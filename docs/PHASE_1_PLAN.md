@@ -43,9 +43,9 @@ DB is down"** rule on the Now screen.
 
 | # | Goal | Key files | Done when |
 | --- | --- | --- | --- |
-| **1.1** | **Schema** — all P1 tables | `migrations/0002_phase1.sql` | `npm run migrate` applies clean; `npm run typecheck` green |
-| **1.2** | **Real-timetable seed** | `src/seed/timetable.ts`, `src/seed/run.ts`, `package.json` (`seed`) | `npm run seed` is idempotent; integrity test passes (30 slots, 3 free, splits correct) |
-| **1.3** | **ClockService + tests** | `src/lib/time.ts`, `src/services/clock.ts`, `tests/clock.test.ts` | ~15 table-driven cases pass; pure (no DB) |
+| **1.1 ✅** | **Schema** — all P1 tables | `migrations/0002_phase1.sql` | done — migrate applies clean, typecheck green |
+| **1.2 ✅** | **Real-timetable seed** | `src/seed/data.ts`, `src/seed/run.ts`, `npm run seed` | done — idempotent; integrity OK (47 lessons; splits/frees correct) |
+| **1.3 ✅** | **ClockService + tests** | `src/lib/time.ts`, `src/services/clock.ts`, `tests/clock.test.ts` | done — 14 tests pass, pure (no DB) |
 | **1.4** | **Timetable grid** (week/day) | `src/repos/timetable.ts`, `src/services/timetable.ts`, `src/routes/timetable.ts` | `/timetable` renders the real week, colour-by-course; click → lesson detail |
 | **1.5** | **Lesson detail + lazy occurrences** | `src/repos/occurrence.ts`, `src/services/occurrence.ts`, `src/routes/lesson.ts` | opening a slot find-or-creates one `lesson_occurrence`; split classes show per-course |
 | **1.6** | **Notes capture** (the fast path) | `src/repos/notes.ts`, `src/services/notes.ts`, `src/routes/notes.ts`, `public/app.js` | text-only note autosaves; stopping point + follow-ups optional; `n` opens the box anywhere |
@@ -242,35 +242,27 @@ Server-rendered HTML via `layout()`; HTMX for partial swaps. All POST/PATCH CSRF
 
 ## 7. Confirmations (status as of 2026-06-08)
 
-None block starting 1.1.
+Status after building the first slice (1.1–1.3):
 
-1. **Term dates — ANSWERED (2026/27)**, captured in
-   [TEACHING_PATTERN.md](TEACHING_PATTERN.md#term-dates-202627); they seed `term_dates`. One
-   decision remains — the target year / go-live (below).
-2. **Overseen-lesson slots — PARTIAL.** 7ARO Skills = **Wed L3**, 7JMI Curriculum = **Fri L3**
-   (in TEACHING_PATTERN). 7JMI Skills + 7RAL Skills slots **to follow**. They run in parallel
-   with my own lessons (non-self `staff_id`), so they don't consume my grid slot.
-3. **`purpose` CHECK** — proceeding with adding **`form`** to `timetabled_lessons.purpose` unless
-   you object; briefing stays a pure `period_definitions` band.
-4. **Wednesday taxi-number duty** — time still TBC → seed as a `duty` with no pinned slot; revisit
-   as a recurring task in P2.
-5. **Timezone** — proceeding with `Europe/London` for server clock + display.
-6. **Now self-advance cadence** — default `every 30s`.
+1. **Term dates — DONE.** Seeded in full: the 2025/26 remainder + the complete 2026/27 set
+   ([TEACHING_PATTERN.md](TEACHING_PATTERN.md#term-dates-202627)).
+2. **Overseen-lesson slots — PARTIAL.** 7ARO Skills **Wed L3** and 7JMI Curriculum **Fri L3** are
+   seeded (non-self staff, parallel to my lessons). 7JMI Skills + 7RAL Skills **still to follow** —
+   add two lines to `OVERSEEN` in `src/seed/data.ts` and re-run `npm run seed`.
+3. **`purpose` CHECK — DONE.** `form` added to `timetabled_lessons.purpose` (migration 0002).
+4. **Wednesday taxi-number duty** — still TBC; not seeded (it has no period). Revisit as a recurring
+   task in P2.
+5. **Timezone — DONE.** `Europe/London`, stored in `settings.timezone`.
+6. **Now self-advance cadence** — will default to `every 30s` when the Now screen lands (1.7).
 
-### The one real decision — target year / go-live
+### Target year / go-live — RESOLVED: live now on 2025/26
 
-The **captured timetable is the current 2025/26 arrangement**; the **2026/27 timetable won't
-exist until it's published in September 2026** ("the whole timetable changes each September"). The
-term dates supplied are **2026/27**. Recommendation:
-
-- **Seed the 2026/27 term dates** (done) and **go live in September 2026** for the new year.
-- **Build over the summer using the current captured timetable as the development seed** (real-
-  shaped data for the screens + clock tests), then **re-seed the real 2026/27 timetable once it's
-  published** — exactly the academic-year rollover the model already supports.
-
-To go **live this term** instead (the last weeks of 2025/26) I'd also need the current year's term
-boundaries — you gave only the end (**Mon 20 Jul 2026**, INSET). Otherwise September is the clean
-boundary.
+You need it working ASAP, so the seed makes **2025/26 the current year** with the captured
+timetable attached, usable today. The current summer term is seeded **2026-06-01 → Fri 17 Jul 2026**
+(INSET Mon 20 Jul); that start is an assumption covering "now onward" — refine it only if you query
+earlier dates. **2026/27's full term dates are seeded ahead** (not current), so the September
+rollover is just a re-seed of the new timetable against dates already in place. Summer changes are
+expected: re-run `npm run seed` (it's idempotent).
 
 ---
 

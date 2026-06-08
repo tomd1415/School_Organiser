@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-08 — Phase 1 started: schema, real-timetable seed & ClockService (1.1–1.3)
+
+- **Migration `0002_phase1.sql`** — the P1 schema: academic years, term dates, period definitions,
+  staff / rooms / courses / groups / group_courses, timetabled lessons (+ split slots), the dated
+  record (`lesson_occurrences` / `occurrence_courses`) and `notes` / `note_followups`. Adds `form`
+  to the lesson `purpose` set.
+- **`npm run seed`** (`src/seed/`) — idempotent seed of the real week from `TEACHING_PATTERN.md`:
+  47 timetabled lessons (Post-16 ×3 and Y10 ×2 splits, 3 frees, daily form/club/open-room, the two
+  known overseen lessons), **2025/26 set current** with **2026/27 seeded ahead** for rollover.
+  Self-checks its integrity counts.
+- **ClockService** (`src/services/clock.ts`, pure) + **`src/lib/time.ts`** + **14 tests** —
+  resolves the current period, minutes remaining and the next teaching slot across every edge
+  (break/lunch/free, before/after school, Fri→Mon, weekend, half-term, INSET, in-term bank holiday,
+  crossing Christmas).
+- **Go-live resolved: live now on 2025/26** (working ASAP); 2026/27 ready for the September
+  rollover. Typecheck green; **18/18 tests pass**.
+
 ### 2026-06-08 — repo renamed; Phase 1 planned
 
 - **Renamed** the local folder and GitHub repo to **`School_Organiser`** — the rename that was
