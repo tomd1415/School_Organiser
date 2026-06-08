@@ -1,0 +1,47 @@
+# Phase 0 stack: Postgres (with pgvector) + the app.
+# Dev:   docker compose up -d db   (then run the app on the host with `npm run dev`)
+# Full:  docker compose up -d --build
+name: school_organiser
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: organiser
+      POSTGRES_PASSWORD: organiser
+      POSTGRES_DB: organiser
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U organiser"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      NODE_ENV: production
+      PORT: 44360
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://organiser:organiser@db:5432/organiser
+      # Provide these via the shell or an .env file beside this compose file when
+      # running the `app` service. `docker compose up -d db` (dev) needs none of them.
+      SESSION_KEY: ${SESSION_KEY:-}
+      APP_PASSWORD_HASH: ${APP_PASSWORD_HASH:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "44360:44360"
+    volumes:
+      - resource-store:/data/resources
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  resource-store:

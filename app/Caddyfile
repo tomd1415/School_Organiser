@@ -1,0 +1,13 @@
+# Production reverse proxy on the school LAN.
+# Replace the hostname with your internal DNS name. Caddy will obtain a cert
+# from your internal CA, or use `tls internal` for a self-signed cert.
+organiser.school.internal {
+	encode gzip
+	# tls internal
+	reverse_proxy app:44360
+}
+
+# Plain-HTTP fallback for first-run testing on the LAN (no TLS):
+# :80 {
+# 	reverse_proxy app:44360
+# }
