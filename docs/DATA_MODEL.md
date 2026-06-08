@@ -238,6 +238,8 @@ own plan and "where we got to".
 | `category` | TEXT NULL | AI-assigned filing for `kind='captured'` (pupil, logistics, admin, …) |
 | `surface_on` | DATE NULL | optional date a captured item becomes relevant (resurface then) |
 | `archived` | BOOL | captured items: filed away / no longer relevant |
+| `safeguarding` | BOOL | highlight + **withhold from all AI calls** (SECURITY) |
+| `interest` | BOOL | marked a "current interest" (§5.18) — biases surfacing |
 | `created_at` / `updated_at` | TIMESTAMPTZ | |
 
 Nullable typed FKs (rather than a generic `entity_type/entity_id`) keep referential integrity
@@ -299,6 +301,7 @@ required; everything else is optional, satisfying "capture in seconds".
 | `recurrence` | TEXT NULL | rule, e.g. `weekly:fri`, `per_lesson:<group_course_id>` |
 | `task_type` | TEXT NULL | grouping for calibration (e.g. `marking, email, resource_prep, admin`) |
 | `actual_seconds` | INT NULL | accumulated from `time_entries` (cached for calibration) |
+| `interest` | BOOL | marked a "current interest" (§5.18) |
 | `completed_at` | TIMESTAMPTZ NULL | |
 
 ### `work_blocks` (P2) — planned vs. actual time
@@ -365,8 +368,9 @@ Storing only the *redacted* request proves no pupil names left the building.
 | `key` TEXT PK · `value` TEXT |
 
 Holds default arrival/leave times, the **target leave time** (for the end-of-day wind-down),
-the AI provider/model, the resource **file-store path**, the current academic year, and the
-fortnightly staff-TTRPG anchor date. No A/B teaching cycle — single repeating week.
+the AI provider/model (default **Anthropic Claude**), the resource **file-store path**, the
+current academic year, and the fortnightly staff-TTRPG anchor date. No A/B teaching cycle —
+single repeating week.
 
 ## H. Year, events & prep
 
@@ -388,7 +392,7 @@ rollover creates a new year and re-creates only the year-specific rows. (SPECIFI
 | Column | Type | Notes |
 | --- | --- | --- |
 | `id` | BIGSERIAL PK | |
-| `kind` | TEXT | CHECK `parents_evening, ehcp_review, report_deadline, data_drop, inset, trip, open_evening, meeting, other` |
+| `kind` | TEXT | CHECK `parents_evening, ehcp_review, report_deadline, exam, data_drop, inset, trip, open_evening, meeting, parent_contact, other` |
 | `title` | TEXT | |
 | `detail` | TEXT NULL | |
 | `date` | DATE | |
@@ -443,5 +447,9 @@ shows undone items "before the next bell". (SPECIFICATION §5.15.)
     for AI duration calibration.
 11. **Captured info reuses `notes`** (`kind='captured'`) with an AI `category` + entity links,
     so "things I was told" resurface next to the pupil/class/date they concern.
+12. **Safeguarding is a hard AI boundary:** `notes.safeguarding=true` items are withheld from
+    every AI call (not just redacted) — enforced in the one LLM wrapper.
+13. **"Current interest" is a flag + a learned signal:** `interest` on notes/tasks marks it
+    explicitly; the AI infers a time-decaying interest profile to bias what surfaces (§5.18).
 
 Open data questions (room for change) are tracked in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

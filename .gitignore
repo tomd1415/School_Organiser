@@ -3,28 +3,25 @@
 .env.*
 !.env.example
 
-# Node / build (when app/ is scaffolded)
+# Node / TypeScript — dependencies & build output
 node_modules/
 dist/
+build/
 coverage/
+*.tsbuildinfo
 *.log
-
-# Python (if Python stack chosen)
-__pycache__/
-*.pyc
-bin/
-lib/
-.venv/
+npm-debug.log*
 
 # Imported data may contain pupil data — keep it local
 data/imports/*
 !data/imports/README.md
 
-# Local backups
+# Local backups (DB dumps + resource-store snapshots)
 backups/
 *.dump
 *.sql.gz
 
 # Editor / OS
 .DS_Store
+Thumbs.db
 .idea/

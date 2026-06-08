@@ -43,6 +43,14 @@ Implemented structurally, not by discipline:
 This matches the project-wide rule in the root `CLAUDE.md` ("Pupil names are never sent to AI
 services — they are replaced with `PUPIL_NAME` before any call").
 
+## Safeguarding content is withheld from AI
+
+Any note or captured item flagged **safeguarding** is highlighted in the UI and **excluded from
+every AI call** — not merely name-redacted, but never sent at all. The flag can be set by hand
+and is suggested by the categoriser; once flagged, the item is removed from all AI context
+(planning, summaries, categorisation). The AI provider is **Anthropic (Claude)**; the same
+redaction *and* withholding rules apply regardless of provider.
+
 ## GDPR / data protection
 
 - **Lawful basis / role:** the school is the data controller; this tool is a processing system

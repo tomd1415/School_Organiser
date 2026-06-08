@@ -62,7 +62,7 @@ snapshots the resource file-store volume, pruning to the most recent 14 of each.
 ```bash
 scripts/backup.sh                          # writes to ./backups (override with BACKUP_DIR=)
 # cron (weekdays 19:15):
-15 19 * * 1-5 /full/path/School_Orgniser/scripts/backup.sh
+15 19 * * 1-5 /full/path/School_Organiser/scripts/backup.sh
 ```
 
 Point `BACKUP_DIR` at a location the school's existing off-site regime already sweeps.

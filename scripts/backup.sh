@@ -3,7 +3,7 @@
 # Run from anywhere; resolves paths relative to the repo. Designed to drop its
 # output where the school's existing off-site backup already sweeps.
 #
-#   crontab:  15 19 * * 1-5  /home/.../School_Orgniser/scripts/backup.sh
+#   crontab:  15 19 * * 1-5  /home/.../School_Organiser/scripts/backup.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

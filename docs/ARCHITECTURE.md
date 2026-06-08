@@ -27,7 +27,7 @@ for the schema and [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for data h
 | Database | **PostgreSQL 16 + pgvector** | Relational core + semantic note search later. |
 | Migrations | SQL files run in order (same tooling as `exam_questions`) | Auditable schema history. |
 | Validation | **Zod** per route | Same convention. |
-| AI | **OpenAI Responses API** (structured outputs) via a single client, Gemini-swappable | Project-wide convention; keys in `.env`. |
+| AI | **Anthropic (Claude) Messages API** — structured output via tool use — through a single client, provider-swappable | `ANTHROPIC_API_KEY` in `.env`. |
 | Container | **Docker Compose** | App + Postgres; deploy to Debian unchanged. |
 | Reverse proxy | **Caddy** (as in `post16_lessons`) or nginx | TLS on the LAN, single entry point. |
 
@@ -55,7 +55,7 @@ before Phase 0 if you change your mind. The rest of this document assumes TypeSc
                 │   │   │          │                                                       │ │
                 │   │   │          ├─▶ ClockService  (what period is it now?)             │ │
                 │   │   │          ├─▶ TimetableService / NotesService / TaskService …     │ │
-                │   │   │          └─▶ LLM client ──redact pupil names──▶ OpenAI/Gemini    │ │
+                │   │   │          └─▶ LLM client ──redact pupil names──▶ Anthropic Claude │ │
                 │   │ Templates (server-rendered HTML + HTMX partials)                     │ │
                 │   └──────────────────────────────────┬───────────────────────────────────┘ │
                 └────────────────────────────────────── │ ─────────────────────────────────────┘
@@ -112,7 +112,13 @@ nightly note summaries) add a single worker process or a cron-driven script — 
 - Single entry point for every AI call. Responsibilities: **redact pupil names → tokens**
   (from `pupils.ai_token`), select provider/model from `settings`, call with structured-output
   schema, and write an `ai_calls` audit row containing only the **redacted** request.
-- Swapping OpenAI ↔ Gemini touches only this file.
+- **Provider = Anthropic (Claude), by default.** Suggested models: planning/authoring →
+  Sonnet (`claude-sonnet-4-6`); heavy curriculum design → Opus (`claude-opus-4-8`); cheap
+  categorisation/tagging → Haiku (`claude-haiku-4-5-20251001`). Structured output via **tool
+  use**; large repeated context (a scheme of work + recent notes) uses prompt caching.
+- Swapping provider/model touches only this file. **Safeguarding-flagged content is withheld
+  here — never sent to the AI** (see SECURITY_AND_PRIVACY). Implementation follows the project's
+  `claude-api` reference at build time.
 
 ### Scheduler / clock source
 
@@ -127,13 +133,15 @@ the DB (`resources` / `resource_versions`).
 
 - **Upload / view / download.** PDFs and images preview in the browser directly; Office formats
   (docx/pptx/xlsx) download to open, with optional in-browser preview via a **server-side render
-  to PDF** (e.g. headless LibreOffice in a sidecar container).
+  to PDF** (e.g. headless LibreOffice in a sidecar container). The corpus is mostly
+  **PowerPoint + Word + some PDF + media files** (every GCSE / Curriculum lesson).
 - **Versioned.** Every change (teacher or AI) writes a new `resource_versions` row and advances
   `current_version_id`, so edits are reviewable and reversible.
-- **AI edits.** The LLM wrapper can produce a new version of a resource. Text-based formats
-  (Markdown/HTML worksheets, lesson-plan text, quiz content) are straightforward to edit and
-  diff; binary Office files are harder — likely "AI drafts a replacement you accept" rather than
-  in-place editing. **How far AI editing goes is [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) Q14.**
+- **AI edits (as far as possible).** Goal: AI-generated **worksheets stay editable for pupils**
+  and **presentations look good** — the underlying format is secondary. Practical path: generate
+  structured content (Markdown/HTML/JSON) and render to editable **DOCX/PPTX** (a templating /
+  headless-Office step), saved as a new version. Pupils currently receive resources via **MS
+  Teams assignments**, so "assign to Teams" stays a key step.
 - **Import.** A script ingests existing scattered copies from a share/folder, hashing each
   (`checksum`) to flag duplicates so you consolidate to one canonical copy.
 - **Backups now include the file store**, not just the database — see Deployment.
@@ -146,7 +154,7 @@ To be scaffolded once the stack is confirmed (TypeScript shown):
 app/
 ├── package.json
 ├── docker-compose.yml          # app + postgres(+pgvector)
-├── .env.example                # OPENAI_API_KEY, SESSION_SECRET, DB url, AI_PROVIDER …
+├── .env.example                # ANTHROPIC_API_KEY, SESSION_KEY, DB url, AI_PROVIDER …
 ├── migrations/                 # 0001_init.sql, 0002_tasks.sql …
 ├── seeds/                      # period_definitions (day shapes), term dates
 ├── src/

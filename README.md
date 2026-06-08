@@ -51,7 +51,7 @@ Full steps (password hashing, production deploy, backups) are in [docs/RUNBOOK.m
 ## Repository layout
 
 ```text
-School_Orgniser/
+School_Organiser/
 ├── README.md            ← you are here
 ├── docs/                ← specification & design (the current deliverable)
 ├── data/

@@ -57,6 +57,8 @@ capture a note in seconds. *Most of the daily value lands here.*
   (interruptible); an estimate-vs-actual time report.
 - **Captured info inbox** ("things I've been told"): fast capture, manual category to start,
   resurfaced via entity links.
+- **Current-interest** marking; **exam dates** + a **parental-contact log** (events); a
+  **start/end-of-day checklist**.
 - Pupils + enrolments + `note_pupil_mentions` ("outstanding pupils"); tags.
 - **Write `docs/DPIA.md`** before real pupil names are entered.
 
@@ -79,12 +81,14 @@ lessons are fully prepared in-app.
 
 **Goal:** turn the accumulated record into planning leverage. Only now is there data worth it.
 
-- The single LLM client wrapper: pupil-name redaction, `ai_calls` audit, provider swap.
+- The single LLM client wrapper: **Anthropic Claude** by default, pupil-name redaction,
+  **safeguarding withholding**, `ai_calls` audit, provider swap.
 - "Draft next lesson" from SoW position + recent notes; "Summarise this term".
 - **"Redesign this unit"** / **author a new scheme from scratch** — especially the unfinished
   KS3 *"Effective use of computers in school"* scheme → new scheme version.
 - **AI resource editing** (new versions) and **AI task breakdown** behind the focus mode.
 - **AI estimate calibration** from timed history, and **AI auto-categorisation** of captured info.
+- A learned, time-decaying **"current interest"** profile that biases what surfaces.
 - (Optional) pgvector semantic search over notes/resources.
 
 **Done when:** you can produce a usable next-lesson draft and a unit redesign from real notes,

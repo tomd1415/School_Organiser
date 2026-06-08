@@ -85,6 +85,7 @@ material for planning lessons and redesigning curriculum (with AI assistance).
 | **Academic year** | The yearly container for the timetable, groups and enrolments; content (courses/schemes/resources/notes) carries over on rollover. |
 | **Timer / time entry** | A timed work session auto-recorded against a task (or lesson); actuals accumulate across interruptions and feed estimate calibration. |
 | **Captured info** | A snippet you were told but can't action yet ("the D12 projector is replaced over half term") — AI-categorised and resurfaced in context. |
+| **Current interest** | A tap-to-set flag on any item; the system learns what you're focused on now and biases what it surfaces. |
 
 ## 5. Functional requirements
 
@@ -168,7 +169,8 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
 - **(M)** **Ingest email into tasks** so emails stop being forgotten. Start with a paste box;
   IMAP later. The source email is kept and linked to the task. See OPEN_QUESTIONS.
 - **(M)** Each task can carry a **cognitive-load** level (low / medium / high) and a **context**
-  (e.g. needs-computer, quick-win) so the right work surfaces at the right time of day.
+  (e.g. needs-computer, quick-win) so the right work surfaces at the right time of day. The **AI
+  suggests these first; you can override; it learns from your corrections.**
 - **(M)** **Break a task into sub-steps** (a checklist), by hand or with AI help, so a daunting
   task collapses into one small next action.
 - **(S)** **Recurring tasks** — weekly admin, and **per-lesson** items like "assign resources to
@@ -226,8 +228,9 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
   recursion and how it went".
 - **(S)** **Estimate calibration & info-filing**: the AI predicts task durations from your
   timed history (§5.16) and categorises captured info (§5.17).
-- **(M, cross-cutting)** Every AI call goes through one wrapper that redacts pupil names,
-  records the prompt/version/response, and is provider-swappable (OpenAI ↔ Gemini).
+- **(M, cross-cutting)** Every AI call goes through one wrapper that **redacts pupil names**,
+  **withholds safeguarding-flagged content entirely**, records the prompt/version/response, and
+  is provider-swappable (default **Anthropic Claude**).
 
 ### 5.11 Search & recall (cross-cutting)
 
@@ -254,6 +257,9 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
   adjust the expected leave time.
 - **(M)** Track **deadlines** with lead-time reminders — **reports**, **EHCP review paperwork**,
   data drops — so they stop being forgotten; a deadline shows a countdown and can spawn prep tasks.
+- **(M)** **Exam dates** and key assessment dates as events, with lead-time reminders.
+- **(S)** A **parental-contact log** — calls/emails I **owe** and have **made** (who, when, why)
+  — so promised contact and "forms to fill in" stop being forgotten (from the bad-day list).
 - **(S)** **EHCP reviews** link to the pupil and carry their prep checklist/tasks.
 - **(S)** A unified **"what's coming"** view blends events, deadlines and by-next-lesson tasks.
 
@@ -269,6 +275,8 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
 
 - **(M)** Each lesson can show a **"before the bell" checklist** on the Now screen — e.g.
   resources ready, **assigned to MS Teams**, starter set — so simple prep stops slipping.
+- **(M)** A **start-of-day and end-of-day checklist** (recurring daily) — the morning set-up
+  routine and the evening "before I leave" sweep (ties to the end-of-day wind-down, §5.12).
 - **(S)** Checklist items can be **recurring templates** (every lesson, or every lesson of a
   course) and are materialised per occurrence.
 - **(S)** A per-class **MS Teams** link (and, later, deeper integration) makes "assign to Teams"
@@ -304,8 +312,19 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
   archived. You can always **override** the AI's category/links.
 - **(S)** A **searchable, browsable store** by category/tag/date, with a periodic "still
   relevant?" review so it doesn't rot.
-- **(C)** **Safeguarding-flagged** items get a clear marker (your private tool, but such
-  information deserves care).
+- **(M)** **Safeguarding-flagged** items are highlighted and **withheld from all AI processing
+  once flagged** — never sent to the AI, not just name-redacted. The categoriser suggests the
+  flag; you can also set it by hand.
+
+### 5.18 Current interest
+
+- **(M)** Mark any item — a task, note, captured snippet, course or project — as a **current
+  interest**, in one tap.
+- **(S)** The system **learns your current interests** over time (what you mark, open, time and
+  return to) and **biases what it surfaces**: focus mode, captured-info resurfacing and AI
+  context lean toward what you're actually focused on now.
+- **(S)** Interests are **time-aware** — they fade as your attention moves on, so the bias
+  follows you rather than ossifying.
 
 ## 6. Non-functional requirements
 
@@ -326,7 +345,9 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
 
 - Public/internet-facing access or multi-teacher tenancy.
 - A full markbook, reporting-to-parents, or MIS replacement.
-- Pupil-facing features (this is the teacher's tool; pupil revision lives in `exam_questions`).
+- Pupil-facing features (this is the teacher's tool). A planned **pupil-facing resource/quiz
+  site** (login, resources, answer questions, teacher marking — a summer project) is out of scope
+  here and overlaps `exam_questions`; the hosted resource store is designed to stay compatible.
 - Native mobile apps.
 
 ## 8. Known gaps / "things I've probably forgotten"

@@ -1,58 +1,87 @@
 # Teaching Pattern (reference)
 
-A confirmed snapshot of the current teaching commitment, used to seed data and sanity-check the
-[DATA_MODEL.md](DATA_MODEL.md). Next year's exact timetable is **not yet fixed** — this is the
-*shape* that must carry over ([SPECIFICATION.md](SPECIFICATION.md) §5.14). Figures from the
-teacher, 2026-06-07.
+The **actual** teaching commitment, used to seed data and sanity-check the
+[DATA_MODEL.md](DATA_MODEL.md). The timetable is a **single week, static for the academic year**;
+the whole timetable changes each September → academic-year rollover
+([SPECIFICATION.md](SPECIFICATION.md) §5.14). All lessons are in **room U1 (Computing Room)**
+(possibly more than one room in some future years). Confirmed by the teacher, 2026-06-08.
 
-## Groups & lessons
+Group naming: `<year><FORM>` — e.g. `8PFA` = Year 8, form PFA. The number is the year group.
 
-| Key stage / year | Groups | Lessons/wk (each) | Course(s) in the slot | Teacher |
-| --- | --- | --- | --- | --- |
-| KS3 Year 7 | 3 | 2 | Teach Computing (1) + "Effective use of computers in school" (1, unwritten) | Me — **but 4 of the 6 Y7 lessons are taught by another teacher** |
-| KS3 Year 8 | 3 | 2 | Teach Computing (1) + Effective use (1, unwritten) | Me |
-| KS3 Year 9 | 3 | 2 | Teach Computing (1) + Effective use (1, unwritten) | Me |
-| Year 10 | 1 | 3 | OCR GCSE CS (J277) — **+ 1 pupil on custom Sound Engineering** | Me |
-| Year 11 | 2 | 3 | OCR GCSE CS (J277) | Me |
-| Post-16 | 1 | 3 | **3 courses run simultaneously** (names TBD — OPEN_Q21) | Me |
+## Weekly timetable
 
-**Totals: 30 timetabled lessons/week** (KS3 18 + Y10 3 + Y11 6 + P16 3). Of these, **4 Year 7
-lessons are taught by another teacher** (I plan/oversee them), leaving ~26 taught by me.
+Periods: L1 09:10 · L2 10:00 · *break 10:50* · L3 11:05 · L4 11:55 · *lunch 12:45* · L5 13:50 ·
+L6 14:40–15:30.
 
-> **Reconcile when the real timetable is entered.** 30 lessons would fill all 6×5 slots, yet you
-> also want ~3 free periods. The likeliest reading is that the **4 other-teacher Year 7 slots are
-> your non-teaching time**. We'll confirm against next year's actual timetable.
+| Period | Monday | Tuesday | Wednesday | Thursday | Friday |
+| --- | --- | --- | --- | --- | --- |
+| L1 | 8PFA Curriculum | 7ARO Curriculum | Post-16 (×3) ¹ | **Free** | Y11 GCSE CS Gp2 |
+| L2 | 9TDU Curriculum | 9SCL Curriculum | Post-16 (×3) ¹ | 8SJO Skills | 9SCL Skills |
+| L3 | 8SJO Curriculum | Y11 GCSE CS Gp2 | 9TDU Skills | Y11 GCSE CS Gp2 | Y11 GCSE CS Gp1 ² |
+| L4 | 9EME Curriculum | **Free** | Y10 GCSE CS ³ | **Free** | Y11 GCSE CS Gp1 ² |
+| L5 | Y10 GCSE CS ³ | 8PFA Skills | 9TDU Extended Form | Y10 GCSE CS ³ | 8MDU Skills |
+| L6 | 8MDU Curriculum | 7RAL Curriculum | Y11 GCSE CS Gp1 | Post-16 (×3) ¹ | 9EME Skills |
+
+¹ Post-16 is a **double on Wednesday (L1–L2)** and a single on Thursday L6 — three courses run
+simultaneously (split). ² Year 11 GCSE CS Group 1 is a **double on Friday (L3–L4)**.
+³ Year 10 GCSE CS includes **one pupil on the Sound Engineering course** (split).
+
+Totals: 27 teaching/form periods + **3 free periods (Tue L4, Thu L1, Thu L4)** = 30.
 
 ## Courses
 
-| Course | Key stage | Qual / board | Where used | Status |
-| --- | --- | --- | --- | --- |
-| Teach Computing | KS3 (Y7–9) | — | one of two weekly KS3 lessons | Exists (NCCE Teach Computing) |
-| "Effective use of computers in school" | KS3 (Y7–9) | — | the other weekly KS3 lesson | **UNWRITTEN — priority to author (AI help, SPEC §5.10/§5.14)** |
-| OCR GCSE Computer Science | KS4 (Y10–11) | GCSE / OCR J277 | Y10 ×1, Y11 ×2 | Exists |
-| Sound Engineering (custom) | KS4 (Y10) | Custom | 1 pupil in the Y10 group | Scheme TBD (OPEN_Q21) |
-| Post-16 courses ×3 | KS5 | TBD | post-16 group | Names/levels TBD (OPEN_Q21) |
+| Course | Stage | Qual / board | Status |
+| --- | --- | --- | --- |
+| **Computing Curriculum** (Teach Computing) | KS3 | — | exists; one of two weekly KS3 lessons |
+| **Computer Skills** (the "effective use of computers in school" scheme) | KS3 | — | **being written** — structure + some lessons first, build as you go (Q22) |
+| **OCR GCSE Computer Science** (J277) | KS4 | GCSE / OCR | Y10 ×1, Y11 Group 1, Y11 Group 2 |
+| **Year 10 Sound Engineering** (custom) | KS4 | custom | **being built**; 1 pupil in the Y10 GCSE slot |
+| **Post-16 Computing** — 3 at once | KS5 | mixed | **BCS "Thinking Like a Coder"**, **AIMS Robotics**, **Using Computers for VI pupils** |
+| *9TDU Extended Form Time* | — | — | the teacher's form group (tutor time) |
+
+## Groups
+
+- **Year 7:** 7ARO, 7RAL, 7JMI — *see "Other-teacher lessons"* (Year 7 Skills, and all of 7JMI,
+  are taught by another teacher).
+- **Year 8:** 8PFA, 8SJO, 8MDU.
+- **Year 9:** 9TDU *(the teacher's form group)*, 9EME, 9SCL.
+- **Year 10:** one GCSE CS group (+1 Sound Engineering pupil).
+- **Year 11:** GCSE CS **Group 1**, **Group 2**.
+- **Post-16:** one group (three courses simultaneously).
+
+## Non-teaching commitments
+
+| When | What |
+| --- | --- |
+| Daily 08:50–09:10 | Morning form (with 9TDU) |
+| Mon/Wed/Thu 08:30–08:50 | Briefing |
+| Tue/Fri 08:30–08:50 | Prep / free |
+| **Every break** 10:50–11:05 | **Computing Club** (open room) |
+| **Every lunch** 13:00–13:30 | **Computing Club** |
+| **Wednesdays** | **Enter taxi numbers** into the system (duty; time TBC) |
+| Tue after school 15:30–17:00 | TTRPG club |
+| Wed 17:00–20:00 (fortnightly) | Staff TTRPG |
+| Thu 15:45–16:45 (sometimes →17:45) | Staff meeting |
+| Fri after school 15:30–17:00 | Computing Club |
+
+Break and lunch are **not** work windows (club running). Work windows = the 3 free periods +
+before/after school. Leave ~19:00 most days (Tue 17:30; Wed 20:00 on staff-TTRPG weeks).
 
 ## Splits (more than one course in one slot)
 
-- **Post-16**: three courses at once in the same room → three `occurrence_courses`, each with its
-  own plan / resources / notes.
-- **Year 10**: one pupil on Sound Engineering while the rest do OCR GCSE → a second course in the
-  slot for that pupil.
+- **Post-16** (Wed L1–L2, Thu L6): three courses at once → three `occurrence_courses`.
+- **Year 10 GCSE CS** (Mon L5, Wed L4, Thu L5): one pupil on Sound Engineering alongside OCR GCSE.
 
-These are the concrete cases behind DATA_MODEL `timetabled_lesson_courses` / `occurrence_courses`.
+## Other-teacher lessons (I plan / oversee)
 
-## Other teacher / non-specialist
+- **7JMI** — both Computing Curriculum *and* Computer Skills (not in my timetable).
+- **7ARO** — Computer Skills (I teach 7ARO Computing Curriculum, Tue L1).
+- **7RAL** — Computer Skills (I teach 7RAL Computing Curriculum, Tue L6).
 
-- **4 Year 7 lessons** are taught by another teacher. Modelled as `timetabled_lessons` with a
-  non-self `staff_id`; I prepare the plan + resources and keep oversight notes (SPEC §5.8, the
-  "Lessons I oversee" view).
+Modelled as `timetabled_lessons` with a non-self `staff_id`; I prepare the plan + resources and
+keep oversight notes (SPEC §5.8, the "Lessons I oversee" view).
 
 ## Carry-over
 
-All content above (courses, schemes, resources, notes) is **year-independent** and carries over;
-only the groups and timetable for the year are re-entered (SPEC §5.14). *"I want this to continue
-next year with everything carrying over."*
-
-Open specifics live in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md): Q21 (post-16 trio + Sound
-Engineering), Q22 (authoring the KS3 "Effective use" scheme).
+Content (courses, schemes, resources, notes) is year-independent and carries over; the timetable
+and groups are re-entered each September (SPEC §5.14).
