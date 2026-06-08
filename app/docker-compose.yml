@@ -23,16 +23,16 @@ services:
 
   app:
     build: .
+    # Secrets come from app/.env as a literal env_file. This matters because the
+    # scrypt password hash contains '$' — passing it through Compose ${VAR}
+    # interpolation would corrupt it. env_file values are never interpolated.
+    env_file:
+      - path: .env
+        required: false
     environment:
+      # Overrides for the two values that differ inside the container.
       NODE_ENV: production
-      PORT: 44360
-      HOST: 0.0.0.0
       DATABASE_URL: postgres://organiser:organiser@db:5432/organiser
-      # Provide these via the shell or an .env file beside this compose file when
-      # running the `app` service. `docker compose up -d db` (dev) needs none of them.
-      SESSION_KEY: ${SESSION_KEY:-}
-      APP_PASSWORD_HASH: ${APP_PASSWORD_HASH:-}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     depends_on:
       db:
         condition: service_healthy

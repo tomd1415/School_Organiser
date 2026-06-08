@@ -1,0 +1,15 @@
+# Dev override for ./start.sh (default mode): run the app from source with
+# hot-reload (tsx watch), bind-mounting the working tree so edits restart it.
+# Production (./start.sh prod) uses docker-compose.yml on its own.
+services:
+  app:
+    build:
+      context: .
+      target: build # the build stage has all deps, including tsx
+    command: ['npx', 'tsx', 'watch', 'src/server.ts']
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./src:/app/src
+      - ./migrations:/app/migrations
+      - ./public:/app/public

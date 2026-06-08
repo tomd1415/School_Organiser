@@ -4,10 +4,10 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** Phase 0 (skeleton) complete — a running, authenticated, backed-up empty app. Phase 1
-> (Timetable · Now · Notes — the MVP) is **planned and awaiting build**: see
-> [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md). [docs/ROADMAP.md](docs/ROADMAP.md) shows what each
-> phase adds; [docs/RUNBOOK.md](docs/RUNBOOK.md) to run it.
+> **Status:** Phase 1 in progress — the schema, the real-timetable seed, the ClockService and the
+> **week timetable grid** are built (run `./start.sh`). Next: lesson detail, fast notes, and the
+> live *Now* screen. See [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) for the build order and
+> [docs/ROADMAP.md](docs/ROADMAP.md) for what each phase adds.
 
 ## The one-sentence pitch
 
@@ -37,18 +37,22 @@ Read in this order:
 | [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) | Detailed build plan for Phase 1 (the MVP): schema, real-timetable seed, ClockService, screens. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
-## Run it (Phase 0)
+## Run it
+
+One command brings everything up — it stops anything already running, starts Postgres + the app,
+waits for health, and seeds the real timetable if the database is empty:
 
 ```bash
-cd app
-cp .env.example .env                  # then set SESSION_KEY + APP_PASSWORD_HASH
-npm install
-docker compose up -d db               # Postgres (pgvector) on :5434
-npm run migrate
-npm run dev                           # http://localhost:44360
+./start.sh            # dev (hot-reload via Docker) — http://localhost:44360
+./start.sh prod       # production stack (built image; for the Debian / Proxmox server)
+./stop.sh             # gracefully stop everything (database volume preserved)
 ```
 
-Full steps (password hashing, production deploy, backups) are in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+First-time setup: `cp app/.env.example app/.env`, then set `SESSION_KEY` (`openssl rand -hex 32`)
+and `APP_PASSWORD_HASH` (`cd app && npm run hash-password -- 'your-password'`) in `app/.env`.
+Prefer host hot-reload without Docker? `cd app && npm install && npm run dev`.
+
+Full steps (production deploy, backups) are in [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
 ## Repository layout
 

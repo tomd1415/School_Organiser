@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-08 — start/stop scripts, login-hash fix, and the timetable grid (1.4)
+
+- **`./start.sh` / `./stop.sh`** (repo root) — one command each. `start.sh` stops anything
+  running, brings up Postgres + the app (Docker Compose; `dev` hot-reloads from source, `prod`
+  runs the built image), waits for health, and seeds the timetable if the DB is empty. Identical
+  on the Gentoo dev box and a Debian / Proxmox deploy. (`app/docker-compose.dev.yml`)
+- **Fixed a deployment footgun:** the scrypt password hash used `$`, which Docker Compose
+  interpolates — corrupting the hash in the container and breaking login. Hash format is now
+  `scrypt:<salt>:<key>` (no `$`); `verifyPassword` still accepts legacy `$` hashes; secrets pass
+  via `env_file` (literal). (`src/lib/passwords.ts`, `app/docker-compose.yml`)
+- **1.4 Timetable grid** — `/timetable` renders the real week from the DB: colour-by-course,
+  split classes, free periods, clubs and ⚑ overseen lessons; prev/next week; cells link to a
+  lesson-detail placeholder (`/lesson`, fleshed out in 1.5). Top-bar nav (Now · Timetable).
+  (`repos/timetable.ts`, `services/timetable.ts`, `routes/timetable.ts`, `routes/lesson.ts`)
+- **Tests:** TimetableService grid assembly, seed-data invariants (catch a mistyped
+  group/course or miscounted split before the DB), and the password round-trip — **36 pass**.
+
 ### 2026-06-08 — Phase 1 started: schema, real-timetable seed & ClockService (1.1–1.3)
 
 - **Migration `0002_phase1.sql`** — the P1 schema: academic years, term dates, period definitions,

@@ -1,16 +1,18 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 // Self-contained password hashing using Node's built-in scrypt — no native deps.
-// Format: scrypt$<saltHex>$<hashHex>
+// Format: scrypt:<saltHex>:<hashHex>. The ':' separator (not '$') keeps the hash
+// safe to store in .env / docker-compose, which interpolate '$'. Legacy '$'-style
+// hashes still verify.
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const derived = scryptSync(password, salt, 64);
-  return `scrypt$${salt.toString('hex')}$${derived.toString('hex')}`;
+  return `scrypt:${salt.toString('hex')}:${derived.toString('hex')}`;
 }
 
 export function verifyPassword(password: string, stored: string): boolean {
-  const parts = stored.split('$');
+  const parts = stored.split(/[:$]/);
   if (parts.length !== 3 || parts[0] !== 'scrypt') return false;
   const [, saltHex, hashHex] = parts;
   if (!saltHex || !hashHex) return false;

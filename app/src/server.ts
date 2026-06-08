@@ -10,6 +10,8 @@ import { migrate } from './db/migrate';
 import { registerAuthRoutes } from './auth/routes';
 import { registerHealthRoutes } from './routes/health';
 import { registerNowRoutes } from './routes/now';
+import { registerTimetableRoutes } from './routes/timetable';
+import { registerLessonRoutes } from './routes/lesson';
 
 /** Build the Fastify instance with all plugins and routes, without listening. */
 export async function buildApp(): Promise<FastifyInstance> {
@@ -45,6 +47,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerHealthRoutes(app);
   registerAuthRoutes(app);
   registerNowRoutes(app);
+  registerTimetableRoutes(app);
+  registerLessonRoutes(app);
 
   return app;
 }

@@ -37,7 +37,10 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">School Organiser</a>
+    <div class="bar-left">
+      <a class="brand" href="/">School Organiser</a>
+      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/timetable">Timetable</a></nav>' : ''}
+    </div>
     ${logout}
   </header>
   <main>${body}</main>

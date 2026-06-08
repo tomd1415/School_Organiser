@@ -65,3 +65,40 @@ button {
 }
 button.link { background: none; color: var(--accent); padding: 0; }
 .inline { display: inline; }
+
+/* top-bar nav */
+.bar-left { display: flex; align-items: center; gap: 1.25rem; }
+.nav { display: flex; gap: 1rem; }
+.nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+.nav a:hover { color: var(--ink); }
+
+/* timetable grid */
+main:has(.tt) { max-width: 76rem; }
+.tt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.tt-head h1 { margin: 0 0 0.5rem; }
+.tt-weeknav { display: flex; gap: 0.75rem; }
+.tt-weeknav a { text-decoration: none; color: var(--accent); font-weight: 600; }
+.tt-table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
+.tt-table thead th { padding: 0.4rem; color: var(--muted); font-size: 0.85rem; font-weight: 700; }
+.tt-table thead th .tt-date { display: block; font-weight: 400; font-size: 0.75rem; }
+.tt-corner { width: 3.2rem; }
+.tt-time { width: 3.2rem; text-align: right; vertical-align: top; padding: 0.35rem 0.4rem 0; }
+.tt-time .tt-rl { display: block; font-size: 0.8rem; font-weight: 700; }
+.tt-time .tt-clock { font-size: 0.7rem; color: var(--muted); }
+.tt-table td { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0; vertical-align: top; height: 3rem; }
+.tt-today { outline: 2px solid var(--accent); outline-offset: -1px; }
+thead th.tt-today { outline: none; color: var(--accent); }
+.tt-lesson { display: block; padding: 0.35rem 0.45rem; border-left: 4px solid var(--line); border-radius: 6px; text-decoration: none; color: var(--ink); }
+a.tt-lesson:hover { background: #eef3fc; }
+.tt-group { display: block; font-weight: 700; font-size: 0.85rem; }
+.tt-course { display: block; font-size: 0.72rem; color: var(--muted); }
+.tt-free { background: repeating-linear-gradient(45deg, #f0f7f0, #f0f7f0 6px, #e7f1e7 6px, #e7f1e7 12px); }
+.tt-free .tt-group { color: #2f7d32; }
+.tt-empty { background: #fafbfc; }
+.tt-empty .tt-band { display: block; padding: 0.3rem 0.45rem; font-size: 0.72rem; color: var(--muted); }
+.tt-row.tt-kind-break td, .tt-row.tt-kind-lunch td, .tt-row.tt-kind-before_school td,
+.tt-row.tt-kind-form_am td, .tt-row.tt-kind-after_school td { height: auto; }
+.tt-legend { margin-top: 1rem; font-size: 0.8rem; color: var(--muted); }
+.tt-key { display: inline-block; width: 0.9rem; height: 0.9rem; vertical-align: middle; border-radius: 3px; }
+.tt-key.tt-free { border: 1px solid var(--line); }
+.tt-key.tt-oversee { width: auto; }
