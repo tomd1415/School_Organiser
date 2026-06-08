@@ -9,7 +9,9 @@ import {
   getOccurrenceHeader,
   getOccurrenceNotes,
 } from '../repos/occurrence';
+import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
+import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem } from '../lib/notesView';
 
 const TZ = 'Europe/London';
 const Query = z.object({
@@ -39,28 +41,32 @@ function fmtLong(iso: string): string {
   }).format(new Date(`${iso}T12:00:00Z`));
 }
 
-function page(title: string, body: string, reply: { generateCsrf: () => string }): string {
-  return layout({ title, body, authed: true, csrfToken: reply.generateCsrf() });
+function errorPage(reply: { generateCsrf: () => string }, code: number, message: string) {
+  const body = `<section class="card"><h1>Lesson</h1><p>${esc(message)}</p><p><a href="/timetable">← Timetable</a></p></section>`;
+  return { code, html: layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }) };
 }
 
 function renderSection(s: CourseSection): string {
   const colour = s.colour ?? '#94a3b8';
   const plan = s.hasPlan ? 'set' : '<em>none yet (Phase 3)</em>';
-  const stop = s.stoppingPoint
-    ? `<p class="ld-stop">Stopping point: <strong>${esc(s.stoppingPoint)}</strong></p>`
-    : '';
   const last = s.lastStop
     ? `<p class="ld-last">Last time → stopped at <strong>${esc(s.lastStop.stoppingPoint)}</strong> <span class="muted">(${esc(s.lastStop.date)})</span></p>`
     : '';
+  const oc = s.occurrenceCourseId;
   return `
     <section class="ld-course" style="border-left-color:${esc(colour)}">
       <h2>${esc(s.courseName)}</h2>
       <p class="muted">Plan: ${plan} · Resources: <em>Phase 3</em></p>
-      ${stop}${last}
+      ${last}
+      <label class="stop-label">Stopping point
+        <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
+          hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
+        <span class="note-status" id="oc-${oc}-status"></span>
+      </label>
     </section>`;
 }
 
-function renderDetail(detail: LessonDetail): string {
+function renderDetail(detail: LessonDetail, notes: NoteItem[], csrf: string): string {
   const h = detail.header;
   const heading = h.groupName ? esc(h.groupName) : esc(purposeLabel(h.purpose));
   const flag = h.isSelf ? '' : '⚑ ';
@@ -74,27 +80,16 @@ function renderDetail(detail: LessonDetail): string {
       ? detail.sections.map(renderSection).join('')
       : `<p class="muted">${h.purpose === 'free' ? 'Free period — protected work time.' : 'No courses attached to this slot.'}</p>`;
 
-  const notes =
-    detail.notes.length > 0
-      ? `<ul class="ld-notes">${detail.notes
-          .map(
-            (n) =>
-              `<li><span class="ld-time">${esc(n.time)}</span> ${esc(n.body)}${
-                n.stoppingPoint ? ` <span class="muted">— stopped at ${esc(n.stoppingPoint)}</span>` : ''
-              }</li>`,
-          )
-          .join('')}</ul>`
-      : `<p class="muted">No notes yet — fast capture arrives in Phase 1.6.</p>`;
-
+  const listId = `notes-list-${h.occurrenceId}`;
   return `
-    <section class="ld">
+    <section class="ld" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <p class="kicker">${flag}${h.isSelf ? 'Lesson' : 'Lesson I oversee'}</p>
       <h1>${heading}</h1>
       <p class="ld-meta">${meta}</p>
       ${sections}
       <section class="ld-notesblock">
-        <h2>Notes</h2>
-        ${notes}
+        <div class="ld-notes-head"><h2>Notes</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: h.occurrenceId })}</div>
+        ${renderNotesList(listId, notes)}
       </section>
       <p><a href="/timetable">← Timetable</a></p>
     </section>`;
@@ -104,8 +99,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
   app.get('/lesson', { preHandler: requireAuth }, async (req, reply) => {
     const parsed = Query.safeParse(req.query);
     if (!parsed.success) {
-      const body = `<section class="card"><h1>Lesson</h1><p>That lesson reference looks wrong.</p><p><a href="/timetable">← Timetable</a></p></section>`;
-      return reply.code(400).type('text/html').send(page('Lesson', body, reply));
+      const e = errorPage(reply, 400, 'That lesson reference looks wrong.');
+      return reply.code(e.code).type('text/html').send(e.html);
     }
     const { lesson, date } = parsed.data;
 
@@ -113,20 +108,36 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const occurrenceId = await findOrCreateOccurrence(lesson, date);
       const header = await getOccurrenceHeader(occurrenceId);
       if (!header) {
-        const body = `<section class="card"><h1>Lesson</h1><p>That lesson no longer exists.</p><p><a href="/timetable">← Timetable</a></p></section>`;
-        return reply.code(404).type('text/html').send(page('Lesson', body, reply));
+        const e = errorPage(reply, 404, 'That lesson no longer exists.');
+        return reply.code(e.code).type('text/html').send(e.html);
       }
-      const [courses, lastStops, notes] = await Promise.all([
+      const [courses, lastStops, noteRows, followups] = await Promise.all([
         getOccurrenceCourses(occurrenceId),
         getLastStoppingPoints(header.lessonId, date),
         getOccurrenceNotes(occurrenceId),
+        getFollowupsForOccurrence(occurrenceId),
       ]);
-      const detail = buildLessonDetail(header, courses, lastStops, notes);
+
+      const fuByNote = new Map<number, FollowupItem[]>();
+      for (const f of followups) {
+        const arr = fuByNote.get(f.noteId) ?? [];
+        arr.push({ id: f.id, text: f.text, done: f.done });
+        fuByNote.set(f.noteId, arr);
+      }
+      const noteItems: NoteItem[] = noteRows.map((n) => ({
+        id: n.id,
+        body: n.body,
+        time: n.time,
+        followups: fuByNote.get(n.id) ?? [],
+      }));
+
+      const detail = buildLessonDetail(header, courses, lastStops);
+      const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
-      return reply.type('text/html').send(page(title, renderDetail(detail), reply));
+      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
-      return reply.type('text/html').send(page('Lesson', body, reply));
+      return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
     }
   });
 }

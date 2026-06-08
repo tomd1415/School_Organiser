@@ -48,9 +48,9 @@ DB is down"** rule on the Now screen.
 | **1.3 ✅** | **ClockService + tests** | `src/lib/time.ts`, `src/services/clock.ts`, `tests/clock.test.ts` | done — 14 tests pass, pure (no DB) |
 | **1.4 ✅** | **Timetable grid** (week) | `src/repos/timetable.ts`, `src/services/timetable.ts`, `src/routes/timetable.ts` | done — real week renders, colour-by-course, ⚑ overseen, cells link to /lesson |
 | **1.5 ✅** | **Lesson detail + lazy occurrences** | `src/repos/occurrence.ts`, `src/services/occurrence.ts`, `src/routes/lesson.ts` | done — opening a slot find-or-creates the occurrence (idempotent); splits show per-course with “last time” |
-| **1.6** | **Notes capture** (the fast path) | `src/repos/notes.ts`, `src/services/notes.ts`, `src/routes/notes.ts`, `public/app.js` | text-only note autosaves; stopping point + follow-ups optional; `n` opens the box anywhere |
-| **1.7** | **Now screen** wired to the clock | rewrite `src/routes/now.ts` | shows current/next lesson, "last time → stopped at", quick note, free-period card; self-advances |
-| **1.8** | **General notes list** (light) | `src/routes/notes.ts` (list view) | `/notes` lists + filters notes by linked course/group |
+| **1.6 ✅** | **Notes capture** (the fast path) | `repos/notes.ts`, `lib/notesView.ts`, `routes/notes.ts`, `public/app.js`, `public/htmx.min.js` | done — inline notes autosave (HTMX), follow-ups, per-course stopping point, `n` shortcut |
+| **1.7 ✅** | **Now screen** wired to the clock | `repos/clock.ts`, rewritten `routes/now.ts` | done — current/next lesson, "last time", embedded quick note, 30s self-advancing clock strip |
+| **1.8 ✅** | **General notes list** (light) | `routes/notes.ts` (`GET /notes`) | done — lists general notes + new-note button; top-bar nav |
 
 ---
 

@@ -30,7 +30,7 @@ const courses: OccurrenceCourseRow[] = [
 const lastStops: LastStop[] = [{ groupCourseId: 100, stoppingPoint: 'fetch-decode-execute', date: '2026-09-02' }];
 
 describe('buildLessonDetail', () => {
-  const detail = buildLessonDetail(header, courses, lastStops, []);
+  const detail = buildLessonDetail(header, courses, lastStops);
   const section = (gc: number) => detail.sections.find((s) => s.groupCourseId === gc);
 
   it('makes one section per course for a split lesson', () => {
@@ -52,11 +52,8 @@ describe('buildLessonDetail', () => {
     expect(section(200)?.hasPlan).toBe(true);
   });
 
-  it('passes notes through unchanged', () => {
-    const withNote = buildLessonDetail(header, courses, lastStops, [
-      { id: 9, body: 'good lesson', stoppingPoint: null, time: '11:48', courseId: null },
-    ]);
-    expect(withNote.notes.length).toBe(1);
-    expect(withNote.notes[0]?.body).toBe('good lesson');
+  it('carries the occurrence_course id (for the stopping-point input)', () => {
+    expect(section(100)?.occurrenceCourseId).toBe(1);
+    expect(section(200)?.occurrenceCourseId).toBe(2);
   });
 });

@@ -116,3 +116,33 @@ a.tt-lesson:hover { background: #eef3fc; }
 .ld-notes { list-style: none; padding: 0; margin: 0; }
 .ld-notes li { padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
 .ld-time { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 0.4rem; }
+
+/* notes capture */
+.ld-notes-head { display: flex; align-items: center; gap: 1rem; justify-content: space-between; }
+.btn-secondary { font: inherit; padding: 0.4rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--accent); cursor: pointer; font-weight: 600; }
+.btn-secondary:hover { background: #f0f5ff; }
+.notes-list { list-style: none; padding: 0; margin: 0.75rem 0 0; display: grid; gap: 0.75rem; }
+.note { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 0.9rem; }
+.note textarea { width: 100%; border: 0; resize: vertical; font: inherit; outline: none; background: transparent; }
+.note-meta { display: flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; }
+.note-status { color: #2f7d32; opacity: 0; }
+.note-status.saved { opacity: 1; animation: ld-fade 1.8s forwards; }
+@keyframes ld-fade { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
+.note-time { margin-left: auto; }
+.link.danger { color: var(--error); }
+.followups { list-style: none; padding: 0; margin: 0.4rem 0 0; }
+.followups .fu { font-size: 0.9rem; }
+.followups .fu.done label { text-decoration: line-through; color: var(--muted); }
+.fu-form { margin-top: 0.3rem; }
+.fu-form input { width: 100%; border: 0; border-bottom: 1px dashed var(--line); font: inherit; padding: 0.2rem 0; outline: none; background: transparent; }
+.stop-label { display: block; font-weight: 600; margin-top: 0.6rem; font-size: 0.85rem; }
+.stop-input { display: inline-block; width: auto; min-width: 16rem; margin-top: 0.25rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-weight: 400; }
+
+/* now screen */
+.now-strip { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.95rem; margin-bottom: 1rem; font-size: 0.95rem; }
+.now-strip .now-when { font-weight: 700; }
+.now-strip .now-mins { color: var(--accent); font-weight: 700; }
+.now-strip a { color: var(--accent); font-weight: 600; }
+.now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
+.now-card h1 { margin: 0.25rem 0 0.4rem; }
+.now-notes { margin-top: 1.1rem; }

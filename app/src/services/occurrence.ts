@@ -43,6 +43,7 @@ export interface NoteView {
 }
 
 export interface CourseSection {
+  occurrenceCourseId: number;
   groupCourseId: number;
   courseName: string;
   colour: string | null;
@@ -54,19 +55,18 @@ export interface CourseSection {
 export interface LessonDetail {
   header: OccurrenceHeader;
   sections: CourseSection[];
-  notes: NoteView[];
 }
 
 export function buildLessonDetail(
   header: OccurrenceHeader,
   courses: OccurrenceCourseRow[],
   lastStops: LastStop[],
-  notes: NoteView[],
 ): LessonDetail {
   const lastByGroupCourse = new Map<number, LastStop>();
   for (const ls of lastStops) lastByGroupCourse.set(ls.groupCourseId, ls);
 
   const sections: CourseSection[] = courses.map((c) => ({
+    occurrenceCourseId: c.occurrenceCourseId,
     groupCourseId: c.groupCourseId,
     courseName: c.courseName,
     colour: c.colour,
@@ -75,5 +75,5 @@ export function buildLessonDetail(
     hasPlan: c.lessonPlanId !== null,
   }));
 
-  return { header, sections, notes };
+  return { header, sections };
 }

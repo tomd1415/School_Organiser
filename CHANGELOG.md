@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-08 — fast notes, the live Now screen & general notes (1.6–1.8) · Phase 1 MVP complete
+
+- **1.6 Notes capture** — HTMX vendored (`public/htmx.min.js`). Inline, autosaving notes on the
+  lesson and Now screens: ＋ New note, body autosaves (debounced; no focus loss, via out-of-band
+  swaps), add/tick **follow-ups**, and an editable **per-course stopping point** that feeds "last
+  time". `n` opens a new note from anywhere. (`repos/notes.ts`, `lib/notesView.ts`,
+  `routes/notes.ts`, `public/app.js`)
+- **1.7 Now screen** — `/` is wired to the ClockService: the current lesson (group, course, room,
+  "last time → stopped at") with an embedded quick-note composer, the next teaching slot, and a
+  clock strip that self-advances every 30s — kept separate from the composer so a half-typed note
+  is never wiped. (`repos/clock.ts`, `routes/now.ts`)
+- **1.8 General notes** — `GET /notes` lists general notes with a composer; top-bar nav
+  (Now · Timetable · Notes).
+- **Tests:** notesView render (incl. HTML-escaping); the integration suite now covers notes CRUD,
+  the clock repo, and an **authenticated end-to-end render** of every screen (login → Timetable,
+  Now strip, Notes, Lesson detail). **46 unit + 12 integration pass**; typecheck clean.
+
 ### 2026-06-08 — lesson detail & lazy occurrences (1.5)
 
 - **1.5 Lesson detail** — opening a timetable cell find-or-creates the dated `lesson_occurrence`

@@ -4,10 +4,10 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** Phase 1 in progress — the schema, the real-timetable seed, the ClockService, the
-> **week timetable grid** and **lesson detail** are built (run `./start.sh`). Next: fast notes,
-> then the live *Now* screen. See [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) for the build order
-> and [docs/ROADMAP.md](docs/ROADMAP.md) for what each phase adds.
+> **Status:** **Phase 1 (the MVP) is complete.** Log in over the LAN and you get the live *Now*
+> screen, the week timetable, click-through lesson detail, and fast autosaving notes with
+> follow-ups and "where we got to" (run `./start.sh`). Next is Phase 2 (tasks, time, events). See
+> [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) for what landed and [docs/ROADMAP.md](docs/ROADMAP.md) for what's next.
 
 ## The one-sentence pitch
 

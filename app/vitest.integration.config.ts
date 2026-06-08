@@ -10,7 +10,9 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       SESSION_KEY: '0'.repeat(64),
-      APP_PASSWORD_HASH: 'scrypt:00:00',
+      // hash of the password "test" (used by the authenticated screens test)
+      APP_PASSWORD_HASH:
+        'scrypt:d58f21eb0ab257d6e0822766bb763c9a:9e2bec377d007afe7c2bea05ad2cb80970c9c3c7af7d126b6e7d82b7cd597a0d791a2b9aa5831c5cbe4820ffa9384ca4f023ff3df7e2d9b675bbbfa3ec612cbc',
       DATABASE_URL: 'postgres://organiser:organiser@localhost:5434/organiser',
       COOKIE_SECURE: 'false',
     },

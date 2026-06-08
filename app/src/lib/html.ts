@@ -39,11 +39,12 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <header class="topbar">
     <div class="bar-left">
       <a class="brand" href="/">School Organiser</a>
-      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/timetable">Timetable</a></nav>' : ''}
+      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/timetable">Timetable</a><a href="/notes">Notes</a></nav>' : ''}
     </div>
     ${logout}
   </header>
   <main>${body}</main>
+  ${authed ? '<script src="/static/htmx.min.js"></script>\n  <script src="/static/app.js" defer></script>' : ''}
 </body>
 </html>`;
 }
