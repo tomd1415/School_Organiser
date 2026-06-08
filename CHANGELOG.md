@@ -7,6 +7,17 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-08 — lesson detail & lazy occurrences (1.5)
+
+- **1.5 Lesson detail** — opening a timetable cell find-or-creates the dated `lesson_occurrence`
+  (idempotent on lesson+date) and materialises one `occurrence_course` per course, so split
+  classes show a section each with its stopping point, plan placeholder and **“last time →
+  stopped at”** (the previous occurrence). Read-only notes list (capture lands in 1.6).
+  (`repos/occurrence.ts`, pure `services/occurrence.ts`, `routes/lesson.ts`)
+- **Integration tests** — a separate `npm run test:integration` (`vitest.integration.config.ts`)
+  exercises find-or-create against the dev DB (idempotency + course materialisation), kept out of
+  the DB-free unit suite. Plus a `buildLessonDetail` unit test. **41 unit + 3 integration pass.**
+
 ### 2026-06-08 — start/stop scripts, login-hash fix, and the timetable grid (1.4)
 
 - **`./start.sh` / `./stop.sh`** (repo root) — one command each. `start.sh` stops anything

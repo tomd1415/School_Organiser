@@ -5,6 +5,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
+    // Unit suite only; DB-backed tests live in tests/integration and run via
+    // `npm run test:integration` (see vitest.integration.config.ts).
+    include: ['tests/*.test.ts'],
     env: {
       NODE_ENV: 'test',
       SESSION_KEY: '0'.repeat(64),

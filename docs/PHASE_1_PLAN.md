@@ -47,7 +47,7 @@ DB is down"** rule on the Now screen.
 | **1.2 ✅** | **Real-timetable seed** | `src/seed/data.ts`, `src/seed/run.ts`, `npm run seed` | done — idempotent; integrity OK (47 lessons; splits/frees correct) |
 | **1.3 ✅** | **ClockService + tests** | `src/lib/time.ts`, `src/services/clock.ts`, `tests/clock.test.ts` | done — 14 tests pass, pure (no DB) |
 | **1.4 ✅** | **Timetable grid** (week) | `src/repos/timetable.ts`, `src/services/timetable.ts`, `src/routes/timetable.ts` | done — real week renders, colour-by-course, ⚑ overseen, cells link to /lesson |
-| **1.5** | **Lesson detail + lazy occurrences** | `src/repos/occurrence.ts`, `src/services/occurrence.ts`, `src/routes/lesson.ts` | opening a slot find-or-creates one `lesson_occurrence`; split classes show per-course |
+| **1.5 ✅** | **Lesson detail + lazy occurrences** | `src/repos/occurrence.ts`, `src/services/occurrence.ts`, `src/routes/lesson.ts` | done — opening a slot find-or-creates the occurrence (idempotent); splits show per-course with “last time” |
 | **1.6** | **Notes capture** (the fast path) | `src/repos/notes.ts`, `src/services/notes.ts`, `src/routes/notes.ts`, `public/app.js` | text-only note autosaves; stopping point + follow-ups optional; `n` opens the box anywhere |
 | **1.7** | **Now screen** wired to the clock | rewrite `src/routes/now.ts` | shows current/next lesson, "last time → stopped at", quick note, free-period card; self-advances |
 | **1.8** | **General notes list** (light) | `src/routes/notes.ts` (list view) | `/notes` lists + filters notes by linked course/group |

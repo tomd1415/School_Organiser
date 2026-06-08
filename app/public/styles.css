@@ -102,3 +102,17 @@ a.tt-lesson:hover { background: #eef3fc; }
 .tt-key { display: inline-block; width: 0.9rem; height: 0.9rem; vertical-align: middle; border-radius: 3px; }
 .tt-key.tt-free { border: 1px solid var(--line); }
 .tt-key.tt-oversee { width: auto; }
+
+/* lesson detail */
+.ld h1 { margin: 0.25rem 0 0.25rem; }
+.ld-meta { color: var(--muted); margin: 0 0 1.25rem; }
+.ld-course { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 0.9rem; }
+.ld-course h2 { margin: 0 0 0.35rem; font-size: 1.1rem; }
+.ld-stop { margin: 0.35rem 0 0; }
+.ld-last { margin: 0.2rem 0 0; color: var(--muted); }
+.ld-last strong { color: var(--ink); }
+.ld-notesblock { margin-top: 1.5rem; }
+.ld-notesblock h2 { font-size: 1.05rem; }
+.ld-notes { list-style: none; padding: 0; margin: 0; }
+.ld-notes li { padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+.ld-time { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 0.4rem; }

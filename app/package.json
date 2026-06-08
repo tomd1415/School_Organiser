@@ -12,7 +12,8 @@
     "seed": "tsx src/seed/run.ts",
     "hash-password": "tsx scripts/hash-password.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
