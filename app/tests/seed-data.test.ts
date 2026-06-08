@@ -20,10 +20,10 @@ const cells = [1, 2, 3, 4, 5].flatMap((w) => GRID[w] ?? []);
 describe('seed data — period definitions', () => {
   const periods = buildPeriodDefinitions();
 
-  it('has 11 slots per weekday (55 total)', () => {
+  it('has 13 slots per weekday (65 total)', () => {
     expect(periods.length).toBe(EXPECTED.periods);
     for (let w = 1; w <= 5; w++) {
-      expect(periods.filter((p) => p.weekday === w).length).toBe(11);
+      expect(periods.filter((p) => p.weekday === w).length).toBe(13);
     }
   });
 

@@ -116,6 +116,8 @@ the same source. Encodes [TEACHING_PATTERN.md](TEACHING_PATTERN.md):
 
 | slot_type | time | teachable | notes |
 | --- | --- | --- | --- |
+| `before_school` | 07:30–07:40 | no | **Coffee** (start of day) |
+| `before_school` | 07:40–08:30 | no | before-school work / prep |
 | `briefing` / `before_school` | 08:30–08:50 | no | briefing Mon/Wed/Thu; prep (before_school) Tue/Fri |
 | `form_am` | 08:50–09:10 | no | daily morning form with 9TDU |
 | `lesson` L1 | 09:10–10:00 | yes | |

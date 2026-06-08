@@ -61,10 +61,16 @@ describe('ClockService — current period within a school day', () => {
 });
 
 describe('ClockService — edges of the day and the next teaching slot', () => {
-  it('before school: 08:00 has no current period; next is today Lesson 1', () => {
-    const s = now('2026-09-09T08:00:00+01:00');
+  it('before the day: 07:00 has no current period; next is today Lesson 1', () => {
+    const s = now('2026-09-09T07:00:00+01:00');
     expect(s.current).toBeNull();
     expect(s.nextTeaching?.date).toBe('2026-09-09');
+    expect(s.nextTeaching?.lessonIndex).toBe(1);
+  });
+
+  it('early morning: 08:00 is the before-school slot, not a lesson', () => {
+    const s = now('2026-09-09T08:00:00+01:00');
+    expect(s.current?.slotType).toBe('before_school');
     expect(s.nextTeaching?.lessonIndex).toBe(1);
   });
 

@@ -8,17 +8,17 @@ describe('clock repo (integration — needs the dev DB up)', () => {
     await pool.end();
   });
 
-  it('loads the clock context: 55 periods, 14 term dates, tz, minutes', async () => {
+  it('loads the clock context: 65 periods, 14 term dates, tz, minutes', async () => {
     const ctx = await getClockContext();
-    expect(ctx.periods.length).toBe(55);
+    expect(ctx.periods.length).toBe(65);
     expect(ctx.terms.length).toBe(14);
     expect(ctx.tz).toBe('Europe/London');
     const l1 = ctx.periods.find((p) => p.lessonIndex === 1);
     expect(l1?.startMin).toBe(9 * 60 + 10); // 09:10
   });
 
-  it('finds the self lesson at a known slot (Mon, slot 3 = Lesson 1 = 8PFA)', async () => {
-    const lesson = await getSelfLessonAt(1, 3);
+  it('finds the self lesson at a known slot (Mon, slot 5 = Lesson 1 = 8PFA)', async () => {
+    const lesson = await getSelfLessonAt(1, 5);
     expect(lesson).not.toBeNull();
     expect(lesson?.purpose).toBe('teaching');
     expect(lesson?.groupName).toBe('8PFA');

@@ -53,6 +53,8 @@ Totals: 27 teaching/form periods + **3 free periods (Tue L4, Thu L1, Thu L4)** =
 
 | When | What |
 | --- | --- |
+| Daily 07:30–07:40 | **Coffee** (start of day) |
+| Daily 07:40–08:30 | Before-school work / prep |
 | Daily 08:50–09:10 | Morning form (with 9TDU) |
 | Mon/Wed/Thu 08:30–08:50 | Briefing |
 | Tue/Fri 08:30–08:50 | Prep / free |

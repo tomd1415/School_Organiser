@@ -7,6 +7,12 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — earlier start: 07:30 coffee + before-school slots
+
+- The seeded day now starts at **07:30** — a 10-minute **Coffee** slot, then a **before-school**
+  work/prep block to 08:30 (briefing / form / lessons unchanged). 13 period slots per weekday;
+  `default_arrival` → 07:30. The Now clock strip shows "NOW Coffee" first thing. (`seed/data.ts`)
+
 ### 2026-06-08 — fast notes, the live Now screen & general notes (1.6–1.8) · Phase 1 MVP complete
 
 - **1.6 Notes capture** — HTMX vendored (`public/htmx.min.js`). Inline, autosaving notes on the

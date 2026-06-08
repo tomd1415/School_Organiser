@@ -30,6 +30,8 @@ export function buildPeriodDefinitions(): PeriodSeed[] {
       teachable: boolean,
     ) => out.push({ weekday, slotOrder: order++, slotType, label, lessonIndex, start, end, teachable });
 
+    push('before_school', 'Coffee', null, '07:30', '07:40', false);
+    push('before_school', 'Before school', null, '07:40', '08:30', false);
     push(earlyPrep ? 'before_school' : 'briefing', earlyPrep ? 'Prep' : 'Briefing', null, '08:30', '08:50', false);
     push('form_am', 'Morning form', null, '08:50', '09:10', false);
     push('lesson', 'Lesson 1', 1, '09:10', '10:00', true);
@@ -210,7 +212,7 @@ export const OVERSEEN: OverseenSeed[] = [
 ];
 
 export const SETTINGS = {
-  default_arrival: '08:15',
+  default_arrival: '07:30',
   default_leave: '19:00',
   target_leave: '18:00',
 };
@@ -220,7 +222,7 @@ export const EXPECTED = {
   academicYears: 2,
   currentYears: 1,
   termDates: 14,
-  periods: 55, // 11 slots × 5 weekdays
+  periods: 65, // 13 slots × 5 weekdays (incl. 07:30 coffee + before-school)
   courses: 7,
   groups: 13,
   groupCourses: 23,
