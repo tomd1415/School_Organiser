@@ -7,12 +7,22 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-08 — repo renamed; Phase 1 planned
+
+- **Renamed** the local folder and GitHub repo to **`School_Organiser`** — the rename that was
+  pending is done; spelling and naming now match across docs, `package.json` and Docker.
+- **Authored [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md)** — the detailed build plan for the
+  Timetable + Now + Notes MVP (schema → real seed → ClockService → screens), for sign-off.
+- **Captured Phase 1 seed inputs:** the **2026/27 term dates** and the first overseen-lesson
+  slots (7ARO Skills Wed L3, 7JMI Curriculum Fri L3) in
+  [docs/TEACHING_PATTERN.md](docs/TEACHING_PATTERN.md); the remaining overseen slots follow.
+
 ### 2026-06-08 — project-name spelling corrected
 
 - **Corrected "Orgniser" → "Organiser"** in all docs/scripts (the project name is
   **School_Organiser**). `package.json` (`school-organiser`) and Docker (`school_organiser`)
-  were already correct. **Pending:** rename the local folder and the GitHub repo to
-  `School_Organiser` to match (outward-facing — awaiting go-ahead).
+  were already correct. The local folder and GitHub repo have **since been renamed to
+  `School_Organiser`** (see the entry above), so naming is consistent everywhere.
 
 ### 2026-06-08 — Q3/Q14 answered, gitignore fix
 

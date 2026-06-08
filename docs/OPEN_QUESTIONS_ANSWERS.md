@@ -10,8 +10,8 @@ batch first. Each entry notes the decision and where it has been applied. Histor
 | --- | --- | --- |
 | **3** Email intake | **(a) Paste box to start** — forward-to-mailbox (b) & `.eml` drop (c) liked but parked for later. | SPEC §5.5, ROADMAP P2 |
 | **4** AI provider | **Anthropic (Claude)** — switched from OpenAI. Wrapper stays provider-swappable. | ARCHITECTURE, DATA_MODEL settings, SECURITY |
-| **5** Repo | On **GitHub** as `tomd1415/School_Orgniser` — **rename to `School_Organiser` pending** (repo + local folder). | — |
-| **6** Project name | **"School_Organiser"** (spelling corrected 2026-06-08; folder + GitHub repo to be renamed to match — `package.json`/Docker already correct). | — |
+| **5** Repo | On **GitHub**; folder + repo **renamed to `School_Organiser`** (2026-06-08) — done. | — |
+| **6** Project name | **"School_Organiser"** — spelling corrected and the folder + GitHub repo renamed to match (2026-06-08); `package.json`/Docker were already correct. | — |
 | **7** Tue/Fri 08:30–08:50 | **Prep/free time** (usable for work blocks). | TEACHING_PATTERN |
 | **8** Before/after-school | **Interactive work blocks**. | SPEC §5.6 (already) |
 | **9** Free periods | **Fixed slots this year**; the whole timetable changes each September but stays static for the year → academic-year rollover. | SPEC §5.14, TEACHING_PATTERN |

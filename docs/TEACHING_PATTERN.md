@@ -74,12 +74,42 @@ before/after school. Leave ~19:00 most days (Tue 17:30; Wed 20:00 on staff-TTRPG
 
 ## Other-teacher lessons (I plan / oversee)
 
-- **7JMI** — both Computing Curriculum *and* Computer Skills (not in my timetable).
-- **7ARO** — Computer Skills (I teach 7ARO Computing Curriculum, Tue L1).
-- **7RAL** — Computer Skills (I teach 7RAL Computing Curriculum, Tue L6).
+These run **in parallel** with my own lessons (taught by another teacher), so a period can hold
+both my lesson and an overseen one:
 
+- **7JMI** — Computing Curriculum (**Fri L3**) *and* Computer Skills (**slot TBC**) — neither in
+  my timetable.
+- **7ARO** — Computer Skills (**Wed L3**) — I teach 7ARO Computing Curriculum, Tue L1.
+- **7RAL** — Computer Skills (**slot TBC**) — I teach 7RAL Computing Curriculum, Tue L6.
+
+Slots captured 2026-06-08 (7ARO Skills Wed L3, 7JMI Curriculum Fri L3); the two TBC slots follow.
 Modelled as `timetabled_lessons` with a non-self `staff_id`; I prepare the plan + resources and
 keep oversight notes (SPEC §5.8, the "Lessons I oversee" view).
+
+## Term dates (2026/27)
+
+The calendar overlay that seeds `term_dates` and drives the ClockService's "is today a school
+day". Confirmed 2026-06-08. (The **current** 2025/26 year's final half-term ends **Mon 20 Jul
+2026**, an INSET day — context only; the live target year is 2026/27, see
+[PHASE_1_PLAN.md §7](PHASE_1_PLAN.md#the-one-real-decision--target-year--go-live).)
+
+| Period | Dates | kind |
+| --- | --- | --- |
+| Autumn term | Tue 1 Sep 2026 – Fri 18 Dec 2026 | term |
+| · INSET (pupils start 2 Sep) | Tue 1 Sep 2026 | inset |
+| · Autumn half term | Mon 26 – Fri 30 Oct 2026 | half_term |
+| · Christmas holiday | Mon 21 Dec 2026 – Fri 1 Jan 2027 | holiday |
+| Spring term | Mon 4 Jan 2027 – Thu 25 Mar 2027 | term |
+| · INSET (pupils start 5 Jan) | Mon 4 Jan 2027 | inset |
+| · Spring half term | Mon 15 – Fri 19 Feb 2027 | half_term |
+| · Easter holiday | Mon 29 Mar – Fri 9 Apr 2027 | holiday |
+| Summer term | Mon 12 Apr 2027 – Wed 21 Jul 2027 | term |
+| · Early May bank holiday (in term — closed) | Mon 3 May 2027 | holiday |
+| · Summer half term | Mon 31 May – Fri 4 Jun 2027 | half_term |
+
+Bank holidays for reference: 31 Aug 2026, 1 Jan 2027, Good Friday 26 Mar 2027, 3 May 2027,
+31 May 2027 — the in-term one that matters for the clock is **3 May 2027**. Only two INSET days are
+known (1 Sep, 4 Jan); any others TBC.
 
 ## Carry-over
 

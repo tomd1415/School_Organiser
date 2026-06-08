@@ -4,9 +4,10 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** Phase 0 (skeleton) scaffolded — a running, authenticated, backed-up empty app —
-> on top of the agreed specification & design documents. See [docs/ROADMAP.md](docs/ROADMAP.md)
-> for what each phase adds, and [docs/RUNBOOK.md](docs/RUNBOOK.md) to run it.
+> **Status:** Phase 0 (skeleton) complete — a running, authenticated, backed-up empty app. Phase 1
+> (Timetable · Now · Notes — the MVP) is **planned and awaiting build**: see
+> [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md). [docs/ROADMAP.md](docs/ROADMAP.md) shows what each
+> phase adds; [docs/RUNBOOK.md](docs/RUNBOOK.md) to run it.
 
 ## The one-sentence pitch
 
@@ -33,6 +34,7 @@ Read in this order:
 | [docs/UX_FLOWS.md](docs/UX_FLOWS.md) | Wireframes and interaction flows for the key screens. |
 | [docs/SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md) | Auth, pupil-data handling, AI redaction, GDPR/DPIA pointers. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan and MVP definition. |
+| [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) | Detailed build plan for Phase 1 (the MVP): schema, real-timetable seed, ClockService, screens. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
 ## Run it (Phase 0)
