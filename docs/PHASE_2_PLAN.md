@@ -48,12 +48,12 @@ everything; Phase 4 layers AI on top without changing the schema. See §10. This
 | **2.1 ✅** | **Schema** — all P2 tables + deferred FKs | `migrations/0003_phase2.sql` | done — 13 tables migrate clean; typecheck green |
 | **2.2 ✅** | **Tasks** — capture, inbox & triage | `repos/tasks.ts`, `services/task.ts`, `lib/taskView.ts`, `routes/tasks.ts` | done — inbox/open/done; inline autosave triage (urgency/estimate/load/group/context); ＋new; nav |
 | **2.3 ✅** | **`due_rule` + Now "before the next bell"** | `services/task.ts` (resolver), `routes/now.ts` | done — pure `resolveDueRule`/`beforeNextBell`; urgent + by-next-lesson + due-before-bell on Now |
-| **2.4** | **Email paste-box → draft task** | `services/emailIntake.ts`, `routes/tasks.ts` | paste an email → draft task, source kept (`email_intake`) |
-| **2.5** | **Events & deadlines** | `repos/events.ts`, `services/event.ts`, `routes/events.ts` | events/deadlines/exams + parental-contact log; lead-time reminders; "what's coming"; on Now |
-| **2.6** | **Availability + work blocks** (plan vs actual / diverted) | `services/availability.ts`, `services/workblock.ts`, `repos/workBlocks.ts`, `routes/time.ts` | real work windows computed; plan a block; one-tap **diverted** keeps the plan; planned-vs-actual log |
-| **2.7** | **Timers** | `services/timer.ts`, `repos/timeEntries.ts` | one timer at a time, interruptible; actuals accumulate; estimate-vs-actual report |
-| **2.8** | **Prep checklists** (before the bell + start/end-of-day) | `repos/prep.ts`, `services/prep.ts` | per-lesson + daily checklists; recurring templates materialise per occurrence; undone shown on Now |
-| **2.9** | **Focus mode + end-of-day wind-down** | `services/focus.ts`, `routes/focus.ts` | one next action (urgency/due/fit/load), shown as steps; morning/free/end-of-day; "go home" |
+| **2.4 ✅** | **Email paste-box → draft task** | `services/emailIntake.ts`, `routes/tasks.ts` | done — paste box on /tasks; Subject/first-line → title; `email_intake` provenance |
+| **2.5 ✅** | **Events & deadlines** | `repos/events.ts`, `services/event.ts`, `lib/eventView.ts`, `routes/events.ts` | done — `/events` "what's coming"; lead-time `dueSoon`; surfaced on Now |
+| **2.6 ✅** | **Availability + work blocks** (diverted) | `services/availability.ts`, `lib/commitments.ts`, `repos/workBlocks.ts`, `routes/time.ts` | done — pure `computeWindows` (frees + before/after − commitments + 10-min buffer); `/time` log + diverted |
+| **2.7 ✅** | **Timers** | `repos/timeEntries.ts`, `routes/timer.ts` | done — one running (partial index), interruptible, accumulates to `actual_seconds`; banner on Now/Tasks |
+| **2.8 ✅** | **Prep checklists** | `migrations/0004_prep.sql`, `repos/prep.ts`, `services/prep.ts` | done — per-lesson prep (templates → occurrence_prep) on the lesson; start/end-of-day on Now |
+| **2.9 ✅** | **Focus mode + wind-down** | `services/focus.ts`, `routes/focus.ts` | done — pure `pickNext` (urgency/due/fit/load); morning/free/end modes; sub-steps; "go home" |
 | **2.10** | **Captured info** ("things I've been told") | `repos/captured.ts`, `routes/captured.ts` | frictionless capture; manual category; resurfaces by entity/date; **safeguarding** flag |
 | **2.11** | **Pupils, enrolments, mentions, tags** + **DPIA** | `repos/pupils.ts`, `routes/pupils.ts`, `docs/DPIA.md` | **DPIA written first**; pupils (+`ai_token`); outstanding-pupil mentions; note tags |
 | **2.12** | **Task enrichment** — recurrence, sub-tasks, current-interest | `services/task.ts` | recurring + per-lesson tasks; manual sub-steps; one-tap current-interest |

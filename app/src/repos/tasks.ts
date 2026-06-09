@@ -32,6 +32,33 @@ export async function createTask(title: string): Promise<number> {
   return id;
 }
 
+export interface ParsedEmailInput {
+  title: string;
+  detail: string;
+  from: string | null;
+  subject: string | null;
+}
+
+/** Store the pasted email and create a linked draft task (source='email'). */
+export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: string): Promise<number> {
+  const intake = await pool.query<{ id: number }>(
+    `INSERT INTO email_intake (from_addr, subject, body, received_at, processed) VALUES ($1, $2, $3, now(), true) RETURNING id`,
+    [parsed.from, parsed.subject, rawBody],
+  );
+  const intakeId = intake.rows[0]?.id;
+  if (intakeId === undefined) throw new Error('failed to store email');
+
+  const task = await pool.query<{ id: number }>(
+    `INSERT INTO tasks (title, detail, source, email_intake_id) VALUES ($1, $2, 'email', $3) RETURNING id`,
+    [parsed.title, parsed.detail || null, intakeId],
+  );
+  const taskId = task.rows[0]?.id;
+  if (taskId === undefined) throw new Error('failed to create task from email');
+
+  await pool.query(`UPDATE email_intake SET created_task_id = $2 WHERE id = $1`, [intakeId, taskId]);
+  return taskId;
+}
+
 export async function listTasks(view: TaskView): Promise<TaskRow[]> {
   const { rows } = await pool.query<TaskRow>(
     `SELECT id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
@@ -93,6 +120,70 @@ export async function getGroupSlots(): Promise<Map<number, GroupSlot[]>> {
     map.set(r.groupId, arr);
   }
   return map;
+}
+
+// ── Focus (2.9) ──────────────────────────────────────────────────────────────
+
+export interface FocusCandidate {
+  id: number;
+  title: string;
+  urgency: string;
+  estimateMin: number | null;
+  cognitiveLoad: string | null;
+  interest: boolean;
+  dueAt: string | null;
+  dueRule: string | null;
+  groupId: number | null;
+}
+
+/** Top-level open tasks (no sub-steps) — the focus candidates. */
+export async function listFocusCandidates(): Promise<FocusCandidate[]> {
+  const { rows } = await pool.query<FocusCandidate>(
+    `SELECT id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad", interest,
+            to_char(due_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "dueAt",
+            due_rule AS "dueRule", group_id AS "groupId"
+     FROM tasks
+     WHERE status NOT IN ('done', 'dropped') AND parent_task_id IS NULL`,
+  );
+  return rows;
+}
+
+export interface SubStep {
+  id: number;
+  title: string;
+  done: boolean;
+}
+
+export async function listSubtasks(parentId: number): Promise<SubStep[]> {
+  const { rows } = await pool.query<{ id: number; title: string; status: string }>(
+    `SELECT id, title, status FROM tasks WHERE parent_task_id = $1 ORDER BY id`,
+    [parentId],
+  );
+  return rows.map((r) => ({ id: r.id, title: r.title, done: r.status === 'done' }));
+}
+
+export async function createSubtask(parentId: number, title: string): Promise<SubStep> {
+  const { rows } = await pool.query<{ id: number }>(
+    `INSERT INTO tasks (title, parent_task_id, status, urgency) VALUES ($1, $2, 'triaged', 'this_week') RETURNING id`,
+    [title, parentId],
+  );
+  const id = rows[0]?.id;
+  if (id === undefined) throw new Error('failed to create sub-step');
+  return { id, title, done: false };
+}
+
+export async function toggleSubtaskDone(id: number): Promise<SubStep | null> {
+  const { rows } = await pool.query<{ id: number; title: string; status: string }>(
+    `UPDATE tasks
+     SET status = CASE WHEN status = 'done' THEN 'triaged' ELSE 'done' END,
+         completed_at = CASE WHEN status = 'done' THEN NULL ELSE now() END,
+         updated_at = now()
+     WHERE id = $1 AND parent_task_id IS NOT NULL
+     RETURNING id, title, status`,
+    [id],
+  );
+  const r = rows[0];
+  return r ? { id: r.id, title: r.title, done: r.status === 'done' } : null;
 }
 
 /** Open tasks that might be due before the next bell (the Now screen filters them). */

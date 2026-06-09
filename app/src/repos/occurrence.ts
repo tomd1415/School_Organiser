@@ -1,6 +1,7 @@
 // SQL for dated lesson occurrences. Occurrences are created lazily — the first
 // time a slot's detail is opened — and are idempotent on (timetabled_lesson, date).
 import { pool } from '../db/pool';
+import { materialiseOccurrencePrep } from './prep';
 import type { LastStop, NoteView, OccurrenceCourseRow, OccurrenceHeader } from '../services/occurrence';
 
 /** Find-or-create the occurrence for a slot on a date, and materialise its courses. */
@@ -24,6 +25,7 @@ export async function findOrCreateOccurrence(lessonId: number, date: string): Pr
      ON CONFLICT (occurrence_id, group_course_id) DO NOTHING`,
     [id, lessonId],
   );
+  await materialiseOccurrencePrep(id);
   return id;
 }
 

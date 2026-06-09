@@ -1,0 +1,70 @@
+// SQL for prep checklists: per-lesson (occurrence_prep, materialised from
+// prep_templates) and the start/end-of-day day_checklist.
+import { pool } from '../db/pool';
+import { DAY_CHECKLIST_DEFAULTS } from '../services/prep';
+
+export interface PrepItem {
+  id: number;
+  text: string;
+  done: boolean;
+}
+
+/** Materialise the global prep templates into this occurrence's checklist (once). */
+export async function materialiseOccurrencePrep(occurrenceId: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO occurrence_prep (occurrence_id, text, source, template_id)
+     SELECT $1, pt.text, 'template', pt.id
+     FROM prep_templates pt
+     WHERE pt.active AND pt.scope = 'global'
+       AND NOT EXISTS (SELECT 1 FROM occurrence_prep op WHERE op.occurrence_id = $1)`,
+    [occurrenceId],
+  );
+}
+
+export async function listOccurrencePrep(occurrenceId: number): Promise<PrepItem[]> {
+  const { rows } = await pool.query<PrepItem>(
+    `SELECT id, text, done FROM occurrence_prep WHERE occurrence_id = $1 ORDER BY id`,
+    [occurrenceId],
+  );
+  return rows;
+}
+
+export async function toggleOccurrencePrep(id: number): Promise<PrepItem | null> {
+  const { rows } = await pool.query<PrepItem>(
+    `UPDATE occurrence_prep SET done = NOT done WHERE id = $1 RETURNING id, text, done`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+async function readDay(date: string, part: 'start' | 'end'): Promise<PrepItem[]> {
+  const { rows } = await pool.query<PrepItem>(
+    `SELECT id, text, done FROM day_checklist WHERE date = $1::date AND part = $2 ORDER BY display_order, id`,
+    [date, part],
+  );
+  return rows;
+}
+
+/** The day's checklist, materialising the defaults the first time a date is opened. */
+export async function getDayChecklist(date: string, part: 'start' | 'end'): Promise<PrepItem[]> {
+  const existing = await readDay(date, part);
+  if (existing.length > 0) return existing;
+  let order = 0;
+  for (const text of DAY_CHECKLIST_DEFAULTS[part]) {
+    await pool.query(`INSERT INTO day_checklist (date, part, text, display_order) VALUES ($1::date, $2, $3, $4)`, [
+      date,
+      part,
+      text,
+      order++,
+    ]);
+  }
+  return readDay(date, part);
+}
+
+export async function toggleDayChecklist(id: number): Promise<PrepItem | null> {
+  const { rows } = await pool.query<PrepItem>(
+    `UPDATE day_checklist SET done = NOT done WHERE id = $1 RETURNING id, text, done`,
+    [id],
+  );
+  return rows[0] ?? null;
+}

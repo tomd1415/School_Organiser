@@ -158,6 +158,35 @@ a.tt-lesson:hover { background: #eef3fc; }
 .task-est { width: 4.5rem; }
 .task-ctx { width: 8rem; }
 .task-actions { display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; }
+.tasks-list .task, .tasks-list .event { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; }
+.event-title { width: 100%; border: 0; border-bottom: 1px solid transparent; font: inherit; font-weight: 600; outline: none; background: transparent; }
+.event-title:focus { border-bottom-color: var(--line); }
+.event-lead { width: 4.5rem; }
+.coming-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+.coming-list li { padding: 0.25rem 0; display: flex; gap: 0.5rem; }
+.coming-when { margin-left: auto; color: var(--muted); font-size: 0.85rem; }
+
+/* time / work windows + work log */
+.windows { list-style: none; padding: 0; margin: 0.5rem 0 1rem; }
+.windows li { padding: 0.3rem 0; display: flex; gap: 0.6rem; align-items: baseline; border-bottom: 1px solid var(--line); }
+.win-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+.win-min { margin-left: auto; }
+.wblock .wb-plan, .wblock .wb-actual { width: 100%; border: 0; border-bottom: 1px solid var(--line); font: inherit; padding: 0.25rem 0; outline: none; background: transparent; margin-bottom: 0.25rem; }
+.wblock.diverted { border-left: 4px solid var(--error); }
+.wblock.done { opacity: 0.7; }
+.wb-status { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* running-timer banner */
+.timer-banner:not(:empty) { display: flex; gap: 1rem; align-items: center; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.5rem 0.8rem; margin-bottom: 1rem; }
+
+/* focus mode */
+.now-focus { margin: 0.5rem 0; }
+.now-focus a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.focus-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; margin-top: 0.5rem; }
+.focus-card h1 { margin: 0.25rem 0 0.75rem; font-size: 1.6rem; }
+.focus-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+.focus-done { margin-top: 1rem; }
+.focus-done h1 { font-size: 1.6rem; }
 
 /* now: before the next bell */
 .now-bell { margin-top: 1rem; }
@@ -165,3 +194,8 @@ a.tt-lesson:hover { background: #eef3fc; }
 .bell-task { padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--line); }
 .bell-task button.link { font-size: 1rem; }
 .bell-tag { font-size: 0.75rem; margin-left: auto; }
+
+/* email paste box */
+.paste-box { margin: 0.5rem 0; }
+.paste-box summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.paste-box textarea { width: 100%; margin: 0.5rem 0; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; font: inherit; }

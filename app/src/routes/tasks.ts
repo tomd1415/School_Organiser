@@ -2,9 +2,12 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { layout } from '../lib/html';
-import { createTask, listGroups, listTasks, setTaskStatus, updateTaskField } from '../repos/tasks';
+import { createTask, createTaskFromEmail, listGroups, listTasks, setTaskStatus, updateTaskField } from '../repos/tasks';
+import { parseEmail } from '../services/emailIntake';
 import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
 import { renderSavedStatus } from '../lib/notesView';
+import { getRunningTimer } from '../repos/timeEntries';
+import { renderTimerBanner } from './timer';
 import type { TaskView } from '../services/task';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -18,9 +21,11 @@ export function registerTaskRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
 
     let listHtml: string;
+    let banner = renderTimerBanner(null);
     try {
-      const [tasks, groups] = await Promise.all([listTasks(view), listGroups()]);
+      const [tasks, groups, running] = await Promise.all([listTasks(view), listGroups(), getRunningTimer()]);
       listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
+      banner = renderTimerBanner(running);
     } catch {
       listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
     }
@@ -29,8 +34,10 @@ export function registerTaskRoutes(app: FastifyInstance): void {
       `<a href="/tasks?view=${v}"${v === view ? ' class="active"' : ''}>${label}</a>`;
     const body = `
       <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        ${banner}
         <div class="ld-notes-head"><h1>Tasks</h1>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') : ''}</div>
         <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')}</nav>
+        ${view === 'inbox' ? `<details class="paste-box"><summary>Paste an email</summary><form hx-post="/tasks/paste" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="this.reset()"><textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea><div><button type="submit" class="btn-secondary">Make task</button></div></form></details>` : ''}
         ${listHtml}
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
@@ -46,6 +53,23 @@ export function registerTaskRoutes(app: FastifyInstance): void {
         groups,
       ),
     );
+  });
+
+  // Paste an email → a draft task (source='email'), kept in email_intake.
+  app.post('/tasks/paste', guard, async (req, reply) => {
+    const b = z.object({ email: z.string().max(50000).default('') }).safeParse(req.body);
+    if (!b.success || b.data.email.trim() === '') return reply.type('text/html').send('');
+    const parsed = parseEmail(b.data.email);
+    const id = await createTaskFromEmail(parsed, b.data.email);
+    const groups = await listGroups();
+    return reply
+      .type('text/html')
+      .send(
+        renderTaskItem(
+          { id, title: parsed.title, urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox' },
+          groups,
+        ),
+      );
   });
 
   // Autosave a single field (HTMX sends just the changed one). Returns an OOB "saved".

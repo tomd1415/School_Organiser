@@ -7,6 +7,33 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 2 planning core: email, events, time, timers, prep & focus (2.4–2.9)
+
+- **2.4 Email paste-box** — paste an email on /tasks → a draft task (Subject / first line → title),
+  kept in `email_intake`. (`services/emailIntake.ts`)
+- **2.5 Events & deadlines** — `/events` "what's coming" (parents' evenings, deadlines, exams,
+  parent-contact); lead-time `dueSoon` surfaces them on Now. (`repos/events.ts`, `services/event.ts`,
+  `lib/eventView.ts`, `routes/events.ts`)
+- **2.6 Availability + work blocks** — pure `computeWindows` (free periods + before/after school,
+  minus break/lunch/coffee/teaching, minus after-school commitments + a **10-min buffer** + blocking
+  events); `/time` shows the windows + a planned-vs-actual work log with the one-tap **diverted**
+  path. (`services/availability.ts`, `lib/commitments.ts`, `repos/workBlocks.ts`, `routes/time.ts`)
+- **2.7 Timers** — one timer at a time (partial unique index), interruptible, accumulating onto
+  `tasks.actual_seconds`; ▶ on tasks, a running banner on Now/Tasks. (`repos/timeEntries.ts`,
+  `routes/timer.ts`)
+- **2.8 Prep checklists** — per-lesson "before the bell" (`prep_templates` → `occurrence_prep`,
+  materialised when a lesson is opened); a **start/end-of-day** checklist on Now. (migration `0004`,
+  `repos/prep.ts`, `services/prep.ts`)
+- **2.9 Focus mode** — pure `pickNext` ranks open tasks (urgency · due-before-bell · fits the
+  window · load vs. energy) to **one next action** with sub-steps; morning / free-period / end-of-day
+  modes + a "✅ go home" wind-down. (`services/focus.ts`, `routes/focus.ts`)
+- Nav: Now · **Focus** · Timetable · Tasks · **Events** · **Time** · Notes.
+- **Tests:** pure units for `parseEmail`, `dueSoon`, `computeWindows`, `pickNext`; integration for
+  events, work blocks / day-slots, timers (one-running + accumulate), focus sub-steps and prep
+  materialisation; + authenticated renders of every new screen. **73 unit + 31 integration pass.**
+- **Deferred (need you):** 2.10 captured-info, 2.11 pupils / **DPIA**, 2.12 recurrence + current
+  interest (task sub-steps already landed in 2.9). Built unattended; left **uncommitted** for review.
+
 ### 2026-06-09 — Phase 2 started: schema, tasks & "before the next bell" (2.1–2.3)
 
 - **Migration `0003_phase2.sql`** — the full P2 schema: `tasks`, `events`, `work_blocks`,

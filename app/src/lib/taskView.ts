@@ -37,6 +37,7 @@ export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
     </div>
     <div class="task-actions">
       ${triage}
+      ${t.status === 'done' || t.status === 'dropped' ? '' : `<button type="button" class="link" hx-post="/timer/start" hx-vals='{"task":${t.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ time</button>`}
       <button type="button" class="link" hx-post="/tasks/${t.id}/done" hx-target="#task-${t.id}" hx-swap="outerHTML">✓ done</button>
       <button type="button" class="link danger" hx-post="/tasks/${t.id}/drop" hx-target="#task-${t.id}" hx-swap="outerHTML">drop</button>
     </div>

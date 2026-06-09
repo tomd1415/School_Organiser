@@ -77,4 +77,23 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('Tasks');
     expect(res.body).toContain('data-new-note');
   });
+
+  it('Events page renders with a new-event button', async () => {
+    const res = await app.inject({ method: 'GET', url: '/events', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain("What's coming");
+    expect(res.body).toContain('data-new-note');
+  });
+
+  it('Time page renders work windows', async () => {
+    const res = await app.inject({ method: 'GET', url: '/time', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Work windows');
+  });
+
+  it('Focus page renders', async () => {
+    const res = await app.inject({ method: 'GET', url: '/focus', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('focus-inner');
+  });
 });

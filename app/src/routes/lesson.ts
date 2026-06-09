@@ -12,6 +12,8 @@ import {
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem } from '../lib/notesView';
+import { listOccurrencePrep, type PrepItem } from '../repos/prep';
+import { renderPrepList } from '../lib/prepView';
 
 const TZ = 'Europe/London';
 const Query = z.object({
@@ -66,7 +68,7 @@ function renderSection(s: CourseSection): string {
     </section>`;
 }
 
-function renderDetail(detail: LessonDetail, notes: NoteItem[], csrf: string): string {
+function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[], csrf: string): string {
   const h = detail.header;
   const heading = h.groupName ? esc(h.groupName) : esc(purposeLabel(h.purpose));
   const flag = h.isSelf ? '' : '⚑ ';
@@ -87,6 +89,7 @@ function renderDetail(detail: LessonDetail, notes: NoteItem[], csrf: string): st
       <h1>${heading}</h1>
       <p class="ld-meta">${meta}</p>
       ${sections}
+      ${prep.length ? `<section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}</section>` : ''}
       <section class="ld-notesblock">
         <div class="ld-notes-head"><h2>Notes</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: h.occurrenceId })}</div>
         ${renderNotesList(listId, notes)}
@@ -111,11 +114,12 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         const e = errorPage(reply, 404, 'That lesson no longer exists.');
         return reply.code(e.code).type('text/html').send(e.html);
       }
-      const [courses, lastStops, noteRows, followups] = await Promise.all([
+      const [courses, lastStops, noteRows, followups, prep] = await Promise.all([
         getOccurrenceCourses(occurrenceId),
         getLastStoppingPoints(header.lessonId, date),
         getOccurrenceNotes(occurrenceId),
         getFollowupsForOccurrence(occurrenceId),
+        listOccurrencePrep(occurrenceId),
       ]);
 
       const fuByNote = new Map<number, FollowupItem[]>();
@@ -134,7 +138,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const detail = buildLessonDetail(header, courses, lastStops);
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
-      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, csrf), authed: true, csrfToken: csrf }));
+      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));

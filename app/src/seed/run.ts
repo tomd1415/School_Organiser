@@ -15,6 +15,7 @@ import {
   EXPECTED,
   buildPeriodDefinitions,
 } from './data';
+import { PREP_TEMPLATE_DEFAULTS } from '../services/prep';
 
 function req<T>(v: T | undefined, what: string): T {
   if (v === undefined) throw new Error(`seed: missing reference: ${what}`);
@@ -230,6 +231,15 @@ async function main(): Promise<void> {
       await client.query(
         `INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=now()`,
         [k, v],
+      );
+    }
+
+    // prep templates (global "before the bell")
+    for (const text of PREP_TEMPLATE_DEFAULTS) {
+      await client.query(
+        `INSERT INTO prep_templates (scope, text) SELECT 'global', $1
+         WHERE NOT EXISTS (SELECT 1 FROM prep_templates WHERE scope = 'global' AND text = $1)`,
+        [text],
       );
     }
 

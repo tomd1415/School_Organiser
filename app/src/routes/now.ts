@@ -14,6 +14,12 @@ import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem 
 import type { LastStop, OccurrenceCourseRow } from '../services/occurrence';
 import { beforeNextBell, URGENCY_LABELS, type BellTask } from '../services/task';
 import { getGroupSlots, listBellTasks } from '../repos/tasks';
+import { daysUntil, dueSoon, type UpcomingEvent } from '../services/event';
+import { listUpcoming } from '../repos/events';
+import { getRunningTimer } from '../repos/timeEntries';
+import { renderTimerBanner } from './timer';
+import { getDayChecklist, type PrepItem } from '../repos/prep';
+import { renderPrepList } from '../lib/prepView';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -117,6 +123,32 @@ function renderBell(tasks: BellTask[]): string {
   </div>`;
 }
 
+function renderComingUp(events: UpcomingEvent[], today: string): string {
+  const soon = dueSoon(events, today);
+  if (soon.length === 0) return '';
+  const items = soon
+    .slice(0, 6)
+    .map((e) => {
+      const d = e.date ? daysUntil(e.date, today) : 0;
+      const when = d < 0 ? `${-d}d overdue` : d === 0 ? 'today' : `in ${d}d`;
+      return `<li><span>${esc(e.title)}</span><span class="coming-when">${esc(when)}</span></li>`;
+    })
+    .join('');
+  return `<div class="now-card now-bell">
+    <p class="kicker">Coming up</p>
+    <ul class="coming-list">${items}</ul>
+    <p><a href="/events">All events →</a></p>
+  </div>`;
+}
+
+function renderDayCard(part: 'start' | 'end', items: PrepItem[]): string {
+  if (items.length === 0) return '';
+  return `<div class="now-card now-bell">
+    <p class="kicker">${part === 'start' ? 'Start of day' : 'End of day'}</p>
+    ${renderPrepList(items, '/day-checklist', 'day', `day-${part}`)}
+  </div>`;
+}
+
 async function resolveNowLessons(now: Date) {
   const ctx = await getClockContext();
   const state = resolveNow(now, ctx);
@@ -156,16 +188,28 @@ export function registerNowRoutes(app: FastifyInstance): void {
         card = `<div class="now-card"><h1>${esc(heading)}</h1><p class="muted">The next teaching slot is shown above.</p></div>`;
       }
 
-      const [bellAll, groupSlots] = await Promise.all([listBellTasks(), getGroupSlots()]);
+      const [bellAll, groupSlots, events, running] = await Promise.all([
+        listBellTasks(),
+        getGroupSlots(),
+        listUpcoming(),
+        getRunningTimer(),
+      ]);
       const nextBell = state.nextTeaching
         ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
         : null;
       const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
 
+      const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
+      const dayItems = await getDayChecklist(state.isoDate, dayPart);
+
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz)}
+        <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
         ${card}
         ${renderBell(bell)}
+        ${renderComingUp(events, state.isoDate)}
+        ${renderDayCard(dayPart, dayItems)}
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
     } catch {
