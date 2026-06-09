@@ -50,6 +50,13 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('now-strip');
   });
 
+  it('Oversee page renders the week of supervised lessons', async () => {
+    const res = await app.inject({ method: 'GET', url: '/oversee', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Lessons I oversee');
+    expect(res.body).toMatch(/ov-day|No lessons to oversee/);
+  });
+
   it('Notes page renders with a new-note button', async () => {
     const res = await app.inject({ method: 'GET', url: '/notes', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

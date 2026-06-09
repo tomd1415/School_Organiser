@@ -7,6 +7,15 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — 3.7: "Lessons I oversee" view — Phase 3 complete
+
+- New **`/oversee`** view: the TA-led lessons you supervise (`isSelf = false`), grouped by day
+  with time, group, course and TA, each linking to the lesson detail. Week prev/next nav + today
+  highlight; new nav entry. Pure `buildOverseenWeek` service (+3 unit tests, +1 integration).
+- **Phase 3 is complete** (3.1–3.8): schemes → lesson plans, the hosted **resource store** (2,433
+  resources), bulk-import + reconcile tooling, the **search browser**, Office preview (wired,
+  sidecar profiled — pull to enable), **lesson-resource wiring**, and this oversee view.
+
 ### 2026-06-09 — 3.8: resources on the lesson screen + attach-to-plan UI
 
 - The **lesson screen** now shows a bound plan's linked resources (read-only — view/download),

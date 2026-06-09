@@ -63,6 +63,45 @@ export interface WeekGrid {
 
 const WEEKDAYS = [1, 2, 3, 4, 5];
 
+export interface OverseenLesson {
+  lessonId: number;
+  weekday: number;
+  start: string;
+  end: string;
+  periodLabel: string;
+  groupName: string | null;
+  staffName: string;
+  purpose: string;
+  courses: CourseRef[];
+}
+
+// The lessons the teacher supervises but does not teach (isSelf === false), enriched with
+// their period time/label and ordered by weekday then start time. Pure — the route overlays
+// real dates onto the weekday. See [[buildWeekGrid]] for the full grid.
+export function buildOverseenWeek(periods: PeriodRow[], lessons: LessonRow[]): OverseenLesson[] {
+  const periodAt = new Map<string, PeriodRow>();
+  for (const p of periods) periodAt.set(`${p.weekday}:${p.slotOrder}`, p);
+
+  const out: OverseenLesson[] = [];
+  for (const l of lessons) {
+    if (l.isSelf) continue;
+    const p = periodAt.get(`${l.weekday}:${l.slotOrder}`);
+    out.push({
+      lessonId: l.lessonId,
+      weekday: l.weekday,
+      start: p?.start ?? '',
+      end: p?.end ?? '',
+      periodLabel: p?.label ?? '',
+      groupName: l.groupName,
+      staffName: l.staffName,
+      purpose: l.purpose,
+      courses: l.courses,
+    });
+  }
+  out.sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start));
+  return out;
+}
+
 function rowLabel(slotType: string, lessonIndex: number | null): string {
   switch (slotType) {
     case 'lesson':

@@ -4,14 +4,15 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** **Phases 1 (the MVP) and 2 are complete** (2.1–2.10 + 2.12 of
-> [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md); only **pupils** 2.11 deferred to the pupil-facing
-> project). **Phase 3 is underway** (3.1–3.6 of [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)):
-> **schemes of work → lesson plans** bound to the timetable, and a **hosted, versioned resource
-> store** with PDF/image + Office→PDF preview and a **bulk-importer** (`npm run import-resources`).
-> Log in over the LAN (`./start.sh`) for the live *Now* screen, the week timetable, lesson detail,
-> autosaving notes, tasks/time/focus, and Resources. Remaining in Phase 3: the "lessons I oversee"
-> view and lesson-resource wiring. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status:** **Phases 1 (the MVP), 2 and 3 are complete** (only **pupils** 2.11 is deferred to the
+> pupil-facing project). **Phase 3** ([docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)) added **schemes
+> of work → lesson plans** bound to the timetable, a **hosted, versioned resource store** (2,433
+> resources) with search, PDF/image + Office→PDF preview and a **bulk-importer** + reconcile tooling
+> (`npm run import-resources` / `reconcile`), **resources wired onto the lesson screen** (attach via
+> the plan editor), and a **"lessons I oversee"** view. Log in over the LAN (`./start.sh`) for the
+> live *Now* screen, the timetable, lesson detail, autosaving notes, tasks/time/focus, Schemes and
+> Resources. Next: **Phase 4 (AI)**. See [docs/ROADMAP.md](docs/ROADMAP.md). To enable live Office
+> preview, pull the Gotenberg sidecar (`docker compose --profile preview up -d gotenberg`).
 
 ## The one-sentence pitch
 

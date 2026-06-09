@@ -239,6 +239,19 @@ a.tt-lesson:hover { background: #eef3fc; }
 .res-attach-list { list-style: none; padding: 0; margin: 0.3rem 0; }
 .res-attach-list li { padding: 0.2rem 0; font-size: 0.85rem; }
 
+/* oversee: lessons I supervise */
+.ov-day { margin: 0.75rem 0; }
+.ov-day h2 { font-size: 1rem; margin: 0 0 0.3rem; }
+.ov-today h2 { color: var(--accent); }
+.ov-list { list-style: none; padding: 0; margin: 0; }
+.ov-item { border-left: 3px solid #94a3b8; margin: 0.3rem 0; }
+.ov-item a { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; padding: 0.4rem 0.6rem; text-decoration: none; color: inherit; }
+.ov-item a:hover { background: var(--bg); }
+.ov-time { font-variant-numeric: tabular-nums; font-size: 0.82rem; min-width: 5.5rem; }
+.ov-group { font-weight: 700; }
+.ov-course { font-size: 0.85rem; }
+.ov-staff { margin-left: auto; }
+
 /* now: before the next bell */
 .now-bell { margin-top: 1rem; }
 .bell-list { list-style: none; padding: 0; margin: 0.5rem 0 0.75rem; }

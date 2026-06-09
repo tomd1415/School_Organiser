@@ -53,7 +53,9 @@ never blocks the core stack — enable with `docker compose --profile preview up
 conversion is **unverified**). The store is a **bind-mounted** `data/resources` (not a Docker
 volume) and **backups** are updated for it. **3.8** is **done** — the lesson screen shows a bound
 plan's resources, and the plan editor has an attach/detach UI (the store now holds **2,433**
-resources, searchable on `/resources`). Remaining: **3.7** (lessons-I-oversee view).
+resources, searchable on `/resources`). **3.7** is **done** — the `/oversee` view lists supervised
+lessons by day. **Phase 3 is complete**; the only open item is pulling the Gotenberg sidecar to
+turn on live Office preview (3.5).
 
 | # | Goal | Key files | Done when |
 | --- | --- | --- | --- |
