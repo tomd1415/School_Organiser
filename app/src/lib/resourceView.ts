@@ -84,6 +84,42 @@ export function renderUploadForm(): string {
   </form>`;
 }
 
+// The editable resource block inside a lesson plan: linked resources (each detachable) plus
+// a live search to attach more. Swapped wholesale on attach/detach (hx-swap="outerHTML").
+export function renderPlanResourcesBlock(planId: number, linked: LinkedResource[]): string {
+  const items = linked.length
+    ? `<ul class="res-linked">${linked
+        .map(
+          (r) =>
+            `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
+              <a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
+              <a class="link" href="/resources/${r.resourceId}/download">↓</a>
+              <button type="button" class="link danger" title="unlink" hx-post="/schemes/plan/${planId}/resources/${r.resourceId}/detach" hx-target="#plan-${planId}-res" hx-swap="outerHTML">✕</button></li>`,
+        )
+        .join('')}</ul>`
+    : '<span class="muted">no resources linked</span>';
+  return `<div class="plan-res" id="plan-${planId}-res">
+    ${items}
+    <div class="res-attach">
+      <input type="search" name="q" placeholder="attach a resource by name…" autocomplete="off"
+        hx-get="/schemes/plan/${planId}/resources/search" hx-trigger="keyup changed delay:300ms" hx-target="#plan-${planId}-attach">
+      <div class="res-attach-results" id="plan-${planId}-attach"></div>
+    </div>
+  </div>`;
+}
+
+// Search hits for the attach picker — each with a ＋ that links it to the plan.
+export function renderAttachResults(planId: number, rows: ResourceRow[]): string {
+  if (rows.length === 0) return '<span class="muted">no matches</span>';
+  return `<ul class="res-attach-list">${rows
+    .map(
+      (r) =>
+        `<li><button type="button" class="link" title="attach" hx-post="/schemes/plan/${planId}/resources" hx-vals='{"resource_id":${r.id}}' hx-target="#plan-${planId}-res" hx-swap="outerHTML">＋</button>
+          <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span> ${esc(r.title)}</li>`,
+    )
+    .join('')}</ul>`;
+}
+
 export function renderLinkedResources(rows: LinkedResource[]): string {
   if (rows.length === 0) return '<span class="muted">no resources linked</span>';
   return `<ul class="res-linked">${rows

@@ -7,6 +7,17 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — 3.8: resources on the lesson screen + attach-to-plan UI
+
+- The **lesson screen** now shows a bound plan's linked resources (read-only — view/download),
+  replacing the old "Phase 3.4" placeholder.
+- The **plan editor** (schemes) gains an **attach/detach** UI per lesson plan: live resource
+  search → ＋ to link, ✕ to unlink. Lazy-loaded when a plan is expanded (no upfront cost for big
+  schemes). Routes under `/schemes/plan/:id/resources`.
+- Repo: `linkResourceToPlan` (idempotent) / `unlinkResourceFromPlan`. +3 integration tests
+  (repo idempotency, lesson render, authed HTTP attach/detach with CSRF). Phase 3 now needs only
+  3.7 (the "lessons I oversee" view).
+
 ### 2026-06-09 — Resource browser: search + filter + pagination
 
 - `/resources` now has a **live search box** (debounced), a **kind filter**, and **pagination**

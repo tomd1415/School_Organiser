@@ -69,6 +69,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Stopping point');
     expect(res.body).toContain('data-new-note');
+    expect(res.body).toContain('ld-res'); // bound plan's resources surface here (3.8)
   });
 
   it('Tasks page renders with a new-task button', async () => {
@@ -137,5 +138,47 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('id="res-list"');
     expect(res.body).toContain('res-pager');
     expect(res.body).toMatch(/matching/); // the count line echoes the active filter
+  });
+
+  it('attaches then detaches a resource on a lesson plan (3.8, authed + CSRF)', async () => {
+    const c = await pool.query<{ id: number }>(`SELECT id FROM courses ORDER BY id LIMIT 1`);
+    const lp = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (course_id, title) VALUES ($1, 'TEST 3.8 plan') RETURNING id`,
+      [c.rows[0]!.id],
+    );
+    const planId = lp.rows[0]!.id;
+    const r = await pool.query<{ id: number }>(`SELECT id FROM resources WHERE active ORDER BY id LIMIT 1`);
+    const resId = r.rows[0]!.id;
+    try {
+      // A CSRF token + the session cookie that carries its secret come from a page render.
+      const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+
+      const attach = await app.inject({
+        method: 'POST',
+        url: `/schemes/plan/${planId}/resources`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `resource_id=${resId}`,
+      });
+      expect(attach.statusCode).toBe(200);
+      expect(attach.body).toContain(`plan-${planId}-res`);
+      const linked = await pool.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM resource_links WHERE lesson_plan_id = $1 AND resource_id = $2`,
+        [planId, resId],
+      );
+      expect(linked.rows[0]!.n).toBe(1);
+
+      const detach = await app.inject({
+        method: 'POST',
+        url: `/schemes/plan/${planId}/resources/${resId}/detach`,
+        headers: { cookie, 'x-csrf-token': token },
+      });
+      expect(detach.statusCode).toBe(200);
+      expect(detach.body).toContain('no resources linked');
+    } finally {
+      await pool.query(`DELETE FROM resource_links WHERE lesson_plan_id = $1`, [planId]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [planId]);
+    }
   });
 });

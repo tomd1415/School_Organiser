@@ -17,12 +17,15 @@ function renderPlan(p: PlanRow): string {
       <span class="note-status" id="plan-${p.id}-status"></span>
       ${rowActions('plan', p.id, 'Delete this lesson plan?')}
     </div>
-    <details class="plan-detail">
+    <details class="plan-detail" id="plan-${p.id}-detail">
       <summary>objectives · outline · ${p.durationMin ? esc(String(p.durationMin)) + ' min' : 'duration'}</summary>
       <label>Objectives<textarea name="objectives" rows="2" ${save('input changed delay:800ms, blur')}>${esc(p.objectives ?? '')}</textarea></label>
       <label>Outline<textarea name="outline" rows="3" ${save('input changed delay:800ms, blur')}>${esc(p.outline ?? '')}</textarea></label>
       <label>Duration (min) <input type="number" name="duration_min" min="0" value="${p.durationMin ?? ''}" ${save('input changed delay:600ms, blur')}></label>
-      <p class="muted">Resources attach here in 3.4.</p>
+      <div class="plan-res-head">Resources</div>
+      <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="toggle from:#plan-${p.id}-detail once" hx-target="this" hx-swap="innerHTML">
+        <span class="muted">resources load when opened…</span>
+      </div>
     </details>
   </li>`;
 }

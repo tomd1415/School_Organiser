@@ -225,9 +225,19 @@ a.tt-lesson:hover { background: #eef3fc; }
 .res-kind { font-size: 1.1rem; }
 .res-meta { font-size: 0.78rem; margin-left: auto; }
 .res-linked { list-style: none; padding: 0; margin: 0.3rem 0; }
-.res-linked li { font-size: 0.85rem; }
+.res-linked li { font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; }
 .oc-plan { font-size: 0.85rem; margin: 0.3rem 0; }
 .oc-plan strong { font-weight: 700; }
+/* lesson screen: bound plan's resources (read-only) */
+.ld-res { margin: 0.4rem 0; font-size: 0.85rem; }
+.ld-res-label { font-weight: 700; }
+/* plan editor: attach/detach resources */
+.plan-res-head { font-weight: 700; margin-top: 0.5rem; font-size: 0.85rem; }
+.plan-res { margin: 0.3rem 0; }
+.res-attach { margin-top: 0.4rem; }
+.res-attach input[type="search"] { width: 100%; padding: 0.3rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; }
+.res-attach-list { list-style: none; padding: 0; margin: 0.3rem 0; }
+.res-attach-list li { padding: 0.2rem 0; font-size: 0.85rem; }
 
 /* now: before the next bell */
 .now-bell { margin-top: 1rem; }

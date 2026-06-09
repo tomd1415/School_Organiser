@@ -8,8 +8,10 @@ import {
   getCurrentVersion,
   getResource,
   linkResource,
+  linkResourceToPlan,
   listResourcesForPlan,
   revertToVersion,
+  unlinkResourceFromPlan,
 } from '../../src/repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../../src/lib/resourceStore';
 import { RESOURCE_STORE_PATH } from '../../src/config/resources';
@@ -68,5 +70,18 @@ describe('resources (integration — needs the dev DB up)', () => {
     const id = resources[0]!;
     await linkResource(id, { lessonPlanId: planId });
     expect((await listResourcesForPlan(planId)).some((r) => r.resourceId === id)).toBe(true);
+  });
+
+  it('linkResourceToPlan is idempotent and unlinkResourceFromPlan removes it (3.8)', async () => {
+    const id = resources[0]!; // already linked once by the previous test
+    await linkResourceToPlan(id, planId);
+    await linkResourceToPlan(id, planId); // no duplicate row
+    const { rows } = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM resource_links WHERE resource_id = $1 AND lesson_plan_id = $2`,
+      [id, planId],
+    );
+    expect(rows[0]!.n).toBe(1);
+    await unlinkResourceFromPlan(id, planId);
+    expect((await listResourcesForPlan(planId)).some((r) => r.resourceId === id)).toBe(false);
   });
 });

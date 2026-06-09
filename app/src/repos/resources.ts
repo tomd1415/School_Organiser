@@ -170,6 +170,19 @@ export async function linkResource(resourceId: number, t: LinkTarget): Promise<v
   );
 }
 
+export async function linkResourceToPlan(resourceId: number, planId: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO resource_links (resource_id, lesson_plan_id)
+     SELECT $1, $2 WHERE NOT EXISTS (
+       SELECT 1 FROM resource_links WHERE resource_id = $1 AND lesson_plan_id = $2)`,
+    [resourceId, planId],
+  );
+}
+
+export async function unlinkResourceFromPlan(resourceId: number, planId: number): Promise<void> {
+  await pool.query(`DELETE FROM resource_links WHERE resource_id = $1 AND lesson_plan_id = $2`, [resourceId, planId]);
+}
+
 export async function listResourcesForPlan(planId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
     `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl

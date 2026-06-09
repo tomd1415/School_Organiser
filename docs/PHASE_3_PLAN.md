@@ -51,8 +51,9 @@ and the integration-test harness.
 never blocks the core stack — enable with `docker compose --profile preview up -d gotenberg` (the
 ~500 MB image is **not pulled by default**; until then preview degrades to download, so live
 conversion is **unverified**). The store is a **bind-mounted** `data/resources` (not a Docker
-volume) and **backups** are updated for it. Remaining: **3.7** (lessons-I-oversee view) and the
-**3.8** lesson/Now resource-display + attach-to-plan UI.
+volume) and **backups** are updated for it. **3.8** is **done** — the lesson screen shows a bound
+plan's resources, and the plan editor has an attach/detach UI (the store now holds **2,433**
+resources, searchable on `/resources`). Remaining: **3.7** (lessons-I-oversee view).
 
 | # | Goal | Key files | Done when |
 | --- | --- | --- | --- |

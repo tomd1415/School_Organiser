@@ -22,8 +22,15 @@ import {
   updatePlanField,
   updateUnitField,
 } from '../repos/schemes';
+import {
+  linkResourceToPlan,
+  listResourcesForPlan,
+  searchResources,
+  unlinkResourceFromPlan,
+} from '../repos/resources';
 import { buildSchemeTree } from '../services/scheme';
 import { renderSchemeTree } from '../lib/schemeView';
+import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -155,6 +162,37 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       await updatePlanField(id.data.id, f, typeof raw === 'string' ? raw : null);
     }
     return reply.type('text/html').send(renderSavedStatus(`plan-${id.data.id}-status`));
+  });
+
+  // ── resources attached to a lesson plan (3.8) ──
+  // Lazy-loaded when a plan's <details> is first opened.
+  app.get('/schemes/plan/:id/resources', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    return reply.type('text/html').send(renderPlanResourcesBlock(id.data.id, await listResourcesForPlan(id.data.id)));
+  });
+
+  app.get('/schemes/plan/:id/resources/search', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const q = ((req.query as { q?: string }).q ?? '').trim().slice(0, 100);
+    const rows = q ? await searchResources({ q }, 8, 0) : [];
+    return reply.type('text/html').send(renderAttachResults(id.data.id, rows));
+  });
+
+  app.post('/schemes/plan/:id/resources', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ resource_id: z.coerce.number().int().positive() }).safeParse(req.body);
+    if (!id.success || !b.success) return reply.code(400).send('');
+    await linkResourceToPlan(b.data.resource_id, id.data.id);
+    return reply.type('text/html').send(renderPlanResourcesBlock(id.data.id, await listResourcesForPlan(id.data.id)));
+  });
+
+  app.post('/schemes/plan/:id/resources/:rid/detach', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive(), rid: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    await unlinkResourceFromPlan(p.data.rid, p.data.id);
+    return reply.type('text/html').send(renderPlanResourcesBlock(p.data.id, await listResourcesForPlan(p.data.id)));
   });
 
   app.post('/schemes/:id/version', guard, async (req, reply) => {

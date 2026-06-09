@@ -11,8 +11,10 @@ import {
   setOccurrenceCoursePlan,
 } from '../repos/occurrence';
 import { getLessonPlan, listCoursePlans } from '../repos/schemes';
+import { listResourcesForPlan, type LinkedResource } from '../repos/resources';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
+import { renderLinkedResources } from '../lib/resourceView';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { renderPrepList } from '../lib/prepView';
@@ -56,7 +58,7 @@ function renderPlanContent(ocId: number, title: string | null, objectives: strin
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
 
-function renderSection(s: CourseSection, plans: Array<{ id: number; title: string }>): string {
+function renderSection(s: CourseSection, plans: Array<{ id: number; title: string }>, resources: LinkedResource[]): string {
   const colour = s.colour ?? '#94a3b8';
   const oc = s.occurrenceCourseId;
   const planOpts =
@@ -74,7 +76,7 @@ function renderSection(s: CourseSection, plans: Array<{ id: number; title: strin
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
       ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
-      <p class="muted">Resources: <em>Phase 3.4</em></p>
+      <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}</div>
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -84,7 +86,14 @@ function renderSection(s: CourseSection, plans: Array<{ id: number; title: strin
     </section>`;
 }
 
-function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[], plansByCourse: Map<number, Array<{ id: number; title: string }>>, csrf: string): string {
+function renderDetail(
+  detail: LessonDetail,
+  notes: NoteItem[],
+  prep: PrepItem[],
+  plansByCourse: Map<number, Array<{ id: number; title: string }>>,
+  resByPlan: Map<number, LinkedResource[]>,
+  csrf: string,
+): string {
   const h = detail.header;
   const heading = h.groupName ? esc(h.groupName) : esc(purposeLabel(h.purpose));
   const flag = h.isSelf ? '' : '⚑ ';
@@ -95,7 +104,7 @@ function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[],
 
   const sections =
     detail.sections.length > 0
-      ? detail.sections.map((s) => renderSection(s, plansByCourse.get(s.courseId) ?? [])).join('')
+      ? detail.sections.map((s) => renderSection(s, plansByCourse.get(s.courseId) ?? [], (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [])).join('')
       : `<p class="muted">${h.purpose === 'free' ? 'Free period — protected work time.' : 'No courses attached to this slot.'}</p>`;
 
   const listId = `notes-list-${h.occurrenceId}`;
@@ -156,9 +165,16 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const planLists = await Promise.all(courseIds.map((cid) => listCoursePlans(cid)));
       const plansByCourse = new Map<number, Array<{ id: number; title: string }>>();
       courseIds.forEach((cid, i) => plansByCourse.set(cid, planLists[i] ?? []));
+
+      // Resources linked to each bound plan, shown read-only on the lesson.
+      const planIds = [...new Set(detail.sections.map((s) => s.lessonPlanId).filter((x): x is number => x != null))];
+      const resLists = await Promise.all(planIds.map((pid) => listResourcesForPlan(pid)));
+      const resByPlan = new Map<number, LinkedResource[]>();
+      planIds.forEach((pid, i) => resByPlan.set(pid, resLists[i] ?? []));
+
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
-      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, csrf), authed: true, csrfToken: csrf }));
+      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
