@@ -16,4 +16,4 @@ cd "$APP_DIR"
 echo "[restore] loading $DUMP into the organiser database"
 gunzip -c "$DUMP" | docker compose exec -T db psql -v ON_ERROR_STOP=1 -U organiser -d organiser
 echo "[restore] database restored."
-echo "[restore] for resources, untar the matching resources-*.tar.gz into the resource-store volume."
+echo "[restore] for resources: tar xzf backups/resources-YYYYmmdd-HHMMSS.tar.gz -C \"$ROOT/data/resources\""

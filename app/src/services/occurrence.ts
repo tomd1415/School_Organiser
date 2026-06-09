@@ -22,10 +22,14 @@ export interface OccurrenceHeader {
 export interface OccurrenceCourseRow {
   occurrenceCourseId: number;
   groupCourseId: number;
+  courseId: number;
   courseName: string;
   colour: string | null;
   stoppingPoint: string | null;
   lessonPlanId: number | null;
+  planTitle: string | null;
+  planObjectives: string | null;
+  planOutline: string | null;
 }
 
 export interface LastStop {
@@ -45,11 +49,15 @@ export interface NoteView {
 export interface CourseSection {
   occurrenceCourseId: number;
   groupCourseId: number;
+  courseId: number;
   courseName: string;
   colour: string | null;
   stoppingPoint: string | null;
   lastStop: LastStop | null;
-  hasPlan: boolean;
+  lessonPlanId: number | null;
+  planTitle: string | null;
+  planObjectives: string | null;
+  planOutline: string | null;
 }
 
 export interface LessonDetail {
@@ -68,11 +76,15 @@ export function buildLessonDetail(
   const sections: CourseSection[] = courses.map((c) => ({
     occurrenceCourseId: c.occurrenceCourseId,
     groupCourseId: c.groupCourseId,
+    courseId: c.courseId,
     courseName: c.courseName,
     colour: c.colour,
     stoppingPoint: c.stoppingPoint,
     lastStop: lastByGroupCourse.get(c.groupCourseId) ?? null,
-    hasPlan: c.lessonPlanId !== null,
+    lessonPlanId: c.lessonPlanId,
+    planTitle: c.planTitle,
+    planObjectives: c.planObjectives,
+    planOutline: c.planOutline,
   }));
 
   return { header, sections };

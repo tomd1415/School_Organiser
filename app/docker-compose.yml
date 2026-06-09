@@ -21,6 +21,15 @@ services:
       timeout: 3s
       retries: 10
 
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    # Behind a profile so the core stack never waits on this large image. The app degrades
+    # to download-only when it is absent. Enable preview with:
+    #   docker compose --profile preview up -d gotenberg
+    profiles: ["preview"]
+    # Internal only — the app reaches it at http://gotenberg:3000 for Office→PDF preview.
+
   app:
     build: .
     # Secrets come from app/.env as a literal env_file. This matters because the
@@ -33,15 +42,17 @@ services:
       # Overrides for the two values that differ inside the container.
       NODE_ENV: production
       DATABASE_URL: postgres://organiser:organiser@db:5432/organiser
+      RESOURCE_STORE_PATH: /data/resources
+      GOTENBERG_URL: http://gotenberg:3000
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "44360:44360"
     volumes:
-      - resource-store:/data/resources
+      # Bind mount so the host (bulk-import, backups) and the app share one directory.
+      - ../data/resources:/data/resources
     restart: unless-stopped
 
 volumes:
   db-data:
-  resource-store:

@@ -23,8 +23,8 @@ const header: OccurrenceHeader = {
 };
 
 const courses: OccurrenceCourseRow[] = [
-  { occurrenceCourseId: 1, groupCourseId: 100, courseName: 'OCR J277', colour: '#8b5cf6', stoppingPoint: 'paging vs segmentation', lessonPlanId: null },
-  { occurrenceCourseId: 2, groupCourseId: 200, courseName: 'Sound Eng', colour: '#f59e0b', stoppingPoint: null, lessonPlanId: 42 },
+  { occurrenceCourseId: 1, groupCourseId: 100, courseId: 50, courseName: 'OCR J277', colour: '#8b5cf6', stoppingPoint: 'paging vs segmentation', lessonPlanId: null, planTitle: null, planObjectives: null, planOutline: null },
+  { occurrenceCourseId: 2, groupCourseId: 200, courseId: 60, courseName: 'Sound Eng', colour: '#f59e0b', stoppingPoint: null, lessonPlanId: 42, planTitle: 'Mixing basics', planObjectives: 'gain staging', planOutline: null },
 ];
 
 const lastStops: LastStop[] = [{ groupCourseId: 100, stoppingPoint: 'fetch-decode-execute', date: '2026-09-02' }];
@@ -47,9 +47,10 @@ describe('buildLessonDetail', () => {
     expect(section(200)?.stoppingPoint).toBeNull();
   });
 
-  it('reports plan presence from lessonPlanId', () => {
-    expect(section(100)?.hasPlan).toBe(false);
-    expect(section(200)?.hasPlan).toBe(true);
+  it('carries the bound lesson plan through', () => {
+    expect(section(100)?.lessonPlanId).toBeNull();
+    expect(section(200)?.lessonPlanId).toBe(42);
+    expect(section(200)?.planTitle).toBe('Mixing basics');
   });
 
   it('carries the occurrence_course id (for the stopping-point input)', () => {

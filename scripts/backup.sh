@@ -20,10 +20,9 @@ echo "[backup] dumping database -> db-$STAMP.sql.gz"
 docker compose exec -T db pg_dump -U organiser organiser | gzip > "$BACKUP_DIR/db-$STAMP.sql.gz"
 
 echo "[backup] snapshotting resource file-store -> resources-$STAMP.tar.gz"
-docker run --rm \
-  -v "${PROJECT}_resource-store:/data:ro" \
-  -v "$BACKUP_DIR:/backup" \
-  alpine tar czf "/backup/resources-$STAMP.tar.gz" -C /data .
+# The store is a bind-mounted host directory (app/docker-compose.yml), so tar it directly.
+RESOURCE_DIR="${RESOURCE_DIR:-$ROOT/data/resources}"
+tar czf "$BACKUP_DIR/resources-$STAMP.tar.gz" -C "$RESOURCE_DIR" .
 
 echo "[backup] pruning to the most recent $KEEP of each"
 ls -1t "$BACKUP_DIR"/db-*.sql.gz        2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f

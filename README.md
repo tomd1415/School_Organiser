@@ -4,13 +4,14 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** **Phase 1 (the MVP) is complete.** Log in over the LAN and you get the live *Now*
-> screen, the week timetable, click-through lesson detail, and fast autosaving notes with
-> follow-ups and "where we got to" (run `./start.sh`). **Phase 2 is essentially complete** (2.1–2.10 + 2.12 of [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md)):
-> tasks + triage, email paste-box, events & deadlines, **work-window time planning**, timers, prep
-> checklists, **focus mode**, captured-info and **recurring tasks** (+ current-interest). Only
-> **pupils** (2.11) is deferred — individual names arrive with the pupil-facing resources project.
-> See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status:** **Phases 1 (the MVP) and 2 are complete** (2.1–2.10 + 2.12 of
+> [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md); only **pupils** 2.11 deferred to the pupil-facing
+> project). **Phase 3 is underway** (3.1–3.6 of [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)):
+> **schemes of work → lesson plans** bound to the timetable, and a **hosted, versioned resource
+> store** with PDF/image + Office→PDF preview and a **bulk-importer** (`npm run import-resources`).
+> Log in over the LAN (`./start.sh`) for the live *Now* screen, the week timetable, lesson detail,
+> autosaving notes, tasks/time/focus, and Resources. Remaining in Phase 3: the "lessons I oversee"
+> view and lesson-resource wiring. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## The one-sentence pitch
 

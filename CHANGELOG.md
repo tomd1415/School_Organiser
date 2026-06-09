@@ -7,6 +7,22 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 3 build: schemes, plans, resource store, bulk-import (3.1–3.6) + Office preview (3.5)
+
+- **Schema `0006`** + **schemes of work → units → lesson plans** editor with versioning, and **plan
+  binding** on the lesson detail — the "Plan" placeholder is now real (3.1–3.3).
+- **Hosted resource store** (3.4): upload, sha256 checksum, versioning + revert, download, inline
+  PDF/image preview. Files live on a **bind-mounted** `data/resources` shared by the app, the
+  importer and backups (replaces the Docker named volume).
+- **Office preview** (3.5): a **Gotenberg** sidecar renders DOCX/PPTX/XLSX → PDF on demand;
+  PDFs/images preview directly; the original is always downloadable. The sidecar is **profiled**
+  (`docker compose --profile preview up -d gotenberg`) so it never blocks the core stack and is not
+  pulled by default — preview degrades to download when it is absent (live conversion unverified).
+- **Bulk-import** (3.6): `npm run import-resources` walks a folder, extracts zip lesson packages,
+  and dedups by checksum. First real run imported **312 files** from the Teach Computing download.
+- **Backups** updated for the bind mount (`scripts/backup.sh`/`restore.sh` tar the host store dir).
+- New deps: `@fastify/multipart`, `adm-zip`. Remaining in Phase 3: 3.7 (oversee view) + 3.8 wiring.
+
 ### 2026-06-09 — Phase 3 plan authored; docs audited
 
 - **Authored [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)** — the Phase 3 build plan (schemes of

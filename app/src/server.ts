@@ -5,6 +5,7 @@ import formbody from '@fastify/formbody';
 import secureSession from '@fastify/secure-session';
 import csrf from '@fastify/csrf-protection';
 import fastifyStatic from '@fastify/static';
+import multipart from '@fastify/multipart';
 import { appConfig } from './config/app';
 import { migrate } from './db/migrate';
 import { registerAuthRoutes } from './auth/routes';
@@ -21,6 +22,8 @@ import { registerFocusRoutes } from './routes/focus';
 import { registerPrepRoutes } from './routes/prep';
 import { registerCapturedRoutes } from './routes/captured';
 import { registerRecurringRoutes } from './routes/recurring';
+import { registerSchemeRoutes } from './routes/schemes';
+import { registerResourceRoutes } from './routes/resources';
 import { generateDueInstances } from './repos/recurringTasks';
 import { localParts } from './lib/time';
 
@@ -54,6 +57,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     root: join(__dirname, '..', 'public'),
     prefix: '/static/',
   });
+  await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024 } });
 
   registerHealthRoutes(app);
   registerAuthRoutes(app);
@@ -69,6 +73,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerPrepRoutes(app);
   registerCapturedRoutes(app);
   registerRecurringRoutes(app);
+  registerSchemeRoutes(app);
+  registerResourceRoutes(app);
 
   return app;
 }

@@ -15,6 +15,7 @@ export default defineConfig({
         'scrypt:d58f21eb0ab257d6e0822766bb763c9a:9e2bec377d007afe7c2bea05ad2cb80970c9c3c7af7d126b6e7d82b7cd597a0d791a2b9aa5831c5cbe4820ffa9384ca4f023ff3df7e2d9b675bbbfa3ec612cbc',
       DATABASE_URL: 'postgres://organiser:organiser@localhost:5434/organiser',
       COOKIE_SECURE: 'false',
+      RESOURCE_STORE_PATH: '/tmp/so-test-resources',
     },
   },
 });

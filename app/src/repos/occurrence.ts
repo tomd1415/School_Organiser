@@ -50,17 +50,23 @@ export async function getOccurrenceHeader(occurrenceId: number): Promise<Occurre
 
 export async function getOccurrenceCourses(occurrenceId: number): Promise<OccurrenceCourseRow[]> {
   const { rows } = await pool.query<OccurrenceCourseRow>(
-    `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId",
+    `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId", gc.course_id AS "courseId",
             c.name AS "courseName", c.colour,
-            oc.stopping_point AS "stoppingPoint", oc.lesson_plan_id AS "lessonPlanId"
+            oc.stopping_point AS "stoppingPoint", oc.lesson_plan_id AS "lessonPlanId",
+            lp.title AS "planTitle", lp.objectives AS "planObjectives", lp.outline AS "planOutline"
      FROM occurrence_courses oc
      JOIN group_courses gc ON gc.id = oc.group_course_id
      JOIN courses c        ON c.id  = gc.course_id
+     LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
      WHERE oc.occurrence_id = $1
      ORDER BY c.name`,
     [occurrenceId],
   );
   return rows;
+}
+
+export async function setOccurrenceCoursePlan(occurrenceCourseId: number, planId: number | null): Promise<void> {
+  await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, planId]);
 }
 
 /** The most recent prior occurrence's stopping point, per course (for "last time"). */

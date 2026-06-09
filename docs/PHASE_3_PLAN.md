@@ -46,6 +46,14 @@ and the integration-test harness.
 
 ## 1. Build order (each row a reviewable commit/PR)
 
+**Status (2026-06-09):** **3.1–3.4 and 3.6 are built + tested** ✅ (the first real import landed
+**312 resources**); **3.5** Office preview is **wired** (Gotenberg sidecar) but **profiled** so it
+never blocks the core stack — enable with `docker compose --profile preview up -d gotenberg` (the
+~500 MB image is **not pulled by default**; until then preview degrades to download, so live
+conversion is **unverified**). The store is a **bind-mounted** `data/resources` (not a Docker
+volume) and **backups** are updated for it. Remaining: **3.7** (lessons-I-oversee view) and the
+**3.8** lesson/Now resource-display + attach-to-plan UI.
+
 | # | Goal | Key files | Done when |
 | --- | --- | --- | --- |
 | **3.1** | **Schema** — schemes/units/plans + resources + links | `migrations/0006_phase3.sql` | `npm run migrate` clean; typecheck green |

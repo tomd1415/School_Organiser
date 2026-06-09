@@ -25,3 +25,6 @@ backups/
 .DS_Store
 Thumbs.db
 .idea/
+
+# Hosted resource store (large; bind-mounted into the app)
+data/resources/

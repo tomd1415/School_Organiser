@@ -8,10 +8,12 @@ import {
   getOccurrenceCourses,
   getOccurrenceHeader,
   getOccurrenceNotes,
+  setOccurrenceCoursePlan,
 } from '../repos/occurrence';
+import { getLessonPlan, listCoursePlans } from '../repos/schemes';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
-import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem } from '../lib/notesView';
+import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { renderPrepList } from '../lib/prepView';
 
@@ -48,17 +50,31 @@ function errorPage(reply: { generateCsrf: () => string }, code: number, message:
   return { code, html: layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }) };
 }
 
-function renderSection(s: CourseSection): string {
+function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false): string {
+  const detail = `${objectives ? `<p><strong>Objectives:</strong> ${esc(objectives)}</p>` : ''}${outline ? `<p><strong>Outline:</strong> ${esc(outline)}</p>` : ''}`;
+  const inner = title ? detail || '<span class="muted">(plan has no detail yet)</span>' : '<span class="muted">No plan bound.</span>';
+  return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
+}
+
+function renderSection(s: CourseSection, plans: Array<{ id: number; title: string }>): string {
   const colour = s.colour ?? '#94a3b8';
-  const plan = s.hasPlan ? 'set' : '<em>none yet (Phase 3)</em>';
+  const oc = s.occurrenceCourseId;
+  const planOpts =
+    `<option value=""${s.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>` +
+    plans.map((p) => `<option value="${p.id}"${p.id === s.lessonPlanId ? ' selected' : ''}>${esc(p.title)}</option>`).join('');
   const last = s.lastStop
     ? `<p class="ld-last">Last time → stopped at <strong>${esc(s.lastStop.stoppingPoint)}</strong> <span class="muted">(${esc(s.lastStop.date)})</span></p>`
     : '';
-  const oc = s.occurrenceCourseId;
   return `
     <section class="ld-course" style="border-left-color:${esc(colour)}">
       <h2>${esc(s.courseName)}</h2>
-      <p class="muted">Plan: ${plan} · Resources: <em>Phase 3</em></p>
+      <label class="stop-label">Plan
+        <select name="lesson_plan_id" hx-post="/occurrence-course/${oc}/plan" hx-trigger="change" hx-swap="none">${planOpts}</select>
+        <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
+        <span class="note-status" id="oc-${oc}-plan-status"></span>
+      </label>
+      ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
+      <p class="muted">Resources: <em>Phase 3.4</em></p>
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -68,7 +84,7 @@ function renderSection(s: CourseSection): string {
     </section>`;
 }
 
-function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[], csrf: string): string {
+function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[], plansByCourse: Map<number, Array<{ id: number; title: string }>>, csrf: string): string {
   const h = detail.header;
   const heading = h.groupName ? esc(h.groupName) : esc(purposeLabel(h.purpose));
   const flag = h.isSelf ? '' : '⚑ ';
@@ -79,7 +95,7 @@ function renderDetail(detail: LessonDetail, notes: NoteItem[], prep: PrepItem[],
 
   const sections =
     detail.sections.length > 0
-      ? detail.sections.map(renderSection).join('')
+      ? detail.sections.map((s) => renderSection(s, plansByCourse.get(s.courseId) ?? [])).join('')
       : `<p class="muted">${h.purpose === 'free' ? 'Free period — protected work time.' : 'No courses attached to this slot.'}</p>`;
 
   const listId = `notes-list-${h.occurrenceId}`;
@@ -136,12 +152,30 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       }));
 
       const detail = buildLessonDetail(header, courses, lastStops);
+      const courseIds = [...new Set(courses.map((c) => c.courseId))];
+      const planLists = await Promise.all(courseIds.map((cid) => listCoursePlans(cid)));
+      const plansByCourse = new Map<number, Array<{ id: number; title: string }>>();
+      courseIds.forEach((cid, i) => plansByCourse.set(cid, planLists[i] ?? []));
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
-      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, csrf), authed: true, csrfToken: csrf }));
+      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
     }
+  });
+
+  // Bind a lesson plan to a course in this occurrence (per course for splits).
+  app.post('/occurrence-course/:id/plan', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const params = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const body = z.object({ lesson_plan_id: z.string().optional() }).safeParse(req.body);
+    if (!params.success || !body.success) return reply.code(400).send('');
+    const raw = body.data.lesson_plan_id;
+    const planId = raw && raw !== '' && Number.isFinite(Number(raw)) ? Number(raw) : null;
+    await setOccurrenceCoursePlan(params.data.id, planId);
+    const plan = planId ? await getLessonPlan(planId) : null;
+    return reply
+      .type('text/html')
+      .send(renderPlanContent(params.data.id, plan?.title ?? null, plan?.objectives ?? null, plan?.outline ?? null, true) + renderSavedStatus(`oc-${params.data.id}-plan-status`));
   });
 }

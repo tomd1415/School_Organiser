@@ -109,4 +109,18 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Recurring tasks');
   });
+
+  it('Schemes page renders', async () => {
+    const res = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Schemes of work');
+    expect(res.body).toContain('scheme-tree');
+  });
+
+  it('Resources page renders', async () => {
+    const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Resources');
+    expect(res.body).toContain('res-upload');
+  });
 });
