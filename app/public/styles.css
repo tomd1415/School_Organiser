@@ -273,3 +273,13 @@ a.tt-lesson:hover { background: #eef3fc; }
 .pupil-token { font-size: 0.78rem; }
 .pupil button { margin-left: auto; }
 .pupil.inactive { opacity: 0.5; }
+
+/* AI draft-lesson (Phase 4.3) */
+.plan-ai { display: flex; align-items: center; gap: 0.6rem; margin: 0.25rem 0 0.6rem; }
+.plan-ai button.htmx-request { opacity: 0.6; }
+.plan-draft-status { font-size: 0.8rem; color: var(--muted); }
+
+/* AI author-scheme (Phase 4.4) */
+.scheme-author { margin: 0.5rem 0; }
+.scheme-author textarea { width: 100%; margin-top: 0.35rem; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; font: inherit; }
+.scheme-author-hint { margin-left: 0.6rem; font-size: 0.8rem; }

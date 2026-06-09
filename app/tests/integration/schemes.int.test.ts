@@ -7,6 +7,7 @@ import {
   listPlansForScheme,
   listSchemeVersions,
   listUnits,
+  materialiseScheme,
   movePlan,
   updatePlanField,
 } from '../../src/repos/schemes';
@@ -51,6 +52,22 @@ describe('schemes (integration — needs the dev DB up)', () => {
     await movePlan(second.id, 'up');
     const after = (await listPlansForScheme(schemeId)).sort((a, b) => a.displayOrder - b.displayOrder);
     expect(after[0]!.id).toBe(second.id);
+  });
+
+  it('materialiseScheme creates a scheme with units + lessons atomically (4.4)', async () => {
+    const schemeId = await materialiseScheme(courseId, 'TEST authored scheme', [
+      { title: 'Unit A', lessons: ['A1', 'A2'] },
+      { title: 'Unit B', lessons: ['B1'] },
+    ]);
+    expect(schemeId).not.toBeNull();
+    try {
+      expect((await listUnits(schemeId!)).length).toBe(2);
+      expect((await listPlansForScheme(schemeId!)).length).toBe(3);
+    } finally {
+      await pool.query(`DELETE FROM lesson_plans WHERE unit_id IN (SELECT id FROM units WHERE scheme_id = $1)`, [schemeId]);
+      await pool.query(`DELETE FROM units WHERE scheme_id = $1`, [schemeId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
+    }
   });
 
   it('clones to a new draft version with the same units', async () => {

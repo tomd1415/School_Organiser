@@ -37,10 +37,14 @@ content is withheld from AI".
 | **4.1** | **LLM wrapper + `ai_calls` audit + settings** — redaction, withholding, tool-use structured output, graceful degradation | the safety core; everything depends on it | M |
 | **4.2** | **Context builder + redaction/withholding tests** — assemble AI inputs (SoW, notes, tasks) with names tokenised and flagged items stripped | the boundary, exercised end-to-end | S |
 
-> **Status (2026-06-09): 4.1 + 4.2 built ✅** — the `llm/` wrapper, `ai_calls` audit (schema 0007),
-> the names-only roster (`/pupils`), and the redaction/withholding **egress tests** (8 unit + 3
-> integration, all forced to zero spend). Structured output via `messages.parse`/`zodOutputFormat`
-> arrives with 4.3 (the zod v3→v4 helper detail is resolved there). Remaining: 4.3–4.8.
+> **Status (2026-06-09): 4.1 – 4.4 built ✅.** Boundary: the `llm/` wrapper, `ai_calls` audit
+> (schema 0007), the names-only roster (`/pupils`), redaction/withholding **egress tests** (forced
+> zero spend). **4.3 draft-next-lesson** ("✨ Draft with AI" per plan) and **4.4 author-a-scheme**
+> ("✨ Author scheme with AI" — a brief → units + lesson titles, materialised atomically) are both
+> live, structured output via `messages.parse`/`zodOutputFormat` (zod v4). **Verified live:** a draft
+> costs ~0.7p, a whole scheme ~1.1p; audits store only the redacted request. Remaining: 4.5–4.8
+> (term summary; the "manual now, AI later" hooks; resource editing; optional semantic search) +
+> scheme **redesign** (new version) as a 4.4 follow-up.
 | **4.3** | **Draft next lesson** → a draft `lesson_plan` from SoW position + recent notes | first concrete win; needs 3.2/3.3 | M |
 | **4.4** | **Author / redesign a scheme** → new scheme **version** (clone) from aims + Teach Computing context | the KS3 *"Effective use of computers in school"* win | M |
 | **4.5** | **Summarise this term** for a group/course from accumulated notes | read-only; cheap | S |

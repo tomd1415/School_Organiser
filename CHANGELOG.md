@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — 4.4: author a scheme of work with AI (verified live)
+
+- **"✨ Author scheme with AI"** in the Schemes empty state → a brief becomes a full scheme (units
+  + lesson titles), **materialised atomically** as a real, editable scheme you then prune and flesh
+  out lesson-by-lesson with the 4.3 drafter. Opus (design model); **nested** structured output.
+- **Verified live:** a 4-unit / 23-lesson KS3 scheme authored for **1.06p** and materialised correctly.
+- New: `llm/schemas/authorScheme.ts`, `llm/prompts/authorScheme.ts`, `repos/schemes.materialiseScheme`
+  (one transaction), `POST /schemes/author`, `renderSchemeEmpty`. Fixed a latent `pg`
+  bigint-as-string comparison bug on course ids. +3 unit, +2 integration → **108 unit / 56 integration**.
+
+### 2026-06-09 — 4.3: draft-next-lesson (first AI feature, verified live)
+
+- **"✨ Draft with AI"** on each lesson plan in the schemes editor → drafts objectives, a lesson
+  outline and a duration from the plan's place in the scheme (course · unit · sibling lessons) and
+  lands them in the plan to edit. Structured output via `messages.parse` + `zodOutputFormat`
+  (zod/v4); `callLLMStructured` reuses the entire 4.1 boundary (withhold → redact → audit → expand).
+- **Verified live end-to-end:** a real draft cost **0.7p** (Sonnet) and the audit row stored only
+  the redacted request. Degrades cleanly with no key (full-route integration test).
+- New: `llm/schemas/draftLesson.ts`, `llm/prompts/draftLesson.ts`, `repos/schemes.getPlanContext`/
+  `getPlanRow`, `POST /schemes/plan/:id/draft`. +3 unit, +1 integration → **105 unit / 54 integration**.
+
 ### 2026-06-09 — Phase 4 boundary (4.1 + 4.2): the one LLM wrapper + redaction + roster
 
 - **`src/llm/client.ts`** — the single wrapper every AI call goes through: withhold safeguarding

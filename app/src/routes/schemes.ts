@@ -10,11 +10,14 @@ import {
   deletePlan,
   deleteUnit,
   getActiveScheme,
+  getPlanContext,
+  getPlanRow,
   getScheme,
   listCourses,
   listPlansForScheme,
   listSchemeVersions,
   listUnits,
+  materialiseScheme,
   movePlan,
   moveUnit,
   schemeIdForPlan,
@@ -29,9 +32,15 @@ import {
   unlinkResourceFromPlan,
 } from '../repos/resources';
 import { buildSchemeTree } from '../services/scheme';
-import { renderSchemeTree } from '../lib/schemeView';
+import { renderPlan, renderSchemeEmpty, renderSchemeTree } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
+import { modelFor } from '../repos/settings';
+import { callLLMStructured } from '../llm/client';
+import { draftLessonSchema } from '../llm/schemas/draftLesson';
+import { DRAFT_LESSON_SYSTEM, DRAFT_LESSON_VERSION, draftLessonInstruction } from '../llm/prompts/draftLesson';
+import { authorSchemeSchema } from '../llm/schemas/authorScheme';
+import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction } from '../llm/prompts/authorScheme';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -64,9 +73,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const verLinks = versions
           .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}"${scheme && v.id === scheme.id ? ' class="active"' : ''}>v${v.version}${v.active ? '' : ' (draft)'}</a>`)
           .join(' ');
-        const tree = scheme
-          ? await treeHtml(scheme.id)
-          : `<div id="scheme-tree"><p class="muted">No scheme of work yet for this course.</p><button type="button" class="btn-secondary" hx-post="/schemes/create?course=${courseId}">＋ Create scheme of work</button></div>`;
+        const tree = scheme ? await treeHtml(scheme.id) : renderSchemeEmpty(courseId);
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
             <h1>Schemes of work</h1>
@@ -90,6 +97,40 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       return reply.send('');
     }
     return reply.type('text/html').send('');
+  });
+
+  // ── author a whole scheme of work with AI (4.4) ──
+  // A brief → units + lesson titles (Opus). Materialised as a real scheme the teacher prunes and
+  // then fleshes out lesson-by-lesson with the 4.3 drafter. Degrades to an inline note if AI is off.
+  app.post('/schemes/author', guard, async (req, reply) => {
+    const q = z.object({ course: z.coerce.number().int().positive() }).safeParse(req.query);
+    const b = z.object({ brief: z.string().trim().min(1).max(4000) }).safeParse(req.body);
+    if (!q.success || !b.success) return reply.code(400).send('');
+    // courses.id is BIGINT → pg returns it as a string, so coerce before comparing.
+    const course = (await listCourses()).find((c) => Number(c.id) === q.data.course);
+    if (!course) return reply.code(404).send('');
+
+    const result = await callLLMStructured(
+      {
+        feature: 'author_scheme',
+        model: await modelFor('design'), // Opus — heavy curriculum design
+        promptVersion: AUTHOR_SCHEME_VERSION,
+        system: AUTHOR_SCHEME_SYSTEM,
+        context: [{ text: authorSchemeInstruction(course.name, b.data.brief) }],
+        instruction: 'Design the scheme now.',
+        maxTokens: 8000,
+      },
+      authorSchemeSchema,
+    );
+
+    const units = result.data?.units.filter((u) => u.title?.trim()) ?? [];
+    if (result.status !== 'ok' || units.length === 0) {
+      return reply.type('text/html').send(renderSchemeEmpty(q.data.course, result.message ?? 'The AI could not author a scheme — try again or add detail to the brief.'));
+    }
+    const schemeId = await materialiseScheme(q.data.course, `${course.name} — Scheme of Work`, units);
+    if (!schemeId) return reply.type('text/html').send(renderSchemeEmpty(q.data.course, 'Could not save the authored scheme.'));
+    reply.header('HX-Redirect', `/schemes?course=${q.data.course}&scheme=${schemeId}`);
+    return reply.send('');
   });
 
   // ── structural changes → re-render the whole tree ──
@@ -162,6 +203,41 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       await updatePlanField(id.data.id, f, typeof raw === 'string' ? raw : null);
     }
     return reply.type('text/html').send(renderSavedStatus(`plan-${id.data.id}-status`));
+  });
+
+  // ── draft a lesson plan with AI (4.3) ──
+  // Drafts objectives/outline/duration from the plan's place in the scheme; the draft lands in
+  // the plan (the teacher edits, autosave persists). Degrades to an inline note if AI is off.
+  app.post('/schemes/plan/:id/draft', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [plan, ctx] = await Promise.all([getPlanRow(id.data.id), getPlanContext(id.data.id)]);
+    if (!plan || !ctx) return reply.code(404).send('');
+
+    const result = await callLLMStructured(
+      {
+        feature: 'draft_lesson',
+        model: await modelFor('plan'),
+        promptVersion: DRAFT_LESSON_VERSION,
+        system: DRAFT_LESSON_SYSTEM,
+        context: [{ text: draftLessonInstruction(ctx) }],
+        instruction: 'Draft the lesson now.',
+        maxTokens: 4000,
+      },
+      draftLessonSchema,
+    );
+
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(renderPlan(plan, { open: true, draftStatus: result.message ?? 'AI unavailable.' }));
+    }
+    const d = result.data;
+    await updatePlanField(id.data.id, 'objectives', d.objectives.join('\n'));
+    await updatePlanField(id.data.id, 'outline', d.outline);
+    if (Number.isFinite(d.durationMin) && d.durationMin > 0) {
+      await updatePlanField(id.data.id, 'duration_min', String(Math.round(d.durationMin)));
+    }
+    const updated = (await getPlanRow(id.data.id)) ?? plan;
+    return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: 'drafted ✓ — review & edit' }));
   });
 
   // ── resources attached to a lesson plan (3.8) ──

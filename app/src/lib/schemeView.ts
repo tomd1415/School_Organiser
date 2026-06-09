@@ -9,7 +9,7 @@ function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string 
   </span>`;
 }
 
-function renderPlan(p: PlanRow): string {
+export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: string } = {}): string {
   const save = (t: string) => `hx-post="/schemes/plan/${p.id}" hx-swap="none" hx-trigger="${t}"`;
   return `<li class="plan" id="plan-${p.id}">
     <div class="row-head">
@@ -17,8 +17,12 @@ function renderPlan(p: PlanRow): string {
       <span class="note-status" id="plan-${p.id}-status"></span>
       ${rowActions('plan', p.id, 'Delete this lesson plan?')}
     </div>
-    <details class="plan-detail" id="plan-${p.id}-detail">
+    <details class="plan-detail" id="plan-${p.id}-detail"${opts.open ? ' open' : ''}>
       <summary>objectives · outline · ${p.durationMin ? esc(String(p.durationMin)) + ' min' : 'duration'}</summary>
+      <div class="plan-ai">
+        <button type="button" class="btn-secondary" hx-post="/schemes/plan/${p.id}/draft" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Draft with AI</button>
+        <span class="plan-draft-status" id="plan-${p.id}-draft">${esc(opts.draftStatus ?? '')}</span>
+      </div>
       <label>Objectives<textarea name="objectives" rows="2" ${save('input changed delay:800ms, blur')}>${esc(p.objectives ?? '')}</textarea></label>
       <label>Outline<textarea name="outline" rows="3" ${save('input changed delay:800ms, blur')}>${esc(p.outline ?? '')}</textarea></label>
       <label>Duration (min) <input type="number" name="duration_min" min="0" value="${p.durationMin ?? ''}" ${save('input changed delay:600ms, blur')}></label>
@@ -38,7 +42,7 @@ function renderUnit(u: UnitWithPlans): string {
       <span class="note-status" id="unit-${u.id}-status"></span>
       ${rowActions('unit', u.id, 'Delete this unit and its plans?')}
     </div>
-    <ol class="plans">${u.plans.map(renderPlan).join('')}</ol>
+    <ol class="plans">${u.plans.map((p) => renderPlan(p)).join('')}</ol>
     <button type="button" class="link" hx-post="/schemes/unit/${u.id}/plan" hx-target="#scheme-tree" hx-swap="outerHTML">＋ lesson plan</button>
   </section>`;
 }
@@ -47,5 +51,22 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): s
   return `<div id="scheme-tree">
     ${tree.map(renderUnit).join('')}
     <button type="button" class="btn-secondary" hx-post="/schemes/${scheme.id}/unit" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
+  </div>`;
+}
+
+// The empty state for a course with no scheme yet: author one with AI from a brief (4.4), or
+// create an empty one to build by hand. Re-used for the author error path (with a message).
+export function renderSchemeEmpty(courseId: number, error?: string): string {
+  return `<div id="scheme-tree">
+    ${error ? `<p class="error">${esc(error)}</p>` : ''}
+    <p class="muted">No scheme of work yet for this course.</p>
+    <form class="scheme-author" hx-post="/schemes/author?course=${courseId}" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="find button">
+      <label>Author a scheme with AI — describe the aims, topics and level
+        <textarea name="brief" rows="4" required placeholder="e.g. A KS3 scheme on using computers effectively in school: logging in and file management, online safety, word processing, spreadsheets, presentations, and finding and evaluating information…"></textarea>
+      </label>
+      <button type="submit" class="btn-secondary">✨ Author scheme with AI</button>
+      <span class="muted scheme-author-hint">a full scheme can take ~20s</span>
+    </form>
+    <p class="muted">…or <button type="button" class="link" hx-post="/schemes/create?course=${courseId}">create an empty one</button> to build by hand.</p>
   </div>`;
 }

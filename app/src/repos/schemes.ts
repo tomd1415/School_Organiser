@@ -49,6 +49,52 @@ export async function createScheme(courseId: number): Promise<number | null> {
   return rows[0]?.id ?? null;
 }
 
+export interface AuthoredUnit {
+  title: string;
+  lessons: string[];
+}
+
+// Create a whole scheme (scheme + units + lesson plans) atomically from an AI-authored skeleton.
+// Returns the new scheme id, or null if the course is gone. All-or-nothing (one transaction).
+export async function materialiseScheme(courseId: number, title: string, units: AuthoredUnit[]): Promise<number | null> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const course = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
+    if (!course.rows[0]) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const s = await client.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title) VALUES ($1, $2) RETURNING id`,
+      [courseId, title || `${course.rows[0].name} — Scheme of Work`],
+    );
+    const schemeId = s.rows[0]!.id;
+    let uOrder = 0;
+    for (const u of units) {
+      const ur = await client.query<{ id: number }>(
+        `INSERT INTO units (scheme_id, title, display_order) VALUES ($1, $2, $3) RETURNING id`,
+        [schemeId, u.title.slice(0, 200), uOrder++],
+      );
+      const unitId = ur.rows[0]!.id;
+      let pOrder = 0;
+      for (const lesson of u.lessons) {
+        await client.query(
+          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, $3, $4)`,
+          [unitId, courseId, lesson.slice(0, 200), pOrder++],
+        );
+      }
+    }
+    await client.query('COMMIT');
+    return schemeId;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export async function listUnits(schemeId: number): Promise<UnitRow[]> {
   const { rows } = await pool.query<UnitRow>(
     `SELECT id, title, display_order AS "displayOrder" FROM units WHERE scheme_id = $1 ORDER BY display_order, id`,
@@ -160,6 +206,44 @@ export async function getLessonPlan(
     [id],
   );
   return rows[0] ?? null;
+}
+
+export async function getPlanRow(id: number): Promise<PlanRow | null> {
+  const { rows } = await pool.query<PlanRow>(
+    `SELECT id, unit_id AS "unitId", title, objectives, outline,
+            duration_min AS "durationMin", display_order AS "displayOrder"
+     FROM lesson_plans WHERE id = $1`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+export interface PlanContext {
+  courseName: string;
+  unitTitle: string;
+  planTitle: string;
+  siblingTitles: string[];
+}
+
+// Context for the AI draft-lesson feature: where this plan sits in the scheme + its siblings.
+export async function getPlanContext(id: number): Promise<PlanContext | null> {
+  const { rows } = await pool.query<{ courseName: string; unitTitle: string; planTitle: string }>(
+    `SELECT c.name AS "courseName", u.title AS "unitTitle", lp.title AS "planTitle"
+     FROM lesson_plans lp
+     JOIN units u ON u.id = lp.unit_id
+     JOIN schemes_of_work s ON s.id = u.scheme_id
+     JOIN courses c ON c.id = s.course_id
+     WHERE lp.id = $1`,
+    [id],
+  );
+  const head = rows[0];
+  if (!head) return null;
+  const sibs = await pool.query<{ title: string }>(
+    `SELECT title FROM lesson_plans WHERE unit_id = (SELECT unit_id FROM lesson_plans WHERE id = $1)
+     ORDER BY display_order, id`,
+    [id],
+  );
+  return { ...head, siblingTitles: sibs.rows.map((r) => r.title) };
 }
 
 export async function schemeIdForUnit(unitId: number): Promise<number | null> {

@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
+import { addPlan, addUnit } from '../../src/repos/schemes';
 
 // End-to-end render of the authenticated screens against the dev DB. Logs in with
 // the password "test" (its hash is set in vitest.integration.config.ts).
@@ -145,6 +146,49 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('id="res-list"');
     expect(res.body).toContain('res-pager');
     expect(res.body).toMatch(/matching/); // the count line echoes the active filter
+  });
+
+  it('Author-scheme degrades cleanly with no API key (full route + CSRF)', async () => {
+    const c = await pool.query<{ id: number }>(`SELECT id FROM courses WHERE active ORDER BY id LIMIT 1`);
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const res = await app.inject({
+      method: 'POST',
+      url: `/schemes/author?course=${c.rows[0]!.id}`,
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `brief=${encodeURIComponent('a KS3 scheme on online safety and productivity software')}`,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('scheme-author'); // re-rendered the author form (no scheme created)
+    expect(res.body).toContain('No API key configured');
+  });
+
+  it('Draft-with-AI degrades cleanly with no API key (full route + CSRF)', async () => {
+    const c = await pool.query<{ id: number }>(`SELECT id FROM courses ORDER BY id LIMIT 1`);
+    const s = await pool.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST draft scheme', 98, false) RETURNING id`,
+      [c.rows[0]!.id],
+    );
+    const unitId = await addUnit(s.rows[0]!.id, 'TEST unit');
+    const planId = await addPlan(unitId, 'L1 Test lesson');
+    try {
+      const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+      const res = await app.inject({
+        method: 'POST',
+        url: `/schemes/plan/${planId}/draft`,
+        headers: { cookie, 'x-csrf-token': token },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain(`plan-${planId}`); // re-rendered the plan row, did not crash
+      expect(res.body).toContain('No API key configured'); // degraded message (key forced empty in tests)
+    } finally {
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [planId]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [s.rows[0]!.id]);
+    }
   });
 
   it('attaches then detaches a resource on a lesson plan (3.8, authed + CSRF)', async () => {
