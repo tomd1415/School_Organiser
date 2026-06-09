@@ -7,6 +7,13 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 2 plan authored
+
+- **Authored [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md)** — the detailed build plan for Phase 2
+  (tasks → time → focus): 12 increments (2.1–2.12), the P2 schema, the **AvailabilityService** and
+  **FocusService** as the two pure "hearts", the safeguarding/**DPIA** gate, and a "manual now, AI
+  in Phase 4" split. For sign-off.
+
 ### 2026-06-09 — earlier start: 07:30 coffee + before-school slots
 
 - The seeded day now starts at **07:30** — a 10-minute **Coffee** slot, then a **before-school**
