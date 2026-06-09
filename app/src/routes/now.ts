@@ -20,6 +20,8 @@ import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
 import { getDayChecklist, type PrepItem } from '../repos/prep';
 import { renderPrepList } from '../lib/prepView';
+import { resurfacing, type CapturedItem } from '../services/captured';
+import { listForResurfacing } from '../repos/captured';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -141,6 +143,22 @@ function renderComingUp(events: UpcomingEvent[], today: string): string {
   </div>`;
 }
 
+function renderHeadsUp(items: CapturedItem[]): string {
+  if (items.length === 0) return '';
+  const lis = items
+    .slice(0, 6)
+    .map(
+      (i) =>
+        `<li${i.safeguarding ? ' class="sg"' : ''}><span>${esc(i.body || '(captured note)')}</span>${i.groupName ? `<span class="muted bell-tag">${esc(i.groupName)}</span>` : ''}</li>`,
+    )
+    .join('');
+  return `<div class="now-card now-bell">
+    <p class="kicker">Heads up</p>
+    <ul class="bell-list">${lis}</ul>
+    <p><a href="/captured">All captured →</a></p>
+  </div>`;
+}
+
 function renderDayCard(part: 'start' | 'end', items: PrepItem[]): string {
   if (items.length === 0) return '';
   return `<div class="now-card now-bell">
@@ -188,16 +206,21 @@ export function registerNowRoutes(app: FastifyInstance): void {
         card = `<div class="now-card"><h1>${esc(heading)}</h1><p class="muted">The next teaching slot is shown above.</p></div>`;
       }
 
-      const [bellAll, groupSlots, events, running] = await Promise.all([
+      const [bellAll, groupSlots, events, running, captured] = await Promise.all([
         listBellTasks(),
         getGroupSlots(),
         listUpcoming(),
         getRunningTimer(),
+        listForResurfacing(),
       ]);
       const nextBell = state.nextTeaching
         ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
         : null;
       const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
+      const todayGroupIds = [...groupSlots.entries()]
+        .filter(([, slots]) => slots.some((s) => s.weekday === state.weekday))
+        .map(([gid]) => gid);
+      const heads = resurfacing(captured, state.isoDate, todayGroupIds);
 
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
@@ -209,6 +232,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
         ${card}
         ${renderBell(bell)}
         ${renderComingUp(events, state.isoDate)}
+        ${renderHeadsUp(heads)}
         ${renderDayCard(dayPart, dayItems)}
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));

@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { layout } from '../lib/html';
-import { createTask, createTaskFromEmail, listGroups, listTasks, setTaskStatus, updateTaskField } from '../repos/tasks';
+import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
 import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
 import { renderSavedStatus } from '../lib/notesView';
@@ -16,27 +16,31 @@ export function registerTaskRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
 
   app.get('/tasks', { preHandler: requireAuth }, async (req, reply) => {
-    const q = z.object({ view: z.enum(['inbox', 'open', 'done']).default('inbox') }).safeParse(req.query);
-    const view: TaskView = q.success ? q.data.view : 'inbox';
+    const q = z.object({ view: z.enum(['inbox', 'open', 'done', 'interest']).default('inbox') }).safeParse(req.query);
+    const view = q.success ? q.data.view : 'inbox';
     const csrf = reply.generateCsrf();
 
     let listHtml: string;
     let banner = renderTimerBanner(null);
     try {
-      const [tasks, groups, running] = await Promise.all([listTasks(view), listGroups(), getRunningTimer()]);
+      const [tasks, groups, running] = await Promise.all([
+        view === 'interest' ? listInterestTasks() : listTasks(view),
+        listGroups(),
+        getRunningTimer(),
+      ]);
       listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
       banner = renderTimerBanner(running);
     } catch {
       listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
     }
 
-    const tab = (v: TaskView, label: string) =>
+    const tab = (v: string, label: string) =>
       `<a href="/tasks?view=${v}"${v === view ? ' class="active"' : ''}>${label}</a>`;
     const body = `
       <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${banner}
-        <div class="ld-notes-head"><h1>Tasks</h1>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') : ''}</div>
-        <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')}</nav>
+        <div class="ld-notes-head"><h1>Tasks</h1><span>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') + ' ' : ''}<a class="link" href="/recurring">Recurring →</a></span></div>
+        <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')} ${tab('interest', '⭐ Interest')}</nav>
         ${view === 'inbox' ? `<details class="paste-box"><summary>Paste an email</summary><form hx-post="/tasks/paste" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="this.reset()"><textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea><div><button type="submit" class="btn-secondary">Make task</button></div></form></details>` : ''}
         ${listHtml}
       </section>`;
@@ -49,7 +53,7 @@ export function registerTaskRoutes(app: FastifyInstance): void {
     const groups = await listGroups();
     return reply.type('text/html').send(
       renderTaskItem(
-        { id, title: 'New task', urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox' },
+        { id, title: 'New task', urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox', interest: false },
         groups,
       ),
     );
@@ -66,7 +70,7 @@ export function registerTaskRoutes(app: FastifyInstance): void {
       .type('text/html')
       .send(
         renderTaskItem(
-          { id, title: parsed.title, urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox' },
+          { id, title: parsed.title, urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox', interest: false },
           groups,
         ),
       );
@@ -88,6 +92,15 @@ export function registerTaskRoutes(app: FastifyInstance): void {
       await updateTaskField(id.data.id, field, value);
     }
     return reply.type('text/html').send(renderSavedStatus(`task-${id.data.id}-status`));
+  });
+
+  // Toggle the "current interest" ⭐ flag — re-renders the item.
+  app.post('/tasks/:id/interest', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    await toggleTaskInterest(id.data.id);
+    const [row, groups] = await Promise.all([getTaskRow(id.data.id), listGroups()]);
+    return reply.type('text/html').send(row ? renderTaskItem(row, groups) : '');
   });
 
   // Status transitions — each empties the targeted item out of the current view.

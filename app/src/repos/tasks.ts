@@ -13,6 +13,7 @@ export interface TaskRow {
   groupId: number | null;
   context: string | null;
   status: string;
+  interest: boolean;
 }
 
 export interface GroupOpt {
@@ -62,7 +63,7 @@ export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: str
 export async function listTasks(view: TaskView): Promise<TaskRow[]> {
   const { rows } = await pool.query<TaskRow>(
     `SELECT id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
-            group_id AS "groupId", context, status
+            group_id AS "groupId", context, status, interest
      FROM tasks
      WHERE status = ANY($1)
      ORDER BY array_position(ARRAY['urgent_today','by_next_lesson','this_week','someday'], urgency),
@@ -101,6 +102,25 @@ export async function setTaskStatus(id: number, status: string): Promise<void> {
      WHERE id = $1`,
     [id, status],
   );
+}
+
+const TASK_ROW_COLS = `id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
+                       group_id AS "groupId", context, status, interest`;
+
+export async function getTaskRow(id: number): Promise<TaskRow | null> {
+  const { rows } = await pool.query<TaskRow>(`SELECT ${TASK_ROW_COLS} FROM tasks WHERE id = $1`, [id]);
+  return rows[0] ?? null;
+}
+
+export async function listInterestTasks(): Promise<TaskRow[]> {
+  const { rows } = await pool.query<TaskRow>(
+    `SELECT ${TASK_ROW_COLS} FROM tasks WHERE interest AND status NOT IN ('done','dropped') ORDER BY created_at DESC`,
+  );
+  return rows;
+}
+
+export async function toggleTaskInterest(id: number): Promise<void> {
+  await pool.query(`UPDATE tasks SET interest = NOT interest, updated_at = now() WHERE id = $1`, [id]);
 }
 
 /** Map of group → the (weekday, slot, start) of each teaching lesson — for due_rule. */

@@ -4,9 +4,12 @@ import {
   createTask,
   createTaskFromEmail,
   getGroupSlots,
+  getTaskRow,
   listBellTasks,
+  listInterestTasks,
   listTasks,
   setTaskStatus,
+  toggleTaskInterest,
   updateTaskField,
 } from '../../src/repos/tasks';
 import { parseEmail } from '../../src/services/emailIntake';
@@ -67,5 +70,15 @@ describe('tasks (integration — needs the dev DB up)', () => {
     );
     expect(rows[0]?.source).toBe('email');
     expect(rows[0]?.email_intake_id).not.toBeNull();
+  });
+
+  it('toggles current-interest and lists interest tasks', async () => {
+    const id = await createTask('Redesign the KS3 unit');
+    created.push(id);
+    await toggleTaskInterest(id);
+    expect((await getTaskRow(id))?.interest).toBe(true);
+    expect((await listInterestTasks()).some((t) => t.id === id)).toBe(true);
+    await toggleTaskInterest(id);
+    expect((await getTaskRow(id))?.interest).toBe(false);
   });
 });

@@ -19,6 +19,10 @@ import { registerTimeRoutes } from './routes/time';
 import { registerTimerRoutes } from './routes/timer';
 import { registerFocusRoutes } from './routes/focus';
 import { registerPrepRoutes } from './routes/prep';
+import { registerCapturedRoutes } from './routes/captured';
+import { registerRecurringRoutes } from './routes/recurring';
+import { generateDueInstances } from './repos/recurringTasks';
+import { localParts } from './lib/time';
 
 /** Build the Fastify instance with all plugins and routes, without listening. */
 export async function buildApp(): Promise<FastifyInstance> {
@@ -63,8 +67,25 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerTimerRoutes(app);
   registerFocusRoutes(app);
   registerPrepRoutes(app);
+  registerCapturedRoutes(app);
+  registerRecurringRoutes(app);
 
   return app;
+}
+
+/** Materialise recurring-task instances on boot, then daily. No broker — a timer + the standalone npm script. */
+function scheduleRecurring(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const today = localParts(new Date(), 'Europe/London').isoDate;
+      const n = await generateDueInstances(today);
+      if (n > 0) app.log.info(`recurring: generated ${n} task instance(s)`);
+    } catch (err) {
+      app.log.error(err);
+    }
+  };
+  void run();
+  setInterval(() => void run(), 24 * 60 * 60 * 1000);
 }
 
 /** Production entrypoint: migrate, then listen. */
@@ -73,6 +94,7 @@ export async function start(): Promise<void> {
   const app = await buildApp();
   try {
     await app.listen({ port: appConfig.PORT, host: appConfig.HOST });
+    scheduleRecurring(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

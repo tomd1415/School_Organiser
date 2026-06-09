@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — captured info & recurrence / current-interest (2.10, 2.12)
+
+- **2.10 Captured info** — `/captured`: a one-line capture box, a category (Pupil · Logistics ·
+  Admin · Curriculum · CPD · Safeguarding · Other), an optional class link and a "resurface on"
+  date; relevant items appear on **Now** ("Heads up") by date or today's classes; ⚑ safeguarding is
+  highlighted (and earmarked never-to-AI for Phase 4); one tap turns a captured note into a task.
+  Reuses the `notes` table (`kind='captured'`) — **no migration**. (`services/captured.ts`,
+  `repos/captured.ts`, `lib/capturedView.ts`, `routes/captured.ts`)
+- **2.12 Recurrence + current-interest** — migration `0005` adds `recurring_tasks`; `/recurring`
+  defines them (weekly / fortnightly / monthly / **per-lesson**), and an idempotent generator
+  materialises due instances into the inbox ahead of their due date — run on app boot + a daily
+  in-app timer **and** as `npm run generate-recurring` (cron-friendly; no broker). Pure
+  `nextDueDate` is the tested core. **Current-interest** ⭐ toggles on tasks (+ a ⭐ Interest filter)
+  and captured items. (`services/recurrence.ts`, `repos/recurringTasks.ts`, `routes/recurring.ts`,
+  `src/jobs/generateRecurring.ts`)
+- **Deferred by the teacher:** 2.11 pupils / **DPIA** — individual pupil names come later, with the
+  pupil-facing resources project.
+- **Tests:** pure units for `resurfacing` and `nextDueDate`; integration for captured CRUD +
+  promote, recurring generation (idempotent) + pause, and the ⭐ interest toggle; + authenticated
+  renders of `/captured` and `/recurring`. **83 unit + 38 integration pass.** Built unattended,
+  left **uncommitted** for review.
+
 ### 2026-06-09 — Phase 2 planning core: email, events, time, timers, prep & focus (2.4–2.9)
 
 - **2.4 Email paste-box** — paste an email on /tasks → a draft task (Subject / first line → title),

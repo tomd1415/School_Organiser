@@ -54,9 +54,9 @@ everything; Phase 4 layers AI on top without changing the schema. See §10. This
 | **2.7 ✅** | **Timers** | `repos/timeEntries.ts`, `routes/timer.ts` | done — one running (partial index), interruptible, accumulates to `actual_seconds`; banner on Now/Tasks |
 | **2.8 ✅** | **Prep checklists** | `migrations/0004_prep.sql`, `repos/prep.ts`, `services/prep.ts` | done — per-lesson prep (templates → occurrence_prep) on the lesson; start/end-of-day on Now |
 | **2.9 ✅** | **Focus mode + wind-down** | `services/focus.ts`, `routes/focus.ts` | done — pure `pickNext` (urgency/due/fit/load); morning/free/end modes; sub-steps; "go home" |
-| **2.10** | **Captured info** ("things I've been told") | `repos/captured.ts`, `routes/captured.ts` | frictionless capture; manual category; resurfaces by entity/date; **safeguarding** flag |
-| **2.11** | **Pupils, enrolments, mentions, tags** + **DPIA** | `repos/pupils.ts`, `routes/pupils.ts`, `docs/DPIA.md` | **DPIA written first**; pupils (+`ai_token`); outstanding-pupil mentions; note tags |
-| **2.12** | **Task enrichment** — recurrence, sub-tasks, current-interest | `services/task.ts` | recurring + per-lesson tasks; manual sub-steps; one-tap current-interest |
+| **2.10 ✅** | **Captured info** ("things I've been told") | `services/captured.ts`, `repos/captured.ts`, `lib/capturedView.ts`, `routes/captured.ts` | done — capture box + categories; resurfaces on Now by date/class; ⚑ safeguarding; → task |
+| **2.11 ⏸** | **Pupils, enrolments, mentions, tags** + **DPIA** | `repos/pupils.ts`, `routes/pupils.ts`, `docs/DPIA.md` | **deferred by the teacher** — individual names come with the pupil-facing resources project (DPIA then) |
+| **2.12 ✅** | **Recurrence, sub-tasks, current-interest** | `migrations/0005`, `services/recurrence.ts`, `repos/recurringTasks.ts`, `routes/recurring.ts` | done — recurring defs (weekly/fortnightly/monthly/per-lesson) auto-appear via a generator (boot + daily + `npm run generate-recurring`); sub-steps (2.9); ⭐ interest on tasks + captured |
 
 ---
 

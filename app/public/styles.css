@@ -159,6 +159,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .task-ctx { width: 8rem; }
 .task-actions { display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; }
 .tasks-list .task, .tasks-list .event { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; }
+.tasks-list .task.inactive { opacity: 0.55; }
 .event-title { width: 100%; border: 0; border-bottom: 1px solid transparent; font: inherit; font-weight: 600; outline: none; background: transparent; }
 .event-title:focus { border-bottom-color: var(--line); }
 .event-lead { width: 4.5rem; }
@@ -187,6 +188,14 @@ a.tt-lesson:hover { background: #eef3fc; }
 .focus-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
 .focus-done { margin-top: 1rem; }
 .focus-done h1 { font-size: 1.6rem; }
+
+/* captured info */
+.captured { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; }
+.captured.sg { border-left: 4px solid var(--error); background: #fff5f5; }
+.captured textarea { width: 100%; border: 0; resize: vertical; font: inherit; outline: none; background: transparent; }
+.cap-when { font-size: 0.78rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.25rem; }
+.task-controls .link.on, .task-actions .link.on { color: var(--accent); font-weight: 700; }
+.bell-list li.sg { color: var(--error); }
 
 /* now: before the next bell */
 .now-bell { margin-top: 1rem; }

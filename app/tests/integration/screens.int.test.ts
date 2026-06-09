@@ -96,4 +96,17 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('focus-inner');
   });
+
+  it('Captured page renders', async () => {
+    const res = await app.inject({ method: 'GET', url: '/captured', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Captured');
+    expect(res.body).toContain('data-new-note');
+  });
+
+  it('Recurring page renders', async () => {
+    const res = await app.inject({ method: 'GET', url: '/recurring', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Recurring tasks');
+  });
 });
