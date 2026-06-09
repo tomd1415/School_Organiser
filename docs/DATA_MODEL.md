@@ -298,11 +298,28 @@ required; everything else is optional, satisfying "capture in seconds".
 | `parent_task_id` | BIGINT FK NULL | self-ref — a sub-step of a broken-down task |
 | `cognitive_load` | TEXT NULL | CHECK `low, medium, high` — offer heavy work when fresh |
 | `context` | TEXT NULL | e.g. `needs_computer, quick_win, can_do_tired` |
-| `recurrence` | TEXT NULL | rule, e.g. `weekly:fri`, `per_lesson:<group_course_id>` |
+| `recurrence` | TEXT NULL | (legacy free-text rule; recurring tasks now use `recurring_tasks` + `recurring_task_id`, P2.12) |
+| `recurring_task_id` | BIGINT FK NULL | the `recurring_tasks` template that generated this instance (P2.12) |
 | `task_type` | TEXT NULL | grouping for calibration (e.g. `marking, email, resource_prep, admin`) |
 | `actual_seconds` | INT NULL | accumulated from `time_entries` (cached for calibration) |
 | `interest` | BOOL | marked a "current interest" (§5.18) |
 | `completed_at` | TIMESTAMPTZ NULL | |
+
+### `recurring_tasks` (P2.12) — recurring task templates
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | BIGSERIAL PK | |
+| `title` / `detail` | TEXT | copied onto each generated instance |
+| `urgency` / `estimate_min` / `cognitive_load` / `group_id` / `course_id` | — | copied onto each instance |
+| `pattern` | TEXT | `weekly:<dow>` · `every_weeks:<n>:<dow>` · `monthly:<dom>` · `per_lesson:<group_id>` |
+| `lead_days` | INT | create the instance this many days before its due date |
+| `active` | BOOL | paused templates don't generate |
+| `last_generated` | DATE | the last due date materialised (idempotency guard) |
+
+A daily generator (app boot + in-process timer, and `npm run generate-recurring`) creates `tasks`
+(`source='recurring'`, `recurring_task_id` set) for due dates within `lead_days`; the pure
+`nextDueDate` computes the schedule, and `per_lesson` uses the timetable (skipping non-school days).
 
 ### `work_blocks` (P2) — planned vs. actual time
 

@@ -39,6 +39,7 @@ Read in this order:
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan and MVP definition. |
 | [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) | Detailed build plan for Phase 1 (the MVP): schema, real-timetable seed, ClockService, screens. |
 | [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md) | Detailed build plan for Phase 2: tasks, time, events, focus mode, captured info, pupils. |
+| [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md) | Detailed build plan for Phase 3: schemes of work, lesson plans, the hosted resource store. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
 ## Run it

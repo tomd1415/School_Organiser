@@ -59,8 +59,9 @@ capture a note in seconds. *Most of the daily value lands here.*
   resurfaced via entity links.
 - **Current-interest** marking; **exam dates** + a **parental-contact log** (events); a
   **start/end-of-day checklist**.
-- Pupils + enrolments + `note_pupil_mentions` ("outstanding pupils"); tags.
-- **Write `docs/DPIA.md`** before real pupil names are entered.
+- Pupils + enrolments + `note_pupil_mentions` ("outstanding pupils"); tags. *(2.11 — **deferred**:
+  picked up with the **pupil-facing resources project**, when individual names are first needed.)*
+- **Write `docs/DPIA.md`** before real pupil names are entered. *(Deferred with 2.11.)*
 
 **Done when:** emails/tasks land in one place, get planned into time, and reality is logged.
 

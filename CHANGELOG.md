@@ -7,6 +7,15 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 3 plan authored; docs audited
+
+- **Authored [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)** — the Phase 3 build plan (schemes of
+  work → lesson plans → the **hosted, versioned resource store** + Office/PDF preview + bulk-import
+  + the "lessons I oversee" view + file-store backups), 8 increments (3.1–3.8). For sign-off.
+- **Docs brought up to date:** added `recurring_tasks` + `tasks.recurring_task_id` to DATA_MODEL,
+  noted the recurring-task generator in ARCHITECTURE, and **marked 2.11 (pupils / DPIA) deferred**
+  in the ROADMAP — picked up with the pupil-facing resources project.
+
 ### 2026-06-09 — captured info & recurrence / current-interest (2.10, 2.12)
 
 - **2.10 Captured info** — `/captured`: a one-line capture box, a category (Pupil · Logistics ·

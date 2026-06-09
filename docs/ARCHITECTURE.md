@@ -72,6 +72,8 @@ before Phase 0 if you change your mind. The rest of this document assumes TypeSc
 
 No queue/Redis initially. If background work appears (email polling, embedding batches,
 nightly note summaries) add a single worker process or a cron-driven script — not a broker.
+Phase 2.12's **recurring-task generator** is the first such job: an idempotent run on app boot + a
+daily in-process timer, also exposed as `npm run generate-recurring` for system cron.
 
 ## Components
 
