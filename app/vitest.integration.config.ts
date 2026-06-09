@@ -16,6 +16,8 @@ export default defineConfig({
       DATABASE_URL: 'postgres://organiser:organiser@localhost:5434/organiser',
       COOKIE_SECURE: 'false',
       RESOURCE_STORE_PATH: '/tmp/so-test-resources',
+      // Force the AI off in tests — no real provider call, no spend, ever.
+      ANTHROPIC_API_KEY: '',
     },
   },
 });

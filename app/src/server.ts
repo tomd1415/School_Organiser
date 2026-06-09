@@ -13,6 +13,7 @@ import { registerHealthRoutes } from './routes/health';
 import { registerNowRoutes } from './routes/now';
 import { registerTimetableRoutes } from './routes/timetable';
 import { registerOverseeRoutes } from './routes/oversee';
+import { registerPupilRoutes } from './routes/pupils';
 import { registerLessonRoutes } from './routes/lesson';
 import { registerNoteRoutes } from './routes/notes';
 import { registerTaskRoutes } from './routes/tasks';
@@ -65,6 +66,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerNowRoutes(app);
   registerTimetableRoutes(app);
   registerOverseeRoutes(app);
+  registerPupilRoutes(app);
   registerLessonRoutes(app);
   registerNoteRoutes(app);
   registerTaskRoutes(app);

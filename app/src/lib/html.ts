@@ -39,7 +39,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <header class="topbar">
     <div class="bar-left">
       <a class="brand" href="/">School Organiser</a>
-      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/focus">Focus</a><a href="/timetable">Timetable</a><a href="/oversee">Oversee</a><a href="/tasks">Tasks</a><a href="/events">Events</a><a href="/time">Time</a><a href="/captured">Captured</a><a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/resources">Resources</a></nav>' : ''}
+      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/focus">Focus</a><a href="/timetable">Timetable</a><a href="/oversee">Oversee</a><a href="/tasks">Tasks</a><a href="/events">Events</a><a href="/time">Time</a><a href="/captured">Captured</a><a href="/pupils">Pupils</a><a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/resources">Resources</a></nav>' : ''}
     </div>
     ${logout}
   </header>

@@ -19,6 +19,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.0",
     "@fastify/cookie": "^11.0.2",
     "@fastify/csrf-protection": "^7.0.2",
     "@fastify/formbody": "^8.0.2",

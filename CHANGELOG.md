@@ -7,6 +7,33 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 4 boundary (4.1 + 4.2): the one LLM wrapper + redaction + roster
+
+- **`src/llm/client.ts`** — the single wrapper every AI call goes through: withhold safeguarding
+  content → redact pupil names to tokens → **egress-assert** → call Anthropic → audit the
+  **redacted** request → re-expand tokens for display. Degrades cleanly (no key / `ai_enabled=false`
+  / over the monthly cap → "unavailable"/"blocked", never throws).
+- **`services/redact.ts`** — the pure boundary (withhold / `redactNames` / `containsRosterName` /
+  `expandTokens`), word-bounded + longest-name-first. **8 egress unit tests** prove no roster name
+  or flagged item can leave.
+- **Schema `0007`** — `ai_calls` audit (redacted-only by construction) + default AI settings
+  (`ai_enabled`, model choices, `ai_month_cap_pence` = £50 ceiling, all runtime-adjustable).
+- **Minimal names-only roster** — `/pupils` page + `repos/pupils.ts` (auto `PUPIL_<n>` tokens);
+  plus `repos/settings.ts`, `repos/aiCalls.ts`, `config/llm.ts`.
+- Dep `@anthropic-ai/sdk`; `ANTHROPIC_API_KEY` documented in `.env.example` (optional — absent ⇒ AI
+  off). **Tests force the key empty: no real call, no spend, ever.** +8 unit, +3 integration.
+- Next: **4.3 draft-next-lesson** (the first feature) adds structured output on top.
+
+### 2026-06-09 — Phase 4 plan authored
+
+- **Authored [docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md)** — the AI build plan: one `llm/` wrapper
+  (the only code that talks to a provider) carrying **pupil-name → token redaction** and
+  **safeguarding withholding**, an `ai_calls` audit (redacted-only), then features in order —
+  draft-next-lesson, scheme author/redesign, term summary, the "manual now, AI later" hooks
+  (task breakdown, estimate calibration, captured categorisation, current-interest), and
+  (staged) AI resource editing. Provider **Anthropic Claude**, provider/model in `settings`.
+  Flags the **pupil-roster decision** (§10.2) that sets how real redaction is on day one.
+
 ### 2026-06-09 — 3.7: "Lessons I oversee" view — Phase 3 complete
 
 - New **`/oversee`** view: the TA-led lessons you supervise (`isSelf = false`), grouped by day
