@@ -70,4 +70,11 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('Stopping point');
     expect(res.body).toContain('data-new-note');
   });
+
+  it('Tasks page renders with a new-task button', async () => {
+    const res = await app.inject({ method: 'GET', url: '/tasks', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('Tasks');
+    expect(res.body).toContain('data-new-note');
+  });
 });

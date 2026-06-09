@@ -6,8 +6,9 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 
 > **Status:** **Phase 1 (the MVP) is complete.** Log in over the LAN and you get the live *Now*
 > screen, the week timetable, click-through lesson detail, and fast autosaving notes with
-> follow-ups and "where we got to" (run `./start.sh`). Next is Phase 2 (tasks, time, events). See
-> [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) for what landed and [docs/ROADMAP.md](docs/ROADMAP.md) for what's next.
+> follow-ups and "where we got to" (run `./start.sh`). **Phase 2 is underway**: task capture/triage and a "before the next bell" list on the Now
+> screen are in (2.1–2.3 of [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md)); email intake, time
+> planning, events and focus mode are next. See [docs/ROADMAP.md](docs/ROADMAP.md) for the arc.
 
 ## The one-sentence pitch
 

@@ -146,3 +146,22 @@ a.tt-lesson:hover { background: #eef3fc; }
 .now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
 .now-card h1 { margin: 0.25rem 0 0.4rem; }
 .now-notes { margin-top: 1.1rem; }
+
+/* tasks */
+.task-tabs { display: flex; gap: 1rem; margin: 0.5rem 0 0.75rem; }
+.task-tabs a { text-decoration: none; color: var(--muted); font-weight: 600; padding-bottom: 0.15rem; }
+.task-tabs a.active { color: var(--ink); border-bottom: 2px solid var(--accent); }
+.task-title { width: 100%; border: 0; border-bottom: 1px solid transparent; font: inherit; font-weight: 600; outline: none; background: transparent; }
+.task-title:focus { border-bottom-color: var(--line); }
+.task-controls { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.4rem; }
+.task-controls select, .task-controls input { font: inherit; font-size: 0.82rem; padding: 0.2rem 0.35rem; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.task-est { width: 4.5rem; }
+.task-ctx { width: 8rem; }
+.task-actions { display: flex; gap: 0.75rem; margin-top: 0.4rem; font-size: 0.82rem; }
+
+/* now: before the next bell */
+.now-bell { margin-top: 1rem; }
+.bell-list { list-style: none; padding: 0; margin: 0.5rem 0 0.75rem; }
+.bell-task { padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--line); }
+.bell-task button.link { font-size: 1rem; }
+.bell-tag { font-size: 0.75rem; margin-left: auto; }

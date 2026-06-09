@@ -1,0 +1,83 @@
+import type { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { requireAuth } from '../auth/guard';
+import { layout } from '../lib/html';
+import { createTask, listGroups, listTasks, setTaskStatus, updateTaskField } from '../repos/tasks';
+import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
+import { renderSavedStatus } from '../lib/notesView';
+import type { TaskView } from '../services/task';
+
+const idParam = z.object({ id: z.coerce.number().int().positive() });
+
+export function registerTaskRoutes(app: FastifyInstance): void {
+  const guard = { preHandler: [requireAuth, app.csrfProtection] };
+
+  app.get('/tasks', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z.object({ view: z.enum(['inbox', 'open', 'done']).default('inbox') }).safeParse(req.query);
+    const view: TaskView = q.success ? q.data.view : 'inbox';
+    const csrf = reply.generateCsrf();
+
+    let listHtml: string;
+    try {
+      const [tasks, groups] = await Promise.all([listTasks(view), listGroups()]);
+      listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
+    } catch {
+      listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
+    }
+
+    const tab = (v: TaskView, label: string) =>
+      `<a href="/tasks?view=${v}"${v === view ? ' class="active"' : ''}>${label}</a>`;
+    const body = `
+      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        <div class="ld-notes-head"><h1>Tasks</h1>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') : ''}</div>
+        <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')}</nav>
+        ${listHtml}
+      </section>`;
+    return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
+  });
+
+  // Create a (blank) task in the inbox; returns the editable item to append.
+  app.post('/tasks', guard, async (_req, reply) => {
+    const id = await createTask('New task');
+    const groups = await listGroups();
+    return reply.type('text/html').send(
+      renderTaskItem(
+        { id, title: 'New task', urgency: 'this_week', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'inbox' },
+        groups,
+      ),
+    );
+  });
+
+  // Autosave a single field (HTMX sends just the changed one). Returns an OOB "saved".
+  app.post('/tasks/:id', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    for (const [field, raw] of Object.entries(body)) {
+      if (field === '_csrf') continue;
+      let value: string | number | null = typeof raw === 'string' ? raw : null;
+      if (value === '') value = null;
+      if ((field === 'estimate_min' || field === 'group_id') && value !== null) {
+        const n = Number(value);
+        value = Number.isFinite(n) ? n : null;
+      }
+      await updateTaskField(id.data.id, field, value);
+    }
+    return reply.type('text/html').send(renderSavedStatus(`task-${id.data.id}-status`));
+  });
+
+  // Status transitions — each empties the targeted item out of the current view.
+  const transitions: Array<[string, string]> = [
+    ['triage', 'triaged'],
+    ['done', 'done'],
+    ['drop', 'dropped'],
+  ];
+  for (const [path, status] of transitions) {
+    app.post(`/tasks/:id/${path}`, guard, async (req, reply) => {
+      const id = idParam.safeParse(req.params);
+      if (!id.success) return reply.code(400).send('');
+      await setTaskStatus(id.data.id, status);
+      return reply.type('text/html').send('');
+    });
+  }
+}

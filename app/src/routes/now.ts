@@ -12,6 +12,8 @@ import {
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem } from '../lib/notesView';
 import type { LastStop, OccurrenceCourseRow } from '../services/occurrence';
+import { beforeNextBell, URGENCY_LABELS, type BellTask } from '../services/task';
+import { getGroupSlots, listBellTasks } from '../repos/tasks';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -100,6 +102,21 @@ function renderCurrentCard(
   </div>`;
 }
 
+function renderBell(tasks: BellTask[]): string {
+  if (tasks.length === 0) return '';
+  const items = tasks
+    .map(
+      (t) =>
+        `<li id="bell-${t.id}" class="bell-task"><button type="button" class="link" title="Done" hx-post="/tasks/${t.id}/done" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button> <span>${esc(t.title)}</span> <span class="muted bell-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span></li>`,
+    )
+    .join('');
+  return `<div class="now-card now-bell">
+    <p class="kicker">Before the next bell</p>
+    <ul class="bell-list">${items}</ul>
+    <p><a href="/tasks">All tasks →</a></p>
+  </div>`;
+}
+
 async function resolveNowLessons(now: Date) {
   const ctx = await getClockContext();
   const state = resolveNow(now, ctx);
@@ -139,9 +156,16 @@ export function registerNowRoutes(app: FastifyInstance): void {
         card = `<div class="now-card"><h1>${esc(heading)}</h1><p class="muted">The next teaching slot is shown above.</p></div>`;
       }
 
+      const [bellAll, groupSlots] = await Promise.all([listBellTasks(), getGroupSlots()]);
+      const nextBell = state.nextTeaching
+        ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
+        : null;
+      const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
+
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderStrip(state, current, next, now, ctx.tz)}
         ${card}
+        ${renderBell(bell)}
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
     } catch {

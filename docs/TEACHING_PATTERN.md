@@ -60,7 +60,7 @@ Totals: 27 teaching/form periods + **3 free periods (Tue L4, Thu L1, Thu L4)** =
 | Tue/Fri 08:30–08:50 | Prep / free |
 | **Every break** 10:50–11:05 | **Computing Club** (open room) |
 | **Every lunch** 13:00–13:30 | **Computing Club** |
-| **Wednesdays** | **Enter taxi numbers** into the system (duty; time TBC) |
+| **Wed 15:30–16:00** | **Enter taxi numbers** into the system (duty) |
 | Tue after school 15:30–17:00 | TTRPG club |
 | Wed 17:00–20:00 (fortnightly) | Staff TTRPG |
 | Thu 15:45–16:45 (sometimes →17:45) | Staff meeting |
@@ -68,6 +68,11 @@ Totals: 27 teaching/form periods + **3 free periods (Tue L4, Thu L1, Thu L4)** =
 
 Break and lunch are **not** work windows (club running). Work windows = the 3 free periods +
 before/after school. Leave ~19:00 most days (Tue 17:30; Wed 20:00 on staff-TTRPG weeks).
+
+**After-school availability rule (for Phase 2 AvailabilityService):** no work happens *during* any
+after-school commitment (Tue/Fri club, Wed taxi 15:30–16:00, Wed staff-TTRPG, Thu staff meeting),
+**and a 10-minute buffer after each** (to walk back to U1 and tidy up) is also not work time. So the
+usable after-school window each day is what's left after `commitment end + 10 min`.
 
 ## Splits (more than one course in one slot)
 

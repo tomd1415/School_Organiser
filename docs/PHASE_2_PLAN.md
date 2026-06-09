@@ -45,9 +45,9 @@ everything; Phase 4 layers AI on top without changing the schema. See §10. This
 
 | # | Goal | Key files | Done when |
 | --- | --- | --- | --- |
-| **2.1** | **Schema** — all P2 tables + deferred FKs | `migrations/0003_phase2.sql` | `npm run migrate` clean; `npm run typecheck` green |
-| **2.2** | **Tasks** — capture, inbox & triage | `repos/tasks.ts`, `services/task.ts`, `routes/tasks.ts` | capture in seconds; inbox→triaged→scheduled→done; set urgency/estimate/load/context/links |
-| **2.3** | **`due_rule` + Now "before the next bell"** | `services/task.ts` (resolver), `routes/now.ts` | "by next lesson with X" resolves via the clock; urgent + by-next-lesson surface on Now |
+| **2.1 ✅** | **Schema** — all P2 tables + deferred FKs | `migrations/0003_phase2.sql` | done — 13 tables migrate clean; typecheck green |
+| **2.2 ✅** | **Tasks** — capture, inbox & triage | `repos/tasks.ts`, `services/task.ts`, `lib/taskView.ts`, `routes/tasks.ts` | done — inbox/open/done; inline autosave triage (urgency/estimate/load/group/context); ＋new; nav |
+| **2.3 ✅** | **`due_rule` + Now "before the next bell"** | `services/task.ts` (resolver), `routes/now.ts` | done — pure `resolveDueRule`/`beforeNextBell`; urgent + by-next-lesson + due-before-bell on Now |
 | **2.4** | **Email paste-box → draft task** | `services/emailIntake.ts`, `routes/tasks.ts` | paste an email → draft task, source kept (`email_intake`) |
 | **2.5** | **Events & deadlines** | `repos/events.ts`, `services/event.ts`, `routes/events.ts` | events/deadlines/exams + parental-contact log; lead-time reminders; "what's coming"; on Now |
 | **2.6** | **Availability + work blocks** (plan vs actual / diverted) | `services/availability.ts`, `services/workblock.ts`, `repos/workBlocks.ts`, `routes/time.ts` | real work windows computed; plan a block; one-tap **diverted** keeps the plan; planned-vs-actual log |
@@ -153,10 +153,11 @@ lunch (club + pupils in the room), and **not** the 07:30 coffee slot. (SPEC §5.
 **`computeWindows(date, ctx)` (pure):** start from the day's `period_definitions`; keep slots that
 are `purpose='free'` (from `timetabled_lessons`) or `slot_type ∈ (before_school, after_school)`;
 **drop** `Coffee`, `break`, `lunch`, any `purpose ∈ (teaching,form,club,open_room,duty,meeting)`,
-and subtract spans of `events` where `affects_availability` (e.g. a 15:45 staff meeting eats the
-after-school window). Returns the available spans with their minutes. **Test cases:** a normal day
-(3 frees + before/after), an after-school-meeting day (window shortened), a non-school day (none),
-coffee/break/lunch always excluded.
+and subtract each `events` span where `affects_availability` **plus a 10-minute tidy-up buffer
+after it** (the teacher walks back to U1) — e.g. Thu staff meeting 15:45–16:45 blocks 15:45–16:55,
+Wed taxi 15:30–16:00 blocks 15:30–16:10. Returns the available spans with their minutes.
+**Test cases:** a normal day (3 frees + before/after), an after-school-commitment day (window
+shortened by the commitment + 10 min), a non-school day (none), coffee/break/lunch always excluded.
 
 **Work blocks** attach a task to a window span. **The diverted path** (SPEC §5.6, UX §6) is the
 one-tap "I did something else": set `status='diverted'` + `actual_note`/`actual_task_id` while
@@ -266,12 +267,11 @@ Gathered up-front or at the relevant increment — none block starting 2.1/2.2:
 
 1. **`due_rule` set** — confirm: "by next lesson with group X", a hard date/time, "by end of day".
    Any others (e.g. "before the next time I see this group's *course*")?
-2. **After-school commitments as recurring events** (for availability + wind-down): Tue TTRPG
-   15:30–17:00; Wed staff-TTRPG 17:00–20:00 **fortnightly** (anchor date?); Thu staff meeting
-   15:45–16:45 (sometimes →17:45); Fri Computing Club 15:30–17:00. Which **eat** the after-school
-   work window?
-3. **Wednesday taxi-number duty** — fixed time now? (still TBC from Phase 1) — for availability +
-   the start/end-of-day checklist.
+2. **After-school commitments — ANSWERED:** **none** are workable, and a **10-min tidy-up buffer
+   after each** is also blocked (back to U1). Tue club 15:30–17:00; Wed taxi 15:30–16:00; Wed
+   staff-TTRPG 17:00–20:00 **fortnightly** (anchor date still needed); Thu staff meeting 15:45–16:45
+   (sometimes →17:45); Fri club 15:30–17:00. Seed as recurring `events` (`affects_availability=true`).
+3. **Wednesday taxi-number duty — ANSWERED:** 15:30–16:00.
 4. **Prep templates to seed** — global (e.g. "Assign resources to MS Teams"), per-course, per-lesson.
 5. **Start-of-day / end-of-day checklist items** — the morning set-up and the "before I leave" sweep.
 6. **Parental-contact log fields** — who · when · medium (call/email) · why · **owed vs. done**.

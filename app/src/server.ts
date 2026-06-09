@@ -13,6 +13,7 @@ import { registerNowRoutes } from './routes/now';
 import { registerTimetableRoutes } from './routes/timetable';
 import { registerLessonRoutes } from './routes/lesson';
 import { registerNoteRoutes } from './routes/notes';
+import { registerTaskRoutes } from './routes/tasks';
 
 /** Build the Fastify instance with all plugins and routes, without listening. */
 export async function buildApp(): Promise<FastifyInstance> {
@@ -51,6 +52,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerTimetableRoutes(app);
   registerLessonRoutes(app);
   registerNoteRoutes(app);
+  registerTaskRoutes(app);
 
   return app;
 }

@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Phase 2 started: schema, tasks & "before the next bell" (2.1–2.3)
+
+- **Migration `0003_phase2.sql`** — the full P2 schema: `tasks`, `events`, `work_blocks`,
+  `time_entries` (+ one-running-timer index), `email_intake`, `prep_templates`/`occurrence_prep`,
+  `pupils`, `enrolments`, `note_pupil_mentions`, `tags`, `schedule_exceptions`, and the deferred
+  Phase-1 FKs (notes → pupils/tasks/events, follow-ups → tasks). `schema_phase=2`.
+- **2.2 Tasks** — `/tasks` with **Inbox / Open / Done**; ＋ New task; inline HTMX-autosaved triage
+  (title, urgency, estimate, cognitive-load, group, context); triage / done / drop. Nav gains Tasks.
+  (`repos/tasks.ts`, `services/task.ts`, `lib/taskView.ts`, `routes/tasks.ts`)
+- **2.3 due_rule + Now** — pure `resolveDueRule` ("by next lesson with group X" → the group's next
+  lesson via the ClockService) + `beforeNextBell`; the Now screen gains a **"Before the next bell"**
+  list (urgent + by-next-lesson + due-before-the-bell) with one-tap done. (`routes/now.ts`)
+- **Tests:** +9 unit (`statusesFor`, `resolveDueRule`, `beforeNextBell`, taskView) + 5 integration
+  (task CRUD/buckets, group-slots, bell candidates, `/tasks` render). **56 unit + 17 integration pass.**
+
 ### 2026-06-09 — Phase 2 plan authored
 
 - **Authored [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md)** — the detailed build plan for Phase 2

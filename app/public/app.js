@@ -23,7 +23,7 @@
   // type immediately.
   document.body.addEventListener('htmx:afterSwap', function (e) {
     if (e.target && e.target.classList && e.target.classList.contains('notes-list')) {
-      var areas = e.target.querySelectorAll('textarea');
+      var areas = e.target.querySelectorAll('textarea, input[type="text"]');
       var last = areas[areas.length - 1];
       if (last) last.focus();
     }
