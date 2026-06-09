@@ -12,6 +12,7 @@
     "seed": "tsx src/seed/run.ts",
     "generate-recurring": "tsx src/jobs/generateRecurring.ts",
     "import-resources": "tsx src/jobs/importResources.ts",
+    "reconcile": "tsx src/jobs/reconcileOldPlans.ts",
     "hash-password": "tsx scripts/hash-password.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

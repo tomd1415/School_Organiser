@@ -117,10 +117,25 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('scheme-tree');
   });
 
-  it('Resources page renders', async () => {
+  it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Resources');
     expect(res.body).toContain('res-upload');
+    expect(res.body).toContain('res-search');
+    expect(res.body).toContain('id="res-list"');
+    expect(res.body).toMatch(/\d+ resources?/);
+  });
+
+  it('Resources search partial filters and paginates', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/resources/list?q=lesson&kind=document&page=1',
+      headers: { cookie: session },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('id="res-list"');
+    expect(res.body).toContain('res-pager');
+    expect(res.body).toMatch(/matching/); // the count line echoes the active filter
   });
 });

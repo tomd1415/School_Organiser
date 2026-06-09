@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-09 — Resource browser: search + filter + pagination
+
+- `/resources` now has a **live search box** (debounced), a **kind filter**, and **pagination**
+  (50/page) with a running result count — previously it showed only the 200 most-recent of 2,433,
+  leaving most of the store unreachable. New repo helpers `searchResources` / `countResources` /
+  `listKinds`; HTMX partial endpoint `GET /resources/list`. +2 integration tests.
+
+### 2026-06-09 — Resource ingestion: reconcile tool + first full curriculum import
+
+- **`npm run reconcile`** (`app/src/jobs/reconcileOldPlans.ts`) — classifies the teacher's old
+  `old_lesson_plan/` folder against the fresh Teach Computing downloads. The new download is a
+  **different curriculum version** (renamed units, en-dash file-renames), so match-based buckets
+  are unreliable; the robust signal is a **download-independent naming split** — **280 files are
+  the teacher's own work**, the rest TC curriculum. Writes manifests to `data/reconcile-report/`.
+- **`import-resources --filter <manifest>`** — import only the files listed in a manifest (e.g.
+  `own.tsv`); also now skips `.part`/`.crdownload` partial downloads and Mac `__MACOSX`/`._` junk.
+- **First full import:** own work (265 files, big backup zips excluded) + KS3 + all 16 GCSE units
+  + KS4 non-GCSE → **2,433 resources, 3.6 GB** in the store (dedup skipped 534 byte-identical).
+- Docs: [docs/RESOURCE_INGEST.md](docs/RESOURCE_INGEST.md) — KS4 download checklist + workflow.
+- `.gitignore`: `data/reconcile-report/` (regenerable, pupil-data-adjacent).
+
 ### 2026-06-09 — Phase 3 build: schemes, plans, resource store, bulk-import (3.1–3.6) + Office preview (3.5)
 
 - **Schema `0006`** + **schemes of work → units → lesson plans** editor with versioning, and **plan

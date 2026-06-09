@@ -32,6 +32,51 @@ export function renderResourceList(rows: ResourceRow[]): string {
   return `<ul class="res-list" id="resources-list">${items}</ul>`;
 }
 
+// Search box + kind filter. Submits q + kind via hx-get on every keystroke (debounced)
+// and on filter change, swapping just the #res-list partial.
+export function renderSearchBar(kinds: string[], q: string, kind: string): string {
+  const opts = ['<option value="">All types</option>']
+    .concat(
+      kinds.map(
+        (k) => `<option value="${esc(k)}"${k === kind ? ' selected' : ''}>${KIND_ICON[k] ?? '📄'} ${esc(k)}</option>`,
+      ),
+    )
+    .join('');
+  return `<form class="res-search" hx-get="/resources/list" hx-target="#res-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:300ms, change">
+    <input type="search" name="q" value="${esc(q)}" placeholder="Search resources by name…" autocomplete="off">
+    <select name="kind">${opts}</select>
+  </form>`;
+}
+
+export interface PagedResources {
+  rows: ResourceRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  q: string;
+  kind: string;
+}
+
+// The #res-list partial: a count line, the page of items, and prev/next. Swapped wholesale
+// by the search bar and the pager links (hx-swap="outerHTML").
+export function renderResourceListPaged(p: PagedResources): string {
+  const pages = Math.max(1, Math.ceil(p.total / p.pageSize));
+  const page = Math.min(Math.max(1, p.page), pages);
+  const items = p.rows.length
+    ? p.rows.map(renderResourceItem).join('')
+    : '<li class="muted">No matching resources.</li>';
+  const link = (pg: number, label: string, on: boolean): string =>
+    on
+      ? `<a class="link" hx-get="/resources/list?q=${encodeURIComponent(p.q)}&kind=${encodeURIComponent(p.kind)}&page=${pg}" hx-target="#res-list" hx-swap="outerHTML">${label}</a>`
+      : `<span class="muted">${label}</span>`;
+  const note = p.q || p.kind ? ` matching ${[p.q && `“${esc(p.q)}”`, p.kind && esc(p.kind)].filter(Boolean).join(' · ')}` : '';
+  return `<div id="res-list">
+    <p class="muted res-count">${p.total} resource${p.total === 1 ? '' : 's'}${note}</p>
+    <ul class="res-list" id="resources-list">${items}</ul>
+    <div class="res-pager">${link(page - 1, '‹ prev', page > 1)} <span class="muted">page ${page} / ${pages}</span> ${link(page + 1, 'next ›', page < pages)}</div>
+  </div>`;
+}
+
 export function renderUploadForm(): string {
   return `<form class="res-upload" hx-post="/resources" hx-encoding="multipart/form-data" hx-target="#resources-list" hx-swap="afterbegin" hx-on::after-request="this.reset()">
     <input type="file" name="file" required>

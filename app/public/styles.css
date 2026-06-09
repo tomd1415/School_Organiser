@@ -215,6 +215,11 @@ a.tt-lesson:hover { background: #eef3fc; }
 
 /* resources */
 .res-upload { display: flex; gap: 0.6rem; align-items: center; margin: 0.5rem 0 1rem; }
+.res-search { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+.res-search input[type="search"] { flex: 1; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; }
+.res-search select { padding: 0.4rem; border: 1px solid var(--line); border-radius: 4px; }
+.res-count { margin: 0.5rem 0 0.25rem; font-size: 0.82rem; }
+.res-pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; font-size: 0.85rem; }
 .res-list { list-style: none; padding: 0; margin: 0; }
 .res { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
 .res-kind { font-size: 1.1rem; }

@@ -79,6 +79,53 @@ export async function listResources(limit = 200): Promise<ResourceRow[]> {
   return rows;
 }
 
+export interface ResourceQuery {
+  q?: string;
+  kind?: string;
+}
+
+// Build the shared WHERE clause for search/count from an optional title query + kind filter.
+function searchWhere(query: ResourceQuery): { clause: string; params: unknown[] } {
+  const where = ['r.active'];
+  const params: unknown[] = [];
+  if (query.q) {
+    params.push(`%${query.q}%`);
+    where.push(`r.title ILIKE $${params.length}`);
+  }
+  if (query.kind) {
+    params.push(query.kind);
+    where.push(`r.kind = $${params.length}`);
+  }
+  return { clause: where.join(' AND '), params };
+}
+
+export async function searchResources(query: ResourceQuery, limit: number, offset: number): Promise<ResourceRow[]> {
+  const { clause, params } = searchWhere(query);
+  params.push(limit, offset);
+  const { rows } = await pool.query<ResourceRow>(
+    `SELECT ${RES_COLS} FROM resources r LEFT JOIN resource_versions v ON v.id = r.current_version_id
+     WHERE ${clause} ORDER BY r.title, r.id LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+  return rows;
+}
+
+export async function countResources(query: ResourceQuery): Promise<number> {
+  const { clause, params } = searchWhere(query);
+  const { rows } = await pool.query<{ n: number }>(
+    `SELECT count(*)::int AS n FROM resources r WHERE ${clause}`,
+    params,
+  );
+  return rows[0]?.n ?? 0;
+}
+
+export async function listKinds(): Promise<string[]> {
+  const { rows } = await pool.query<{ kind: string }>(
+    `SELECT DISTINCT kind FROM resources WHERE active ORDER BY kind`,
+  );
+  return rows.map((r) => r.kind);
+}
+
 export async function getCurrentVersion(resourceId: number): Promise<VersionRow | null> {
   const { rows } = await pool.query<VersionRow>(
     `SELECT v.id, v.version_no AS "versionNo", v.storage_path AS "storagePath", v.byte_size AS "byteSize",

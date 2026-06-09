@@ -28,3 +28,7 @@ Thumbs.db
 
 # Hosted resource store (large; bind-mounted into the app)
 data/resources/
+
+# Reconcile manifests — regenerable output from `npm run reconcile`; list paths from the
+# pupil-data-sensitive old_lesson_plan folder, so keep them local.
+data/reconcile-report/

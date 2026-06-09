@@ -4,37 +4,64 @@ import { requireAuth } from '../auth/guard';
 import { layout } from '../lib/html';
 import {
   addVersion,
+  countResources,
   createResource,
   findResourceByChecksum,
   getCurrentVersion,
   getResource,
-  listResources,
+  listKinds,
+  searchResources,
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
-import { renderResourceItem, renderResourceList, renderUploadForm } from '../lib/resourceView';
+import { renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { convertToPdf } from '../lib/officePreview';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
+const PAGE_SIZE = 50;
+
+function parseQuery(raw: unknown): { q: string; kind: string; page: number } {
+  const s = (raw ?? {}) as Record<string, string | undefined>;
+  const page = Math.max(1, Number.parseInt(s.page ?? '1', 10) || 1);
+  return { q: (s.q ?? '').trim().slice(0, 100), kind: (s.kind ?? '').trim().slice(0, 40), page };
+}
+
+async function loadPage(q: string, kind: string, page: number) {
+  const [total, rows] = await Promise.all([
+    countResources({ q, kind }),
+    searchResources({ q, kind }, PAGE_SIZE, (page - 1) * PAGE_SIZE),
+  ]);
+  return { rows, total, page, pageSize: PAGE_SIZE, q, kind };
+}
+
 export function registerResourceRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
 
-  app.get('/resources', { preHandler: requireAuth }, async (_req, reply) => {
+  app.get('/resources', { preHandler: requireAuth }, async (req, reply) => {
     const csrf = reply.generateCsrf();
+    const { q, kind, page } = parseQuery(req.query);
     let body: string;
     try {
-      const rows = await listResources();
+      const [kinds, paged] = await Promise.all([listKinds(), loadPage(q, kind, page)]);
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Resources</h1>
-        <p class="muted">The single source of truth — uploaded, versioned, downloadable. PDFs/images preview in the browser; Office files preview as PDF (Phase 3.5). Bulk-import with <code>npm run import-resources</code>.</p>
+        <p class="muted">The single source of truth — uploaded, versioned, downloadable. PDFs/images preview in the browser; Office files preview as PDF. Bulk-import with <code>npm run import-resources</code>.</p>
         ${renderUploadForm()}
-        ${renderResourceList(rows)}
+        ${renderSearchBar(kinds, q, kind)}
+        ${renderResourceListPaged(paged)}
       </section>`;
     } catch {
       body = `<section class="card"><h1>Resources</h1><p class="muted">Resources are unavailable — the database is not reachable.</p></section>`;
     }
     return reply.type('text/html').send(layout({ title: 'Resources', body, authed: true, csrfToken: csrf }));
+  });
+
+  // HTMX partial: the #res-list block, driven by the search box and the pager links.
+  app.get('/resources/list', { preHandler: requireAuth }, async (req, reply) => {
+    const { q, kind, page } = parseQuery(req.query);
+    const paged = await loadPage(q, kind, page);
+    return reply.type('text/html').send(renderResourceListPaged(paged));
   });
 
   app.post('/resources', guard, async (req, reply) => {

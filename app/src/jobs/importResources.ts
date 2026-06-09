@@ -39,6 +39,8 @@ async function importDir(dir: string, sourcePrefix: string, depth: number): Prom
   if (depth > 8) return;
   for (const e of await readdir(dir, { withFileTypes: true })) {
     if (SKIP.has(e.name) || e.name.startsWith('.')) continue;
+    const lname = e.name.toLowerCase();
+    if (lname.endsWith('.part') || lname.endsWith('.crdownload')) continue; // in-progress download
     const full = join(dir, e.name);
     const rel = sourcePrefix + e.name;
     if (e.isDirectory()) {
@@ -60,15 +62,42 @@ async function importDir(dir: string, sourcePrefix: string, depth: number): Prom
   }
 }
 
+// Import only the files listed in a manifest (the first tab-column of each line, a path
+// relative to `source`). Used to bring in just the teacher's own work — `own.tsv` from the
+// reconcile job — without re-importing the superseded Teach Computing copies beside it.
+async function importFromManifest(source: string, manifestPath: string): Promise<void> {
+  const lines = (await readFile(manifestPath, 'utf8')).split('\n');
+  const rels = lines.map((l) => l.split('\t')[0]?.trim()).filter((x): x is string => !!x);
+  console.log(`importing ${rels.length} listed file(s) from ${source} …`);
+  for (const rel of rels) {
+    const full = join(source, rel);
+    const st = await stat(full).catch(() => null);
+    if (!st || !st.isFile()) {
+      console.error(`  ! missing, skipped: ${rel}`);
+      stats.skipped++;
+      continue;
+    }
+    await importFile(full, rel); // listed files import as-is (no zip extraction)
+  }
+}
+
 async function main(): Promise<void> {
-  const source = process.argv[2] ?? `${process.env.HOME ?? ''}/Downloads/TeachComputing`;
+  // Args: <source> [--filter <manifest.tsv>]
+  const args = process.argv.slice(2);
+  const filterIdx = args.indexOf('--filter');
+  const manifest = filterIdx >= 0 ? args[filterIdx + 1] : undefined;
+  const source = (filterIdx === 0 ? undefined : args[0]) ?? `${process.env.HOME ?? ''}/Downloads/TeachComputing`;
   const s = await stat(source).catch(() => null);
   if (!s || !s.isDirectory()) {
     console.error(`source directory not found: ${source}`);
     process.exit(1);
   }
-  console.log(`importing resources from ${source} …`);
-  await importDir(source, '', 0);
+  if (manifest) {
+    await importFromManifest(source, manifest);
+  } else {
+    console.log(`importing resources from ${source} …`);
+    await importDir(source, '', 0);
+  }
   console.log(`done: ${stats.imported} imported, ${stats.skipped} duplicate(s) skipped, ${stats.zips} zip(s) extracted.`);
   await pool.end();
 }
