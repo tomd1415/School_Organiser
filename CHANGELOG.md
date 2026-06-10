@@ -7,6 +7,13 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-10 — Schemes: make the selected course unmistakable
+
+- The active **course tab now highlights** on `/schemes` — it never did, because `c.id === courseId`
+  compared a `BIGINT` (pg returns a string) to a coerced number. Normalised the comparison.
+- Added an explicit **"Course:"** label (showing the selected course's name) under the tabs, and the
+  author form now names the course it will create the scheme under — so it's clear where it lands.
+
 ### 2026-06-09 — 4.4: author a scheme of work with AI (verified live)
 
 - **"✨ Author scheme with AI"** in the Schemes empty state → a brief becomes a full scheme (units

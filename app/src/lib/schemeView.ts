@@ -56,12 +56,13 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): s
 
 // The empty state for a course with no scheme yet: author one with AI from a brief (4.4), or
 // create an empty one to build by hand. Re-used for the author error path (with a message).
-export function renderSchemeEmpty(courseId: number, error?: string): string {
+export function renderSchemeEmpty(courseId: number, error?: string, courseName?: string): string {
+  const forCourse = courseName ? ` for <strong>${esc(courseName)}</strong>` : '';
   return `<div id="scheme-tree">
     ${error ? `<p class="error">${esc(error)}</p>` : ''}
-    <p class="muted">No scheme of work yet for this course.</p>
+    <p class="muted">No scheme of work yet${forCourse}.</p>
     <form class="scheme-author" hx-post="/schemes/author?course=${courseId}" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="find button">
-      <label>Author a scheme with AI — describe the aims, topics and level
+      <label>Author a scheme of work${forCourse} with AI — describe the aims, topics and level
         <textarea name="brief" rows="4" required placeholder="e.g. A KS3 scheme on using computers effectively in school: logging in and file management, online safety, word processing, spreadsheets, presentations, and finding and evaluating information…"></textarea>
       </label>
       <button type="submit" class="btn-secondary">✨ Author scheme with AI</button>

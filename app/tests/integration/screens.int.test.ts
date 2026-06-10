@@ -124,6 +124,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Schemes of work');
     expect(res.body).toContain('scheme-tree');
+    expect(res.body).toContain('scheme-course'); // explicit selected-course label
+    expect(res.body).toContain('class="active"'); // the selected course tab highlights
   });
 
   it('Resources page renders with search bar + paged list', async () => {

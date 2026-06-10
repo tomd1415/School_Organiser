@@ -62,22 +62,25 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const courses = await listCourses();
-      const courseId = (q.success && q.data.course) || courses[0]?.id;
+      // courses.id is BIGINT → pg returns a string; normalise to number so comparisons work.
+      const courseId = (q.success && q.data.course) || (courses[0] ? Number(courses[0].id) : undefined);
       if (!courseId) {
         body = `<section class="card"><h1>Schemes of work</h1><p class="muted">No courses yet.</p></section>`;
       } else {
+        const current = courses.find((c) => Number(c.id) === courseId);
         const scheme = q.success && q.data.scheme ? await getScheme(q.data.scheme) : await getActiveScheme(courseId);
         const versions = await listSchemeVersions(courseId);
         const tab = (c: { id: number; name: string }) =>
-          `<a href="/schemes?course=${c.id}"${c.id === courseId ? ' class="active"' : ''}>${esc(c.name)}</a>`;
+          `<a href="/schemes?course=${c.id}"${Number(c.id) === courseId ? ' class="active"' : ''}>${esc(c.name)}</a>`;
         const verLinks = versions
           .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}"${scheme && v.id === scheme.id ? ' class="active"' : ''}>v${v.version}${v.active ? '' : ' (draft)'}</a>`)
           .join(' ');
-        const tree = scheme ? await treeHtml(scheme.id) : renderSchemeEmpty(courseId);
+        const tree = scheme ? await treeHtml(scheme.id) : renderSchemeEmpty(courseId, undefined, current?.name);
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
             <h1>Schemes of work</h1>
             <nav class="task-tabs">${courses.map(tab).join(' ')}</nav>
+            <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong></p>
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>` : ''}
             ${tree}
           </section>`;
@@ -125,10 +128,10 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
 
     const units = result.data?.units.filter((u) => u.title?.trim()) ?? [];
     if (result.status !== 'ok' || units.length === 0) {
-      return reply.type('text/html').send(renderSchemeEmpty(q.data.course, result.message ?? 'The AI could not author a scheme — try again or add detail to the brief.'));
+      return reply.type('text/html').send(renderSchemeEmpty(q.data.course, result.message ?? 'The AI could not author a scheme — try again or add detail to the brief.', course.name));
     }
     const schemeId = await materialiseScheme(q.data.course, `${course.name} — Scheme of Work`, units);
-    if (!schemeId) return reply.type('text/html').send(renderSchemeEmpty(q.data.course, 'Could not save the authored scheme.'));
+    if (!schemeId) return reply.type('text/html').send(renderSchemeEmpty(q.data.course, 'Could not save the authored scheme.', course.name));
     reply.header('HX-Redirect', `/schemes?course=${q.data.course}&scheme=${schemeId}`);
     return reply.send('');
   });
