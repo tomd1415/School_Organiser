@@ -228,6 +228,17 @@ a.tt-lesson:hover { background: #eef3fc; }
 .res-linked li { font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; }
 .oc-plan { font-size: 0.85rem; margin: 0.3rem 0; }
 .oc-plan strong { font-weight: 700; }
+/* 5.2: per-group adaptation of a master lesson */
+.adapt { margin: 0.4rem 0 0.2rem; padding: 0.5rem 0.7rem; background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; }
+.adapt-meta { font-size: 0.82rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.adapt-badge { font-weight: 700; }
+.adapt-badge.on { color: var(--accent); }
+.adapt-l { display: block; font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; }
+.adapt-l textarea { display: block; width: 100%; margin-top: 0.2rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; font-weight: 400; resize: vertical; }
+.adapt-log { margin-top: 0.4rem; font-size: 0.8rem; }
+.adapt-log summary { cursor: pointer; color: var(--accent); }
+.adapt-hist { list-style: none; padding: 0; margin: 0.3rem 0 0; }
+.adapt-hist li { padding: 0.15rem 0; border-top: 1px solid var(--line); }
 /* lesson screen: bound plan's resources (read-only) */
 .ld-res { margin: 0.4rem 0; font-size: 0.85rem; }
 .ld-res-label { font-weight: 700; }
@@ -252,6 +263,16 @@ a.tt-lesson:hover { background: #eef3fc; }
 .ov-course { font-size: 0.85rem; }
 .ov-staff { margin-left: auto; }
 
+/* now: two columns — current lesson on the left, what's next on the right; stacks on narrow */
+.now-cols { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem; align-items: start; }
+.now-col { min-width: 0; }
+@media (max-width: 760px) { .now-cols { grid-template-columns: 1fr; } }
+.now-next h2 { margin: 0.1rem 0 0.3rem; font-size: 1.15rem; }
+.next-courses { list-style: none; padding: 0; margin: 0.5rem 0 0.3rem; }
+.next-courses li { padding: 0.4rem 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
+.next-plan { font-size: 0.82rem; }
+.next-resume { font-size: 0.8rem; margin-top: 0.15rem; }
+.next-when2 { font-size: 0.75rem; }
 /* now: before the next bell */
 .now-bell { margin-top: 1rem; }
 .bell-list { list-style: none; padding: 0; margin: 0.5rem 0 0.75rem; }

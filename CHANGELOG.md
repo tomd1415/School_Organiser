@@ -7,6 +7,36 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-10 — Phase 5.1 + 5.2: per-group lesson adaptation, and the Now screen in two columns
+
+- **5.1 — Adaptation data layer** (migration `0010`): `lesson_adaptations` (a group's override of one
+  master lesson, keyed on `group_courses` + `lesson_plans`, `UNIQUE` per pair) and an append-only
+  `lesson_adaptation_history`. New repo `repos/adaptations.ts`: `getEffectiveLesson` (the **resolution
+  rule** — a group's override where present, else the master, per-field), `upsertAdaptation` (creates/
+  updates + logs, in a transaction; **never touches the master**), `listAdaptationHistory`,
+  `resetAdaptation` (deletes the override; history cascades).
+- **5.2 — Per-group adaptation on the lesson screen** — under each bound master lesson, an editable
+  "for this group" block (objectives/outline) that autosaves as the group's adaptation, a badge
+  (*following the master* ↔ *✏ adapted for this group*), **↩ reset to master**, and a lazy-loaded
+  **change log**. Routes `POST /lesson/adapt/:gc/:lp`, `…/reset`, `GET …/history`. The master scheme
+  stays canonical and is still edited in `/schemes`.
+- **Now screen → two columns** — **now on the left** (current lesson + quick note), **what's next on
+  the right** (a new *next-session* card: time + countdown, room, and per group its bound plan +
+  where to *resume*, plus before-the-bell / coming-up / heads-up). Stacks (now above next) below
+  760px. Files: `routes/now.ts`, `routes/lesson.ts`, `public/styles.css`.
+- Tests: +6 adaptation integration tests (resolution, per-field inherit, history append, master-never-
+  mutated, reset-cascades) and +2 screen tests (two-column Now render; lesson adapt round-trip end-to-
+  end). **112 unit / 69 integration.**
+
+### 2026-06-10 — Phase 5 plan authored (curriculum delivery)
+
+- **Authored [docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)** — the curriculum-delivery phase: convert a
+  downloaded unit → a SEND **master scheme**; deliver it to each group's weekly slot; **per-group
+  adaptations** (overrides + change log, master stays canonical); lay a unit into the **term calendar**
+  (holiday-aware); and a **feedback loop** (stopping point + notes → adapt the next lesson / improve the
+  master). Decided: master+overrides model, plan-first. Grounded in the existing
+  slot→course→scheme + `occurrence_courses` binding. Plan only — no code yet, pending approval.
+
 ### 2026-06-10 — Manage schemes: delete, move between courses, and label
 
 - **Delete a scheme** — "🗑 delete scheme" on `/schemes` (with confirm). `deleteScheme` handles the

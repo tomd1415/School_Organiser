@@ -12,6 +12,14 @@ import {
 } from '../repos/occurrence';
 import { getLessonPlan, listCoursePlans } from '../repos/schemes';
 import { listResourcesForPlan, type LinkedResource } from '../repos/resources';
+import {
+  getAdaptation,
+  getEffectiveLesson,
+  listAdaptationHistory,
+  resetAdaptation,
+  upsertAdaptation,
+  type EffectiveLesson,
+} from '../repos/adaptations';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
@@ -58,7 +66,37 @@ function renderPlanContent(ocId: number, title: string | null, objectives: strin
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
 
-function renderSection(s: CourseSection, plans: Array<{ id: number; title: string }>, resources: LinkedResource[]): string {
+// 5.2: the per-group adaptation block. The master stays in renderPlanContent above; here the teacher
+// edits THIS group's version (effective = override-else-master). The first edit creates the override.
+function adaptMeta(gc: number, lp: number, adapted: boolean, oob = false): string {
+  const badge = adapted
+    ? `<span class="adapt-badge on">✏ adapted for this group</span>` +
+      ` <button type="button" class="link danger" hx-post="/lesson/adapt/${gc}/${lp}/reset" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML"` +
+      ` hx-confirm="Reset this lesson to the master for this group? This group's changes and their log will be removed.">↩ reset to master</button>`
+    : `<span class="adapt-badge muted">following the master — edit below to adapt it for this group</span>`;
+  return `<div class="adapt-meta" id="adapt-${gc}-${lp}-meta"${oob ? ' hx-swap-oob="true"' : ''}>${badge} <span class="note-status" id="adapt-${gc}-${lp}-status"></span></div>`;
+}
+
+function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson): string {
+  return `<div class="adapt" id="adapt-${gc}-${lp}">
+      ${adaptMeta(gc, lp, eff.adapted)}
+      <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
+        <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
+        <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
+      </form>
+      <details class="adapt-log" id="adapt-${gc}-${lp}-log">
+        <summary>change log</summary>
+        <div hx-get="/lesson/adapt/${gc}/${lp}/history" hx-trigger="toggle from:#adapt-${gc}-${lp}-log once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+      </details>
+    </div>`;
+}
+
+function renderSection(
+  s: CourseSection,
+  plans: Array<{ id: number; title: string }>,
+  resources: LinkedResource[],
+  eff: EffectiveLesson | undefined,
+): string {
   const colour = s.colour ?? '#94a3b8';
   const oc = s.occurrenceCourseId;
   const planOpts =
@@ -76,6 +114,7 @@ function renderSection(s: CourseSection, plans: Array<{ id: number; title: strin
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
       ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
+      ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
       <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}</div>
       ${last}
       <label class="stop-label">Stopping point
@@ -92,6 +131,7 @@ function renderDetail(
   prep: PrepItem[],
   plansByCourse: Map<number, Array<{ id: number; title: string }>>,
   resByPlan: Map<number, LinkedResource[]>,
+  effByKey: Map<string, EffectiveLesson>,
   csrf: string,
 ): string {
   const h = detail.header;
@@ -104,7 +144,16 @@ function renderDetail(
 
   const sections =
     detail.sections.length > 0
-      ? detail.sections.map((s) => renderSection(s, plansByCourse.get(s.courseId) ?? [], (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [])).join('')
+      ? detail.sections
+          .map((s) =>
+            renderSection(
+              s,
+              plansByCourse.get(s.courseId) ?? [],
+              (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [],
+              s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
+            ),
+          )
+          .join('')
       : `<p class="muted">${h.purpose === 'free' ? 'Free period — protected work time.' : 'No courses attached to this slot.'}</p>`;
 
   const listId = `notes-list-${h.occurrenceId}`;
@@ -172,9 +221,25 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const resByPlan = new Map<number, LinkedResource[]>();
       planIds.forEach((pid, i) => resByPlan.set(pid, resLists[i] ?? []));
 
+      // 5.2: each group's effective lesson (its adaptation where present, else the master).
+      const effByKey = new Map<string, EffectiveLesson>();
+      await Promise.all(
+        detail.sections
+          .filter((s) => s.lessonPlanId != null)
+          .map(async (s) => {
+            const eff = await getEffectiveLesson(s.groupCourseId, s.lessonPlanId as number, {
+              objectives: s.planObjectives,
+              outline: s.planOutline,
+            });
+            effByKey.set(`${s.groupCourseId}:${s.lessonPlanId}`, eff);
+          }),
+      );
+
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
-      return reply.type('text/html').send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, csrf), authed: true, csrfToken: csrf }));
+      return reply
+        .type('text/html')
+        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
@@ -193,5 +258,59 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply
       .type('text/html')
       .send(renderPlanContent(params.data.id, plan?.title ?? null, plan?.objectives ?? null, plan?.outline ?? null, true) + renderSavedStatus(`oc-${params.data.id}-plan-status`));
+  });
+
+  // 5.2: per-group lesson adaptations (keyed on group_course + master lesson). The master is untouched.
+  const AdaptParams = z.object({ gc: z.coerce.number().int().positive(), lp: z.coerce.number().int().positive() });
+
+  // Autosave this group's adaptation of a master lesson; first save creates the override + logs it.
+  app.post('/lesson/adapt/:gc/:lp', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    const b = z.object({ objectives: z.string().max(8000).optional(), outline: z.string().max(8000).optional() }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await upsertAdaptation({
+      groupCourseId: p.data.gc,
+      lessonPlanId: p.data.lp,
+      objectives: (b.data.objectives ?? '').trim() || null,
+      outline: (b.data.outline ?? '').trim() || null,
+      adaptationNote: null,
+      changeSummary: 'teacher edit',
+    });
+    // Flip the badge to "adapted" (OOB) and confirm the save — without re-rendering the textareas.
+    return reply.type('text/html').send(adaptMeta(p.data.gc, p.data.lp, true, true) + renderSavedStatus(`adapt-${p.data.gc}-${p.data.lp}-status`));
+  });
+
+  // Reset this group's lesson back to the master (delete the override + its log).
+  app.post('/lesson/adapt/:gc/:lp/reset', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    await resetAdaptation(p.data.gc, p.data.lp);
+    const master = await getLessonPlan(p.data.lp);
+    const eff: EffectiveLesson = {
+      adapted: false,
+      objectives: master?.objectives ?? null,
+      outline: master?.outline ?? null,
+      adaptationNote: null,
+      adaptationId: null,
+    };
+    return reply.type('text/html').send(renderAdaptation(p.data.gc, p.data.lp, eff));
+  });
+
+  // This group's change log for a lesson (lazy-loaded when the log is opened).
+  app.get('/lesson/adapt/:gc/:lp/history', { preHandler: requireAuth }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const a = await getAdaptation(p.data.gc, p.data.lp);
+    if (!a) return reply.type('text/html').send('<span class="muted">no changes yet — following the master</span>');
+    const hist = await listAdaptationHistory(a.id);
+    return reply
+      .type('text/html')
+      .send(
+        hist.length
+          ? `<ul class="adapt-hist">${hist
+              .map((h) => `<li><span class="muted">${esc(h.createdAt)}</span> · ${esc(h.author)} · ${esc(h.changeSummary ?? '')}</li>`)
+              .join('')}</ul>`
+          : '<span class="muted">no changes yet</span>',
+      );
   });
 }

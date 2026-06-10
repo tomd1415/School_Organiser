@@ -4,12 +4,14 @@ import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { addPlan, addUnit } from '../../src/repos/schemes';
 import { createTask } from '../../src/repos/tasks';
+import { findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from '../../src/repos/occurrence';
 
 // End-to-end render of the authenticated screens against the dev DB. Logs in with
 // the password "test" (its hash is set in vitest.integration.config.ts).
 let app: FastifyInstance;
 let session = '';
 const LESSON_DATE = '2099-03-03';
+const ADAPT_DATE = '2099-03-04';
 
 function firstCookie(setCookie: string | string[] | undefined): string {
   const v = Array.isArray(setCookie) ? setCookie[0] : setCookie;
@@ -34,7 +36,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app.close();
-  await pool.query(`DELETE FROM lesson_occurrences WHERE date = $1`, [LESSON_DATE]);
+  await pool.query(`DELETE FROM lesson_occurrences WHERE date = ANY($1)`, [[LESSON_DATE, ADAPT_DATE]]);
   await pool.end();
 });
 
@@ -79,6 +81,66 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('Stopping point');
     expect(res.body).toContain('data-new-note');
     expect(res.body).toContain('ld-res'); // bound plan's resources surface here (3.8)
+  });
+
+  it('Now page renders two columns with the next-session card (5.2 layout)', async () => {
+    const res = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('now-cols'); // two-column wrapper
+    expect(res.body).toContain('now-col-now'); // current lesson, left
+    expect(res.body).toContain('now-col-next'); // what's next, right
+    expect(res.body).toContain('now-next'); // the next-session card itself
+  });
+
+  it('Lesson detail shows the per-group adaptation block, and adapt round-trips (5.2)', async () => {
+    const lr = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`);
+    const lessonId = lr.rows[0]!.id;
+    const occId = await findOrCreateOccurrence(lessonId, ADAPT_DATE);
+    const ocs = await getOccurrenceCourses(occId);
+    expect(ocs.length).toBeGreaterThan(0);
+    const oc = ocs[0]!;
+    const gc = Number(oc.groupCourseId);
+    // a throwaway master lesson under that course, bound to this occurrence
+    const s = await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST adapt screen', 98, false) RETURNING id`, [oc.courseId]);
+    const schemeId = Number(s.rows[0]!.id);
+    const u = await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'U', 1) RETURNING id`, [schemeId]);
+    const unitId = Number(u.rows[0]!.id);
+    const p = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline) VALUES ($1, $2, 'Screen master', 1, 'MASTER obj', 'MASTER out') RETURNING id`,
+      [unitId, oc.courseId],
+    );
+    const planId = Number(p.rows[0]!.id);
+    try {
+      await setOccurrenceCoursePlan(oc.occurrenceCourseId, planId);
+      // 1) renders the adaptation block, initially following the master
+      const page = await app.inject({ method: 'GET', url: `/lesson?lesson=${lessonId}&date=${ADAPT_DATE}`, headers: { cookie: session } });
+      expect(page.statusCode).toBe(200);
+      expect(page.body).toContain(`id="adapt-${gc}-${planId}"`);
+      expect(page.body).toContain('following the master');
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+      // 2) adapt for this group
+      const save = await app.inject({
+        method: 'POST',
+        url: `/lesson/adapt/${gc}/${planId}`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: 'objectives=GROUP+only&outline=',
+      });
+      expect(save.statusCode).toBe(200);
+      expect(save.body).toContain('adapted for this group');
+      // 3) reload shows the saved adaptation + the change log records it
+      const page2 = await app.inject({ method: 'GET', url: `/lesson?lesson=${lessonId}&date=${ADAPT_DATE}`, headers: { cookie: session } });
+      expect(page2.body).toContain('GROUP only');
+      expect(page2.body).toContain('adapted for this group');
+      const hist = await app.inject({ method: 'GET', url: `/lesson/adapt/${gc}/${planId}/history`, headers: { cookie: session } });
+      expect(hist.body).toContain('teacher edit');
+    } finally {
+      await pool.query(`DELETE FROM lesson_adaptations WHERE group_course_id = $1 AND lesson_plan_id = $2`, [gc, planId]);
+      await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE lesson_plan_id = $1`, [planId]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [planId]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
+    }
   });
 
   it('Tasks page renders with a new-task button', async () => {

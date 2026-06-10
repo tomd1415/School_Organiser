@@ -110,6 +110,45 @@ function renderCurrentCard(
   </div>`;
 }
 
+function fmtMin(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+// The "next session" column: what's coming, when, and where each group will pick up — so I can
+// glance right and know what to set up next without opening the lesson.
+function renderNextCard(
+  next: NowLesson,
+  state: NowState,
+  courses: OccurrenceCourseRow[],
+  lastStops: LastStop[],
+  slot: { date: string; label: string; startMin: number },
+): string {
+  const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
+  const courseBlocks = courses
+    .map((c) => {
+      const ls = lastByGc.get(c.groupCourseId);
+      const plan = c.planTitle ? `<span class="next-plan">📋 ${esc(c.planTitle)}</span>` : '<span class="muted">no plan bound</span>';
+      const resume = ls ? `<div class="muted next-resume">resume → ${esc(ls.stoppingPoint)} <span class="next-when2">(${esc(ls.date)})</span></div>` : '';
+      return `<li><strong>${esc(c.courseName)}</strong> ${plan}${resume}</li>`;
+    })
+    .join('');
+  const sameDay = slot.date === state.isoDate;
+  const when = sameDay
+    ? `${fmtMin(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
+    : esc(slot.date);
+  const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
+  const openHref = `/lesson?lesson=${next.lessonId}&date=${esc(slot.date)}`;
+  return `<div class="now-card now-next">
+    <p class="kicker">Next · ${esc(slot.label)}</p>
+    <h2>${esc(next.groupName ?? purposeLabel(next.purpose))}</h2>
+    <p class="ld-meta">${when}${room}</p>
+    ${courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
+    <p><a href="${openHref}">Open next lesson →</a></p>
+  </div>`;
+}
+
 function renderBell(tasks: BellTask[]): string {
   if (tasks.length === 0) return '';
   const items = tasks
@@ -225,15 +264,37 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
 
+      // The "next session" card for the right column.
+      let nextCard: string;
+      if (state.nextTeaching && next && (next.purpose === 'teaching' || next.purpose === 'free' || next.purpose === 'form')) {
+        const nextOccId = await findOrCreateOccurrence(next.lessonId, state.nextTeaching.date);
+        const [nextCourses, nextLastStops] = await Promise.all([
+          getOccurrenceCourses(nextOccId),
+          getLastStoppingPoints(next.lessonId, state.nextTeaching.date),
+        ]);
+        nextCard = renderNextCard(next, state, nextCourses, nextLastStops, state.nextTeaching);
+      } else if (state.nextTeaching && next) {
+        nextCard = `<div class="now-card now-next"><p class="kicker">Next · ${esc(state.nextTeaching.label)}</p><h2>${esc(lessonName(next))}</h2><p class="muted">${esc(state.nextTeaching.date)}</p></div>`;
+      } else {
+        nextCard = `<div class="now-card now-next"><p class="kicker">Next</p><p class="muted">${state.isSchoolDay ? 'No more teaching today.' : 'No school today.'}</p></div>`;
+      }
+
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz)}
-        <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
-        ${card}
-        ${renderBell(bell)}
-        ${renderComingUp(events, state.isoDate)}
-        ${renderHeadsUp(heads)}
-        ${renderDayCard(dayPart, dayItems)}
+        <div class="now-cols">
+          <div class="now-col now-col-now">
+            <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
+            ${card}
+          </div>
+          <div class="now-col now-col-next">
+            ${nextCard}
+            ${renderBell(bell)}
+            ${renderComingUp(events, state.isoDate)}
+            ${renderHeadsUp(heads)}
+            ${renderDayCard(dayPart, dayItems)}
+          </div>
+        </div>
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
     } catch {
