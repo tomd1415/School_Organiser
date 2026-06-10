@@ -1,5 +1,5 @@
 // Versioned prompt for authoring a scheme of work from a teacher's brief.
-export const AUTHOR_SCHEME_VERSION = 'author_scheme@1';
+export const AUTHOR_SCHEME_VERSION = 'author_scheme@2'; // @2: per-course teaching-context prepended
 
 export const AUTHOR_SCHEME_SYSTEM =
   'You are an experienced UK secondary-school Computing teacher and curriculum designer. ' +

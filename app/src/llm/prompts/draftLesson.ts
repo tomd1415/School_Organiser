@@ -1,6 +1,6 @@
 // Versioned prompt for the draft-next-lesson feature. The version is recorded on every
 // ai_calls row so a prompt change is traceable.
-export const DRAFT_LESSON_VERSION = 'draft_lesson@1';
+export const DRAFT_LESSON_VERSION = 'draft_lesson@2'; // @2: per-course teaching-context prepended
 
 export const DRAFT_LESSON_SYSTEM =
   'You are an experienced UK secondary-school Computing teacher planning a single lesson. ' +

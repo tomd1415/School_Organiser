@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
-import { layout } from '../lib/html';
+import { esc, layout } from '../lib/html';
 import {
   addVersion,
   countResources,
@@ -14,8 +14,12 @@ import {
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
-import { renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
+import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { convertToPdf } from '../lib/officePreview';
+import { modelFor } from '../repos/settings';
+import { callLLMStructured } from '../llm/client';
+import { generateResourceSchema } from '../llm/schemas/generateResource';
+import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -48,6 +52,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         <h1>Resources</h1>
         <p class="muted">The single source of truth — uploaded, versioned, downloadable. PDFs/images preview in the browser; Office files preview as PDF. Bulk-import with <code>npm run import-resources</code>.</p>
         ${renderUploadForm()}
+        ${renderGenerateForm()}
         ${renderSearchBar(kinds, q, kind)}
         ${renderResourceListPaged(paged)}
       </section>`;
@@ -78,6 +83,37 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const r = await getResource(id);
     const warn = dup ? `<li class="muted">⚠ a copy already existed (resource #${dup}).</li>` : '';
     return reply.type('text/html').send((r ? renderResourceItem(r) : '') + warn);
+  });
+
+  // Generate a new resource with AI (4.7) → store as an editable Markdown resource + v1.
+  app.post('/resources/generate', guard, async (req, reply) => {
+    const b = z.object({ brief: z.string().trim().min(1).max(2000) }).safeParse(req.body);
+    if (!b.success) return reply.type('text/html').send('<li class="muted">Describe what to generate.</li>');
+    const result = await callLLMStructured(
+      {
+        feature: 'generate_resource',
+        model: await modelFor('plan'),
+        promptVersion: GENERATE_RESOURCE_VERSION,
+        system: GENERATE_RESOURCE_SYSTEM,
+        context: [{ text: b.data.brief }],
+        instruction: 'Generate the resource now.',
+        maxTokens: 8000,
+      },
+      generateResourceSchema,
+    );
+    if (result.status !== 'ok' || !result.data || !result.data.content.trim()) {
+      return reply.type('text/html').send(`<li class="muted">${esc(result.message ?? 'The AI could not generate that.')}</li>`);
+    }
+    const d = result.data;
+    const base = safeFilename((d.filename || d.title || 'resource').replace(/\.(md|markdown|txt)$/i, ''));
+    const filename = `${base || 'resource'}.md`;
+    const buf = Buffer.from(d.content, 'utf8');
+    const id = await createResource(filename, 'document', 'text/markdown', 'ai');
+    const rel = relPathFor(id, 1, filename);
+    await storeBuffer(rel, buf);
+    await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
+    const r = await getResource(id);
+    return reply.type('text/html').send(r ? renderResourceItem(r) : '');
   });
 
   app.post('/resources/:id/version', guard, async (req, reply) => {

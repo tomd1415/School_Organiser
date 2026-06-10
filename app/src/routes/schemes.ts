@@ -10,6 +10,7 @@ import {
   deletePlan,
   deleteUnit,
   getActiveScheme,
+  getCourseTeachingContext,
   getPlanContext,
   getPlanRow,
   getScheme,
@@ -22,6 +23,7 @@ import {
   moveUnit,
   schemeIdForPlan,
   schemeIdForUnit,
+  setCourseTeachingContext,
   updatePlanField,
   updateUnitField,
 } from '../repos/schemes';
@@ -32,11 +34,14 @@ import {
   unlinkResourceFromPlan,
 } from '../repos/resources';
 import { buildSchemeTree } from '../services/scheme';
-import { renderPlan, renderSchemeEmpty, renderSchemeTree } from '../lib/schemeView';
+import { renderPlan, renderSchemeEmpty, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
+import { teachingContextItems } from '../llm/prompts/teachingContext';
 import { modelFor } from '../repos/settings';
-import { callLLMStructured } from '../llm/client';
+import { listGeneralNotes } from '../repos/notes';
+import { callLLM, callLLMStructured } from '../llm/client';
+import { TERM_SUMMARY_INSTRUCTION, TERM_SUMMARY_SYSTEM, TERM_SUMMARY_VERSION } from '../llm/prompts/termSummary';
 import { draftLessonSchema } from '../llm/schemas/draftLesson';
 import { DRAFT_LESSON_SYSTEM, DRAFT_LESSON_VERSION, draftLessonInstruction } from '../llm/prompts/draftLesson';
 import { authorSchemeSchema } from '../llm/schemas/authorScheme';
@@ -75,12 +80,19 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const verLinks = versions
           .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}"${scheme && v.id === scheme.id ? ' class="active"' : ''}>v${v.version}${v.active ? '' : ' (draft)'}</a>`)
           .join(' ');
-        const tree = scheme ? await treeHtml(scheme.id) : renderSchemeEmpty(courseId, undefined, current?.name);
+        const [tree, teachingCtx] = await Promise.all([
+          scheme ? treeHtml(scheme.id) : Promise.resolve(renderSchemeEmpty(courseId, undefined, current?.name)),
+          getCourseTeachingContext(courseId),
+        ]);
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
             <h1>Schemes of work</h1>
             <nav class="task-tabs">${courses.map(tab).join(' ')}</nav>
-            <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong></p>
+            <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong>
+              <button type="button" class="link" hx-post="/schemes/course/${courseId}/summary" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>
+            </p>
+            <div id="course-${courseId}-summary"></div>
+            ${renderTeachingContext(courseId, teachingCtx)}
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>` : ''}
             ${tree}
           </section>`;
@@ -119,7 +131,10 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelFor('design'), // Opus — heavy curriculum design
         promptVersion: AUTHOR_SCHEME_VERSION,
         system: AUTHOR_SCHEME_SYSTEM,
-        context: [{ text: authorSchemeInstruction(course.name, b.data.brief) }],
+        context: [
+          ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
+          { text: authorSchemeInstruction(course.name, b.data.brief) },
+        ],
         instruction: 'Design the scheme now.',
         maxTokens: 8000,
       },
@@ -134,6 +149,38 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     if (!schemeId) return reply.type('text/html').send(renderSchemeEmpty(q.data.course, 'Could not save the authored scheme.', course.name));
     reply.header('HX-Redirect', `/schemes?course=${q.data.course}&scheme=${schemeId}`);
     return reply.send('');
+  });
+
+  // Summarise a course's notes with AI (4.5).
+  app.post('/schemes/course/:id/summary', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const notes = await listGeneralNotes({ courseId: id.data.id });
+    if (notes.length === 0) {
+      return reply.type('text/html').send('<p class="muted">No notes for this course yet to summarise.</p>');
+    }
+    const result = await callLLM({
+      feature: 'term_summary',
+      model: await modelFor('plan'),
+      promptVersion: TERM_SUMMARY_VERSION,
+      system: TERM_SUMMARY_SYSTEM,
+      context: notes.map((n) => ({ text: n.body })),
+      instruction: TERM_SUMMARY_INSTRUCTION,
+      maxTokens: 1500,
+    });
+    if (result.status !== 'ok' || !result.text) {
+      return reply.type('text/html').send(`<p class="muted">${esc(result.message ?? 'AI unavailable.')}</p>`);
+    }
+    return reply.type('text/html').send(`<div class="term-summary">${esc(result.text)}</div>`);
+  });
+
+  // Autosave the per-course teaching context (4.4.1).
+  app.post('/schemes/course/:id/context', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ teaching_context: z.string().max(8000) }).safeParse(req.body);
+    if (!id.success || !b.success) return reply.code(400).send('');
+    await setCourseTeachingContext(id.data.id, b.data.teaching_context);
+    return reply.type('text/html').send(renderSavedStatus(`course-${id.data.id}-ctx-status`));
   });
 
   // ── structural changes → re-render the whole tree ──
@@ -223,7 +270,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelFor('plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
-        context: [{ text: draftLessonInstruction(ctx) }],
+        context: [...teachingContextItems(ctx.teachingContext), { text: draftLessonInstruction(ctx) }],
         instruction: 'Draft the lesson now.',
         maxTokens: 4000,
       },

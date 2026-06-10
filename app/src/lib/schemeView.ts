@@ -71,3 +71,14 @@ export function renderSchemeEmpty(courseId: number, error?: string, courseName?:
     <p class="muted">…or <button type="button" class="link" hx-post="/schemes/create?course=${courseId}">create an empty one</button> to build by hand.</p>
   </div>`;
 }
+
+// Per-course teaching-context editor (4.4.1): autosaving textarea. The cohort/pedagogy guidance
+// here is auto-prepended to every AI request for this course. Cohort-level prose only — no pupil names.
+export function renderTeachingContext(courseId: number, text: string | null): string {
+  return `<details class="teaching-ctx">
+    <summary>Teaching context — auto-added to every AI request for this course ✨</summary>
+    <p class="muted">Cohort and pedagogy guidance the AI always follows for this course. Edit it per course (e.g. tweak for VI pupils or a GCSE class). <strong>Cohort-level only — never name an individual pupil.</strong></p>
+    <textarea name="teaching_context" rows="6" hx-post="/schemes/course/${courseId}/context" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(text ?? '')}</textarea>
+    <span class="note-status" id="course-${courseId}-ctx-status"></span>
+  </details>`;
+}

@@ -9,12 +9,17 @@ import { beforeNextBell, type BellTask } from '../services/task';
 import {
   createSubtask,
   getGroupSlots,
+  getTaskRow,
   listFocusCandidates,
   listSubtasks,
   setTaskStatus,
   toggleSubtaskDone,
   type SubStep,
 } from '../repos/tasks';
+import { modelFor } from '../repos/settings';
+import { callLLMStructured } from '../llm/client';
+import { taskBreakdownSchema } from '../llm/schemas/taskBreakdown';
+import { TASK_BREAKDOWN_SYSTEM, TASK_BREAKDOWN_VERSION, taskBreakdownInstruction } from '../llm/prompts/taskBreakdown';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -84,6 +89,7 @@ async function buildInner(now: Date, modeOverride: FocusMode | null): Promise<st
       <form class="fu-form" hx-post="/focus/${picked.id}/breakdown" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-on::after-request="this.reset()">
         <input type="text" name="text" data-followup placeholder="+ break into a step" autocomplete="off">
       </form>
+      <button type="button" class="link fu-ai" hx-post="/focus/${picked.id}/breakdown-ai" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-disabled-elt="this">✨ Break down with AI</button>
       <div class="focus-actions">
         <button type="button" class="btn-secondary" hx-post="/timer/start" hx-vals='{"task":${picked.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ start</button>
         <button type="button" class="btn-secondary" hx-post="/focus/${picked.id}/done" hx-target="#focus-inner" hx-swap="innerHTML">✓ done &amp; next</button>
@@ -121,6 +127,35 @@ export function registerFocusRoutes(app: FastifyInstance): void {
     const body = z.object({ text: z.string().trim().max(500) }).safeParse(req.body);
     if (!id.success || !body.success || body.data.text === '') return reply.type('text/html').send('');
     return reply.type('text/html').send(renderSubStep(await createSubtask(id.data.id, body.data.text)));
+  });
+
+  // AI task breakdown (4.6): generate sub-steps for the focused task and append them.
+  app.post('/focus/:id/breakdown-ai', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const task = await getTaskRow(id.data.id);
+    if (!task) return reply.code(404).send('');
+    const result = await callLLMStructured(
+      {
+        feature: 'task_breakdown',
+        model: await modelFor('cheap'),
+        promptVersion: TASK_BREAKDOWN_VERSION,
+        system: TASK_BREAKDOWN_SYSTEM,
+        context: [{ text: taskBreakdownInstruction(task.title, task.context) }],
+        instruction: 'Break it down now.',
+        maxTokens: 1000,
+      },
+      taskBreakdownSchema,
+    );
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(`<li class="muted">${esc(result.message ?? 'AI unavailable.')}</li>`);
+    }
+    const made: string[] = [];
+    for (const step of result.data.steps.slice(0, 8)) {
+      const t = step.trim().slice(0, 200);
+      if (t) made.push(renderSubStep(await createSubtask(id.data.id, t)));
+    }
+    return reply.type('text/html').send(made.join(''));
   });
 
   app.post('/focus/substep/:id/toggle', guard, async (req, reply) => {

@@ -7,6 +7,25 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-10 — Phase 4 batch: DPIA, teaching-context, term-summary, task-breakdown, resource-generation
+
+- **`docs/DPIA.md`** — data-protection impact assessment (real pupil names are now stored for
+  redaction). Mirrors the `exam_questions` DPIA; `[CONFIRM]` markers for the school/DPO to complete.
+- **Teaching-context auto-inject (4.4.1)** — schema `0008` adds `courses.teaching_context`, seeded
+  with a school-wide SEND default (editable per course). `teachingContextItems()` prepends it to
+  every draft/scheme request via `context[]` — so it inherits redaction + safeguarding-withholding +
+  the audit. Editor on `/schemes`; prompt versions bumped to `@2`. **Live-verified:** a draft came
+  back with the predictable SEND routine + visual supports baked in.
+- **4.5 term-summary** — "✨ summarise this course's notes" on `/schemes` (text via `callLLM`).
+- **4.6 task-breakdown** — "✨ Break down with AI" in Focus → AI sub-steps (Haiku, ~0.1p). Live.
+- **4.7 AI resource-generation** — "✨ Generate a resource with AI" on Resources → a Markdown
+  resource saved as a versioned `.md` (Sonnet, ~0.8p). **Live-verified** a SEND binary-addition
+  worksheet with answer spaces. (DOCX/PPTX rendering remains a later spike.)
+- +tests for each (schemas + full-route degrade paths) → **112 unit / 60 integration**. All live
+  verification was throwaway (self-cleaned); a few pence total.
+- Still open in Phase 4: 4.6 captured-categorise / estimate-calibration / current-interest (need data
+  or steering), scheme **redesign**, and optional 4.8 semantic search.
+
 ### 2026-06-10 — Schemes: make the selected course unmistakable
 
 - The active **course tab now highlights** on `/schemes` — it never did, because `c.id === courseId`

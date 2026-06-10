@@ -287,3 +287,18 @@ a.tt-lesson:hover { background: #eef3fc; }
 /* schemes: make the selected course unmistakable */
 .scheme-course { margin: 0.25rem 0 0.5rem; font-size: 0.9rem; }
 .scheme-course strong { color: var(--accent); }
+
+/* per-course teaching context (Phase 4.4.1) */
+.teaching-ctx { margin: 0.5rem 0; }
+.teaching-ctx summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.teaching-ctx textarea { width: 100%; margin: 0.4rem 0; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; font: inherit; }
+
+/* AI resource generation (Phase 4.7) */
+.res-generate { margin: 0.25rem 0 0.75rem; }
+.res-generate summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.res-generate textarea { width: 100%; margin: 0.4rem 0; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; font: inherit; }
+.res-generate-hint { margin-left: 0.6rem; font-size: 0.8rem; }
+.fu-ai { margin: 0.2rem 0 0.4rem; display: inline-block; }
+
+/* AI term summary (Phase 4.5) */
+.term-summary { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.75rem 0.9rem; margin: 0.5rem 0; font-size: 0.92rem; }

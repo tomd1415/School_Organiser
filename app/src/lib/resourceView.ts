@@ -84,6 +84,18 @@ export function renderUploadForm(): string {
   </form>`;
 }
 
+// Generate a new resource with AI (4.7) — saved as an editable Markdown resource (a new version).
+export function renderGenerateForm(): string {
+  return `<details class="res-generate">
+    <summary>✨ Generate a resource with AI</summary>
+    <form hx-post="/resources/generate" hx-target="#resources-list" hx-swap="afterbegin" hx-disabled-elt="find button" hx-on::after-request="this.reset()">
+      <textarea name="brief" rows="3" required placeholder="Describe it — e.g. 'A one-page Year 7 worksheet on binary addition: 6 questions building up, lots of answer space, minimal text, for autistic pupils.'"></textarea>
+      <button type="submit" class="btn-secondary">Generate (Markdown)</button>
+      <span class="muted res-generate-hint">saved as an editable .md resource</span>
+    </form>
+  </details>`;
+}
+
 // The editable resource block inside a lesson plan: linked resources (each detachable) plus
 // a live search to attach more. Swapped wholesale on attach/detach (hx-swap="outerHTML").
 export function renderPlanResourcesBlock(planId: number, linked: LinkedResource[]): string {

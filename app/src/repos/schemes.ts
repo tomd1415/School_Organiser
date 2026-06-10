@@ -12,6 +12,19 @@ export async function listCourses(): Promise<CourseOpt[]> {
   return rows;
 }
 
+// Per-course cohort/pedagogy guidance the AI layer auto-prepends to every request (4.4.1).
+export async function getCourseTeachingContext(courseId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ teaching_context: string | null }>(
+    `SELECT teaching_context FROM courses WHERE id = $1`,
+    [courseId],
+  );
+  return rows[0]?.teaching_context ?? null;
+}
+
+export async function setCourseTeachingContext(courseId: number, text: string): Promise<void> {
+  await pool.query(`UPDATE courses SET teaching_context = $2 WHERE id = $1`, [courseId, text]);
+}
+
 const SCHEME_COLS = `s.id, s.course_id AS "courseId", c.name AS "courseName", s.title, s.version, s.active`;
 
 export async function getScheme(id: number): Promise<SchemeHeader | null> {
@@ -223,12 +236,15 @@ export interface PlanContext {
   unitTitle: string;
   planTitle: string;
   siblingTitles: string[];
+  teachingContext: string | null;
 }
 
-// Context for the AI draft-lesson feature: where this plan sits in the scheme + its siblings.
+// Context for the AI draft-lesson feature: where this plan sits in the scheme + its siblings,
+// plus the course's teaching-context (cohort/pedagogy guidance auto-applied to AI output).
 export async function getPlanContext(id: number): Promise<PlanContext | null> {
-  const { rows } = await pool.query<{ courseName: string; unitTitle: string; planTitle: string }>(
-    `SELECT c.name AS "courseName", u.title AS "unitTitle", lp.title AS "planTitle"
+  const { rows } = await pool.query<{ courseName: string; unitTitle: string; planTitle: string; teachingContext: string | null }>(
+    `SELECT c.name AS "courseName", u.title AS "unitTitle", lp.title AS "planTitle",
+            c.teaching_context AS "teachingContext"
      FROM lesson_plans lp
      JOIN units u ON u.id = lp.unit_id
      JOIN schemes_of_work s ON s.id = u.scheme_id

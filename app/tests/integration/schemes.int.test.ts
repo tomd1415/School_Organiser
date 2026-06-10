@@ -4,6 +4,8 @@ import {
   addPlan,
   addUnit,
   cloneSchemeNewVersion,
+  getCourseTeachingContext,
+  setCourseTeachingContext,
   listPlansForScheme,
   listSchemeVersions,
   listUnits,
@@ -31,6 +33,14 @@ describe('schemes (integration — needs the dev DB up)', () => {
     await pool.query(`DELETE FROM units WHERE scheme_id = ANY($1)`, [schemes]);
     await pool.query(`DELETE FROM schemes_of_work WHERE id = ANY($1)`, [schemes]);
     await pool.end();
+  });
+
+  it('course teaching-context round-trips and is seeded by default (4.4.1)', async () => {
+    const seeded = await getCourseTeachingContext(courseId);
+    expect(seeded && seeded.length > 0).toBe(true); // migration 0008 seeded a SEND default
+    await setCourseTeachingContext(courseId, 'TEST ctx — autistic majority, low arousal');
+    expect(await getCourseTeachingContext(courseId)).toBe('TEST ctx — autistic majority, low arousal');
+    await setCourseTeachingContext(courseId, seeded ?? ''); // restore
   });
 
   it('adds units + plans and autosaves a field', async () => {

@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { addPlan, addUnit } from '../../src/repos/schemes';
+import { createTask } from '../../src/repos/tasks';
 
 // End-to-end render of the authenticated screens against the dev DB. Logs in with
 // the password "test" (its hash is set in vitest.integration.config.ts).
@@ -126,6 +127,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('scheme-tree');
     expect(res.body).toContain('scheme-course'); // explicit selected-course label
     expect(res.body).toContain('class="active"'); // the selected course tab highlights
+    expect(res.body).toContain('teaching-ctx'); // per-course teaching-context editor (4.4.1)
   });
 
   it('Resources page renders with search bar + paged list', async () => {
@@ -148,6 +150,48 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('id="res-list"');
     expect(res.body).toContain('res-pager');
     expect(res.body).toMatch(/matching/); // the count line echoes the active filter
+  });
+
+  it('AI term-summary route responds without crashing (4.5, full route + CSRF)', async () => {
+    const c = await pool.query<{ id: number }>(`SELECT id FROM courses WHERE active ORDER BY id LIMIT 1`);
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const res = await app.inject({
+      method: 'POST',
+      url: `/schemes/course/${c.rows[0]!.id}/summary`,
+      headers: { cookie, 'x-csrf-token': token },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatch(/No notes for this course|No API key configured|term-summary/);
+  });
+
+  it('AI resource-generation degrades cleanly with no API key (4.7, full route + CSRF)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const res = await app.inject({
+      method: 'POST',
+      url: '/resources/generate',
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `brief=${encodeURIComponent('a short worksheet on binary addition')}`,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('No API key configured');
+  });
+
+  it('AI task-breakdown degrades cleanly with no API key (4.6, full route + CSRF)', async () => {
+    const taskId = await createTask('TEST breakdown task');
+    try {
+      const page = await app.inject({ method: 'GET', url: '/focus', headers: { cookie: session } });
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+      const res = await app.inject({ method: 'POST', url: `/focus/${taskId}/breakdown-ai`, headers: { cookie, 'x-csrf-token': token } });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain('No API key configured');
+    } finally {
+      await pool.query(`DELETE FROM tasks WHERE id = $1`, [taskId]);
+    }
   });
 
   it('Author-scheme degrades cleanly with no API key (full route + CSRF)', async () => {

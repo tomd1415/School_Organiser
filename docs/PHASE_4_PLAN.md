@@ -37,14 +37,14 @@ content is withheld from AI".
 | **4.1** | **LLM wrapper + `ai_calls` audit + settings** — redaction, withholding, tool-use structured output, graceful degradation | the safety core; everything depends on it | M |
 | **4.2** | **Context builder + redaction/withholding tests** — assemble AI inputs (SoW, notes, tasks) with names tokenised and flagged items stripped | the boundary, exercised end-to-end | S |
 
-> **Status (2026-06-09): 4.1 – 4.4 built ✅.** Boundary: the `llm/` wrapper, `ai_calls` audit
-> (schema 0007), the names-only roster (`/pupils`), redaction/withholding **egress tests** (forced
-> zero spend). **4.3 draft-next-lesson** ("✨ Draft with AI" per plan) and **4.4 author-a-scheme**
-> ("✨ Author scheme with AI" — a brief → units + lesson titles, materialised atomically) are both
-> live, structured output via `messages.parse`/`zodOutputFormat` (zod v4). **Verified live:** a draft
-> costs ~0.7p, a whole scheme ~1.1p; audits store only the redacted request. Remaining: 4.5–4.8
-> (term summary; the "manual now, AI later" hooks; resource editing; optional semantic search) +
-> scheme **redesign** (new version) as a 4.4 follow-up.
+> **Status (2026-06-10): 4.1–4.5, 4.7 + teaching-context built ✅; 4.6 partial.** Boundary: the
+> `llm/` wrapper, `ai_calls` audit, names-only roster, redaction/withholding egress tests.
+> **Live, all verified:** 4.3 draft-lesson (~0.7p), 4.4 author-scheme (~1.1p), **4.4.1 per-course
+> teaching-context** auto-injected into every request (SEND default, editable), **4.5 term-summary**,
+> **4.6 task-breakdown** (~0.1p), **4.7 AI resource-generation** → versioned Markdown (~0.8p). A
+> **DPIA** is drafted (`docs/DPIA.md`). Remaining: **4.6** captured-categorise / estimate-calibration
+> / current-interest (need data or steering); scheme **redesign**; 4.7 DOCX/PPTX rendering; optional
+> **4.8** semantic search.
 | **4.3** | **Draft next lesson** → a draft `lesson_plan` from SoW position + recent notes | first concrete win; needs 3.2/3.3 | M |
 | **4.4** | **Author / redesign a scheme** → new scheme **version** (clone) from aims + Teach Computing context | the KS3 *"Effective use of computers in school"* win | M |
 | **4.5** | **Summarise this term** for a group/course from accumulated notes | read-only; cheap | S |
