@@ -8,22 +8,26 @@ import {
   cloneSchemeNewVersion,
   createScheme,
   deletePlan,
+  deleteScheme,
   deleteUnit,
   getActiveScheme,
   getCourseTeachingContext,
   getPlanContext,
   getPlanRow,
   getScheme,
+  listAllSchemes,
   listCourses,
   listPlansForScheme,
   listSchemeVersions,
   listUnits,
   materialiseScheme,
   movePlan,
+  moveSchemeToCourse,
   moveUnit,
   schemeIdForPlan,
   schemeIdForUnit,
   setCourseTeachingContext,
+  setSchemeLabels,
   updatePlanField,
   updateUnitField,
 } from '../repos/schemes';
@@ -34,7 +38,7 @@ import {
   unlinkResourceFromPlan,
 } from '../repos/resources';
 import { buildSchemeTree } from '../services/scheme';
-import { renderPlan, renderSchemeEmpty, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
+import { renderAllSchemes, renderPlan, renderSchemeControls, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
@@ -80,9 +84,10 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const verLinks = versions
           .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}"${scheme && v.id === scheme.id ? ' class="active"' : ''}>v${v.version}${v.active ? '' : ' (draft)'}</a>`)
           .join(' ');
-        const [tree, teachingCtx] = await Promise.all([
+        const [tree, teachingCtx, allSchemes] = await Promise.all([
           scheme ? treeHtml(scheme.id) : Promise.resolve(renderSchemeEmpty(courseId, undefined, current?.name)),
           getCourseTeachingContext(courseId),
+          listAllSchemes(),
         ]);
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
@@ -93,8 +98,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             </p>
             <div id="course-${courseId}-summary"></div>
             ${renderTeachingContext(courseId, teachingCtx)}
-            ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>` : ''}
+            ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
             ${tree}
+            ${renderAllSchemes(allSchemes, scheme?.id)}
           </section>`;
       }
     } catch {
@@ -181,6 +187,36 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     if (!id.success || !b.success) return reply.code(400).send('');
     await setCourseTeachingContext(id.data.id, b.data.teaching_context);
     return reply.type('text/html').send(renderSavedStatus(`course-${id.data.id}-ctx-status`));
+  });
+
+  // ── scheme management: label, move, delete ──
+  app.post('/schemes/:id/labels', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ labels: z.string().max(500) }).safeParse(req.body);
+    if (!id.success || !b.success) return reply.code(400).send('');
+    await setSchemeLabels(id.data.id, b.data.labels);
+    const s = await getScheme(id.data.id);
+    return reply.type('text/html').send(renderSchemeLabels(id.data.id, s?.labels ?? null));
+  });
+
+  app.post('/schemes/:id/move-course', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ course: z.coerce.number().int().positive() }).safeParse(req.body);
+    if (!id.success || !b.success) return reply.code(400).send('');
+    if (await moveSchemeToCourse(id.data.id, b.data.course)) {
+      reply.header('HX-Redirect', `/schemes?course=${b.data.course}&scheme=${id.data.id}`);
+      return reply.send('');
+    }
+    return reply.type('text/html').send('');
+  });
+
+  app.post('/schemes/:id/delete', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const s = await getScheme(id.data.id); // capture the course before deleting
+    await deleteScheme(id.data.id);
+    reply.header('HX-Redirect', s ? `/schemes?course=${s.courseId}` : '/schemes');
+    return reply.send('');
   });
 
   // ── structural changes → re-render the whole tree ──

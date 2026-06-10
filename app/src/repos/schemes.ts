@@ -25,7 +25,88 @@ export async function setCourseTeachingContext(courseId: number, text: string): 
   await pool.query(`UPDATE courses SET teaching_context = $2 WHERE id = $1`, [courseId, text]);
 }
 
-const SCHEME_COLS = `s.id, s.course_id AS "courseId", c.name AS "courseName", s.title, s.version, s.active`;
+export interface SchemeListRow {
+  id: number;
+  courseId: number;
+  courseName: string;
+  title: string;
+  version: number;
+  active: boolean;
+  labels: string | null;
+  units: number;
+  plans: number;
+}
+
+// Every scheme across all courses, with counts — for the "all schemes" overview / management.
+export async function listAllSchemes(): Promise<SchemeListRow[]> {
+  const { rows } = await pool.query<SchemeListRow>(
+    `SELECT s.id, s.course_id AS "courseId", c.name AS "courseName", s.title, s.version, s.active, s.labels,
+            (SELECT count(*)::int FROM units u WHERE u.scheme_id = s.id) AS units,
+            (SELECT count(*)::int FROM lesson_plans lp JOIN units u ON u.id = lp.unit_id WHERE u.scheme_id = s.id) AS plans
+     FROM schemes_of_work s JOIN courses c ON c.id = s.course_id
+     ORDER BY c.name, s.version`,
+  );
+  return rows;
+}
+
+export async function setSchemeLabels(id: number, labels: string): Promise<void> {
+  const clean = labels.split(',').map((l) => l.trim()).filter(Boolean).join(', ');
+  await pool.query(`UPDATE schemes_of_work SET labels = $2 WHERE id = $1`, [id, clean || null]);
+}
+
+// Delete a scheme and everything under it, handling the FKs: occurrence_courses.lesson_plan_id is
+// NO ACTION (null it first); lesson_plans.unit_id is SET NULL on a unit delete (so delete the plans
+// explicitly to avoid orphans); units cascade from the scheme; resource_links cascade from plans.
+export async function deleteScheme(id: number): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `UPDATE occurrence_courses SET lesson_plan_id = NULL
+       WHERE lesson_plan_id IN (SELECT lp.id FROM lesson_plans lp JOIN units u ON u.id = lp.unit_id WHERE u.scheme_id = $1)`,
+      [id],
+    );
+    await client.query(`DELETE FROM lesson_plans WHERE unit_id IN (SELECT id FROM units WHERE scheme_id = $1)`, [id]);
+    await client.query(`DELETE FROM schemes_of_work WHERE id = $1`, [id]); // units cascade
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+// Move a scheme to another course: repoint the scheme + its plans' course_id, and rename the title
+// only if it still uses the old course's default pattern (so custom titles are preserved).
+export async function moveSchemeToCourse(id: number, courseId: number): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const s = await client.query<{ title: string; oldCourse: string }>(
+      `SELECT s.title, c.name AS "oldCourse" FROM schemes_of_work s JOIN courses c ON c.id = s.course_id WHERE s.id = $1`,
+      [id],
+    );
+    const target = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
+    if (!s.rows[0] || !target.rows[0]) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+    const wasDefault = s.rows[0].title === `${s.rows[0].oldCourse} — Scheme of Work`;
+    const newTitle = wasDefault ? `${target.rows[0].name} — Scheme of Work` : s.rows[0].title;
+    await client.query(`UPDATE schemes_of_work SET course_id = $2, title = $3 WHERE id = $1`, [id, courseId, newTitle]);
+    await client.query(`UPDATE lesson_plans SET course_id = $2 WHERE unit_id IN (SELECT id FROM units WHERE scheme_id = $1)`, [id, courseId]);
+    await client.query('COMMIT');
+    return true;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+const SCHEME_COLS = `s.id, s.course_id AS "courseId", c.name AS "courseName", s.title, s.version, s.active, s.labels`;
 
 export async function getScheme(id: number): Promise<SchemeHeader | null> {
   const { rows } = await pool.query<SchemeHeader>(

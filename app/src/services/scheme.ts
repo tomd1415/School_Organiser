@@ -28,6 +28,7 @@ export interface SchemeHeader {
   title: string;
   version: number;
   active: boolean;
+  labels: string | null;
 }
 
 const byOrder = <T extends { displayOrder: number; id: number }>(a: T, b: T) => a.displayOrder - b.displayOrder || a.id - b.id;

@@ -4,8 +4,13 @@ import {
   addPlan,
   addUnit,
   cloneSchemeNewVersion,
+  deleteScheme,
   getCourseTeachingContext,
+  getScheme,
+  listAllSchemes,
+  moveSchemeToCourse,
   setCourseTeachingContext,
+  setSchemeLabels,
   listPlansForScheme,
   listSchemeVersions,
   listUnits,
@@ -62,6 +67,39 @@ describe('schemes (integration — needs the dev DB up)', () => {
     await movePlan(second.id, 'up');
     const after = (await listPlansForScheme(schemeId)).sort((a, b) => a.displayOrder - b.displayOrder);
     expect(after[0]!.id).toBe(second.id);
+  });
+
+  it('scheme labels / move / delete with clean FK handling', async () => {
+    const cs = await pool.query<{ id: number }>(`SELECT id FROM courses WHERE active ORDER BY id LIMIT 2`);
+    const c1 = cs.rows[0]!.id;
+    const c2 = cs.rows[1]!.id;
+    const schemeId = await materialiseScheme(c1, 'TEST mgmt scheme', [{ title: 'U1', lessons: ['MGMT-L1', 'MGMT-L2'] }]);
+    expect(schemeId).not.toBeNull();
+    try {
+      // labels — trimmed and de-duplicated of blanks
+      await setSchemeLabels(schemeId!, ' Year 7 , Computer skills ,, ');
+      expect((await getScheme(schemeId!))?.labels).toBe('Year 7, Computer skills');
+      // move — scheme + all its plans repoint to the new course
+      expect(await moveSchemeToCourse(schemeId!, c2)).toBe(true);
+      expect(Number((await getScheme(schemeId!))?.courseId)).toBe(Number(c2));
+      const wrong = await pool.query<{ n: number }>(
+        `SELECT count(*)::int n FROM lesson_plans lp JOIN units u ON u.id=lp.unit_id WHERE u.scheme_id=$1 AND lp.course_id<>$2`,
+        [schemeId, c2],
+      );
+      expect(wrong.rows[0]!.n).toBe(0);
+      expect((await listAllSchemes()).some((s) => Number(s.id) === Number(schemeId))).toBe(true);
+      // delete — gone, no orphaned plans left behind
+      await deleteScheme(schemeId!);
+      expect(await getScheme(schemeId!)).toBeNull();
+      const orphans = await pool.query<{ n: number }>(
+        `SELECT count(*)::int n FROM lesson_plans WHERE unit_id IS NULL AND title IN ('MGMT-L1','MGMT-L2')`,
+      );
+      expect(orphans.rows[0]!.n).toBe(0);
+    } finally {
+      // Belt-and-braces: clean up even if an assertion above failed mid-test.
+      await pool.query(`DELETE FROM lesson_plans WHERE unit_id IN (SELECT id FROM units WHERE scheme_id=$1)`, [schemeId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id=$1`, [schemeId]);
+    }
   });
 
   it('materialiseScheme creates a scheme with units + lessons atomically (4.4)', async () => {

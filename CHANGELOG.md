@@ -7,6 +7,19 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-10 — Manage schemes: delete, move between courses, and label
+
+- **Delete a scheme** — "🗑 delete scheme" on `/schemes` (with confirm). `deleteScheme` handles the
+  awkward FKs in one transaction: nulls `occurrence_courses` bindings, deletes the lesson plans
+  explicitly (so the `unit_id` SET-NULL FK can't leave orphans), then the scheme (units cascade).
+- **Move a scheme to another course** — a "Move to →" course dropdown; repoints the scheme + all its
+  plans' `course_id` and renames the title only if it still used the old default pattern (migration
+  schema `0009`-adjacent; no more raw-SQL moves).
+- **Label schemes** — free-text labels (e.g. "Year 7", "Computer skills"), shown as chips and edited
+  inline; stored in `schemes_of_work.labels` (schema `0009`).
+- **"All schemes" overview** — a collapsible list of every scheme across courses (course, labels,
+  unit/lesson counts, open link) so they're findable. +1 integration test; **112 unit / 61 integration**.
+
 ### 2026-06-10 — Phase 4 batch: DPIA, teaching-context, term-summary, task-breakdown, resource-generation
 
 - **`docs/DPIA.md`** — data-protection impact assessment (real pupil names are now stored for

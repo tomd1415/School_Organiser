@@ -1,5 +1,6 @@
 import { esc } from './html';
 import type { PlanRow, SchemeHeader, UnitWithPlans } from '../services/scheme';
+import type { SchemeListRow } from '../repos/schemes';
 
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
   return `<span class="row-actions">
@@ -70,6 +71,54 @@ export function renderSchemeEmpty(courseId: number, error?: string, courseName?:
     </form>
     <p class="muted">…or <button type="button" class="link" hx-post="/schemes/create?course=${courseId}">create an empty one</button> to build by hand.</p>
   </div>`;
+}
+
+function chips(labels: string | null): string {
+  const ls = (labels ?? '').split(',').map((l) => l.trim()).filter(Boolean);
+  return ls.length ? ls.map((l) => `<span class="label-chip">${esc(l)}</span>`).join(' ') : '<span class="muted">none</span>';
+}
+
+// The labels sub-block (re-rendered on save).
+export function renderSchemeLabels(schemeId: number, labels: string | null): string {
+  return `<span class="scheme-labels" id="scheme-${schemeId}-labels">
+    <span class="muted">Labels:</span> ${chips(labels)}
+    <input class="label-input" name="labels" value="${esc(labels ?? '')}" placeholder="e.g. Year 7, Computer skills"
+      hx-post="/schemes/${schemeId}/labels" hx-trigger="change, blur" hx-target="#scheme-${schemeId}-labels" hx-swap="outerHTML">
+  </span>`;
+}
+
+// Move / delete / label controls for the currently-viewed scheme.
+export function renderSchemeControls(scheme: SchemeHeader, courses: Array<{ id: number; name: string }>): string {
+  const opts = courses
+    .filter((c) => Number(c.id) !== Number(scheme.courseId))
+    .map((c) => `<option value="${c.id}">${esc(c.name)}</option>`)
+    .join('');
+  return `<div class="scheme-controls">
+    ${renderSchemeLabels(scheme.id, scheme.labels)}
+    <span class="scheme-admin">
+      <label class="inline muted">Move to
+        <select name="course" hx-post="/schemes/${scheme.id}/move-course" hx-trigger="change"><option value="">— course —</option>${opts}</select>
+      </label>
+      <button type="button" class="link danger" hx-post="/schemes/${scheme.id}/delete" hx-confirm="Delete this whole scheme of work (its units and lessons)? This cannot be undone.">🗑 delete scheme</button>
+    </span>
+  </div>`;
+}
+
+// A collapsible overview of every scheme across all courses — for finding and organising them.
+export function renderAllSchemes(schemes: SchemeListRow[], currentId?: number): string {
+  if (schemes.length === 0) return '';
+  const items = schemes
+    .map(
+      (s) => `<li${Number(s.id) === currentId ? ' class="current"' : ''}>
+        <a href="/schemes?course=${s.courseId}&scheme=${s.id}">${esc(s.title)}</a>
+        <span class="muted">· ${esc(s.courseName)} · ${s.units}u / ${s.plans}L</span> ${chips(s.labels)}
+      </li>`,
+    )
+    .join('');
+  return `<details class="all-schemes">
+    <summary>All schemes (${schemes.length})</summary>
+    <ul class="all-schemes-list">${items}</ul>
+  </details>`;
 }
 
 // Per-course teaching-context editor (4.4.1): autosaving textarea. The cohort/pedagogy guidance

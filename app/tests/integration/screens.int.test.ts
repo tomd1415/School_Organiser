@@ -128,6 +128,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('scheme-course'); // explicit selected-course label
     expect(res.body).toContain('class="active"'); // the selected course tab highlights
     expect(res.body).toContain('teaching-ctx'); // per-course teaching-context editor (4.4.1)
+    expect(res.body).toContain('all-schemes'); // the all-schemes overview (find/move/delete)
   });
 
   it('Resources page renders with search bar + paged list', async () => {
