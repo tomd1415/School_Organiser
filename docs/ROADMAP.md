@@ -5,9 +5,10 @@ tool earns its keep early and we learn before building more. Priorities referenc
 stories in [SPECIFICATION.md](SPECIFICATION.md).
 
 > **Status (2026-06-11):** Phases **0–3 ✅ complete** (pupils 2.11 deferred to the pupil-facing
-> project), **Phase 4 ✅** except parts of 4.6 and the optional 4.8, and **Phase 5 — curriculum
-> delivery** (inserted 2026-06-10; it displaced the old "polish" phase, renumbered to Phase 6)
-> **built through 5.8** plus parts of 5.9 — live status in [PHASE_5_PLAN.md](PHASE_5_PLAN.md).
+> project), **Phase 4 ✅** except parts of 4.6 and the optional 4.8, **Phase 5 — curriculum
+> delivery built through 5.8** plus parts of 5.9 ([PHASE_5_PLAN.md](PHASE_5_PLAN.md)), and
+> **Phase 6 — setup, September & new instances planned** ([PHASE_6_PLAN.md](PHASE_6_PLAN.md)).
+> The original "polish" phase is now **Phase 7**.
 
 ## Sequencing principle
 
@@ -124,18 +125,30 @@ log; the record feeds back into next week's lesson and the master.
 **Done when:** a whole unit can be filled and assigned for a class in one request, and each
 class's delivery record visibly improves the next lesson. *(Reached for the headline flow.)*
 
-## Phase 6 — Polish & the "forgotten" extras *(was Phase 5 before curriculum delivery landed)*
+## Phase 6 — Setup, September & new instances *(planned 2026-06-11 — see [PHASE_6_PLAN.md](PHASE_6_PLAN.md))*
+
+**Goal:** the app becomes self-sufficient across time and teachers — no more seed scripts.
+
+- **In-app setup editors**: terms, day shapes, rooms, staff, courses, groups & pupils, and a
+  **timetable grid editor** (lesson times and details finally editable in the app).
+- **The September rollover wizard**: a completely new timetable every year, with **class-group
+  knowledge following the group** across its annual rename (predecessor chain; teaching contexts
+  carried; history browsable; adaptations stay with their year — masters already absorbed them).
+- **Onboarding wizard** for a brand-new instance (password → year → day shape → courses → groups →
+  timetable), so **each teacher runs their own instance** (`new-instance.sh`, no data shared).
+- Settings page (password change, AI cap/models), **calendar exceptions** (cover / room change /
+  off-timetable), group-history and year-archive views, year export, MIS CSV import (stretch).
+
+## Phase 7 — Polish & the "forgotten" extras *(was Phase 5, then 6 — renumbered as real phases landed)*
 
 **Goal:** quality-of-life and the parked ideas worth keeping.
 
 - Global search across everything; saved filters; keyboard shortcuts everywhere.
-- Calendar exceptions UI (cover, room changes, off-timetable days).
-- **Academic-year rollover** UI: archive the year, carry content over, re-enter the timetable.
 - **Deeper MS Teams integration** (beyond the per-class link / checklist) if worth it.
 - Email intake v2 (IMAP poll) if volume justifies it.
 - A TA read/feedback login if wanted (needs the second-account work).
-- Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue,
-  start/end-of-day checklist) — picked by what actually hurts in daily use.
+- Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue) —
+  picked by what actually hurts in daily use.
 
 ## What MVP deliberately excludes
 
@@ -155,4 +168,5 @@ These are relative sizes, not promises (one developer, evenings):
 | 3 SoW + Hosted resources | M | Single source of truth on the Now screen |
 | 4 AI | M | Planning leverage from the record |
 | 5 Curriculum delivery | L | The app runs the curriculum (master → class → calendar → feedback) |
-| 6 Polish + extras | ongoing | Long-tail quality of life |
+| 6 Setup + September + instances | L | Self-sufficient across years and teachers |
+| 7 Polish + extras | ongoing | Long-tail quality of life |

@@ -7,6 +7,20 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-11 — Phase 6 planned: setup editors, the September problem, onboarding, instances
+
+- New [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) (plan-first, for review): **in-app setup
+  editors** (terms, day shape, rooms/staff, courses, groups & pupils, timetable grid — lesson
+  times/details finally editable without SQL); the **September rollover wizard** — a completely
+  new timetable each year with **class-group knowledge following the group** across its rename
+  via a `predecessor_group_id` chain (teaching contexts copied forward, history browsable,
+  adaptations deliberately staying with their year since masters already absorbed them); an
+  **onboarding wizard** for first boot of an empty instance (password moves to `settings` with
+  env override); **one instance per teacher** (`new-instance.sh`, no cross-instance traffic);
+  plus settings page, calendar exceptions, group-history/year-archive views, year export, MIS
+  CSV import (stretch). ROADMAP updated (old polish phase → Phase 7); README indexes the plan.
+  Docs only — no code in this change.
+
 ### 2026-06-11 — Fitted to the classroom monitor (portrait 1080×1920 + landscape 1920×1080)
 
 The app's real home is a 1920×1080 monitor **on its side** in Edge on a school Windows PC, with
