@@ -12,6 +12,12 @@
 - **Author of this draft:** the project owner (teacher). **Date of draft:** 2026-06-10.
 - **Phase at time of draft:** Phase 4 (AI assistance). A **names-only pupil roster** and free-text
   notes are in use; the AI sub-processor (Anthropic) is live behind the redaction control (§5).
+- **Reviewed 2026-06-11 (Phase 5, curriculum delivery):** new AI flows since the draft — per-class
+  **lesson notes + stopping points** (the feedback loop), per-course **and per-class teaching
+  contexts** (cohort-level prose; the UI instructs "never an individual pupil"), and the
+  **equipment inventory** (no personal data). All pass through the same wrapper (redaction,
+  safeguarding withholding, audit); no new category of personal data is processed, so the §5
+  controls and the Anthropic sub-processor position are unchanged.
 - **Review cadence:** termly, and before any change that widens the scope of processing (notably any
   move to pupil-facing logins, or storing per-pupil progress/SEND data).
 

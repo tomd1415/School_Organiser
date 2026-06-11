@@ -41,7 +41,11 @@ Mirrors the sibling `exam_questions` project so patterns transfer:
                                                               │
                                                         email_intake
 
-   academic_years · events · prep_templates · resource_versions · time_entries · settings · term_dates · schedule_exceptions · ai_calls   (cross-cutting)
+                  group_courses ──< lesson_adaptations >── lesson_plans
+                                            │
+                                 lesson_adaptation_history
+
+   academic_years · events · prep_templates · resource_versions · time_entries · settings · term_dates · schedule_exceptions · ai_calls · equipment   (cross-cutting)
 ```
 
 ## A. Time structure
@@ -380,6 +384,9 @@ AI uses to calibrate future estimates.
 
 Storing only the *redacted* request proves no pupil names left the building.
 
+*(Drafted here before Phase 4; the as-built shape — migration `0007` — differs slightly. See
+section I.)*
+
 ### `settings` (P1)
 
 | `key` TEXT PK · `value` TEXT |
@@ -435,6 +442,96 @@ occurrence_prep(id, occurrence_id FK, text, done BOOL,
 
 Templates are materialised into `occurrence_prep` when an occurrence is created; the Now screen
 shows undone items "before the next bell". (SPECIFICATION §5.15.)
+
+## I. Phase 4–5 — as built (migrations `0007`–`0012`)
+
+Phases 4–5 shipped; the migration files in `app/migrations/` are the source of truth for this
+section, which records the schema **as built**. (The §C planning tables landed as drafted in
+`0006_phase3.sql`; the drafts above stand wherever unchanged.)
+
+### `ai_calls` (P4, `0007`) — the AI audit log, as built
+
+```text
+ai_calls(id, created_at, feature TEXT,           -- 'draft_lesson', 'author_scheme', …
+         provider TEXT, model TEXT, prompt_version TEXT,
+         request_redacted JSONB,                 -- redacted payload ONLY; no raw column exists
+         response JSONB, input_tokens INT, output_tokens INT,
+         cost_pence NUMERIC(10,2),
+         status TEXT DEFAULT 'ok',               -- ok | error | blocked
+         error TEXT)
+```
+
+Differs from the §G draft: a free-text `feature` replaces the CHECKed `purpose`; the
+request/response are JSONB; `cost_pence` + `status`/`error` power the **monthly spend cap** and
+record blocked calls (cap reached, redaction check failed); the FK context columns were dropped.
+Features in use: `author_scheme`, `draft_lesson`, `term_summary`, `task_breakdown`,
+`generate_resource`, `convert_unit`, `adapt_lesson`, `improve_master` — every one through the
+single wrapper (`src/llm/client.ts`). `0007` also seeds `settings` with the AI defaults:
+`ai_provider` (`anthropic`), `ai_enabled`, `ai_model_plan` / `ai_model_design` /
+`ai_model_cheap`, and `ai_month_cap_pence`.
+
+### `courses.teaching_context` (P4, `0008`) · `group_courses.teaching_context` (P5, `0012`)
+
+```text
+ALTER TABLE courses       ADD COLUMN teaching_context TEXT;   -- cohort default (0008)
+ALTER TABLE group_courses ADD COLUMN teaching_context TEXT;   -- this class's additions (0012)
+```
+
+Cohort + pedagogy guidance the AI layer auto-prepends to every lesson/scheme request, so the
+teacher stops retyping it. Non-identifying prose only — never a named or described pupil.
+`0008` seeds a school-wide SEND default onto every course (editable per course); `0012` layers
+an optional per-class note (7ARO ≠ 7JMI) injected alongside the course context when adapting
+for that group — but **not** when improving the master, which serves every class.
+
+### `schemes_of_work.labels` (P4, `0009`)
+
+```text
+ALTER TABLE schemes_of_work ADD COLUMN labels TEXT;   -- comma-separated; rendered as chips
+```
+
+Free-text labels ("Year 7", "Computer Skills") for organising and finding schemes across courses.
+
+### `lesson_adaptations` (P5, `0010`) + `lesson_adaptation_history` (P5, `0010`)
+
+```text
+lesson_adaptations(id, group_course_id FK ON DELETE CASCADE,
+                   lesson_plan_id FK ON DELETE CASCADE,
+                   objectives TEXT,               -- NULL ⇒ inherit master
+                   outline TEXT,                  -- NULL ⇒ inherit master
+                   adaptation_note TEXT, updated_at,
+                   UNIQUE (group_course_id, lesson_plan_id))
+lesson_adaptation_history(id, adaptation_id FK ON DELETE CASCADE,
+                          objectives, outline, adaptation_note,
+                          change_summary TEXT,    -- "teacher edit" / "AI adapted from notes"
+                          author TEXT DEFAULT 'teacher',   -- 'teacher' | 'ai'
+                          created_at)
+```
+
+Master `lesson_plans` stay canonical; a group stores only its **differences**. **Resolution
+rule: override-else-master, per field** — a NULL `objectives`/`outline` inherits the master's
+value, and the absence of a row means the group teaches the master unchanged. Every change
+(teacher or AI) appends a history row, giving each group its own change log; "reset to master"
+deletes the adaptation and, via the CASCADE, its log.
+
+### `equipment` (P5, `0011`) — the classroom kit list
+
+```text
+equipment(id, name TEXT,                     -- "micro:bit v2", "Crumble kit", "ESP32 CYD"
+          category TEXT DEFAULT 'other',     -- soft vocabulary: physical-computing | robotics |
+                                             --   computers | peripherals | av | consumables | other
+          qty_total INT,                     -- how many we own (NULL = uncounted class set)
+          qty_working INT,                   -- usable now; total − working = out of action
+          location TEXT,                     -- "cupboard B top shelf", "trolley 2"
+          notes TEXT,                        -- "needs 2xAAA each", "3 missing USB leads"
+          tags TEXT,                         -- comma labels, like scheme labels
+          active BOOL DEFAULT true,          -- archive, never delete
+          last_checked DATE,                 -- when last counted / tested
+          updated_at)
+```
+
+One flat, fast-to-maintain list: what's in the room, how many work, where it lives. Referred to
+during planning (`/kit` + a panel on Schemes) and injected into every AI planning feature, so
+practical suggestions fit the kit we actually own.
 
 ## Key modelling decisions (for discussion)
 

@@ -91,7 +91,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
           return `<tr class="tt-row tt-kind-${esc(row.kind)}"><th class="tt-time"><span class="tt-rl">${esc(row.label)}</span><span class="tt-clock">${esc(row.start)}</span></th>${cells}</tr>`;
         })
         .join('');
-      table = `<table class="tt-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+      table = `<div class="table-scroll"><table class="tt-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
     } catch {
       table = `<p class="muted">The timetable is unavailable — the database is not reachable. Try <code>./start.sh</code>.</p>`;
     }

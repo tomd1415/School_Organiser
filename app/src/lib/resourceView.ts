@@ -19,11 +19,19 @@ function fmtSize(bytes: number | null): string {
 }
 
 export function renderResourceItem(r: ResourceRow): string {
+  // where-used: a 📋 badge when the resource is attached to plans / source-linked to units.
+  const used =
+    r.usedCount > 0
+      ? `<button type="button" class="link res-used" title="where this resource is used"
+          hx-get="/resources/${r.id}/usage" hx-target="#res-${r.id}-usage" hx-swap="innerHTML">📋 ${r.usedCount}</button>`
+      : '';
   return `<li class="res" id="res-${r.id}">
     <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
     <a href="/resources/${r.id}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
+    ${used}
     <span class="muted res-meta">${esc(r.source)}${r.versionNo ? ` · v${r.versionNo}` : ''}${r.byteSize ? ' · ' + fmtSize(r.byteSize) : ''}</span>
     <a class="link" href="/resources/${r.id}/download">download</a>
+    <span class="res-usage" id="res-${r.id}-usage"></span>
   </li>`;
 }
 

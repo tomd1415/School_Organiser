@@ -7,6 +7,35 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-11 — Review pass: fixes, doc catch-up, and usability batch
+
+A full docs-vs-code-vs-UX review (three parallel audits), then everything actionable applied.
+
+- **Fixed: the pg BIGINT bug class, at the root.** node-postgres returns BIGINT as a string; this
+  had silently broken four comparisons over time. A pool-level type parser
+  ([db/pool.ts](app/src/db/pool.ts)) now parses int8 → `Number` everywhere. This also fixes a real
+  bug: **archiving/restoring a pupil made the row vanish** until reload (regression test added).
+- **Quick wins:** *Recurring* added to the nav; stale "Phase 2+" copy on Notes replaced; the Now
+  strip shows a **week-of-term badge** ("wk 3/12", from term dates; `termProgress` + 4 unit tests);
+  each lesson section links to **📅 the term map for that class** and offers **↻ continue next
+  week** right where the stopping point is typed; map rows link back to the master on Schemes.
+- **Docs caught up with reality:** ROADMAP gains a status banner, the real **Phase 5 (curriculum
+  delivery)** section, and the old polish phase renumbered to **Phase 6**; SECURITY_AND_PRIVACY's
+  data table now names the Phase 5 AI flows (per-class notes/stopping points, teaching contexts,
+  kit list); DPIA gains a 2026-06-11 review note (no new category of personal data); a repo-root
+  **CLAUDE.md** now exists (two docs referenced it); DATA_MODEL gains §I (migrations 0007–0012 as
+  built); UX_FLOWS updated for the two-column Now and the adaptation block, and gains §12
+  (Curriculum map) and §13 (Kit); SPECIFICATION gains §5.19–§5.24 (Phase 5 stories, marked built).
+- **Usability batch:** **responsive pass** (nav wraps; timetable/map/kit tables scroll sideways in
+  a `.table-scroll` wrapper; narrow-screen rules at 900/600px) and a **print stylesheet** (chrome,
+  buttons and forms hidden; collapsed sections print expanded — a lesson page, the map or the week
+  grid now prints as a usable cover/medium-term-plan sheet). **Schemes page readability**: expand
+  all / collapse all on the tree, titled ▲▼✕ buttons, and "Add or import content" / "Reference &
+  admin" dividers. **Resources where-used**: a 📋 *n* badge per resource expands to the lesson
+  plans it's attached to and the units it's a source for, each linking to the course's Schemes
+  page (`/resources/:id/usage`; +1 integration test).
+- **Totals: 143 unit / 84 integration tests, all green.**
+
 ### 2026-06-11 — Phase 5.7 + 5.8 built, and 5.9's first two stretches
 
 - **5.8 — Kit inventory** (`/kit`, "Kit" in the nav; migration `0011_equipment`): the classroom

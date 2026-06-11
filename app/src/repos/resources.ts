@@ -10,6 +10,7 @@ export interface ResourceRow {
   source: string;
   versionNo: number | null;
   byteSize: number | null;
+  usedCount: number; // lesson plans + units this resource is linked to (where-used)
 }
 
 export interface VersionRow {
@@ -29,7 +30,9 @@ export interface LinkedResource {
 }
 
 const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source,
-                  v.version_no AS "versionNo", v.byte_size AS "byteSize"`;
+                  v.version_no AS "versionNo", v.byte_size AS "byteSize",
+                  (SELECT count(*)::int FROM resource_links rl
+                   WHERE rl.resource_id = r.id AND (rl.lesson_plan_id IS NOT NULL OR rl.unit_id IS NOT NULL)) AS "usedCount"`;
 
 export async function createResource(title: string, kind: string, mimeType: string | null, source: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
@@ -188,6 +191,34 @@ export async function listResourcesForPlan(planId: number): Promise<LinkedResour
     `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
      JOIN resources r ON r.id = rl.resource_id WHERE rl.lesson_plan_id = $1 AND r.active ORDER BY r.title`,
     [planId],
+  );
+  return rows;
+}
+
+export interface ResourceUsage {
+  kind: 'plan' | 'unit';
+  title: string;
+  courseId: number;
+  courseName: string;
+}
+
+/** Where a resource is used — the lesson plans it's attached to and the units it's a source for. */
+export async function listUsageForResource(resourceId: number): Promise<ResourceUsage[]> {
+  const { rows } = await pool.query<ResourceUsage>(
+    `SELECT 'plan' AS kind, lp.title, c.id AS "courseId", c.name AS "courseName"
+     FROM resource_links rl
+     JOIN lesson_plans lp ON lp.id = rl.lesson_plan_id
+     JOIN courses c ON c.id = lp.course_id
+     WHERE rl.resource_id = $1
+     UNION ALL
+     SELECT 'unit' AS kind, u.title, c.id AS "courseId", c.name AS "courseName"
+     FROM resource_links rl
+     JOIN units u ON u.id = rl.unit_id
+     JOIN schemes_of_work s ON s.id = u.scheme_id
+     JOIN courses c ON c.id = s.course_id
+     WHERE rl.resource_id = $1
+     ORDER BY kind, title`,
+    [resourceId],
   );
   return rows;
 }

@@ -1,0 +1,44 @@
+# CLAUDE.md — School_Organiser
+
+Single-teacher "command centre" web app (timetable, Now screen, lesson notes, schemes of work,
+curriculum delivery, AI planning). One developer-user; runs on the school LAN.
+
+## Non-negotiable rules
+
+- **No pupil name is ever sent to any AI service.** All AI calls go through the one wrapper
+  (`app/src/llm/client.ts`): roster names → tokens before egress, an egress assert refuses if a
+  name survives, the audit row stores the redacted request only.
+- **Safeguarding-flagged content is withheld from AI entirely** — never sent, not just redacted.
+- Teaching contexts (course + per-class) are **cohort-level prose only — never name or describe an
+  individual pupil**.
+- Feature inputs go in the wrapper's `context[]`, never the `system` string (so they inherit
+  redaction/withholding/audit).
+- `ANTHROPIC_API_KEY` lives in `app/.env` (git-ignored). Tests must never make real AI calls —
+  the integration config forces an empty key.
+
+## Stack & layout
+
+TypeScript / Fastify 5 / PostgreSQL 16 (Docker, port 5434 dev) / server-rendered HTML + vendored
+HTMX / Zod. Layering: `routes → services (pure) → repos (thin SQL over pg)`. Migrations in
+`app/migrations/`, auto-run on boot. pg BIGINT is parsed to `Number` globally in
+`app/src/db/pool.ts` — don't add per-call coercions.
+
+## Commands
+
+```bash
+./start.sh                  # dev stack (db + app) → http://localhost:44360
+cd app && npm test          # unit (DB-free)
+cd app && npm run test:integration   # needs the dev DB up; never calls the real API
+cd app && npm run typecheck
+```
+
+## Docs
+
+`README.md` → docs index. Live build status: `docs/PHASE_5_PLAN.md` (+ CHANGELOG.md).
+Privacy/AI rules in detail: `docs/SECURITY_AND_PRIVACY.md`, `docs/DPIA.md`.
+
+## Conventions
+
+The user commits work themselves between sessions — don't commit/push unless asked. Verify AI
+features with a throwaway smoke script (`app/scripts/X-smoke.ts`, self-cleaning, then delete it);
+keep test data out of real tables (clean up in `finally`).

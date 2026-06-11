@@ -10,6 +10,7 @@ import {
   getCurrentVersion,
   getResource,
   listKinds,
+  listUsageForResource,
   searchResources,
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
@@ -133,6 +134,21 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'new version');
     const updated = await getResource(id.data.id);
     return reply.type('text/html').send(updated ? renderResourceItem(updated) : '');
+  });
+
+  // Where-used: the plans this resource is attached to and the units it's a source for.
+  app.get('/resources/:id/usage', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const usage = await listUsageForResource(id.data.id);
+    if (!usage.length) return reply.type('text/html').send('<span class="muted">not used in any plan or unit</span>');
+    const items = usage
+      .map(
+        (u) =>
+          `<li>${u.kind === 'plan' ? '📋 lesson' : '📦 unit source'}: <a href="/schemes?course=${u.courseId}">${esc(u.title)}</a> <span class="muted">(${esc(u.courseName)})</span></li>`,
+      )
+      .join('');
+    return reply.type('text/html').send(`<ul class="res-usage-list">${items}</ul>`);
   });
 
   app.get('/resources/:id/download', { preHandler: requireAuth }, async (req, reply) => {

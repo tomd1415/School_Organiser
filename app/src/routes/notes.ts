@@ -95,7 +95,7 @@ export function registerNoteRoutes(app: FastifyInstance): void {
     const body = `
       <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="ld-notes-head"><h1>Notes</h1>${renderNewNoteButton('notes-list-general', { kind: 'general' })}</div>
-        <p class="muted">General notes and knowledge base. Link to a course or group from a note later (Phase 2+).</p>
+        <p class="muted">General notes and the knowledge base. Notes made during a lesson live on that lesson's page and feed the per-class AI feedback loop.</p>
         ${listHtml}
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Notes', body, authed: true, csrfToken: csrf }));

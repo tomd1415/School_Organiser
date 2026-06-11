@@ -4,6 +4,11 @@ Phased delivery. Each phase is independently useful and shippable to the school 
 tool earns its keep early and we learn before building more. Priorities reference the user
 stories in [SPECIFICATION.md](SPECIFICATION.md).
 
+> **Status (2026-06-11):** Phases **0–3 ✅ complete** (pupils 2.11 deferred to the pupil-facing
+> project), **Phase 4 ✅** except parts of 4.6 and the optional 4.8, and **Phase 5 — curriculum
+> delivery** (inserted 2026-06-10; it displaced the old "polish" phase, renumbered to Phase 6)
+> **built through 5.8** plus parts of 5.9 — live status in [PHASE_5_PLAN.md](PHASE_5_PLAN.md).
+
 ## Sequencing principle
 
 Build the **glanceable core that captures the record first** (timetable → Now → notes),
@@ -95,7 +100,31 @@ lessons are fully prepared in-app.
 **Done when:** you can produce a usable next-lesson draft and a unit redesign from real notes,
 with zero pupil names leaving the building.
 
-## Phase 5 — Polish & the "forgotten" extras
+*Status: ✅ built (4.1–4.5, 4.7, teaching-context, task-breakdown). Remaining: captured
+auto-categorisation, estimate calibration, current-interest profile (4.6) and the optional
+pgvector search (4.8).*
+
+## Phase 5 — Curriculum delivery *(added 2026-06-10 — see [PHASE_5_PLAN.md](PHASE_5_PLAN.md))*
+
+**Goal:** the app runs the curriculum, not just the day. A downloaded unit becomes a
+SEND-adapted **master scheme**; each class adapts it as it is taught, with a per-class change
+log; the record feeds back into next week's lesson and the master.
+
+- Master + **per-group adaptations** with an append-only change log (5.1/5.2). ✅
+- **Convert a downloaded unit** into adapted master lessons (AI), source files linked (5.3). ✅
+- **Lay a unit into a class's weekly slot**, holiday-aware (5.4) — and both in one action with
+  review on the map (5.7). ✅
+- The **feedback loop**: adapt the next delivery from the class's notes; fold improvements back
+  into the master on approval (5.5). ✅
+- **Curriculum map** (`/map`) per class-slot with carry-over ("continue next week") (5.6, 5.9). ✅
+- **Equipment inventory** (`/kit`) the teacher and every AI planning feature plan within (5.8). ✅
+- Remaining (5.9): content-based conversion (read the actual files), cross-group compare,
+  kit-per-lesson, CSV import / convert de-dup.
+
+**Done when:** a whole unit can be filled and assigned for a class in one request, and each
+class's delivery record visibly improves the next lesson. *(Reached for the headline flow.)*
+
+## Phase 6 — Polish & the "forgotten" extras *(was Phase 5 before curriculum delivery landed)*
 
 **Goal:** quality-of-life and the parked ideas worth keeping.
 
@@ -125,4 +154,5 @@ These are relative sizes, not promises (one developer, evenings):
 | 2 Tasks + Time + Focus + Events | L | Plan the day, one-thing-now, never miss a deadline |
 | 3 SoW + Hosted resources | M | Single source of truth on the Now screen |
 | 4 AI | M | Planning leverage from the record |
-| 5 Polish + extras | ongoing | Long-tail quality of life |
+| 5 Curriculum delivery | L | The app runs the curriculum (master → class → calendar → feedback) |
+| 6 Polish + extras | ongoing | Long-tail quality of life |

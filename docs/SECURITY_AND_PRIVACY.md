@@ -9,8 +9,11 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Data | Sensitivity | Where it lives |
 | --- | --- | --- |
 | Pupil names, enrolments | **Personal data** | PostgreSQL only; never sent to AI with name attached |
-| Pupil progress / behaviour notes | **Sensitive** | PostgreSQL; included in AI calls only after redaction |
-| Lesson notes, plans, resources, tasks | Internal | PostgreSQL / school file shares |
+| Pupil progress / behaviour notes | **Sensitive** | PostgreSQL; included in AI calls only after redaction; safeguarding-flagged notes **withheld entirely** |
+| Lesson notes + stopping points (per class) | **Sensitive** | PostgreSQL; flow to AI (adapt-lesson, improve-master, term-summary) after redaction + withholding |
+| Teaching contexts (per course + per class) | Sensitive — cohort-level prose, must never name a pupil | PostgreSQL; injected into every AI planning call via the wrapper |
+| Lesson plans, schemes, adaptations, resources, tasks | Internal | PostgreSQL / hosted resource store |
+| Equipment inventory (kit list) | Internal — no personal data | PostgreSQL; injected into AI planning calls |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
 | Auth secrets (`SESSION_SECRET`, API keys) | Secret | `.env`, never committed |
 

@@ -588,6 +588,23 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Pupil archive/restore re-renders the row (regression: BIGINT id comparison)', async () => {
+    const { createPupil } = await import('../../src/repos/pupils');
+    const pupil = await createPupil('TEST Pupilrow');
+    const page = await app.inject({ method: 'GET', url: '/pupils', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    try {
+      // Before the pool-level BIGINT parser, this returned '' (the row vanished from the page).
+      const off = await app.inject({ method: 'POST', url: `/pupils/${pupil.id}/deactivate`, headers: { cookie, 'x-csrf-token': token }, payload: '' });
+      expect(off.body).toContain('TEST Pupilrow');
+      const on = await app.inject({ method: 'POST', url: `/pupils/${pupil.id}/activate`, headers: { cookie, 'x-csrf-token': token }, payload: '' });
+      expect(on.body).toContain('TEST Pupilrow');
+    } finally {
+      await pool.query(`DELETE FROM pupils WHERE id = $1`, [pupil.id]);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
@@ -596,6 +613,30 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('res-search');
     expect(res.body).toContain('id="res-list"');
     expect(res.body).toMatch(/\d+ resources?/);
+  });
+
+  it('Resource where-used: badge count + usage panel list plans/units (review fix)', async () => {
+    // a resource linked to a plan (any) — or link one temporarily
+    const linked = await pool.query<{ rid: number }>(
+      `SELECT rl.resource_id AS rid FROM resource_links rl WHERE rl.lesson_plan_id IS NOT NULL LIMIT 1`,
+    );
+    let rid = linked.rows[0]?.rid;
+    let tempLink = false;
+    if (!rid) {
+      const r = await pool.query<{ id: number }>(`SELECT id FROM resources WHERE active ORDER BY id LIMIT 1`);
+      const p = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans ORDER BY id LIMIT 1`);
+      await pool.query(`INSERT INTO resource_links (resource_id, lesson_plan_id) VALUES ($1, $2)`, [r.rows[0]!.id, p.rows[0]!.id]);
+      rid = r.rows[0]!.id;
+      tempLink = true;
+    }
+    try {
+      const usage = await app.inject({ method: 'GET', url: `/resources/${rid}/usage`, headers: { cookie: session } });
+      expect(usage.statusCode).toBe(200);
+      expect(usage.body).toMatch(/lesson|unit source/);
+      expect(usage.body).toContain('/schemes?course=');
+    } finally {
+      if (tempLink) await pool.query(`DELETE FROM resource_links WHERE resource_id = $1 AND lesson_plan_id IS NOT NULL`, [rid]);
+    }
   });
 
   it('Resources search partial filters and paginates', async () => {

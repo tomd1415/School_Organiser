@@ -326,6 +326,78 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
 - **(S)** Interests are **time-aware** — they fade as your attention moves on, so the bias
   follows you rather than ossifying.
 
+### 5.19 Master schemes & per-group adaptation (Phase 5 — built)
+
+*§5.19–§5.24 were added with Phase 5 (curriculum delivery — see PHASE_5_PLAN.md) and shipped.*
+
+- **(M)** As the teacher, I keep **one canonical (master) scheme per course**; each group that
+  studies it stores only its **differences** from the master — per-field overrides of a lesson's
+  objectives/outline plus an adaptation note. No override ⇒ the group teaches the master.
+- **(M)** On the lesson screen I see the master content and **this group's version** together,
+  edit the group's version in place (autosaved; the first edit creates the override), and can
+  **reset to master** at any time.
+- **(M)** Every change to a group's adaptation — mine or the AI's — is appended to that group's
+  **change log**, openable from the lesson.
+- **(S)** A per-course **teaching context** (cohort + pedagogy prose; never an identified pupil)
+  is stored once and auto-prepended to every AI planning call; an optional **per-class layer**
+  adds what is specific to that group (§5.22).
+
+### 5.20 Convert a downloaded unit (Phase 5 — built)
+
+- **(M)** I pick a **downloaded unit** (an imported folder of lesson subfolders, found by
+  search) and the **AI converts it** into a SEND-adapted master unit on the course's scheme — a
+  titled unit with objectives and an outline per lesson — guided by the course teaching context
+  and the kit list (§5.24).
+- **(M)** The downloaded source files are untouched and are **linked to the new unit** as
+  provenance.
+- **(S)** While converting I can pick a group's weekly slot, so the unit is **laid into the
+  calendar in the same action** (§5.21) and I land on the curriculum map to review it.
+
+### 5.21 Lay a unit into the calendar (Phase 5 — built)
+
+- **(M)** I assign a **unit to a group's weekly slot**: each lesson is bound, in order, to that
+  slot's upcoming dated occurrences — one per school week, **holidays skipped automatically**.
+- **(M)** **Bulk fill-and-assign**: convert a downloaded unit *and* lay it into a chosen slot in
+  one action (§5.20); a short lay-down never rolls back the conversion.
+- **(S)** Re-laying a unit overwrites those future weeks; past occurrences are never rewritten.
+
+### 5.22 The delivery feedback loop (Phase 5 — built)
+
+- **(M)** **Adapt from recent lessons**: from the lesson screen, the AI rewrites **this group's
+  version** of a lesson from the group's recent record (stopping points + lesson notes), the
+  course and per-class teaching contexts, and the kit list. The master is never touched; the
+  change log records the change as the AI's.
+- **(M)** **Suggest a master improvement**: where a group's adaptation has proved better, the AI
+  proposes folding it back into the **master** — shown as a proposal with a rationale and
+  **applied only on my approval**, after which every group starts from the improved master
+  (per-group adaptations still apply).
+- **(M, cross-cutting)** Both run through the one AI wrapper (§5.10): pupil names redacted,
+  safeguarding-flagged notes withheld entirely, every call audited.
+
+### 5.23 Curriculum map & carry-over (Phase 5 — built)
+
+- **(M)** A **curriculum map** per group + weekly slot: the recent weeks taught (with their
+  stopping points), today, and the next school weeks (**holiday-aware**) — which lesson lands
+  which week, with adapted-for-this-group marked and one click to the dated lesson or its master.
+- **(M)** **Carry-over**: when a lesson didn't finish, one tap ("continue next week") repeats it
+  at the slot's next occurrence and shifts every later lesson back one school week — holidays
+  still skipped, and nothing before today is ever rebound.
+- **(S)** The same carry-over sits on the lesson screen beside the stopping point, with a "term
+  map for this class" link in the other direction.
+
+### 5.24 Equipment inventory — "the kit" (Phase 5 — built)
+
+- **(M)** I keep a flat **classroom kit list** — item, category, how many we **own** vs how many
+  currently **work**, where it lives, notes and tags — maintained inline in seconds (autosave)
+  and **archived, never deleted**.
+- **(M)** I can **refer to it during planning at any stage**: a dedicated kit page plus a
+  read-only panel on the schemes page.
+- **(M)** The active list is **injected into every AI planning feature** (author a scheme, draft
+  a lesson, convert a unit, adapt for a group, improve the master, generate a resource) so
+  practical suggestions fit the hardware we actually own.
+- **(S)** A one-tap "**checked today**" stock-take stamp; an item unchecked for over a term is
+  flagged stale, and broken stock (working < owned) is highlighted.
+
 ## 6. Non-functional requirements
 
 - **Performance.** Now screen and note-save feel instant on the LAN (<150 ms perceived).

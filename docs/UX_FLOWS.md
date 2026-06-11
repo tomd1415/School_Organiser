@@ -18,41 +18,42 @@ everything else.**
 ## 1. Now screen (home)
 
 ```text
-┌─ School Organiser ───────────────────  Tue 9 Sep · 11:12 · Week A ──┐
-│                                                                      │
-│  NOW · Lesson 3  (11:05–11:55)        ⏳ 43 min left                  │
-│  ┌────────────────────────────────────────────────────────────────┐ │
-│  │ 9X/Cp1 · OCR J277 GCSE CS · Room D12                            │ │
-│  │ Plan: 1.3 Networks — “Topologies & the Internet” (lesson 4/6)  │ │
-│  │ Resources:  [Slides]  [Worksheet]  [Quiz]  [Folder]            │ │
-│  │ Last time → stopped at: “packet switching, mid-way”            │ │
-│  │            open follow-ups: ▢ re-cap subnetting to PUPIL_4     │ │
-│  │ ┌─ Quick note ────────────────────────────────────────────┐   │ │
-│  │ │ (type here — autosaves)                                  │   │ │
-│  │ └──────────────────────────────────────────────────────────┘   │ │
-│  │ + stopping point   + follow-up   + pupil   #tag                │ │
-│  └────────────────────────────────────────────────────────────────┘ │
-│                                                                      │
-│  BEFORE THE NEXT BELL (due by 11:55)                                  │
-│   ▢ Set retrieval starter for 9Y (next, Lesson 4)   [do] [snooze]    │
-│   ▢ Print 8 worksheets for Y10                       [do] [done]     │
-│                                                                      │
-│  NEXT · Lesson 4 (11:55) · 9Y/Cp2 · KS4 Python · D12   [open]        │
-│                                                                      │
-│  [Timetable]  [Tasks]  [Notes]  [Planning/AI]  [Settings]            │
-└──────────────────────────────────────────────────────────────────────┘
+┌─ School Organiser ──────────────────────────────────────────────────┐
+│ Tue 9 Sep · 11:12 · wk 3/12 · NOW Lesson 3 · 9X/Cp1 · 43 min left   │
+│                              · NEXT Lesson 4 9Y/Cp2 [open]    ⟳ 30s │
+│──────────────────────────────────────────────────────────────────── │
+│  🎯 Focus — one thing now →        │  NEXT · Lesson 4 (11:55)        │
+│  ┌─ NOW · Lesson 3 ─────────────┐  │  9Y/Cp2 · in 43 min · D12       │
+│  │ 9X/Cp1 · OCR J277 · Room D12 │  │  KS4 Python 📋 “Loops 3/6”      │
+│  │ Last time → “packet switch-  │  │  resume → “while loops” (2 Sep) │
+│  │  ing, mid-way” (2 Sep)       │  │─────────────────────────────────│
+│  │ ┌─ Quick note ────────────┐  │  │  BEFORE THE NEXT BELL           │
+│  │ │ (type here — autosaves) │  │  │  ✓ Set retrieval starter 9Y     │
+│  │ └─────────────────────────┘  │  │  ✓ Print 8 worksheets Y10       │
+│  │ Open lesson detail →         │  │─────────────────────────────────│
+│  └──────────────────────────────┘  │  COMING UP    Y10 reports in 3d │
+│                                    │  HEADS UP     D12 projector …   │
+│                                    │  END OF DAY   ▢ lock cupboard B │
+└────────────────────────────────────┴─────────────────────────────────┘
 ```
 
-During a **free period**, the top card flips to the planned work block:
+The **strip** along the top carries the clock, the **week-of-term badge** ("wk 3/12") and the
+now/next summary, and **auto-refreshes every 30 s**. Each refresh carries a *signature* of what
+is on show (day · current period · next teaching slot): unchanged → only the strip swaps and
+the countdown ticks down; changed (the bell rang, a gap started, the day rolled over) → the
+whole page reloads so every card is fresh. The note composer is never part of the refresh, so a
+half-typed note is never wiped.
 
-```text
-│  NOW · Free (Lesson 5, 13:50–14:40) · protected                     │
-│  Planned: “Mark Y10 assessment” (45 min)        [start] [change]    │
-│  ┌─ What I actually did ───────────────────────────────────────┐    │
-│  │ (autosaves — e.g. “Pupil X pastoral issue, didn’t mark”)    │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│  This logs the block as ‘diverted’ and keeps the original plan.     │
-```
+**Two columns.** The current lesson fills the left: course(s), room, "last time → stopping
+point" per course, and the quick-note box. The right rail stacks the **next-session card** —
+when and where it starts and, per course, the bound plan and where that group will pick up —
+then **before-the-bell tasks** (tick done in place), **coming up** (events by days-until),
+**heads-up** (captured info resurfacing for today's groups), and the **start-of-day /
+end-of-day checklist** (start shown before noon, end after).
+
+During a **free period**, the left card shows the protected slot with the same quick-note box;
+the planned block and "what I actually did" live on the Time planner (flow 6), and Focus
+(flow 10) picks the one thing to do with the window.
 
 ## 2. Week timetable
 
@@ -81,23 +82,41 @@ oversee" view (flow 7).
 ## 3. Lesson detail / occurrence
 
 ```text
-┌─ 9X/Cp1 · OCR J277 · Tue 9 Sep · Lesson 3 ──────────────────────────┐
-│ Plan: 1.3 Networks — Topologies (4/6)         [open plan] [change]   │
-│ Resources: [Slides][Worksheet][Quiz][Folder]  + add                  │
+┌─ 9X/Cp1 · Tue 9 Sep · Lesson 3 · 11:05–11:55 · D12 ─────────────────┐
+│ ── OCR J277 GCSE CS ─────────────────────────────────────────────── │
+│ Plan: [1.3 Networks — Topologies ▾]  edit →                          │
+│   Objectives: … master …      Outline: … master …                    │
+│  ┌─ This group's version ────────────────────────────────────────┐  │
+│  │ ✏ adapted for this group              ↩ reset to master       │  │
+│  │ Objectives — for this group [(inherits the master)__________] │  │
+│  │ Outline — for this group    [___________________] (autosaves) │  │
+│  │ ✨ Adapt from recent lessons (AI)                              │  │
+│  │ ⬆ Suggest master improvement (AI)         ▸ change log        │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│ Resources: [Slides][Worksheet][Quiz]                                 │
+│ Last time → stopped at “packet switching” (2 Sep)                    │
+│ Stopping point: [where we got to…_________________] (autosaves)     │
+│ 📅 term map for this class →     ↻ continue next week                │
+│ ▸ this class's teaching context                                      │
 │──────────────────────────────────────────────────────────────────── │
+│ BEFORE THE BELL   ▢ assign to Teams   ▢ starter set                  │
 │ NOTES (this lesson)                                   [+ quick note] │
 │  11:48  “Good engagement. Got through star/mesh, not bus.”           │
-│         stopping point: bus topology                                 │
-│         follow-ups: ▢ reteach subnetting · ▢ collect homework PUPIL_4│
-│         pupils: PUPIL_4 absent · PUPIL_7 needs extension             │
-│  #networks #assessment-soon                                          │
-│──────────────────────────────────────────────────────────────────── │
-│ Split class? add another course running this slot      [+ course]    │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-For a **split lesson** (two courses at once), the detail shows a tab/section per course, each
-with its own plan, resources, stopping point and notes (`occurrence_courses` in DATA_MODEL).
+For a **split lesson** (two courses at once), one such section renders per course, each with
+its own plan, adaptation, resources and stopping point (`occurrence_courses` in DATA_MODEL);
+the notes belong to the occurrence.
+
+**The adaptation block** (Phase 5) resolves **override-else-master, per field**: empty boxes
+inherit the master, the first edit creates this group's override, and every change — teacher or
+AI — lands in the group's **change log** (`lesson_adaptations` in DATA_MODEL). "Adapt from
+recent lessons (AI)" rewrites this group's version from its recent stopping points and notes;
+"Suggest a master improvement (AI)" proposes folding a proven adaptation back into the master,
+applied only on approval. "Term map" jumps to the curriculum map (flow 12) for this class's
+slot; "continue next week" is the same carry-over as the map's. "This class's teaching context"
+folds out an editor for the per-class prose added to the course default in AI calls.
 
 ## 4. Quick-note capture (the fast path)
 
@@ -256,6 +275,60 @@ A one-line brain-dump for things you can't action yet; the AI files and resurfac
 Re-file to override the AI's category, promote an item to a task/deadline, or archive it.
 Stored as `notes` with `kind='captured'` (DATA_MODEL).
 
+## 12. Curriculum map — the term at a glance
+
+```text
+┌─ Curriculum map ────────────────────────────────────────────────────┐
+│ Group & weekly slot: [7ARO · Computing Curriculum · Tue Lesson 3 ▾] │
+│ Last 6 weeks taught, then the next 12 school weeks (holidays        │
+│ skipped). ✏ = adapted for this group.   fill this slot from a       │
+│ downloaded unit →                                                    │
+│                                                                      │
+│  2026-06-02  Algorithms 3  master ↗     stopped at “flowcharts”     │
+│                                         ↻ continue next week        │
+│  2026-06-09  Algorithms 4 ✏ adapted     today                       │
+│  2026-06-16  Algorithms 5  master ↗                                 │
+│  2026-06-23  Algorithms 6  master ↗                                 │
+│  2026-06-30  — nothing planned                                      │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+One class's weekly slot as a term calendar: which lesson lands which week. Past rows come from
+real occurrences and show the recorded **stopping point**; future rows walk the **next school
+weeks, holiday-aware**. Every lesson links to its dated occurrence (flow 3); "master ↗" opens
+the master on the Schemes page; "fill this slot" jumps to the convert-a-unit panel.
+**↻ continue next week** (today + the recent past): the unfinished lesson repeats at the slot's
+next occurrence and every later lesson shifts back one school week — holidays still skipped,
+nothing before today ever rebound. The map is otherwise read-only; editing stays on the lesson
+screen and the Schemes page.
+
+## 13. Kit — the classroom equipment inventory
+
+```text
+┌─ Kit — classroom equipment ─────────────────────────────────────────┐
+│ [filter… name, notes, tags]   ☐ show archived                       │
+│                                                                      │
+│ physical-computing                                                   │
+│  Item          Own Work Location    Notes        Tags    Checked    │
+│  micro:bit v2  30  27   cupboard B  3 dead USB   ks3     2026-06-01 │
+│                                                          [✓ today]  │
+│  Crumble kit   12  12   trolley 2   2×AAA each           never      │
+│ av                                                                   │
+│  Visualiser    1   1    front desk                       2026-04-20 │
+│                                                                      │
+│ [ new item… e.g. micro:bit v2 ]  [category ▾]  [＋ add]   [archive] │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+One flat list grouped by category, every cell **inline-autosaving** — maintained in the seconds
+it takes to notice "two micro:bits died". *Work* < *Own* renders the counts red so broken stock
+shows at a glance; **✓ today** stamps a stock-take, and a last-checked date older than a term
+(~13 weeks) turns red as stale. Items **archive, never delete**. Referred to while planning
+from this page and from a read-only "🔧 Kit available" panel on the Schemes page — and the
+active list is injected into all six AI planning features (author scheme, draft lesson, convert
+unit, adapt for a group, improve the master, generate a resource) so practical suggestions fit
+the kit actually owned.
+
 ## Navigation summary
 
 ```text
@@ -265,5 +338,7 @@ Now ──┬── Timetable ──── Lesson detail ──── Plan / Res
       ├── Notes ──────── Search / General notes
       ├── Captured ───── "Things I've been told" inbox (AI-filed)
       ├── Oversee ────── TA lesson prep
+      ├── Map ────────── Curriculum map — which lesson lands which week
+      ├── Kit ────────── Classroom equipment inventory
       └── Planning/AI ── Draft / Summarise / Redesign
 ```

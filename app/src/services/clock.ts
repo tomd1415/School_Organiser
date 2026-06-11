@@ -58,6 +58,23 @@ function inRange(iso: string, start: string, end: string): boolean {
   return iso >= start && iso <= end;
 }
 
+export interface TermProgress {
+  name: string;
+  week: number; // 1-based week of the term
+  weeksTotal: number;
+  weeksLeft: number; // after this one
+}
+
+/** Where this date sits in its term — "Week 3 of Summer term (4 left)". Null outside term time. */
+export function termProgress(isoDate: string, terms: TermDate[]): TermProgress | null {
+  const t = terms.find((x) => x.kind === 'term' && inRange(isoDate, x.startDate, x.endDate));
+  if (!t) return null;
+  const days = (iso: string) => Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / 86400000;
+  const week = Math.floor((days(isoDate) - days(t.startDate)) / 7) + 1;
+  const weeksTotal = Math.floor((days(t.endDate) - days(t.startDate)) / 7) + 1;
+  return { name: t.name ?? 'term', week, weeksTotal, weeksLeft: weeksTotal - week };
+}
+
 /** Is this civil date a teaching day, and if not, why not? */
 export function classifyDay(
   isoDate: string,

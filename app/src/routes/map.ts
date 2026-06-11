@@ -27,11 +27,13 @@ function renderRow(
   e: ScheduleEntry | undefined,
   kind: 'past' | 'today' | 'future',
   lessonId: number,
+  courseId: number,
   shift?: { slotKey: string; today: string },
 ): string {
   const open = `/lesson?lesson=${lessonId}&date=${esc(date)}`;
   const title = e?.planTitle
-    ? `<a href="${open}">${esc(e.planTitle)}</a>${e.adapted ? ' <span class="map-adapted">✏ adapted</span>' : ''}`
+    ? `<a href="${open}">${esc(e.planTitle)}</a>${e.adapted ? ' <span class="map-adapted">✏ adapted</span>' : ''}` +
+      ` <a class="map-master" href="/schemes?course=${courseId}" title="edit the master lesson on the Schemes page">master ↗</a>`
     : `<a href="${open}" class="muted">— nothing planned</a>`;
   // 5.9: carry-over — a recent lesson that didn't finish repeats next week; the rest shift back.
   const canShift = shift && e?.planTitle && kind !== 'future' && date >= addDays(shift.today, -14);
@@ -73,9 +75,9 @@ export function registerMapRoutes(app: FastifyInstance): void {
         const shift = { slotKey: slotKey(chosen), today };
         const pastRows = entries
           .filter((e) => e.date < today)
-          .map((e) => renderRow(e.date, e, 'past', chosen.lessonId, shift));
-        const todayRow = byDate.has(today) ? [renderRow(today, byDate.get(today), 'today', chosen.lessonId, shift)] : [];
-        const futureRows = futureDates.map((d) => renderRow(d, byDate.get(d), 'future', chosen.lessonId));
+          .map((e) => renderRow(e.date, e, 'past', chosen.lessonId, chosen.courseId, shift));
+        const todayRow = byDate.has(today) ? [renderRow(today, byDate.get(today), 'today', chosen.lessonId, chosen.courseId, shift)] : [];
+        const futureRows = futureDates.map((d) => renderRow(d, byDate.get(d), 'future', chosen.lessonId, chosen.courseId));
 
         const opts = slots
           .map((s) => `<option value="${slotKey(s)}"${slotKey(s) === slotKey(chosen) ? ' selected' : ''}>${esc(slotLabel(s))}</option>`)
@@ -92,10 +94,10 @@ export function registerMapRoutes(app: FastifyInstance): void {
             </form>
             <p class="muted">Last ${PAST_WEEKS} weeks taught, then the next ${FUTURE_WEEKS} school weeks (holidays skipped). ✏ = adapted for this group.
               <a href="/schemes?course=${chosen.courseId}">fill this slot from a downloaded unit →</a></p>
-            <table class="map-table">
+            <div class="table-scroll"><table class="map-table">
               <thead><tr><th>Week</th><th>Lesson</th><th></th></tr></thead>
               <tbody>${rows || '<tr><td colspan="3" class="muted">nothing recorded or planned in this window</td></tr>'}</tbody>
-            </table>
+            </table></div>
           </section>`;
       }
     } catch {

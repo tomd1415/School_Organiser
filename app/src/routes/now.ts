@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { resolveNow, type NowState } from '../services/clock';
+import { resolveNow, termProgress, type NowState, type TermDate } from '../services/clock';
 import { getClockContext, getSelfLessonAt, type NowLesson } from '../repos/clock';
 import {
   findOrCreateOccurrence,
@@ -61,9 +61,11 @@ function nowSignature(state: NowState, current: NowLesson | null, next: NowLesso
   ].join('|');
 }
 
-function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string): string {
+function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string, terms: TermDate[]): string {
   const { dateLabel, clock } = nowLabels(now, tz);
   const sig = nowSignature(state, current, next);
+  const tp = termProgress(state.isoDate, terms);
+  const weekBadge = tp ? ` · <span class="now-week" title="${esc(tp.name)}">wk ${tp.week}/${tp.weeksTotal}</span>` : '';
 
   let nowLine: string;
   if (!state.isSchoolDay) {
@@ -84,7 +86,7 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
   }
 
   return `<div id="now-strip" class="now-strip" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML">
-    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span> &nbsp;·&nbsp; ${nowLine}${nextLine}
+    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}
   </div>`;
 }
 
@@ -296,7 +298,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
 
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
-        ${renderStrip(state, current, next, now, ctx.tz)}
+        ${renderStrip(state, current, next, now, ctx.tz, ctx.terms)}
         <div class="now-cols">
           <div class="now-col now-col-now">
             <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
@@ -330,7 +332,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       if (prevSig !== null && prevSig !== sig) {
         return reply.header('HX-Refresh', 'true').send('');
       }
-      return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz));
+      return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms));
     } catch {
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');
     }

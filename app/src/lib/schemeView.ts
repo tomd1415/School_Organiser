@@ -7,9 +7,9 @@ import type { UnitCandidate } from '../services/convertUnit';
 
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
   return `<span class="row-actions">
-    <button type="button" class="link" hx-post="/schemes/${kind}/${id}/move/up" hx-target="#scheme-tree" hx-swap="outerHTML">▲</button>
-    <button type="button" class="link" hx-post="/schemes/${kind}/${id}/move/down" hx-target="#scheme-tree" hx-swap="outerHTML">▼</button>
-    <button type="button" class="link danger" hx-post="/schemes/${kind}/${id}/delete" hx-target="#scheme-tree" hx-swap="outerHTML" hx-confirm="${esc(confirm)}">✕</button>
+    <button type="button" class="link" title="Move ${kind} up" aria-label="Move ${kind} up" hx-post="/schemes/${kind}/${id}/move/up" hx-target="#scheme-tree" hx-swap="outerHTML">▲</button>
+    <button type="button" class="link" title="Move ${kind} down" aria-label="Move ${kind} down" hx-post="/schemes/${kind}/${id}/move/down" hx-target="#scheme-tree" hx-swap="outerHTML">▼</button>
+    <button type="button" class="link danger" title="Delete ${kind}" aria-label="Delete ${kind}" hx-post="/schemes/${kind}/${id}/delete" hx-target="#scheme-tree" hx-swap="outerHTML" hx-confirm="${esc(confirm)}">✕</button>
   </span>`;
 }
 
@@ -83,7 +83,15 @@ export function renderLayResult(laid: LaidLesson[], totalLessons: number): strin
 }
 
 export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): string {
+  const toggles =
+    tree.length > 0
+      ? `<p class="tree-tools muted">
+          <button type="button" class="link" onclick="this.closest('#scheme-tree').querySelectorAll('details').forEach(d=>d.open=true)">expand all</button> ·
+          <button type="button" class="link" onclick="this.closest('#scheme-tree').querySelectorAll('details').forEach(d=>d.open=false)">collapse all</button>
+        </p>`
+      : '';
   return `<div id="scheme-tree">
+    ${toggles}
     ${tree.map(renderUnit).join('')}
     <button type="button" class="btn-secondary" hx-post="/schemes/${scheme.id}/unit" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
   </div>`;

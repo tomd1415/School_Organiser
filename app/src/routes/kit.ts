@@ -70,7 +70,7 @@ function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchi
     ? groups
         .map(
           ([cat, items]) => `<h2 class="kit-cat">${esc(cat)}</h2>
-          <table class="kit-table"><thead>${head}</thead><tbody>${items.map((e) => renderRow(e, today)).join('')}</tbody></table>`,
+          <div class="table-scroll"><table class="kit-table"><thead>${head}</thead><tbody>${items.map((e) => renderRow(e, today)).join('')}</tbody></table></div>`,
         )
         .join('')
     : `<p class="muted">${needle ? 'Nothing matches the filter.' : 'No kit recorded yet — add the first item below.'}</p>`;

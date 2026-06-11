@@ -142,6 +142,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .now-strip { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.95rem; margin-bottom: 1rem; font-size: 0.95rem; }
 .now-strip .now-when { font-weight: 700; }
 .now-strip .now-mins { color: var(--accent); font-weight: 700; }
+.now-strip .now-week { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
 .now-strip a { color: var(--accent); font-weight: 600; }
 .now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
 .now-card h1 { margin: 0.25rem 0 0.4rem; }
@@ -241,7 +242,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .res-count { margin: 0.5rem 0 0.25rem; font-size: 0.82rem; }
 .res-pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; font-size: 0.85rem; }
 .res-list { list-style: none; padding: 0; margin: 0; }
-.res { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+.res { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
 .res-kind { font-size: 1.1rem; }
 .res-meta { font-size: 0.78rem; margin-left: auto; }
 .res-linked { list-style: none; padding: 0; margin: 0.3rem 0; }
@@ -327,6 +328,10 @@ a.tt-lesson:hover { background: #eef3fc; }
 .map-adapted { font-size: 0.75rem; color: var(--accent); font-weight: 700; }
 .map-stop { font-size: 0.8rem; }
 .map-future a { text-decoration: none; }
+.map-master { font-size: 0.72rem; color: var(--muted); text-decoration: none; }
+.map-master:hover { color: var(--accent); }
+.map-shift { font-size: 0.78rem; }
+.ld-slot-links { margin: 0.3rem 0; font-size: 0.82rem; display: flex; gap: 1rem; align-items: center; }
 
 /* now: two columns — current lesson on the left, what's next on the right; stacks on narrow */
 .now-cols { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem; align-items: start; }
@@ -400,3 +405,41 @@ a.tt-lesson:hover { background: #eef3fc; }
 .all-schemes-list { list-style: none; padding: 0; margin: 0.4rem 0; }
 .all-schemes-list li { padding: 0.3rem 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
 .all-schemes-list li.current { font-weight: 700; }
+
+/* ── responsive: tablets & phones on the LAN ─────────────────────────────────────────────── */
+.nav { flex-wrap: wrap; row-gap: 0.25rem; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 900px) {
+  .nav { gap: 0.6rem; }
+  .nav a { font-size: 0.85rem; }
+  .card, .now-card { padding: 0.9rem 1rem; }
+  .lay-form, .convert-assign, .kit-filter { flex-wrap: wrap; align-items: start; }
+}
+@media (max-width: 600px) {
+  body { font-size: 15px; }
+  .topbar { flex-wrap: wrap; gap: 0.3rem; }
+  .map-date { width: auto; }
+  .kit-table input { min-width: 6rem; }
+  .kit-qty { min-width: 2.6rem !important; }
+}
+
+/* ── print: cover sheets, the week grid and the medium-term plan ─────────────────────────── */
+@media print {
+  .topbar, .nav, button, .btn-secondary, .link, .now-focus, .map-pick, .kit-add, .kit-filter,
+  .res-upload, .res-search, .fu-form, .note-status, .timer-banner, summary { display: none !important; }
+  details { display: block; }
+  details > *:not(summary) { display: block; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .card, .now-card, .ld-course { border: none; box-shadow: none; padding: 0.25rem 0; }
+  a { color: #000; text-decoration: none; }
+  .table-scroll { overflow: visible; }
+  .tt-table, .map-table { font-size: 9pt; }
+  input, textarea { border: none !important; padding: 0; font: inherit; }
+}
+
+/* schemes: readability */
+.tree-tools { margin: 0 0 0.4rem; font-size: 0.8rem; }
+.sch-divider { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-top: 1px solid var(--line); padding-top: 0.8rem; margin: 1.4rem 0 0.4rem; }
+.res-used { font-size: 0.78rem; }
+.res-usage { flex-basis: 100%; }
+.res-usage-list { list-style: none; margin: 0.2rem 0 0.2rem 1.6rem; padding: 0; font-size: 0.8rem; }

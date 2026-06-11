@@ -115,9 +115,11 @@ function renderSection(
   plans: Array<{ id: number; title: string }>,
   resources: LinkedResource[],
   eff: EffectiveLesson | undefined,
+  slot: { lessonId: number; date: string },
 ): string {
   const colour = s.colour ?? '#94a3b8';
   const oc = s.occurrenceCourseId;
+  const slotKey = `${slot.lessonId}:${s.groupCourseId}`;
   const planOpts =
     `<option value=""${s.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>` +
     plans.map((p) => `<option value="${p.id}"${p.id === s.lessonPlanId ? ' selected' : ''}>${esc(p.title)}</option>`).join('');
@@ -141,6 +143,12 @@ function renderSection(
           hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
         <span class="note-status" id="oc-${oc}-status"></span>
       </label>
+      <p class="ld-slot-links">
+        <a class="link" href="/map?slot=${slotKey}">📅 term map for this class →</a>
+        ${s.lessonPlanId != null ? `<button type="button" class="link" hx-post="/map/shift" hx-vals='{"slot":"${slotKey}","date":"${esc(slot.date)}"}'
+          hx-confirm="Didn't finish? This lesson repeats at the next ${esc(s.courseName)} slot and everything after shifts back one school week (holidays skipped)."
+          title="repeat this lesson next week and shift the rest">↻ continue next week</button>` : ''}
+      </p>
       <details class="group-ctx" id="group-ctx-${s.groupCourseId}">
         <summary>this class's teaching context</summary>
         <div hx-get="/lesson/group-context/${s.groupCourseId}" hx-trigger="toggle from:#group-ctx-${s.groupCourseId} once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
@@ -174,6 +182,7 @@ function renderDetail(
               plansByCourse.get(s.courseId) ?? [],
               (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [],
               s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
+              { lessonId: h.lessonId, date: h.date },
             ),
           )
           .join('')

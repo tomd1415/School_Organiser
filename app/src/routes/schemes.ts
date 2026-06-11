@@ -117,7 +117,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             ${renderTeachingContext(courseId, teachingCtx)}
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
             ${tree}
+            <h2 class="sch-divider">Add or import content</h2>
             ${renderConvertPanel(courseId, courseSlots, today)}
+            <h2 class="sch-divider">Reference &amp; admin</h2>
             <details class="kit-avail" id="kit-avail">
               <summary>🔧 Kit available</summary>
               <div hx-get="/kit/panel" hx-trigger="toggle from:#kit-avail once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
