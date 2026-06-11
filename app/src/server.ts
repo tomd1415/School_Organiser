@@ -26,6 +26,7 @@ import { registerCapturedRoutes } from './routes/captured';
 import { registerRecurringRoutes } from './routes/recurring';
 import { registerSchemeRoutes } from './routes/schemes';
 import { registerMapRoutes } from './routes/map';
+import { registerKitRoutes } from './routes/kit';
 import { registerResourceRoutes } from './routes/resources';
 import { generateDueInstances } from './repos/recurringTasks';
 import { localParts } from './lib/time';
@@ -80,6 +81,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerRecurringRoutes(app);
   registerSchemeRoutes(app);
   registerMapRoutes(app);
+  registerKitRoutes(app);
   registerResourceRoutes(app);
 
   return app;

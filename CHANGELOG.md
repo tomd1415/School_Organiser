@@ -7,6 +7,50 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-11 — Phase 5.7 + 5.8 built, and 5.9's first two stretches
+
+- **5.8 — Kit inventory** (`/kit`, "Kit" in the nav; migration `0011_equipment`): the classroom
+  hardware list — name, category, **own vs working counts** (the gap = out for repair, shown red),
+  location, notes, tags, archive-not-delete, and a one-click **"✓ today"** stock-take stamp (stale >
+  a term shows red). A collapsed **"🔧 Kit available"** panel sits on the Schemes page, and
+  `equipmentItem()` injects the active list into **all six AI planning features** (author scheme,
+  draft lesson, generate resource, convert unit, adapt lesson, improve master) with the instruction
+  to *plan within this list and say so if something needed isn't on it*. Empty inventory injects
+  nothing. Live-verified: the audited request for a real conversion contained the kit list.
+- **5.7 — Bulk: fill a whole unit + assign, in one action.** The convert panel gains *"…and lay
+  into [slot] starting from [date]"*: convert → materialise → source-link → lay into the slot's
+  upcoming weeks → land on **`/map`** showing the filled weeks. The assign target is validated
+  **before** the AI call (no spend on a doomed request); a short or skipped lay-down never rolls
+  back the converted unit. The Map page links back ("fill this slot from a downloaded unit →").
+  Live-verified end-to-end (real AI convert → 3 lessons laid in order onto far-future dates).
+- **5.9 (first two stretches):**
+  - **"↻ continue next week"** on the map (recent/today rows): the unfinished lesson repeats at the
+    slot's next occurrence and everything after shifts back one school week, holiday-aware; new
+    bindings never start before today, so history is never rewritten.
+  - **Per-class teaching-context** (migration `0012_group_context`): a per-`group_courses` text on
+    the lesson screen ("this class's teaching context"), **adding to** the course context (labelled
+    *FOR THIS CLASS SPECIFICALLY*) when the AI adapts for that class. Improve-master deliberately
+    still gets only the course context, so the canonical lesson never drifts towards one group.
+- **Totals: 139 unit / 82 integration tests, all green.** Two live AI verifications, cleaned up;
+  zero test/audit debris. Remaining 5.9: content-based conversion, cross-group compare,
+  kit-per-lesson, CSV import / convert de-dup.
+
+### 2026-06-11 — Plan: equipment inventory joins Phase 5 (5.8); detailed 5.7/5.8 plans written
+
+- **New requirement (teacher):** keep an **inventory of classroom hardware/equipment** that can be
+  referred to during planning at any stage. Added to [docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md) as
+  **slice 5.8** (`/kit`): migration `0011_equipment` (name, category, qty total/working, location,
+  notes, tags, archive, last-checked), a grouped autosaving page, a read-only "🔧 Kit available"
+  panel on Schemes, and an `equipmentItems()` prompt item injected into **all six AI planning
+  features** (author/draft/generate/convert/adapt/improve) — empty inventory injects nothing.
+- **Detailed plans written** for **5.7** (bulk *fill a whole unit + assign* in one action: optional
+  assign block on the convert panel → lay into the slot's weeks → land on `/map` to review; decided
+  semantics: degrade writes nothing, short lay-downs never roll back the conversion) and **5.8**
+  (above), plus an itemised **5.9** stretch list (pacing/carry-over, per-group teaching-context,
+  content-based conversion, kit-per-lesson, cross-group compare). Former stretch bundle renumbered
+  **5.8 → 5.9**; §8 marked promote-to-master and source-provenance as already landed (5.5b / 5.3).
+  Docs only — no code in this change.
+
 ### 2026-06-11 — Phase 5.3–5.6: convert a downloaded unit, lay it into the calendar, the feedback loop, and the curriculum map
 
 Phase 5's headline workflow is now end-to-end: **download → convert → lay into the weeks → teach →

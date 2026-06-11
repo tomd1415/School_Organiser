@@ -90,7 +90,14 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): s
 }
 
 // 5.3: convert a downloaded (imported) unit into adapted master lessons for this course.
-export function renderConvertPanel(courseId: number, error?: string): string {
+// 5.7: optionally assign in the same action — lay the converted lessons straight into a group's
+// weekly slot, then land on the curriculum map to review.
+export function renderConvertPanel(courseId: number, slots: CourseSlot[], defaultStart: string, error?: string): string {
+  const slotOpts =
+    `<option value="">— don't assign yet —</option>` +
+    slots
+      .map((s) => `<option value="${s.lessonId}:${s.groupCourseId}">${esc(s.groupName ?? 'group')} · ${weekdayName(s.weekday)} ${esc(s.periodLabel)} (${esc(s.start)})</option>`)
+      .join('');
   return `<details class="convert-panel" id="convert-panel"${error ? ' open' : ''}>
     <summary>📥 Convert a downloaded unit for my classes</summary>
     <form hx-post="/schemes/course/${courseId}/convert" hx-target="#convert-panel" hx-swap="outerHTML" hx-disabled-elt="find button">
@@ -98,8 +105,12 @@ export function renderConvertPanel(courseId: number, error?: string): string {
       <input type="search" name="q" placeholder="find a unit folder… e.g. year_7 or Networks" autocomplete="off"
         hx-get="/schemes/course/${courseId}/convert-search" hx-trigger="input changed delay:400ms, search" hx-target="#convert-results" hx-swap="innerHTML">
       <div id="convert-results"><span class="muted">type to search the imported folders…</span></div>
+      <div class="convert-assign">
+        <label>…and lay into<select name="assign_slot">${slotOpts}</select></label>
+        <label>starting from<input type="date" name="assign_start" value="${esc(defaultStart)}"></label>
+      </div>
       <button type="submit" class="btn-secondary">✨ Convert the selected unit (AI)</button>
-      <p class="muted lay-note">Adds the adapted lessons as a new unit on this course's scheme — the downloaded files are untouched and get linked to it as sources.</p>
+      <p class="muted lay-note">Adds the adapted lessons as a new unit on this course's scheme — the downloaded files are untouched and get linked as sources. If a slot is chosen, the lessons are laid into its upcoming weeks (holidays skipped) and you land on the Map to review.</p>
     </form>
   </details>`;
 }

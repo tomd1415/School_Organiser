@@ -45,6 +45,7 @@ export interface SlotOption {
   lessonId: number;
   groupCourseId: number;
   groupName: string | null;
+  courseId: number;
   courseName: string;
   weekday: number;
   periodLabel: string;
@@ -53,7 +54,7 @@ export interface SlotOption {
 export async function listAllSlots(): Promise<SlotOption[]> {
   const { rows } = await pool.query<SlotOption>(
     `SELECT tl.id AS "lessonId", gc.id AS "groupCourseId", g.name AS "groupName",
-            c.name AS "courseName", p.weekday, p.label AS "periodLabel"
+            c.id AS "courseId", c.name AS "courseName", p.weekday, p.label AS "periodLabel"
      FROM timetabled_lesson_courses tlc
      JOIN group_courses gc      ON gc.id = tlc.group_course_id
      JOIN courses c             ON c.id  = gc.course_id

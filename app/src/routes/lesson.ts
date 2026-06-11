@@ -16,20 +16,24 @@ import {
   getAdaptation,
   getEffectiveLesson,
   getGroupCourseInfo,
+  getGroupTeachingContext,
   listAdaptationHistory,
   recentGroupHistory,
   resetAdaptation,
+  setGroupTeachingContext,
   upsertAdaptation,
   type EffectiveLesson,
 } from '../repos/adaptations';
 import { getCourseTeachingContext } from '../repos/schemes';
-import { teachingContextItems } from '../llm/prompts/teachingContext';
+import { groupContextItems } from '../llm/prompts/teachingContext';
 import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
 import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, historyItems, lessonItem } from '../llm/prompts/adaptLesson';
 import { improveMasterSchema } from '../llm/schemas/improveMaster';
 import { IMPROVE_MASTER_INSTRUCTION, IMPROVE_MASTER_SYSTEM, IMPROVE_MASTER_VERSION, masterPairItems } from '../llm/prompts/improveMaster';
+import { listActiveEquipment } from '../repos/equipment';
+import { equipmentItem } from '../llm/prompts/equipment';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
@@ -137,6 +141,10 @@ function renderSection(
           hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
         <span class="note-status" id="oc-${oc}-status"></span>
       </label>
+      <details class="group-ctx" id="group-ctx-${s.groupCourseId}">
+        <summary>this class's teaching context</summary>
+        <div hx-get="/lesson/group-context/${s.groupCourseId}" hx-trigger="toggle from:#group-ctx-${s.groupCourseId} once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+      </details>
     </section>`;
 }
 
@@ -329,6 +337,27 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       );
   });
 
+  // 5.9: per-class teaching-context — cohort-level prose only (never an individual pupil); adds to
+  // the course context when the AI adapts for this group.
+  app.get('/lesson/group-context/:gc', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const text = await getGroupTeachingContext(p.data.gc);
+    return reply.type('text/html').send(`
+      <p class="muted group-ctx-hint">Adds to the course context when adapting for this class. Describe the class as a whole — never an individual pupil.</p>
+      <textarea name="text" rows="3" placeholder="e.g. this class needs shorter tasks and a movement break mid-lesson…"
+        hx-post="/lesson/group-context/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(text ?? '')}</textarea>
+      <span class="note-status" id="group-ctx-${p.data.gc}-status"></span>`);
+  });
+
+  app.post('/lesson/group-context/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ text: z.string().max(4000) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await setGroupTeachingContext(p.data.gc, b.data.text);
+    return reply.type('text/html').send(renderSavedStatus(`group-ctx-${p.data.gc}-status`));
+  });
+
   // 5.5: the feedback loop — AI adapts this lesson for THIS group from its recent lessons
   // (stopping points + notes). Inputs go through the one wrapper: names redacted, safeguarding-
   // flagged notes withheld entirely, call audited. The master is never touched.
@@ -356,7 +385,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         promptVersion: ADAPT_LESSON_VERSION,
         system: ADAPT_LESSON_SYSTEM,
         context: [
-          ...teachingContextItems(await getCourseTeachingContext(info.courseId)),
+          ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
+          ...equipmentItem(await listActiveEquipment()),
           lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),
           ...historyItems(history),
         ],
@@ -403,7 +433,10 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         promptVersion: IMPROVE_MASTER_VERSION,
         system: IMPROVE_MASTER_SYSTEM,
         context: [
-          ...teachingContextItems(await getCourseTeachingContext(info.courseId)),
+          // The MASTER serves every class, so only the course-level context applies here — the
+          // class-specific text would pull the canonical lesson towards one group.
+          ...groupContextItems(await getCourseTeachingContext(info.courseId), null),
+          ...equipmentItem(await listActiveEquipment()),
           ...masterPairItems(master.title, master, adaptation),
           ...historyItems(history),
         ],

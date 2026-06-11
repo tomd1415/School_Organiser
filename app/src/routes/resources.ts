@@ -20,6 +20,8 @@ import { modelFor } from '../repos/settings';
 import { callLLMStructured } from '../llm/client';
 import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
+import { listActiveEquipment } from '../repos/equipment';
+import { equipmentItem } from '../llm/prompts/equipment';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -95,7 +97,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         model: await modelFor('plan'),
         promptVersion: GENERATE_RESOURCE_VERSION,
         system: GENERATE_RESOURCE_SYSTEM,
-        context: [{ text: b.data.brief }],
+        context: [...equipmentItem(await listActiveEquipment()), { text: b.data.brief }],
         instruction: 'Generate the resource now.',
         maxTokens: 8000,
       },

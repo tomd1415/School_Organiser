@@ -43,6 +43,8 @@ import {
   unlinkResourceFromPlan,
 } from '../repos/resources';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
+import { listActiveEquipment } from '../repos/equipment';
+import { equipmentItem } from '../llm/prompts/equipment';
 import { convertUnitSchema } from '../llm/schemas/convertUnit';
 import { CONVERT_UNIT_SYSTEM, CONVERT_UNIT_VERSION, convertUnitInstruction } from '../llm/prompts/convertUnit';
 import { buildSchemeTree } from '../services/scheme';
@@ -96,11 +98,14 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const verLinks = versions
           .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}"${scheme && v.id === scheme.id ? ' class="active"' : ''}>v${v.version}${v.active ? '' : ' (draft)'}</a>`)
           .join(' ');
-        const [tree, teachingCtx, allSchemes] = await Promise.all([
+        const [tree, teachingCtx, allSchemes, courseSlots, clockCtx] = await Promise.all([
           scheme ? treeHtml(scheme.id) : Promise.resolve(renderSchemeEmpty(courseId, undefined, current?.name)),
           getCourseTeachingContext(courseId),
           listAllSchemes(),
+          listSlotsForCourse(courseId),
+          getClockContext(),
         ]);
+        const today = localParts(new Date(), clockCtx.tz).isoDate;
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
             <h1>Schemes of work</h1>
@@ -112,7 +117,11 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             ${renderTeachingContext(courseId, teachingCtx)}
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
             ${tree}
-            ${renderConvertPanel(courseId)}
+            ${renderConvertPanel(courseId, courseSlots, today)}
+            <details class="kit-avail" id="kit-avail">
+              <summary>🔧 Kit available</summary>
+              <div hx-get="/kit/panel" hx-trigger="toggle from:#kit-avail once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+            </details>
             ${renderAllSchemes(allSchemes, scheme?.id)}
           </section>`;
       }
@@ -152,6 +161,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         system: AUTHOR_SCHEME_SYSTEM,
         context: [
           ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
+          ...equipmentItem(await listActiveEquipment()),
           { text: authorSchemeInstruction(course.name, b.data.brief) },
         ],
         instruction: 'Design the scheme now.',
@@ -181,21 +191,43 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(renderConvertResults(candidates));
   });
 
-  // 5.3: convert the chosen downloaded unit into adapted master lessons on this course's scheme.
+  // 5.3 + 5.7: convert the chosen downloaded unit into adapted master lessons on this course's
+  // scheme — and, if a slot was chosen, lay the lessons straight into its upcoming weeks.
   app.post('/schemes/course/:id/convert', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
-    const b = z.object({ folder: z.string().min(1).max(500), q: z.string().optional() }).safeParse(req.body);
+    const b = z
+      .object({
+        folder: z.string().min(1).max(500),
+        q: z.string().optional(),
+        assign_slot: z.string().regex(/^\d+:\d+$/).optional().or(z.literal('')),
+        assign_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+      })
+      .safeParse(req.body);
     if (!id.success) return reply.code(400).send('');
     const courseId = id.data.id;
     const course = (await listCourses()).find((c) => Number(c.id) === courseId);
     if (!course) return reply.code(404).send('');
+    const [slots, ctx] = await Promise.all([listSlotsForCourse(courseId), getClockContext()]);
+    const today = localParts(new Date(), ctx.tz).isoDate;
+    const panel = (error: string) => renderConvertPanel(courseId, slots, today, error);
     if (!b.success) {
-      return reply.type('text/html').send(renderConvertPanel(courseId, 'Pick a unit folder first — search, then select one.'));
+      return reply.type('text/html').send(panel('Pick a unit folder first — search, then select one.'));
     }
+    // Validate the optional assign target BEFORE the AI call — don't spend, then fail.
+    const assignSlot = b.data.assign_slot || null;
+    let assignTarget: { lessonId: number; groupCourseId: number } | null = null;
+    if (assignSlot) {
+      const [lessonId, groupCourseId] = assignSlot.split(':').map(Number) as [number, number];
+      if (!slots.some((s) => Number(s.lessonId) === lessonId && Number(s.groupCourseId) === groupCourseId)) {
+        return reply.type('text/html').send(panel("That slot doesn't teach this course — pick one from the list."));
+      }
+      assignTarget = { lessonId, groupCourseId };
+    }
+    const startDate = b.data.assign_start || today;
     const paths = await getImportedPaths();
     // Only a genuine candidate folder is convertible (also guards the LIKE in the source-link query).
     if (!unitCandidates(paths).some((c) => c.folder === b.data.folder)) {
-      return reply.type('text/html').send(renderConvertPanel(courseId, 'That folder is not a convertible unit — pick one from the search results.'));
+      return reply.type('text/html').send(panel('That folder is not a convertible unit — pick one from the search results.'));
     }
     const lessons = lessonStructure(paths, b.data.folder);
 
@@ -207,6 +239,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         system: CONVERT_UNIT_SYSTEM,
         context: [
           ...teachingContextItems(await getCourseTeachingContext(courseId)),
+          ...equipmentItem(await listActiveEquipment()),
           { text: convertUnitInstruction(course.name, b.data.folder, lessons) },
         ],
         instruction: 'Convert the unit now.',
@@ -216,19 +249,32 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     );
     const converted = result.data;
     if (result.status !== 'ok' || !converted || converted.lessons.length === 0) {
-      return reply.type('text/html').send(renderConvertPanel(courseId, result.message ?? 'The AI could not convert this unit — try again.'));
+      return reply.type('text/html').send(panel(result.message ?? 'The AI could not convert this unit — try again.'));
     }
 
     // Land on the course's scheme (create one if the course has none yet).
-    let scheme = await getActiveScheme(courseId);
-    let schemeId = scheme ? Number(scheme.id) : await createScheme(courseId);
-    if (!schemeId) return reply.type('text/html').send(renderConvertPanel(courseId, 'Could not find or create a scheme for this course.'));
+    const scheme = await getActiveScheme(courseId);
+    const schemeId = scheme ? Number(scheme.id) : await createScheme(courseId);
+    if (!schemeId) return reply.type('text/html').send(panel('Could not find or create a scheme for this course.'));
     const unitId = await materialiseUnit(schemeId, converted.unitTitle, converted.lessons);
-    if (!unitId) return reply.type('text/html').send(renderConvertPanel(courseId, 'Could not save the converted unit.'));
+    if (!unitId) return reply.type('text/html').send(panel('Could not save the converted unit.'));
 
     // Source provenance: link the downloaded files to the new unit (capped — a unit can hold many).
     const sourceIds = (await listResourceIdsForFolder(b.data.folder)).slice(0, 80);
     for (const rid of sourceIds) await linkResourceToUnit(rid, unitId);
+
+    // 5.7: assign in the same action — lay into the chosen slot's weeks, then review on the map.
+    // A short or empty lay-down never rolls back the conversion; the map shows what happened.
+    if (assignTarget) {
+      const weekday = await getSlotWeekday(assignTarget.lessonId);
+      if (weekday != null) {
+        const unitPlans = await listPlansForUnit(unitId);
+        const dates = upcomingSlotDates(weekday, startDate, unitPlans.length, ctx.terms);
+        await layLessonsIntoSlot(assignTarget.lessonId, assignTarget.groupCourseId, unitPlans, dates);
+      }
+      reply.header('HX-Redirect', `/map?slot=${assignTarget.lessonId}:${assignTarget.groupCourseId}`);
+      return reply.send('');
+    }
 
     reply.header('HX-Redirect', `/schemes?course=${courseId}&scheme=${schemeId}`);
     return reply.send('');
@@ -421,7 +467,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelFor('plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
-        context: [...teachingContextItems(ctx.teachingContext), { text: draftLessonInstruction(ctx) }],
+        context: [...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
         instruction: 'Draft the lesson now.',
         maxTokens: 4000,
       },

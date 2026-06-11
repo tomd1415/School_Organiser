@@ -319,6 +319,41 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       payload: `folder=${encodeURIComponent('Not/A/Real/Unit')}`,
     });
     expect(bad.body).toContain('not a convertible unit');
+
+    // 5.7: the assign block is on the panel, and a slot that doesn't teach the course is rejected
+    // up front (before any AI spend)
+    expect(page.body).toContain('assign_slot');
+    const badSlot = await app.inject({
+      method: 'POST',
+      url: `/schemes/course/${courseId}/convert`,
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `folder=${encodeURIComponent(folder)}&assign_slot=999999%3A999999&assign_start=2099-06-01`,
+    });
+    expect(badSlot.body).toContain('teach this course'); // (apostrophe is HTML-escaped)
+    // degrade with a VALID assign target still writes neither unit nor bindings
+    const slotRow = await pool.query<{ lessonId: number; groupCourseId: number }>(
+      `SELECT tl.id AS "lessonId", gc.id AS "groupCourseId"
+       FROM timetabled_lesson_courses tlc
+       JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
+       JOIN group_courses gc ON gc.id = tlc.group_course_id
+       WHERE gc.course_id = $1 LIMIT 1`,
+      [courseId],
+    );
+    if (slotRow.rows[0]) {
+      const { lessonId, groupCourseId } = slotRow.rows[0];
+      const beforeOcc = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM lesson_occurrences WHERE date >= '2099-01-01'`);
+      const deg = await app.inject({
+        method: 'POST',
+        url: `/schemes/course/${courseId}/convert`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `folder=${encodeURIComponent(folder)}&assign_slot=${lessonId}%3A${groupCourseId}&assign_start=2099-06-01`,
+      });
+      expect(deg.body).toContain('class="error"'); // AI degrade (no key)
+      const afterUnits = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM units`);
+      expect(afterUnits.rows[0]!.n).toBe(before.rows[0]!.n);
+      const afterOcc = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM lesson_occurrences WHERE date >= '2099-01-01'`);
+      expect(afterOcc.rows[0]!.n).toBe(beforeOcc.rows[0]!.n); // no bindings either
+    }
   });
 
   it('AI adapt-for-this-group: no-history message, then degrade without a key; never writes (5.5)', async () => {
@@ -411,6 +446,145 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     if (second) {
       const r2 = await app.inject({ method: 'GET', url: `/map?slot=${second}`, headers: { cookie: session } });
       expect(r2.body).toContain(`value="${second}" selected`);
+    }
+  });
+
+  it('Kit page: renders, add/edit/archive round-trip, panel on Schemes (5.8)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/kit', headers: { cookie: session } });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('Kit — classroom equipment');
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const hdrs = { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' };
+    // add
+    const added = await app.inject({ method: 'POST', url: '/kit/add', headers: hdrs, payload: 'name=TEST+kit+item&category=robotics' });
+    expect(added.body).toContain('TEST kit item');
+    const r = await pool.query<{ id: number }>(`SELECT id FROM equipment WHERE name = 'TEST kit item'`);
+    const id = Number(r.rows[0]!.id);
+    try {
+      // autosave a field + invalid numeric rejected
+      const save = await app.inject({ method: 'POST', url: `/kit/${id}`, headers: hdrs, payload: 'field=qty_total&value=12' });
+      expect(save.body).toContain('saved');
+      const bad = await app.inject({ method: 'POST', url: `/kit/${id}`, headers: hdrs, payload: 'field=qty_total&value=-3' });
+      expect(bad.statusCode).toBe(400);
+      const nofield = await app.inject({ method: 'POST', url: `/kit/${id}`, headers: hdrs, payload: 'field=id&value=99' });
+      expect(nofield.statusCode).toBe(400); // whitelist holds
+      // checked-today stamp
+      const checked = await app.inject({ method: 'POST', url: `/kit/${id}/checked`, headers: hdrs, payload: '' });
+      expect(checked.body).not.toContain('never');
+      // schemes panel lists it
+      const panel = await app.inject({ method: 'GET', url: '/kit/panel', headers: { cookie: session } });
+      expect(panel.body).toContain('TEST kit item');
+      // archive → leaves the active list (and the AI input)
+      await app.inject({ method: 'POST', url: `/kit/${id}/archive`, headers: hdrs, payload: '' });
+      const panel2 = await app.inject({ method: 'GET', url: '/kit/panel', headers: { cookie: session } });
+      expect(panel2.body).not.toContain('TEST kit item');
+      // schemes page hosts the collapsed kit panel
+      const schemes = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+      expect(schemes.body).toContain('kit-avail');
+    } finally {
+      await pool.query(`DELETE FROM equipment WHERE id = $1`, [id]);
+    }
+  });
+
+  it('Map carry-over: "continue next week" repeats the lesson and shifts the rest (5.9)', async () => {
+    // a real slot + its course
+    const slot = await pool.query<{ lessonId: number; groupCourseId: number; courseId: number; weekday: number }>(
+      `SELECT tl.id AS "lessonId", gc.id AS "groupCourseId", gc.course_id AS "courseId", p.weekday
+       FROM timetabled_lesson_courses tlc
+       JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
+       JOIN period_definitions p ON p.id = tl.period_definition_id
+       JOIN group_courses gc ON gc.id = tlc.group_course_id
+       WHERE tl.purpose = 'teaching' ORDER BY tl.id LIMIT 1`,
+    );
+    const { lessonId, groupCourseId, courseId, weekday } = slot.rows[0]!;
+    // a temporary 2099 term so the holiday-aware date walk has school days, far from the live calendar
+    const yr = await pool.query<{ id: number }>(`SELECT id FROM academic_years ORDER BY id LIMIT 1`);
+    const term = await pool.query<{ id: number }>(
+      `INSERT INTO term_dates (academic_year_id, name, start_date, end_date, kind) VALUES ($1, 'TEST 2099 term', '2099-06-01', '2099-07-31', 'term') RETURNING id`,
+      [yr.rows[0]!.id],
+    );
+    const termId = Number(term.rows[0]!.id);
+    const s = await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST shift', 93, false) RETURNING id`, [courseId]);
+    const schemeId = Number(s.rows[0]!.id);
+    const u = await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'U', 1) RETURNING id`, [schemeId]);
+    const unitId = Number(u.rows[0]!.id);
+    const planIds: number[] = [];
+    for (const [i, t] of ['SH-L1', 'SH-L2', 'SH-L3'].entries()) {
+      const p = await pool.query<{ id: number }>(
+        `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, $3, $4) RETURNING id`,
+        [unitId, courseId, t, i + 1],
+      );
+      planIds.push(Number(p.rows[0]!.id));
+    }
+    // first four slot dates inside the 2099 term
+    const dates: string[] = [];
+    {
+      let d = '2099-06-01';
+      while (dates.length < 4) {
+        if (new Date(`${d}T00:00:00Z`).getUTCDay() === (weekday === 7 ? 0 : weekday)) dates.push(d);
+        const nd = new Date(`${d}T00:00:00Z`);
+        nd.setUTCDate(nd.getUTCDate() + 1);
+        d = nd.toISOString().slice(0, 10);
+      }
+    }
+    const { layLessonsIntoSlot } = await import('../../src/repos/delivery');
+    try {
+      await layLessonsIntoSlot(lessonId, groupCourseId, planIds.map((id, i) => ({ id, title: `SH-L${i + 1}` })), dates.slice(0, 3));
+      const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/map/shift',
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `slot=${lessonId}%3A${groupCourseId}&date=${dates[0]}`,
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['hx-redirect']).toContain('/map?slot=');
+      const bound = await pool.query<{ date: string; lesson_plan_id: string }>(
+        `SELECT to_char(o.date, 'YYYY-MM-DD') AS date, oc.lesson_plan_id
+         FROM occurrence_courses oc JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+         WHERE oc.group_course_id = $1 AND o.date = ANY($2) ORDER BY o.date`,
+        [groupCourseId, dates],
+      );
+      const byDate = new Map(bound.rows.map((r) => [r.date, Number(r.lesson_plan_id)]));
+      expect(byDate.get(dates[0]!)).toBe(planIds[0]); // the unfinished week keeps its record
+      expect(byDate.get(dates[1]!)).toBe(planIds[0]); // …and repeats next week
+      expect(byDate.get(dates[2]!)).toBe(planIds[1]); // the rest shift back one week
+      expect(byDate.get(dates[3]!)).toBe(planIds[2]);
+    } finally {
+      await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE lesson_plan_id = ANY($1)`, [planIds]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = ANY($1)`, [dates]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = ANY($1)`, [planIds]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
+      await pool.query(`DELETE FROM term_dates WHERE id = $1`, [termId]);
+    }
+  });
+
+  it('Per-class teaching-context: form + autosave round-trip (5.9)', async () => {
+    const gc = await pool.query<{ id: number }>(`SELECT id FROM group_courses ORDER BY id LIMIT 1`);
+    const gcId = Number(gc.rows[0]!.id);
+    const before = await pool.query<{ tc: string | null }>(`SELECT teaching_context tc FROM group_courses WHERE id = $1`, [gcId]);
+    const form = await app.inject({ method: 'GET', url: `/lesson/group-context/${gcId}`, headers: { cookie: session } });
+    expect(form.statusCode).toBe(200);
+    expect(form.body).toContain('never an individual pupil');
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    try {
+      const save = await app.inject({
+        method: 'POST',
+        url: `/lesson/group-context/${gcId}`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: 'text=TEST+class+ctx+%E2%80%94+movement+breaks',
+      });
+      expect(save.body).toContain('saved');
+      const after = await pool.query<{ tc: string | null }>(`SELECT teaching_context tc FROM group_courses WHERE id = $1`, [gcId]);
+      expect(after.rows[0]!.tc).toContain('TEST class ctx');
+    } finally {
+      await pool.query(`UPDATE group_courses SET teaching_context = $2 WHERE id = $1`, [gcId, before.rows[0]!.tc]);
     }
   });
 

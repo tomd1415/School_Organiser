@@ -5,14 +5,16 @@ lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. 
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
 > **Status:** **Phases 1–4 are complete** (only **pupils** 2.11 is deferred to the pupil-facing
-> project; 4.6/4.8 partial) and **Phase 5 (curriculum delivery) is largely built — 5.1–5.6**
+> project; 4.6/4.8 partial) and **Phase 5 (curriculum delivery) is built through 5.8**
 > ([docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)): a **master scheme per course** with **per-group
-> adaptations + change logs** on the lesson screen, **convert a downloaded unit into SEND-pitched
-> master lessons (AI)**, **lay a unit into a group's weekly slots** (holiday-aware), a two-way
-> **feedback loop** (adapt the next delivery from the group's notes; fold improvements back into the
-> master on approval) and a per-group **curriculum map** (`/map`). All AI goes through the one
-> redaction/withholding/audit wrapper ([docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md), DPIA drafted).
-> Log in over the LAN (`./start.sh`). To enable live Office preview, pull the Gotenberg sidecar
+> adaptations + change logs**, **convert a downloaded unit into SEND-pitched master lessons (AI)**
+> — optionally **assigned straight into a group's weekly slots in the same action** (holiday-aware),
+> a two-way **feedback loop** (adapt the next delivery from the class's notes; fold improvements
+> back into the master on approval), a per-group **curriculum map** (`/map`) with **carry-over**
+> ("continue next week"), a **per-class teaching-context**, and a **kit inventory** (`/kit`) that
+> every AI planning feature plans within. All AI goes through the one redaction/withholding/audit
+> wrapper ([docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md), DPIA drafted). Log in over the LAN
+> (`./start.sh`). For live Office preview, pull the Gotenberg sidecar
 > (`docker compose --profile preview up -d gotenberg`).
 
 ## The one-sentence pitch

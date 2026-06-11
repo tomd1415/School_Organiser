@@ -218,6 +218,9 @@ a.tt-lesson:hover { background: #eef3fc; }
 .convert-panel form { margin-top: 0.5rem; }
 .convert-panel input[type="search"] { width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; }
 #convert-results { display: flex; flex-direction: column; gap: 0.2rem; margin: 0.5rem 0; max-height: 14rem; overflow-y: auto; }
+.convert-assign { display: flex; gap: 0.8rem; align-items: end; margin: 0.5rem 0; flex-wrap: wrap; }
+.convert-assign label { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.78rem; font-weight: 700; }
+.convert-assign select, .convert-assign input { font: inherit; font-weight: 400; padding: 0.3rem 0.4rem; border: 1px solid var(--line); border-radius: 4px; }
 .convert-opt { font-size: 0.85rem; display: flex; gap: 0.4rem; align-items: baseline; }
 /* 5.4: lay a unit into the calendar */
 .unit-lay { margin-top: 0.5rem; font-size: 0.85rem; }
@@ -253,6 +256,11 @@ a.tt-lesson:hover { background: #eef3fc; }
 .adapt-l { display: block; font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; }
 .adapt-l textarea { display: block; width: 100%; margin-top: 0.2rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; font-weight: 400; resize: vertical; }
 .adapt-note { font-size: 0.82rem; font-style: italic; margin: 0.3rem 0 0; color: var(--muted); }
+/* 5.9: per-class teaching-context */
+.group-ctx { margin-top: 0.4rem; font-size: 0.82rem; }
+.group-ctx summary { cursor: pointer; color: var(--muted); }
+.group-ctx textarea { display: block; width: 100%; margin-top: 0.25rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; resize: vertical; }
+.group-ctx-hint { margin: 0.25rem 0 0; font-size: 0.76rem; }
 .improve-prop { margin-top: 0.5rem; padding: 0.5rem 0.7rem; border: 1px solid var(--accent); border-radius: 8px; }
 .improve-prop form { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.4rem; }
 .improve-prop textarea[hidden] { display: none; }
@@ -284,6 +292,28 @@ a.tt-lesson:hover { background: #eef3fc; }
 .ov-course { font-size: 0.85rem; }
 .ov-staff { margin-left: auto; }
 
+/* 5.8: kit inventory */
+.kit-filter { display: flex; gap: 0.8rem; align-items: center; margin: 0.6rem 0; font-size: 0.85rem; }
+.kit-filter input[type="search"] { flex: 1; max-width: 22rem; padding: 0.35rem 0.55rem; border: 1px solid var(--line); border-radius: 4px; }
+.kit-cat { font-size: 0.95rem; margin: 1rem 0 0.2rem; text-transform: capitalize; }
+.kit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.kit-table th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding: 0.25rem 0.3rem; }
+.kit-table td { padding: 0.2rem 0.3rem; border-top: 1px solid var(--line); }
+.kit-table input { width: 100%; font: inherit; border: 1px solid transparent; border-radius: 4px; padding: 0.25rem 0.35rem; background: transparent; }
+.kit-table input:hover, .kit-table input:focus { border-color: var(--line); background: var(--card); }
+.kit-name { font-weight: 600; min-width: 9rem; }
+.kit-qty { width: 3.2rem !important; text-align: center; }
+.kit-qty.kit-broken { color: var(--error); font-weight: 700; }
+.kit-tags { min-width: 5rem; }
+.kit-checked { white-space: nowrap; font-size: 0.78rem; }
+.kit-checked.kit-stale { color: var(--error); }
+.kit-archived td { opacity: 0.55; }
+.kit-add { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.kit-add input { flex: 1; max-width: 22rem; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; }
+.kit-add select { padding: 0.35rem; border: 1px solid var(--line); border-radius: 4px; }
+.kit-avail { margin: 0.8rem 0; font-size: 0.9rem; }
+.kit-avail summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.kit-panel-list { margin: 0.4rem 0; padding-left: 1.2rem; font-size: 0.85rem; }
 /* 5.6: curriculum map */
 .map-pick label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; font-weight: 700; max-width: 30rem; }
 .map-pick select { font: inherit; font-weight: 400; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; }
