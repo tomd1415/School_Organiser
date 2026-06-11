@@ -1,6 +1,9 @@
 import { esc } from './html';
 import type { PlanRow, SchemeHeader, UnitWithPlans } from '../services/scheme';
 import type { SchemeListRow } from '../repos/schemes';
+import type { CourseSlot, LaidLesson } from '../repos/delivery';
+import { weekdayName } from '../services/delivery';
+import type { UnitCandidate } from '../services/convertUnit';
 
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
   return `<span class="row-actions">
@@ -45,7 +48,38 @@ function renderUnit(u: UnitWithPlans): string {
     </div>
     <ol class="plans">${u.plans.map((p) => renderPlan(p)).join('')}</ol>
     <button type="button" class="link" hx-post="/schemes/unit/${u.id}/plan" hx-target="#scheme-tree" hx-swap="outerHTML">＋ lesson plan</button>
+    <details class="unit-lay" id="unit-${u.id}-lay">
+      <summary>📅 Lay into a group's calendar</summary>
+      <div class="unit-lay-body" hx-get="/schemes/unit/${u.id}/lay-form" hx-trigger="toggle from:#unit-${u.id}-lay once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading slots…</span></div>
+    </details>
   </section>`;
+}
+
+// 5.4: the form to lay a unit's lessons into a group's weekly slot (loaded when the section opens).
+export function renderLayForm(unitId: number, slots: CourseSlot[], lessonCount: number, defaultStart: string): string {
+  if (!slots.length) {
+    return `<p class="muted">No group is timetabled for this course yet — nowhere to lay it down.</p>`;
+  }
+  if (lessonCount === 0) {
+    return `<p class="muted">This unit has no lessons yet — add some first.</p>`;
+  }
+  const opts = slots
+    .map((s) => `<option value="${s.lessonId}:${s.groupCourseId}">${esc(s.groupName ?? 'group')} · ${weekdayName(s.weekday)} ${esc(s.periodLabel)} (${esc(s.start)})</option>`)
+    .join('');
+  return `<form class="lay-form" hx-post="/schemes/unit/${unitId}/lay-down" hx-target="#unit-${unitId}-lay-result" hx-swap="innerHTML">
+      <label>Group &amp; weekly slot<select name="slot">${opts}</select></label>
+      <label>Start from<input type="date" name="start" value="${esc(defaultStart)}"></label>
+      <button type="submit" class="btn-secondary">Lay down ${lessonCount} lesson${lessonCount === 1 ? '' : 's'} →</button>
+      <p class="muted lay-note">Binds each lesson to that slot's upcoming weeks, skipping holidays. Re-laying overwrites those weeks.</p>
+    </form>
+    <div id="unit-${unitId}-lay-result"></div>`;
+}
+
+export function renderLayResult(laid: LaidLesson[], totalLessons: number): string {
+  if (!laid.length) return `<p class="muted">Nothing laid down — no upcoming dates found for that slot.</p>`;
+  const rows = laid.map((l) => `<li><span class="lay-date">${esc(l.date)}</span> → <a href="#" class="muted">${esc(l.title)}</a></li>`).join('');
+  const short = laid.length < totalLessons ? `<p class="muted">Only ${laid.length} of ${totalLessons} fit before the data runs out — re-lay later for the rest.</p>` : '';
+  return `<div class="lay-result"><p><strong>Laid ${laid.length} lesson${laid.length === 1 ? '' : 's'} into the calendar:</strong></p><ol class="lay-list">${rows}</ol>${short}</div>`;
 }
 
 export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): string {
@@ -53,6 +87,32 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): s
     ${tree.map(renderUnit).join('')}
     <button type="button" class="btn-secondary" hx-post="/schemes/${scheme.id}/unit" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
   </div>`;
+}
+
+// 5.3: convert a downloaded (imported) unit into adapted master lessons for this course.
+export function renderConvertPanel(courseId: number, error?: string): string {
+  return `<details class="convert-panel" id="convert-panel"${error ? ' open' : ''}>
+    <summary>📥 Convert a downloaded unit for my classes</summary>
+    <form hx-post="/schemes/course/${courseId}/convert" hx-target="#convert-panel" hx-swap="outerHTML" hx-disabled-elt="find button">
+      ${error ? `<p class="error">${esc(error)}</p>` : ''}
+      <input type="search" name="q" placeholder="find a unit folder… e.g. year_7 or Networks" autocomplete="off"
+        hx-get="/schemes/course/${courseId}/convert-search" hx-trigger="input changed delay:400ms, search" hx-target="#convert-results" hx-swap="innerHTML">
+      <div id="convert-results"><span class="muted">type to search the imported folders…</span></div>
+      <button type="submit" class="btn-secondary">✨ Convert the selected unit (AI)</button>
+      <p class="muted lay-note">Adds the adapted lessons as a new unit on this course's scheme — the downloaded files are untouched and get linked to it as sources.</p>
+    </form>
+  </details>`;
+}
+
+export function renderConvertResults(candidates: UnitCandidate[]): string {
+  if (!candidates.length) return '<span class="muted">no unit folders match — try fewer letters</span>';
+  return candidates
+    .slice(0, 12)
+    .map(
+      (c, i) =>
+        `<label class="convert-opt"><input type="radio" name="folder" value="${esc(c.folder)}"${i === 0 ? ' checked' : ''}> ${esc(c.folder)} <span class="muted">(${c.lessonCount} lessons)</span></label>`,
+    )
+    .join('');
 }
 
 // The empty state for a course with no scheme yet: author one with AI from a brief (4.4), or

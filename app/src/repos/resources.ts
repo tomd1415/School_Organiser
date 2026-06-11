@@ -192,6 +192,37 @@ export async function listResourcesForPlan(planId: number): Promise<LinkedResour
   return rows;
 }
 
+// 5.3: import provenance. The bulk importer recorded each file's original folder path in its
+// version's change_note ("imported from <relative path>") — that's how downloaded units are found.
+export async function getImportedPaths(): Promise<string[]> {
+  const { rows } = await pool.query<{ rel: string }>(
+    `SELECT DISTINCT substring(change_note from 'imported from (.*)') AS rel
+     FROM resource_versions WHERE change_note LIKE 'imported from %'`,
+  );
+  return rows.map((r) => r.rel).filter((r): r is string => !!r);
+}
+
+/** Distinct resources whose imported path sits under a folder — the unit's source files. */
+export async function listResourceIdsForFolder(folder: string): Promise<number[]> {
+  const { rows } = await pool.query<{ id: number }>(
+    `SELECT DISTINCT rv.resource_id AS id
+     FROM resource_versions rv
+     WHERE rv.change_note LIKE 'imported from ' || $1 || '/%'`,
+    [folder],
+  );
+  return rows.map((r) => Number(r.id));
+}
+
+/** Link a resource to a unit (idempotent) — source provenance for converted units (5.3). */
+export async function linkResourceToUnit(resourceId: number, unitId: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO resource_links (resource_id, unit_id)
+     SELECT $1, $2 WHERE NOT EXISTS (
+       SELECT 1 FROM resource_links WHERE resource_id = $1 AND unit_id = $2)`,
+    [resourceId, unitId],
+  );
+}
+
 export async function listResourcesForCourse(courseId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
     `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl

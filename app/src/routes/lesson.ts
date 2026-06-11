@@ -10,16 +10,26 @@ import {
   getOccurrenceNotes,
   setOccurrenceCoursePlan,
 } from '../repos/occurrence';
-import { getLessonPlan, listCoursePlans } from '../repos/schemes';
+import { getLessonPlan, listCoursePlans, updatePlanField } from '../repos/schemes';
 import { listResourcesForPlan, type LinkedResource } from '../repos/resources';
 import {
   getAdaptation,
   getEffectiveLesson,
+  getGroupCourseInfo,
   listAdaptationHistory,
+  recentGroupHistory,
   resetAdaptation,
   upsertAdaptation,
   type EffectiveLesson,
 } from '../repos/adaptations';
+import { getCourseTeachingContext } from '../repos/schemes';
+import { teachingContextItems } from '../llm/prompts/teachingContext';
+import { callLLMStructured } from '../llm/client';
+import { modelFor } from '../repos/settings';
+import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
+import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, historyItems, lessonItem } from '../llm/prompts/adaptLesson';
+import { improveMasterSchema } from '../llm/schemas/improveMaster';
+import { IMPROVE_MASTER_INSTRUCTION, IMPROVE_MASTER_SYSTEM, IMPROVE_MASTER_VERSION, masterPairItems } from '../llm/prompts/improveMaster';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
@@ -77,13 +87,18 @@ function adaptMeta(gc: number, lp: number, adapted: boolean, oob = false): strin
   return `<div class="adapt-meta" id="adapt-${gc}-${lp}-meta"${oob ? ' hx-swap-oob="true"' : ''}>${badge} <span class="note-status" id="adapt-${gc}-${lp}-status"></span></div>`;
 }
 
-function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson): string {
+function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string): string {
   return `<div class="adapt" id="adapt-${gc}-${lp}">
       ${adaptMeta(gc, lp, eff.adapted)}
+      ${eff.adaptationNote ? `<p class="adapt-note">${esc(eff.adaptationNote)}</p>` : ''}
+      ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
       <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
         <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
         <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
       </form>
+      <button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt from recent lessons (AI)</button>
+      ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>` : ''}
+      <div id="adapt-${gc}-${lp}-proposal"></div>
       <details class="adapt-log" id="adapt-${gc}-${lp}-log">
         <summary>change log</summary>
         <div hx-get="/lesson/adapt/${gc}/${lp}/history" hx-trigger="toggle from:#adapt-${gc}-${lp}-log once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
@@ -312,5 +327,118 @@ export function registerLessonRoutes(app: FastifyInstance): void {
               .join('')}</ul>`
           : '<span class="muted">no changes yet</span>',
       );
+  });
+
+  // 5.5: the feedback loop — AI adapts this lesson for THIS group from its recent lessons
+  // (stopping points + notes). Inputs go through the one wrapper: names redacted, safeguarding-
+  // flagged notes withheld entirely, call audited. The master is never touched.
+  app.post('/lesson/adapt/:gc/:lp/ai', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const { gc, lp } = p.data;
+    const [master, current, info, history] = await Promise.all([
+      getLessonPlan(lp),
+      getAdaptation(gc, lp),
+      getGroupCourseInfo(gc),
+      recentGroupHistory(gc),
+    ]);
+    if (!master || !info) return reply.code(404).send('');
+    const eff = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
+
+    if (history.length === 0) {
+      return reply.type('text/html').send(renderAdaptation(gc, lp, eff, 'No recent lessons recorded for this group yet — teach one (stopping point / notes) first.'));
+    }
+
+    const result = await callLLMStructured(
+      {
+        feature: 'adapt_lesson',
+        model: await modelFor('plan'),
+        promptVersion: ADAPT_LESSON_VERSION,
+        system: ADAPT_LESSON_SYSTEM,
+        context: [
+          ...teachingContextItems(await getCourseTeachingContext(info.courseId)),
+          lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),
+          ...historyItems(history),
+        ],
+        instruction: adaptLessonInstruction(info.courseName, info.groupName),
+        maxTokens: 4000,
+      },
+      adaptLessonSchema,
+    );
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(renderAdaptation(gc, lp, eff, result.message ?? 'AI unavailable — nothing changed.'));
+    }
+    await upsertAdaptation({
+      groupCourseId: gc,
+      lessonPlanId: lp,
+      objectives: result.data.objectives.trim() || null,
+      outline: result.data.outline.trim() || null,
+      adaptationNote: result.data.adaptationNote.trim() || null,
+      changeSummary: `AI: ${result.data.changeSummary.trim() || 'adapted from recent lessons'}`,
+      author: 'ai',
+    });
+    const updated = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
+    return reply.type('text/html').send(renderAdaptation(gc, lp, updated, 'adapted ✓ — review and edit below; the change log records it'));
+  });
+
+  // 5.5b: AI proposes folding a group's adaptation back into the MASTER. Nothing is written until
+  // the teacher applies the proposal.
+  app.post('/lesson/adapt/:gc/:lp/improve-master', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const { gc, lp } = p.data;
+    const [master, adaptation, info, history] = await Promise.all([
+      getLessonPlan(lp),
+      getAdaptation(gc, lp),
+      getGroupCourseInfo(gc),
+      recentGroupHistory(gc),
+    ]);
+    if (!master || !info) return reply.code(404).send('');
+    if (!adaptation) return reply.type('text/html').send('<p class="muted">Adapt the lesson for this group first — then there\'s something to fold back.</p>');
+
+    const result = await callLLMStructured(
+      {
+        feature: 'improve_master',
+        model: await modelFor('plan'),
+        promptVersion: IMPROVE_MASTER_VERSION,
+        system: IMPROVE_MASTER_SYSTEM,
+        context: [
+          ...teachingContextItems(await getCourseTeachingContext(info.courseId)),
+          ...masterPairItems(master.title, master, adaptation),
+          ...historyItems(history),
+        ],
+        instruction: IMPROVE_MASTER_INSTRUCTION,
+        maxTokens: 4000,
+      },
+      improveMasterSchema,
+    );
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(`<p class="muted">${esc(result.message ?? 'AI unavailable — nothing proposed.')}</p>`);
+    }
+    const d = result.data;
+    return reply.type('text/html').send(`
+      <div class="improve-prop">
+        <p class="adapt-note">${esc(d.rationale)}</p>
+        <label class="adapt-l">Proposed master objectives<textarea rows="3" readonly>${esc(d.objectives)}</textarea></label>
+        <label class="adapt-l">Proposed master outline<textarea rows="5" readonly>${esc(d.outline)}</textarea></label>
+        <form hx-post="/lesson/plan/${lp}/apply-improvement" hx-target="closest .improve-prop" hx-swap="outerHTML">
+          <textarea name="objectives" hidden>${esc(d.objectives)}</textarea>
+          <textarea name="outline" hidden>${esc(d.outline)}</textarea>
+          <button type="submit" class="btn-secondary">⬆ Apply to master</button>
+          <button type="button" class="link" onclick="this.closest('.improve-prop').remove()">✕ discard</button>
+        </form>
+      </div>`);
+  });
+
+  // Apply an accepted master improvement (teacher decision; the master changes for every group).
+  app.post('/lesson/plan/:id/apply-improvement', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ objectives: z.string().max(8000), outline: z.string().max(8000) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await updatePlanField(p.data.id, 'objectives', b.data.objectives.trim() || null);
+    await updatePlanField(p.data.id, 'outline', b.data.outline.trim() || null);
+    return reply
+      .type('text/html')
+      .send('<p class="adapt-note">Master updated ✓ — every group now starts from this version (this group\'s adaptation still applies here). <a href="/schemes">View on Schemes →</a></p>');
   });
 }

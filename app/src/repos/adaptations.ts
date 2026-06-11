@@ -107,3 +107,52 @@ export async function listAdaptationHistory(adaptationId: number): Promise<Histo
 export async function resetAdaptation(groupCourseId: number, lessonPlanId: number): Promise<void> {
   await pool.query(`DELETE FROM lesson_adaptations WHERE group_course_id = $1 AND lesson_plan_id = $2`, [groupCourseId, lessonPlanId]);
 }
+
+// ── 5.5: the feedback loop — what recently happened in this group's lessons ────────────────────
+
+export interface GroupCourseInfo {
+  courseId: number;
+  courseName: string;
+  groupName: string | null;
+}
+
+export async function getGroupCourseInfo(groupCourseId: number): Promise<GroupCourseInfo | null> {
+  const { rows } = await pool.query<GroupCourseInfo>(
+    `SELECT c.id AS "courseId", c.name AS "courseName", g.name AS "groupName"
+     FROM group_courses gc
+     JOIN courses c ON c.id = gc.course_id
+     LEFT JOIN groups g ON g.id = gc.group_id
+     WHERE gc.id = $1`,
+    [groupCourseId],
+  );
+  return rows[0] ?? null;
+}
+
+export interface GroupHistoryEntry {
+  date: string;
+  stoppingPoint: string | null;
+  planTitle: string | null;
+  notes: Array<{ body: string; safeguarding: boolean }>;
+}
+
+/** The group's most recent taught lessons (stopping point + notes), newest first.
+ * Notes keep their safeguarding flag so the AI boundary can withhold flagged ones entirely. */
+export async function recentGroupHistory(groupCourseId: number, limit = 4): Promise<GroupHistoryEntry[]> {
+  const { rows } = await pool.query<GroupHistoryEntry>(
+    `SELECT to_char(o.date, 'YYYY-MM-DD') AS date,
+            oc.stopping_point AS "stoppingPoint",
+            lp.title AS "planTitle",
+            COALESCE((SELECT json_agg(json_build_object('body', n.body, 'safeguarding', n.safeguarding) ORDER BY n.created_at)
+                      FROM notes n WHERE n.occurrence_id = o.id AND n.body <> ''), '[]') AS notes
+     FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
+     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE
+       AND (oc.stopping_point IS NOT NULL
+            OR EXISTS (SELECT 1 FROM notes n WHERE n.occurrence_id = o.id AND n.body <> ''))
+     ORDER BY o.date DESC
+     LIMIT $2`,
+    [groupCourseId, limit],
+  );
+  return rows;
+}

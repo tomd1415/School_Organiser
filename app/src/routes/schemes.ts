@@ -18,9 +18,11 @@ import {
   listAllSchemes,
   listCourses,
   listPlansForScheme,
+  listPlansForUnit,
   listSchemeVersions,
   listUnits,
   materialiseScheme,
+  materialiseUnit,
   movePlan,
   moveSchemeToCourse,
   moveUnit,
@@ -32,13 +34,23 @@ import {
   updateUnitField,
 } from '../repos/schemes';
 import {
+  getImportedPaths,
   linkResourceToPlan,
+  linkResourceToUnit,
+  listResourceIdsForFolder,
   listResourcesForPlan,
   searchResources,
   unlinkResourceFromPlan,
 } from '../repos/resources';
+import { lessonStructure, unitCandidates } from '../services/convertUnit';
+import { convertUnitSchema } from '../llm/schemas/convertUnit';
+import { CONVERT_UNIT_SYSTEM, CONVERT_UNIT_VERSION, convertUnitInstruction } from '../llm/prompts/convertUnit';
 import { buildSchemeTree } from '../services/scheme';
-import { renderAllSchemes, renderPlan, renderSchemeControls, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
+import { getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse } from '../repos/delivery';
+import { upcomingSlotDates } from '../services/delivery';
+import { getClockContext } from '../repos/clock';
+import { localParts } from '../lib/time';
+import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderSchemeControls, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
@@ -100,6 +112,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             ${renderTeachingContext(courseId, teachingCtx)}
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
             ${tree}
+            ${renderConvertPanel(courseId)}
             ${renderAllSchemes(allSchemes, scheme?.id)}
           </section>`;
       }
@@ -154,6 +167,70 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const schemeId = await materialiseScheme(q.data.course, `${course.name} — Scheme of Work`, units);
     if (!schemeId) return reply.type('text/html').send(renderSchemeEmpty(q.data.course, 'Could not save the authored scheme.', course.name));
     reply.header('HX-Redirect', `/schemes?course=${q.data.course}&scheme=${schemeId}`);
+    return reply.send('');
+  });
+
+  // 5.3: find convertible downloaded units (folders with lesson-named subfolders) by substring.
+  app.get('/schemes/course/:id/convert-search', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const qq = z.object({ q: z.string().max(200).optional() }).safeParse(req.query);
+    if (!id.success) return reply.code(400).send('');
+    const needle = (qq.success ? (qq.data.q ?? '') : '').trim().toLowerCase();
+    if (!needle) return reply.type('text/html').send('<span class="muted">type to search the imported folders…</span>');
+    const candidates = unitCandidates(await getImportedPaths()).filter((c) => c.folder.toLowerCase().includes(needle));
+    return reply.type('text/html').send(renderConvertResults(candidates));
+  });
+
+  // 5.3: convert the chosen downloaded unit into adapted master lessons on this course's scheme.
+  app.post('/schemes/course/:id/convert', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ folder: z.string().min(1).max(500), q: z.string().optional() }).safeParse(req.body);
+    if (!id.success) return reply.code(400).send('');
+    const courseId = id.data.id;
+    const course = (await listCourses()).find((c) => Number(c.id) === courseId);
+    if (!course) return reply.code(404).send('');
+    if (!b.success) {
+      return reply.type('text/html').send(renderConvertPanel(courseId, 'Pick a unit folder first — search, then select one.'));
+    }
+    const paths = await getImportedPaths();
+    // Only a genuine candidate folder is convertible (also guards the LIKE in the source-link query).
+    if (!unitCandidates(paths).some((c) => c.folder === b.data.folder)) {
+      return reply.type('text/html').send(renderConvertPanel(courseId, 'That folder is not a convertible unit — pick one from the search results.'));
+    }
+    const lessons = lessonStructure(paths, b.data.folder);
+
+    const result = await callLLMStructured(
+      {
+        feature: 'convert_unit',
+        model: await modelFor('plan'), // Sonnet — structured adaptation of a known sequence
+        promptVersion: CONVERT_UNIT_VERSION,
+        system: CONVERT_UNIT_SYSTEM,
+        context: [
+          ...teachingContextItems(await getCourseTeachingContext(courseId)),
+          { text: convertUnitInstruction(course.name, b.data.folder, lessons) },
+        ],
+        instruction: 'Convert the unit now.',
+        maxTokens: 8000,
+      },
+      convertUnitSchema,
+    );
+    const converted = result.data;
+    if (result.status !== 'ok' || !converted || converted.lessons.length === 0) {
+      return reply.type('text/html').send(renderConvertPanel(courseId, result.message ?? 'The AI could not convert this unit — try again.'));
+    }
+
+    // Land on the course's scheme (create one if the course has none yet).
+    let scheme = await getActiveScheme(courseId);
+    let schemeId = scheme ? Number(scheme.id) : await createScheme(courseId);
+    if (!schemeId) return reply.type('text/html').send(renderConvertPanel(courseId, 'Could not find or create a scheme for this course.'));
+    const unitId = await materialiseUnit(schemeId, converted.unitTitle, converted.lessons);
+    if (!unitId) return reply.type('text/html').send(renderConvertPanel(courseId, 'Could not save the converted unit.'));
+
+    // Source provenance: link the downloaded files to the new unit (capped — a unit can hold many).
+    const sourceIds = (await listResourceIdsForFolder(b.data.folder)).slice(0, 80);
+    for (const rid of sourceIds) await linkResourceToUnit(rid, unitId);
+
+    reply.header('HX-Redirect', `/schemes?course=${courseId}&scheme=${schemeId}`);
     return reply.send('');
   });
 
@@ -233,6 +310,44 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     await addPlan(id.data.id, 'New lesson');
     const sid = await schemeIdForUnit(id.data.id);
     return reply.type('text/html').send(sid ? await treeHtml(sid) : '');
+  });
+
+  // 5.4: lay a unit into a group's weekly slot. The form lists the slots that teach this course.
+  app.get('/schemes/unit/:id/lay-form', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const sid = await schemeIdForUnit(id.data.id);
+    const scheme = sid ? await getScheme(sid) : null;
+    if (!scheme) return reply.type('text/html').send('<p class="muted">Unit not found.</p>');
+    const [slots, lessons, ctx] = await Promise.all([
+      listSlotsForCourse(Number(scheme.courseId)),
+      listPlansForUnit(id.data.id),
+      getClockContext(),
+    ]);
+    const today = localParts(new Date(), ctx.tz).isoDate;
+    return reply.type('text/html').send(renderLayForm(id.data.id, slots, lessons.length, today));
+  });
+
+  app.post('/schemes/unit/:id/lay-down', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const body = z
+      .object({ slot: z.string().regex(/^\d+:\d+$/), start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })
+      .safeParse(req.body);
+    if (!id.success || !body.success) return reply.code(400).send('<p class="muted">Bad request.</p>');
+    const [lessonId, groupCourseId] = body.data.slot.split(':').map(Number) as [number, number];
+    const sid = await schemeIdForUnit(id.data.id);
+    const scheme = sid ? await getScheme(sid) : null;
+    if (!scheme) return reply.type('text/html').send('<p class="muted">Unit not found.</p>');
+    // Only allow a slot that actually teaches this unit's course.
+    const slots = await listSlotsForCourse(Number(scheme.courseId));
+    if (!slots.some((s) => Number(s.lessonId) === lessonId && Number(s.groupCourseId) === groupCourseId)) {
+      return reply.type('text/html').send('<p class="muted">That slot doesn\'t teach this course.</p>');
+    }
+    const [lessons, weekday, ctx] = await Promise.all([listPlansForUnit(id.data.id), getSlotWeekday(lessonId), getClockContext()]);
+    if (weekday == null) return reply.type('text/html').send('<p class="muted">Slot not found.</p>');
+    const dates = upcomingSlotDates(weekday, body.data.start, lessons.length, ctx.terms);
+    const laid = await layLessonsIntoSlot(lessonId, groupCourseId, lessons, dates);
+    return reply.type('text/html').send(renderLayResult(laid, lessons.length));
   });
 
   app.post('/schemes/unit/:id/move/:dir', guard, async (req, reply) => {

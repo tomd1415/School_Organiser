@@ -7,6 +7,58 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-11 — Phase 5.3–5.6: convert a downloaded unit, lay it into the calendar, the feedback loop, and the curriculum map
+
+Phase 5's headline workflow is now end-to-end: **download → convert → lay into the weeks → teach →
+adapt per group → fold improvements back into the master.**
+
+- **5.4 — Lay a unit into a group's calendar.** Each unit on the Schemes page gains **📅 Lay into a
+  group's calendar**: pick the group's weekly slot (every slot that teaches the course is listed) and
+  a start date → each unit lesson is bound, in order, to that slot's upcoming weeks via
+  `occurrence_courses.lesson_plan_id`. Dates come from the pure `upcomingSlotDates` walk —
+  **skipping weekends, holidays, half-term, INSET and out-of-term weeks** (the unit slides past
+  them). Re-laying overwrites those weeks; short windows lay down only what fits (and say so).
+  New `services/delivery.ts` + `repos/delivery.ts`. 8 unit tests (the holiday logic) + 5 integration
+  (binding order, re-lay overwrite, route validation — tests bind only far-future 2099 dates).
+- **5.3 — Convert a downloaded unit → adapted master lessons (AI).** The Schemes page gains
+  **📥 Convert a downloaded unit**: search the 2,433 imported files' original folders (provenance
+  recorded at import), pick a unit (folders with ≥2 `Lesson n…`/`L9 - …` subfolders — KS3 and GCSE
+  trees both work), and the AI converts its lesson structure into **full SEND-pitched master
+  lessons** (objectives + outline, one per source lesson, course teaching-context applied) appended
+  as a new unit on the course's scheme (created if missing). The source files are **linked to the new
+  unit** (`resource_links.unit_id`) for provenance. Live-verified: a real 3-lesson Year-8 web unit
+  converted with arrival routines, card sorts and TA deployment baked in. 6 unit + 1 integration test
+  (degrade path writes nothing).
+- **5.5 — The feedback loop (both directions).**
+  - **✨ Adapt from recent lessons (AI)** on each lesson's per-group block: feeds the group's last
+    few taught lessons (stopping points + lesson notes) + the current version into the wrapper and
+    **writes the group's adaptation** (logged as `ai` in the change log, master untouched).
+    Safeguarding-flagged notes are **withheld entirely** (each note travels as its own item with its
+    flag); names are redacted as always. Live-verified — it spotted a Y11 class's real "course
+    finished, in revision mode" note and reframed the lesson as revision.
+  - **⬆ Suggest master improvement (AI)** (shown once a group has an adaptation): proposes folding
+    what worked back into the **canonical** lesson — shown as a reviewable proposal; **nothing
+    changes until "Apply to master"** is clicked. Live-verified (sound generalisation: kept the
+    movement break, generalised the recap, dropped class-specific bits).
+  - New `recentGroupHistory` repo (per-group taught record), 4 unit tests on the prompt boundary
+    (incl. safeguarding withholding) + integration coverage of the no-history nudge, degrade-writes-
+    nothing, and apply-improvement.
+- **5.6 — Curriculum map** (`/map`, in the nav): per group-slot, the last 6 taught weeks (with
+  stopping points) → **today** → the next 12 school weeks (holiday-aware), each linking to its
+  lesson, with **✏ adapted** marked. The medium-term plan at a glance; laying down stays on Schemes.
+- **Totals: 130 unit / 79 integration tests, all green.** Three live AI verifications run and
+  cleaned up (no audit debris, no test schemes left).
+
+### 2026-06-10 — Now + Focus auto-refresh (no manual reload)
+
+- **Now** — the 30s clock-strip poll now carries a signature of the current day/period/lesson + next
+  slot; when that **changes** (the bell rings, a gap starts, the day rolls over) it returns
+  `HX-Refresh` so the whole page re-renders. Unchanged ticks still only swap the strip, so a quick
+  note (which autosaves) is untouched between lessons.
+- **Focus** — the card now **self-polls every 45s** and re-renders only when the picked task or mode
+  shifts (`HX-Reswap: none` otherwise, so a half-typed sub-step is never wiped), and the page now
+  shows the **running timer banner** like Now does. +2 integration tests. **112 unit / 71 integration.**
+
 ### 2026-06-10 — Phase 5.1 + 5.2: per-group lesson adaptation, and the Now screen in two columns
 
 - **5.1 — Adaptation data layer** (migration `0010`): `lesson_adaptations` (a group's override of one

@@ -212,6 +212,23 @@ a.tt-lesson:hover { background: #eef3fc; }
 .plan-detail summary { cursor: pointer; font-size: 0.8rem; color: var(--muted); }
 .plan-detail label { display: block; font-size: 0.82rem; font-weight: 600; margin-top: 0.4rem; }
 .plan-detail textarea { width: 100%; font: inherit; font-weight: 400; border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem; }
+/* 5.3: convert a downloaded unit */
+.convert-panel { margin: 0.8rem 0; font-size: 0.9rem; }
+.convert-panel summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.convert-panel form { margin-top: 0.5rem; }
+.convert-panel input[type="search"] { width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; }
+#convert-results { display: flex; flex-direction: column; gap: 0.2rem; margin: 0.5rem 0; max-height: 14rem; overflow-y: auto; }
+.convert-opt { font-size: 0.85rem; display: flex; gap: 0.4rem; align-items: baseline; }
+/* 5.4: lay a unit into the calendar */
+.unit-lay { margin-top: 0.5rem; font-size: 0.85rem; }
+.unit-lay summary { cursor: pointer; color: var(--accent); }
+.lay-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; margin-top: 0.4rem; }
+.lay-form label { display: flex; flex-direction: column; font-size: 0.78rem; font-weight: 700; gap: 0.15rem; }
+.lay-form select, .lay-form input { font: inherit; font-weight: 400; padding: 0.3rem 0.4rem; border: 1px solid var(--line); border-radius: 4px; }
+.lay-note { flex-basis: 100%; margin: 0.2rem 0 0; font-size: 0.78rem; }
+.lay-result { margin-top: 0.5rem; }
+.lay-list { margin: 0.3rem 0; padding-left: 1.1rem; }
+.lay-date { font-variant-numeric: tabular-nums; font-weight: 700; }
 
 /* resources */
 .res-upload { display: flex; gap: 0.6rem; align-items: center; margin: 0.5rem 0 1rem; }
@@ -235,6 +252,10 @@ a.tt-lesson:hover { background: #eef3fc; }
 .adapt-badge.on { color: var(--accent); }
 .adapt-l { display: block; font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; }
 .adapt-l textarea { display: block; width: 100%; margin-top: 0.2rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; font-weight: 400; resize: vertical; }
+.adapt-note { font-size: 0.82rem; font-style: italic; margin: 0.3rem 0 0; color: var(--muted); }
+.improve-prop { margin-top: 0.5rem; padding: 0.5rem 0.7rem; border: 1px solid var(--accent); border-radius: 8px; }
+.improve-prop form { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.4rem; }
+.improve-prop textarea[hidden] { display: none; }
 .adapt-log { margin-top: 0.4rem; font-size: 0.8rem; }
 .adapt-log summary { cursor: pointer; color: var(--accent); }
 .adapt-hist { list-style: none; padding: 0; margin: 0.3rem 0 0; }
@@ -262,6 +283,20 @@ a.tt-lesson:hover { background: #eef3fc; }
 .ov-group { font-weight: 700; }
 .ov-course { font-size: 0.85rem; }
 .ov-staff { margin-left: auto; }
+
+/* 5.6: curriculum map */
+.map-pick label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; font-weight: 700; max-width: 30rem; }
+.map-pick select { font: inherit; font-weight: 400; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; }
+.map-table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; font-size: 0.9rem; }
+.map-table th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding: 0.3rem 0.5rem; }
+.map-table td { padding: 0.4rem 0.5rem; border-top: 1px solid var(--line); }
+.map-date { font-variant-numeric: tabular-nums; white-space: nowrap; width: 7.5rem; }
+.map-past td { color: var(--muted); }
+.map-past a { color: inherit; }
+.map-today td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.map-adapted { font-size: 0.75rem; color: var(--accent); font-weight: 700; }
+.map-stop { font-size: 0.8rem; }
+.map-future a { text-decoration: none; }
 
 /* now: two columns — current lesson on the left, what's next on the right; stacks on narrow */
 .now-cols { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem; align-items: start; }

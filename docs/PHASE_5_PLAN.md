@@ -1,5 +1,11 @@
 # Phase 5 — Curriculum delivery: master schemes, per-group adaptation & the calendar
 
+> **Status (2026-06-11): 5.1–5.6 built.** Schema + adaptation layer (5.1/5.2), unit conversion
+> (5.3), calendar lay-down (5.4), the feedback loop in both directions (5.5, incl. apply-to-master),
+> and the curriculum map (5.6 — `/map`). Remaining: 5.7 bulk fill-and-assign in one action (the
+> pieces exist: convert → lay down), and the 5.8 stretches (content-based conversion, per-group
+> teaching-context, pacing/carry-over, cross-group compare).
+
 The leap from "the app holds plans" to "the app runs the curriculum". A downloaded Teach Computing
 unit becomes a **SEND-adapted master scheme**; the master is delivered to each group's weekly lesson
 slot; each group **adapts the lessons as they're taught**, with a per-group change log; and the

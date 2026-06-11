@@ -47,8 +47,23 @@ function nowLabels(now: Date, tz: string): { dateLabel: string; clock: string } 
   };
 }
 
+// A signature of "what the Now page is showing" — the day, the current period/lesson and the next
+// teaching slot. It deliberately excludes the minutes countdown, so the 30s poll only forces a full
+// refresh when the lesson genuinely changes (the bell rings, a gap starts, the day rolls over).
+function nowSignature(state: NowState, current: NowLesson | null, next: NowLesson | null): string {
+  return [
+    state.isoDate,
+    state.isSchoolDay ? '1' : '0',
+    state.current?.slotOrder ?? '',
+    current?.lessonId ?? '',
+    next?.lessonId ?? '',
+    state.nextTeaching?.date ?? '',
+  ].join('|');
+}
+
 function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string): string {
   const { dateLabel, clock } = nowLabels(now, tz);
+  const sig = nowSignature(state, current, next);
 
   let nowLine: string;
   if (!state.isSchoolDay) {
@@ -68,7 +83,7 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
     nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${esc(lessonName(next))} <a href="${href}">open</a>`;
   }
 
-  return `<div id="now-strip" class="now-strip" hx-get="/now/clock" hx-trigger="every 30s" hx-swap="outerHTML">
+  return `<div id="now-strip" class="now-strip" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML">
     <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span> &nbsp;·&nbsp; ${nowLine}${nextLine}
   </div>`;
 }
@@ -305,10 +320,16 @@ export function registerNowRoutes(app: FastifyInstance): void {
 
   // Auto-refreshing clock strip (every 30s) — never includes the note composer,
   // so a half-typed note is never wiped.
-  app.get('/now/clock', { preHandler: requireAuth }, async (_req, reply) => {
+  app.get('/now/clock', { preHandler: requireAuth }, async (req, reply) => {
     const now = new Date();
     try {
       const { ctx, state, current, next } = await resolveNowLessons(now);
+      const prevSig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
+      const sig = nowSignature(state, current, next);
+      // The lesson/day changed since this strip was rendered → reload so every card is fresh.
+      if (prevSig !== null && prevSig !== sig) {
+        return reply.header('HX-Refresh', 'true').send('');
+      }
       return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz));
     } catch {
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');

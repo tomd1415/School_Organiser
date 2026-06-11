@@ -208,6 +208,56 @@ export async function listPlansForScheme(schemeId: number): Promise<PlanRow[]> {
   return rows;
 }
 
+// 5.3: append a converted unit (full lessons, objectives + outline) to an existing scheme,
+// atomically. Returns the new unit id, or null if the scheme is gone.
+export async function materialiseUnit(
+  schemeId: number,
+  title: string,
+  lessons: Array<{ title: string; objectives: string; outline: string }>,
+): Promise<number | null> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const s = await client.query<{ course_id: number }>(`SELECT course_id FROM schemes_of_work WHERE id = $1`, [schemeId]);
+    if (!s.rows[0]) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const courseId = s.rows[0].course_id;
+    const u = await client.query<{ id: number }>(
+      `INSERT INTO units (scheme_id, title, display_order)
+       VALUES ($1, $2, COALESCE((SELECT max(display_order) + 1 FROM units WHERE scheme_id = $1), 0))
+       RETURNING id`,
+      [schemeId, title.slice(0, 200)],
+    );
+    const unitId = u.rows[0]!.id;
+    let order = 0;
+    for (const l of lessons) {
+      await client.query(
+        `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [unitId, courseId, l.title.slice(0, 200), order++, l.objectives, l.outline],
+      );
+    }
+    await client.query('COMMIT');
+    return unitId;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+/** A unit's lessons in teaching order — used to lay a unit into the calendar (5.4). */
+export async function listPlansForUnit(unitId: number): Promise<Array<{ id: number; title: string }>> {
+  const { rows } = await pool.query<{ id: number; title: string }>(
+    `SELECT id, title FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`,
+    [unitId],
+  );
+  return rows;
+}
+
 export async function addUnit(schemeId: number, title: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
     `INSERT INTO units (scheme_id, title, display_order)

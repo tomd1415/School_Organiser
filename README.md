@@ -4,15 +4,16 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** **Phases 1 (the MVP), 2 and 3 are complete** (only **pupils** 2.11 is deferred to the
-> pupil-facing project). **Phase 3** ([docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)) added **schemes
-> of work → lesson plans** bound to the timetable, a **hosted, versioned resource store** (2,433
-> resources) with search, PDF/image + Office→PDF preview and a **bulk-importer** + reconcile tooling
-> (`npm run import-resources` / `reconcile`), **resources wired onto the lesson screen** (attach via
-> the plan editor), and a **"lessons I oversee"** view. Log in over the LAN (`./start.sh`) for the
-> live *Now* screen, the timetable, lesson detail, autosaving notes, tasks/time/focus, Schemes and
-> Resources. Next: **Phase 4 (AI)**. See [docs/ROADMAP.md](docs/ROADMAP.md). To enable live Office
-> preview, pull the Gotenberg sidecar (`docker compose --profile preview up -d gotenberg`).
+> **Status:** **Phases 1–4 are complete** (only **pupils** 2.11 is deferred to the pupil-facing
+> project; 4.6/4.8 partial) and **Phase 5 (curriculum delivery) is largely built — 5.1–5.6**
+> ([docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)): a **master scheme per course** with **per-group
+> adaptations + change logs** on the lesson screen, **convert a downloaded unit into SEND-pitched
+> master lessons (AI)**, **lay a unit into a group's weekly slots** (holiday-aware), a two-way
+> **feedback loop** (adapt the next delivery from the group's notes; fold improvements back into the
+> master on approval) and a per-group **curriculum map** (`/map`). All AI goes through the one
+> redaction/withholding/audit wrapper ([docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md), DPIA drafted).
+> Log in over the LAN (`./start.sh`). To enable live Office preview, pull the Gotenberg sidecar
+> (`docker compose --profile preview up -d gotenberg`).
 
 ## The one-sentence pitch
 
