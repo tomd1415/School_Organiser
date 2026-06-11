@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-11 — Fitted to the classroom monitor (portrait 1080×1920 + landscape 1920×1080)
+
+The app's real home is a 1920×1080 monitor **on its side** in Edge on a school Windows PC, with
+landscape as the secondary case. Verified with headless-Chromium screenshots of 8 key pages at
+**both orientations**: zero horizontal overflow anywhere (including the kit table seeded with
+worst-case-length content), nav fits one row in landscape and wraps cleanly in portrait.
+
+- **Page-width strategy:** work surfaces (Now, lesson, Schemes, Map, Kit, Resources) widen to
+  73rem — filling a portrait screen edge-to-edge and sitting at a comfortable centred ~1170px in
+  landscape; reading pages keep the narrower 60rem measure; the timetable keeps 76rem.
+- **The Now screen now earns the tall screen:** outside a lesson, the main column shows the
+  **rest of today's lessons** (or, evenings/weekends, the **next teaching day's full list** —
+  "Next teaching day — Friday 12 Jun"), each row time · class · course linking straight to the
+  dated lesson. During a lesson the current-lesson card keeps the space as before.
+- All 143 unit / 84 integration tests green; screenshot kit, test instance and seeded rows all
+  cleaned up.
+
 ### 2026-06-11 — Review pass: fixes, doc catch-up, and usability batch
 
 A full docs-vs-code-vs-UX review (three parallel audits), then everything actionable applied.

@@ -22,6 +22,9 @@ import { getDayChecklist, type PrepItem } from '../repos/prep';
 import { renderPrepList } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
+import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
+import type { LessonRow, PeriodRow } from '../services/timetable';
+import { toMinutes, weekdayOf } from '../lib/time';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -166,6 +169,39 @@ function renderNextCard(
   </div>`;
 }
 
+// Outside a teaching slot the main column would sit empty (very visible on the portrait monitor) —
+// fill it with the rest of today's own lessons, or the next teaching day's, each one click away.
+function renderDayList(
+  lessons: LessonRow[],
+  periods: PeriodRow[],
+  weekday: number,
+  afterMin: number | null, // only slots starting after this time (null = whole day)
+  date: string,
+  heading: string,
+): string {
+  const startOf = new Map(periods.filter((p) => p.weekday === weekday).map((p) => [p.slotOrder, p.start]));
+  const rows = lessons
+    .filter((l) => l.weekday === weekday && l.isSelf && ['teaching', 'form', 'club'].includes(l.purpose))
+    .map((l) => ({ ...l, start: startOf.get(l.slotOrder) ?? '' }))
+    .filter((l) => l.start && (afterMin === null || toMinutes(l.start) > afterMin))
+    .sort((a, b) => a.slotOrder - b.slotOrder);
+  if (!rows.length) return '';
+  const items = rows
+    .map((l) => {
+      const courses = l.courses.map((c) => esc(c.name)).join(' · ');
+      return `<li><a href="/lesson?lesson=${l.lessonId}&date=${esc(date)}">
+        <span class="day-time">${esc(l.start)}</span>
+        <span class="day-group">${esc(l.groupName ?? purposeLabel(l.purpose))}</span>
+        ${courses ? `<span class="muted day-courses">${courses}</span>` : ''}
+      </a></li>`;
+    })
+    .join('');
+  return `<div class="now-card now-day">
+    <p class="kicker">${esc(heading)}</p>
+    <ul class="day-list">${items}</ul>
+  </div>`;
+}
+
 function renderBell(tasks: BellTask[]): string {
   if (tasks.length === 0) return '';
   const items = tasks
@@ -262,12 +298,14 @@ export function registerNowRoutes(app: FastifyInstance): void {
         card = `<div class="now-card"><h1>${esc(heading)}</h1><p class="muted">The next teaching slot is shown above.</p></div>`;
       }
 
-      const [bellAll, groupSlots, events, running, captured] = await Promise.all([
+      const [bellAll, groupSlots, events, running, captured, allLessons, periods] = await Promise.all([
         listBellTasks(),
         getGroupSlots(),
         listUpcoming(),
         getRunningTimer(),
         listForResurfacing(),
+        getTimetabledLessons(),
+        getPeriodDefinitions(),
       ]);
       const nextBell = state.nextTeaching
         ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
@@ -296,6 +334,21 @@ export function registerNowRoutes(app: FastifyInstance): void {
         nextCard = `<div class="now-card now-next"><p class="kicker">Next</p><p class="muted">${state.isSchoolDay ? 'No more teaching today.' : 'No school today.'}</p></div>`;
       }
 
+      // When not in a lesson, fill the main column with what's coming: the rest of today's own
+      // lessons, or (evenings/weekends/holidays) the next teaching day's list.
+      let dayList = '';
+      const inTeachingCard = current && (current.purpose === 'teaching' || current.purpose === 'free' || current.purpose === 'form');
+      if (!inTeachingCard) {
+        if (state.isSchoolDay) {
+          dayList = renderDayList(allLessons, periods, state.weekday, state.minutes, state.isoDate, 'Rest of today');
+        }
+        if (!dayList && state.nextTeaching) {
+          const d = state.nextTeaching.date;
+          const label = new Intl.DateTimeFormat('en-GB', { timeZone: ctx.tz, weekday: 'long', day: 'numeric', month: 'short' }).format(new Date(`${d}T12:00:00Z`));
+          dayList = renderDayList(allLessons, periods, weekdayOf(d), null, d, `Next teaching day — ${label}`);
+        }
+      }
+
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz, ctx.terms)}
@@ -303,6 +356,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           <div class="now-col now-col-now">
             <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
             ${card}
+            ${dayList}
           </div>
           <div class="now-col now-col-next">
             ${nextCard}
