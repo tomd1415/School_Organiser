@@ -81,3 +81,24 @@ scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz
 | Now screen "database not reachable" | `docker compose ps`; is `db` healthy? Did `npm run migrate` run? |
 | Login always fails | Re-hash the password; ensure the whole `scrypt$...$...` line is in `.env`. |
 | CSRF errors on a form | Cookies enabled; you're on the same host/port that issued the page. |
+
+## Instances — one per teacher (Phase 6.8)
+
+Each colleague gets a **fully isolated instance**: own database volume, own resource store, own
+backups, own (optional) AI key. Nothing is shared and nothing is transmitted between instances.
+
+```bash
+./scripts/new-instance.sh mrs-jones 44370     # creates instances/mrs-jones/
+cd instances/mrs-jones && docker compose up -d --build
+# → http://server:44370/ opens the onboarding wizard (/welcome): the teacher sets their own
+#   password, year, day shape, courses, groups and timetable. No SQL, no .env editing needed.
+```
+
+- **Backups:** `instances/<name>/backup.sh` dumps the DB + resources (14 kept). Cron it nightly per
+  instance. Restores follow the same pattern as the main instance (see above), inside the
+  instance's directory.
+- **Updates:** `git pull`, then for each instance `docker compose up -d --build` — migrations run
+  on boot. Update one instance first, check it, then the rest.
+- **Removal:** `docker compose down -v` inside the instance directory deletes its database volume;
+  hand the teacher a final backup first.
+- The `instances/` directory is git-ignored; each instance's `.env` holds its own secrets.

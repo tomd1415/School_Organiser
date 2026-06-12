@@ -2,7 +2,7 @@
   "name": "school-organiser",
   "private": true,
   "version": "0.0.0",
-  "description": "Single-teacher command centre — Phase 0 skeleton",
+  "description": "Single-teacher command centre \u2014 Phase 0 skeleton",
   "license": "UNLICENSED",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -16,7 +16,8 @@
     "hash-password": "tsx scripts/hash-password.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "export-year": "tsx scripts/export-year.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.0",

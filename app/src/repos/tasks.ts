@@ -131,7 +131,8 @@ export async function getGroupSlots(): Promise<Map<number, GroupSlot[]>> {
      JOIN period_definitions p ON p.id = tl.period_definition_id
      JOIN staff s ON s.id = tl.staff_id AND s.is_self
      JOIN groups g ON g.id = tl.group_id
-     WHERE tl.purpose = 'teaching'`,
+     WHERE tl.purpose = 'teaching'
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)`,
   );
   const map = new Map<number, GroupSlot[]>();
   for (const r of rows) {

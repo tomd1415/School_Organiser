@@ -2,7 +2,19 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { appConfig } from '../config/app';
 import { verifyPassword } from '../lib/passwords';
+import { getSetting } from '../repos/settings';
 import { esc, layout } from '../lib/html';
+
+/** The configured password hash: the env var wins (existing instances); otherwise the value the
+ * onboarding wizard wrote to settings; null on a brand-new instance (→ /welcome). */
+export async function configuredHash(): Promise<string | null> {
+  if (appConfig.APP_PASSWORD_HASH) return appConfig.APP_PASSWORD_HASH;
+  try {
+    return (await getSetting('auth_password_hash')) || null;
+  } catch {
+    return null;
+  }
+}
 
 function loginPage(csrfToken: string, error?: string): string {
   return layout({
@@ -24,6 +36,7 @@ function loginPage(csrfToken: string, error?: string): string {
 
 export function registerAuthRoutes(app: FastifyInstance): void {
   app.get('/login', async (_req, reply) => {
+    if (!(await configuredHash())) return reply.redirect('/welcome'); // brand-new instance
     const token = reply.generateCsrf();
     return reply.type('text/html').send(loginPage(token));
   });
@@ -33,7 +46,8 @@ export function registerAuthRoutes(app: FastifyInstance): void {
     if (!parsed.success) {
       return reply.code(400).type('text/html').send(loginPage(reply.generateCsrf(), 'Enter a password.'));
     }
-    if (!verifyPassword(parsed.data.password, appConfig.APP_PASSWORD_HASH)) {
+    const hash = await configuredHash();
+    if (!hash || !verifyPassword(parsed.data.password, hash)) {
       return reply.code(401).type('text/html').send(loginPage(reply.generateCsrf(), 'Incorrect password.'));
     }
     req.session.set('authed', true);

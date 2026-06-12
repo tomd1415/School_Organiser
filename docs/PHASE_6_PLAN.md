@@ -1,6 +1,9 @@
 # Phase 6 — Setup, September & new instances
 
-> **Status (2026-06-11): planned, plan-first — for review before any code.**
+> **Status (2026-06-12): built — 6.1–6.9 all landed** (year-scoping; /setup editors incl. the
+> timetable grid; September rollover wizard; onboarding /welcome + password-in-settings with env
+> override; /settings; exceptions; new-instance.sh; group history, year-browse + year export).
+> Deviations from plan and the post-phase improvements list are in §12–§13.
 > The ask (teacher, 2026-06-11): *editing lesson times and lesson details in-app; a completely new
 > timetable every September with **nothing carried over** — except that **the teaching-group
 > knowledge follows the class group**, whose name changes each year and whose pupils sometimes
@@ -240,3 +243,49 @@ Recommended, in rough order of value:
 survivable even if nothing else lands by then (terms + day shape + a hand-built timetable via 6.3
 next). Then 6.3 → 6.4 in time for the real rollover, with 6.5/6.8 (onboarding + instances)
 following before any colleague gets an instance.
+
+---
+
+## 12. After this phase — improvements & features to pick up next *(noted 2026-06-12, as built)*
+
+Deliberately not in Phase 6; each is worth a slice of its own:
+
+1. **Exceptions → clock integration.** Exceptions are display-level (banners on the lesson, ⚠ on
+   the timetable/Now). Next: a cancelled lesson frees the work window (AvailabilityService), an
+   off-timetable day suppresses the day's occurrences and bell tasks, cover changes the Now card.
+2. **Onboarding accelerators.** Day-shape *templates* ("5 lessons + form", "6 lessons") instead of
+   building Monday by hand; **MIS CSV import** for pupils/groups (SIMS/Arbor exports); a starter
+   kit list; an optional sample-data mode for exploring before committing.
+3. **Rollover extras.** Optional *carry adaptations* tick per group (resit/Post-16 classes
+   retaught the same scheme); copy recurring INSET-day patterns; a one-click "create next year
+   from this one" that chains year → terms → day shape → groups in a single action.
+4. **Timetable editor conveniences.** Room double-booking warnings, drag-to-move between slots,
+   a per-group "lessons this week" counter while filling the grid.
+5. **Instance operations.** `update-instances.sh` (pull + rebuild each, one at a time), backup-age
+   surfaced on /settings (read the backups directory), an in-app restore checklist.
+6. **Archive depth.** Read-only Map for past years (slot picker filtered by year), notes browsing
+   by year, per-class printable "year summary" sheet from the group-history page.
+7. **Pupil page polish.** Show each pupil's current group chip (enrolments are now real data) and
+   their group history via the chain.
+8. **Retention mechanism.** The DPIA's retention row: an "anonymise pupils inactive > N years"
+   action (replace display_name, keep ai_token) + a yearly prompt on /settings.
+9. **Fortnight (week A/B) support** if the school ever adopts one — schema column exists, clock
+   assumes a single week.
+10. **Earlier backlog still open:** Phase 4.6 remainder (captured auto-categorise, estimate
+    calibration, current-interest), 4.8 semantic search, content-based unit conversion (5.9),
+    cross-group compare (5.9), kit-per-lesson (5.9), and the Phase 7 polish list (global search,
+    Teams, IMAP intake, TA login).
+
+## 13. Build notes — where reality differed from the plan *(2026-06-12)*
+
+- **Groups were already year-scoped** in the Phase 1 schema, so the predecessor chain dropped in
+  exactly as designed (§2) with zero data rewriting; `bumpName` covers 7ARO→8ARO and Y7→Y8.
+- **First year auto-becomes current** when it's the only one (onboarding friendliness).
+- **Deletion guards as planned:** a period with timetabled lessons and a lesson with taught
+  occurrences refuse to delete (🔒) — archive the year instead of rewriting the past.
+- **Lay-down/map/shift clamp to the current year's end** so future planning never spills into a
+  draft year's calendar.
+- The onboarding wizard is a **checklist over the real Setup editors** (not separate forms), as
+  decided in §8 — `/welcome` stays useful after setup as a health overview.
+- Year export is a script (`npm run export-year`) rather than a UI button — fine for now; a
+  /settings button belongs with the backup-age work (§12.5).

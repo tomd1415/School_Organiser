@@ -26,7 +26,8 @@ export async function getClockContext(): Promise<{ periods: PeriodDefinition[]; 
     `SELECT weekday, slot_order AS "slotOrder", slot_type AS "slotType", label,
             lesson_index AS "lessonIndex",
             to_char(start_time, 'HH24:MI') AS start, to_char(end_time, 'HH24:MI') AS "end", teachable
-     FROM period_definitions`,
+     FROM period_definitions
+     WHERE academic_year_id = (SELECT id FROM academic_years WHERE is_current)`,
   );
   const periods: PeriodDefinition[] = periodsRes.rows.map((p) => ({
     weekday: p.weekday,
@@ -68,6 +69,7 @@ export async function getSelfLessonAt(weekday: number, slotOrder: number): Promi
      LEFT JOIN group_courses gc ON gc.id = tlc.group_course_id
      LEFT JOIN courses c        ON c.id = gc.course_id
      WHERE p.weekday = $1 AND p.slot_order = $2
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      GROUP BY tl.id, g.name, r.name
      LIMIT 1`,
     [weekday, slotOrder],

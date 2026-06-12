@@ -505,6 +505,11 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       [yr.rows[0]!.id],
     );
     const termId = Number(term.rows[0]!.id);
+    // 6.1 clamps shifts to the current year's end — stretch it over the test dates, restore after.
+    const yearEndBefore = await pool.query<{ d: string }>(
+      `SELECT to_char(end_date, 'YYYY-MM-DD') d FROM academic_years WHERE is_current`,
+    );
+    await pool.query(`UPDATE academic_years SET end_date = '2099-12-31' WHERE is_current`);
     const s = await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST shift', 93, false) RETURNING id`, [courseId]);
     const schemeId = Number(s.rows[0]!.id);
     const u = await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'U', 1) RETURNING id`, [schemeId]);
@@ -560,6 +565,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
       await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
       await pool.query(`DELETE FROM term_dates WHERE id = $1`, [termId]);
+      await pool.query(`UPDATE academic_years SET end_date = $1 WHERE is_current`, [yearEndBefore.rows[0]!.d]);
     }
   });
 
@@ -603,6 +609,163 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     } finally {
       await pool.query(`DELETE FROM pupils WHERE id = $1`, [pupil.id]);
     }
+  });
+
+  it('Year-scoping: a draft next year never bleeds into the live views (6.1)', async () => {
+    // build a draft year with its own day shape, group and lesson
+    const y = await pool.query<{ id: number }>(
+      `INSERT INTO academic_years (name, start_date, end_date, is_current) VALUES ('2098/99', '2098-09-01', '2099-08-31', false) RETURNING id`,
+    );
+    const yearId = Number(y.rows[0]!.id);
+    const p = await pool.query<{ id: number }>(
+      `INSERT INTO period_definitions (weekday, slot_order, slot_type, label, lesson_index, start_time, end_time, teachable, academic_year_id)
+       VALUES (1, 1, 'lesson', 'DRAFT L1', 1, '09:00', '09:50', true, $1) RETURNING id`,
+      [yearId],
+    );
+    const g = await pool.query<{ id: number }>(
+      `INSERT INTO groups (name, year_group, academic_year_id) VALUES ('DRAFT-GRP', 'Y7', $1) RETURNING id`,
+      [yearId],
+    );
+    const self = await pool.query<{ id: number }>(`SELECT id FROM staff WHERE is_self`);
+    const tl = await pool.query<{ id: number }>(
+      `INSERT INTO timetabled_lessons (period_definition_id, purpose, group_id, staff_id) VALUES ($1, 'teaching', $2, $3) RETURNING id`,
+      [p.rows[0]!.id, g.rows[0]!.id, self.rows[0]!.id],
+    );
+    try {
+      const { getPeriodDefinitions, getTimetabledLessons } = await import('../../src/repos/timetable');
+      // current-year queries see none of it…
+      expect((await getPeriodDefinitions()).some((r) => r.label === 'DRAFT L1')).toBe(false);
+      expect((await getTimetabledLessons()).some((r) => r.groupName === 'DRAFT-GRP')).toBe(false);
+      const tt = await app.inject({ method: 'GET', url: '/timetable', headers: { cookie: session } });
+      expect(tt.body).not.toContain('DRAFT-GRP');
+      const map = await app.inject({ method: 'GET', url: '/map', headers: { cookie: session } });
+      expect(map.body).not.toContain('DRAFT-GRP');
+      // …but the year-targeted editor query does
+      expect((await getPeriodDefinitions(yearId)).some((r) => r.label === 'DRAFT L1')).toBe(true);
+      expect((await getTimetabledLessons(yearId)).some((r) => r.groupName === 'DRAFT-GRP')).toBe(true);
+    } finally {
+      await pool.query(`DELETE FROM timetabled_lessons WHERE id = $1`, [tl.rows[0]!.id]);
+      await pool.query(`DELETE FROM groups WHERE id = $1`, [g.rows[0]!.id]);
+      await pool.query(`DELETE FROM period_definitions WHERE id = $1`, [p.rows[0]!.id]);
+      await pool.query(`DELETE FROM academic_years WHERE id = $1`, [yearId]);
+    }
+  });
+
+  it('Setup: tabs render; draft-year terms + day shape + group round-trip (6.2)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/setup', headers: { cookie: session } });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('Academic years');
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const hdrs = { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' };
+    // create a draft year
+    const added = await app.inject({ method: 'POST', url: '/setup/year/add', headers: hdrs, payload: 'name=TEST%2FYR&start=2097-09-01&end=2098-08-31' });
+    expect(added.body).toContain('TEST/YR');
+    const y = await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE name = 'TEST/YR'`);
+    const yearId = Number(y.rows[0]!.id);
+    try {
+      // term + period + group in the draft year
+      const t = await app.inject({ method: 'POST', url: `/setup/term/add?year=${yearId}`, headers: hdrs, payload: 'name=TEST+Autumn&kind=term&start=2097-09-01&end=2097-12-19' });
+      expect(t.body).toContain('TEST Autumn');
+      const pd = await app.inject({ method: 'POST', url: `/setup/period/add?year=${yearId}&weekday=1`, headers: hdrs, payload: '' });
+      expect(pd.body).toContain('New period');
+      const g = await app.inject({ method: 'POST', url: `/setup/group/add?year=${yearId}`, headers: hdrs, payload: 'name=TEST-7XX&year_group=Y7' });
+      expect(g.body).toContain('TEST-7XX');
+      // the draft never bleeds into the live timetable
+      const tt = await app.inject({ method: 'GET', url: '/timetable', headers: { cookie: session } });
+      expect(tt.body).not.toContain('TEST-7XX');
+      // current year is untouched
+      const cur = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM academic_years WHERE is_current AND name = 'TEST/YR'`);
+      expect(cur.rows[0]!.n).toBe(0);
+    } finally {
+      await pool.query(`DELETE FROM groups WHERE academic_year_id = $1`, [yearId]);
+      await pool.query(`DELETE FROM period_definitions WHERE academic_year_id = $1`, [yearId]);
+      await pool.query(`DELETE FROM term_dates WHERE academic_year_id = $1`, [yearId]);
+      await pool.query(`DELETE FROM academic_years WHERE id = $1`, [yearId]);
+    }
+  });
+
+  it('Rollover: a class moves up with pupils, courses + context; history stays (6.4)', async () => {
+    // source: a real active group with a course; target: a draft year
+    const src = await pool.query<{ id: number; name: string }>(
+      `SELECT g.id, g.name FROM groups g
+       WHERE g.active AND g.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+         AND EXISTS (SELECT 1 FROM group_courses gc WHERE gc.group_id = g.id AND gc.active)
+       ORDER BY g.id LIMIT 1`,
+    );
+    const srcId = Number(src.rows[0]!.id);
+    const y = await pool.query<{ id: number }>(
+      `INSERT INTO academic_years (name, start_date, end_date, is_current) VALUES ('TEST/RO', '2096-09-01', '2097-08-31', false) RETURNING id`,
+    );
+    const yearId = Number(y.rows[0]!.id);
+    // give the source group a class context + a pupil so the carry is observable
+    const ctxBefore = await pool.query<{ gc: number; tc: string | null }>(
+      `SELECT id AS gc, teaching_context AS tc FROM group_courses WHERE group_id = $1 AND active LIMIT 1`,
+      [srcId],
+    );
+    await pool.query(`UPDATE group_courses SET teaching_context = 'TEST carry ctx' WHERE id = $1`, [ctxBefore.rows[0]!.gc]);
+    const pup = await pool.query<{ id: number }>(`INSERT INTO pupils (display_name, ai_token) VALUES ('TEST Rollover Pupil', 'PUPIL_TEST_RO') RETURNING id`);
+    await pool.query(`INSERT INTO enrolments (pupil_id, group_id, active) VALUES ($1, $2, true) ON CONFLICT (pupil_id, group_id) DO UPDATE SET active = true`, [pup.rows[0]!.id, srcId]);
+    const { rolloverGroup, bumpName } = await import('../../src/repos/setup');
+    try {
+      const newName = bumpName(src.rows[0]!.name) === src.rows[0]!.name ? `${src.rows[0]!.name}-NEXT` : bumpName(src.rows[0]!.name);
+      const newId = await rolloverGroup(srcId, yearId, newName);
+      expect(newId).not.toBeNull();
+      // predecessor chain set
+      const chain = await pool.query<{ p: number }>(`SELECT predecessor_group_id p FROM groups WHERE id = $1`, [newId]);
+      expect(Number(chain.rows[0]!.p)).toBe(srcId);
+      // pupils followed
+      const enr = await pool.query<{ n: number }>(
+        `SELECT count(*)::int n FROM enrolments WHERE group_id = $1 AND active AND pupil_id = $2`,
+        [newId, pup.rows[0]!.id],
+      );
+      expect(enr.rows[0]!.n).toBe(1);
+      // courses + class context followed
+      const ctx = await pool.query<{ tc: string | null }>(
+        `SELECT teaching_context tc FROM group_courses WHERE group_id = $1 AND course_id = (SELECT course_id FROM group_courses WHERE id = $2)`,
+        [newId, ctxBefore.rows[0]!.gc],
+      );
+      expect(ctx.rows[0]!.tc).toBe('TEST carry ctx');
+      // the source group + its enrolments are untouched (history intact)
+      const srcStill = await pool.query<{ active: boolean }>(`SELECT active FROM groups WHERE id = $1`, [srcId]);
+      expect(srcStill.rows[0]!.active).toBe(true);
+      // idempotent: same name again → skipped
+      expect(await rolloverGroup(srcId, yearId, newName)).toBeNull();
+      // the wizard page renders the moved class as done
+      const page = await app.inject({ method: 'GET', url: `/setup/rollover?from=${(await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE is_current`)).rows[0]!.id}&to=${yearId}`, headers: { cookie: session } });
+      expect(page.body).toContain('moved up');
+    } finally {
+      await pool.query(`DELETE FROM enrolments WHERE pupil_id = $1`, [pup.rows[0]!.id]);
+      await pool.query(`DELETE FROM pupils WHERE id = $1`, [pup.rows[0]!.id]);
+      await pool.query(`UPDATE group_courses SET teaching_context = $2 WHERE id = $1`, [ctxBefore.rows[0]!.gc, ctxBefore.rows[0]!.tc]);
+      await pool.query(`DELETE FROM enrolments WHERE group_id IN (SELECT id FROM groups WHERE academic_year_id = $1)`, [yearId]);
+      await pool.query(`DELETE FROM group_courses WHERE group_id IN (SELECT id FROM groups WHERE academic_year_id = $1)`, [yearId]);
+      await pool.query(`DELETE FROM groups WHERE academic_year_id = $1`, [yearId]);
+      await pool.query(`DELETE FROM academic_years WHERE id = $1`, [yearId]);
+    }
+  });
+
+  it('Onboarding: configured instance shows the checklist; identity endpoint is dead (6.5)', async () => {
+    // this suite runs with the env password set → /welcome is the authed checklist, not the form
+    const w = await app.inject({ method: 'GET', url: '/welcome', headers: { cookie: session } });
+    expect(w.statusCode).toBe(200);
+    expect(w.body).toContain('Getting set up');
+    expect(w.body).toContain('Academic year');
+    // unauthenticated → login (never the identity form once a password exists)
+    const anon = await app.inject({ method: 'GET', url: '/welcome' });
+    expect(anon.statusCode).toBe(302);
+    expect(anon.headers.location).toBe('/login');
+    // the one-time identity endpoint refuses once configured
+    const page = await app.inject({ method: 'GET', url: '/setup', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const id = await app.inject({
+      method: 'POST',
+      url: '/welcome/identity',
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'name=X&school=Y&password=longenough1&password2=longenough1',
+    });
+    expect(id.statusCode).toBe(403);
   });
 
   it('Resources page renders with search bar + paged list', async () => {

@@ -48,7 +48,7 @@ import { equipmentItem } from '../llm/prompts/equipment';
 import { convertUnitSchema } from '../llm/schemas/convertUnit';
 import { CONVERT_UNIT_SYSTEM, CONVERT_UNIT_VERSION, convertUnitInstruction } from '../llm/prompts/convertUnit';
 import { buildSchemeTree } from '../services/scheme';
-import { getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse } from '../repos/delivery';
+import { getCurrentYearEnd, getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse } from '../repos/delivery';
 import { upcomingSlotDates } from '../services/delivery';
 import { getClockContext } from '../repos/clock';
 import { localParts } from '../lib/time';
@@ -271,7 +271,8 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       const weekday = await getSlotWeekday(assignTarget.lessonId);
       if (weekday != null) {
         const unitPlans = await listPlansForUnit(unitId);
-        const dates = upcomingSlotDates(weekday, startDate, unitPlans.length, ctx.terms);
+        const yearEnd = await getCurrentYearEnd();
+        const dates = upcomingSlotDates(weekday, startDate, unitPlans.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
         await layLessonsIntoSlot(assignTarget.lessonId, assignTarget.groupCourseId, unitPlans, dates);
       }
       reply.header('HX-Redirect', `/map?slot=${assignTarget.lessonId}:${assignTarget.groupCourseId}`);
@@ -393,7 +394,8 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     }
     const [lessons, weekday, ctx] = await Promise.all([listPlansForUnit(id.data.id), getSlotWeekday(lessonId), getClockContext()]);
     if (weekday == null) return reply.type('text/html').send('<p class="muted">Slot not found.</p>');
-    const dates = upcomingSlotDates(weekday, body.data.start, lessons.length, ctx.terms);
+    const yearEnd = await getCurrentYearEnd();
+    const dates = upcomingSlotDates(weekday, body.data.start, lessons.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
     const laid = await layLessonsIntoSlot(lessonId, groupCourseId, lessons, dates);
     return reply.type('text/html').send(renderLayResult(laid, lessons.length));
   });

@@ -116,11 +116,11 @@ async function main(): Promise<void> {
     for (const p of buildPeriodDefinitions()) {
       const id = idOf(
         await client.query<{ id: number }>(
-          `INSERT INTO period_definitions (weekday, slot_order, slot_type, label, lesson_index, start_time, end_time, teachable)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-           ON CONFLICT (weekday, slot_order) DO UPDATE SET slot_type=EXCLUDED.slot_type, label=EXCLUDED.label, lesson_index=EXCLUDED.lesson_index, start_time=EXCLUDED.start_time, end_time=EXCLUDED.end_time, teachable=EXCLUDED.teachable
+          `INSERT INTO period_definitions (weekday, slot_order, slot_type, label, lesson_index, start_time, end_time, teachable, academic_year_id)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT (academic_year_id, weekday, slot_order) DO UPDATE SET slot_type=EXCLUDED.slot_type, label=EXCLUDED.label, lesson_index=EXCLUDED.lesson_index, start_time=EXCLUDED.start_time, end_time=EXCLUDED.end_time, teachable=EXCLUDED.teachable
            RETURNING id`,
-          [p.weekday, p.slotOrder, p.slotType, p.label, p.lessonIndex, p.start, p.end, p.teachable],
+          [p.weekday, p.slotOrder, p.slotType, p.label, p.lessonIndex, p.start, p.end, p.teachable, currentYearId],
         ),
       );
       if (p.lessonIndex != null) periodId.set(`L:${p.weekday}:${p.lessonIndex}`, id);

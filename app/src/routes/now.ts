@@ -22,6 +22,7 @@ import { getDayChecklist, type PrepItem } from '../repos/prep';
 import { renderPrepList } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
+import { listExceptionsBetween } from '../repos/exceptions';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import type { LessonRow, PeriodRow } from '../services/timetable';
 import { toMinutes, weekdayOf } from '../lib/time';
@@ -316,6 +317,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
         .map(([gid]) => gid);
       const heads = resurfacing(captured, state.isoDate, todayGroupIds);
 
+      const exToday = (await listExceptionsBetween(state.isoDate, state.isoDate)).length;
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
 
@@ -352,6 +354,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz, ctx.terms)}
+        ${exToday ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>` : ''}
         <div class="now-cols">
           <div class="now-col now-col-now">
             <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>

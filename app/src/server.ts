@@ -27,6 +27,11 @@ import { registerRecurringRoutes } from './routes/recurring';
 import { registerSchemeRoutes } from './routes/schemes';
 import { registerMapRoutes } from './routes/map';
 import { registerKitRoutes } from './routes/kit';
+import { registerSetupRoutes } from './routes/setup';
+import { registerRolloverRoutes } from './routes/rollover';
+import { registerWelcomeRoutes } from './routes/welcome';
+import { registerSettingsRoutes } from './routes/settingsPage';
+import { registerGroupHistoryRoutes } from './routes/groupHistory';
 import { registerResourceRoutes } from './routes/resources';
 import { generateDueInstances } from './repos/recurringTasks';
 import { localParts } from './lib/time';
@@ -82,6 +87,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerSchemeRoutes(app);
   registerMapRoutes(app);
   registerKitRoutes(app);
+  registerSetupRoutes(app);
+  registerRolloverRoutes(app);
+  registerWelcomeRoutes(app);
+  registerSettingsRoutes(app);
+  registerGroupHistoryRoutes(app);
   registerResourceRoutes(app);
 
   return app;

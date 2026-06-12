@@ -4,9 +4,13 @@
 import { pool } from '../db/pool';
 import type { LessonRow, PeriodRow } from '../services/timetable';
 
-export async function getPeriodDefinitions(): Promise<PeriodRow[]> {
-  const { rows } = await pool.query<PeriodRow>(`
-    SELECT weekday,
+// Year-scoped (6.1): no year given ⇒ the current year. Editors pass a specific year so next
+// September can be built in advance without touching the live timetable.
+const CURRENT_YEAR = `(SELECT id FROM academic_years WHERE is_current)`;
+
+export async function getPeriodDefinitions(yearId?: number): Promise<PeriodRow[]> {
+  const { rows } = await pool.query<PeriodRow>(
+    `SELECT weekday,
            slot_order   AS "slotOrder",
            slot_type    AS "slotType",
            label,
@@ -15,14 +19,16 @@ export async function getPeriodDefinitions(): Promise<PeriodRow[]> {
            to_char(end_time,   'HH24:MI') AS "end",
            teachable
     FROM period_definitions
-    ORDER BY weekday, slot_order
-  `);
+    WHERE academic_year_id = COALESCE($1, ${CURRENT_YEAR})
+    ORDER BY weekday, slot_order`,
+    [yearId ?? null],
+  );
   return rows;
 }
 
-export async function getTimetabledLessons(): Promise<LessonRow[]> {
-  const { rows } = await pool.query<LessonRow>(`
-    SELECT tl.id        AS "lessonId",
+export async function getTimetabledLessons(yearId?: number): Promise<LessonRow[]> {
+  const { rows } = await pool.query<LessonRow>(
+    `SELECT tl.id        AS "lessonId",
            tl.purpose,
            p.weekday,
            p.slot_order AS "slotOrder",
@@ -41,8 +47,10 @@ export async function getTimetabledLessons(): Promise<LessonRow[]> {
     LEFT JOIN timetabled_lesson_courses tlc ON tlc.timetabled_lesson_id = tl.id
     LEFT JOIN group_courses gc             ON gc.id = tlc.group_course_id
     LEFT JOIN courses c                    ON c.id  = gc.course_id
+    WHERE p.academic_year_id = COALESCE($1, ${CURRENT_YEAR})
     GROUP BY tl.id, p.weekday, p.slot_order, s.is_self, s.name, g.name
-    ORDER BY p.weekday, p.slot_order
-  `);
+    ORDER BY p.weekday, p.slot_order`,
+    [yearId ?? null],
+  );
   return rows;
 }

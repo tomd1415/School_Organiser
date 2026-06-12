@@ -8,7 +8,7 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { getClockContext } from '../repos/clock';
 import { localParts, addDays } from '../lib/time';
-import { layLessonsIntoSlot, listAllSlots, slotSchedule, type ScheduleEntry, type SlotOption } from '../repos/delivery';
+import { getCurrentYearEnd, layLessonsIntoSlot, listAllSlots, slotSchedule, type ScheduleEntry, type SlotOption } from '../repos/delivery';
 import { upcomingSlotDates, weekdayName } from '../services/delivery';
 
 const PAST_WEEKS = 6;
@@ -70,7 +70,10 @@ export function registerMapRoutes(app: FastifyInstance): void {
         const pastFrom = addDays(today, -7 * PAST_WEEKS);
         const entries = await slotSchedule(chosen.lessonId, chosen.groupCourseId, pastFrom, addDays(today, 7 * FUTURE_WEEKS));
         const byDate = new Map(entries.map((e) => [e.date, e]));
-        const futureDates = upcomingSlotDates(chosen.weekday, addDays(today, 1), FUTURE_WEEKS, ctx.terms);
+        const yearEnd = await getCurrentYearEnd();
+        const futureDates = upcomingSlotDates(chosen.weekday, addDays(today, 1), FUTURE_WEEKS, ctx.terms).filter(
+          (d) => !yearEnd || d <= yearEnd,
+        );
 
         const shift = { slotKey: slotKey(chosen), today };
         const pastRows = entries
@@ -128,7 +131,8 @@ export function registerMapRoutes(app: FastifyInstance): void {
 
     // New dates start after `date`, but never before today (history is never rewritten).
     const from = addDays(b.data.date, 1) < today ? today : addDays(b.data.date, 1);
-    const dates = upcomingSlotDates(chosen.weekday, from, seq.length, ctx.terms);
+    const yearEnd = await getCurrentYearEnd();
+    const dates = upcomingSlotDates(chosen.weekday, from, seq.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
     await layLessonsIntoSlot(lessonId, groupCourseId, seq, dates);
     reply.header('HX-Redirect', `/map?slot=${b.data.slot}`);
     return reply.send('');

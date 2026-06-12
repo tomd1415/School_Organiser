@@ -12,6 +12,7 @@ export async function getDaySlots(weekday: number): Promise<AvailSlot[]> {
      LEFT JOIN timetabled_lessons tl
        ON tl.period_definition_id = p.id AND tl.staff_id = (SELECT id FROM staff WHERE is_self)
      WHERE p.weekday = $1
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      ORDER BY p.slot_order`,
     [weekday],
   );

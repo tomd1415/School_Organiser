@@ -39,6 +39,8 @@ import { buildLessonDetail, type CourseSection, type LessonDetail } from '../ser
 import { renderLinkedResources } from '../lib/resourceView';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, type PrepItem } from '../repos/prep';
+import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
+import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList } from '../lib/prepView';
 
 const TZ = 'Europe/London';
@@ -156,6 +158,34 @@ function renderSection(
     </section>`;
 }
 
+const EX_LABEL: Record<string, string> = { cancelled: 'Cancelled', room_change: 'Room change', cover: 'Cover', off_timetable: 'Off-timetable day' };
+
+function renderExceptions(ex: ExceptionRow[], lessonId: number, date: string, rooms: Array<{ id: number; name: string }>, staff: Array<{ id: number; name: string }>): string {
+  const banners = ex
+    .map(
+      (e) => `<p class="ex-banner ex-${e.kind}">⚠ <strong>${EX_LABEL[e.kind] ?? e.kind}</strong>${e.roomName ? ` → ${esc(e.roomName)}` : ''}${e.staffName ? ` (cover: ${esc(e.staffName)})` : ''}${e.note ? ` — ${esc(e.note)}` : ''}${e.timetabledLessonId == null ? ' <span class="muted">(whole day)</span>' : ''}
+        <button type="button" class="link danger" hx-post="/lesson/exception/${e.id}/delete" hx-confirm="Remove this exception?" hx-target="closest .ex-banner" hx-swap="outerHTML">✕</button></p>`,
+    )
+    .join('');
+  const roomOpts = rooms.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  const staffOpts = staff.map((x) => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
+  return `${banners}
+    <details class="ex-add"><summary>⚠ report an exception for this date</summary>
+      <form class="setup-add" hx-post="/lesson/exception" hx-vals='{"lesson":"${lessonId}","date":"${esc(date)}"}' hx-target="closest .ex-add" hx-swap="outerHTML">
+        <select name="kind">
+          <option value="cancelled">cancelled</option>
+          <option value="room_change">room change</option>
+          <option value="cover">cover</option>
+          <option value="off_timetable">off-timetable day (whole day)</option>
+        </select>
+        <select name="room"><option value="">room…</option>${roomOpts}</select>
+        <select name="staff"><option value="">cover by…</option>${staffOpts}</select>
+        <input name="note" placeholder="note… (trip, exams, snow)" maxlength="200">
+        <button type="submit" class="btn-secondary">add</button>
+      </form>
+    </details>`;
+}
+
 function renderDetail(
   detail: LessonDetail,
   notes: NoteItem[],
@@ -163,6 +193,7 @@ function renderDetail(
   plansByCourse: Map<number, Array<{ id: number; title: string }>>,
   resByPlan: Map<number, LinkedResource[]>,
   effByKey: Map<string, EffectiveLesson>,
+  exceptionsHtml: string,
   csrf: string,
 ): string {
   const h = detail.header;
@@ -194,6 +225,7 @@ function renderDetail(
       <p class="kicker">${flag}${h.isSelf ? 'Lesson' : 'Lesson I oversee'}</p>
       <h1>${heading}</h1>
       <p class="ld-meta">${meta}</p>
+      ${exceptionsHtml}
       ${sections}
       ${prep.length ? `<section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}</section>` : ''}
       <section class="ld-notesblock">
@@ -267,11 +299,14 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           }),
       );
 
+      const [exRows, exRooms, exStaff] = await Promise.all([listExceptionsFor(date, lesson), listRooms(), listStaff()]);
+      const exceptionsHtml = renderExceptions(exRows, lesson, date, exRooms.filter((r) => r.active), exStaff.filter((x) => x.active && !x.isSelf));
+
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
       return reply
         .type('text/html')
-        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, csrf), authed: true, csrfToken: csrf }));
+        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
@@ -482,5 +517,37 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply
       .type('text/html')
       .send('<p class="adapt-note">Master updated ✓ — every group now starts from this version (this group\'s adaptation still applies here). <a href="/schemes">View on Schemes →</a></p>');
+  });
+
+  // 6.7: dated exceptions (cancelled / room change / cover / off-timetable day)
+  app.post('/lesson/exception', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z
+      .object({
+        lesson: z.coerce.number().int().positive(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        kind: z.enum(['cancelled', 'room_change', 'cover', 'off_timetable']),
+        room: z.string().optional(),
+        staff: z.string().optional(),
+        note: z.string().max(200).optional(),
+      })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    await addException({
+      date: b.data.date,
+      timetabledLessonId: b.data.kind === 'off_timetable' ? null : b.data.lesson,
+      kind: b.data.kind,
+      roomId: b.data.room ? Number(b.data.room) : null,
+      staffId: b.data.staff ? Number(b.data.staff) : null,
+      note: b.data.note?.trim() || null,
+    });
+    reply.header('HX-Refresh', 'true');
+    return reply.send('');
+  });
+
+  app.post('/lesson/exception/:id/delete', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    await deleteException(p.data.id);
+    return reply.send('');
   });
 }

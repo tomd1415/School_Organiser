@@ -14,6 +14,15 @@ export interface CourseSlot {
   start: string;
 }
 
+/** The current academic year's last day — future planning never crosses into next September's
+ * timetable (which may not even exist yet). */
+export async function getCurrentYearEnd(): Promise<string | null> {
+  const { rows } = await pool.query<{ end: string }>(
+    `SELECT to_char(end_date, 'YYYY-MM-DD') AS "end" FROM academic_years WHERE is_current`,
+  );
+  return rows[0]?.end ?? null;
+}
+
 /** Every weekly slot that teaches a course (group + period) — the targets for laying a unit down. */
 export async function listSlotsForCourse(courseId: number): Promise<CourseSlot[]> {
   const { rows } = await pool.query<CourseSlot>(
@@ -26,6 +35,7 @@ export async function listSlotsForCourse(courseId: number): Promise<CourseSlot[]
      JOIN period_definitions p  ON p.id  = tl.period_definition_id
      LEFT JOIN groups g         ON g.id  = tl.group_id
      WHERE gc.course_id = $1
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      ORDER BY p.weekday, p.slot_order`,
     [courseId],
   );
@@ -62,6 +72,7 @@ export async function listAllSlots(): Promise<SlotOption[]> {
      JOIN period_definitions p  ON p.id  = tl.period_definition_id
      LEFT JOIN groups g         ON g.id  = tl.group_id
      WHERE tl.purpose = 'teaching'
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      ORDER BY g.name, p.weekday, p.slot_order`,
   );
   return rows;

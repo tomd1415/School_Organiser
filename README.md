@@ -5,7 +5,12 @@ lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. 
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
 > **Status:** **Phases 1–4 are complete** (only **pupils** 2.11 is deferred to the pupil-facing
-> project; 4.6/4.8 partial) and **Phase 5 (curriculum delivery) is built through 5.8**
+> project; 4.6/4.8 partial), **Phase 6 (setup, September & instances) is built** —
+> in-app [Setup](docs/PHASE_6_PLAN.md) editors + timetable editor, the **September rollover
+> wizard** (build next year in advance as a draft; class knowledge follows the group via a
+> predecessor chain), the **onboarding wizard** for brand-new per-teacher instances
+> (`scripts/new-instance.sh`), settings, exceptions and the class-history/archive views — and
+> **Phase 5 (curriculum delivery) is built through 5.8**
 > ([docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)): a **master scheme per course** with **per-group
 > adaptations + change logs**, **convert a downloaded unit into SEND-pitched master lessons (AI)**
 > — optionally **assigned straight into a group's weekly slots in the same action** (holiday-aware),

@@ -7,6 +7,48 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Phase 6 built: setup in-app, September solved, onboarding, instances
+
+The whole phase (6.1–6.9) landed in one pass. **Next September can now be built months in
+advance as a draft, without touching the live year** — the explicit "go live" flips the app over.
+
+- **6.1 Year-scoping** (migration `0013`): day shapes (`period_definitions`) are now per-year;
+  groups gain a `predecessor_group_id` chain; the clock/timetable/map/slots queries all filter to
+  the **current** year (regression test: a draft year never bleeds into live views); lay-down,
+  map and carry-over **clamp to the current year's end**. The pool-level BIGINT parser meant zero
+  comparison bugs.
+- **6.2 Setup area** (`/setup`, in the nav): year-aware tabs — *Year & terms* (create years —
+  the first ever becomes current automatically; "make current" = go-live with confirm), *Day
+  shape* (per-weekday period editor + **copy from another year**), *Rooms & staff*, *Courses*
+  (name/colour/archive), *Groups & pupils* (groups with predecessor info, course ticks, pupil
+  enrolment chips — enrolments are now live data).
+- **6.3 Timetable editor** (Setup → Timetable): the week grid per year; each slot holds multiple
+  entries (splits, TA lessons); per-entry purpose/group/room/staff selects + course ticks;
+  entries with taught history are locked 🔒 (the past is never rewritten).
+- **6.4 September rollover wizard** (`/setup/rollover`): pick from-year → to-year; checklist of
+  the new year's bones; **classes move up** with suggested names (7ARO→8ARO, editable), leaver
+  unticks, and each successor keeping its **pupils, courses and per-class teaching context**,
+  chained to its old self. Adaptations stay with their year (the masters already absorbed them).
+  Idempotent — moved classes show as done. Integration test asserts the §3 carries table.
+- **6.5 Onboarding** (`/welcome`): a brand-new instance (no password anywhere) opens a one-time
+  identity form (name/school/password → settings; **env var still wins** on existing instances),
+  then a 10-step checklist over the real Setup editors with live counts and a finish gate.
+- **6.6 Settings** (`/settings`): school name, password change (when DB-managed), AI kill-switch +
+  monthly cap + per-role models (was SQL-only), data-health panel (current year, DB size, AI
+  calls this month).
+- **6.7 Exceptions** (migration `0014`): cancelled / room change / cover / off-timetable day per
+  date — reported from the lesson page, shown as banners there, ⚠ badges on the timetable and a
+  note on Now. (Clock/availability integration deliberately deferred — see plan §12.)
+- **6.8 Instances**: `scripts/new-instance.sh <name> <port>` creates an isolated compose project
+  (own DB volume, port, secrets, backup script, 14-deep rotation) whose first boot lands on the
+  onboarding wizard; RUNBOOK gains the instances section; `instances/` git-ignored.
+- **6.9 History & archive**: `/group/:id/history` walks the predecessor chain both ways (contexts,
+  coverage, notes per year — safeguarding withheld); `/timetable?year=` browses a draft/archive
+  year's structure; `npm run export-year "2025/26"` dumps a year's full record as JSON.
+- **Plan §12** records the post-phase improvement list (exceptions→clock, onboarding templates +
+  MIS CSV import, rollover adaptation-carry option, instance update script, retention mechanism…)
+  and §13 the build-vs-plan deviations. **143 unit / 88 integration tests green** (5 new).
+
 ### 2026-06-11 — Phase 6 planned: setup editors, the September problem, onboarding, instances
 
 - New [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) (plan-first, for review): **in-app setup
