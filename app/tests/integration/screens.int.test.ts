@@ -417,6 +417,22 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       // improve-master (5.5b): without an adaptation → nudge; apply-improvement writes the master
       const nudge = await post(`/lesson/adapt/${groupCourseId}/${planId}/improve-master`);
       expect(nudge.body).toContain('Adapt the lesson for this group first');
+
+      // per-class resources: same nudge without an adaptation…
+      const resNudge = await post(`/lesson/adapt/${groupCourseId}/${planId}/resources-ai`);
+      expect(resNudge.body).toContain('Adapt the lesson for this class first');
+      // …and with one but no API key, degrade writes nothing
+      await pool.query(
+        `INSERT INTO lesson_adaptations (group_course_id, lesson_plan_id, objectives, outline) VALUES ($1, $2, 'GO', 'GL')
+         ON CONFLICT (group_course_id, lesson_plan_id) DO NOTHING`,
+        [groupCourseId, planId],
+      );
+      const beforeRes = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM resources`);
+      const resDeg = await post(`/lesson/adapt/${groupCourseId}/${planId}/resources-ai`);
+      expect(resDeg.statusCode).toBe(200);
+      expect(resDeg.body).not.toContain('class copies ready');
+      const afterRes = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM resources`);
+      expect(afterRes.rows[0]!.n).toBe(beforeRes.rows[0]!.n);
       const apply = await app.inject({
         method: 'POST',
         url: `/lesson/plan/${planId}/apply-improvement`,
@@ -766,6 +782,45 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       payload: 'name=X&school=Y&password=longenough1&password2=longenough1',
     });
     expect(id.statusCode).toBe(403);
+  });
+
+  it('Lesson resources: empty-plan guard + degrade writes nothing (resource generation)', async () => {
+    const c = await pool.query<{ id: number }>(`SELECT id FROM courses WHERE active ORDER BY id LIMIT 1`);
+    const s = await pool.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST res-gen', 92, false) RETURNING id`,
+      [c.rows[0]!.id],
+    );
+    const u = await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'U', 1) RETURNING id`, [s.rows[0]!.id]);
+    const empty = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, 'Empty plan', 1) RETURNING id`,
+      [u.rows[0]!.id, c.rows[0]!.id],
+    );
+    const full = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline) VALUES ($1, $2, 'Full plan', 2, 'O', '1. step (5 min)') RETURNING id`,
+      [u.rows[0]!.id, c.rows[0]!.id],
+    );
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const post = (url: string) => app.inject({ method: 'POST', url, headers: { cookie, 'x-csrf-token': token }, payload: '' });
+    try {
+      // no objectives/outline → guard message before any AI call
+      const r1 = await post(`/schemes/plan/${empty.rows[0]!.id}/resources-ai`);
+      expect(r1.body).toContain('resources are generated from them');
+      // with content but no key → degrades, creates nothing
+      const before = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM resources`);
+      const r2 = await post(`/schemes/plan/${full.rows[0]!.id}/resources-ai`);
+      expect(r2.statusCode).toBe(200);
+      expect(r2.body).not.toContain('resources ready');
+      const after = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM resources`);
+      expect(after.rows[0]!.n).toBe(before.rows[0]!.n);
+      const links = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM resource_links WHERE lesson_plan_id = $1`, [full.rows[0]!.id]);
+      expect(links.rows[0]!.n).toBe(0);
+    } finally {
+      await pool.query(`DELETE FROM lesson_plans WHERE unit_id = $1`, [u.rows[0]!.id]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [u.rows[0]!.id]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [s.rows[0]!.id]);
+    }
   });
 
   it('Resources page renders with search bar + paged list', async () => {

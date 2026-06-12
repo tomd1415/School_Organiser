@@ -7,6 +7,48 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Per-class adapted resources
+
+- A class's adapted lesson can now get **its own versions of the documents**: the new
+  **📄 Adapt resources for this class (AI)** button on the adaptation block feeds the AI the
+  lesson's **master documents** (read from the store, so it adapts the real sheets rather than
+  regenerating blind), the class's adapted objectives/outline + adaptation note, both teaching
+  contexts and the kit list — and produces the class's slides/worksheet/support/answers, named
+  with the class ("… — worksheet (8PFA).md").
+- **Filed in the right place:** migration `0015` adds `resource_links.adaptation_id` (the
+  exactly-one-target rule now spans six targets), so class copies are linked to the *adaptation* —
+  they appear on the lesson screen under "✏ this class" next to the master resources, count in the
+  where-used badge, and show as "✏ class copy" in a resource's usage list. **Reset to master
+  cascades the links away** (the documents stay in the store). Re-running **version-bumps, never
+  duplicates**; without an adaptation the button nudges you to adapt the lesson first.
+- Live-verified end-to-end (4 class copies named for 8PFA → regenerate → v2, no duplicates →
+  reset cascade confirmed). One flake found en route: two 8k-token AI calls back-to-back can trip
+  the API rate limit — harmless in real use (calls are one-at-a-time button presses).
+  **149 unit / 89 integration tests green.**
+
+### 2026-06-12 — Readable lesson outlines + per-lesson resource generation
+
+- **Outlines are structure, not a text block.** New formatter ([lib/formatLesson.ts](app/src/lib/formatLesson.ts),
+  6 unit tests): numbered lines become a step list with the **timing pulled out as a badge**
+  ("(5 min)" → a pill on the right), bullet lines a list, prose stays short paragraphs;
+  objectives render as a ✓-list. Applied to the lesson screen's master-plan block and to the
+  per-group adaptation, which now shows a **formatted read view** (kept fresh by an out-of-band
+  swap on every autosave) with the edit textareas tucked behind "✏ edit this group's version".
+- **Every lesson can generate/update its full resource set and file it in the right place.**
+  New `lesson_resources` AI feature: one call per lesson produces **slides outline + pupil
+  worksheet + scaffolded support version + teacher answers** as Markdown, each stored in the
+  resource store, **linked to the lesson plan** (so they surface on the lesson screen, the plan
+  editor and resource where-used), pitched by the course teaching-context and the kit list.
+  **Re-running updates the same documents as new versions — never duplicates.** Buttons:
+  **📄 Generate resources** on each plan (Schemes), **📄 resources for all lessons** per unit
+  (one call per lesson, stops early if AI is unavailable), and **📄 generate/update (AI)** right
+  on the lesson screen. Guard: a plan with no objectives/outline is refused before any spend.
+- **Fixed (pre-existing):** both AI resource creators passed `source='ai'`, violating the
+  `resources_source_check` constraint (allowed: `ai_generated`) — 4.7's generate button would
+  have failed at runtime; both now write `ai_generated`.
+- Live-verified end-to-end (4 documents generated → linked; regenerate → v2, no duplicates;
+  all cleaned up). **149 unit / 89 integration tests green.**
+
 ### 2026-06-12 — Phase 6 built: setup in-app, September solved, onboarding, instances
 
 The whole phase (6.1–6.9) landed in one pass. **Next September can now be built months in

@@ -32,7 +32,7 @@ export interface LinkedResource {
 const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source,
                   v.version_no AS "versionNo", v.byte_size AS "byteSize",
                   (SELECT count(*)::int FROM resource_links rl
-                   WHERE rl.resource_id = r.id AND (rl.lesson_plan_id IS NOT NULL OR rl.unit_id IS NOT NULL)) AS "usedCount"`;
+                   WHERE rl.resource_id = r.id AND (rl.lesson_plan_id IS NOT NULL OR rl.unit_id IS NOT NULL OR rl.adaptation_id IS NOT NULL)) AS "usedCount"`;
 
 export async function createResource(title: string, kind: string, mimeType: string | null, source: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
@@ -196,7 +196,7 @@ export async function listResourcesForPlan(planId: number): Promise<LinkedResour
 }
 
 export interface ResourceUsage {
-  kind: 'plan' | 'unit';
+  kind: 'plan' | 'unit' | 'group';
   title: string;
   courseId: number;
   courseName: string;
@@ -216,6 +216,16 @@ export async function listUsageForResource(resourceId: number): Promise<Resource
      JOIN units u ON u.id = rl.unit_id
      JOIN schemes_of_work s ON s.id = u.scheme_id
      JOIN courses c ON c.id = s.course_id
+     WHERE rl.resource_id = $1
+     UNION ALL
+     SELECT 'group' AS kind, lp.title || ' (' || coalesce(g.name, 'class') || ')' AS title,
+            c.id AS "courseId", c.name AS "courseName"
+     FROM resource_links rl
+     JOIN lesson_adaptations a ON a.id = rl.adaptation_id
+     JOIN lesson_plans lp ON lp.id = a.lesson_plan_id
+     JOIN group_courses gc ON gc.id = a.group_course_id
+     JOIN courses c ON c.id = gc.course_id
+     LEFT JOIN groups g ON g.id = gc.group_id
      WHERE rl.resource_id = $1
      ORDER BY kind, title`,
     [resourceId],
@@ -242,6 +252,26 @@ export async function listResourceIdsForFolder(folder: string): Promise<number[]
     [folder],
   );
   return rows.map((r) => Number(r.id));
+}
+
+/** Link a resource to one class's adaptation of a lesson (idempotent). */
+export async function linkResourceToAdaptation(resourceId: number, adaptationId: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO resource_links (resource_id, adaptation_id)
+     SELECT $1, $2 WHERE NOT EXISTS (
+       SELECT 1 FROM resource_links WHERE resource_id = $1 AND adaptation_id = $2)`,
+    [resourceId, adaptationId],
+  );
+}
+
+/** The adapted documents for one class's version of a lesson. */
+export async function listResourcesForAdaptation(adaptationId: number): Promise<LinkedResource[]> {
+  const { rows } = await pool.query<LinkedResource>(
+    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+     JOIN resources r ON r.id = rl.resource_id WHERE rl.adaptation_id = $1 AND r.active ORDER BY r.title`,
+    [adaptationId],
+  );
+  return rows;
 }
 
 /** Link a resource to a unit (idempotent) — source provenance for converted units (5.3). */

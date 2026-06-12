@@ -11,7 +11,20 @@ import {
   setOccurrenceCoursePlan,
 } from '../repos/occurrence';
 import { getLessonPlan, listCoursePlans, updatePlanField } from '../repos/schemes';
-import { listResourcesForPlan, type LinkedResource } from '../repos/resources';
+import {
+  addVersion,
+  createResource,
+  getCurrentVersion,
+  linkResourceToAdaptation,
+  listResourcesForAdaptation,
+  listResourcesForPlan,
+  listVersions,
+  type LinkedResource,
+} from '../repos/resources';
+import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
+import { safeFilename } from '../services/resource';
+import { lessonResourcesSchema } from '../llm/schemas/lessonResources';
+import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
 import {
   getAdaptation,
   getEffectiveLesson,
@@ -42,6 +55,7 @@ import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList } from '../lib/prepView';
+import { formatObjectives, formatOutline } from '../lib/formatLesson';
 
 const TZ = 'Europe/London';
 const Query = z.object({
@@ -77,7 +91,9 @@ function errorPage(reply: { generateCsrf: () => string }, code: number, message:
 }
 
 function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false): string {
-  const detail = `${objectives ? `<p><strong>Objectives:</strong> ${esc(objectives)}</p>` : ''}${outline ? `<p><strong>Outline:</strong> ${esc(outline)}</p>` : ''}`;
+  const detail =
+    `${objectives ? `<div class="oc-block"><span class="oc-label">Objectives</span>${formatObjectives(objectives)}</div>` : ''}` +
+    `${outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(outline)}</div>` : ''}`;
   const inner = title ? detail || '<span class="muted">(plan has no detail yet)</span>' : '<span class="muted">No plan bound.</span>';
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
@@ -93,17 +109,32 @@ function adaptMeta(gc: number, lp: number, adapted: boolean, oob = false): strin
   return `<div class="adapt-meta" id="adapt-${gc}-${lp}-meta"${oob ? ' hx-swap-oob="true"' : ''}>${badge} <span class="note-status" id="adapt-${gc}-${lp}-status"></span></div>`;
 }
 
+function adaptView(gc: number, lp: number, eff: EffectiveLesson, oob = false): string {
+  const inner = eff.adapted
+    ? `${eff.objectives ? `<div class="oc-block"><span class="oc-label">Objectives — this group</span>${formatObjectives(eff.objectives)}</div>` : ''}` +
+      `${eff.outline ? `<div class="oc-block"><span class="oc-label">Outline — this group</span>${formatOutline(eff.outline)}</div>` : ''}`
+    : '';
+  return `<div class="adapt-view" id="adapt-${gc}-${lp}-view"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
+}
+
 function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string): string {
   return `<div class="adapt" id="adapt-${gc}-${lp}">
       ${adaptMeta(gc, lp, eff.adapted)}
       ${eff.adaptationNote ? `<p class="adapt-note">${esc(eff.adaptationNote)}</p>` : ''}
       ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
-      <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
-        <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
-        <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
-      </form>
+      ${adaptView(gc, lp, eff)}
+      <details class="adapt-edit"${eff.adapted ? '' : ' open'}>
+        <summary>✏ ${eff.adapted ? "edit this group's version" : 'adapt it for this group'}</summary>
+        <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
+          <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
+          <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
+        </form>
+      </details>
       <button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt from recent lessons (AI)</button>
-      ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>` : ''}
+      ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
+      <button type="button" class="link fu-ai" title="re-make the lesson's documents for this class from the master sheets + this adapted version; re-running updates them"
+        hx-post="/lesson/adapt/${gc}/${lp}/resources-ai" hx-target="#adapt-res-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">📄 Adapt resources for this class (AI)</button>
+      <span id="adapt-res-${gc}-${lp}"></span>` : ''}
       <div id="adapt-${gc}-${lp}-proposal"></div>
       <details class="adapt-log" id="adapt-${gc}-${lp}-log">
         <summary>change log</summary>
@@ -116,6 +147,7 @@ function renderSection(
   s: CourseSection,
   plans: Array<{ id: number; title: string }>,
   resources: LinkedResource[],
+  adaptedRes: LinkedResource[],
   eff: EffectiveLesson | undefined,
   slot: { lessonId: number; date: string },
 ): string {
@@ -138,7 +170,10 @@ function renderSection(
       </label>
       ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
-      <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}</div>
+      <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}
+        ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
+        ${s.lessonPlanId != null ? `<button type="button" class="link" title="slides + worksheet + support + answers for this lesson (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate/update (AI)</button><span id="res-gen-${oc}"></span>` : ''}
+      </div>
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -193,6 +228,7 @@ function renderDetail(
   plansByCourse: Map<number, Array<{ id: number; title: string }>>,
   resByPlan: Map<number, LinkedResource[]>,
   effByKey: Map<string, EffectiveLesson>,
+  adaptedResByKey: Map<string, LinkedResource[]>,
   exceptionsHtml: string,
   csrf: string,
 ): string {
@@ -212,6 +248,7 @@ function renderDetail(
               s,
               plansByCourse.get(s.courseId) ?? [],
               (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [],
+              adaptedResByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) ?? [],
               s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
               { lessonId: h.lessonId, date: h.date },
             ),
@@ -234,6 +271,76 @@ function renderDetail(
       </section>
       <p><a href="/timetable">← Timetable</a></p>
     </section>`;
+}
+
+
+// Per-class adapted resources: re-make the lesson's documents for ONE class, from the master
+// documents + the class's adapted lesson. Stored in the resource store, linked to the ADAPTATION
+// (reset-to-master unlinks them; the files stay). Re-running version-bumps, never duplicates.
+const ADAPT_RES_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'support worksheet', answers: 'answers' };
+
+async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: boolean; message: string }> {
+  const [adaptation, master, info] = await Promise.all([getAdaptation(gc, lp), getLessonPlan(lp), getGroupCourseInfo(gc)]);
+  if (!master || !info) return { ok: false, message: 'Lesson not found.' };
+  if (!adaptation) return { ok: false, message: "Adapt the lesson for this class first — class copies are made from the class's version." };
+  const eff = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
+
+  // The master documents (Markdown only), so the AI adapts the real sheets rather than guessing.
+  const masterDocs: Array<{ title: string; content: string }> = [];
+  for (const r of (await listResourcesForPlan(lp)).filter((x) => x.title.endsWith('.md')).slice(0, 4)) {
+    try {
+      const v = await getCurrentVersion(r.resourceId);
+      if (v) masterDocs.push({ title: r.title, content: (await readStored(v.storagePath)).toString('utf8') });
+    } catch {
+      // a missing file shouldn't block adaptation — the prompt creates the doc from the outline
+    }
+  }
+
+  const result = await callLLMStructured(
+    {
+      feature: 'adapt_resources',
+      model: await modelFor('plan'),
+      promptVersion: ADAPT_RESOURCES_VERSION,
+      system: ADAPT_RESOURCES_SYSTEM,
+      context: [
+        ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
+        ...equipmentItem(await listActiveEquipment()),
+        ...adaptResourceItems(
+          { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
+          masterDocs,
+        ),
+      ],
+      instruction: adaptResourcesInstruction(info.groupName),
+      maxTokens: 8000,
+    },
+    lessonResourcesSchema,
+  );
+  if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
+
+  const existing = await listResourcesForAdaptation(adaptation.id);
+  let created = 0;
+  let updated = 0;
+  for (const r of result.data.resources.slice(0, 4)) {
+    if (!r.content.trim()) continue;
+    const filename = `${safeFilename(master.title).replace(/\.md$/i, '') || 'lesson'} — ${ADAPT_RES_LABEL[r.kind] ?? r.kind} (${safeFilename(info.groupName ?? 'class')}).md`;
+    const buf = Buffer.from(r.content, 'utf8');
+    const match = existing.find((e) => e.title === filename);
+    if (match) {
+      const vNo = (await listVersions(match.resourceId)).length + 1;
+      const rel = relPathFor(match.resourceId, vNo, filename);
+      await storeBuffer(rel, buf);
+      await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class (regenerated)');
+      updated++;
+    } else {
+      const id = await createResource(filename, r.kind === 'slides' ? 'slides' : r.kind === 'answers' ? 'document' : 'worksheet', 'text/markdown', 'ai_generated');
+      const rel = relPathFor(id, 1, filename);
+      await storeBuffer(rel, buf);
+      await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class');
+      await linkResourceToAdaptation(id, adaptation.id);
+      created++;
+    }
+  }
+  return { ok: true, message: `class copies ready ✓ — ${created} new, ${updated} updated` };
 }
 
 export function registerLessonRoutes(app: FastifyInstance): void {
@@ -287,6 +394,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
 
       // 5.2: each group's effective lesson (its adaptation where present, else the master).
       const effByKey = new Map<string, EffectiveLesson>();
+      const adaptedResByKey = new Map<string, LinkedResource[]>();
       await Promise.all(
         detail.sections
           .filter((s) => s.lessonPlanId != null)
@@ -296,6 +404,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
               outline: s.planOutline,
             });
             effByKey.set(`${s.groupCourseId}:${s.lessonPlanId}`, eff);
+            if (eff.adaptationId != null) {
+              adaptedResByKey.set(`${s.groupCourseId}:${s.lessonPlanId}`, await listResourcesForAdaptation(eff.adaptationId));
+            }
           }),
       );
 
@@ -306,7 +417,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const title = header.groupName ?? purposeLabel(header.purpose);
       return reply
         .type('text/html')
-        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
+        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, adaptedResByKey, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
     } catch {
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
@@ -343,8 +454,12 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       adaptationNote: null,
       changeSummary: 'teacher edit',
     });
-    // Flip the badge to "adapted" (OOB) and confirm the save — without re-rendering the textareas.
-    return reply.type('text/html').send(adaptMeta(p.data.gc, p.data.lp, true, true) + renderSavedStatus(`adapt-${p.data.gc}-${p.data.lp}-status`));
+    // Flip the badge + refresh the formatted view (both OOB) without re-rendering the textareas.
+    const master = await getLessonPlan(p.data.lp);
+    const eff = await getEffectiveLesson(p.data.gc, p.data.lp, { objectives: master?.objectives ?? null, outline: master?.outline ?? null });
+    return reply
+      .type('text/html')
+      .send(adaptMeta(p.data.gc, p.data.lp, true, true) + adaptView(p.data.gc, p.data.lp, eff, true) + renderSavedStatus(`adapt-${p.data.gc}-${p.data.lp}-status`));
   });
 
   // Reset this group's lesson back to the master (delete the override + its log).
@@ -453,6 +568,20 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     });
     const updated = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
     return reply.type('text/html').send(renderAdaptation(gc, lp, updated, 'adapted ✓ — review and edit below; the change log records it'));
+  });
+
+
+  // Per-class adapted resources: re-make the documents for THIS class from the masters + the
+  // class's adapted lesson. Success refreshes the page (the ✏ list appears in Resources).
+  app.post('/lesson/adapt/:gc/:lp/resources-ai', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const res = await generateAdaptedResources(p.data.gc, p.data.lp);
+    if (res.ok) {
+      reply.header('HX-Refresh', 'true');
+      return reply.send('');
+    }
+    return reply.type('text/html').send(`<span class="muted">${esc(res.message)}</span>`);
   });
 
   // 5.5b: AI proposes folding a group's adaptation back into the MASTER. Nothing is written until

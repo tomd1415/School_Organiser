@@ -34,14 +34,21 @@ import {
   updateUnitField,
 } from '../repos/schemes';
 import {
+  addVersion,
+  createResource,
   getImportedPaths,
   linkResourceToPlan,
   linkResourceToUnit,
   listResourceIdsForFolder,
   listResourcesForPlan,
+  listVersions,
   searchResources,
   unlinkResourceFromPlan,
 } from '../repos/resources';
+import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
+import { safeFilename } from '../services/resource';
+import { lessonResourcesSchema } from '../llm/schemas/lessonResources';
+import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems } from '../llm/prompts/lessonResources';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { listActiveEquipment } from '../repos/equipment';
 import { equipmentItem } from '../llm/prompts/equipment';
@@ -72,6 +79,63 @@ async function treeHtml(schemeId: number): Promise<string> {
   const [scheme, units, plans] = await Promise.all([getScheme(schemeId), listUnits(schemeId), listPlansForScheme(schemeId)]);
   if (!scheme) return '<div id="scheme-tree"><p class="muted">Scheme not found.</p></div>';
   return renderSchemeTree(scheme, buildSchemeTree(units, plans));
+}
+
+
+// Generate/update ONE lesson's resource set (slides outline, worksheet, support, answers) and put
+// each file where it belongs: the resource store, linked to the plan, so it surfaces on the lesson
+// screen and the plan editor. Re-running creates new VERSIONS of the same documents, not copies.
+const RES_KIND_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'support worksheet', answers: 'answers' };
+const RES_KIND_STORE: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'worksheet', answers: 'document' };
+
+async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; message: string }> {
+  const [ctx, row] = await Promise.all([getPlanContext(planId), getPlanRow(planId)]);
+  if (!ctx || !row) return { ok: false, message: 'Lesson not found.' };
+  if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
+    return { ok: false, message: 'Write or ✨draft the objectives/outline first — resources are generated from them.' };
+  }
+  const result = await callLLMStructured(
+    {
+      feature: 'lesson_resources',
+      model: await modelFor('plan'),
+      promptVersion: LESSON_RESOURCES_VERSION,
+      system: LESSON_RESOURCES_SYSTEM,
+      context: [
+        ...teachingContextItems(ctx.teachingContext),
+        ...equipmentItem(await listActiveEquipment()),
+        ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
+      ],
+      instruction: LESSON_RESOURCES_INSTRUCTION,
+      maxTokens: 8000,
+    },
+    lessonResourcesSchema,
+  );
+  if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
+
+  const existing = await listResourcesForPlan(planId);
+  let created = 0;
+  let updated = 0;
+  for (const r of result.data.resources.slice(0, 4)) {
+    if (!r.content.trim()) continue;
+    const filename = `${safeFilename(ctx.planTitle).replace(/\.md$/i, '') || 'lesson'} — ${RES_KIND_LABEL[r.kind] ?? r.kind}.md`;
+    const buf = Buffer.from(r.content, 'utf8');
+    const match = existing.find((e) => e.title === filename);
+    if (match) {
+      const vNo = (await listVersions(match.resourceId)).length + 1;
+      const rel = relPathFor(match.resourceId, vNo, filename);
+      await storeBuffer(rel, buf);
+      await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-regenerated');
+      updated++;
+    } else {
+      const id = await createResource(filename, RES_KIND_STORE[r.kind] ?? 'document', 'text/markdown', 'ai_generated');
+      const rel = relPathFor(id, 1, filename);
+      await storeBuffer(rel, buf);
+      await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
+      await linkResourceToPlan(id, planId);
+      created++;
+    }
+  }
+  return { ok: true, message: `resources ready ✓ — ${created} new, ${updated} updated (linked below)` };
 }
 
 export function registerSchemeRoutes(app: FastifyInstance): void {
@@ -281,6 +345,46 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
 
     reply.header('HX-Redirect', `/schemes?course=${courseId}&scheme=${schemeId}`);
     return reply.send('');
+  });
+
+
+  // Generate/update a lesson's resource set (AI) — slides outline + worksheet + support + answers.
+  app.post('/schemes/plan/:id/resources-ai', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const q = z.object({ from: z.enum(['lesson']).optional() }).safeParse(req.query);
+    const res = await generateResourcesForPlan(id.data.id);
+    if (q.success && q.data.from === 'lesson') {
+      if (res.ok) {
+        reply.header('HX-Refresh', 'true');
+        return reply.send('');
+      }
+      return reply.type('text/html').send(`<span class="muted">${esc(res.message)}</span>`);
+    }
+    const updated = await getPlanRow(id.data.id);
+    if (!updated) return reply.code(404).send('');
+    return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: res.message }));
+  });
+
+  // …and for every lesson in a unit (one AI call per lesson; stops early if AI is unavailable).
+  app.post('/schemes/unit/:id/resources-ai', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const plans = await listPlansForUnit(id.data.id);
+    let done = 0;
+    let skipped = 0;
+    for (const pl of plans) {
+      const r = await generateResourcesForPlan(pl.id);
+      if (r.ok) done++;
+      else {
+        skipped++;
+        if (/unavailable|cap|disabled|key|not configured/i.test(r.message)) break; // no point hammering
+      }
+    }
+    const sid = await schemeIdForUnit(id.data.id);
+    const tree = sid ? await treeHtml(sid) : '<div id="scheme-tree"></div>';
+    const note = `<p class="adapt-note">unit resources: ${done} lesson${done === 1 ? '' : 's'} done${skipped ? `, ${skipped} skipped` : ''}</p>`;
+    return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
   });
 
   // Summarise a course's notes with AI (4.5).

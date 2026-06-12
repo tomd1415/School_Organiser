@@ -111,7 +111,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const base = safeFilename((d.filename || d.title || 'resource').replace(/\.(md|markdown|txt)$/i, ''));
     const filename = `${base || 'resource'}.md`;
     const buf = Buffer.from(d.content, 'utf8');
-    const id = await createResource(filename, 'document', 'text/markdown', 'ai');
+    const id = await createResource(filename, 'document', 'text/markdown', 'ai_generated');
     const rel = relPathFor(id, 1, filename);
     await storeBuffer(rel, buf);
     await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
@@ -145,7 +145,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const items = usage
       .map(
         (u) =>
-          `<li>${u.kind === 'plan' ? '📋 lesson' : '📦 unit source'}: <a href="/schemes?course=${u.courseId}">${esc(u.title)}</a> <span class="muted">(${esc(u.courseName)})</span></li>`,
+          `<li>${u.kind === 'plan' ? '📋 lesson' : u.kind === 'group' ? '✏ class copy' : '📦 unit source'}: <a href="/schemes?course=${u.courseId}">${esc(u.title)}</a> <span class="muted">(${esc(u.courseName)})</span></li>`,
       )
       .join('');
     return reply.type('text/html').send(`<ul class="res-usage-list">${items}</ul>`);

@@ -25,6 +25,8 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
       <summary>objectives · outline · ${p.durationMin ? esc(String(p.durationMin)) + ' min' : 'duration'}</summary>
       <div class="plan-ai">
         <button type="button" class="btn-secondary" hx-post="/schemes/plan/${p.id}/draft" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Draft with AI</button>
+        <button type="button" class="btn-secondary" title="slides outline + worksheet + support version + answers — stored and linked to this lesson; re-running updates the versions"
+          hx-post="/schemes/plan/${p.id}/resources-ai" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">📄 Generate resources</button>
         <span class="plan-draft-status" id="plan-${p.id}-draft">${esc(opts.draftStatus ?? '')}</span>
       </div>
       <label>Objectives<textarea name="objectives" rows="2" ${save('input changed delay:800ms, blur')}>${esc(p.objectives ?? '')}</textarea></label>
@@ -48,6 +50,9 @@ function renderUnit(u: UnitWithPlans): string {
     </div>
     <ol class="plans">${u.plans.map((p) => renderPlan(p)).join('')}</ol>
     <button type="button" class="link" hx-post="/schemes/unit/${u.id}/plan" hx-target="#scheme-tree" hx-swap="outerHTML">＋ lesson plan</button>
+    <button type="button" class="link" title="one AI call per lesson; existing documents get new versions"
+      hx-post="/schemes/unit/${u.id}/resources-ai" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="this"
+      hx-confirm="Generate/update the resource set (slides, worksheet, support, answers) for EVERY lesson in this unit? One AI call per lesson — this can take a few minutes.">📄 resources for all lessons</button>
     <details class="unit-lay" id="unit-${u.id}-lay">
       <summary>📅 Lay into a group's calendar</summary>
       <div class="unit-lay-body" hx-get="/schemes/unit/${u.id}/lay-form" hx-trigger="toggle from:#unit-${u.id}-lay once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading slots…</span></div>
