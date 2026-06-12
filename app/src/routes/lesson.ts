@@ -418,7 +418,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       return reply
         .type('text/html')
         .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, adaptedResByKey, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
       return reply.type('text/html').send(layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
     }

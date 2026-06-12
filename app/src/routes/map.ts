@@ -103,7 +103,8 @@ export function registerMapRoutes(app: FastifyInstance): void {
             </table></div>
           </section>`;
       }
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>Curriculum map</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
     return reply.type('text/html').send(layout({ title: 'Map', body, authed: true, csrfToken: csrf }));

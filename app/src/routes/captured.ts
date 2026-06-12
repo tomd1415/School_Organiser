@@ -22,7 +22,8 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     try {
       const [items, groups] = await Promise.all([listCaptured(category), listGroups()]);
       listHtml = renderCapturedList(items, groups);
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Captured info is unavailable — the database is not reachable.</p>`;
     }
 

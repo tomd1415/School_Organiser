@@ -371,7 +371,8 @@ export function registerNowRoutes(app: FastifyInstance): void {
         </div>
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="now"><p class="kicker">Now</p><h1>Now</h1><p class="muted">The database is not reachable — start the stack with <code>./start.sh</code>.</p></section>`;
       return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
     }
@@ -390,7 +391,8 @@ export function registerNowRoutes(app: FastifyInstance): void {
         return reply.header('HX-Refresh', 'true').send('');
       }
       return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms));
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');
     }
   });

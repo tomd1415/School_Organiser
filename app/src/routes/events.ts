@@ -17,7 +17,8 @@ export function registerEventRoutes(app: FastifyInstance): void {
     let listHtml: string;
     try {
       listHtml = renderEventList(await listUpcoming());
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Events are unavailable — the database is not reachable.</p>`;
     }
     const body = `

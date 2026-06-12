@@ -119,7 +119,8 @@ export function registerFocusRoutes(app: FastifyInstance): void {
     try {
       inner = (await buildInner(new Date(), q.success && q.data.mode ? q.data.mode : null)).html;
       banner = renderTimerBanner(await getRunningTimer());
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       inner = `<p class="muted">Focus is unavailable — the database is not reachable.</p>`;
     }
     const body = `<section class="card focus" hx-headers='{"x-csrf-token":"${csrf}"}'>${banner}<div id="focus-inner">${inner}</div></section>`;

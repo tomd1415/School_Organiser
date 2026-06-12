@@ -397,7 +397,8 @@ export function registerSetupRoutes(app: FastifyInstance): void {
       } else {
         body = await renderSetup(tab, Number(yearId), csrf);
       }
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>Setup</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
     return reply.type('text/html').send(layout({ title: 'Setup', body, authed: true, csrfToken: csrf }));

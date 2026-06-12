@@ -28,4 +28,29 @@
       if (last) last.focus();
     }
   });
+
+  // Visible feedback for slow requests (AI calls can take 20–60s): htmx already adds
+  // .htmx-request to the busy element (button spinner via CSS); this adds a page-top activity
+  // bar whenever anything has been in flight longer than a moment, so even a swapped-away
+  // button leaves visible evidence that work is happening.
+  var inflight = 0;
+  var busyTimer = null;
+  document.body.addEventListener('htmx:beforeRequest', function () {
+    inflight++;
+    if (!busyTimer) {
+      busyTimer = setTimeout(function () {
+        if (inflight > 0) document.body.classList.add('hx-busy');
+      }, 400);
+    }
+  });
+  function requestDone() {
+    inflight = Math.max(0, inflight - 1);
+    if (inflight === 0) {
+      clearTimeout(busyTimer);
+      busyTimer = null;
+      document.body.classList.remove('hx-busy');
+    }
+  }
+  document.body.addEventListener('htmx:afterRequest', requestDone);
+  document.body.addEventListener('htmx:sendAbort', requestDone);
 })();

@@ -85,7 +85,8 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         </ul>
         <p class="muted">Setup checklist: <a href="/welcome">/welcome</a> · September: <a href="/setup/rollover">rollover wizard</a></p>
       </section>`;
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>Settings</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
     return reply.type('text/html').send(layout({ title: 'Settings', body, authed: true, csrfToken: csrf }));

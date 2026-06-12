@@ -7,6 +7,55 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Immediate feedback on every AI (and other) button
+
+- AI calls can take 20–60s and the only signal was a quietly-disabled button — inviting repeat
+  clicks. Now **every htmx-driven button shows itself working, globally** (no per-button markup,
+  so future buttons inherit it): the in-flight button dims, gets a **spinner**, and ignores
+  further clicks; submit buttons inside posting forms do the same; and a thin **animated activity
+  bar** appears across the top of the page for anything in flight longer than 400ms (so instant
+  autosaves never flash it), clearing when the work lands.
+- Verified with a headless browser holding a real AI endpoint open: spinner + bar visible
+  mid-flight, a second click fires **zero** extra requests, everything clears on completion.
+  The lay-down form also gained the disable-while-busy guard its siblings already had.
+
+### 2026-06-12 — Scheme authoring now knows the curriculum history + bug-class sweep
+
+- **Creating/updating schemes now accounts for what came before.** New
+  [repos/curriculumHistory.ts](app/src/repos/curriculumHistory.ts): the course's existing schemes
+  (all versions — they persist across years) and, for every class currently taking the course,
+  **what it has already covered walked back through its predecessor chain** (taught lesson titles
+  and counts across years, token-capped). Injected as two labelled context items into **author a
+  scheme** (4.4, prompt → `author_scheme@3`) and **convert a downloaded unit** (5.3 →
+  `convert_unit@2`), whose system prompts now instruct: *design the next step — continue from
+  what was covered, recap rather than reteach, don't repeat whole units.* Empty history injects
+  nothing, so new courses behave exactly as before. Tests: items builder (2 unit), recursive
+  chain coverage across a two-year fixture (integration), and a live check — the model correctly
+  named the real Computing Curriculum unit from the history item, and the audited request carries
+  it.
+- **Bug sweep for the two recent bug classes:**
+  - *CHECK-constraint mismatches* (the `source='ai'` class): full cross-reference of every CHECK
+    in migrations 0001–0015 against every write site — **no further instances**.
+  - *Error-hiding catches* (the "unavailable" class): **21 page-render catches across 20 route
+    files logged nothing** and blamed the database for any failure whatsoever. All now log the
+    real error (`app.log.error`) before showing the friendly page — `docker compose logs app`
+    finally tells the truth. Resource **download/view** also no longer 500 on a missing store
+    file: they log the path and return a clear 404 ("restore from backup or re-upload").
+- **151 unit / 90 integration tests green.**
+
+### 2026-06-12 — Fixed: "AI service unavailable" was the container losing its internet
+
+- Every AI call failed with the generic message; the audit log showed the real cause:
+  **"Connection error."** — the app container had lost all outbound network (DNS *and* raw TCP)
+  while the host was fine, the classic Docker symptom after a host network/firewall change
+  (likely overnight, post-power-cut). `./start.sh` recreates the compose network and its NAT
+  rules; verified from inside the container afterwards (DNS ✓, egress ✓, the Anthropic models
+  endpoint answering **200** with the real key, no tokens spent).
+- **The wrapper now says what's actually wrong** instead of one generic line: connection failures
+  → "the server has lost internet access… restart the stack"; rate-limit → "wait a minute";
+  overloaded → "try again shortly"; rejected key → "check ANTHROPIC_API_KEY". The audit row
+  always kept the raw error; now the on-screen message is actionable too.
+
 ### 2026-06-12 — Per-class adapted resources
 
 - A class's adapted lesson can now get **its own versions of the documents**: the new

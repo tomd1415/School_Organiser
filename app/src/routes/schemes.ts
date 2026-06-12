@@ -50,6 +50,8 @@ import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema } from '../llm/schemas/lessonResources';
 import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems } from '../llm/prompts/lessonResources';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
+import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
+import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
 import { listActiveEquipment } from '../repos/equipment';
 import { equipmentItem } from '../llm/prompts/equipment';
 import { convertUnitSchema } from '../llm/schemas/convertUnit';
@@ -191,7 +193,8 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             ${renderAllSchemes(allSchemes, scheme?.id)}
           </section>`;
       }
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = `<section class="card"><h1>Schemes of work</h1><p class="muted">Unavailable — the database is not reachable.</p></section>`;
     }
     return reply.type('text/html').send(layout({ title: 'Schemes', body, authed: true, csrfToken: csrf }));
@@ -227,6 +230,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         system: AUTHOR_SCHEME_SYSTEM,
         context: [
           ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
+          ...curriculumHistoryItems(await getCourseCurriculumHistory(q.data.course)),
           ...equipmentItem(await listActiveEquipment()),
           { text: authorSchemeInstruction(course.name, b.data.brief) },
         ],
@@ -305,6 +309,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         system: CONVERT_UNIT_SYSTEM,
         context: [
           ...teachingContextItems(await getCourseTeachingContext(courseId)),
+          ...curriculumHistoryItems(await getCourseCurriculumHistory(courseId)),
           ...equipmentItem(await listActiveEquipment()),
           { text: convertUnitInstruction(course.name, b.data.folder, lessons) },
         ],

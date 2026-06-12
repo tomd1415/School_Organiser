@@ -25,7 +25,8 @@ export function registerRecurringRoutes(app: FastifyInstance): void {
     try {
       const [defs, groups] = await Promise.all([listRecurring(), listGroups()]);
       listHtml = renderRecurringList(defs, groups);
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Recurring tasks are unavailable — the database is not reachable.</p>`;
     }
     const body = `

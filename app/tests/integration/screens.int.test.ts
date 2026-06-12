@@ -823,6 +823,65 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Curriculum history: coverage follows the predecessor chain across years', async () => {
+    const { getCourseCurriculumHistory } = await import('../../src/repos/curriculumHistory');
+    // throwaway course + a two-year class chain with one taught lesson in the OLD year
+    const course = await pool.query<{ id: number }>(`INSERT INTO courses (name) VALUES ('TEST hist course') RETURNING id`);
+    const cId = Number(course.rows[0]!.id);
+    const curYear = await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE is_current`);
+    const oldYear = await pool.query<{ id: number }>(
+      `INSERT INTO academic_years (name, start_date, end_date, is_current) VALUES ('TEST/HIST', '2000-09-01', '2001-08-31', false) RETURNING id`,
+    );
+    const gOld = await pool.query<{ id: number }>(
+      `INSERT INTO groups (name, academic_year_id) VALUES ('TEST-7H', $1) RETURNING id`,
+      [oldYear.rows[0]!.id],
+    );
+    const gNew = await pool.query<{ id: number }>(
+      `INSERT INTO groups (name, academic_year_id, predecessor_group_id) VALUES ('TEST-8H', $1, $2) RETURNING id`,
+      [curYear.rows[0]!.id, gOld.rows[0]!.id],
+    );
+    const gcOld = await pool.query<{ id: number }>(`INSERT INTO group_courses (group_id, course_id) VALUES ($1, $2) RETURNING id`, [gOld.rows[0]!.id, cId]);
+    await pool.query(`INSERT INTO group_courses (group_id, course_id) VALUES ($1, $2)`, [gNew.rows[0]!.id, cId]);
+    const sch = await pool.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST hist scheme', 1, true) RETURNING id`,
+    [cId]);
+    const unit = await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'Old unit', 1) RETURNING id`, [sch.rows[0]!.id]);
+    const plan = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, 'Taught last year', 1) RETURNING id`,
+      [unit.rows[0]!.id, cId],
+    );
+    // a taught occurrence in the old year, bound to the old group's group_course
+    const slot = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose='teaching' ORDER BY id LIMIT 1`);
+    const occ = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_occurrences (timetabled_lesson_id, date) VALUES ($1, '2001-01-08')
+       ON CONFLICT (timetabled_lesson_id, date) DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id RETURNING id`,
+      [slot.rows[0]!.id],
+    );
+    await pool.query(
+      `INSERT INTO occurrence_courses (occurrence_id, group_course_id, lesson_plan_id) VALUES ($1, $2, $3)
+       ON CONFLICT (occurrence_id, group_course_id) DO UPDATE SET lesson_plan_id = EXCLUDED.lesson_plan_id`,
+      [occ.rows[0]!.id, gcOld.rows[0]!.id, plan.rows[0]!.id],
+    );
+    try {
+      const h = await getCourseCurriculumHistory(cId);
+      expect(h.priorSchemes.some((s) => s.title === 'TEST hist scheme' && s.unitTitles.includes('Old unit'))).toBe(true);
+      // the CURRENT-year class (TEST-8H) reports last year's lesson via its predecessor
+      const cls = h.classCoverage.find((c) => c.groupName === 'TEST-8H');
+      expect(cls).toBeDefined();
+      expect(cls!.coveredCount).toBe(1);
+      expect(cls!.recentCovered).toContain('Taught last year');
+    } finally {
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = '2001-01-08'`);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [plan.rows[0]!.id]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [unit.rows[0]!.id]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [sch.rows[0]!.id]);
+      await pool.query(`DELETE FROM group_courses WHERE course_id = $1`, [cId]);
+      await pool.query(`DELETE FROM groups WHERE id IN ($1, $2)`, [gNew.rows[0]!.id, gOld.rows[0]!.id]);
+      await pool.query(`DELETE FROM academic_years WHERE id = $1`, [oldYear.rows[0]!.id]);
+      await pool.query(`DELETE FROM courses WHERE id = $1`, [cId]);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

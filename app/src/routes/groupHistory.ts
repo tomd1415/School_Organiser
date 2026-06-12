@@ -102,7 +102,8 @@ export function registerGroupHistoryRoutes(app: FastifyInstance): void {
         ${sections.join('')}
       </section>`;
       return reply.type('text/html').send(layout({ title: 'Class history', body, authed: true, csrfToken: csrf }));
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       return reply.type('text/html').send(layout({ title: 'Class history', body: '<section class="card"><p class="muted">Unavailable.</p></section>', authed: true, csrfToken: csrf }));
     }
   });

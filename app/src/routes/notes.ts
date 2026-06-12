@@ -89,7 +89,8 @@ export function registerNoteRoutes(app: FastifyInstance): void {
       const rows = await listGeneralNotes(filter);
       const items = rows.map((n) => ({ id: n.id, body: n.body, time: n.date, followups: [] }));
       listHtml = renderNotesList('notes-list-general', items);
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Notes are unavailable — the database is not reachable.</p>`;
     }
     const body = `

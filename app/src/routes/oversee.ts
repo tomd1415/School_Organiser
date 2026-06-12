@@ -66,7 +66,8 @@ export function registerOverseeRoutes(app: FastifyInstance): void {
         })
         .join('');
       content = days || '<p class="muted">No lessons to oversee this week.</p>';
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       content = '<p class="muted">Unavailable — the database is not reachable.</p>';
     }
 

@@ -106,7 +106,8 @@ export function registerRolloverRoutes(app: FastifyInstance): void {
           ${pickerForm(years, from, to)}
           ${steps}
         </section>`;
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>September rollover</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
     return reply.type('text/html').send(layout({ title: 'Rollover', body, authed: true, csrfToken: csrf }));

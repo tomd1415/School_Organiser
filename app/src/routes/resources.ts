@@ -59,7 +59,8 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         ${renderSearchBar(kinds, q, kind)}
         ${renderResourceListPaged(paged)}
       </section>`;
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = `<section class="card"><h1>Resources</h1><p class="muted">Resources are unavailable — the database is not reachable.</p></section>`;
     }
     return reply.type('text/html').send(layout({ title: 'Resources', body, authed: true, csrfToken: csrf }));
@@ -156,7 +157,13 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     if (!id.success) return reply.code(400).send('');
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
-    const buf = await readStored(v.storagePath);
+    let buf: Buffer;
+    try {
+      buf = await readStored(v.storagePath);
+    } catch (err) {
+      app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
+      return reply.code(404).send('The stored file is missing from the resource store — restore it from a backup or re-upload it.');
+    }
     return reply
       .header('Content-Disposition', `attachment; filename="${encodeURIComponent(r.title)}"`)
       .type(r.mimeType ?? 'application/octet-stream')
@@ -169,16 +176,21 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
     const pk = previewKind(r.mimeType, r.title);
-    if (pk === 'pdf' || pk === 'image') {
-      const buf = await readStored(v.storagePath);
-      return reply
-        .header('Content-Disposition', `inline; filename="${encodeURIComponent(r.title)}"`)
-        .type(r.mimeType ?? 'application/octet-stream')
-        .send(buf);
-    }
-    if (pk === 'office') {
-      const pdf = await convertToPdf(await readStored(v.storagePath), r.title);
-      if (pdf) return reply.header('Content-Disposition', 'inline; filename="preview.pdf"').type('application/pdf').send(pdf);
+    try {
+      if (pk === 'pdf' || pk === 'image') {
+        const buf = await readStored(v.storagePath);
+        return reply
+          .header('Content-Disposition', `inline; filename="${encodeURIComponent(r.title)}"`)
+          .type(r.mimeType ?? 'application/octet-stream')
+          .send(buf);
+      }
+      if (pk === 'office') {
+        const pdf = await convertToPdf(await readStored(v.storagePath), r.title);
+        if (pdf) return reply.header('Content-Disposition', 'inline; filename="preview.pdf"').type('application/pdf').send(pdf);
+      }
+    } catch (err) {
+      app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
+      return reply.code(404).send('The stored file is missing from the resource store — restore it from a backup or re-upload it.');
     }
     // No inline preview available → download the original.
     return reply.redirect(`/resources/${id.data.id}/download`);

@@ -127,8 +127,20 @@ export async function callLLM(req: LlmRequest): Promise<LlmResult> {
   } catch (err) {
     const msg = err instanceof Anthropic.APIError ? `${err.status ?? ''} ${err.message}`.trim() : (err as Error).message;
     await audit(req, { status: 'error', requestRedacted: p.requestRedacted, error: msg });
-    return { status: 'error', text: null, message: 'The AI service is unavailable right now.' };
+    return { status: 'error', text: null, message: degradeMessage(msg) };
   }
+}
+
+
+/** A degrade message the teacher can act on, instead of one generic line for every failure. */
+function degradeMessage(raw: string): string {
+  if (/connection error|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|ECONNREFUSED|fetch failed/i.test(raw)) {
+    return "Can't reach the AI service — the server has lost internet access (Docker networking can drop this after a host network change). Restart the stack (./start.sh) and try again.";
+  }
+  if (/429|rate.?limit/i.test(raw)) return 'The AI service is rate-limiting us — wait a minute and try again.';
+  if (/overloaded|529/i.test(raw)) return 'The AI service is overloaded right now — try again shortly.';
+  if (/401|403|authentication|invalid.*key/i.test(raw)) return 'The AI key was rejected — check ANTHROPIC_API_KEY in app/.env.';
+  return 'The AI service is unavailable right now.';
 }
 
 /** Structured completion against a Zod (v4) schema. Returns the parsed object, tokens re-expanded. */
@@ -163,6 +175,6 @@ export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>):
   } catch (err) {
     const msg = err instanceof Anthropic.APIError ? `${err.status ?? ''} ${err.message}`.trim() : (err as Error).message;
     await audit(req, { status: 'error', requestRedacted: p.requestRedacted, error: msg });
-    return { status: 'error', data: null, message: 'The AI service is unavailable right now.' };
+    return { status: 'error', data: null, message: degradeMessage(msg) };
   }
 }

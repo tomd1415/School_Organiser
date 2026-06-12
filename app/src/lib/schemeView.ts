@@ -71,7 +71,7 @@ export function renderLayForm(unitId: number, slots: CourseSlot[], lessonCount: 
   const opts = slots
     .map((s) => `<option value="${s.lessonId}:${s.groupCourseId}">${esc(s.groupName ?? 'group')} · ${weekdayName(s.weekday)} ${esc(s.periodLabel)} (${esc(s.start)})</option>`)
     .join('');
-  return `<form class="lay-form" hx-post="/schemes/unit/${unitId}/lay-down" hx-target="#unit-${unitId}-lay-result" hx-swap="innerHTML">
+  return `<form class="lay-form" hx-post="/schemes/unit/${unitId}/lay-down" hx-target="#unit-${unitId}-lay-result" hx-swap="innerHTML" hx-disabled-elt="find button">
       <label>Group &amp; weekly slot<select name="slot">${opts}</select></label>
       <label>Start from<input type="date" name="start" value="${esc(defaultStart)}"></label>
       <button type="submit" class="btn-secondary">Lay down ${lessonCount} lesson${lessonCount === 1 ? '' : 's'} →</button>

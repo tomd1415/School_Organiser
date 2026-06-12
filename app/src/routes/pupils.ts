@@ -35,7 +35,8 @@ export function registerPupilRoutes(app: FastifyInstance): void {
         </form>
         <ul class="pupil-list" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
       </section>`;
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = `<section class="card"><h1>Pupils</h1><p class="muted">Unavailable — the database is not reachable.</p></section>`;
     }
     return reply.type('text/html').send(layout({ title: 'Pupils', body, authed: true, csrfToken: csrf }));

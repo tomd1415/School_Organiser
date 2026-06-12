@@ -62,7 +62,8 @@ export function registerTimeRoutes(app: FastifyInstance): void {
             .join('')}</ul>`
         : `<p class="muted">${isSchoolDay ? 'No free work windows today.' : 'Not a school day.'}</p>`;
       logHtml = renderWorkLog(blocks);
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       windowsHtml = `<p class="muted">Time is unavailable — the database is not reachable.</p>`;
       date = '';
     }

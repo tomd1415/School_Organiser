@@ -30,7 +30,8 @@ export function registerTaskRoutes(app: FastifyInstance): void {
       ]);
       listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
       banner = renderTimerBanner(running);
-    } catch {
+    } catch (err) {
+      app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
     }
 
