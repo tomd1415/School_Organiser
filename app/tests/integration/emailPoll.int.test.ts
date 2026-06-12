@@ -67,7 +67,6 @@ function fakeImap(): Promise<{ server: Server; port: number }> {
 describe('email intake v2 (integration — fake IMAP server)', () => {
   afterAll(async () => {
     await pool.query(`DELETE FROM settings WHERE key LIKE 'email_%'`);
-    await pool.end();
   });
 
   it('polls, imports a task, marks seen; second poll is a no-op', async () => {
@@ -112,4 +111,75 @@ describe('email intake v2 (integration — fake IMAP server)', () => {
     expect(r.ok).toBe(false);
     expect(r.message).toContain('not configured');
   });
+});
+
+import { routeTriagedEmail } from '../../src/services/emailPoll';
+
+describe('email triage routing (no AI — fake triage objects)', () => {
+  const m = { subject: 'FW: original', from: 'office@school.org', date: null, text: 'body' };
+  const base = { title: 'X', summary: 'Y', urgency: null, eventKind: null, dateIso: null, category: null, groupName: null, safeguarding: false, reason: 'test' };
+
+  it('task route: urgency + group land on the task', async () => {
+    const g = await pool.query<{ id: number; name: string }>(`SELECT id, name FROM groups WHERE active ORDER BY id LIMIT 1`);
+    const route = await routeTriagedEmail(
+      { ...base, route: 'task', title: 'TEST triage task', urgency: 'urgent_today', groupName: g.rows[0]!.name },
+      m, 'raw', [{ id: Number(g.rows[0]!.id), name: g.rows[0]!.name }],
+    );
+    expect(route).toBe('task');
+    const t = await pool.query<{ urgency: string; gid: number }>(
+      `SELECT urgency, group_id gid FROM tasks WHERE title = 'TEST triage task'`,
+    );
+    expect(t.rows[0]!.urgency).toBe('urgent_today');
+    expect(Number(t.rows[0]!.gid)).toBe(Number(g.rows[0]!.id));
+    await pool.query(`UPDATE email_intake SET created_task_id = NULL WHERE subject = 'FW: original'`);
+    await pool.query(`DELETE FROM tasks WHERE title = 'TEST triage task'`);
+  });
+
+  it('event route: dated entry in events', async () => {
+    const route = await routeTriagedEmail(
+      { ...base, route: 'event', title: 'TEST triage trip', eventKind: 'trip', dateIso: '2099-07-01' },
+      m, 'raw', [],
+    );
+    expect(route).toBe('event');
+    const e = await pool.query<{ kind: string; d: string }>(
+      `SELECT kind, to_char(date,'YYYY-MM-DD') d FROM events WHERE title = 'TEST triage trip'`,
+    );
+    expect(e.rows[0]!.kind).toBe('trip');
+    expect(e.rows[0]!.d).toBe('2099-07-01');
+    await pool.query(`DELETE FROM events WHERE title = 'TEST triage trip'`);
+  });
+
+  it('awareness route: captured note with category + safeguarding flag', async () => {
+    const route = await routeTriagedEmail(
+      { ...base, route: 'awareness', title: 'TEST triage aware', category: 'pupil', safeguarding: true },
+      m, 'raw', [],
+    );
+    expect(route).toBe('awareness');
+    const n = await pool.query<{ kind: string; category: string; sg: boolean }>(
+      `SELECT kind, category, safeguarding sg FROM notes WHERE body LIKE 'TEST triage aware%'`,
+    );
+    expect(n.rows[0]!.kind).toBe('captured');
+    expect(n.rows[0]!.category).toBe('pupil');
+    expect(n.rows[0]!.sg).toBe(true); // withheld from all future AI calls
+    await pool.query(`DELETE FROM notes WHERE body LIKE 'TEST triage aware%'`);
+  });
+
+  it('note route: general note with the extraction', async () => {
+    const route = await routeTriagedEmail({ ...base, route: 'note', title: 'TEST triage ref', summary: 'the wifi code is X' }, m, 'raw', []);
+    expect(route).toBe('note');
+    const n = await pool.query<{ kind: string; body: string }>(`SELECT kind, body FROM notes WHERE body LIKE 'TEST triage ref%'`);
+    expect(n.rows[0]!.kind).toBe('general');
+    expect(n.rows[0]!.body).toContain('wifi code');
+    await pool.query(`DELETE FROM notes WHERE body LIKE 'TEST triage ref%'`);
+  });
+
+  it('intake rows recorded for non-task routes too', async () => {
+    const c = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM email_intake WHERE subject = 'FW: original'`);
+    expect(c.rows[0]!.n).toBeGreaterThanOrEqual(3);
+    await pool.query(`DELETE FROM email_intake WHERE subject = 'FW: original'`);
+  });
+});
+
+afterAll(async () => {
+  await pool.end(); // file-level: after every describe in this file
 });

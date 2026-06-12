@@ -7,6 +7,7 @@ import { LOADS, URGENCIES, statusesFor, type BellTask, type GroupSlot, type Task
 export interface TaskRow {
   id: number;
   title: string;
+  detail?: string | null;
   urgency: string;
   estimateMin: number | null;
   cognitiveLoad: string | null;
@@ -60,9 +61,26 @@ export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: str
   return taskId;
 }
 
+/** Record an email in the intake log without a task (triage filed it elsewhere). */
+export async function recordEmailIntake(parsed: { from: string | null; subject: string | null }, rawBody: string): Promise<number> {
+  const { rows } = await pool.query<{ id: number }>(
+    `INSERT INTO email_intake (from_addr, subject, body, received_at, processed) VALUES ($1, $2, $3, now(), true) RETURNING id`,
+    [parsed.from, parsed.subject, rawBody],
+  );
+  return rows[0]!.id;
+}
+
+/** Triage refinements on an email-created task. */
+export async function setTaskTriage(taskId: number, urgency: string | null, groupId: number | null): Promise<void> {
+  await pool.query(
+    `UPDATE tasks SET urgency = COALESCE($2, urgency), group_id = COALESCE($3, group_id) WHERE id = $1`,
+    [taskId, urgency, groupId],
+  );
+}
+
 export async function listTasks(view: TaskView): Promise<TaskRow[]> {
   const { rows } = await pool.query<TaskRow>(
-    `SELECT id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
+    `SELECT id, title, detail, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
             group_id AS "groupId", context, status, interest
      FROM tasks
      WHERE status = ANY($1)

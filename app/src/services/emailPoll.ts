@@ -3,9 +3,16 @@
 // screen and everything downstream behave identically. Dedup is the mailbox's own \Seen flag:
 // only messages successfully imported get marked, failures stay unseen for the next poll.
 import { pollMailbox, type ImapConfig } from '../lib/imapClient';
-import { parseMime } from '../lib/mime';
-import { createTaskFromEmail } from '../repos/tasks';
+import { parseMime, type ParsedMime } from '../lib/mime';
+import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage } from '../repos/tasks';
+import { createEventFromIntake } from '../repos/events';
+import { fileCaptured } from '../repos/captured';
+import { createNote, updateNoteBody } from '../repos/notes';
 import { getSetting, setSetting } from '../repos/settings';
+import { callLLMStructured } from '../llm/client';
+import { modelFor } from '../repos/settings';
+import { emailTriageSchema, type EmailTriage } from '../llm/schemas/emailTriage';
+import { EMAIL_TRIAGE_SYSTEM, EMAIL_TRIAGE_VERSION, emailTriageInstruction, emailTriageItems } from '../llm/prompts/emailTriage';
 
 export interface EmailPollResult {
   ok: boolean;
@@ -35,18 +42,97 @@ export async function emailPollConfig(): Promise<ImapConfig | null> {
   };
 }
 
+/** Classify + extract with the cheap model; null = AI unavailable (caller falls back to a task). */
+async function triageEmail(m: ParsedMime, groupNames: string[]): Promise<EmailTriage | null> {
+  const result = await callLLMStructured(
+    {
+      feature: 'email_triage',
+      model: await modelFor('cheap'),
+      promptVersion: EMAIL_TRIAGE_VERSION,
+      system: EMAIL_TRIAGE_SYSTEM,
+      context: emailTriageItems({ subject: m.subject, from: m.from, text: m.text }),
+      instruction: emailTriageInstruction(new Date().toISOString().slice(0, 10), groupNames),
+      maxTokens: 1500,
+    },
+    emailTriageSchema,
+  );
+  return result.status === 'ok' ? result.data : null;
+}
+
+export type EmailRoute = 'task' | 'event' | 'awareness' | 'note';
+
+/** File a triaged email in the right part of the app. Exported for tests (no AI involved). */
+export async function routeTriagedEmail(
+  t: EmailTriage,
+  m: ParsedMime,
+  raw: string,
+  groups: Array<{ id: number; name: string }>,
+): Promise<EmailRoute> {
+  const groupId = t.groupName ? (groups.find((g) => g.name.toLowerCase() === t.groupName!.toLowerCase())?.id ?? null) : null;
+  const provenance = `${t.reason}${m.from ? ` · from ${m.from}` : ''}`;
+  const dateOk = t.dateIso && /^\d{4}-\d{2}-\d{2}$/.test(t.dateIso) ? t.dateIso : null;
+
+  if (t.route === 'event') {
+    await createEventFromIntake({
+      kind: t.eventKind ?? 'other',
+      title: t.title,
+      date: dateOk,
+      detail: `${t.summary}\n(${provenance})`,
+    });
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    return 'event';
+  }
+  if (t.route === 'awareness') {
+    await fileCaptured({
+      body: `${t.title} — ${t.summary}`,
+      category: t.category ?? null,
+      groupId: groupId == null ? null : Number(groupId),
+      safeguarding: t.safeguarding,
+    });
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    return 'awareness';
+  }
+  if (t.route === 'note') {
+    const id = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) });
+    await updateNoteBody(id, `${t.title}\n${t.summary}\n(${provenance})`);
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    return 'note';
+  }
+  // default: task
+  const taskId = await createTaskFromEmail(
+    { title: t.title, detail: `${t.summary}\n(${provenance})`, from: m.from, subject: m.subject },
+    raw,
+  );
+  await setTaskTriage(taskId, t.urgency ?? null, groupId == null ? null : Number(groupId));
+  return 'task';
+}
+
 /** Run one poll now. Records a human-readable status line in settings either way. */
 export async function pollEmailOnce(): Promise<EmailPollResult> {
   const cfg = await emailPollConfig();
   if (!cfg) return { ok: false, message: 'Email intake is not configured (host, user and password needed).' };
   try {
+    const groups = await listGroups();
+    const counts: Record<EmailRoute, number> = { task: 0, event: 0, awareness: 0, note: 0 };
     const r = await pollMailbox(cfg, async (mail) => {
       const m = parseMime(mail.raw);
-      const title = (m.subject ?? m.text.split('\n')[0] ?? 'Email task').trim().slice(0, 200) || 'Email task';
-      const detail = [m.from ? `From: ${m.from}` : '', m.text.slice(0, 5000)].filter(Boolean).join('\n');
-      await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, mail.raw.toString('utf8').slice(0, 100_000));
+      const raw = mail.raw.toString('utf8').slice(0, 100_000);
+      const triage = await triageEmail(m, groups.map((g) => g.name));
+      if (triage) {
+        counts[await routeTriagedEmail(triage, m, raw, groups)]++;
+      } else {
+        // AI unavailable → never block intake: plain task, exactly as v1 behaved
+        const title = (m.subject ?? m.text.split('\n')[0] ?? 'Email task').trim().slice(0, 200) || 'Email task';
+        const detail = [m.from ? `From: ${m.from}` : '', m.text.slice(0, 5000)].filter(Boolean).join('\n');
+        await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw);
+        counts.task++;
+      }
     });
-    const msg = `${new Date().toISOString().slice(0, 16).replace('T', ' ')} — ${r.found} unseen, ${r.imported} imported${r.failed ? `, ${r.failed} failed (left unseen)` : ''}`;
+    const routed = (Object.entries(counts) as Array<[EmailRoute, number]>)
+      .filter(([, n]) => n > 0)
+      .map(([k, n]) => `${n} ${k}${n === 1 ? '' : 's'}`.replace('awarenesss', 'awareness'))
+      .join(', ');
+    const msg = `${new Date().toISOString().slice(0, 16).replace('T', ' ')} — ${r.found} unseen, ${r.imported} imported${routed ? ` (${routed})` : ''}${r.failed ? `, ${r.failed} failed (left unseen)` : ''}`;
     await setSetting('email_last_poll', msg);
     return { ok: true, message: msg, ...r };
   } catch (err) {

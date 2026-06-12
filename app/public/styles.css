@@ -612,3 +612,8 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .trk-step.trk-now .trk-marker { background: var(--accent); color: #fff; }
 .trk-step.trk-now .trk-label { font-weight: 700; }
 @media print { .trk button { border: none; background: none; } }
+
+/* email-triaged tasks: the extracted detail, one click away */
+.task-detail { font-size: 0.82rem; margin: 0.15rem 0 0.2rem; }
+.task-detail summary { cursor: pointer; color: var(--muted); }
+.task-detail-body { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.6rem; margin: 0.25rem 0 0; white-space: normal; }

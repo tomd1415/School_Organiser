@@ -15,6 +15,17 @@ export async function createCaptured(body: string): Promise<number> {
   return id;
 }
 
+/** Email triage files awareness items here, fully categorised. */
+export async function fileCaptured(input: { body: string; category: string | null; groupId: number | null; safeguarding: boolean }): Promise<number> {
+  const { rows } = await pool.query<{ id: number }>(
+    `INSERT INTO notes (kind, body, category, group_id, safeguarding) VALUES ('captured', $1, $2, $3, $4) RETURNING id`,
+    [input.body, input.category, input.groupId, input.safeguarding],
+  );
+  const id = rows[0]?.id;
+  if (id === undefined) throw new Error('failed to file captured item');
+  return id;
+}
+
 export async function getCaptured(id: number): Promise<CapturedItem | null> {
   const { rows } = await pool.query<CapturedItem>(`${SELECT} WHERE n.id = $1 AND n.kind = 'captured'`, [id]);
   return rows[0] ?? null;

@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Email triage: every forwarded email is read, classified and filed by AI
+
+- **Incoming emails are now triaged, not just dumped as tasks.** Each polled email goes through a
+  fast, cheap classifier (`email_triage@1`, Haiku) that assumes the forward was deliberate — it
+  never ignores, it picks the best home: **task** (something to do — with an urgency guess and
+  the class matched from your real group names), **event** (a dated thing — filed into Events
+  with kind + date), **awareness** (need-to-know, undated — filed into Captured with a category
+  and, when content touches welfare, the **safeguarding flag set**, which withholds it from all
+  future AI calls), or **note** (pure reference → general notes). The substance is **extracted
+  and rewritten** — greetings, signatures and legal footers stripped; the poll status line now
+  reports the breakdown ("3 imported (2 tasks, 1 event)").
+- **Frictionless by design:** if AI is unreachable the email still lands as a plain task exactly
+  as before — intake never blocks on the classifier. Every email keeps its `email_intake` record
+  whichever way it routes.
+- **Tasks now show the content, not just the subject**: each email-created task has a "✉ what it
+  says" disclosure with the extracted detail (TaskRow finally carries `detail`).
+- Verified: four-route integration tests against the database (urgency+group on tasks, dated
+  events, flagged captured items, general notes, intake records) and a **live triage** of a
+  realistic office email — routed as a by-next-lesson task for 8PFA with dates, £8 and the
+  outstanding-forms count extracted, footer dropped. **175 unit / 100 integration tests green.**
+
 ### 2026-06-12 — Email intake v2: the mailbox becomes the task inbox (no more copy-paste)
 
 - **Emails now become tasks automatically.** The app polls an IMAP mailbox (Settings → **Email

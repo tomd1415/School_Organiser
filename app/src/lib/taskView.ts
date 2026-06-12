@@ -25,8 +25,10 @@ export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
     t.status === 'inbox'
       ? `<button type="button" class="link" hx-post="/tasks/${t.id}/triage" hx-target="#task-${t.id}" hx-swap="outerHTML">▶ open</button>`
       : '';
+  const detail = (t.detail ?? '').trim();
   return `<li class="task" id="task-${t.id}">
     <input class="task-title" type="text" name="title" value="${esc(t.title)}" placeholder="Task…" ${save('input changed delay:600ms, blur')}>
+    ${detail ? `<details class="task-detail"><summary>✉ what it says</summary><p class="task-detail-body">${esc(detail).replace(/\n/g, '<br>')}</p></details>` : ''}
     <div class="task-controls">
       <select name="urgency" ${save('change')}>${enumOptions(URGENCIES, URGENCY_LABELS, t.urgency)}</select>
       <input class="task-est" type="number" name="estimate_min" min="0" step="5" value="${t.estimateMin ?? ''}" placeholder="min" ${save('input changed delay:600ms, blur')}>

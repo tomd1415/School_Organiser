@@ -2,6 +2,17 @@
 import { pool } from '../db/pool';
 import { EVENT_KINDS, type UpcomingEvent } from '../services/event';
 
+/** Email triage files dated items here directly. */
+export async function createEventFromIntake(input: { kind: string; title: string; date: string | null; detail: string | null }): Promise<number> {
+  const { rows } = await pool.query<{ id: number }>(
+    `INSERT INTO events (kind, title, date, detail) VALUES ($1, $2, $3, $4) RETURNING id`,
+    [input.kind, input.title.slice(0, 200), input.date, input.detail],
+  );
+  const id = rows[0]?.id;
+  if (id === undefined) throw new Error('failed to create event');
+  return id;
+}
+
 export async function createEvent(): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
     `INSERT INTO events (kind, title, date) VALUES ('other', 'New event', CURRENT_DATE) RETURNING id`,
