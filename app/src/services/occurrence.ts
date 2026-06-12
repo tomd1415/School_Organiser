@@ -26,6 +26,7 @@ export interface OccurrenceCourseRow {
   courseName: string;
   colour: string | null;
   stoppingPoint: string | null;
+  progressStep?: number | null;
   lessonPlanId: number | null;
   planTitle: string | null;
   planObjectives: string | null;
@@ -53,6 +54,7 @@ export interface CourseSection {
   courseName: string;
   colour: string | null;
   stoppingPoint: string | null;
+  progressStep: number | null;
   lastStop: LastStop | null;
   lessonPlanId: number | null;
   planTitle: string | null;
@@ -80,6 +82,7 @@ export function buildLessonDetail(
     courseName: c.courseName,
     colour: c.colour,
     stoppingPoint: c.stoppingPoint,
+    progressStep: c.progressStep ?? null,
     lastStop: lastByGroupCourse.get(c.groupCourseId) ?? null,
     lessonPlanId: c.lessonPlanId,
     planTitle: c.planTitle,

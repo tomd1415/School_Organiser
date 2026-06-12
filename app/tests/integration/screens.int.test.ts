@@ -938,6 +938,44 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Lesson tracker: tapping a step marks position + writes the stopping point', async () => {
+    const lr = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`);
+    const occId = await (await import('../../src/repos/occurrence')).findOrCreateOccurrence(lr.rows[0]!.id, '2099-03-05');
+    const ocs = await (await import('../../src/repos/occurrence')).getOccurrenceCourses(occId);
+    const oc = ocs[0]!;
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/occurrence-course/${oc.occurrenceCourseId}/progress`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: 'step=1&label=step+2+%E2%80%94+Demo',
+      });
+      expect(res.statusCode).toBe(200);
+      const row = await pool.query<{ ps: number; sp: string }>(
+        `SELECT progress_step ps, stopping_point sp FROM occurrence_courses WHERE id = $1`,
+        [oc.occurrenceCourseId],
+      );
+      expect(Number(row.rows[0]!.ps)).toBe(1);
+      expect(row.rows[0]!.sp).toContain('Demo'); // doubles as the stopping point
+      // ability midpoint round-trip (same fixture)
+      const ab = await app.inject({
+        method: 'POST',
+        url: `/lesson/group-ability/${oc.groupCourseId}`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: 'text=TEST+midpoint+E3',
+      });
+      expect(ab.body).toContain('saved');
+      const a = await pool.query<{ am: string }>(`SELECT ability_midpoint am FROM group_courses WHERE id = $1`, [oc.groupCourseId]);
+      expect(a.rows[0]!.am).toBe('TEST midpoint E3');
+    } finally {
+      await pool.query(`UPDATE group_courses SET ability_midpoint = NULL WHERE id = $1`, [oc.groupCourseId]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = '2099-03-05'`);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

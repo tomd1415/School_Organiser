@@ -17,3 +17,12 @@ export function groupContextItems(courseText: string | null | undefined, groupTe
   if (g) items.push({ text: `FOR THIS CLASS SPECIFICALLY — this overrides the general context where they differ:\n${g}` });
   return items;
 }
+
+// The recorded class ability midpoint: Core work pitches HERE; Support sits below it, Challenge
+// above. Cohort-level only — never an individual pupil.
+export function abilityItem(midpoint: string | null | undefined): RedactableItem[] {
+  const m = (midpoint ?? '').trim();
+  return m
+    ? [{ text: `CLASS ABILITY MIDPOINT — pitch the Core level exactly here; Support one step below; Challenge one step above:\n${m}` }]
+    : [];
+}

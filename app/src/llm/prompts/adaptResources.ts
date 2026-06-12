@@ -3,9 +3,10 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@3'; // @3: no underscores anywhere — name/date header is a typed table too
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@4'; // @4: 3-level differentiation kept through adaptation
 
 export const ADAPT_RESOURCES_SYSTEM =
+  'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents ' +
   'for ONE specific class, as Markdown. You are given the class\'s adapted lesson (its objectives ' +
   'and outline — follow these, not the master\'s) and, where they exist, the master documents to ' +

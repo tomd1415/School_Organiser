@@ -9,6 +9,7 @@ import {
   getOccurrenceHeader,
   getOccurrenceNotes,
   setOccurrenceCoursePlan,
+  setOccurrenceProgress,
 } from '../repos/occurrence';
 import { getLessonPlan, listCoursePlans, updatePlanField } from '../repos/schemes';
 import {
@@ -23,13 +24,15 @@ import {
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
-import { lessonResourcesSchema, normaliseResourceKind } from '../llm/schemas/lessonResources';
+import { lessonResourcesSchema, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
 import {
   getAdaptation,
   getEffectiveLesson,
+  getGroupAbility,
   getGroupCourseInfo,
   getGroupTeachingContext,
+  setGroupAbility,
   listAdaptationHistory,
   recentGroupHistory,
   resetAdaptation,
@@ -38,7 +41,7 @@ import {
   type EffectiveLesson,
 } from '../repos/adaptations';
 import { getCourseTeachingContext } from '../repos/schemes';
-import { groupContextItems } from '../llm/prompts/teachingContext';
+import { abilityItem, groupContextItems } from '../llm/prompts/teachingContext';
 import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
@@ -55,7 +58,7 @@ import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList } from '../lib/prepView';
-import { formatObjectives, formatOutline } from '../lib/formatLesson';
+import { formatObjectives, formatOutline, outlineSteps } from '../lib/formatLesson';
 
 const TZ = 'Europe/London';
 const Query = z.object({
@@ -143,6 +146,30 @@ function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: st
     </div>`;
 }
 
+
+// The in-lesson marker: the effective outline's steps as a clickable list — tap a step to mark
+// "we are here". The click also writes the textual stopping point, so "last time → resume" and
+// the AI feedback loop keep working off the same record.
+function renderTracker(oc: number, steps: string[], progress: number | null): string {
+  if (!steps.length) return '';
+  const rows = steps
+    .map((label, i) => {
+      const state = progress == null ? '' : i < progress ? ' trk-done' : i === progress ? ' trk-now' : '';
+      return `<li class="trk-step${state}">
+        <button type="button" hx-post="/occurrence-course/${oc}/progress" hx-vals='${JSON.stringify({ step: i, label: `step ${i + 1} — ${label.slice(0, 150)}` }).replace(/'/g, '&#39;')}'
+          hx-target="#trk-${oc}" hx-swap="outerHTML" title="mark: we are here">
+          <span class="trk-marker">${progress != null && i === progress ? '▶' : progress != null && i < progress ? '✓' : i + 1}</span>
+          <span class="trk-label">${esc(label)}</span>
+        </button>
+      </li>`;
+    })
+    .join('');
+  return `<div class="trk" id="trk-${oc}">
+    <span class="oc-label">Lesson tracker — tap where you are</span>
+    <ol class="trk-list">${rows}</ol>
+  </div>`;
+}
+
 function renderSection(
   s: CourseSection,
   plans: Array<{ id: number; title: string }>,
@@ -169,6 +196,7 @@ function renderSection(
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
       ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
+      ${renderTracker(oc, outlineSteps((eff?.adapted ? eff.outline : null) ?? s.planOutline), s.progressStep)}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
       <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}
         ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
@@ -296,33 +324,51 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
     }
   }
 
-  const result = await callLLMStructured(
-    {
-      feature: 'adapt_resources',
-      model: await modelFor('plan'),
-      promptVersion: ADAPT_RESOURCES_VERSION,
-      system: ADAPT_RESOURCES_SYSTEM,
-      context: [
-        ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
-        ...equipmentItem(await listActiveEquipment()),
-        ...adaptResourceItems(
-          { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
-          masterDocs,
-        ),
-      ],
-      instruction: adaptResourcesInstruction(info.groupName),
-      maxTokens: 16000,
-    },
-    lessonResourcesSchema,
-  );
+  const modelChoice = await modelFor('plan');
+  const courseCtx = await getCourseTeachingContext(info.courseId);
+  const groupCtx = await getGroupTeachingContext(gc);
+  const ability = await getGroupAbility(gc);
+  const equipment = await listActiveEquipment();
+  const callOnce = () =>
+    callLLMStructured(
+      {
+        feature: 'adapt_resources',
+        model: modelChoice,
+        promptVersion: ADAPT_RESOURCES_VERSION,
+        system: ADAPT_RESOURCES_SYSTEM,
+        context: [
+          ...groupContextItems(courseCtx, groupCtx),
+          ...abilityItem(ability),
+          ...equipmentItem(equipment),
+          ...adaptResourceItems(
+            { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
+            masterDocs,
+          ),
+        ],
+        instruction: adaptResourcesInstruction(info.groupName),
+        maxTokens: 16000,
+      },
+      lessonResourcesSchema,
+    );
+  let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
+  let tidy = tidyResourceSet(result.data.resources);
+  if (tidy.missing.length) {
+    const second = await callOnce();
+    if (second.status === 'ok' && second.data) {
+      const retry = tidyResourceSet(second.data.resources);
+      if (retry.missing.length < tidy.missing.length) tidy = retry;
+    }
+  }
+  if (tidy.missing.length) {
+    return { ok: false, message: `The AI returned an incomplete set (missing: ${tidy.missing.join(', ')}) — try again.` };
+  }
 
   const existing = await listResourcesForAdaptation(adaptation.id);
   let created = 0;
   let updated = 0;
-  for (const r of result.data.resources.slice(0, 4)) {
-    if (!r.content.trim()) continue;
-    const kind = normaliseResourceKind(r.kind);
+  for (const r of tidy.docs) {
+    const kind = r.kind;
     const filename = `${safeFilename(master.title).replace(/\.md$/i, '') || 'lesson'} — ${ADAPT_RES_LABEL[kind] ?? kind} (${safeFilename(info.groupName ?? 'class')}).md`;
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);
@@ -440,6 +486,32 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       .send(renderPlanContent(params.data.id, plan?.title ?? null, plan?.objectives ?? null, plan?.outline ?? null, true) + renderSavedStatus(`oc-${params.data.id}-plan-status`));
   });
 
+
+  // The movable in-lesson marker: store the step index + write the textual stopping point.
+  app.post('/occurrence-course/:id/progress', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const params = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const body = z.object({ step: z.coerce.number().int().min(0).max(200), label: z.string().max(200) }).safeParse(req.body);
+    if (!params.success || !body.success) return reply.code(400).send('');
+    await setOccurrenceProgress(params.data.id, body.data.step, body.data.label);
+    const ocs = await getOccurrenceCourses(
+      (await poolOccurrenceOf(params.data.id)) ?? 0,
+    );
+    const sec = ocs.find((o) => Number(o.occurrenceCourseId) === params.data.id);
+    const effOutline = sec?.lessonPlanId != null
+      ? (await getEffectiveLesson(sec.groupCourseId, sec.lessonPlanId, { objectives: sec.planObjectives ?? null, outline: sec.planOutline ?? null }))
+      : null;
+    const steps = outlineSteps((effOutline?.adapted ? effOutline.outline : null) ?? sec?.planOutline ?? null);
+    return reply
+      .type('text/html')
+      .send(renderTracker(params.data.id, steps, body.data.step) + renderSavedStatus(`oc-${params.data.id}-status`));
+  });
+
+  async function poolOccurrenceOf(occurrenceCourseId: number): Promise<number | null> {
+    const { pool } = await import('../db/pool');
+    const { rows } = await pool.query<{ o: number }>(`SELECT occurrence_id AS o FROM occurrence_courses WHERE id = $1`, [occurrenceCourseId]);
+    return rows[0]?.o ?? null;
+  }
+
   // 5.2: per-group lesson adaptations (keyed on group_course + master lesson). The master is untouched.
   const AdaptParams = z.object({ gc: z.coerce.number().int().positive(), lp: z.coerce.number().int().positive() });
 
@@ -503,12 +575,24 @@ export function registerLessonRoutes(app: FastifyInstance): void {
   app.get('/lesson/group-context/:gc', { preHandler: requireAuth }, async (req, reply) => {
     const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
-    const text = await getGroupTeachingContext(p.data.gc);
+    const [text, ability] = await Promise.all([getGroupTeachingContext(p.data.gc), getGroupAbility(p.data.gc)]);
     return reply.type('text/html').send(`
       <p class="muted group-ctx-hint">Adds to the course context when adapting for this class. Describe the class as a whole — never an individual pupil.</p>
       <textarea name="text" rows="3" placeholder="e.g. this class needs shorter tasks and a movement break mid-lesson…"
         hx-post="/lesson/group-context/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(text ?? '')}</textarea>
+      <label class="adapt-l">Ability midpoint — Core work pitches here (Support below, Challenge above)
+        <input name="text" value="${esc(ability ?? '')}" placeholder="e.g. working at Entry Level 3 / emerging GCSE grade 2"
+          hx-post="/lesson/group-ability/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">
+      </label>
       <span class="note-status" id="group-ctx-${p.data.gc}-status"></span>`);
+  });
+
+  app.post('/lesson/group-ability/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ text: z.string().max(300) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await setGroupAbility(p.data.gc, b.data.text);
+    return reply.type('text/html').send(renderSavedStatus(`group-ctx-${p.data.gc}-status`));
   });
 
   app.post('/lesson/group-context/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
@@ -547,6 +631,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         system: ADAPT_LESSON_SYSTEM,
         context: [
           ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
+          ...abilityItem(await getGroupAbility(gc)),
           ...equipmentItem(await listActiveEquipment()),
           lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),
           ...historyItems(history),

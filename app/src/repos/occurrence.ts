@@ -52,7 +52,7 @@ export async function getOccurrenceCourses(occurrenceId: number): Promise<Occurr
   const { rows } = await pool.query<OccurrenceCourseRow>(
     `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId", gc.course_id AS "courseId",
             c.name AS "courseName", c.colour,
-            oc.stopping_point AS "stoppingPoint", oc.lesson_plan_id AS "lessonPlanId",
+            oc.stopping_point AS "stoppingPoint", oc.progress_step AS "progressStep", oc.lesson_plan_id AS "lessonPlanId",
             lp.title AS "planTitle", lp.objectives AS "planObjectives", lp.outline AS "planOutline"
      FROM occurrence_courses oc
      JOIN group_courses gc ON gc.id = oc.group_course_id
@@ -67,6 +67,16 @@ export async function getOccurrenceCourses(occurrenceId: number): Promise<Occurr
 
 export async function setOccurrenceCoursePlan(occurrenceCourseId: number, planId: number | null): Promise<void> {
   await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, planId]);
+}
+
+/** The in-lesson marker: which step we're on, also written as the textual stopping point so the
+ * existing "last time → resume" machinery picks it up unchanged. */
+export async function setOccurrenceProgress(occurrenceCourseId: number, step: number, label: string): Promise<void> {
+  await pool.query(`UPDATE occurrence_courses SET progress_step = $2, stopping_point = $3 WHERE id = $1`, [
+    occurrenceCourseId,
+    step,
+    label.slice(0, 200),
+  ]);
 }
 
 /** The most recent prior occurrence's stopping point, per course (for "last time"). */

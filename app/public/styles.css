@@ -592,3 +592,23 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 /* the document view shows visuals + images sensibly too */
 .md-doc .md-visual { font-size: 3rem; margin: 0.2rem 0; }
 .md-doc .md-img { max-width: 100%; border-radius: 8px; }
+
+/* richer lesson-plan display: boxes, colour, whitespace */
+.oc-block { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.85rem; margin: 0.55rem 0; }
+.oc-block.oc-objectives, .adapt-view .oc-block:first-child { background: #f3faf3; border-color: #d5e8d5; }
+.oc-label { margin-bottom: 0.35rem; }
+.outline-steps li { border-bottom: none; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.6rem; margin: 0.3rem 0; }
+.plan-view { margin: 0.4rem 0 0.6rem; }
+
+/* the in-lesson tracker */
+.trk { margin: 0.55rem 0; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 0.6rem 0.85rem; background: var(--card); }
+.trk-list { list-style: none; margin: 0.3rem 0 0; padding: 0; counter-reset: trk; }
+.trk-step button { display: flex; width: 100%; text-align: left; gap: 0.6rem; align-items: baseline; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: inherit; padding: 0.45rem 0.6rem; margin: 0.25rem 0; cursor: pointer; font-size: 0.92rem; }
+.trk-step button:hover { border-color: var(--accent); background: #eef3fc; }
+.trk-marker { min-width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--line); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+.trk-step.trk-done button { opacity: 0.55; }
+.trk-step.trk-done .trk-marker { background: #d5e8d5; color: #2f7d32; }
+.trk-step.trk-now button { border-color: var(--accent); background: #eef3fc; box-shadow: 0 0 0 2px #c8daf7; }
+.trk-step.trk-now .trk-marker { background: var(--accent); color: #fff; }
+.trk-step.trk-now .trk-label { font-weight: 700; }
+@media print { .trk button { border: none; background: none; } }

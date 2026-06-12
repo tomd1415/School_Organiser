@@ -57,3 +57,13 @@ export function formatObjectives(text: string | null | undefined): string {
   if (!lines.length) return '';
   return `<ul class="obj-list">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>`;
 }
+
+/** The outline's step labels (numbered or bulleted lines), for the in-lesson tracker. */
+export function outlineSteps(text: string | null | undefined): string[] {
+  return (text ?? '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => NUMBERED.test(l) || BULLET.test(l))
+    .map((l) => l.replace(NUMBERED, '').replace(BULLET, '').trim())
+    .filter(Boolean);
+}

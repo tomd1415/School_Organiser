@@ -37,3 +37,32 @@ describe('normaliseResourceKind (model kind drift)', () => {
     expect(normaliseResourceKind('starter quiz')).toBe('document');
   });
 });
+
+import { tidyResourceSet } from '../src/llm/schemas/lessonResources';
+
+describe('tidyResourceSet (cumulative-draft defence)', () => {
+  it('keeps only the longest of same-kind cumulative drafts', () => {
+    const { docs, missing } = tidyResourceSet([
+      { kind: 'slides', title: 'a', content: '## Slide 1' },
+      { kind: 'slides', title: 'b', content: '## Slide 1\n## Slide 2' },
+      { kind: 'slides', title: 'c', content: '## Slide 1\n## Slide 2\n## Slide 3' },
+      { kind: 'worksheet', title: 'w', content: '| Q | A |' },
+    ]);
+    expect(docs.filter((d) => d.kind === 'slides')).toHaveLength(1);
+    expect(docs.find((d) => d.kind === 'slides')!.content).toContain('Slide 3');
+    expect(missing).toHaveLength(0);
+  });
+
+  it('reports missing core documents', () => {
+    const { missing } = tidyResourceSet([{ kind: 'slides', title: 's', content: 'x' }]);
+    expect(missing).toEqual(['worksheet']);
+  });
+
+  it('drops empty entries', () => {
+    const { docs } = tidyResourceSet([
+      { kind: 'worksheet', title: 'w', content: '  ' },
+      { kind: 'slides', title: 's', content: 'real' },
+    ]);
+    expect(docs).toHaveLength(1);
+  });
+});

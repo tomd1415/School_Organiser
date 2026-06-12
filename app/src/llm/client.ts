@@ -2,6 +2,12 @@
 // It enforces the two structural guarantees (withhold safeguarding content, redact pupil names),
 // audits the redacted request, and degrades cleanly when AI is off/unavailable/over budget.
 // Two call shapes share the same boundary: callLLM (text) and callLLMStructured (typed object).
+import { setDefaultResultOrder } from 'node:dns';
+
+// The school network's IPv6 route intermittently blackholes while IPv4 stays fine; node then
+// hangs on the AAAA record where curl's happy-eyeballs falls back. Prefer IPv4 outright.
+setDefaultResultOrder('ipv4first');
+
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { ZodType } from 'zod/v4';
@@ -43,7 +49,9 @@ export interface LlmRequest {
 
 let client: Anthropic | null = null;
 function sdk(): Anthropic {
-  client ??= new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+  // The school line can crawl (6s+ round-trips) — give the SDK patience instead of insta-failing:
+  // more retries with backoff, and a generous per-request timeout for the long generations.
+  client ??= new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 4, timeout: 180_000 });
   return client;
 }
 

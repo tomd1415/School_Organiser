@@ -1,3 +1,9 @@
+import { setDefaultResultOrder } from 'node:dns';
+
+// The school network's IPv6 route intermittently blackholes while IPv4 stays fine; node then
+// hangs on the AAAA record where curl's happy-eyeballs falls back. Prefer IPv4 outright.
+setDefaultResultOrder('ipv4first');
+
 import { join } from 'node:path';
 import Fastify, { type FastifyInstance } from 'fastify';
 import cookie from '@fastify/cookie';

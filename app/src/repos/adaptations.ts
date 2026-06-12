@@ -141,6 +141,16 @@ export async function setGroupTeachingContext(groupCourseId: number, text: strin
   await pool.query(`UPDATE group_courses SET teaching_context = $2 WHERE id = $1`, [groupCourseId, text.trim() || null]);
 }
 
+/** The class's recorded ability midpoint — the anchor the three differentiation levels sit around. */
+export async function getGroupAbility(groupCourseId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ a: string | null }>(`SELECT ability_midpoint a FROM group_courses WHERE id = $1`, [groupCourseId]);
+  return rows[0]?.a ?? null;
+}
+
+export async function setGroupAbility(groupCourseId: number, text: string): Promise<void> {
+  await pool.query(`UPDATE group_courses SET ability_midpoint = $2 WHERE id = $1`, [groupCourseId, text.trim() || null]);
+}
+
 export interface GroupHistoryEntry {
   date: string;
   stoppingPoint: string | null;

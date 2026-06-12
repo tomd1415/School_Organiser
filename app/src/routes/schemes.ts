@@ -47,7 +47,7 @@ import {
 } from '../repos/resources';
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
-import { lessonResourcesSchema, normaliseResourceKind } from '../llm/schemas/lessonResources';
+import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems } from '../llm/prompts/lessonResources';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
@@ -96,30 +96,45 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
   if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
     return { ok: false, message: 'Write or ✨draft the objectives/outline first — resources are generated from them.' };
   }
-  const result = await callLLMStructured(
-    {
-      feature: 'lesson_resources',
-      model: await modelFor('plan'),
-      promptVersion: LESSON_RESOURCES_VERSION,
-      system: LESSON_RESOURCES_SYSTEM,
-      context: [
-        ...teachingContextItems(ctx.teachingContext),
-        ...equipmentItem(await listActiveEquipment()),
-        ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
-      ],
-      instruction: LESSON_RESOURCES_INSTRUCTION,
-      maxTokens: 16000, // four full documents need room — a tight cap makes the model drop one
-    },
-    lessonResourcesSchema,
-  );
+  const callOnce = () =>
+    callLLMStructured(
+      {
+        feature: 'lesson_resources',
+        model: modelChoice,
+        promptVersion: LESSON_RESOURCES_VERSION,
+        system: LESSON_RESOURCES_SYSTEM,
+        context: [
+          ...teachingContextItems(ctx.teachingContext),
+          ...equipmentItem(equipment),
+          ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
+        ],
+        instruction: LESSON_RESOURCES_INSTRUCTION,
+        maxTokens: 16000, // four full documents need room — a tight cap makes the model drop one
+      },
+      lessonResourcesSchema,
+    );
+  const modelChoice = await modelFor('plan');
+  const equipment = await listActiveEquipment();
+  let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
+  let tidy = tidyResourceSet(result.data.resources);
+  if (tidy.missing.length) {
+    // the model occasionally burns its budget on one document — one retry usually completes the set
+    const second = await callOnce();
+    if (second.status === 'ok' && second.data) {
+      const retry = tidyResourceSet(second.data.resources);
+      if (retry.missing.length < tidy.missing.length) tidy = retry;
+    }
+  }
+  if (tidy.missing.length) {
+    return { ok: false, message: `The AI returned an incomplete set (missing: ${tidy.missing.join(', ')}) — try again.` };
+  }
 
   const existing = await listResourcesForPlan(planId);
   let created = 0;
   let updated = 0;
-  for (const r of result.data.resources.slice(0, 4)) {
-    if (!r.content.trim()) continue;
-    const kind = normaliseResourceKind(r.kind);
+  for (const r of tidy.docs) {
+    const kind = r.kind;
     const filename = `${safeFilename(ctx.planTitle).replace(/\.md$/i, '') || 'lesson'} — ${RES_KIND_LABEL[kind] ?? kind}.md`;
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);

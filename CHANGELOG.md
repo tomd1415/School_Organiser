@@ -7,6 +7,33 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Cumulative-slides fix, lesson tracker, readable plans, 3-level differentiation
+
+- **Fixed the "three slides files, no worksheet" generation** (reported): the model sometimes
+  emits *progressive drafts of one document as separate entries* and burns its budget before the
+  worksheet. `tidyResourceSet` now keeps only the longest of same-kind entries, detects a missing
+  slides/worksheet, **retries once automatically**, and refuses honestly ("incomplete set —
+  missing: worksheet") rather than storing a broken set. Schema wording forbids partial entries.
+  3 unit tests.
+- **Lesson plans are readable everywhere.** The Schemes tree now shows the same **formatted
+  read-view** (objective ✓-boxes, step cards) as the lesson screen, with the editor textareas
+  behind "✏ edit"; plan content everywhere got boxes, colour tints and whitespace (objectives in
+  a green-tinted card, each outline step its own row).
+- **The in-lesson tracker** (migration `0016`): every lesson section shows its effective
+  outline's steps as a tappable list — tap to mark **▶ we are here** (done steps tick and dim).
+  The tap also writes the textual **stopping point**, so "last time → resume", the Now screen and
+  the AI feedback loop all keep working off the same record.
+- **Three-level differentiation is now the default** across draft-lesson, lesson-resources,
+  adapt-lesson and adapt-resources (all prompts bumped): whole-class teaching, then 🟢 Support /
+  🟡 Core / 🔴 Challenge tasks that all meet the same objectives. **Core pitches at the class's
+  recorded ability midpoint** — a new per-class field (migration `0016`,
+  `group_courses.ability_midpoint`) edited in the lesson screen's class panel and injected into
+  the per-class AI calls. Worksheets carry the three labelled sections.
+- **Network resilience for the school line**: the Anthropic client now retries 4× with a 180s
+  budget, and node prefers IPv4 (the school's IPv6 route intermittently blackholes). The final
+  live check of the differentiated output is pending a stable line — the button now either
+  delivers or explains itself. **164 unit / 93 integration tests green.**
+
 ### 2026-06-12 — Resource generation hardened by live verification (post-outage)
 
 - The deferred live check ran once the connection returned, and shook out three robustness fixes:
