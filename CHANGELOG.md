@@ -16,13 +16,18 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
   grid); released results **ticks-only by default** (per-class score toggle); **remembered
   devices per-class, off by default**; numeric marking **strict after parsing**; misconception
   notes **free prose** until 9.9 needs a table.
-- **One divergence from the recommendations — Q34: AI marking auto-runs when a pupil taps
-  Done ✓.** PHASE_9_PLAN updated (9.3 slice, §3 trigger, §9): Done ✓ enqueues the pupil's open
-  answers, a ~2-minute debounce groups finishers so the per-question anonymous batches survive
-  the auto trigger, the review page keeps a "✨ Mark anything unmarked" sweep button, and the
-  monthly spend cap + kill-switch apply (AI off ⇒ answers wait, everything else works).
-  SPECIFICATION §5.30 aligned; PHASE_8_PLAN §8 decision list updated; OPEN_QUESTIONS now shows
-  only the DPIA [CONFIRM]/sign-off items as open (DPO/SLT — gates 8.0 and the 9.0 addendum).
+- **One divergence from the recommendations — Q34, refined the same day into a per-class
+  choice: mark "as pupils finish" (default) or in one batch on the button** (the button stays
+  as the sweep in both modes; Done ✓ enqueues and a ~2-minute debounce keeps the per-question
+  anonymous batches). **Paired with per-class results visibility: instant-on-confirm
+  (default) — objective ✓/✗ seconds after Done ✓ so feedback lands *inside* the lesson,
+  AI-marked answers appearing as the teacher confirms them from the live grid — or
+  hold-until-Release.** Invariant either way: pupils only ever see *confirmed* marks; AI
+  feedback never reaches a pupil unconfirmed; spend cap + kill-switch apply (AI off ⇒ answers
+  wait, everything else works). PHASE_9_PLAN updated (9.3–9.5 slices, §0, §2 settings columns,
+  §3 trigger, §5 visibility, §8, §9, §10); SPECIFICATION §5.30 aligned; PHASE_8_PLAN §8
+  decision list updated; OPEN_QUESTIONS now shows only the DPIA [CONFIRM]/sign-off items as
+  open (DPO/SLT — gates 8.0 and the 9.0 addendum).
 
 ### 2026-06-12 — Phase 9 planned: auto-marking & the results loop
 

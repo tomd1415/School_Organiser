@@ -31,8 +31,9 @@ Change history: [../CHANGELOG.md](../CHANGELOG.md).
 - **Extra** "current interest" marking + learning (SPEC §5.18).
 - **Q29** class-code → name → PIN login · **Q30** level slices unlabelled (teacher toggle) ·
   **Q31** classroom-only (idle ~20 min) · **Q32** Done ✓ self-declared (+ field count) ·
-  **Q33** ticks-only results (per-class score toggle) · **Q34** **AI marking auto-runs on
-  Done ✓** (debounced per-question batches + sweep button) · **Q35** remembered devices
+  **Q33** ticks-only results (per-class score toggle) · **Q34** marking trigger per class —
+  as-pupils-finish (default) or batch button — with **instant-on-confirm** (default) or
+  hold-until-Release results; confirmed marks only · **Q35** remembered devices
   per-class, off by default · **Q36** numeric strict-after-parsing · **Q37** misconceptions
   free prose
 

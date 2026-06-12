@@ -478,16 +478,18 @@ PHASE_6_PLAN.md).*
 - **(M)** Every generated worksheet carries a **mark scheme as data** (per answer field:
   expected answer, accepted alternatives, marks) — emitted with the answers doc, editable by me.
 - **(M)** **Objective answers mark themselves** (ticks, choices, exact/numeric/keyword) as
-  pupils tap Done ✓ — no AI involved; **open answers are AI-marked as suggestions
-  automatically as pupils finish** (debounced into per-question batches; a sweep button covers
-  stragglers and re-marks), with **no pupil identity attached**, evidence-quoted and
-  confidence-flagged, and anything pattern-matched as sensitive **withheld from AI and shown
-  straight to me**.
+  pupils tap Done ✓ — no AI involved; **open answers are AI-marked as suggestions** — per
+  class, **automatically as pupils finish or in one batch when I press** (the button stays as
+  the sweep either way; debounced per-question batches), with **no pupil identity attached**,
+  evidence-quoted and confidence-flagged, and anything pattern-matched as sensitive
+  **withheld from AI and shown straight to me**.
 - **(M)** I **confirm or override** every suggestion from the review grid (one click for the
-  confident ones), add a **comment back to each pupil** (AI-prefilled, my words by the time it
-  ships), and **release** — only then does a pupil see big friendly ✓/✗, a "what went well /
-  try this" line and my comment on their own screen. Ticks-only by default; never any
-  class comparison.
+  confident ones, usable mid-lesson while circulating) and add a **comment back to each pupil**
+  (AI-prefilled, my words by the time it ships). Per class, results show **instantly as marks
+  are confirmed** — objective ✓/✗ within seconds of Done ✓, so **feedback lands inside the
+  lesson** — or are **held until I press Release**. Either way a pupil only ever sees
+  **confirmed** marks: big friendly ✓/✗, a "what went well / try this" line and my comment on
+  their own screen. Ticks-only by default; never any class comparison.
 - **(M)** Marks feed the loop: **per-question class success rates and misconceptions** join the
   class-work summary that adapt-next-lesson reads; a **printable answer pack** (questions,
   answers, class stats) supports going through it on the board; marks **export to CSV**.

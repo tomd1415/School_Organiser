@@ -23,10 +23,11 @@ is reused, what is adapted, and what is deliberately skipped.
 - **Objective answers mark themselves** — ticks, choices, exact/numeric answers are marked
   instantly, deterministically, with no AI call at all.
 - **Open answers are AI-marked as suggestions** — batched per question with **no pupil identity
-  attached** (anonymous slots), evidence-quoted, confidence-scored, safety-gated — and nothing
-  reaches a pupil until the teacher reviews and **releases**.
-- **Pupils get results back** — friendly ticks + a "what went well / try this" line + an
-  optional teacher comment, on their own screen, the next time they look.
+  attached** (anonymous slots), evidence-quoted, confidence-scored, safety-gated — and no AI
+  mark reaches a pupil until the teacher confirms it.
+- **Pupils get results back, fast** — friendly ticks + a "what went well / try this" line + an
+  optional teacher comment, on their own screen: objective answers within seconds of Done ✓,
+  so feedback lands **inside the lesson** (or everything held until Release — per class).
 - **Marks close the loop properly** — per-question class success rates and misconception notes
   join the class-work summary the adapt-next-lesson AI already reads; over time each pupil gets
   a **"what works for me" profile** and the class gets retrieval-practice starters built from
@@ -49,9 +50,9 @@ with the teacher as decision-maker, LAN-only, graceful degradation when AI is of
 | **9.0** | **DPIA addendum** (external) — anonymous answer text to the AI sub-processor for marking; per-pupil marks (attainment) stored; the remembered-device credential; marks retention | the legal gate for 9.2+ | S (blocking) |
 | **9.1** | **Mark schemes as data** — generation emits a structured scheme alongside the answers doc (`lesson_resources@5`); a "derive scheme" action backfills existing worksheets (one AI call, teacher reviews); inline scheme editor on the resource page | every worksheet knows its right answers | M |
 | **9.2** | **Deterministic marking** — tick / choice / exact / numeric / keyword fields marked server-side the moment work is reviewed (or on Done ✓); zero AI | most marks, instantly, free | M |
-| **9.3** | **AI marking of open answers** — auto-runs as pupils tap **Done ✓** (debounced into **per-question** batches of anonymous slots; a review-page "✨ Mark anything unmarked" button sweeps stragglers/re-marks); evidence quotes, confidence, short pupil feedback; the **safety gate** + guard-pattern screen | the hard 20% marked as suggestions | L |
-| **9.4** | **Review & release** — marks land in the Pupil-work grid as amber suggestions; confirm-all-confident in one click; tap-to-override (audited); per-pupil **teacher comment back** (AI-prefilled, editable); a deliberate **Release marks** action per lesson | teacher stays the marker of record | M |
-| **9.5** | **Results on `/me`** — after release: big ✓/✗/partial per answer, the feedback line, the teacher's comment; scores optionally hidden (ticks only) | pupils see how they did, kindly | S |
+| **9.3** | **AI marking of open answers** — per-class trigger: **as pupils finish** (default; Done ✓ enqueues, debounced into **per-question** batches of anonymous slots) or **batch-on-button** ("✨ Mark the written answers", always present as the sweep); evidence quotes, confidence, short pupil feedback; the **safety gate** + guard-pattern screen | the hard 20% marked as suggestions | L |
+| **9.4** | **Review, confirm & visibility** — marks land in the Pupil-work grid as amber suggestions; confirm-all-confident in one click (usable mid-lesson while circulating); tap-to-override (audited); per-pupil **teacher comment back** (AI-prefilled, editable); per-class visibility: **instant on confirm** (default) or **hold until Release** | teacher stays the marker of record | M |
+| **9.5** | **Results on `/me`** — big ✓/✗/◐ per answer as marks become visible (objective ones within seconds of Done ✓ in instant mode), the feedback line, the teacher's comment; scores optionally hidden (ticks only) | quick feedback, inside the lesson | S |
 | **9.6** | **Stay signed in on this computer** — remembered-device cookie bound to the pupil (hashed at rest, term-long, revocable, "Not me?" escape); teacher device list + revoke; account-disable kills devices | login friction → zero on own Windows profiles | M |
 | **9.7** | **Marks → the loop + the answer pack** — per-question success rates in the class-work summary (8.7 becomes mark-aware); misconception notes accumulate per course; **printable class answer pack** (questions + answers + class stats, for going through on the board); CSV marks export | the loop closes on hard data | M |
 | **9.8** | **"What works for me" profiles** — per pupil, from feedback + marks history (tokens only): a two-line digest on the review grid & Pupils page; suggests level changes ("full marks on core 3 lessons running → try challenge") | the system learns each pupil | S |
@@ -122,7 +123,9 @@ pupil_profiles               -- "what works for me" (9.8)
   digest     TEXT NOT NULL DEFAULT ''      -- two lines of prose; AI-written from tokenised history
   updated_at TIMESTAMPTZ NOT NULL
 
--- plus: occurrence_courses.marks_released_at TIMESTAMPTZ  (release is per lesson per class)
+-- plus: occurrence_courses.marks_released_at TIMESTAMPTZ  (the hold-mode release act)
+-- plus: group_courses.marking_trigger TEXT CHECK ('on_done','manual')    DEFAULT 'on_done'
+--       group_courses.results_mode    TEXT CHECK ('instant','on_release') DEFAULT 'instant'
 ```
 
 The scheme is keyed by the **same `field_key`s as `pupil_answers`** and by resource version, so
@@ -168,12 +171,13 @@ pupil answers ──┬─ tick/choice/exact/numeric/keyword ──► determini
   **withheld from AI entirely** and surfaced prominently to the teacher ("needs your eyes") —
   in a SEND setting, a worksheet answer is a plausible disclosure channel and is treated as one.
   This is the existing withholding principle applied to a new inbound surface.
-- **Trigger (decided 2026-06-12, Q34)**: marking runs **automatically when a pupil taps
-  Done ✓** — deterministic marks land instantly; the pupil's open answers join a queue, and a
-  short debounce (~2 min) groups finishers so the AI still marks **per-question batches across
-  whoever is done** (consistency + fewer calls survive the auto trigger). The review page keeps
-  a "✨ Mark anything unmarked" button as the sweep for pupils who never tap Done and for
-  re-marks. Auto-marking respects the monthly spend cap and the AI kill-switch — with AI off,
+- **Trigger (decided 2026-06-12, Q34 — refined same day): a per-class choice.** Default
+  **"as pupils finish"**: Done ✓ marks the objective fields instantly and enqueues the open
+  ones; a short debounce (~2 min) groups finishers so the AI still marks **per-question batches
+  across whoever is done** (consistency + fewer calls survive the auto trigger). Alternative
+  **"when I press"**: nothing goes to the AI until the "✨ Mark the written answers" batch
+  button — which stays present in *both* modes as the sweep for pupils who never tap Done and
+  for re-marks. Marking respects the monthly spend cap and the AI kill-switch — with AI off,
   open answers simply wait, marked "not yet marked", and everything else still works.
 
 ---
@@ -197,10 +201,16 @@ authoring wizard (schemes are generated, then edited inline); separate `teacher_
 
 ## 5. Results back to the pupil (9.4/9.5)
 
-- **Nothing is pupil-visible until the teacher releases** — marking produces *suggestions*;
-  `Release marks` (per lesson, per class) is the deliberate act that publishes confirmed marks,
-  feedback lines and comments. Unconfirmed suggestions are simply held back.
-- On `/me`, a released lesson shows the pupil's own sheet with **big ✓ / ✗ / ◐ per answer**, the
+- **Two visibility modes, per class** — **instant** (default): a pupil who taps Done ✓ sees
+  ✓/✗/◐ on their objective answers within seconds — **quick feedback inside the lesson** — and
+  AI-marked open answers appear as the teacher confirms them, one tap each or
+  confirm-all-confident from the live grid while circulating. **Hold until Release**: nothing
+  is visible until the deliberate per-lesson `Release marks` action (the right mode for
+  assessments or a class that needs results handled carefully).
+- **The invariant in both modes: pupils only ever see *confirmed* marks.** Deterministic marks
+  confirm themselves (they are objective); AI suggestions never reach a pupil until the teacher
+  confirms them, and the feedback line ships teacher-editable.
+- On `/me`, visible marks render on the pupil's own sheet as **big ✓ / ✗ / ◐ per answer**, the
   one-line feedback under each open answer, and the teacher's comment at the top. Tone is
   two-stars-and-a-wish; **no class comparison, ever**. Numeric scores are a per-class teacher
   toggle (default: ticks only — same sensitivity instinct as the unlabelled levels).
@@ -262,9 +272,11 @@ theirs — a persistent cookie makes Windows login double as app login:
 - **Withholding gains a new front door**: guard-patterned answers never reach the AI and are
   surfaced to the teacher as a distinct "needs your eyes" strip — the safeguarding-flag
   workflow then applies as usual.
-- **Marks are suggestions until a teacher confirms; invisible until a teacher releases.**
-  Overrides are audited in-row (`history`). The AI never communicates with a pupil directly —
-  feedback lines ship only inside a teacher-released, teacher-editable surface.
+- **Pupils only ever see confirmed marks.** Deterministic marks self-confirm (objective); AI
+  marks are suggestions until the teacher confirms — in instant mode that confirmation is what
+  makes them visible, in hold mode visibility additionally waits for `Release marks`. Overrides
+  are audited in-row (`history`). The AI never communicates with a pupil directly — its
+  feedback ships only after teacher confirmation, teacher-editable.
 - **Device cookies** are secondary credentials: scrypt-hashed like every other credential,
   bound to one pupil, name-confirmed on use, killed by disable/PIN-reset/expiry/revoke.
 
@@ -272,10 +284,11 @@ theirs — a persistent cookie makes Windows login double as app login:
 
 ## 9. Decisions & open questions
 
-- **Decided (teacher, 2026-06-12 — Q33–Q37):** released results are **ticks-only by default**
+- **Decided (teacher, 2026-06-12 — Q33–Q37):** visible results are **ticks-only by default**
   (per-class toggle for scores — same sensitivity-first instinct as the unlabelled levels);
-  **AI marking auto-runs on Done ✓** (the one choice against the manual-first recommendation —
-  see the §3 trigger: debounced per-question batches + the sweep button); **remembered devices
+  **the marking trigger is a per-class choice — "as pupils finish" (default) or
+  batch-on-button — paired with per-class results visibility: instant-on-confirm (default;
+  quick feedback within the lesson) or hold-until-Release** (§3/§5); **remembered devices
   are per-class, off by default** until the DPO has seen the addendum; **numeric marking is
   strict after parsing** with word forms as listed alternatives (widen only on real friction);
   **misconception notes stay free prose** until 9.9 needs a queryable table.
@@ -295,8 +308,9 @@ theirs — a persistent cookie makes Windows login double as app login:
   redaction suite.
 - **Safety gate**: evidence-not-in-answer → flagged; confidence below threshold → flagged;
   clipping recorded; gate reasons land in `history`.
-- **Release gating**: pupils see nothing pre-release (direct-URL probes included); release
-  exposes only confirmed marks; un-release is possible until end of day.
+- **Visibility gating**: in hold mode pupils see nothing pre-Release; in instant mode only
+  **confirmed** marks ever show — suggestions never (direct-URL probes included); mode changes
+  take effect cleanly mid-lesson; un-release/hide is possible until end of day.
 - **Override audit**: prior value + actor recorded; grid math (n/m, success rates) correct.
 - **Devices**: hash-at-rest, expiry honoured, revoke/disable/PIN-reset all kill the cookie,
   "Not me" path clean, rate-limited.
