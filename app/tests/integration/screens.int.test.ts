@@ -882,6 +882,30 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Markdown resources preview as formatted pages in the browser', async () => {
+    const { createResource, addVersion } = await import('../../src/repos/resources');
+    const { checksum, relPathFor, storeBuffer } = await import('../../src/lib/resourceStore');
+    const md = '# Worksheet\n\n## Tasks\n\n| Step | Tick |\n|---|---|\n| Open the file | |\n\n- [ ] extension task';
+    const id = await createResource('TEST preview.md', 'worksheet', 'text/markdown', 'ai_generated');
+    const rel = relPathFor(id, 1, 'TEST preview.md');
+    await storeBuffer(rel, Buffer.from(md, 'utf8'));
+    await addVersion(id, rel, md.length, checksum(Buffer.from(md)), 'ai', 'test');
+    try {
+      const res = await app.inject({ method: 'GET', url: `/resources/${id}/view`, headers: { cookie: session } });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toContain('text/html');
+      expect(res.body).toContain('<h1>Worksheet</h1>'); // rendered, not raw '#'
+      expect(res.body).toContain('<table>');
+      expect(res.body).toContain('md-task');
+      expect(res.body).toContain('🖨 print');
+      expect(res.body).not.toContain('# Worksheet'); // no raw markdown leaking
+    } finally {
+      await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [id]);
+      await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [id]);
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [id]);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

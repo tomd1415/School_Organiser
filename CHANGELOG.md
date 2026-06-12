@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Generated resources preview in the browser, formatted
+
+- Generated documents are Markdown, but the viewer only knew PDF/image/Office — so "view" fell
+  through to a download. Now **`/resources/:id/view` renders Markdown as a formatted, printable
+  page**: headings, bold/italic/code, bullet + numbered lists, **tables** (worksheets lean on
+  them), task checkboxes, blockquotes, fenced code and rules — with the title/version, a **🖨
+  print** button and a download link in the header. **Slides outlines get one card per `##`
+  slide, and print one slide per page.** Plain-text files preview too.
+- Rendering is a small dependency-free renderer ([lib/markdown.ts](app/src/lib/markdown.ts), 5
+  unit tests): text is escaped before any tags are added, so raw HTML/script in a document can
+  never reach the page. Integration test renders a stored worksheet end-to-end; verified in a
+  real browser against today's actual generated set ("What Makes a Good Digital Message?") —
+  worksheet tables and the slide cards render exactly as intended.
+  **156 unit / 91 integration tests green.**
+
 ### 2026-06-12 — Immediate feedback on every AI (and other) button
 
 - AI calls can take 20–60s and the only signal was a quietly-disabled button — inviting repeat

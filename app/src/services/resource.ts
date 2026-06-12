@@ -54,12 +54,14 @@ export function exactlyOneTarget(t: LinkTarget): boolean {
   return [t.courseId, t.unitId, t.lessonPlanId, t.occurrenceId, t.groupId].filter((x) => x != null).length === 1;
 }
 
-export type PreviewKind = 'pdf' | 'image' | 'office' | 'other';
+export type PreviewKind = 'pdf' | 'image' | 'office' | 'markdown' | 'text' | 'other';
 
 export function previewKind(mime: string | null, filename: string): PreviewKind {
   const ext = extOf(filename);
   if (ext === 'pdf' || mime === 'application/pdf') return 'pdf';
   if (IMAGE_EXT.has(ext) || (mime ?? '').startsWith('image/')) return 'image';
   if (OFFICE_EXT.has(ext)) return 'office';
+  if (ext === 'md' || ext === 'markdown' || mime === 'text/markdown') return 'markdown';
+  if (ext === 'txt' || mime === 'text/plain') return 'text';
   return 'other';
 }

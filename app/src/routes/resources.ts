@@ -16,6 +16,7 @@ import {
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
+import { renderMarkdown } from '../lib/markdown';
 import { convertToPdf } from '../lib/officePreview';
 import { modelFor } from '../repos/settings';
 import { callLLMStructured } from '../llm/client';
@@ -177,6 +178,23 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     if (!r || !v) return reply.code(404).send('Not found');
     const pk = previewKind(r.mimeType, r.title);
     try {
+      // Generated documents (Markdown) render as a formatted, printable page in the browser.
+      if (pk === 'markdown' || pk === 'text') {
+        const text = (await readStored(v.storagePath)).toString('utf8');
+        const inner = pk === 'markdown' ? renderMarkdown(text) : `<pre class="md-pre">${esc(text)}</pre>`;
+        const body = `
+          <article class="card md-doc${r.kind === 'slides' ? ' md-slides' : ''}">
+            <div class="md-head">
+              <span class="muted">${esc(r.title)} · v${r.versionNo ?? 1}</span>
+              <span class="md-head-actions">
+                <button type="button" class="link" onclick="window.print()">🖨 print</button>
+                <a class="link" href="/resources/${id.data.id}/download">download</a>
+              </span>
+            </div>
+            ${inner}
+          </article>`;
+        return reply.type('text/html').send(layout({ title: r.title, body, authed: true, csrfToken: reply.generateCsrf() }));
+      }
       if (pk === 'pdf' || pk === 'image') {
         const buf = await readStored(v.storagePath);
         return reply
