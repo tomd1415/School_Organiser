@@ -7,6 +7,42 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Resource generation hardened by live verification (post-outage)
+
+- The deferred live check ran once the connection returned, and shook out three robustness fixes:
+  **(1)** the model sometimes labels a document outside the four kinds ("support worksheet",
+  "answer key") — a strict enum failed the whole response, so `kind` is now a guided string with
+  a **normaliser** (`normaliseResourceKind`, unit-tested) and the storage maps' fallbacks;
+  **(2)** four full documents didn't fit an 8k output budget, making the model drop one —
+  **raised to 16k** and the instruction now demands *exactly four documents*; **(3)** prompts →
+  **@3**: no underscore runs anywhere — the name/date header must itself be a typed table.
+- Final live run **PASS**: worksheet opens with `| Name | Type your name here |`, every task is a
+  question + "Type your answer here" cell, zero underscores; slides arrive numbered with an emoji
+  visual per slide and ≤4 big-print bullets. **161 unit / 92 integration tests green.**
+
+### 2026-06-12 — Worksheets pupils can type into; slides that actually present
+
+- **Worksheets are now designed for the computer, not paper** (prompts → `lesson_resources@2`,
+  `adapt_resources@2`): pupils type answers into two-column tables ("Type your answer here"
+  cells); blank lines, dotted lines and underscores are banned; "type" not "write". Support
+  versions keep sentence starters in the answer cells.
+- **⬇ Word (.docx) export** on every generated document: a dependency-free Markdown→DOCX
+  converter ([lib/docx.ts](app/src/lib/docx.ts) — hand-rolled ZIP + WordprocessingML, since npm
+  is proxy-blocked) with headings, bold/italic, lists, task boxes and **bordered tables pupils
+  type into**. Validated by a LibreOffice round-trip (opens + converts cleanly) and python's
+  strict zip reader; 3 unit tests.
+- **▶ Present mode** for slides documents (`/resources/:id/present`): one slide at a time,
+  full screen — ←/→/space/click to move, **F** fullscreen, **N** toggles the teacher *Say:*
+  notes (hidden from the class by default), Esc/✕ back to the document. Slides prompts now put
+  a **large supporting emoji visual** on every slide (rendered huge), at most 4 big-print
+  bullets, and a highlighted `> key idea` callout; `![images](…)` render too if a document
+  includes them.
+- Fixed en route: the resource-set schema's hard `.max(4)` failed the **whole** response when
+  the model offered extra documents — now soft-capped in code; format/parse failures get an
+  honest message ("the AI returned an unexpected format — retry") instead of "unavailable".
+- **160 unit / 92 integration tests green.** (The final live-output spot-check hit a school
+  internet outage — the pipeline was proven live earlier today; press 📄 once the line is back.)
+
 ### 2026-06-12 — Generated resources preview in the browser, formatted
 
 - Generated documents are Markdown, but the viewer only knew PDF/image/Office — so "view" fell

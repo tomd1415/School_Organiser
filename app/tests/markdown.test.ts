@@ -37,6 +37,12 @@ describe('renderMarkdown (resource preview)', () => {
     expect(html).not.toContain('<b>');
   });
 
+  it('emoji-only lines become large visuals; images render', () => {
+    const html = renderMarkdown('## Slide 1\n\n📬\n\nA bullet\n\n![diagram](https://school.local/x.png)');
+    expect(html).toContain('class="md-visual">📬');
+    expect(html).toContain('<img class="md-img" src="https://school.local/x.png"');
+  });
+
   it('paragraph line-breaks and links', () => {
     const html = renderMarkdown('line one\nline two\n\n[BBC](https://bbc.co.uk/page)');
     expect(html).toContain('line one<br>line two');

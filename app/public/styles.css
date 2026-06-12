@@ -570,3 +570,25 @@ main:has(.md-doc) { max-width: 50rem; }
   .md-slides h2:first-of-type { page-break-before: avoid; }
   .md-doc table, .md-doc pre { page-break-inside: avoid; }
 }
+
+/* presentation mode: one slide at a time on the projector */
+body.deck { background: #1c2430; margin: 0; overflow: hidden; }
+.deck-slide { display: none; position: fixed; inset: 0; padding: 5vh 7vw; background: #fff; overflow: auto; }
+.deck-slide.deck-current { display: block; }
+.deck-slide h1 { font-size: 3.2rem; margin: 1rem 0; }
+.deck-slide h2 { font-size: 2.6rem; margin: 0.5rem 0 1rem; color: var(--ink); border-bottom: 4px solid var(--accent); padding-bottom: 0.4rem; }
+.deck-slide ul, .deck-slide ol { font-size: 1.7rem; line-height: 1.7; padding-left: 1.5em; }
+.deck-slide p { font-size: 1.5rem; }
+.deck-slide table { font-size: 1.3rem; border-collapse: collapse; }
+.deck-slide th, .deck-slide td { border: 1px solid var(--line); padding: 0.4rem 0.7rem; }
+.deck-slide blockquote { border-left: 6px solid var(--accent); background: #eef3fc; margin: 1rem 0; padding: 0.6rem 1rem; font-size: 1.6rem; font-weight: 600; }
+.deck-slide .md-visual { font-size: 7rem; margin: 0.2rem 0; text-align: center; }
+.deck-slide .md-img { max-width: 60%; max-height: 45vh; display: block; margin: 0.6rem auto; border-radius: 8px; }
+.deck-note { display: none; }
+body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 0.5rem; margin-top: 1rem; }
+.deck-counter { position: fixed; bottom: 0.6rem; right: 0.9rem; color: #fff; font-size: 0.9rem; opacity: 0.7; z-index: 10; }
+.deck-exit { position: fixed; top: 0.5rem; right: 0.7rem; color: #fff; opacity: 0.6; text-decoration: none; font-size: 1.2rem; z-index: 10; }
+.deck-exit:hover { opacity: 1; }
+/* the document view shows visuals + images sensibly too */
+.md-doc .md-visual { font-size: 3rem; margin: 0.2rem 0; }
+.md-doc .md-img { max-width: 100%; border-radius: 8px; }

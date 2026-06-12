@@ -23,7 +23,7 @@ import {
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
-import { lessonResourcesSchema } from '../llm/schemas/lessonResources';
+import { lessonResourcesSchema, normaliseResourceKind } from '../llm/schemas/lessonResources';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
 import {
   getAdaptation,
@@ -311,7 +311,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
         ),
       ],
       instruction: adaptResourcesInstruction(info.groupName),
-      maxTokens: 8000,
+      maxTokens: 16000,
     },
     lessonResourcesSchema,
   );
@@ -322,7 +322,8 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
   let updated = 0;
   for (const r of result.data.resources.slice(0, 4)) {
     if (!r.content.trim()) continue;
-    const filename = `${safeFilename(master.title).replace(/\.md$/i, '') || 'lesson'} — ${ADAPT_RES_LABEL[r.kind] ?? r.kind} (${safeFilename(info.groupName ?? 'class')}).md`;
+    const kind = normaliseResourceKind(r.kind);
+    const filename = `${safeFilename(master.title).replace(/\.md$/i, '') || 'lesson'} — ${ADAPT_RES_LABEL[kind] ?? kind} (${safeFilename(info.groupName ?? 'class')}).md`;
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);
     if (match) {
@@ -332,7 +333,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
       await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class (regenerated)');
       updated++;
     } else {
-      const id = await createResource(filename, r.kind === 'slides' ? 'slides' : r.kind === 'answers' ? 'document' : 'worksheet', 'text/markdown', 'ai_generated');
+      const id = await createResource(filename, kind === 'slides' ? 'slides' : kind === 'answers' || kind === 'document' ? 'document' : 'worksheet', 'text/markdown', 'ai_generated');
       const rel = relPathFor(id, 1, filename);
       await storeBuffer(rel, buf);
       await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class');

@@ -25,3 +25,15 @@ describe('curriculumHistoryItems (history-aware scheme authoring)', () => {
     ).toHaveLength(0);
   });
 });
+
+import { normaliseResourceKind } from '../src/llm/schemas/lessonResources';
+
+describe('normaliseResourceKind (model kind drift)', () => {
+  it('maps stray labels onto the four kinds', () => {
+    expect(normaliseResourceKind('slides')).toBe('slides');
+    expect(normaliseResourceKind('Support Worksheet')).toBe('support');
+    expect(normaliseResourceKind('answer key')).toBe('answers');
+    expect(normaliseResourceKind('pupil task sheet')).toBe('worksheet');
+    expect(normaliseResourceKind('starter quiz')).toBe('document');
+  });
+});

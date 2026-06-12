@@ -137,6 +137,9 @@ function degradeMessage(raw: string): string {
   if (/connection error|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|ECONNREFUSED|fetch failed/i.test(raw)) {
     return "Can't reach the AI service — the server has lost internet access (Docker networking can drop this after a host network change). Restart the stack (./start.sh) and try again.";
   }
+  if (/parse|schema|too_big|invalid_type|output_format/i.test(raw)) {
+    return 'The AI returned an unexpected format — try again (a retry almost always passes).';
+  }
   if (/429|rate.?limit/i.test(raw)) return 'The AI service is rate-limiting us — wait a minute and try again.';
   if (/overloaded|529/i.test(raw)) return 'The AI service is overloaded right now — try again shortly.';
   if (/401|403|authentication|invalid.*key/i.test(raw)) return 'The AI key was rejected — check ANTHROPIC_API_KEY in app/.env.';

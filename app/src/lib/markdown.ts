@@ -10,6 +10,7 @@ function inline(text: string): string {
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+  s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img class="md-img" src="$2" alt="$1">');
   s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
   return s;
 }
@@ -120,6 +121,15 @@ export function renderMarkdown(src: string): string {
 
     if (line.trim() === '') {
       closeList();
+      i++;
+      continue;
+    }
+
+    // a line that is only emoji becomes the slide/page visual (large)
+    const bare = line.trim();
+    if (/^[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}#*0-9]{1,8}$/u.test(bare) && /\p{Extended_Pictographic}/u.test(bare)) {
+      closeList();
+      out.push(`<p class="md-visual">${esc(bare)}</p>`);
       i++;
       continue;
     }

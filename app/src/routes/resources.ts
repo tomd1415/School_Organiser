@@ -17,6 +17,7 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
+import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
 import { modelFor } from '../repos/settings';
 import { callLLMStructured } from '../llm/client';
@@ -138,6 +139,90 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(updated ? renderResourceItem(updated) : '');
   });
 
+
+
+  // Word export for generated (Markdown) documents — pupils open the worksheet in Word and type
+  // their answers straight into the table cells.
+  app.get('/resources/:id/download.docx', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v) return reply.code(404).send('Not found');
+    if (previewKind(r.mimeType, r.title) !== 'markdown') return reply.code(400).send('Only generated (Markdown) documents export to Word.');
+    let text: string;
+    try {
+      text = (await readStored(v.storagePath)).toString('utf8');
+    } catch (err) {
+      app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
+      return reply.code(404).send('The stored file is missing from the resource store.');
+    }
+    const docx = markdownToDocx(text);
+    const base = r.title.replace(/\.md$/i, '');
+    return reply
+      .header('Content-Disposition', `attachment; filename="${encodeURIComponent(base)}.docx"`)
+      .type('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+      .send(docx);
+  });
+
+  // Presentation mode: a generated slides document, one slide at a time, full screen.
+  // ←/→ (or space / click) to move, N toggles the teacher "Say:" notes, F fullscreen, Esc exits.
+  app.get('/resources/:id/present', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v) return reply.code(404).send('Not found');
+    let text: string;
+    try {
+      text = (await readStored(v.storagePath)).toString('utf8');
+    } catch (err) {
+      app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
+      return reply.code(404).send('The stored file is missing from the resource store.');
+    }
+    // split on `## ` slide headings; anything before the first heading is the title slide
+    const parts = text.replace(/\r\n/g, '\n').split(/\n(?=## )/);
+    const slides = parts
+      .map((p) => renderMarkdown(p))
+      .filter((h) => h.trim() !== '')
+      .map(
+        (h, i) =>
+          `<section class="deck-slide${i === 0 ? ' deck-current' : ''}">${h.replace(/<p><em>Say:<\/em>/g, '<p class="deck-note"><em>Say:</em>')}</section>`,
+      );
+    const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(r.title)} — present</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head><body class="deck">
+  <a class="deck-exit" href="/resources/${id.data.id}/view" title="back to the document">✕</a>
+  ${slides.join('\n')}
+  <div class="deck-counter"><span id="deck-n">1</span> / ${slides.length}</div>
+  <script>
+    (function () {
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.deck-slide'));
+      var n = 0;
+      function show(i) {
+        n = Math.max(0, Math.min(slides.length - 1, i));
+        slides.forEach(function (s, j) { s.classList.toggle('deck-current', j === n); });
+        document.getElementById('deck-n').textContent = String(n + 1);
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(n + 1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(n - 1); }
+        else if (e.key.toLowerCase() === 'n') document.body.classList.toggle('deck-show-notes');
+        else if (e.key.toLowerCase() === 'f') {
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen();
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        show(e.clientX > window.innerWidth / 3 ? n + 1 : n - 1);
+      });
+    })();
+  </script>
+</body></html>`;
+    return reply.type('text/html').send(html);
+  });
+
   // Where-used: the plans this resource is attached to and the units it's a source for.
   app.get('/resources/:id/usage', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
@@ -187,6 +272,8 @@ export function registerResourceRoutes(app: FastifyInstance): void {
             <div class="md-head">
               <span class="muted">${esc(r.title)} · v${r.versionNo ?? 1}</span>
               <span class="md-head-actions">
+                ${r.kind === 'slides' ? `<a class="link" href="/resources/${id.data.id}/present"><strong>▶ present</strong></a>` : ''}
+                ${pk === 'markdown' ? `<a class="link" href="/resources/${id.data.id}/download.docx">⬇ Word (.docx)</a>` : ''}
                 <button type="button" class="link" onclick="window.print()">🖨 print</button>
                 <a class="link" href="/resources/${id.data.id}/download">download</a>
               </span>

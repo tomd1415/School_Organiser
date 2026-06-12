@@ -906,6 +906,38 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Slides present one at a time; markdown exports to Word (.docx)', async () => {
+    const { createResource, addVersion } = await import('../../src/repos/resources');
+    const { checksum, relPathFor, storeBuffer } = await import('../../src/lib/resourceStore');
+    const md = '# Deck title\n\n## Slide 1 — Hello\n\n📬\n\n- point one\n\n*Say:* welcome them in.\n\n## Slide 2\n\n- point two';
+    const id = await createResource('TEST deck — slides.md', 'slides', 'text/markdown', 'ai_generated');
+    const rel = relPathFor(id, 1, 'deck.md');
+    await storeBuffer(rel, Buffer.from(md, 'utf8'));
+    await addVersion(id, rel, md.length, checksum(Buffer.from(md)), 'ai', 'test');
+    try {
+      // viewer offers ▶ present for slides
+      const view = await app.inject({ method: 'GET', url: `/resources/${id}/view`, headers: { cookie: session } });
+      expect(view.body).toContain('▶ present');
+      expect(view.body).toContain('⬇ Word');
+      // the deck: 3 sections (title + 2 slides), one current, teacher notes marked
+      const deck = await app.inject({ method: 'GET', url: `/resources/${id}/present`, headers: { cookie: session } });
+      expect(deck.statusCode).toBe(200);
+      expect((deck.body.match(/class="deck-slide/g) ?? []).length).toBe(3);
+      expect((deck.body.match(/class="deck-slide deck-current"/g) ?? []).length).toBe(1); // only the first is shown
+      expect(deck.body).toContain('deck-note');
+      expect(deck.body).toContain('md-visual');
+      // Word export: valid container + right content type
+      const docx = await app.inject({ method: 'GET', url: `/resources/${id}/download.docx`, headers: { cookie: session } });
+      expect(docx.statusCode).toBe(200);
+      expect(docx.headers['content-type']).toContain('officedocument.wordprocessingml.document');
+      expect(docx.rawPayload.subarray(0, 2).toString('latin1')).toBe('PK');
+    } finally {
+      await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [id]);
+      await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [id]);
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [id]);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

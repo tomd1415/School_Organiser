@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@1';
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@3'; // @3: no underscores anywhere — name/date header is a typed table too
 
 export const ADAPT_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents ' +
@@ -11,9 +11,14 @@ export const ADAPT_RESOURCES_SYSTEM =
   'and outline — follow these, not the master\'s) and, where they exist, the master documents to ' +
   'adapt rather than rewrite from scratch: keep their coverage and voice, apply the class\'s ' +
   'changes (shorter or chunked tasks, recaps, scaffolds, swapped activities), and keep every ' +
-  'sheet low cognitive load with one instruction per line. Produce the same set: "slides", ' +
-  '"worksheet", "support", and "answers" where useful. If a master document is missing, create ' +
-  'that document from the adapted outline. Plain UK English; never reference an individual pupil.';
+  'sheet low cognitive load with one instruction per line. Worksheets are COMPLETED ON A ' +
+  'COMPUTER: typed answers into two-column tables (question | "Type your answer here" cell), ' +
+  'NEVER blank lines or underscore runs anywhere — the name/date header is a typed table too — ' +
+  'and say "type" not "write". Slides are real presentation ' +
+  'slides: one `##` per slide, a supporting emoji visual on its own line after each heading, at ' +
+  'most 4 short bullets, a *Say:* line. Produce the same set: "slides", "worksheet", "support", ' +
+  'and "answers" where useful. If a master document is missing, create that document from the ' +
+  'adapted outline. Plain UK English; never reference an individual pupil.';
 
 /** The class's effective lesson + each master document (capped) as separate context items. */
 export function adaptResourceItems(

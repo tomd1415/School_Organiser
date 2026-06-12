@@ -47,7 +47,7 @@ import {
 } from '../repos/resources';
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
-import { lessonResourcesSchema } from '../llm/schemas/lessonResources';
+import { lessonResourcesSchema, normaliseResourceKind } from '../llm/schemas/lessonResources';
 import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems } from '../llm/prompts/lessonResources';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
@@ -108,7 +108,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
         ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
       ],
       instruction: LESSON_RESOURCES_INSTRUCTION,
-      maxTokens: 8000,
+      maxTokens: 16000, // four full documents need room — a tight cap makes the model drop one
     },
     lessonResourcesSchema,
   );
@@ -119,7 +119,8 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
   let updated = 0;
   for (const r of result.data.resources.slice(0, 4)) {
     if (!r.content.trim()) continue;
-    const filename = `${safeFilename(ctx.planTitle).replace(/\.md$/i, '') || 'lesson'} — ${RES_KIND_LABEL[r.kind] ?? r.kind}.md`;
+    const kind = normaliseResourceKind(r.kind);
+    const filename = `${safeFilename(ctx.planTitle).replace(/\.md$/i, '') || 'lesson'} — ${RES_KIND_LABEL[kind] ?? kind}.md`;
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);
     if (match) {
@@ -129,7 +130,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
       await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-regenerated');
       updated++;
     } else {
-      const id = await createResource(filename, RES_KIND_STORE[r.kind] ?? 'document', 'text/markdown', 'ai_generated');
+      const id = await createResource(filename, RES_KIND_STORE[kind] ?? 'document', 'text/markdown', 'ai_generated');
       const rel = relPathFor(id, 1, filename);
       await storeBuffer(rel, buf);
       await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
