@@ -38,6 +38,7 @@ import { registerRolloverRoutes } from './routes/rollover';
 import { registerWelcomeRoutes } from './routes/welcome';
 import { registerSettingsRoutes } from './routes/settingsPage';
 import { registerGroupHistoryRoutes } from './routes/groupHistory';
+import { registerTaRoutes } from './routes/ta';
 import { registerResourceRoutes } from './routes/resources';
 import { generateDueInstances } from './repos/recurringTasks';
 import { pollEmailOnce } from './services/emailPoll';
@@ -76,6 +77,15 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
   await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024 } });
 
+  // TA sessions are deny-by-default: only the TA view, feedback, logout and linked resource
+  // files. Everything else bounces back to /ta.
+  const TA_ALLOWED = [/^\/ta($|\/|\?)/, /^\/login/, /^\/logout/, /^\/static\//, /^\/healthz/, /^\/resources\/\d+\/(view|download|present|download\.docx)$/];
+  app.addHook('onRequest', async (req, reply) => {
+    if (req.session?.get?.('role') === 'ta' && !TA_ALLOWED.some((re) => re.test(req.url))) {
+      return reply.redirect('/ta');
+    }
+  });
+
   registerHealthRoutes(app);
   registerAuthRoutes(app);
   registerNowRoutes(app);
@@ -100,6 +110,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerWelcomeRoutes(app);
   registerSettingsRoutes(app);
   registerGroupHistoryRoutes(app);
+  registerTaRoutes(app);
   registerResourceRoutes(app);
 
   return app;

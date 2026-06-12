@@ -55,6 +55,7 @@ import { buildLessonDetail, type CourseSection, type LessonDetail } from '../ser
 import { renderLinkedResources } from '../lib/resourceView';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, type PrepItem } from '../repos/prep';
+import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList } from '../lib/prepView';
@@ -170,11 +171,24 @@ function renderTracker(oc: number, steps: string[], progress: number | null): st
   </div>`;
 }
 
+function renderTaFeedback(rows: TaFeedbackRow[]): string {
+  if (!rows.length) return '';
+  const items = rows
+    .map(
+      (f) => `<li${f.safeguarding ? ' class="sg"' : ''}>${f.safeguarding ? '🛡 <strong>safeguarding flag</strong> · ' : ''}<span class="muted">${esc(f.createdAt)}</span>
+        ${f.pupilsText ? `<div><strong>Pupils:</strong> ${esc(f.pupilsText)}</div>` : ''}
+        ${f.lessonText ? `<div><strong>Lesson:</strong> ${esc(f.lessonText)}</div>` : ''}</li>`,
+    )
+    .join('');
+  return `<div class="oc-block ta-fb-teacher"><span class="oc-label">TA feedback</span><ul class="ta-fb-list">${items}</ul></div>`;
+}
+
 function renderSection(
   s: CourseSection,
   plans: Array<{ id: number; title: string }>,
   resources: LinkedResource[],
   adaptedRes: LinkedResource[],
+  taFb: TaFeedbackRow[],
   eff: EffectiveLesson | undefined,
   slot: { lessonId: number; date: string },
 ): string {
@@ -208,6 +222,7 @@ function renderSection(
           hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
         <span class="note-status" id="oc-${oc}-status"></span>
       </label>
+      ${renderTaFeedback(taFb)}
       <p class="ld-slot-links">
         <a class="link" href="/map?slot=${slotKey}">📅 term map for this class →</a>
         ${s.lessonPlanId != null ? `<button type="button" class="link" hx-post="/map/shift" hx-vals='{"slot":"${slotKey}","date":"${esc(slot.date)}"}'
@@ -257,6 +272,7 @@ function renderDetail(
   resByPlan: Map<number, LinkedResource[]>,
   effByKey: Map<string, EffectiveLesson>,
   adaptedResByKey: Map<string, LinkedResource[]>,
+  taFbByOc: Map<number, TaFeedbackRow[]>,
   exceptionsHtml: string,
   csrf: string,
 ): string {
@@ -277,6 +293,7 @@ function renderDetail(
               plansByCourse.get(s.courseId) ?? [],
               (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [],
               adaptedResByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) ?? [],
+              taFbByOc.get(s.occurrenceCourseId) ?? [],
               s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
               { lessonId: h.lessonId, date: h.date },
             ),
@@ -457,6 +474,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           }),
       );
 
+      const taFbByOc = new Map<number, TaFeedbackRow[]>();
+      await Promise.all(detail.sections.map(async (s) => taFbByOc.set(s.occurrenceCourseId, await listTaFeedback(s.occurrenceCourseId))));
       const [exRows, exRooms, exStaff] = await Promise.all([listExceptionsFor(date, lesson), listRooms(), listStaff()]);
       const exceptionsHtml = renderExceptions(exRows, lesson, date, exRooms.filter((r) => r.active), exStaff.filter((x) => x.active && !x.isSelf));
 
@@ -464,7 +483,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const title = header.groupName ?? purposeLabel(header.purpose);
       return reply
         .type('text/html')
-        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, adaptedResByKey, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
+        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, adaptedResByKey, taFbByOc, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;

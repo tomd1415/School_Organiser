@@ -47,11 +47,19 @@ export function registerAuthRoutes(app: FastifyInstance): void {
       return reply.code(400).type('text/html').send(loginPage(reply.generateCsrf(), 'Enter a password.'));
     }
     const hash = await configuredHash();
-    if (!hash || !verifyPassword(parsed.data.password, hash)) {
-      return reply.code(401).type('text/html').send(loginPage(reply.generateCsrf(), 'Incorrect password.'));
+    if (hash && verifyPassword(parsed.data.password, hash)) {
+      req.session.set('authed', true);
+      req.session.set('role', 'teacher');
+      return reply.redirect('/');
     }
-    req.session.set('authed', true);
-    return reply.redirect('/');
+    // TA access: a separate password the teacher sets in Settings routes into the locked-down view
+    const taHash = await getSetting('ta_password_hash').catch(() => null);
+    if (taHash && taHash.trim() !== '' && verifyPassword(parsed.data.password, taHash)) {
+      req.session.set('authed', true);
+      req.session.set('role', 'ta');
+      return reply.redirect('/ta');
+    }
+    return reply.code(401).type('text/html').send(loginPage(reply.generateCsrf(), 'Incorrect password.'));
   });
 
   app.post('/logout', { preHandler: app.csrfProtection }, async (req, reply) => {

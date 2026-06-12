@@ -2,7 +2,7 @@
 // input (pupil names redacted before egress; the audit row stores the redacted form).
 import type { RedactableItem } from '../../services/redact';
 
-export const EMAIL_TRIAGE_VERSION = 'email_triage@1';
+export const EMAIL_TRIAGE_VERSION = 'email_triage@2'; // @2: structured key facts for at-a-glance display
 
 export const EMAIL_TRIAGE_SYSTEM =
   'You triage one forwarded email for a UK secondary SEND Computing teacher. The teacher ' +
@@ -12,7 +12,9 @@ export const EMAIL_TRIAGE_SYSTEM =
   'when they need to know something about a pupil, class or situation but nothing is dated; ' +
   '"note" only for pure reference material. Extract the substance — names of staff, dates, ' +
   'rooms, amounts, the actual request — and drop greetings, signatures, legal footers and ' +
-  'quoted history. Be decisive about safeguarding: anything touching welfare, disclosures, ' +
+  'quoted history. Pull the key facts (when, deadline, where, who, money, what to bring, contact) ' +
+  'into the facts list — tiny values, only facts genuinely present — and keep the summary to one ' +
+  'or two plain sentences. Be decisive about safeguarding: anything touching welfare, disclosures, ' +
   'social services or home circumstances gets safeguarding=true.';
 
 export function emailTriageItems(email: { subject: string | null; from: string | null; text: string }): RedactableItem[] {

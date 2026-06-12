@@ -156,6 +156,7 @@ export interface GroupHistoryEntry {
   stoppingPoint: string | null;
   planTitle: string | null;
   notes: Array<{ body: string; safeguarding: boolean }>;
+  taFeedback: Array<{ pupils: string; lesson: string; safeguarding: boolean }>;
 }
 
 /** The group's most recent taught lessons (stopping point + notes), newest first.
@@ -166,13 +167,16 @@ export async function recentGroupHistory(groupCourseId: number, limit = 4): Prom
             oc.stopping_point AS "stoppingPoint",
             lp.title AS "planTitle",
             COALESCE((SELECT json_agg(json_build_object('body', n.body, 'safeguarding', n.safeguarding) ORDER BY n.created_at)
-                      FROM notes n WHERE n.occurrence_id = o.id AND n.body <> ''), '[]') AS notes
+                      FROM notes n WHERE n.occurrence_id = o.id AND n.body <> ''), '[]') AS notes,
+            COALESCE((SELECT json_agg(json_build_object('pupils', tf.pupils_text, 'lesson', tf.lesson_text, 'safeguarding', tf.safeguarding) ORDER BY tf.created_at)
+                      FROM ta_feedback tf WHERE tf.occurrence_course_id = oc.id), '[]') AS "taFeedback"
      FROM occurrence_courses oc
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
      WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE
        AND (oc.stopping_point IS NOT NULL
-            OR EXISTS (SELECT 1 FROM notes n WHERE n.occurrence_id = o.id AND n.body <> ''))
+            OR EXISTS (SELECT 1 FROM notes n WHERE n.occurrence_id = o.id AND n.body <> '')
+            OR EXISTS (SELECT 1 FROM ta_feedback tf WHERE tf.occurrence_course_id = oc.id))
      ORDER BY o.date DESC
      LIMIT $2`,
     [groupCourseId, limit],

@@ -34,6 +34,12 @@ export function historyItems(history: GroupHistoryEntry[]): RedactableItem[] {
       text: `RECENT LESSON ${h.date}${h.planTitle ? ` — ${h.planTitle}` : ''}${h.stoppingPoint ? `\nStopped at: ${h.stoppingPoint}` : ''}`,
     });
     for (const n of h.notes) items.push({ text: `Note from that lesson: ${n.body}`, safeguarding: n.safeguarding });
+    for (const f of h.taFeedback ?? []) {
+      items.push({
+        text: `TA feedback from that lesson — pupils: ${f.pupils || '(nothing noted)'} · the lesson: ${f.lesson || '(nothing noted)'}`,
+        safeguarding: f.safeguarding,
+      });
+    }
   }
   return items;
 }

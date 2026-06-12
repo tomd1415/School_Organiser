@@ -7,6 +7,56 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — TA read/feedback login
+
+- **TAs can now log in** with a separate password (Settings → **TA access**; same login page —
+  the password decides the role). A TA session is **deny-by-default**: it lands straight on
+  `/ta`, a read-only view of the **current lesson** — the class's effective plan (adapted where
+  one exists, formatted with the step cards), its linked + class-copy resources — with a
+  **"Next lesson (if you're early)"** tab for the rest of today. Everything else (notes, pupils,
+  schemes, settings…) bounces back to `/ta`; only resource viewing/downloading is allowed
+  through.
+- **Structured feedback** per class: *How were the pupils?* and *Thoughts on the lesson*, plus a
+  **safeguarding-concern flag** ("also tell the teacher in person") — flagged feedback is
+  **withheld from every AI call**, like all safeguarding content. Feedback appears on the
+  teacher's lesson page as a purple-edged "TA feedback" block (🛡 highlighted when flagged) and
+  **joins the per-class history the AI uses to adapt the next lesson** (migration `0017`,
+  `ta_feedback`).
+- Looking ahead (noted in ROADMAP): per-TA logins + "all my upcoming prepared lessons" arrive
+  with the pupil-login project — this shared-password version is deliberately the simple bridge.
+- Tested end-to-end: TA password routes to `/ta`; six teacher pages all bounce; feedback lands,
+  reaches the teacher view, appears in `recentGroupHistory` and the adapt-lesson prompt items;
+  flagged feedback is provably withheld. **179 unit / 104 integration tests green.**
+
+### 2026-06-12 — Email settings: the "not persistent" mystery, fixed properly
+
+- **The settings were saving all along** — the database showed every field stored and a
+  successful poll ("0 unseen") minutes later. What *looked* like non-persistence was a **race**:
+  typing a value and clicking "Poll now / test" immediately fired the test before the field's
+  autosave landed → "not configured" → re-enter everything. Three fixes: every email field now
+  flashes **saved ✓**; fields **save while typing** (700ms debounce), not only on leaving the
+  field; and the test button **submits the current field values with it** — the test route saves
+  them first, then polls, so type-and-test can never race again. Browser-verified: fill + instant
+  click now reports an honest connection result and the values survive reload.
+- Dropped the `hx-vals='js:…'` pattern on this section for plain named fields (checkbox-absent =
+  off handled server-side) — fewer moving parts.
+- **Fixed a destructive test**: the email-intake suite's cleanup blanket-deleted `email_%`
+  settings from the shared dev database (it wiped the real config once — restored, bar the app
+  password). It now snapshots and restores instead; the full suite run leaves real settings
+  untouched, verified. **179 unit / 100 integration tests green.**
+
+### 2026-06-12 — Email summaries built for scanning: fact chips, highlights, whitespace
+
+- The triage classifier (`email_triage@2`) now also returns the **key facts as structure** —
+  when / deadline / where / who / money / bring / contact — and the task's "✉ what it says" box
+  renders them as **colour-coded chips** (deadlines amber, money green, people purple), above a
+  short prose summary in which **dates, times and amounts are highlighted**, with the routing
+  reason + sender tucked into a muted footer line. Whitespace and boxes throughout.
+- The same fact lines are written into events/captured/notes details as plain "• label: value"
+  text, so they read fine everywhere else too; plain manual tasks render exactly as before.
+  Verified live — a trip email came back with when/deadline/where/money/who facts populated.
+  4 renderer unit tests. **179 unit / 100 integration tests green.**
+
 ### 2026-06-12 — Email triage: every forwarded email is read, classified and filed by AI
 
 - **Incoming emails are now triaged, not just dumped as tasks.** Each polled email goes through a

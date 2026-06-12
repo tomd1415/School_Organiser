@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createServer, type Server, type Socket } from 'node:net';
 import { pool } from '../../src/db/pool';
 import { setSetting } from '../../src/repos/settings';
@@ -64,9 +64,20 @@ function fakeImap(): Promise<{ server: Server; port: number }> {
   });
 }
 
+// The dev DB is the teacher's real data — snapshot their email settings and put them back,
+// never blanket-delete.
+let savedSettings: Array<{ key: string; value: string }> = [];
+
 describe('email intake v2 (integration — fake IMAP server)', () => {
+  beforeAll(async () => {
+    savedSettings = (await pool.query<{ key: string; value: string }>(`SELECT key, value FROM settings WHERE key LIKE 'email_%'`)).rows;
+  });
+
   afterAll(async () => {
     await pool.query(`DELETE FROM settings WHERE key LIKE 'email_%'`);
+    for (const s of savedSettings) {
+      await pool.query(`INSERT INTO settings (key, value, updated_at) VALUES ($1, $2, now())`, [s.key, s.value]);
+    }
   });
 
   it('polls, imports a task, marks seen; second poll is a no-op', async () => {

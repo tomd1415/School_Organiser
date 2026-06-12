@@ -32,6 +32,17 @@ export const emailTriageSchema = z.object({
   safeguarding: z
     .boolean()
     .describe('true if the content touches safeguarding/welfare AT ALL — flagged items are withheld from all future AI calls'),
+  facts: z
+    .array(
+      z.object({
+        label: z
+          .enum(['when', 'deadline', 'where', 'who', 'money', 'bring', 'contact', 'other'])
+          .describe('what kind of fact this is'),
+        value: z.string().describe('the fact itself, as short as possible ("Thu 9 July", "£8", "8PFA — 5 outstanding")'),
+      }),
+    )
+    .max(6)
+    .describe('the key facts pulled out for at-a-glance reading — only ones genuinely present, 0–6'),
   reason: z.string().describe('one short line: why this route'),
 });
 

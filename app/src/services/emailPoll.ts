@@ -70,6 +70,8 @@ export async function routeTriagedEmail(
 ): Promise<EmailRoute> {
   const groupId = t.groupName ? (groups.find((g) => g.name.toLowerCase() === t.groupName!.toLowerCase())?.id ?? null) : null;
   const provenance = `${t.reason}${m.from ? ` · from ${m.from}` : ''}`;
+  const factLines = (t.facts ?? []).map((f) => `• ${f.label}: ${f.value}`).join('\n');
+  const detailText = [t.summary, factLines, `(${provenance})`].filter(Boolean).join('\n');
   const dateOk = t.dateIso && /^\d{4}-\d{2}-\d{2}$/.test(t.dateIso) ? t.dateIso : null;
 
   if (t.route === 'event') {
@@ -77,14 +79,14 @@ export async function routeTriagedEmail(
       kind: t.eventKind ?? 'other',
       title: t.title,
       date: dateOk,
-      detail: `${t.summary}\n(${provenance})`,
+      detail: detailText,
     });
     await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
     return 'event';
   }
   if (t.route === 'awareness') {
     await fileCaptured({
-      body: `${t.title} — ${t.summary}`,
+      body: `${t.title} — ${detailText}`,
       category: t.category ?? null,
       groupId: groupId == null ? null : Number(groupId),
       safeguarding: t.safeguarding,
@@ -94,13 +96,13 @@ export async function routeTriagedEmail(
   }
   if (t.route === 'note') {
     const id = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) });
-    await updateNoteBody(id, `${t.title}\n${t.summary}\n(${provenance})`);
+    await updateNoteBody(id, `${t.title}\n${detailText}`);
     await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
     return 'note';
   }
   // default: task
   const taskId = await createTaskFromEmail(
-    { title: t.title, detail: `${t.summary}\n(${provenance})`, from: m.from, subject: m.subject },
+    { title: t.title, detail: detailText, from: m.from, subject: m.subject },
     raw,
   );
   await setTaskTriage(taskId, t.urgency ?? null, groupId == null ? null : Number(groupId));

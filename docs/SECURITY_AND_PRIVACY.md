@@ -26,8 +26,11 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 - All POSTs CSRF-protected.
 - Password hashed (argon2/bcrypt). Lockout after repeated failures.
 - The app is **not exposed to the public internet**; only outbound HTTPS to the AI provider.
-- If a TA read/feedback view is added later (SPECIFICATION §5.8), it gets a separate, lower-
-  privilege account — never a shared login.
+- **TA access (built 2026-06-12):** a separate TA password (set in Settings) routes into a
+  deny-by-default role — only the read-only current/next-lesson view, its linked resources and
+  the feedback form are reachable; teacher notes, pupils, settings and everything else bounce.
+  TA feedback can be safeguarding-flagged, which withholds it from all AI calls. Per-TA accounts
+  arrive with the pupil-login project.
 
 ## The pupil-name rule (the one that must never break)
 

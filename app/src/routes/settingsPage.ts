@@ -86,30 +86,43 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         </div>
         <span class="note-status" id="ai-status"></span>
 
+        <h2>TA access</h2>
+        <p class="muted">A separate password TAs use on the normal login page. They land on a <strong>read-only view of the current lesson</strong>
+          (plan + resources, option to peek at the next lesson) with a feedback form — nothing else is reachable. Feedback shows on your lesson
+          page and feeds the adapt-next-lesson AI (safeguarding-flagged feedback stays out of AI).</p>
+        <form class="setup-add" hx-post="/settings/ta-password" hx-target="#ta-pw-result" hx-swap="innerHTML">
+          <input type="password" name="next" placeholder="new TA password (8+)" minlength="8" autocomplete="new-password">
+          <button type="submit" class="btn-secondary">Set TA password</button>
+          <button type="submit" class="btn-secondary" name="clear" value="1" formnovalidate>Disable TA access</button>
+        </form>
+        <div id="ta-pw-result"></div>
+
         <h2>Email intake</h2>
         <p class="muted">Emails arriving in this mailbox become inbox tasks automatically (the paste box still works too).
           Use a <strong>dedicated or forwarded mailbox</strong>, not your main school account — set an Outlook rule that
           forwards the mail you want as tasks. Only unread mail is imported; imported mail is marked read.</p>
-        <div class="setup-add">
-          <label>IMAP host <input name="v" value="${esc(emHost ?? '')}" placeholder="imap.gmail.com"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_host","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
-          <label>Port <input class="setup-num" style="width:5rem" name="v" value="${esc(emPort ?? '')}" placeholder="993"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_port","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
-          <label>User <input name="v" value="${esc(emUser ?? '')}" placeholder="organiser.intake@gmail.com" autocomplete="off"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_user","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
-          <label>Password <input type="password" name="v" value="${esc(emPass ?? '')}" placeholder="app password" autocomplete="new-password"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_password","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
-          <label>Folder <input name="v" value="${esc(emFolder ?? '')}" placeholder="INBOX"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_folder","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+        <div class="setup-add" id="email-intake-fields">
+          <label>IMAP host <input name="email_imap_host" value="${esc(emHost ?? '')}" placeholder="imap.gmail.com"
+            hx-post="/settings/email?key=email_imap_host" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <label>Port <input class="setup-num" style="width:5rem" name="email_imap_port" value="${esc(emPort ?? '')}" placeholder="993"
+            hx-post="/settings/email?key=email_imap_port" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <label>User <input name="email_imap_user" value="${esc(emUser ?? '')}" placeholder="organiser.intake@gmail.com" autocomplete="off"
+            hx-post="/settings/email?key=email_imap_user" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <label>Password <input type="password" name="email_imap_password" value="${esc(emPass ?? '')}" placeholder="app password" autocomplete="new-password"
+            hx-post="/settings/email?key=email_imap_password" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <label>Folder <input name="email_imap_folder" value="${esc(emFolder ?? '')}" placeholder="INBOX"
+            hx-post="/settings/email?key=email_imap_folder" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <span class="note-status" id="email-status"></span>
         </div>
         <div class="setup-add">
-          <label><input type="checkbox"${emOn === 'true' ? ' checked' : ''}
-            hx-post="/settings/email" hx-vals='js:{"key":"email_poll_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> poll automatically</label>
-          <label>every <input class="setup-num" style="width:4rem" value="${esc(emMins ?? '5')}"
-            hx-post="/settings/email" hx-vals='js:{"key":"email_poll_minutes","value":event.target.value}' hx-trigger="change" hx-swap="none"> min</label>
-          <label><input type="checkbox"${emTls !== 'false' ? ' checked' : ''}
-            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_tls","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> TLS</label>
-          <button type="button" class="btn-secondary" hx-post="/settings/email/test" hx-target="#email-test-result" hx-swap="innerHTML" hx-disabled-elt="this">Poll now / test</button>
+          <label><input type="checkbox" name="email_poll_enabled" value="true"${emOn === 'true' ? ' checked' : ''}
+            hx-post="/settings/email?key=email_poll_enabled" hx-trigger="change" hx-swap="none"> poll automatically</label>
+          <label>every <input class="setup-num" style="width:4rem" name="email_poll_minutes" value="${esc(emMins ?? '5')}"
+            hx-post="/settings/email?key=email_poll_minutes" hx-trigger="input changed delay:700ms, change" hx-swap="none"> min</label>
+          <label><input type="checkbox" name="email_imap_tls" value="true"${emTls !== 'false' ? ' checked' : ''}
+            hx-post="/settings/email?key=email_imap_tls" hx-trigger="change" hx-swap="none"> TLS</label>
+          <button type="button" class="btn-secondary" title="saves whatever is typed above first, then polls"
+            hx-post="/settings/email/test" hx-include="#email-intake-fields" hx-target="#email-test-result" hx-swap="innerHTML" hx-disabled-elt="this">Poll now / test</button>
         </div>
         <div id="email-test-result">${emLast ? `<p class="muted">last poll: ${esc(emLast)}</p>` : ''}</div>
 
@@ -145,23 +158,46 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
   });
 
 
+  const EMAIL_KEYS = ['email_imap_host', 'email_imap_port', 'email_imap_user', 'email_imap_password', 'email_imap_folder', 'email_imap_tls', 'email_poll_enabled', 'email_poll_minutes'] as const;
+  const EMAIL_BOOLS = new Set(['email_imap_tls', 'email_poll_enabled']);
+
+  // The field posts itself under its own name; the key rides in the query. An absent checkbox
+  // value means unticked → 'false'.
   app.post('/settings/email', guard, async (req, reply) => {
-    const b = z
-      .object({
-        key: z.enum(['email_imap_host', 'email_imap_port', 'email_imap_user', 'email_imap_password', 'email_imap_folder', 'email_imap_tls', 'email_poll_enabled', 'email_poll_minutes']),
-        value: z.string().max(300),
-      })
-      .safeParse(req.body);
-    if (!b.success) return reply.code(400).send('');
-    await setSetting(b.data.key, b.data.value.trim());
-    return reply.send('');
+    const q = z.object({ key: z.enum(EMAIL_KEYS) }).safeParse(req.query);
+    if (!q.success) return reply.code(400).send('');
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const raw = body[q.data.key];
+    const value = typeof raw === 'string' ? raw.trim().slice(0, 300) : EMAIL_BOOLS.has(q.data.key) ? 'false' : '';
+    await setSetting(q.data.key, value);
+    return reply.type('text/html').send('<span class="note-status saved" id="email-status" hx-swap-oob="true">saved ✓</span>');
   });
 
-  app.post('/settings/email/test', guard, async (_req, reply) => {
+  // Poll-now first SAVES whatever is currently typed in the fields (hx-include sends them), so
+  // "type the details, hit test" can never race the autosaves and report "not configured".
+  app.post('/settings/email/test', guard, async (req, reply) => {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    for (const key of EMAIL_KEYS) {
+      const raw = body[key];
+      if (typeof raw === 'string' && raw.trim() !== '') await setSetting(key, raw.trim().slice(0, 300));
+    }
     const r = await pollEmailOnce();
     return reply
       .type('text/html')
       .send(`<p class="${r.ok ? 'adapt-note' : 'error'}">${r.ok ? '✓ ' : ''}${r.message.replace(/</g, '&lt;')}</p>`);
+  });
+
+
+  app.post('/settings/ta-password', guard, async (req, reply) => {
+    const b = z.object({ next: z.string().max(200).default(''), clear: z.string().optional() }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    if (b.data.clear === '1') {
+      await setSetting('ta_password_hash', '');
+      return reply.type('text/html').send('<p class="adapt-note">TA access disabled.</p>');
+    }
+    if (b.data.next.length < 8) return reply.type('text/html').send('<p class="error">TA password needs 8+ characters.</p>');
+    await setSetting('ta_password_hash', hashPassword(b.data.next));
+    return reply.type('text/html').send('<p class="adapt-note">TA password set ✓ — share it with your TAs; they log in on the normal page.</p>');
   });
 
   app.post('/settings/password', guard, async (req, reply) => {

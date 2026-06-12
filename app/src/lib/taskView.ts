@@ -19,6 +19,34 @@ function groupOptions(groups: GroupOpt[], current: number | null): string {
   );
 }
 
+
+// Email-triage detail, rendered for scanning: "• label: value" lines become colour-coded fact
+// chips, dates/deadlines/amounts in the prose get highlighted, the provenance line goes muted.
+// Plain prose (manual tasks, pre-triage emails) renders unchanged.
+const FACT_LINE = /^•\s*([a-z]+):\s*(.+)$/i;
+const HL = /(£\s?\d+(?:\.\d{2})?|\b(?:Mon|Tues?|Wedn?e?s?|Thurs?|Fri|Satur|Sun)[a-z]*day\b(?:\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)?)?|\b\d{1,2}(?:st|nd|rd|th)?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b|\b\d{1,2}[:.]\d{2}\s?(?:am|pm)?\b|\bby\s+(?:Mon|Tues?|Wedn?e?s?|Thurs?|Fri)[a-z]*day\b)/gi;
+
+export function renderEmailDetail(detail: string): string {
+  const lines = detail.split('\n').map((l) => l.trim()).filter(Boolean);
+  const chips: string[] = [];
+  const prose: string[] = [];
+  let provenance = '';
+  for (const line of lines) {
+    const f = line.match(FACT_LINE);
+    if (f) {
+      const label = f[1]!.toLowerCase();
+      chips.push(`<span class="fact fact-${esc(label)}"><span class="fact-label">${esc(label)}</span>${esc(f[2]!)}</span>`);
+    } else if (/^\(.*\)$/.test(line) && line.length < 240) {
+      provenance = line.slice(1, -1);
+    } else {
+      prose.push(esc(line).replace(HL, '<mark class="hl">$1</mark>'));
+    }
+  }
+  return `${chips.length ? `<div class="fact-row">${chips.join('')}</div>` : ''}
+    ${prose.length ? `<p class="task-detail-prose">${prose.join('<br>')}</p>` : ''}
+    ${provenance ? `<p class="task-detail-prov">${esc(provenance)}</p>` : ''}`;
+}
+
 export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
   const save = (trigger: string) => `hx-post="/tasks/${t.id}" hx-swap="none" hx-trigger="${trigger}"`;
   const triage =
@@ -28,7 +56,7 @@ export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
   const detail = (t.detail ?? '').trim();
   return `<li class="task" id="task-${t.id}">
     <input class="task-title" type="text" name="title" value="${esc(t.title)}" placeholder="Task…" ${save('input changed delay:600ms, blur')}>
-    ${detail ? `<details class="task-detail"><summary>✉ what it says</summary><p class="task-detail-body">${esc(detail).replace(/\n/g, '<br>')}</p></details>` : ''}
+    ${detail ? `<details class="task-detail"><summary>✉ what it says</summary><div class="task-detail-body">${renderEmailDetail(detail)}</div></details>` : ''}
     <div class="task-controls">
       <select name="urgency" ${save('change')}>${enumOptions(URGENCIES, URGENCY_LABELS, t.urgency)}</select>
       <input class="task-est" type="number" name="estimate_min" min="0" step="5" value="${t.estimateMin ?? ''}" placeholder="min" ${save('input changed delay:600ms, blur')}>
