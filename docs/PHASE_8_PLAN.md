@@ -199,18 +199,16 @@ per-IP and per-pupil. The DPO may prefer full usernames — the schema doesn't c
 
 ## 8. Decisions & open questions
 
-- **Login style** (§4): class-code + name + PIN (recommended for this cohort) vs full usernames —
-  needs DPO/SLT view during 8.0.
+- **Decided (teacher, 2026-06-12 — Q29/Q31/Q32):** login is **class-code → pick-your-name →
+  PIN** (§4; the DPO still sees the design during 8.0); pupils work **in the teaching classroom
+  only** (so idle-logout defaults to a relaxed ~20 min); **Done ✓ is self-declared**, with the
+  real field count shown beside it on the review grid.
 - **Decided (teacher, 2026-06-12):** pupils are **assigned a level per course** and receive
   **only that slice** of the worksheet (default core when unset; changeable live from the review
   grid). Pupil lesson feedback (rating + activity chips) is in scope from the start.
-- **Open**: should pupils SEE their level name/colour, or just get "their" sheet unlabelled?
-  (Sensitivity question for this cohort — recommend unlabelled by default, teacher toggle.)
+- **Decided (teacher, 2026-06-12 — Q30):** level slices are **unlabelled** — a pupil just gets
+  "their" sheet, no 🟢🟡🔴 shown; a teacher toggle can reveal labels later if ever wanted.
 - **Retention**: proposed year+term for answers — DPO to confirm.
-- **Where pupils work**: classroom machines only at first (LAN), or also school-network laptops
-  anywhere on site? (Same build either way; affects the idle-logout default.)
-- **Done ✓ semantics**: self-declared vs all-required-fields — recommend self-declared plus the
-  field count shown to the teacher (honest *and* low-pressure).
 
 ---
 

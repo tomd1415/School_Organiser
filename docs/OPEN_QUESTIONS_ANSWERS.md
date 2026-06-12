@@ -4,6 +4,23 @@ Canonical record of the teacher's answers to [OPEN_QUESTIONS.md](OPEN_QUESTIONS.
 batch first. Each entry notes the decision and where it has been applied. History is in
 [../CHANGELOG.md](../CHANGELOG.md).
 
+## 2026-06-12 — batch 3 (Phase 8 pupils · Phase 9 auto-marking)
+
+| Q | Decision | Applied to |
+| --- | --- | --- |
+| **29** Pupil login style | **Class code → pick-your-name → PIN** (4–6 digits, lockout, printable cards). The DPO still sees the design during 8.0 sign-off. | PHASE_8_PLAN §4/§8 |
+| **30** Level visibility | **Unlabelled** — each pupil just gets "their" sheet, no 🟢🟡🔴 shown; teacher toggle can reveal labels later. | PHASE_8_PLAN §3/§8 |
+| **31** Where pupils work | **The teaching classroom only** → relaxed idle-logout (~20 min). Same build keeps the wider option open. | PHASE_8_PLAN §4/§8 |
+| **32** Done ✓ semantics | **Self-declared** by the pupil; the review grid shows the real field count alongside. | PHASE_8_PLAN §3/§8 |
+| **33** Released results view | **Ticks only by default** (✓/✗/◐ + feedback line + teacher comment); per-class toggle for scores; never class comparison. | PHASE_9_PLAN §5/§9 |
+| **34** AI marking trigger | **Automatically when a pupil taps Done ✓** *(the one divergence from the recommendation)* — Done enqueues; a short debounce groups finishers into the per-question anonymous batches; a review-page sweep button covers stragglers and re-marks; spend cap + kill-switch apply. | PHASE_9_PLAN §1 (9.3)/§3/§9, SPEC §5.30 |
+| **35** Remembered devices | **Per-class enable, off by default** — switched on after the DPO has seen the addendum. | PHASE_9_PLAN §6/§9 |
+| **36** Numeric tolerance | **Strict after parsing** ("4"="4.0"=" 4 "); word forms as listed alternatives; anything fuzzier is an open answer for the AI. Widen only on real friction. | PHASE_9_PLAN §3/§9 |
+| **37** Misconception notes | **Free prose per course** in summaries/history; promote to a table only when retrieval starters (9.9) need to query them. | PHASE_9_PLAN §7/§9 |
+
+Still open: only the **DPIA [CONFIRM] items + sign-offs** (DPO/SLT) — they gate 8.0 and the 9.0
+addendum.
+
 ## 2026-06-08 — batch 2
 
 | Q | Decision | Applied to |

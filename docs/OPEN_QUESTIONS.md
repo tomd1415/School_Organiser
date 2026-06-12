@@ -29,8 +29,22 @@ Change history: [../CHANGELOG.md](../CHANGELOG.md).
   **Q27** timers as recommended · **Q28** captured-info categories yes; **safeguarding withheld
   from AI**
 - **Extra** "current interest" marking + learning (SPEC §5.18).
+- **Q29** class-code → name → PIN login · **Q30** level slices unlabelled (teacher toggle) ·
+  **Q31** classroom-only (idle ~20 min) · **Q32** Done ✓ self-declared (+ field count) ·
+  **Q33** ticks-only results (per-class score toggle) · **Q34** **AI marking auto-runs on
+  Done ✓** (debounced per-question batches + sweep button) · **Q35** remembered devices
+  per-class, off by default · **Q36** numeric strict-after-parsing · **Q37** misconceptions
+  free prose
 
-No open questions remain. New questions get appended here as they arise.
+## Open
+
+Only the **DPIA [CONFIRM] items and sign-offs** ([DPIA.md](DPIA.md)) remain — they sit with the
+DPO/SLT and gate Phase 8 (slice 8.0) and the Phase 9 addendum (slice 9.0): school name & key
+stages, lawful basis, the pupil/parent information route, Anthropic's data-processing terms,
+retention periods (answers and marks both proposed at academic year + one term), and the
+signatures themselves.
+
+New questions get appended here as they arise.
 
 ## Parked future direction
 

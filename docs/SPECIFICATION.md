@@ -477,10 +477,12 @@ PHASE_6_PLAN.md).*
 
 - **(M)** Every generated worksheet carries a **mark scheme as data** (per answer field:
   expected answer, accepted alternatives, marks) — emitted with the answers doc, editable by me.
-- **(M)** **Objective answers mark themselves** (ticks, choices, exact/numeric/keyword) the
-  moment I review — no AI involved; **open answers are AI-marked as suggestions**, batched per
-  question with **no pupil identity attached**, evidence-quoted and confidence-flagged, with
-  anything pattern-matched as sensitive **withheld from AI and shown straight to me**.
+- **(M)** **Objective answers mark themselves** (ticks, choices, exact/numeric/keyword) as
+  pupils tap Done ✓ — no AI involved; **open answers are AI-marked as suggestions
+  automatically as pupils finish** (debounced into per-question batches; a sweep button covers
+  stragglers and re-marks), with **no pupil identity attached**, evidence-quoted and
+  confidence-flagged, and anything pattern-matched as sensitive **withheld from AI and shown
+  straight to me**.
 - **(M)** I **confirm or override** every suggestion from the review grid (one click for the
   confident ones), add a **comment back to each pupil** (AI-prefilled, my words by the time it
   ships), and **release** — only then does a pupil see big friendly ✓/✗, a "what went well /

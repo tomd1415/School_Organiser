@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Q29–Q37 answered: all Phase 8/9 plan decisions made
+
+- All nine open questions decided by the teacher (canonical record:
+  [docs/OPEN_QUESTIONS_ANSWERS.md](docs/OPEN_QUESTIONS_ANSWERS.md) batch 3): login =
+  **class-code → pick-your-name → PIN**; level slices **unlabelled** (teacher toggle);
+  **classroom-only** use (idle-logout ~20 min); **Done ✓ self-declared** (+ field count on the
+  grid); released results **ticks-only by default** (per-class score toggle); **remembered
+  devices per-class, off by default**; numeric marking **strict after parsing**; misconception
+  notes **free prose** until 9.9 needs a table.
+- **One divergence from the recommendations — Q34: AI marking auto-runs when a pupil taps
+  Done ✓.** PHASE_9_PLAN updated (9.3 slice, §3 trigger, §9): Done ✓ enqueues the pupil's open
+  answers, a ~2-minute debounce groups finishers so the per-question anonymous batches survive
+  the auto trigger, the review page keeps a "✨ Mark anything unmarked" sweep button, and the
+  monthly spend cap + kill-switch apply (AI off ⇒ answers wait, everything else works).
+  SPECIFICATION §5.30 aligned; PHASE_8_PLAN §8 decision list updated; OPEN_QUESTIONS now shows
+  only the DPIA [CONFIRM]/sign-off items as open (DPO/SLT — gates 8.0 and the 9.0 addendum).
+
 ### 2026-06-12 — Phase 9 planned: auto-marking & the results loop
 
 - **[docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)** (plan-first, for review): the answers Phase 8

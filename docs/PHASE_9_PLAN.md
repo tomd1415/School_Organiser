@@ -49,7 +49,7 @@ with the teacher as decision-maker, LAN-only, graceful degradation when AI is of
 | **9.0** | **DPIA addendum** (external) — anonymous answer text to the AI sub-processor for marking; per-pupil marks (attainment) stored; the remembered-device credential; marks retention | the legal gate for 9.2+ | S (blocking) |
 | **9.1** | **Mark schemes as data** — generation emits a structured scheme alongside the answers doc (`lesson_resources@5`); a "derive scheme" action backfills existing worksheets (one AI call, teacher reviews); inline scheme editor on the resource page | every worksheet knows its right answers | M |
 | **9.2** | **Deterministic marking** — tick / choice / exact / numeric / keyword fields marked server-side the moment work is reviewed (or on Done ✓); zero AI | most marks, instantly, free | M |
-| **9.3** | **AI marking of open answers** — teacher-triggered "✨ Mark the written answers"; batched **per question** as anonymous slots; evidence quotes, confidence, short pupil feedback; the **safety gate** + guard-pattern screen | the hard 20% marked as suggestions | L |
+| **9.3** | **AI marking of open answers** — auto-runs as pupils tap **Done ✓** (debounced into **per-question** batches of anonymous slots; a review-page "✨ Mark anything unmarked" button sweeps stragglers/re-marks); evidence quotes, confidence, short pupil feedback; the **safety gate** + guard-pattern screen | the hard 20% marked as suggestions | L |
 | **9.4** | **Review & release** — marks land in the Pupil-work grid as amber suggestions; confirm-all-confident in one click; tap-to-override (audited); per-pupil **teacher comment back** (AI-prefilled, editable); a deliberate **Release marks** action per lesson | teacher stays the marker of record | M |
 | **9.5** | **Results on `/me`** — after release: big ✓/✗/partial per answer, the feedback line, the teacher's comment; scores optionally hidden (ticks only) | pupils see how they did, kindly | S |
 | **9.6** | **Stay signed in on this computer** — remembered-device cookie bound to the pupil (hashed at rest, term-long, revocable, "Not me?" escape); teacher device list + revoke; account-disable kills devices | login friction → zero on own Windows profiles | M |
@@ -168,9 +168,13 @@ pupil answers ──┬─ tick/choice/exact/numeric/keyword ──► determini
   **withheld from AI entirely** and surfaced prominently to the teacher ("needs your eyes") —
   in a SEND setting, a worksheet answer is a plausible disclosure channel and is treated as one.
   This is the existing withholding principle applied to a new inbound surface.
-- **Trigger**: deterministic marks run automatically; AI marking is a **visible teacher action**
-  per lesson ("✨ Mark the written answers", with the house busy-feedback), keeping spend
-  deliberate and the teacher in charge. An auto-run-on-Done setting can come later if wanted.
+- **Trigger (decided 2026-06-12, Q34)**: marking runs **automatically when a pupil taps
+  Done ✓** — deterministic marks land instantly; the pupil's open answers join a queue, and a
+  short debounce (~2 min) groups finishers so the AI still marks **per-question batches across
+  whoever is done** (consistency + fewer calls survive the auto trigger). The review page keeps
+  a "✨ Mark anything unmarked" button as the sweep for pupils who never tap Done and for
+  re-marks. Auto-marking respects the monthly spend cap and the AI kill-switch — with AI off,
+  open answers simply wait, marked "not yet marked", and everything else still works.
 
 ---
 
@@ -268,16 +272,13 @@ theirs — a persistent cookie makes Windows login double as app login:
 
 ## 9. Decisions & open questions
 
-- **Show scores or ticks-only on `/me`?** Recommend ticks-only default, per-class toggle
-  (same instinct as unlabelled levels — decided sensitivity-first in Phase 8).
-- **AI marking trigger**: teacher-pressed per lesson (recommended; visible, deliberate spend)
-  vs auto-on-Done. Start manual; revisit after a half-term of real use.
-- **Remembered devices**: always-offer vs teacher-enables-per-class? Recommend per-class
-  setting, off by default until the DPO has seen the addendum.
-- **Numeric tolerance**: exact after parsing ("4" = "four"? units?) — start strict-numeric with
-  alternatives covering word forms; widen only if real marking shows friction.
-- **Misconception notes**: free-accumulating per course vs curated list — start free, promote
-  to a table only when 9.9 needs to query them.
+- **Decided (teacher, 2026-06-12 — Q33–Q37):** released results are **ticks-only by default**
+  (per-class toggle for scores — same sensitivity-first instinct as the unlabelled levels);
+  **AI marking auto-runs on Done ✓** (the one choice against the manual-first recommendation —
+  see the §3 trigger: debounced per-question batches + the sweep button); **remembered devices
+  are per-class, off by default** until the DPO has seen the addendum; **numeric marking is
+  strict after parsing** with word forms as listed alternatives (widen only on real friction);
+  **misconception notes stay free prose** until 9.9 needs a queryable table.
 - **Marks retention** (9.0): year + one term proposed — DPO to confirm alongside answers.
 
 ---
