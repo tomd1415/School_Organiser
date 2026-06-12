@@ -473,6 +473,36 @@ PHASE_6_PLAN.md).*
   feeding "adapt from recent lessons" (§5.22); **flagged feedback is withheld from AI
   entirely**, and the TA is prompted to tell me in person too.
 
+### 5.30 Auto-marking & results back to pupils (planned — Phase 9)
+
+- **(M)** Every generated worksheet carries a **mark scheme as data** (per answer field:
+  expected answer, accepted alternatives, marks) — emitted with the answers doc, editable by me.
+- **(M)** **Objective answers mark themselves** (ticks, choices, exact/numeric/keyword) the
+  moment I review — no AI involved; **open answers are AI-marked as suggestions**, batched per
+  question with **no pupil identity attached**, evidence-quoted and confidence-flagged, with
+  anything pattern-matched as sensitive **withheld from AI and shown straight to me**.
+- **(M)** I **confirm or override** every suggestion from the review grid (one click for the
+  confident ones), add a **comment back to each pupil** (AI-prefilled, my words by the time it
+  ships), and **release** — only then does a pupil see big friendly ✓/✗, a "what went well /
+  try this" line and my comment on their own screen. Ticks-only by default; never any
+  class comparison.
+- **(M)** Marks feed the loop: **per-question class success rates and misconceptions** join the
+  class-work summary that adapt-next-lesson reads; a **printable answer pack** (questions,
+  answers, class stats) supports going through it on the board; marks **export to CSV**.
+- **(S)** A per-pupil **"what works for me" profile** (two lines, from feedback + marks history,
+  tokenised before AI) on the review grid, suggesting level moves I apply with the usual chips.
+- **(S)** **Retrieval-practice starters**: "open with 3 questions this class got wrong
+  recently" offered when drafting/adapting lessons.
+
+### 5.31 Stay signed in on classroom computers (planned — Phase 9)
+
+- **(M)** A pupil who signed in once on **their own school Windows account** stays signed in on
+  that computer: a revocable, term-bounded device cookie turns the next visit into a one-tap
+  **"Continue as Alex 👋 / Not me"** screen — so Windows login effectively becomes app login.
+- **(M)** I see each pupil's remembered devices and can revoke any or all; disabling the pupil
+  or resetting their PIN revokes everything automatically. Off by default until the DPIA
+  addendum is agreed.
+
 ## 6. Non-functional requirements
 
 - **Performance.** Now screen and note-save feel instant on the LAN (<150 ms perceived).

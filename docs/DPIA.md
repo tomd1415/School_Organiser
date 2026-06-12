@@ -25,7 +25,12 @@
 - **Review cadence:** termly, and before any change that widens the scope of processing (notably any
   move to pupil-facing logins, or storing per-pupil progress/SEND data). **The planned Phase 8
   (pupil logins + answers) requires completing this DPIA's [CONFIRM] items and DPO sign-off first
-  — pupil-authored answers are a new category of personal data.**
+  — pupil-authored answers are a new category of personal data.** **The planned Phase 9
+  (auto-marking) additionally requires an addendum before build: per-pupil attainment records are
+  stored (server-side only); identity-free pupil answer text goes to the AI sub-processor for
+  marking (anonymous slots, roster redaction still applied inside the text, pattern-screened
+  content withheld entirely); and a revocable remembered-device credential exists on classroom
+  machines ([PHASE_9_PLAN.md](PHASE_9_PLAN.md) §8).**
 
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and

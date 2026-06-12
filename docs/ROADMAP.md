@@ -162,6 +162,21 @@ from the review grid), answers stored per pupil, live completion for the teacher
 the answers and the feedback feeding the adapt-next-lesson loop and, over time, the class
 teaching-context — behind a DPIA-signed-off, deny-by-default pupil role.
 
+## Phase 9 — Auto-marking & the results loop *(planned 2026-06-12 — see [PHASE_9_PLAN.md](PHASE_9_PLAN.md))*
+
+**Goal:** the answers Phase 8 collects mark themselves, and the results flow back out — to
+pupils, kindly, and into planning, precisely. **Mark schemes as data** beside every generated
+worksheet; **deterministic marking** for objective fields; **AI-suggested marks** for open
+answers (batched per question with *no pupil identity attached*, evidence-quoted,
+safety-gated) that the teacher confirms, comments on and **releases** before a pupil sees
+big-friendly ✓/✗ and a "try this" line. Marks make the adapt loop question-precise
+(success rates, misconceptions), print as a class answer pack, build per-pupil
+**"what works for me" profiles**, and (stretch) seed retrieval-practice starters. Plus
+**stay-signed-in on classroom computers** (revocable device cookie — Windows login becomes app
+login). Absorbs the old 8.8 stretch list; design mines the sibling `exam_questions` project's
+marking architecture. Gated on a **DPIA addendum** (attainment storage, anonymous answer text
+to the AI, the device credential).
+
 ## What MVP deliberately excludes
 
 Phase 1 has **no** tasks, AI, pupils-as-data, or full lesson-plan authoring. That is on
@@ -183,3 +198,4 @@ These are relative sizes, not promises (one developer, evenings):
 | 6 Setup + September + instances | L | Self-sufficient across years and teachers |
 | 7 Polish + extras | ongoing | Long-tail quality of life |
 | 8 Pupil logins + in-app work | L | Answers become data; less marking; the loop closes |
+| 9 Auto-marking + results loop | L | Marks without transcribing; results back to pupils; question-precise planning |

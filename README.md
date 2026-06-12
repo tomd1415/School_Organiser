@@ -17,7 +17,8 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 > live; lessons default to **3-level differentiation** (Support/Core/Challenge around each
 > class's recorded ability midpoint), generated resources preview/present in-browser and export
 > to Word, and an in-lesson tracker doubles as the stopping point. Log in over the LAN
-> (`./start.sh`). Next: **pupil logins** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)).
+> (`./start.sh`). Next: **pupil logins** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)), then
+> **auto-marking & the results loop** ([docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)).
 
 ## The one-sentence pitch
 
@@ -52,6 +53,7 @@ Read in this order:
 | [docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md) | Detailed build plan for Phase 5: curriculum delivery — master schemes, per-group adaptation + change log, converting downloaded units, and the term calendar. |
 | [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) | Build plan for Phase 6: in-app setup editors, the September rollover (new timetable every year; class-group knowledge follows the group), the onboarding wizard, and per-teacher instances. |
 | [docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md) | Build plan for Phase 8: pupil logins and in-app work — interactive worksheets, answers as data, teacher review, per-TA accounts. |
+| [docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md) | Build plan for Phase 9: auto-marking (deterministic + AI-suggested, teacher-released), results back to pupils, marks feeding the loop, "what works for me" profiles, stay-signed-in devices. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
 ## Run it

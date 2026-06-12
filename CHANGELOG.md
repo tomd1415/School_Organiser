@@ -7,6 +7,32 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Phase 9 planned: auto-marking & the results loop
+
+- **[docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)** (plan-first, for review): the answers Phase 8
+  collects get marked — **mark schemes as data** emitted beside every generated answers doc
+  (9.1, can land before pupils even log in); **deterministic marking** of tick/choice/exact/
+  numeric/keyword fields, instant and AI-free (9.2); **AI-suggested marks for open answers**,
+  batched per question with **no pupil identity attached** (anonymous slots — the
+  least-identified AI traffic in the app), evidence-quoted, confidence-scored, safety-gated,
+  with guard-patterned answers **withheld from AI and routed to a "needs your eyes" strip**
+  (9.3); teacher **confirm/override → comment back → release** before pupils see friendly
+  ✓/✗ + a "try this" line on `/me` (9.4/9.5); **stay signed in on this computer** — a
+  revocable, hashed, term-bounded device cookie so Windows login becomes app login, replacing
+  the kiosk-per-room idea (9.6); marks make the adapt loop **question-precise** + printable
+  class answer pack + CSV export (9.7); per-pupil **"what works for me" profiles** (9.8);
+  stretch: retrieval-practice starters from real misses (9.9). Absorbs the 8.8 stretch list.
+- **Design mined from the sibling `exam_questions` project** (its Phase-3 marking architecture):
+  reused mark-points-with-alternatives, deterministic-first dispatch, evidence-substring
+  verification, confidence-thresholded moderation and guard patterns; adapted per-attempt
+  marking into anonymous per-question batching; skipped its prompt-version table, pgvector
+  bank and authoring wizard as unneeded here.
+- **Gate added to [docs/DPIA.md](docs/DPIA.md):** Phase 9 needs an addendum before build —
+  per-pupil attainment stored, identity-free answer text to the AI sub-processor, the
+  remembered-device credential. README (status + docs table), ROADMAP (Phase 9 section + size
+  row), SPECIFICATION (§5.30 auto-marking, §5.31 stay-signed-in) and PHASE_8_PLAN (8.8 →
+  promoted) all reconciled.
+
 ### 2026-06-12 — Phase 8 plan: per-pupil levels + pupil lesson feedback (teacher additions)
 
 - The plan now specifies (teacher, 2026-06-12): **each pupil is assigned a differentiation level
