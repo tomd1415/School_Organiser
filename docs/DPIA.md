@@ -18,8 +18,14 @@
   **equipment inventory** (no personal data). All pass through the same wrapper (redaction,
   safeguarding withholding, audit); no new category of personal data is processed, so the §5
   controls and the Anthropic sub-processor position are unchanged.
+- **Reviewed 2026-06-12 (email intake + TA access):** two new inbound flows — forwarded **emails**
+  (parsed, AI-triaged through the standard wrapper; mailbox credentials in the instance DB) and
+  **TA lesson feedback** (may describe pupils; redacted before AI; safeguarding-flagged feedback
+  withheld from AI entirely and highlighted to the teacher). Same controls, no new category.
 - **Review cadence:** termly, and before any change that widens the scope of processing (notably any
-  move to pupil-facing logins, or storing per-pupil progress/SEND data).
+  move to pupil-facing logins, or storing per-pupil progress/SEND data). **The planned Phase 8
+  (pupil logins + answers) requires completing this DPIA's [CONFIRM] items and DPO sign-off first
+  — pupil-authored answers are a new category of personal data.**
 
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and

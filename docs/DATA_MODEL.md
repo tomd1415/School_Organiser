@@ -533,6 +533,97 @@ One flat, fast-to-maintain list: what's in the room, how many work, where it liv
 during planning (`/kit` + a panel on Schemes) and injected into every AI planning feature, so
 practical suggestions fit the kit we actually own.
 
+## J. Phase 6+ — as built (migrations `0013`–`0017`)
+
+Phase 6 (setup, September & new instances — see PHASE_6_PLAN.md) and the post-phase
+improvements shipped; as in §I, the migration files are the source of truth for this section,
+and the drafts above stand wherever unchanged.
+
+### Year scoping (P6, `0013`) — `period_definitions.academic_year_id` · `groups.predecessor_group_id`
+
+```text
+ALTER TABLE period_definitions ADD COLUMN academic_year_id BIGINT NOT NULL
+  REFERENCES academic_years(id);             -- backfilled to the current year
+-- (weekday, slot_order) is now unique PER YEAR, not globally:
+CREATE UNIQUE INDEX period_definitions_year_slot
+  ON period_definitions (academic_year_id, weekday, slot_order);
+
+ALTER TABLE groups ADD COLUMN predecessor_group_id BIGINT REFERENCES groups(id);
+```
+
+The academic year becomes a hard boundary: **day shapes are year-scoped**, so September can
+have new lesson times while the old year's record keeps its old ones. The self-FK is the
+**predecessor chain** — the same class last year, set by the September rollover (NULL for new
+intake and pre-Phase-6 rows) — so a group keeps its identity across the annual rename
+(7ARO → 8ARO) without rewriting any history. `0013` also backfills
+`settings.setup_complete = 'true'` where timetabled lessons already exist, so only a
+brand-new instance gets the onboarding wizard (`/welcome`).
+
+### `lesson_exceptions` (P6, `0014`) — the dated reality over the weekly pattern
+
+```text
+lesson_exceptions(id, date,
+                  timetabled_lesson_id FK ON DELETE CASCADE,   -- NULL = the whole day
+                  kind TEXT CHECK (cancelled | room_change | cover | off_timetable),
+                  room_id FK NULL,                             -- for room_change
+                  staff_id FK NULL,                            -- for cover
+                  note TEXT, created_at)                       -- indexed by date
+```
+
+A row either targets **one timetabled lesson on one date** (cancelled / room change / cover)
+or, with a NULL lesson, **the whole day** (off-timetable: trips, exam days, snow).
+Display-level for now — banners on the lesson screen, ⚠ marks on the week grid, a count on the
+Now screen; the clock and availability still follow the recurring pattern.
+
+### `resource_links.adaptation_id` (P6+, `0015`) — per-class adapted resources
+
+```text
+ALTER TABLE resource_links ADD COLUMN adaptation_id BIGINT
+  REFERENCES lesson_adaptations(id) ON DELETE CASCADE;
+-- the one-target CHECK now spans six columns: exactly one of
+-- (course_id, unit_id, lesson_plan_id, occurrence_id, group_id, adaptation_id) is set
+```
+
+A resource can now belong to **one class's adaptation** of a lesson — the AI-adapted class
+copies. Resetting the adaptation CASCADEs the links away; the documents stay in the store.
+
+### `occurrence_courses.progress_step` · `group_courses.ability_midpoint` (P6+, `0016`)
+
+```text
+ALTER TABLE occurrence_courses ADD COLUMN progress_step INT;      -- the in-lesson marker
+ALTER TABLE group_courses      ADD COLUMN ability_midpoint TEXT;  -- cohort-level prose
+```
+
+`progress_step` is which outline step a class is on for one dated lesson — the movable marker
+behind the **in-lesson tracker**; the same tap also writes the textual `stopping_point`, so the
+resume machinery and the AI feedback loop keep working off one record. `ability_midpoint` is
+the class's recorded anchor for **three-level differentiation** — Core work pitches here,
+Support one step below, Challenge one step above. Cohort-level prose only, never a pupil.
+
+### `ta_feedback` (P6+, `0017`)
+
+```text
+ta_feedback(id, occurrence_course_id FK ON DELETE CASCADE,
+            pupils_text TEXT DEFAULT '',     -- how the pupils were
+            lesson_text TEXT DEFAULT '',     -- thoughts on the lesson itself
+            safeguarding BOOL DEFAULT false,
+            created_at)                      -- indexed (occurrence_course_id, created_at DESC)
+```
+
+A TA — logged in with the separate password in `settings.ta_password_hash`, on a locked-down
+session — leaves **two-part feedback** on the current lesson. It renders on the teacher's
+lesson page and joins the group's recent history feeding "adapt from recent lessons";
+**safeguarding-flagged rows are withheld from AI entirely** — the standing boundary.
+
+### `settings` keys — as built (P6/P6+)
+
+Beyond the AI keys seeded by `0007` (§I), the key/value table now also carries: `school_name`;
+`auth_password_hash` (the in-app password — `APP_PASSWORD_HASH` in `.env`, where set, always
+wins); `setup_complete`; `ta_password_hash` (empty ⇒ TA access disabled); and the email-intake
+group — `email_imap_host` / `email_imap_port` / `email_imap_user` / `email_imap_password` /
+`email_imap_folder` / `email_imap_tls`, `email_poll_enabled` / `email_poll_minutes`, and
+`email_last_poll` (the human-readable status line every poll writes, success or failure).
+
 ## Key modelling decisions (for discussion)
 
 1. **Plan vs. occurrence are separate.** `lesson_plans` are reusable; `lesson_occurrences`

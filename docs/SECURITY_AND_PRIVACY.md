@@ -14,6 +14,7 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Teaching contexts (per course + per class) | Sensitive — cohort-level prose, must never name a pupil | PostgreSQL; injected into every AI planning call via the wrapper |
 | Lesson plans, schemes, adaptations, resources, tasks | Internal | PostgreSQL / hosted resource store |
 | Equipment inventory (kit list) | Internal — no personal data | PostgreSQL; injected into AI planning calls |
+| TA lesson feedback | **Sensitive** (may describe pupils) | PostgreSQL; flows to adapt-lesson AI after redaction; **safeguarding-flagged feedback withheld entirely** |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
 | Auth secrets (`SESSION_SECRET`, API keys) | Secret | `.env`, never committed |
 | Email-intake mailbox credentials | Secret | `settings` table (instance-local DB); use a **dedicated/forwarded mailbox with an app password**, never the main school account |

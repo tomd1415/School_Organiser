@@ -7,6 +7,38 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Phase 8 plan: per-pupil levels + pupil lesson feedback (teacher additions)
+
+- The plan now specifies (teacher, 2026-06-12): **each pupil is assigned a differentiation level
+  per course** (🟢🟡🔴, default core, changed live from the review grid) and **receives only that
+  slice of the worksheet** — shared parts plus their level's section; field keys derive from the
+  full document so review aligns and level changes never lose answers. New **8.5: pupil lesson
+  feedback** — an emoji rating + tap-chips for activities enjoyed/disliked + optional comment,
+  one per lesson. Both the answers *and* the feedback feed the adapt-next-lesson loop (8.7), and
+  over time the feedback offers a one-click digest into the class teaching-context ("loves
+  practical + cards, rates long typing lowest"). New tables sketched: `pupil_levels`,
+  `pupil_lesson_feedback`. Open question flagged: whether pupils see their level label at all
+  (recommend unlabelled, teacher toggle). ROADMAP blurb updated to match.
+
+### 2026-06-12 — Docs reconciled with reality + Phase 8 (pupils) planned
+
+- **Documentation catch-up** for everything since the last pass: README status rewritten
+  (Phases 0–6 + the polish items now live); DATA_MODEL gains §J (migrations 0013–0017 as built);
+  UX_FLOWS gains the TA view, Settings, and email-intake/triage flows (+ tracker/ability notes on
+  the lesson flow); SPECIFICATION gains §5.25–§5.29 (setup & September, exceptions, email triage,
+  tracker + differentiation, TA access); SECURITY adds the TA-feedback data row; DPIA gains the
+  2026-06-12 review entry and an explicit **Phase-8 precondition** (sign-off before any pupil
+  credential); ROADMAP gains Phase 7 status + the Phase 8 section.
+- **[docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md) — Pupils: logins & in-app work** (plan-first,
+  for review): DPIA sign-off as a hard gate (8.0); roles hardened + **per-TA named accounts**
+  (8.1); SEND-friendly pupil login — class code → pick your name → PIN, with lockout and
+  printable cards (8.2); a zero-navigation pupil surface showing *their* class's live worksheet
+  (8.3); **interactive worksheets** — answer cells become inputs, autosaved per pupil per lesson
+  occurrence, version-pinned (8.4); a live **completion grid + read-back** on the teacher's
+  lesson page (8.5); and an aggregated, redacted **class-answers summary feeding the
+  adapt-next-lesson loop** (8.6). Decisions flagged for the DPO/teacher: login style, retention,
+  level assignment. Recommended start: 8.1 immediately, DPIA in parallel.
+
 ### 2026-06-12 — TA read/feedback login
 
 - **TAs can now log in** with a separate password (Settings → **TA access**; same login page —

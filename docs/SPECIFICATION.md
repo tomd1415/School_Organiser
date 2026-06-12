@@ -398,6 +398,81 @@ Written as user stories. **MoSCoW** priority in brackets: **(M)**ust / **(S)**ho
 - **(S)** A one-tap "**checked today**" stock-take stamp; an item unchecked for over a term is
   flagged stale, and broken stock (working < owned) is highlighted.
 
+### 5.25 In-app setup & the September rollover (built)
+
+*§5.25–§5.29 shipped after Phase 5, with Phase 6 and the improvements that followed it (see
+PHASE_6_PLAN.md).*
+
+- **(M)** Everything the seed once hard-coded is **editable in-app**: a Setup area for the year
+  & terms, the **day shape** (lesson times), rooms & staff, courses, and groups & pupils.
+  **Day shapes and the timetable are year-scoped**, so next September is built as a **draft
+  alongside the live year** and nothing changes until an explicit "make current".
+- **(M)** A **September rollover wizard**: a completely new timetable every year with nothing
+  carried over — except that **teaching-group knowledge follows the class** via a
+  **predecessor chain** (7ARO → 8ARO), so a group keeps its identity across the annual rename
+  without rewriting any history. Re-enterable and idempotent; the live year is untouched until
+  the explicit "go live".
+- **(M)** A brand-new instance opens an **onboarding wizard** (`/welcome`): create the teacher
+  and password (stored in settings; the env var, where set, always wins), then a guided,
+  tracked checklist through the Setup editors — supporting the long-run **fresh instance per
+  teacher** (nothing flows between instances).
+
+### 5.26 Calendar exceptions (built)
+
+- **(M)** From the lesson screen I record that a **date deviates from the weekly pattern**: one
+  lesson **cancelled**, a **room change**, **cover** (by whom), or a whole **off-timetable
+  day** (trips, exam days, snow) — each with a note.
+- **(M)** Exceptions show as **banners on the affected lesson**, ⚠ marks on the week grid and a
+  count on the Now screen; removing one is one click. (Display-level for now — the clock and
+  availability still follow the recurring pattern.)
+
+### 5.27 Email intake & AI triage (built)
+
+- **(M)** A **dedicated or forwarded mailbox** (never my main account; an Outlook rule forwards
+  what matters) is **polled over IMAP** on a configurable cadence, with a "Poll now / test"
+  button in Settings; only unread mail is imported, and **imported mail is marked read** — the
+  mailbox's own flag is the dedup, so failures stay unseen for the next poll.
+- **(M)** Each email is parsed (encoded subjects, multipart bodies, HTML-stripped fallback) and
+  **AI-triaged to the single best home**: a **task** (with urgency, and the class matched from
+  my group names), a dated **event** (kind + date), an **awareness** item (filed as Captured,
+  §5.17, with category and safeguarding flag), or a general **note** — never dismissed, because
+  a forwarded email always arrived for a reason.
+- **(M)** The **key facts** — when, deadline, where, who, money, what to bring, contact — are
+  extracted and shown as **colour-coded chips** in the task's "✉ what it says" disclosure, so
+  the substance reads at a glance without the greetings and footers.
+- **(M)** If the AI is unavailable the email still becomes a **plain inbox task** — intake never
+  blocks — and every import keeps the raw email as provenance (§5.5). Triage runs through the
+  one wrapper (§5.10): cheap model, names redacted, every call audited.
+
+### 5.28 The in-lesson tracker & three-level differentiation (built)
+
+- **(M)** An **in-lesson tracker** on the lesson screen: the (adapted) outline's steps as a
+  tappable list — tap where we are (▶ current, ✓ done) and the same tap **writes the textual
+  stopping point**, so "last time → resume", the curriculum map and the AI feedback loop all
+  keep working off one record.
+- **(M)** A per-class **ability midpoint** (cohort-level prose, never a pupil) recorded beside
+  the class teaching context — the anchor for **three-level differentiation by default**:
+  every AI-planned lesson teaches whole-class, then offers 🟢 **Support**, 🟡 **Core** and 🔴
+  **Challenge** tasks meeting the same objectives, Core pitched at the midpoint (the
+  draft-lesson, lesson-resources, adapt-lesson and adapt-resources prompts alike).
+- **(M)** Per-lesson **resource sets** — slides, worksheet, support sheet, answers — are
+  generated and **linked to the plan** in one action, with **per-class adapted copies** linked
+  to that class's adaptation; slides **present** full-screen one slide at a time, documents
+  preview in-browser and **export to Word** for pupils to type into.
+
+### 5.29 TA read/feedback access (built)
+
+- **(M)** A TA logs in **on the normal login page** with a **separate TA password** I set (or
+  disable) in Settings; the session is **deny-by-default** — only the TA view, log in/out and
+  linked resources are reachable, everything else bounces back to it.
+- **(M)** The TA lands on the **current lesson, read-only**: the class's **effective (adapted)
+  plan**, formatted, with its linked and class-copy resources — plus a "**next lesson (if
+  you're early)**" tab for today only. No notes, no pupil names, no navigation.
+- **(M)** A **two-part feedback form** — how the pupils were / thoughts on the lesson — with a
+  **safeguarding tick**: feedback lands on my lesson page and joins the group's recent history
+  feeding "adapt from recent lessons" (§5.22); **flagged feedback is withheld from AI
+  entirely**, and the TA is prompted to tell me in person too.
+
 ## 6. Non-functional requirements
 
 - **Performance.** Now screen and note-save feel instant on the LAN (<150 ms perceived).

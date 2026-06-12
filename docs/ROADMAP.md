@@ -143,12 +143,24 @@ class's delivery record visibly improves the next lesson. *(Reached for the head
 
 **Goal:** quality-of-life and the parked ideas worth keeping.
 
+*Status 2026-06-12: email intake v2 ✅ (+ AI triage) and the TA login ✅ are built (below);
+remaining items stay a pick-by-pain list alongside Phase 8.*
+
 - Global search across everything; saved filters; keyboard shortcuts everywhere.
 - **Deeper MS Teams integration** (beyond the per-class link / checklist) if worth it.
 - ~~Email intake v2 (IMAP poll)~~ ✅ **built 2026-06-12** — in-app IMAP poller (Settings → Email intake), dedicated/forwarded-mailbox pattern, dependency-free client; the paste box remains as fallback.
 - ~~A TA read/feedback login~~ ✅ **built 2026-06-12** — separate TA password (Settings), locked-down read-only current/next-lesson view with structured feedback that feeds the teacher's lesson page and the adapt-next-lesson AI; per-TA logins follow with the pupil-login project.
 - Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue) —
   picked by what actually hurts in daily use.
+
+## Phase 8 — Pupils: logins & in-app work *(planned 2026-06-12 — see [PHASE_8_PLAN.md](PHASE_8_PLAN.md))*
+
+**Goal:** pupils log in and DO the work in the app — the long-deferred pupil-facing project
+(2.11). Interactive worksheets **sliced to each pupil's assigned level** (🟢🟡🔴, set per course
+from the review grid), answers stored per pupil, live completion for the teacher, a tap-the-faces
+**pupil feedback widget** (rating + enjoyed/disliked activity chips), per-TA accounts — and both
+the answers and the feedback feeding the adapt-next-lesson loop and, over time, the class
+teaching-context — behind a DPIA-signed-off, deny-by-default pupil role.
 
 ## What MVP deliberately excludes
 
@@ -170,3 +182,4 @@ These are relative sizes, not promises (one developer, evenings):
 | 5 Curriculum delivery | L | The app runs the curriculum (master → class → calendar → feedback) |
 | 6 Setup + September + instances | L | Self-sufficient across years and teachers |
 | 7 Polish + extras | ongoing | Long-tail quality of life |
+| 8 Pupil logins + in-app work | L | Answers become data; less marking; the loop closes |

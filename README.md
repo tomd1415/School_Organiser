@@ -4,23 +4,20 @@ A single-teacher "command centre" web app: timetable, current-lesson resources, 
 lesson notes, task/time planning, and AI-assisted lesson & curriculum planning. Runs on
 the school's internal Debian server, accessed from the teacher's desktop and laptop.
 
-> **Status:** **Phases 1–4 are complete** (only **pupils** 2.11 is deferred to the pupil-facing
-> project; 4.6/4.8 partial), **Phase 6 (setup, September & instances) is built** —
-> in-app [Setup](docs/PHASE_6_PLAN.md) editors + timetable editor, the **September rollover
-> wizard** (build next year in advance as a draft; class knowledge follows the group via a
-> predecessor chain), the **onboarding wizard** for brand-new per-teacher instances
-> (`scripts/new-instance.sh`), settings, exceptions and the class-history/archive views — and
-> **Phase 5 (curriculum delivery) is built through 5.8**
-> ([docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)): a **master scheme per course** with **per-group
-> adaptations + change logs**, **convert a downloaded unit into SEND-pitched master lessons (AI)**
-> — optionally **assigned straight into a group's weekly slots in the same action** (holiday-aware),
-> a two-way **feedback loop** (adapt the next delivery from the class's notes; fold improvements
-> back into the master on approval), a per-group **curriculum map** (`/map`) with **carry-over**
-> ("continue next week"), a **per-class teaching-context**, and a **kit inventory** (`/kit`) that
-> every AI planning feature plans within. All AI goes through the one redaction/withholding/audit
-> wrapper ([docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md), DPIA drafted). Log in over the LAN
-> (`./start.sh`). For live Office preview, pull the Gotenberg sidecar
-> (`docker compose --profile preview up -d gotenberg`).
+> **Status:** **Phases 0–6 are built** — the daily core (timetable, Now, lessons, notes, tasks,
+> time, focus, events, captured), schemes of work + the hosted resource store, the full **AI
+> layer** behind one redaction/withholding/audit wrapper ([docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md)),
+> **curriculum delivery** (master schemes with per-class adaptations + change logs, convert-a-
+> downloaded-unit, calendar lay-down, the two-way feedback loop, curriculum map with carry-over,
+> kit inventory — [docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md)), and **setup & September**
+> (in-app editors incl. the timetable editor, the rollover wizard with the class predecessor
+> chain, onboarding for per-teacher instances — [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md)).
+> From the old polish list, **email intake + AI triage** (a forwarded email becomes a task /
+> event / captured item / note, with fact chips) and the **TA read/feedback login** are also
+> live; lessons default to **3-level differentiation** (Support/Core/Challenge around each
+> class's recorded ability midpoint), generated resources preview/present in-browser and export
+> to Word, and an in-lesson tracker doubles as the stopping point. Log in over the LAN
+> (`./start.sh`). Next: **pupil logins** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)).
 
 ## The one-sentence pitch
 
@@ -54,6 +51,7 @@ Read in this order:
 | [docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md) | Detailed build plan for Phase 4: the one LLM wrapper (redaction + safeguarding withholding + audit) and AI planning features. |
 | [docs/PHASE_5_PLAN.md](docs/PHASE_5_PLAN.md) | Detailed build plan for Phase 5: curriculum delivery — master schemes, per-group adaptation + change log, converting downloaded units, and the term calendar. |
 | [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) | Build plan for Phase 6: in-app setup editors, the September rollover (new timetable every year; class-group knowledge follows the group), the onboarding wizard, and per-teacher instances. |
+| [docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md) | Build plan for Phase 8: pupil logins and in-app work — interactive worksheets, answers as data, teacher review, per-TA accounts. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
 ## Run it

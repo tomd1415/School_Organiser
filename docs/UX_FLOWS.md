@@ -118,6 +118,15 @@ applied only on approval. "Term map" jumps to the curriculum map (flow 12) for t
 slot; "continue next week" is the same carry-over as the map's. "This class's teaching context"
 folds out an editor for the per-class prose added to the course default in AI calls.
 
+**Since Phase 6** each course section also carries: the **in-lesson tracker** — the effective
+outline's steps as a tappable list (✓ done · ▶ current; tapping "we are here" also writes the
+textual stopping point, so resume and the AI feedback loop work off the same record); an
+**ability midpoint** field inside the teaching-context fold-out — the anchor Support / Core /
+Challenge work is pitched around (SPECIFICATION §5.28); and a **TA feedback** block showing
+what the TA sent from flow 14, safeguarding-flagged items marked. Objectives and outlines
+everywhere render as formatted read-views (step cards with timing pills, ✓-listed objectives)
+rather than walls of text.
+
 ## 4. Quick-note capture (the fast path)
 
 Triggered by the `n` shortcut or any `[+ quick note]` button — a small overlay, pre-bound to
@@ -328,6 +337,108 @@ from this page and from a read-only "🔧 Kit available" panel on the Schemes pa
 active list is injected into all six AI planning features (author scheme, draft lesson, convert
 unit, adapt for a group, improve the master, generate a resource) so practical suggestions fit
 the kit actually owned.
+
+## 14. The TA view — current lesson, read-only, with feedback
+
+```text
+┌─ School Organiser · TA view ───────────────────────────── [Log out] ┐
+│ [This lesson]  [Next lesson (if you're early)]                       │
+│ 7ARO                                                                 │
+│ Lesson 3 · 11:05–11:55 · D12                                         │
+│ ── Computing Curriculum ──────────────────────────────────────────── │
+│ Algorithms 4  ✏ adapted for this class                               │
+│   Objectives  ✓ describe a flowchart   ✓ order the steps …           │
+│   Outline     1. Arrival routine (5 min)  2. Recap quiz (10 min) …   │
+│   Resources   Slides · Worksheet · Support sheet                     │
+│ ── Your feedback for the teacher ──────────────────────────────────  │
+│   How were the pupils?   [_______________________________________]   │
+│   Thoughts on the lesson [_______________________________________]   │
+│   ▢ safeguarding concern (also tell the teacher in person —          │
+│      flagged items are kept out of AI)             [Send feedback]   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+A TA logs in **on the normal login page** with a **separate TA password** (set or disabled in
+Settings, flow 15) and lands straight here. The session is **deny-by-default**: a global hook
+allows only this view, log in/out, static assets and linked-resource view/download/present —
+everything else bounces back to `/ta`. The view is the **current lesson, strictly read-only**:
+the **effective plan** (the class's adapted version where one exists, ✏-badged, formatted like
+the teacher's read-views) with its linked resources and any class copies; the second tab shows
+the **next lesson, today only**, for early arrivals. Every lesson running in the slot renders —
+the teacher's own and TA-led ones — so a TA in another room still finds theirs, and a split
+lesson gets one section per course. The **two-part feedback** (how the pupils were / thoughts
+on the lesson) plus a **safeguarding tick** posts to the teacher: it appears on the lesson
+screen (flow 3) and joins the group's recent history behind "adapt from recent lessons" —
+**flagged items are withheld from AI entirely**, and the form reminds the TA to speak to the
+teacher in person. No notes, no pupil names, no navigation.
+
+## 15. Settings
+
+```text
+┌─ Settings ──────────────────────────────────────────────────────────┐
+│ School        School name [____________________]  saved ✓           │
+│ Password      managed by APP_PASSWORD_HASH in .env (remove it to    │
+│               manage here) — otherwise current/new/again [Change]   │
+│ AI            Key: ✅ set (via .env) · every call is redacted,      │
+│               safeguarding-withheld and audited regardless          │
+│               ☑ AI features enabled · monthly cap (pence) [____]    │
+│               Design [claude-…] Planning [claude-…] Cheap [claude-…]│
+│ TA access     [new TA password (8+)____] [Set] [Disable TA access]  │
+│ Email intake  IMAP host [____] port [993] user [____] pass [____]   │
+│               folder [INBOX] · ☑ TLS · ☑ poll automatically [5] min │
+│               [Poll now / test]  last poll: … — 2 unseen, 2 imported │
+│ Data health   ✅ current year · 📦 DB size · 🤖 AI calls this month  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+Everything that used to need SQL, on one page, every field **inline-autosaving** (the standard
+pattern). **Password**: an instance managed by `APP_PASSWORD_HASH` sees an explanation instead
+of a form; remove the variable and the change form appears (writing `auth_password_hash` to
+settings). **TA access** sets or disables the separate TA password (flow 14). **AI** holds the
+enabled toggle, the monthly cap and the three model fields (design / planning / cheap), with
+the key's status shown read-only — the key itself stays in `.env`. **Email intake** (flow 16)
+is configured here; **"Poll now / test" saves whatever is typed first, then polls**, so a
+freshly entered config can never race the autosaves and report "not configured", and the
+last-poll status line records every outcome, success or failure. **Data health** shows the
+current year, database size and this month's AI call count.
+
+## 16. Email intake & triage
+
+```text
+  dedicated / forwarded mailbox    (an Outlook rule forwards the mail
+        │                           that should become tasks)
+        ▼  IMAP poll · unread only — imported mail is marked read (dedup)
+  MIME parse — encoded subjects · multipart · QP/base64 · HTML-strip
+        ▼
+  AI triage — email_triage@2 · cheap model · redacted · audited
+        │      (AI unavailable → plain inbox task; intake never blocks)
+        ├─ task      → inbox task: urgency + class matched from group names
+        ├─ event     → dated event (kind + date)
+        ├─ awareness → Captured item (category · ⚑ safeguarding flag)
+        └─ note      → general note (pure reference)
+```
+
+The triaged task, opened in the inbox (flow 5):
+
+```text
+│ • Trip money — chase 8PFA payments             from email   [triage] │
+│   ▾ ✉ what it says                                                   │
+│     (deadline Thu 9 July) (money £8) (who 8PFA — 5 outstanding)      │
+│     One or two extracted sentences, dates and amounts highlighted.   │
+│     route: task — the teacher must chase payments · from office@…    │
+```
+
+A **dedicated or forwarded mailbox** — never the main school account — is polled on the
+configurable cadence (flow 15, plus "Poll now / test"). Each unread message is MIME-parsed
+dependency-free, then classified by the **cheap model** through the one AI wrapper. The
+classifier never dismisses a forwarded email — there is always a reason it arrived — it picks
+the **single best home** of the four routes above. The key **facts** (when · deadline · where ·
+who · money · bring · contact) come back as tiny values and render as **colour-coded chips**
+inside the task's "✉ what it says" disclosure, with dates and amounts highlighted in the
+remaining prose and the provenance line muted; plain prose (manual tasks, pre-triage emails)
+renders unchanged. The **Seen flag is the dedup**: only successfully imported messages are
+marked read — a failure stays unseen for the next poll — and every import keeps the raw email
+as provenance (`email_intake`), exactly like the paste box.
 
 ## Navigation summary
 
