@@ -145,7 +145,7 @@ class's delivery record visibly improves the next lesson. *(Reached for the head
 
 - Global search across everything; saved filters; keyboard shortcuts everywhere.
 - **Deeper MS Teams integration** (beyond the per-class link / checklist) if worth it.
-- Email intake v2 (IMAP poll) if volume justifies it.
+- ~~Email intake v2 (IMAP poll)~~ ✅ **built 2026-06-12** — in-app IMAP poller (Settings → Email intake), dedicated/forwarded-mailbox pattern, dependency-free client; the paste box remains as fallback.
 - A TA read/feedback login if wanted (needs the second-account work).
 - Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue) —
   picked by what actually hurts in daily use.

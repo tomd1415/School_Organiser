@@ -40,6 +40,8 @@ import { registerSettingsRoutes } from './routes/settingsPage';
 import { registerGroupHistoryRoutes } from './routes/groupHistory';
 import { registerResourceRoutes } from './routes/resources';
 import { generateDueInstances } from './repos/recurringTasks';
+import { pollEmailOnce } from './services/emailPoll';
+import { getSetting } from './repos/settings';
 import { localParts } from './lib/time';
 
 /** Build the Fastify instance with all plugins and routes, without listening. */
@@ -118,6 +120,28 @@ function scheduleRecurring(app: FastifyInstance): void {
   setInterval(() => void run(), 24 * 60 * 60 * 1000);
 }
 
+/** Email intake v2: poll the configured mailbox every few minutes (no-op until configured). */
+function scheduleEmailPoll(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      if ((await getSetting('email_poll_enabled')) !== 'true') return;
+      const r = await pollEmailOnce();
+      if (r.imported) app.log.info(`email intake: imported ${r.imported} task(s)`);
+      if (!r.ok) app.log.warn({ msg: r.message }, 'email intake poll failed');
+    } catch (err) {
+      app.log.error({ err }, 'email intake poll crashed');
+    }
+  };
+  setTimeout(() => void run(), 15_000); // first poll shortly after boot
+  setInterval(() => {
+    void (async () => {
+      const mins = Number(await getSetting('email_poll_minutes').catch(() => null)) || 5;
+      // align: only fire when the minute slot matches the configured cadence
+      if (new Date().getMinutes() % Math.max(1, Math.min(60, mins)) === 0) await run();
+    })();
+  }, 60_000);
+}
+
 /** Production entrypoint: migrate, then listen. */
 export async function start(): Promise<void> {
   await migrate();
@@ -125,6 +149,7 @@ export async function start(): Promise<void> {
   try {
     await app.listen({ port: appConfig.PORT, host: appConfig.HOST });
     scheduleRecurring(app);
+    scheduleEmailPoll(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

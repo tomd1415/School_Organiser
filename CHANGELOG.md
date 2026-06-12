@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Email intake v2: the mailbox becomes the task inbox (no more copy-paste)
+
+- **Emails now become tasks automatically.** The app polls an IMAP mailbox (Settings → **Email
+  intake**: host/port/user/app-password/folder, poll toggle + cadence, **Poll now / test**
+  button, last-poll status line). Each unread message becomes a draft **inbox task** through the
+  exact same path as the paste box (`email_intake` row + task with `source='email'`), so triage,
+  the Now screen and AI task-breakdown all behave identically. Only unread mail is imported;
+  imported mail is marked read — that flag *is* the dedup, and failures stay unread for retry.
+  The paste box remains as a fallback.
+- **Dependency-free by necessity** (npm unreachable on the school line): a minimal IMAP4 client
+  ([lib/imapClient.ts](app/src/lib/imapClient.ts) — LOGIN/SELECT/SEARCH UNSEEN/FETCH
+  BODY.PEEK/STORE \Seen over TLS, with literal handling) and a tolerant MIME parser
+  ([lib/mime.ts](app/src/lib/mime.ts) — RFC2047 subjects, multipart/alternative preferring
+  text/plain, quoted-printable + base64, HTML-strip fallback). 7 parser unit tests.
+- **Proven end-to-end** against a scripted in-process IMAP server (integration test): one unseen
+  multipart email with a base64-encoded subject → poll → task "Trip forms ✅" with the text/plain
+  body and sender in its detail → marked seen → a second poll imports nothing → unconfigured
+  polls degrade with a clear message.
+- **Recommended setup** (documented in Settings + SECURITY): a *dedicated or forwarded* mailbox
+  (an Outlook rule forwards the school mail you want as tasks), never the main school account —
+  this also sidesteps O365's OAuth-only IMAP. Credentials live in the instance's own database;
+  ROADMAP's Phase-7 "Email intake v2" is ticked off. **175 unit / 95 integration tests green.**
+
 ### 2026-06-12 — Draft-with-AI flat-text fix, Word layout polish, pupil-format investigation
 
 - **Why "Draft with AI" produced one big chunk:** the draft schema only asked for "a concise

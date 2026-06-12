@@ -8,6 +8,7 @@ import { esc, layout } from '../lib/html';
 import { hashPassword, verifyPassword } from '../lib/passwords';
 import { appConfig } from '../config/app';
 import { getSetting, setSetting } from '../repos/settings';
+import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
 
 export function registerSettingsRoutes(app: FastifyInstance): void {
@@ -18,13 +19,22 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const envManaged = !!appConfig.APP_PASSWORD_HASH;
-      const [school, aiEnabled, cap, mPlan, mDesign, mCheap] = await Promise.all([
+      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast] = await Promise.all([
         getSetting('school_name'),
         getSetting('ai_enabled'),
         getSetting('ai_month_cap_pence'),
         getSetting('ai_model_plan'),
         getSetting('ai_model_design'),
         getSetting('ai_model_cheap'),
+        getSetting('email_imap_host'),
+        getSetting('email_imap_port'),
+        getSetting('email_imap_user'),
+        getSetting('email_imap_password'),
+        getSetting('email_imap_folder'),
+        getSetting('email_imap_tls'),
+        getSetting('email_poll_enabled'),
+        getSetting('email_poll_minutes'),
+        getSetting('email_last_poll'),
       ]);
       const health = (
         await pool.query<{ years: number; current: string | null; aiMonth: number; dbMb: number }>(`
@@ -76,6 +86,33 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         </div>
         <span class="note-status" id="ai-status"></span>
 
+        <h2>Email intake</h2>
+        <p class="muted">Emails arriving in this mailbox become inbox tasks automatically (the paste box still works too).
+          Use a <strong>dedicated or forwarded mailbox</strong>, not your main school account — set an Outlook rule that
+          forwards the mail you want as tasks. Only unread mail is imported; imported mail is marked read.</p>
+        <div class="setup-add">
+          <label>IMAP host <input name="v" value="${esc(emHost ?? '')}" placeholder="imap.gmail.com"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_host","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+          <label>Port <input class="setup-num" style="width:5rem" name="v" value="${esc(emPort ?? '')}" placeholder="993"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_port","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+          <label>User <input name="v" value="${esc(emUser ?? '')}" placeholder="organiser.intake@gmail.com" autocomplete="off"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_user","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+          <label>Password <input type="password" name="v" value="${esc(emPass ?? '')}" placeholder="app password" autocomplete="new-password"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_password","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+          <label>Folder <input name="v" value="${esc(emFolder ?? '')}" placeholder="INBOX"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_folder","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+        </div>
+        <div class="setup-add">
+          <label><input type="checkbox"${emOn === 'true' ? ' checked' : ''}
+            hx-post="/settings/email" hx-vals='js:{"key":"email_poll_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> poll automatically</label>
+          <label>every <input class="setup-num" style="width:4rem" value="${esc(emMins ?? '5')}"
+            hx-post="/settings/email" hx-vals='js:{"key":"email_poll_minutes","value":event.target.value}' hx-trigger="change" hx-swap="none"> min</label>
+          <label><input type="checkbox"${emTls !== 'false' ? ' checked' : ''}
+            hx-post="/settings/email" hx-vals='js:{"key":"email_imap_tls","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> TLS</label>
+          <button type="button" class="btn-secondary" hx-post="/settings/email/test" hx-target="#email-test-result" hx-swap="innerHTML" hx-disabled-elt="this">Poll now / test</button>
+        </div>
+        <div id="email-test-result">${emLast ? `<p class="muted">last poll: ${esc(emLast)}</p>` : ''}</div>
+
         <h2>Data health</h2>
         <ul class="rollover-checks">
           <li>${health.current ? `✅ current year: <strong>${esc(health.current)}</strong>` : '⚠ no current academic year set'} (${health.years} year${health.years === 1 ? '' : 's'} in the database)</li>
@@ -105,6 +142,26 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (b.data.key === 'ai_month_cap_pence' && b.data.value.trim() !== '' && !(Number(b.data.value) > 0)) return reply.code(400).send('');
     await setSetting(b.data.key, b.data.value.trim());
     return reply.send('');
+  });
+
+
+  app.post('/settings/email', guard, async (req, reply) => {
+    const b = z
+      .object({
+        key: z.enum(['email_imap_host', 'email_imap_port', 'email_imap_user', 'email_imap_password', 'email_imap_folder', 'email_imap_tls', 'email_poll_enabled', 'email_poll_minutes']),
+        value: z.string().max(300),
+      })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    await setSetting(b.data.key, b.data.value.trim());
+    return reply.send('');
+  });
+
+  app.post('/settings/email/test', guard, async (_req, reply) => {
+    const r = await pollEmailOnce();
+    return reply
+      .type('text/html')
+      .send(`<p class="${r.ok ? 'adapt-note' : 'error'}">${r.ok ? '✓ ' : ''}${r.message.replace(/</g, '&lt;')}</p>`);
   });
 
   app.post('/settings/password', guard, async (req, reply) => {

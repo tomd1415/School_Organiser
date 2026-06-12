@@ -16,6 +16,7 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Equipment inventory (kit list) | Internal — no personal data | PostgreSQL; injected into AI planning calls |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
 | Auth secrets (`SESSION_SECRET`, API keys) | Secret | `.env`, never committed |
+| Email-intake mailbox credentials | Secret | `settings` table (instance-local DB); use a **dedicated/forwarded mailbox with an app password**, never the main school account |
 
 ## Authentication & access
 
