@@ -4,7 +4,11 @@ import * as z from 'zod/v4';
 
 export const draftLessonSchema = z.object({
   objectives: z.array(z.string()).describe('2–4 concise, age-appropriate learning objectives'),
-  outline: z.string().describe('a lesson outline: starter, main activities, plenary — concise and concrete'),
+  outline: z
+    .string()
+    .describe(
+      'the lesson outline as numbered steps, ONE STEP PER LINE, each "N. Name (M min) — what happens", e.g. "1. Arrival routine (5 min) — slide up, register" — covering starter, whole-class teaching, the three levelled tasks (Support/Core/Challenge) and plenary',
+    ),
   durationMin: z.number().int().describe('estimated lesson length in minutes (e.g. 50 or 60)'),
 });
 

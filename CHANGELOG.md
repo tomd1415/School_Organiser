@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-12 — Draft-with-AI flat-text fix, Word layout polish, pupil-format investigation
+
+- **Why "Draft with AI" produced one big chunk:** the draft schema only asked for "a concise
+  outline", so the model returned a single flat block ("STARTER (10 min) — … MAIN — …") with no
+  line breaks for the formatter to work on. Fixed at both ends: the schema now demands numbered
+  steps **one per line** (`draft_lesson@4`), and the formatter gained a **flat-block rescue** —
+  inline numbered steps and CAPS section headers are split apart and rendered as proper step
+  cards. **Existing drafted lessons display structured immediately** (no regeneration needed),
+  and the lesson tracker works on them too. 4 new unit tests incl. a no-mangling guard for prose.
+- **Word export layout polish** (the "crowded / misaligned" feedback): table cell margins,
+  question/answer columns at 38/62, and **answer rows with a minimum typing height** (~1.1 cm).
+  Revalidated via the LibreOffice round-trip.
+- **Pupil-fillable formats investigated** and parked deliberately until pupil logins, as agreed:
+  [docs/PUPIL_WORKSHEET_FORMATS.md](docs/PUPIL_WORKSHEET_FORMATS.md) compares in-app HTML
+  worksheets (recommended — answers become data), fillable PDF, DOCX content controls, and
+  Teams/Forms; linked from PHASE_6_PLAN §12. **168 unit / 93 integration tests green.**
+
 ### 2026-06-12 — Cumulative-slides fix, lesson tracker, readable plans, 3-level differentiation
 
 - **Fixed the "three slides files, no worksheet" generation** (reported): the model sometimes

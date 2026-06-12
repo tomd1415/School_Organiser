@@ -1,6 +1,6 @@
 // Versioned prompt for the draft-next-lesson feature. The version is recorded on every
 // ai_calls row so a prompt change is traceable.
-export const DRAFT_LESSON_VERSION = 'draft_lesson@3'; // 3-level differentiation default // @2: per-course teaching-context prepended
+export const DRAFT_LESSON_VERSION = 'draft_lesson@4'; // numbered steps one-per-line (was arriving as a flat block) // @2: per-course teaching-context prepended
 
 export const DRAFT_LESSON_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +

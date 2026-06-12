@@ -5,8 +5,23 @@
 import { esc } from './html';
 
 const NUMBERED = /^\s*(?:step\s*)?\d+\s*[.)–—-]\s+/i;
+// "STARTER (10 min) — …" style section headers count as steps too (older drafts use them)
+const SECTION = /^[A-Z][A-Z &/-]{2,}(?=\s*[(—:–-])/;
 const BULLET = /^\s*[-*•]\s+/;
 const MINUTES = /\(\s*(~?\s*\d+(?:\s*[-–]\s*\d+)?\s*min[s.]?)\s*\)/i;
+
+// Older AI drafts arrive as one flat block: inline numbered steps and/or CAPS section headers
+// with no newlines. Break those apart before parsing so they format like everything else.
+function unflatten(text: string): string {
+  let t = text;
+  // newline before inline numbered steps ("… 2. Demo (10 min)") when several exist
+  if ((t.match(/\s\d+[.)]\s+[A-Z(]/g) ?? []).length >= 2) {
+    t = t.replace(/\s(?=\d+[.)]\s+[A-Z(])/g, '\n');
+  }
+  // newline before CAPS section headers ("MAIN ACTIVITY (20 min) —", "PLENARY —")
+  t = t.replace(/(?<=[.!?)’"'”])\s+(?=[A-Z][A-Z &/-]{2,}\s*[(—:–])/g, '\n');
+  return t;
+}
 
 function stepHtml(raw: string): string {
   const text = raw.replace(NUMBERED, '').trim();
@@ -18,7 +33,7 @@ function stepHtml(raw: string): string {
 
 /** The outline as readable structure. Empty/null → ''. */
 export function formatOutline(text: string | null | undefined): string {
-  const lines = (text ?? '').split('\n').map((l) => l.trim()).filter(Boolean);
+  const lines = unflatten(text ?? '').split('\n').map((l) => l.trim()).filter(Boolean);
   if (!lines.length) return '';
   const out: string[] = [];
   let buf: string[] = [];
@@ -31,7 +46,7 @@ export function formatOutline(text: string | null | undefined): string {
     bufKind = null;
   };
   for (const line of lines) {
-    if (NUMBERED.test(line)) {
+    if (NUMBERED.test(line) || SECTION.test(line)) {
       if (bufKind !== 'ol') flush();
       bufKind = 'ol';
       buf.push(stepHtml(line));
@@ -60,10 +75,10 @@ export function formatObjectives(text: string | null | undefined): string {
 
 /** The outline's step labels (numbered or bulleted lines), for the in-lesson tracker. */
 export function outlineSteps(text: string | null | undefined): string[] {
-  return (text ?? '')
+  return unflatten(text ?? '')
     .split('\n')
     .map((l) => l.trim())
-    .filter((l) => NUMBERED.test(l) || BULLET.test(l))
+    .filter((l) => NUMBERED.test(l) || BULLET.test(l) || SECTION.test(l))
     .map((l) => l.replace(NUMBERED, '').replace(BULLET, '').trim())
     .filter(Boolean);
 }

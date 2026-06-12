@@ -107,17 +107,28 @@ function para(content: string, opts: { size?: number; bold?: boolean; indent?: b
 
 function tableXml(headCells: string[], rows: string[][]): string {
   const cols = Math.max(headCells.length, 1);
-  const width = Math.floor(9360 / cols);
-  const grid = `<w:tblGrid>${Array.from({ length: cols }, () => `<w:gridCol w:w="${width}"/>`).join('')}</w:tblGrid>`;
-  const cell = (c: string, bold = false): string =>
-    `<w:tc><w:tcPr><w:tcW w:w="${width}" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:after="60"/></w:pPr>${runs(c, bold ? '<w:b/>' : '')}</w:p></w:tc>`;
-  const head = `<w:tr>${headCells.map((c) => cell(c, true)).join('')}</w:tr>`;
-  const body = rows.map((r) => `<w:tr>${Array.from({ length: cols }, (_, i) => cell(r[i] ?? '')).join('')}</w:tr>`).join('');
+  // two-column question/answer tables breathe better at 38/62; otherwise equal split
+  const widths =
+    cols === 2 ? [Math.floor(9360 * 0.38), Math.floor(9360 * 0.62)] : Array.from({ length: cols }, () => Math.floor(9360 / cols));
+  const grid = `<w:tblGrid>${widths.map((w) => `<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>`;
+  const cell = (c: string, i: number, bold = false): string =>
+    `<w:tc><w:tcPr><w:tcW w:w="${widths[i] ?? widths[0]}" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>${runs(c, bold ? '<w:b/>' : '')}</w:p></w:tc>`;
+  const head = `<w:tr>${headCells.map((c, i) => cell(c, i, true)).join('')}</w:tr>`;
+  // rows with an empty cell are answer rows — give pupils typing room (min height ~1.1cm)
+  const body = rows
+    .map((r) => {
+      const hasEmpty = Array.from({ length: cols }, (_, i) => r[i] ?? '').some((c) => c.trim() === '');
+      const trPr = hasEmpty ? '<w:trPr><w:trHeight w:val="620" w:hRule="atLeast"/></w:trPr>' : '';
+      return `<w:tr>${trPr}${Array.from({ length: cols }, (_, i) => cell(r[i] ?? '', i)).join('')}</w:tr>`;
+    })
+    .join('');
   const borders =
     '<w:tblBorders><w:top w:val="single" w:sz="6" w:color="999999"/><w:left w:val="single" w:sz="6" w:color="999999"/>' +
     '<w:bottom w:val="single" w:sz="6" w:color="999999"/><w:right w:val="single" w:sz="6" w:color="999999"/>' +
     '<w:insideH w:val="single" w:sz="6" w:color="999999"/><w:insideV w:val="single" w:sz="6" w:color="999999"/></w:tblBorders>';
-  return `<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/>${borders}</w:tblPr>${grid}${head}${body}</w:tbl><w:p/>`;
+  const margins =
+    '<w:tblCellMar><w:top w:w="80" w:type="dxa"/><w:left w:w="110" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="110" w:type="dxa"/></w:tblCellMar>';
+  return `<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/>${borders}${margins}</w:tblPr>${grid}${head}${body}</w:tbl><w:p/>`;
 }
 
 const MD_H = /^(#{1,4})\s+(.*)$/;

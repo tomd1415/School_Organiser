@@ -271,7 +271,10 @@ Deliberately not in Phase 6; each is worth a slice of its own:
    action (replace display_name, keep ai_token) + a yearly prompt on /settings.
 9. **Fortnight (week A/B) support** if the school ever adopts one — schema column exists, clock
    assumes a single week.
-10. **Earlier backlog still open:** Phase 4.6 remainder (captured auto-categorise, estimate
+10. **Pupil-fillable worksheets** — investigated 2026-06-12
+    ([PUPIL_WORKSHEET_FORMATS.md](PUPIL_WORKSHEET_FORMATS.md)): recommendation is in-app HTML
+    worksheets once pupil logins exist (answers become data); DOCX stays the bridge until then.
+11. **Earlier backlog still open:** Phase 4.6 remainder (captured auto-categorise, estimate
     calibration, current-interest), 4.8 semantic search, content-based unit conversion (5.9),
     cross-group compare (5.9), kit-per-lesson (5.9), and the Phase 7 polish list (global search,
     Teams, IMAP intake, TA login).

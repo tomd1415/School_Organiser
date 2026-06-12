@@ -44,3 +44,30 @@ describe('formatObjectives', () => {
     expect(formatObjectives('  ')).toBe('');
   });
 });
+
+import { outlineSteps } from '../src/lib/formatLesson';
+
+describe('flat-block rescue (older AI drafts)', () => {
+  it('splits inline numbered steps with no newlines', () => {
+    const html = formatOutline('1. Arrival (5 min) — settle. 2. Demo =SUM (10 min) — model it. 3. Practice (20 min) — pupils total sheets.');
+    expect((html.match(/<li>/g) ?? []).length).toBe(3);
+    expect(html).toContain('step-min');
+  });
+
+  it('splits CAPS section headers and treats them as steps', () => {
+    const html = formatOutline('STARTER (10 min) — same slide routine. MAIN ACTIVITY (25 min) — levelled tasks. PLENARY (10 min) — whiteboards.');
+    expect((html.match(/<li>/g) ?? []).length).toBe(3);
+    expect(html).toContain('STARTER');
+  });
+
+  it('outlineSteps sees the rescued steps (tracker works on old drafts)', () => {
+    const steps = outlineSteps('STARTER (10 min) — routine. MAIN (20 min) — tasks. PLENARY (5 min) — check.');
+    expect(steps.length).toBe(3);
+  });
+
+  it('normal prose with one number is not mangled', () => {
+    const html = formatOutline('Recap lesson 3. Pupils continue their posters from last week.');
+    expect(html).toContain('<p class="outline-p">');
+    expect(html).not.toContain('<ol');
+  });
+});
