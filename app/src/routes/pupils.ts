@@ -14,6 +14,7 @@ import {
   type GroupLogins,
   type PupilLoginRow,
 } from '../repos/pupilCredentials';
+import { revokeAllDevices } from '../repos/pupilDevices';
 
 function renderPupil(p: RosterEntry): string {
   return `<li class="pupil${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
@@ -36,6 +37,7 @@ function renderLoginPupil(groupId: number, p: PupilLoginRow): string {
     <button type="button" class="link" hx-post="/pupils/${p.pupilId}/pin" hx-prompt="New 4–6 digit PIN for ${esc(p.displayName)}" hx-target="#login-${p.pupilId}" hx-swap="outerHTML">${p.hasPin ? 'reset PIN' : 'set PIN'}</button>
     ${p.hasPin ? `<button type="button" class="link" hx-post="/pupils/${p.pupilId}/pin-enabled" hx-vals='{"enabled":"${p.enabled ? 'false' : 'true'}"}' hx-target="#login-${p.pupilId}" hx-swap="outerHTML">${p.enabled ? 'disable' : 'enable'}</button>` : ''}
     ${p.locked ? `<button type="button" class="link" hx-post="/pupils/${p.pupilId}/unlock" hx-target="#login-${p.pupilId}" hx-swap="outerHTML">unlock</button>` : ''}
+    ${p.devices > 0 ? `<button type="button" class="link" hx-post="/pupils/${p.pupilId}/forget-devices" hx-target="#login-${p.pupilId}" hx-swap="outerHTML" title="${p.devices} remembered device${p.devices === 1 ? '' : 's'}">📱${p.devices} forget</button>` : ''}
   </li>`;
 }
 
@@ -112,6 +114,9 @@ export function registerPupilRoutes(app: FastifyInstance): void {
       const id = idParam.safeParse(req.params);
       if (!id.success) return reply.code(400).send('');
       await setPupilActive(id.data.id, active);
+      // Archiving a pupil (a leaver) revokes their remembered devices so they can't resume,
+      // mirroring the PIN-reset/disable cascade.
+      if (!active) await revokeAllDevices(id.data.id);
       const p = (await listPupils()).find((x) => x.id === id.data.id);
       return reply.type('text/html').send(p ? renderPupil(p) : '');
     });
@@ -142,6 +147,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
       return reply.type('text/html').send(renderLoginPupil(g.groupId, row).replace('</li>', ' <span class="error">PIN must be 4–6 digits</span></li>'));
     }
     await setPupilPin(id.data.id, pin);
+    await revokeAllDevices(id.data.id); // a new PIN invalidates remembered devices (security cascade)
     const row = (await oneLogin(id.data.id, g.groupId))!;
     return reply.type('text/html').send(renderLoginPupil(g.groupId, row).replace('</li>', ' <span class="note-status saved">PIN set ✓</span></li>'));
   });
@@ -152,6 +158,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
     const b = z.object({ enabled: z.enum(['true', 'false']) }).safeParse(req.body);
     if (!id.success || !b.success) return reply.code(400).send('');
     await setPupilCredentialEnabled(id.data.id, b.data.enabled === 'true');
+    if (b.data.enabled === 'false') await revokeAllDevices(id.data.id); // disabling kills remembered devices
     const g = await groupOfPupil(id.data.id);
     const row = g ? await oneLogin(id.data.id, g.groupId) : null;
     return reply.type('text/html').send(g && row ? renderLoginPupil(g.groupId, row) : '');
@@ -162,6 +169,16 @@ export function registerPupilRoutes(app: FastifyInstance): void {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
     await unlockPupil(id.data.id);
+    const g = await groupOfPupil(id.data.id);
+    const row = g ? await oneLogin(id.data.id, g.groupId) : null;
+    return reply.type('text/html').send(g && row ? renderLoginPupil(g.groupId, row) : '');
+  });
+
+  app.post('/pupils/:id/forget-devices', guard, async (req, reply) => {
+    if (!(await pinGate(reply))) return;
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    await revokeAllDevices(id.data.id);
     const g = await groupOfPupil(id.data.id);
     const row = g ? await oneLogin(id.data.id, g.groupId) : null;
     return reply.type('text/html').send(g && row ? renderLoginPupil(g.groupId, row) : '');

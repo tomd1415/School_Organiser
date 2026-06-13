@@ -39,6 +39,17 @@
   marking (anonymous slots, roster redaction still applied inside the text, pattern-screened
   content withheld entirely); and a revocable remembered-device credential exists on classroom
   machines ([PHASE_9_PLAN.md](PHASE_9_PLAN.md) §8).**
+- **Built 2026-06-13 (Phase 9, behind the gate):** the auto-marking code is in place but **disabled
+  by default**. Enabling it is a deliberate Settings action that **requires confirming DPO/SLT
+  sign-off of the addendum** (recorded as `pupil_marks_dpia_ack`) and that pupil access is already
+  on — so this addendum remains the precondition for real use, now enforced in code. New personal
+  data once enabled: per-pupil **marks** (`pupil_marks`) + teacher **comments**, a **remembered-
+  device** credential (sha256-hashed), and a per-pupil **"what works for me" profile**. AI exposure
+  is the **least-identified traffic in the app** — open answers are marked in **anonymous,
+  slot-lettered, per-question batches** (no id/token/name) through the same wrapper, and
+  **guard-matched answers are withheld from the AI entirely**. Cross-subject sharing of the profile
+  is out of scope here (deferred to the multi-teacher whole-school DPIA). Marks retention: proposed
+  academic year + one term, then aggregate — DPO to confirm.
 
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and

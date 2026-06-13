@@ -14,6 +14,7 @@ export interface PupilLoginRow {
   enabled: boolean;
   locked: boolean;
   pin: string | null; // the PIN value, for the teacher-only printable cards + admin display
+  devices: number; // remembered-device count (9.6)
 }
 
 /** Current-year groups that have a login code, each with its enrolled pupils' credential state. */
@@ -36,13 +37,15 @@ export async function listGroupLogins(): Promise<GroupLogins[]> {
     enabled: boolean;
     locked: boolean;
     pin: string | null;
+    devices: number;
   }>(
     `SELECT g.id AS "groupId", g.name AS "groupName", g.login_code AS "loginCode",
             p.id AS "pupilId", p.display_name AS "displayName",
             (pc.pupil_id IS NOT NULL) AS "hasPin",
             COALESCE(pc.enabled, false) AS enabled,
             COALESCE(pc.failed_count, 0) >= $1 AS locked,
-            pc.pin AS pin
+            pc.pin AS pin,
+            COALESCE((SELECT count(*)::int FROM pupil_devices d WHERE d.pupil_id = p.id AND d.expires_at > now()), 0) AS devices
      FROM groups g
      LEFT JOIN enrolments e ON e.group_id = g.id AND e.active
      LEFT JOIN pupils p ON p.id = e.pupil_id
@@ -59,7 +62,7 @@ export async function listGroupLogins(): Promise<GroupLogins[]> {
       byGroup.set(r.groupId, grp);
     }
     if (r.pupilId != null) {
-      grp.pupils.push({ pupilId: r.pupilId, displayName: r.displayName!, hasPin: r.hasPin, enabled: r.enabled, locked: r.locked, pin: r.pin });
+      grp.pupils.push({ pupilId: r.pupilId, displayName: r.displayName!, hasPin: r.hasPin, enabled: r.enabled, locked: r.locked, pin: r.pin, devices: r.devices });
     }
   }
   return [...byGroup.values()];

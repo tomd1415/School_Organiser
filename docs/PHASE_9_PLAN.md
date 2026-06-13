@@ -1,5 +1,16 @@
 # Phase 9 — Auto-marking & the results loop
 
+> **Status (2026-06-13): BUILT (9.1–9.8), behind the `pupil_marks_enabled` DPIA-addendum gate
+> (9.0 still requires the actual sign-off).** Migration `0022` adds the tables. Deterministic
+> marking, AI open-answer marking (anonymous per-question batches + safety gate + content guard),
+> the inline mark-scheme editor + AI derive, review/confirm/override/release with per-class
+> instant-vs-hold visibility, the teacher comment-back, results on `/me` (ticks-only default),
+> remembered devices, the marks-aware class summary, printable answer pack, CSV export, and the
+> "what works for me" profiles are all in and tested (232 unit / 141 integration). **Auto-marking
+> is OFF by default**; enabling it requires confirming the DPIA-addendum sign-off (and pupil access
+> already on). 9.9 (retrieval-practice starters) remains a stretch, not built. The plan-first
+> design follows; §13 records the multi-teacher forward-compatibility that was honoured.
+>
 > **Status (2026-06-12): planned, plan-first — for review before any code.**
 > Phase 8 turns pupil answers into data; Phase 9 turns that data into **marks, feedback and
 > better next lessons** — with the teacher moderating, not transcribing. It also absorbs the
@@ -45,18 +56,29 @@ with the teacher as decision-maker, LAN-only, graceful degradation when AI is of
 
 ## 1. Build order (each slice a reviewable commit)
 
-| # | Slice | Delivers | Size |
-|---|---|---|---|
-| **9.0** | **DPIA addendum** (external) — anonymous answer text to the AI sub-processor for marking; per-pupil marks (attainment) stored; the remembered-device credential; marks retention | the legal gate for 9.2+ | S (blocking) |
-| **9.1** | **Mark schemes as data** — generation emits a structured scheme alongside the answers doc (`lesson_resources@5`); a "derive scheme" action backfills existing worksheets (one AI call, teacher reviews); inline scheme editor on the resource page | every worksheet knows its right answers | M |
-| **9.2** | **Deterministic marking** — tick / choice / exact / numeric / keyword fields marked server-side the moment work is reviewed (or on Done ✓); zero AI | most marks, instantly, free | M |
-| **9.3** | **AI marking of open answers** — per-class trigger: **as pupils finish** (default; Done ✓ enqueues, debounced into **per-question** batches of anonymous slots) or **batch-on-button** ("✨ Mark the written answers", always present as the sweep); evidence quotes, confidence, short pupil feedback; the **safety gate** + guard-pattern screen | the hard 20% marked as suggestions | L |
-| **9.4** | **Review, confirm & visibility** — marks land in the Pupil-work grid as amber suggestions; confirm-all-confident in one click (usable mid-lesson while circulating); tap-to-override (audited); per-pupil **teacher comment back** (AI-prefilled, editable); per-class visibility: **instant on confirm** (default) or **hold until Release** | teacher stays the marker of record | M |
-| **9.5** | **Results on `/me`** — big ✓/✗/◐ per answer as marks become visible (objective ones within seconds of Done ✓ in instant mode), the feedback line, the teacher's comment; scores optionally hidden (ticks only) | quick feedback, inside the lesson | S |
-| **9.6** | **Stay signed in on this computer** — remembered-device cookie bound to the pupil (hashed at rest, term-long, revocable, "Not me?" escape); teacher device list + revoke; account-disable kills devices | login friction → zero on own Windows profiles | M |
-| **9.7** | **Marks → the loop + the answer pack** — per-question success rates in the class-work summary (8.7 becomes mark-aware); misconception notes accumulate per course; **printable class answer pack** (questions + answers + class stats, for going through on the board); CSV marks export | the loop closes on hard data | M |
-| **9.8** | **"What works for me" profiles** — per pupil, from feedback + marks history (tokens only): a two-line digest on the review grid & Pupils page; suggests level changes ("full marks on core 3 lessons running → try challenge") | the system learns each pupil | S |
-| **9.9** | *(stretch)* **retrieval-practice starters** — "open with 3 questions this class got wrong recently" offered in draft/adapt lessons; misconception-aware re-asks; marks sparklines per pupil | spaced retrieval for free | M |
+| # | Slice | Delivers | Size | Status |
+|---|---|---|---|---|
+| **9.0** | **DPIA addendum** (external) — anonymous answer text to the AI sub-processor for marking; per-pupil marks (attainment) stored; the remembered-device credential; marks retention | the legal gate for 9.2+ | S (blocking) | ⏳ external — enforced by `pupil_marks_enabled` gate |
+| **9.1** | **Mark schemes as data** — AI "derive scheme" from the worksheet (+answers doc) into structured points; inline scheme editor (kind/expected/alternatives/marks, mark ready) | every worksheet knows its right answers | M | ✅ built |
+| **9.2** | **Deterministic marking** — tick / choice / exact / numeric / keyword marked server-side; zero AI | most marks, instantly, free | M | ✅ built |
+| **9.3** | **AI marking of open answers** — per-class trigger (as pupils finish, debounced per-question anonymous batches; or batch-on-button "Mark answers now"); evidence quotes, confidence, short feedback; **safety gate** + **content guard** | the hard 20% marked as suggestions | L | ✅ built |
+| **9.4** | **Review, confirm & visibility** — marks as amber suggestions in the grid; confirm-all-confident / per-pupil confirm; tap-to-override (audited in `history`); per-pupil **comment back**; per-class **instant on confirm** vs **hold until Release** | teacher stays the marker of record | M | ✅ built |
+| **9.5** | **Results on `/me`** — ✓/✗/◐ per answer + feedback line + teacher comment; **ticks-only by default** (per-class score toggle); pupils see ONLY confirmed, visibility-gated marks | quick feedback, inside the lesson | S | ✅ built |
+| **9.6** | **Stay signed in on this computer** — pupil-bound device cookie (sha256 at rest, ~term-long, "Not me"), per-class enable; teacher device list + revoke; PIN-reset/disable kills devices | login friction → zero on own Windows profiles | M | ✅ built |
+| **9.7** | **Marks → the loop + the answer pack** — mark-aware class summary (per-question full/partial/none folded in); **printable answer pack**; **CSV marks export** | the loop closes on hard data | M | ✅ built |
+| **9.8** | **"What works for me" profiles** — per pupil, AI digest from feedback + marks history (no name to AI); shown + rebuildable on the review grid | the system learns each pupil | S | ✅ built |
+| **9.9** | *(stretch)* **retrieval-practice starters** — "open with 3 questions this class got wrong recently"; misconception-aware re-asks; marks sparklines per pupil | spaced retrieval for free | M | ⬜ not built (stretch) |
+
+**As-built notes (2026-06-13).** Migration `0022` (0019–0021 were Phase-8 fixes). The deterministic
+marker ([deterministicMarker.ts](../app/src/lib/deterministicMarker.ts)) and safety gate +
+content guard ([markSafetyGate.ts](../app/src/lib/markSafetyGate.ts)) are pure and unit-tested.
+Marking resolves the scheme via the **lesson instance** (`occurrence_course → plan → worksheet
+resource+version`), never `pupil_answers.resource_id` (nullable provenance after 0020). AI open
+marking sends **anonymous slot-lettered per-question batches** (no pupil id/name) through the one
+wrapper; guard-matched answers are withheld entirely and flagged "needs your eyes". Whole feature
+gated by `pupil_marks_enabled` (the 9.0 gate, off by default, requires DPIA-addendum
+acknowledgement + pupil access already on). Per-class settings (trigger / results-mode /
+show-scores / devices) live on the lesson's *Pupil work* panel.
 
 Strict order: 9.0 gates 9.2 onwards (it covers stored attainment, not just AI marking). 9.1
 touches only resource generation — it can land **during Phase 8's tail**, before any pupil has

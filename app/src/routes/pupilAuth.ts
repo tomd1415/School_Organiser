@@ -6,6 +6,10 @@ import { esc } from '../lib/html';
 import { getSetting } from '../repos/settings';
 import { allowAttempt } from '../auth/rateLimit';
 import { listLoginNames, pupilInGroup, resolveGroupByCode, verifyPin, getPupilName } from '../repos/pupilCredentials';
+import { marksEnabled } from '../auth/marksGate';
+import { resumeDevice, pupilPrimaryGroup, devicesEnabledForGroup } from '../repos/pupilDevices';
+
+const DEVICE_COOKIE = 'pupil_device';
 
 export async function pupilAccessEnabled(): Promise<boolean> {
   return (await getSetting('pupil_access_enabled').catch(() => null)) === 'true';
@@ -43,9 +47,60 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     if (!(await pupilAccessEnabled())) {
       return reply.type('text/html').send(pupilLayout('<section class="pupil-card"><h1>Not available yet</h1><p class="pupil-note">Pupil log-in isn’t switched on. Ask your teacher.</p></section>', csrf));
     }
+    // 9.6 — a remembered device: one-tap "Continue as Alex 👋", with a clear "Not me".
+    const deviceSecret = req.cookies?.[DEVICE_COOKIE];
+    if (deviceSecret && (await marksEnabled())) {
+      const pupilId = await resumeDevice(deviceSecret);
+      const grp = pupilId ? await pupilPrimaryGroup(pupilId) : null;
+      // Re-check the class still allows remembered devices — a teacher who turned it off (and the
+      // revoke) means this device should fall back to the normal login.
+      if (pupilId && grp && (await devicesEnabledForGroup(grp))) {
+        const who = (await getPupilName(pupilId)) ?? 'me';
+        return reply.type('text/html').send(
+          pupilLayout(
+            `<section class="pupil-card"><h1>Continue as ${esc(who)} 👋</h1>
+              <form hx-post="/pupil/resume" hx-target="#pupil-step" hx-swap="outerHTML">
+                <input type="hidden" name="_csrf" value="${esc(csrf)}">
+                <button type="submit" class="pupil-go" id="pupil-step">Continue →</button>
+              </form>
+              <p><a class="link" href="/pupil/forget">Not me — someone else</a></p></section>`,
+            csrf,
+          ),
+        );
+      }
+    }
     const timedOut = z.object({ timeout: z.string().optional() }).safeParse(req.query);
     const note = timedOut.success && timedOut.data.timeout ? 'You were logged out after a break. Log in again to carry on.' : undefined;
     return reply.type('text/html').send(pupilLayout(codeForm(csrf, note), csrf));
+  });
+
+  // Resume a remembered device → restore the pupil session (pupilId only; class via enrolment).
+  app.post('/pupil/resume', { preHandler: app.csrfProtection }, async (req, reply) => {
+    if (!(await marksEnabled())) return reply.redirect('/pupil');
+    const secret = req.cookies?.[DEVICE_COOKIE];
+    const pupilId = secret ? await resumeDevice(secret) : null;
+    if (!pupilId) {
+      reply.clearCookie(DEVICE_COOKIE, { path: '/' });
+      return reply.redirect('/pupil');
+    }
+    const groupId = await pupilPrimaryGroup(pupilId);
+    if (!groupId || !(await devicesEnabledForGroup(groupId))) {
+      reply.clearCookie(DEVICE_COOKIE, { path: '/' });
+      reply.header('HX-Redirect', '/pupil');
+      return reply.type('text/html').send('');
+    }
+    req.session.set('authed', true);
+    req.session.set('role', 'pupil');
+    req.session.set('pupilId', pupilId);
+    req.session.set('pupilGroupId', groupId);
+    req.session.set('lastSeen', Date.now());
+    reply.header('HX-Redirect', '/me');
+    return reply.type('text/html').send('');
+  });
+
+  app.get('/pupil/forget', async (_req, reply) => {
+    reply.clearCookie(DEVICE_COOKIE, { path: '/' });
+    return reply.redirect('/pupil');
   });
 
   app.post('/pupil/names', { preHandler: app.csrfProtection }, async (req, reply) => {

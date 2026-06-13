@@ -669,6 +669,49 @@ tokenised before egress. The redaction roster includes **inactive** pupils for e
 reason, and name matching is **Unicode-aware** (accented names like José/Zoë are bounded
 correctly, where JS `\b` previously failed open).
 
+## L. Phase 9 — auto-marking & the results loop (migration `0022`)
+
+```text
+mark_schemes(id, resource_id FK→resources ON DELETE CASCADE, version_no,
+             source CHECK(generated|derived|teacher), status CHECK(draft|ready),
+             UNIQUE(resource_id, version_no))        -- one scheme per worksheet resource version
+
+mark_scheme_points(id, mark_scheme_id FK ON DELETE CASCADE,
+             field_key,                               -- SAME keys as pupil_answers ("t2.r3.c1")
+             kind CHECK(tick|choice|exact|numeric|keyword|open),
+             expected, alternatives TEXT[], marks, required, display_order)
+
+pupil_marks(id, pupil_answer_id FK→pupil_answers ON DELETE CASCADE UNIQUE,
+             marks_awarded, marks_total, points_hit BIGINT[], evidence TEXT[],
+             marker CHECK(auto|ai|teacher), confidence NUMERIC(3,2),
+             status CHECK(suggested|confirmed), needs_review, feedback, history JSONB, updated_at)
+
+pupil_lesson_comments(pupil_id FK, occurrence_course_id FK, comment, updated_at,
+             UNIQUE(pupil_id, occurrence_course_id)) -- the teacher's comment back
+
+pupil_devices(id, pupil_id FK ON DELETE CASCADE, token_hash UNIQUE, label,
+             last_used_at, expires_at, created_at)   -- "stay signed in" (sha256 of the cookie secret)
+
+pupil_profiles(pupil_id PK FK, digest, updated_at)   -- "what works for me" (pupil-keyed bridge)
+
+-- plus: occurrence_courses.marks_released_at TIMESTAMPTZ                 (the hold-mode release)
+--       group_courses.marking_trigger  CHECK(on_done|manual)   DEFAULT on_done
+--       group_courses.results_mode     CHECK(instant|on_release) DEFAULT instant
+--       group_courses.show_scores      BOOLEAN DEFAULT false      (ticks-only by default)
+--       group_courses.devices_enabled  BOOLEAN DEFAULT false      (remembered devices off by default)
+```
+
+The whole surface is gated by the `pupil_marks_enabled` setting (the 9.0 DPIA-addendum gate, off
+by default, requires acknowledging DPO/SLT sign-off + pupil access already on). **Marking resolves
+the scheme via the lesson instance** (`occurrence_course → bound plan → the class's current
+worksheet resource + version`), matching answers by `field_key` — not via `pupil_answers.resource_id`
+(nullable provenance). **AI open-answer marking sends anonymous, slot-lettered per-question batches**
+(no pupil id/name; the slot→pupil map stays server-side) through the one wrapper; **guard-matched
+answers are withheld from the AI entirely** and flagged for the teacher. Pupils see **only confirmed
+marks**, gated by the per-class `results_mode` (instant on confirm, or held until `marks_released_at`
+is set). `pupil_profiles`/`pupil_devices` are **pupil-keyed** with no teacher/class binding — the
+multi-teacher forward-compat choice (PHASE_9_PLAN §13).
+
 ## Key modelling decisions (for discussion)
 
 1. **Plan vs. occurrence are separate.** `lesson_plans` are reusable; `lesson_occurrences`

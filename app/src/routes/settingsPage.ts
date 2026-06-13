@@ -12,6 +12,7 @@ import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
 import { createTaAccount, deleteTaAccount, listTaAccounts, setTaAccountActive, setTaAccountPassword, type TaAccount } from '../repos/taAccounts';
 import { invalidatePupilCfg } from '../auth/pupilAccessCache';
+import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
@@ -51,13 +52,15 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('email_last_poll'),
         getSetting('ai_api_key'),
       ]);
-      const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows] = await Promise.all([
+      const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck] = await Promise.all([
         getSetting('pupil_access_enabled'),
         getSetting('pupil_idle_minutes'),
         getSetting('pupil_dpia_ack'),
         getSetting('ta_password_hash'),
         listTaAccounts(),
         pool.query<{ id: number; name: string }>(`SELECT id, name FROM staff WHERE NOT is_self ORDER BY name`).then((r) => r.rows),
+        getSetting('pupil_marks_enabled'),
+        getSetting('pupil_marks_dpia_ack'),
       ]);
       const health = (
         await pool.query<{ years: number; current: string | null; aiMonth: number; dbMb: number }>(`
@@ -172,6 +175,30 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             <span class="muted">(classroom-only use → relaxed default)</span></label>
           <span class="note-status" id="pupil-status"></span>
         </div>
+
+        <h2>Auto-marking</h2>
+        <p class="muted">Marks pupils' answers (objective answers instantly; written answers AI-suggested, you confirm),
+          shows released results on the pupil's screen, builds "what works for me" profiles, and can remember a pupil's
+          device. Per-class settings (mark-as-they-finish vs on a button; show scores or ticks-only; remembered devices)
+          live on each lesson's <em>Pupil work</em> panel.</p>
+        ${
+          marksOn === 'true'
+            ? `<p class="adapt-note">✅ Auto-marking is <strong>enabled</strong>${marksAck ? ` (DPIA addendum acknowledged ${esc(marksAck.slice(0, 10))})` : ''}.
+                <button type="button" class="link danger" hx-post="/settings/marks-access" hx-vals='{"enable":"false"}' hx-swap="none" hx-on::after-request="location.reload()">Disable</button></p>`
+            : `<div class="setup-add">
+                <p class="muted"><strong>Off by default — the DPIA addendum gate.</strong> Auto-marking stores per-pupil
+                  attainment, sends <em>anonymised</em> answer text to the AI for marking, and issues a remembered-device
+                  credential — each a new data-protection consideration. The DPIA addendum (docs/DPIA.md) must be completed
+                  and <strong>signed by the DPO and SLT</strong> before enabling. Requires pupil access already on.</p>
+                <form hx-post="/settings/marks-access" hx-target="#marks-access-result" hx-swap="innerHTML"
+                      hx-on::after-request="if(event.detail.successful)location.reload()">
+                  <input type="hidden" name="enable" value="true">
+                  <label><input type="checkbox" name="ack" value="yes" required> the DPIA addendum has been signed off by the DPO and SLT</label>
+                  <button type="submit" class="btn-secondary">Enable auto-marking</button>
+                </form>
+                <div id="marks-access-result"></div>
+              </div>`
+        }
 
         <h2>Email intake</h2>
         <p class="muted">Emails arriving in this mailbox become inbox tasks automatically (the paste box still works too).
@@ -351,6 +378,24 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
       await setSetting('pupil_access_enabled', 'false');
     }
     invalidatePupilCfg(); // take effect immediately — the kill-switch must evict live sessions at once
+    return reply.send('');
+  });
+
+  // ── Auto-marking (9.0): the DPIA-addendum gate ────────────────────────────────────────────
+  app.post('/settings/marks-access', guard, async (req, reply) => {
+    const b = z.object({ enable: z.enum(['true', 'false']), ack: z.string().optional() }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    if (b.data.enable === 'true') {
+      if (b.data.ack !== 'yes') return reply.code(400).type('text/html').send('<p class="error">Tick the DPIA addendum sign-off box first.</p>');
+      if ((await getSetting('pupil_access_enabled').catch(() => null)) !== 'true') {
+        return reply.code(400).type('text/html').send('<p class="error">Turn on pupil access first — pupils must be able to answer before there is anything to mark.</p>');
+      }
+      await setSetting('pupil_marks_enabled', 'true');
+      await setSetting('pupil_marks_dpia_ack', new Date().toISOString());
+    } else {
+      await setSetting('pupil_marks_enabled', 'false');
+    }
+    invalidateMarksGate();
     return reply.send('');
   });
 

@@ -17,12 +17,16 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 > live; lessons default to **3-level differentiation** (Support/Core/Challenge around each
 > class's recorded ability midpoint), generated resources preview/present in-browser and export
 > to Word, and an in-lesson tracker doubles as the stopping point. Log in over the LAN
-> (`./start.sh`). **Phase 8 — pupil logins** is now **built** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)):
+> (`./start.sh`). **Phases 8 and 9 are now built.** **Phase 8 — pupil logins** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)):
 > pupils log in (class code → tap your name → PIN) and fill in their worksheet **sliced to their
-> level**, with a Done ✓ and a tap-the-faces feedback widget; the teacher gets a live completion
-> grid and an AI "summarise the class's work" that feeds the adapt loop — all behind a
-> **DPIA-gated master switch that is off until DPO/SLT sign-off is confirmed**. Next:
-> **auto-marking & the results loop** ([docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)).
+> level**, with a Done ✓ and a tap-the-faces feedback widget. **Phase 9 — auto-marking & the
+> results loop** ([docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)): objective answers mark themselves,
+> written answers are AI-suggested (anonymous per-question batches, safety-gated) for the teacher to
+> confirm; released results show on the pupil's screen (ticks-only by default); marks feed the adapt
+> loop, a printable answer pack, CSV export and per-pupil "what works for me" profiles; pupils can
+> "stay signed in on this computer". Both sit behind **DPIA-gated master switches that are off until
+> DPO/SLT sign-off is confirmed**. Beyond: the parked **multi-teacher** v2
+> ([docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md)).
 
 ## The one-sentence pitch
 

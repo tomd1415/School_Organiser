@@ -191,7 +191,12 @@ teaching-context — behind a deny-by-default pupil role.
 teacher to confirm DPO/SLT DPIA sign-off, so 8.0 (the external gate) still governs real use. 8.8
 became [Phase 9](PHASE_9_PLAN.md).*
 
-## Phase 9 — Auto-marking & the results loop *(planned 2026-06-12 — see [PHASE_9_PLAN.md](PHASE_9_PLAN.md))*
+## Phase 9 — Auto-marking & the results loop *(BUILT 2026-06-13 — see [PHASE_9_PLAN.md](PHASE_9_PLAN.md))*
+
+*Status 2026-06-13: 9.1–9.8 built and tested (migration 0022; 232 unit / 141 integration green).
+**Auto-marking is OFF by default** — the `pupil_marks_enabled` master switch requires confirming
+the DPIA-addendum sign-off (and pupil access already on), so 9.0 still governs real use. 9.9
+(retrieval-practice starters) remains a stretch.*
 
 **Goal:** the answers Phase 8 collects mark themselves, and the results flow back out — to
 pupils, kindly, and into planning, precisely. **Mark schemes as data** beside every generated

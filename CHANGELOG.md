@@ -7,6 +7,56 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 9 BUILT: auto-marking & the results loop (9.1–9.8)
+
+- **Migration `0022`** adds `mark_schemes`, `mark_scheme_points`, `pupil_marks`,
+  `pupil_lesson_comments`, `pupil_devices`, `pupil_profiles`, and per-class columns on
+  `group_courses` (`marking_trigger`, `results_mode`, `show_scores`, `devices_enabled`) +
+  `occurrence_courses.marks_released_at`.
+- **9.1 Mark schemes as data** — AI "derive scheme" from the worksheet (+ answers doc) into
+  structured points, plus an inline scheme editor (kind / expected / alternatives / marks, mark
+  ready). Schemes are keyed to the worksheet **resource version**.
+- **9.2 Deterministic marking** ([deterministicMarker.ts](../app/src/lib/deterministicMarker.ts),
+  pure + 11 tests) — tick / choice / exact / numeric (strict-after-parsing) / keyword
+  (word-bounded, multi-point), instant and AI-free.
+- **9.3 AI marking of open answers** — anonymous **slot-lettered per-question batches** (no pupil
+  id/name) through the one wrapper; a **safety gate** ([markSafetyGate.ts](../app/src/lib/markSafetyGate.ts),
+  8 tests) flags low confidence / hallucinated evidence / clipped marks; a **content guard**
+  withholds safeguarding/injection-matched answers from the AI and routes them to "needs your
+  eyes". Trigger is per-class: **as pupils finish** (Done ✓ → objective now, open AI pass
+  debounced ~2 min into per-question batches) or **batch-on-button**.
+- **9.4 Review/confirm/release** — marks land in the *Pupil work* grid as amber suggestions;
+  confirm-all-confident or per-pupil confirm; tap-to-**override** (audited in `history`); per-pupil
+  **comment back**; per-class **instant-on-confirm** vs **hold-until-Release** visibility.
+- **9.5 Results on `/me`** — ✓/✗/◐ per answer + a "try this" line + the teacher's comment;
+  **ticks-only by default**. Pupils see **only confirmed** marks, visibility-gated.
+- **9.6 Stay signed in** — a pupil-bound device cookie (random secret, **sha256 at rest**,
+  ~term expiry, "Continue as … / Not me"), per-class enabled; teacher device list + revoke;
+  **PIN-reset / disable cascade-revokes** all of a pupil's devices.
+- **9.7** — mark-aware class summary (per-question full/partial/none folded into the existing
+  `ai_summary` note that the adapt loop reads), a **printable answer pack**, and a **marks CSV**.
+- **9.8 "What works for me" profiles** — per-pupil AI digest from feedback + marks history (no
+  name to the AI), shown + rebuildable on the read-back.
+- **Gated by `pupil_marks_enabled`** (the 9.0 DPIA-addendum master switch, off by default,
+  requires acknowledging DPO/SLT sign-off **and** pupil access already on). Marking resolves the
+  scheme via the **lesson instance**, never the nullable `pupil_answers.resource_id`.
+- **Tests**: deterministic marker (11) + safety gate (8) unit; a marking-pipeline integration
+  suite (deterministic marking, confirm, instant-vs-hold visibility, override, device
+  round-trip + revoke cascade, scheme-by-version). **232 unit / 141 integration green; typecheck
+  clean.** Docs updated (PHASE_9_PLAN status + as-built notes, README, ROADMAP, DATA_MODEL §L,
+  SECURITY data rows, DPIA in-code gate). 9.9 (retrieval-practice starters) left as a stretch.
+- **Adversarial review (4 lenses) → 12 fixes, no high-severity** (the AI-boundary lens confirmed
+  clean: the slot→pupil map stays server-side, guard withholds correctly, no name egress).
+  Fixed: the debounced open-marking pass now **re-checks the gate** before any AI call (can't fire
+  after auto-marking is turned off); marking resolves the scheme against the **version the pupils
+  answered** (not silently the current one); turning a class's remembered-devices **off now
+  revokes** existing devices and resume re-checks the policy; **archiving a pupil revokes** their
+  devices and `resumeDevice` requires an active pupil + enabled credential; per-pupil "confirm"
+  no longer bulk-confirms **needs-review** marks; `overrideMark` + scheme-point edits are **scoped
+  to the authorised pupil/lesson**; the **marks CSV neutralises formula-injection**; partial AI
+  failure is **surfaced** not swallowed; migration `0023` makes `mark_schemes.resource_id`
+  **ON DELETE SET NULL** (the 0020 footgun again).
+
 ### 2026-06-13 — Phase 9 reconciled with the multi-teacher future + forward-compat tests
 
 - **Verdict (independent three-lens audit): the multi-teacher v2 forces NO structural change to

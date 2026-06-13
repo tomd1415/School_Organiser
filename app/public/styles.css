@@ -738,3 +738,50 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
   .ws-answer-cell { min-width: 0; }
   .pupil-names { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Phase 9: auto-marking, results, devices ───────────────────────────────────────── */
+.pw-mark { font-variant-numeric: tabular-nums; }
+.mk-review { color: var(--error); font-weight: 700; }
+.mk-sugg { color: #b7791f; }
+.mk-released { opacity: 0.8; }
+.pw-gate { font-size: 0.85rem; }
+.pw-marking { margin-top: 0.6rem; border-top: 1px dashed var(--line); padding-top: 0.5rem; }
+.pw-mark-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+.pw-mark-settings { margin-top: 0.4rem; font-size: 0.88rem; }
+.pw-mark-settings label { display: block; margin: 0.25rem 0; }
+.scheme-editor { margin-top: 0.5rem; border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem; }
+.scheme-field { margin: 0.5rem 0; }
+.scheme-pt { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: 0.2rem 0; }
+.scheme-pt input { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 0.2rem 0.4rem; }
+.scheme-pt input:nth-of-type(1) { flex: 2; min-width: 8rem; }
+.scheme-pt input:nth-of-type(2) { flex: 1; min-width: 6rem; }
+.pw-marks { margin: 0.5rem 0; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; }
+.pw-markrow { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; padding: 0.2rem 0; border-bottom: 1px solid var(--line); }
+.pw-markrow .mk-fb { flex-basis: 100%; color: var(--muted); font-size: 0.85rem; }
+.mk-override { width: 3.5rem; font: inherit; }
+.pw-comment { display: block; margin-top: 0.5rem; }
+.pw-comment textarea { width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.5rem; }
+.pw-profile { margin-top: 0.5rem; border-top: 1px dashed var(--line); padding-top: 0.4rem; }
+
+/* Pupil results card */
+.pupil-results { background: #f3faf3; border: 2px solid #cfe8cf; border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+.pupil-results h2 { margin: 0 0 0.5rem; font-size: 1.3rem; }
+.rc-total { float: right; font-size: 1.1rem; color: #2f7d32; }
+.rc-comment { background: #fffef8; border: 1px solid #e8e2c8; border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 1.05rem; }
+.rc-list { list-style: none; padding: 0; }
+.rc-item { padding: 0.45rem 0; border-bottom: 1px solid #dceadc; font-size: 1.05rem; }
+.rc-ok { color: #2f7d32; font-weight: 700; font-size: 1.3rem; }
+.rc-no { color: #c0392b; font-weight: 700; font-size: 1.3rem; }
+.rc-part { color: #b7791f; font-weight: 700; font-size: 1.3rem; }
+.rc-fb { color: var(--muted); font-size: 0.95rem; margin-top: 0.2rem; }
+.rc-score { color: var(--muted); }
+
+/* Device "stay signed in" */
+.pupil-remember { background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 0.3rem 0.7rem; font-size: 0.9rem; }
+.pupil-remembered { color: #2f7d32; font-size: 0.9rem; }
+
+/* Answer pack */
+.answer-pack { display: grid; gap: 0.5rem; padding: 0.5rem; }
+.ap-q { border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 0.8rem; page-break-inside: avoid; }
+.ap-qh { font-weight: 700; }
+.ap-a { margin: 0.3rem 0; }

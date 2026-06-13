@@ -46,3 +46,20 @@ export async function getLessonWorksheet(groupCourseId: number, lessonPlanId: nu
     return null;
   }
 }
+
+/** The markdown of a sibling lesson document of a given kind (e.g. 'answers'), class-copy preferred,
+ * else the master plan's. Used to feed mark-scheme derivation. Null if none. */
+export async function getLessonDocMarkdown(groupCourseId: number, lessonPlanId: number, kind: string): Promise<string | null> {
+  const adaptation = await getAdaptation(groupCourseId, lessonPlanId);
+  let res: LinkedResource | undefined;
+  if (adaptation) res = (await listResourcesForAdaptation(adaptation.id)).find((r) => r.kind === kind);
+  if (!res) res = (await listResourcesForPlan(lessonPlanId)).find((r) => r.kind === kind);
+  if (!res) return null;
+  const v = await getCurrentVersion(res.resourceId);
+  if (!v) return null;
+  try {
+    return (await readStored(v.storagePath)).toString('utf8');
+  } catch {
+    return null;
+  }
+}

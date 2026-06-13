@@ -21,6 +21,13 @@ import {
 } from '../repos/pupilWork';
 import { pupilLayout, pupilAccessEnabled } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
+import { marksEnabled } from '../auth/marksGate';
+import { pupilLessonResults, type PupilResults } from '../services/marking';
+import { onPupilDone } from '../services/markingQueue';
+import { devicesEnabledForGroup, rememberDevice, newDeviceSecret } from '../repos/pupilDevices';
+import { appConfig } from '../config/app';
+
+const DEVICE_COOKIE = 'pupil_device';
 
 export const ACTIVITY_CHIPS = ['practical', 'typing', 'cards', 'video', 'drawing', 'talking', 'worksheet', 'quiz', 'games', 'reading'];
 const FACES = [
@@ -77,6 +84,23 @@ function feedbackWidget(oc: number, fb: { rating: number | null; liked: string; 
   </form>`;
 }
 
+// 9.5 — a pupil's released results: a kind comment, then big ✓/✗/◐ per answer with a "try this"
+// line. Ticks-only by default (no scores) — two-stars-and-a-wish, never any class comparison.
+function resultsCard(r: PupilResults): string {
+  const mark = (a: number, t: number): string => (t > 0 && a >= t ? '<span class="rc-ok">✓</span>' : a <= 0 ? '<span class="rc-no">✗</span>' : '<span class="rc-part">◐</span>');
+  const items = r.items
+    .map(
+      (i) => `<li class="rc-item">${mark(i.awarded, i.total)} <span class="rc-q">${esc(i.label)}</span>${r.showScores ? ` <span class="rc-score">${i.awarded}/${i.total}</span>` : ''}
+        ${i.feedback ? `<div class="rc-fb">${esc(i.feedback)}</div>` : ''}</li>`,
+    )
+    .join('');
+  return `<section class="pupil-results">
+    <h2>Your feedback ${r.showScores ? `<span class="rc-total">${r.awarded}/${r.total}</span>` : ''}</h2>
+    ${r.comment ? `<p class="rc-comment">💬 ${esc(r.comment)}</p>` : ''}
+    <ul class="rc-list">${items}</ul>
+  </section>`;
+}
+
 function doneBlock(oc: number, done: boolean): string {
   return `<div class="pupil-done" id="done-${oc}">
     ${
@@ -115,7 +139,14 @@ export function registerMeRoutes(app: FastifyInstance): void {
         if (id) lesson = { lessonId: id, date: state.nextTeaching.date };
       }
 
+      // "Stay signed in on this computer" — only when auto-marking is on and the class allows it,
+      // and not already remembered on this device.
+      const canRemember = !req.cookies?.[DEVICE_COOKIE] && (await marksEnabled()) && groupId > 0 && (await devicesEnabledForGroup(groupId));
+      const remember = canRemember
+        ? `<button class="pupil-remember" hx-post="/me/remember" hx-target="this" hx-swap="outerHTML">Stay signed in on this computer</button>`
+        : '';
       const head = `<header class="pupil-top"><span class="pupil-hi">Hi ${esc(name)}</span>
+        ${remember}
         <form method="post" action="/logout" class="inline"><input type="hidden" name="_csrf" value="${esc(csrf)}"><button class="pupil-logout">Log out</button></form></header>`;
 
       if (!lesson) {
@@ -141,7 +172,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
                   getPupilFeedback(pupilId, oc),
                 ]);
                 const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}` });
-                inner = `<div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
+                inner = `${results ? resultsCard(results) : ''}<div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
               }
             }
             if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
@@ -186,8 +218,24 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const b = z.object({ done: z.enum(['true', 'false']) }).safeParse(req.body);
     if (!q.success || !b.success) return reply.code(400).send('');
     if (!(await pupilOwnsOccurrenceCourse(pupilId, q.data.oc))) return reply.code(403).send('');
-    await setDone(pupilId, q.data.oc, b.data.done === 'true');
-    return reply.type('text/html').send(doneBlock(q.data.oc, b.data.done === 'true'));
+    const done = b.data.done === 'true';
+    await setDone(pupilId, q.data.oc, done);
+    // "Mark as pupils finish" (Q34): tapping Done triggers marking (objective now; open debounced).
+    if (done) await onPupilDone(q.data.oc).catch(() => {});
+    return reply.type('text/html').send(doneBlock(q.data.oc, done));
+  });
+
+  app.post('/me/remember', { preHandler: app.csrfProtection }, async (req, reply) => {
+    const pupilId = Number(req.session.get('pupilId') ?? 0);
+    if (req.session.get('role') !== 'pupil' || !pupilId) return reply.code(401).send('');
+    if (!(await marksEnabled())) return reply.code(403).send('');
+    const groupId = Number(req.session.get('pupilGroupId') ?? 0);
+    if (!groupId || !(await devicesEnabledForGroup(groupId))) return reply.code(403).send('');
+    const secret = newDeviceSecret();
+    const ua = String(req.headers['user-agent'] ?? '').slice(0, 40);
+    await rememberDevice(pupilId, secret, ua || 'this computer');
+    reply.setCookie(DEVICE_COOKIE, secret, { path: '/', httpOnly: true, sameSite: 'strict', secure: appConfig.COOKIE_SECURE, maxAge: 120 * 24 * 60 * 60 });
+    return reply.type('text/html').send('<span class="pupil-remembered">✓ This computer will remember you</span>');
   });
 
   app.post('/me/feedback', { preHandler: app.csrfProtection }, async (req, reply) => {
