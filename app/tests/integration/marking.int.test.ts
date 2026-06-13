@@ -6,9 +6,12 @@ import { storeBuffer, checksum, relPathFor } from '../../src/lib/resourceStore';
 import { saveAnswer } from '../../src/repos/pupilWork';
 import {
   upsertScheme, markSummaries, confirmAllConfident, getMarkingSettings, setMarkingSetting,
-  releaseMarks, overrideMark, marksForPupil, answersForMarking, getScheme,
+  releaseMarks, overrideMark, marksForPupil, answersForMarking, getScheme, confirmMarksForPupil,
 } from '../../src/repos/marking';
-import { markObjective, pupilLessonResults } from '../../src/services/marking';
+import { markObjective, markOpen, pupilLessonResults } from '../../src/services/marking';
+import { classAnswers } from '../../src/repos/pupilWork';
+import { guardMatch } from '../../src/lib/markSafetyGate';
+import { invalidateMarksGate } from '../../src/auth/marksGate';
 import { rememberDevice, resumeDevice, revokeAllDevices, newDeviceSecret, deviceCount } from '../../src/repos/pupilDevices';
 
 // Phase 9 marking pipeline against the dev DB. AI-free: deterministic marking, confirm, release,
@@ -137,5 +140,53 @@ describe('Phase 9 marking pipeline (integration)', () => {
     expect(s!.scheme.status).toBe('ready');
     expect(s!.points).toHaveLength(2);
     expect(await answersForMarking(oc)).toHaveLength(2);
+  });
+});
+
+// The invariants that, if broken, would either send a child's words to the AI or mis-attribute a
+// mark. Deliberately AI-free (the env key is empty) — each asserts the GATE/scope, not the model.
+describe('Phase 9 marking — safety invariants (integration)', () => {
+  it('markOpen sends NOTHING to the AI when the marks gate is off (returns "nothing", not "unavailable")', async () => {
+    await setSetting('pupil_marks_enabled', 'false');
+    invalidateMarksGate();
+    const r = await markOpen(oc);
+    // "nothing" means the gate short-circuited BEFORE any prepare/AI path (which would say
+    // "unavailable" for the empty key) — so the gate, not the missing key, is what stopped it.
+    expect(r.status).toBe('nothing');
+    expect(r.marked).toBe(0);
+    await setSetting('pupil_marks_enabled', 'true');
+    invalidateMarksGate();
+  });
+
+  it('confirmMarksForPupil confirms confident marks but never the ones flagged needs_review', async () => {
+    // Reset this pupil's two marks to suggested, and flag the tick as needing the teacher's eyes.
+    await pool.query(
+      `UPDATE pupil_marks m SET status='suggested', needs_review = (a.field_key = 'task.1')
+       FROM pupil_answers a WHERE m.pupil_answer_id = a.id AND a.pupil_id = $1 AND a.occurrence_course_id = $2`,
+      [pupil, oc],
+    );
+    const n = await confirmMarksForPupil(pupil, oc);
+    expect(n).toBe(1); // only the confident keyword mark flips
+    const marks = await marksForPupil(pupil, oc);
+    expect(marks.find((m) => m.fieldKey === 't1.r1.c2')!.status).toBe('confirmed');
+    expect(marks.find((m) => m.fieldKey === 'task.1')!.status).toBe('suggested'); // held back for review
+  });
+
+  it('overrideMark refuses a forged answer id (wrong pupil / non-existent) — 0 rows, no change', async () => {
+    const realId = (await marksForPupil(pupil, oc))[0]!.pupilAnswerId;
+    expect(await overrideMark(realId, pupil + 9_000_000, oc, 99, 'forged')).toBe(0); // right answer, wrong pupil
+    expect(await overrideMark(2_100_000_000, pupil, oc, 99, 'forged')).toBe(0); // answer id that isn't this pupil's
+    const after = (await marksForPupil(pupil, oc)).find((m) => m.pupilAnswerId === realId)!;
+    expect(after.feedback).not.toBe('forged'); // the real mark is untouched
+  });
+
+  it('class-work summary withholds a guard-matched pupil answer from the AI (stored raw, screened at egress)', async () => {
+    // A pupil isn't blocked from typing a disclosure/injection — but the egress screen must drop it.
+    await saveAnswer({ pupilId: pupil, occurrenceCourseId: oc, resourceId, versionNo: 1, fieldKey: 't1.r1.c2', value: 'I want to hurt myself' });
+    const raw = await classAnswers(oc);
+    expect(raw.flatMap((a) => a.answers).join(' | ')).toContain('hurt myself'); // stored, not censored from the teacher
+    // the exact screen the /summarise route applies before building the AI context:
+    const screened = raw.map((a) => ({ ...a, answers: a.answers.filter((v) => !guardMatch(v)) })).filter((a) => a.answers.length > 0);
+    expect(screened.flatMap((a) => a.answers).join(' | ')).not.toContain('hurt myself');
   });
 });

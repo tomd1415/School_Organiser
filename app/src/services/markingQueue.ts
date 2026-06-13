@@ -17,7 +17,7 @@ export async function onPupilDone(occurrenceCourseId: number): Promise<void> {
   if (!oc) return;
   if ((await getMarkingSettings(oc.groupCourseId)).markingTrigger !== 'on_done') return;
 
-  await markObjective(occurrenceCourseId).catch(() => {}); // instant, no AI
+  await markObjective(occurrenceCourseId).catch((e) => console.error('[marking] objective pass failed:', (e as Error).message)); // instant, no AI
 
   // In tests, run the open pass inline (AI is forced off, so it's a no-op) — no dangling timers.
   if (appConfig.NODE_ENV === 'test') {
@@ -28,7 +28,12 @@ export async function onPupilDone(occurrenceCourseId: number): Promise<void> {
   if (existing) clearTimeout(existing);
   const t = setTimeout(() => {
     timers.delete(occurrenceCourseId);
-    void markOpen(occurrenceCourseId).catch(() => {});
+    // Log failures (and a non-ok status) so a class's written answers can't silently go unmarked.
+    void markOpen(occurrenceCourseId)
+      .then((r) => {
+        if (r.status === 'unavailable') console.error(`[marking] open pass for oc ${occurrenceCourseId} unavailable: ${r.message ?? ''}`);
+      })
+      .catch((e) => console.error('[marking] open pass failed:', (e as Error).message));
   }, DEBOUNCE_MS);
   t.unref?.(); // don't keep the process alive for a pending mark
   timers.set(occurrenceCourseId, t);

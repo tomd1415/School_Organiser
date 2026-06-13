@@ -421,7 +421,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       model: await modelFor('plan'),
       promptVersion: TERM_SUMMARY_VERSION,
       system: TERM_SUMMARY_SYSTEM,
-      context: notes.map((n) => ({ text: n.body })),
+      context: notes.map((n) => ({ text: n.body, safeguarding: n.safeguarding })),
       instruction: TERM_SUMMARY_INSTRUCTION,
       maxTokens: 1500,
     });

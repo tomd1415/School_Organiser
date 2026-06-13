@@ -58,7 +58,7 @@ async function resolve(occurrenceCourseId: number): Promise<Resolved | null> {
   if (!ws) return null;
   const answersVer = await answersVersionFor(occurrenceCourseId, ws.resourceId);
   const scheme = (answersVer != null ? await getScheme(ws.resourceId, answersVer) : null) ?? (await getScheme(ws.resourceId, ws.versionNo));
-  if (!scheme) return null;
+  if (!scheme || scheme.scheme.status !== 'ready') return null; // never mark against an unreviewed draft
   const pointsByField = new Map<string, SchemePoint[]>();
   for (const p of scheme.points) {
     const arr = pointsByField.get(p.fieldKey) ?? [];

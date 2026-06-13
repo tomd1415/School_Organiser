@@ -673,6 +673,10 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .ws-answer-cell { min-width: 14rem; }
 .ws-input { width: 100%; min-height: 3rem; font: inherit; font-size: 1.05rem; border: 2px solid #cdd6e3; border-radius: 8px; padding: 0.45rem 0.55rem; resize: vertical; background: #fffef8; }
 .ws-input:focus { border-color: var(--accent); outline: none; }
+/* "saved ✓" reassurance: hidden until /me/answer swaps in .show, then fades after a moment */
+.ws-saved { display: inline-block; font-size: 0.85rem; color: #2e7d32; min-height: 1.1em; opacity: 0; transition: opacity 0.2s; }
+.ws-saved.show { opacity: 1; animation: ws-saved-fade 2.4s forwards; }
+@keyframes ws-saved-fade { 0%,60% { opacity: 1; } 100% { opacity: 0; } }
 .ws-checklist { list-style: none; padding: 0; }
 .ws-checklist .md-task { font-size: 1.05rem; padding: 0.3rem 0; }
 .ws-check input { width: 1.3rem; height: 1.3rem; vertical-align: middle; }
@@ -694,7 +698,8 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .chip { font-size: 0.95rem; padding: 0.35rem 0.7rem; border: 2px solid var(--line); border-radius: 999px; cursor: pointer; }
 .chip input { position: absolute; opacity: 0; }
-.chip.on { border-color: var(--accent); background: #eef4ff; }
+/* .on is the server-rendered state; :has(:checked) gives INSTANT feedback on tap (no round-trip) */
+.chip.on, .chip:has(input:checked) { border-color: var(--accent); background: #eef4ff; }
 .fb-comment { display: block; margin-top: 0.6rem; font-weight: 600; }
 .fb-comment textarea { width: 100%; font: inherit; font-weight: 400; border: 2px solid var(--line); border-radius: 8px; padding: 0.4rem 0.5rem; margin-top: 0.2rem; }
 

@@ -376,6 +376,10 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
       await setSetting('pupil_dpia_ack', new Date().toISOString());
     } else {
       await setSetting('pupil_access_enabled', 'false');
+      // Cascade: marks can't exist without access, and "marks on / access off" is an inconsistent
+      // state the enable path already forbids. Force marks off too so the gates can't diverge.
+      await setSetting('pupil_marks_enabled', 'false');
+      invalidateMarksGate();
     }
     invalidatePupilCfg(); // take effect immediately — the kill-switch must evict live sessions at once
     return reply.send('');

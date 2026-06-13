@@ -210,9 +210,16 @@ function textControl(key: string, label: string, placeholder: string, opts: Work
       ? `<div class="ws-answer">${esc(value)}</div>`
       : `<div class="ws-answer ws-empty">—</div>`;
   }
+  // A per-field "saved ✓" reassurance (updated by an OOB swap from /me/answer) — anxious pupils
+  // need to see their typing was kept.
   return `<textarea class="ws-input" name="value" rows="2" placeholder="${esc(placeholder || 'Type your answer here')}"
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"
-    aria-label="${esc(label || 'answer')}">${esc(value)}</textarea>`;
+    aria-label="${esc(label || 'answer')}">${esc(value)}</textarea><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+}
+
+/** The OOB "saved ✓" span /me/answer returns so the field that just saved confirms instantly. */
+export function savedTick(key: string): string {
+  return `<span class="ws-saved show" id="ws-sv-${esc(key)}" aria-live="polite" hx-swap-oob="true">saved ✓</span>`;
 }
 
 function checkControl(key: string, label: string, opts: WorksheetOptions): string {
@@ -251,25 +258,35 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const answerColHasEmptyBody = answerCol.some((isA, c) => isA && bodyRows.some((r) => (r[c] ?? '').trim() === ''));
   const headerIsData = headerHasPlaceholder && !answerColHasEmptyBody;
 
-  const inputRows = headerIsData ? [header, ...bodyRows] : bodyRows;
   const theadCells = headerIsData ? null : header;
+  // Iterate the FULL column count (header or widest row) so a ragged row missing its trailing
+  // answer cell still gets an input in the answer column, not an unanswerable blank.
+  const colCount = Math.max(header.length, ...bodyRows.map((r) => r.length), 0);
 
-  const out: string[] = ['<table class="ws-table">'];
-  if (theadCells) out.push(`<thead><tr>${theadCells.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`);
-  out.push('<tbody>');
-  inputRows.forEach((row, r) => {
-    const rowNo = r + 1;
-    const tds = row.map((cell, c) => {
+  // Keys must be STABLE across the header-vs-data classification flip (a re-version that flips it
+  // must NOT renumber body rows and mis-attach saved answers/marks). So body rows are ALWAYS
+  // numbered among body rows (r1, r2, …) regardless of the flip, and a header rendered as a data
+  // row (name/date layout) gets the fixed key r0. Only the header input appears/disappears on a
+  // flip; body-row keys never move.
+  const renderRow = (row: string[], rowNo: number): string => {
+    const tds = Array.from({ length: colCount }, (_, c) => {
+      const cell = row[c] ?? '';
       const colNo = c + 1;
       const isInput = answerCol[c] || PLACEHOLDER.test(cell);
       if (!isInput) return `<td>${esc(cell)}</td>`;
       const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
-      const label = row.find((x, idx) => idx !== c && !PLACEHOLDER.test(x)) ?? (theadCells?.[c] ?? '');
+      const label = row.find((x, ci) => ci !== c && !PLACEHOLDER.test(x)) ?? (theadCells?.[c] ?? '');
       fields.push({ key, kind: 'text', level: block.level, label });
       return `<td class="ws-answer-cell">${textControl(key, label, PLACEHOLDER.test(cell) ? cell : '', opts)}</td>`;
     });
-    out.push(`<tr>${tds.join('')}</tr>`);
-  });
+    return `<tr>${tds.join('')}</tr>`;
+  };
+
+  const out: string[] = ['<table class="ws-table">'];
+  if (theadCells) out.push(`<thead><tr>${theadCells.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`);
+  out.push('<tbody>');
+  if (headerIsData) out.push(renderRow(header, 0)); // header-as-data is the fixed r0 row
+  bodyRows.forEach((row, i) => out.push(renderRow(row, i + 1)));
   out.push('</tbody></table>');
   return out.join('');
 }

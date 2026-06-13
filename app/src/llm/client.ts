@@ -86,19 +86,26 @@ function estimateCostPence(model: string, inTok: number, outTok: number): number
 }
 
 async function audit(req: LlmRequest, fields: Partial<AiCallRecord> & Pick<AiCallRecord, 'status'>): Promise<void> {
-  await insertAiCall({
-    feature: req.feature,
-    provider: PROVIDER,
-    model: req.model,
-    promptVersion: req.promptVersion ?? null,
-    requestRedacted: {},
-    response: null,
-    inputTokens: null,
-    outputTokens: null,
-    costPence: null,
-    error: null,
-    ...fields,
-  });
+  // The audit write must NEVER throw into the caller — otherwise a failed insert after a SUCCESSFUL
+  // (billed) provider call would be caught by the caller's try and re-logged as an 'error',
+  // discarding correct output and undercounting spend. Swallow + log instead.
+  try {
+    await insertAiCall({
+      feature: req.feature,
+      provider: PROVIDER,
+      model: req.model,
+      promptVersion: req.promptVersion ?? null,
+      requestRedacted: {},
+      response: null,
+      inputTokens: null,
+      outputTokens: null,
+      costPence: null,
+      error: null,
+      ...fields,
+    });
+  } catch (err) {
+    console.error('[ai audit] failed to record ai_calls row:', (err as Error).message);
+  }
 }
 
 type Prep =

@@ -45,14 +45,21 @@ export function gateMark(input: GateInput): GateVerdict {
   const reasons: string[] = [];
   let marks = input.marksAwarded;
 
+  // A non-finite mark (NaN/±∞ from a malformed AI number) would slip past the >total / <0 clamps
+  // below (both comparisons are false for NaN) and get stored as-is. Force it to 0 and flag.
+  if (!Number.isFinite(marks)) {
+    reasons.push('invalid mark → 0');
+    marks = 0;
+  }
   if (marks > input.marksTotal) {
     reasons.push(`clipped ${marks}→${input.marksTotal}`);
     marks = input.marksTotal;
   }
   if (marks < 0) marks = 0;
 
-  if (input.confidence < CONFIDENCE_FLOOR) {
-    reasons.push(`low confidence ${input.confidence.toFixed(2)}`);
+  // A non-finite confidence likewise wouldn't trip the floor (NaN < 0.6 is false) — treat as untrusted.
+  if (!(input.confidence >= CONFIDENCE_FLOOR)) {
+    reasons.push(`low confidence ${Number.isFinite(input.confidence) ? input.confidence.toFixed(2) : '?'}`);
   }
   // Evidence must be a real (case-insensitive) substring of the answer when marks were awarded.
   if (marks > 0) {

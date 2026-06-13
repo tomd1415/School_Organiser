@@ -5,6 +5,21 @@ import { pool } from '../db/pool';
 
 export type Level = 'support' | 'core' | 'challenge';
 
+/** The one authorisation predicate: may this pupil access this occurrence-course? True iff the
+ * oc's group is one the pupil is actively enrolled in. Used both pupil-side (writing answers in
+ * /me) and teacher-side (acting on a :pid in the review grid) so a stray/out-of-class id can't be
+ * read or written. Kept here, in one place, rather than re-spelled per route. */
+export async function pupilCanAccessOc(pupilId: number, occurrenceCourseId: number): Promise<boolean> {
+  const { rows } = await pool.query<{ n: number }>(
+    `SELECT count(*)::int n FROM occurrence_courses oc
+     JOIN group_courses gc ON gc.id = oc.group_course_id
+     JOIN enrolments e ON e.group_id = gc.group_id AND e.active
+     WHERE oc.id = $1 AND e.pupil_id = $2`,
+    [occurrenceCourseId, pupilId],
+  );
+  return (rows[0]?.n ?? 0) > 0;
+}
+
 // ── differentiation level, per pupil per course (no row ⇒ core) ────────────────────────────────
 export async function getPupilLevel(pupilId: number, groupCourseId: number): Promise<Level> {
   const { rows } = await pool.query<{ level: Level }>(

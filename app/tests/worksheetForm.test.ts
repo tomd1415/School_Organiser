@@ -267,6 +267,35 @@ describe('worksheetForm — parsing edge cases (2nd-review regressions)', () => 
   });
 });
 
+describe('worksheetForm — key stability across header flip + ragged rows (deep-review regression)', () => {
+  it('a header-as-data row is the fixed r0; the body answer row starts at r1 (never pushed to r2)', () => {
+    // name/date layout: the header row itself is fillable. The header field must be r0 and the
+    // first body answer row r1 — so if a re-version later flips this to a column-label header, the
+    // body answer (and any saved value/mark) stays on r1 instead of silently shifting.
+    const src = `# Sheet\n\n| Name | Type your name here |\n|------|---------------------|\n| What is your favourite topic? | Type your answer here |\n`;
+    const r = renderWorksheet(src, { mode: 'review' });
+    const keys = r.fields.filter((f) => f.kind === 'text').map((f) => f.key);
+    expect(keys).toEqual(['t1.r0.c2', 't1.r1.c2']);
+  });
+
+  it('a Q&A table (header names the answer column) numbers body answers r1, r2, … with no r0', () => {
+    const src = `# Sheet\n\n| Question | Type your answer here |\n|----------|----------------------|\n| First? | |\n| Second? | |\n`;
+    const r = renderWorksheet(src, { mode: 'review' });
+    const keys = r.fields.filter((f) => f.kind === 'text').map((f) => f.key);
+    expect(keys).toEqual(['t1.r1.c2', 't1.r2.c2']); // header is a label, not a field — no r0
+  });
+
+  it('a ragged body row (missing its trailing answer cell) still yields a fillable input at the answer column', () => {
+    const src = `# Sheet\n\n| Question | Type your answer here |\n|----------|----------------------|\n| Short |\n| Proper question? | |\n`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    // The short row's missing answer cell is still rendered as an input in column 2 (colCount =
+    // widest row), and column indices don't drift for the following row.
+    expect(text.map((f) => f.key)).toEqual(['t1.r1.c2', 't1.r2.c2']);
+    expect(r.html).toContain('<textarea');
+  });
+});
+
 describe('worksheetForm — robustness', () => {
   it('a sheet with no level headings is all shared (every pupil sees it whole)', () => {
     const flat = `# Quiz\n\n| Q | Type your answer here |\n|---|---|\n| 2+2? | |\n`;

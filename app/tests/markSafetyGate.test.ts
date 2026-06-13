@@ -40,4 +40,16 @@ describe('markSafetyGate — the gate', () => {
     const v = gateMark({ answer: 'no idea', marksAwarded: 0, marksTotal: 2, evidence: '', confidence: 0.9 });
     expect(v.needsReview).toBe(false);
   });
+  it('coerces a non-finite (NaN) mark to 0 and flags it — never lets NaN through', () => {
+    const v = gateMark({ answer: 'something', marksAwarded: Number.NaN, marksTotal: 2, evidence: 'something', confidence: 0.9 });
+    expect(v.marksAwarded).toBe(0);
+    expect(Number.isFinite(v.marksAwarded)).toBe(true);
+    expect(v.needsReview).toBe(true);
+    expect(v.reasons.join(' ')).toContain('invalid mark');
+  });
+  it('treats a non-finite confidence as untrusted (flags rather than silently passing)', () => {
+    const v = gateMark({ answer: 'a list', marksAwarded: 1, marksTotal: 2, evidence: 'a list', confidence: Number.NaN });
+    expect(v.needsReview).toBe(true);
+    expect(v.reasons.join(' ')).toContain('low confidence');
+  });
 });

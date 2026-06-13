@@ -17,6 +17,7 @@ import {
   markAnswersSeen,
   classAnswers,
   classFeedback,
+  pupilCanAccessOc,
 } from '../repos/pupilWork';
 import { getGroupTeachingContext, setGroupTeachingContext } from '../repos/adaptations';
 import { getLessonWorksheetMeta } from '../services/worksheet';
@@ -44,6 +45,7 @@ import {
   type SchemePoint,
 } from '../repos/marking';
 import { deriveScheme, markAll, worksheetAndScheme, setSchemeReadyForOc, buildPupilProfile } from '../services/marking';
+import { guardMatch } from '../lib/markSafetyGate';
 import { getProfile } from '../repos/pupilProfiles';
 import { revokeDevicesForGroup } from '../repos/pupilDevices';
 
@@ -65,19 +67,6 @@ async function ocInfo(occurrenceCourseId: number): Promise<OcInfo | null> {
     [occurrenceCourseId],
   );
   return rows[0] ?? null;
-}
-
-/** A pupil must be enrolled in the occurrence-course's group before the teacher acts on :pid —
- * so a stray/out-of-class id can't be written to a mis-scoped level row or read back. */
-async function pupilInOc(pupilId: number, occurrenceCourseId: number): Promise<boolean> {
-  const { rows } = await pool.query<{ n: number }>(
-    `SELECT count(*)::int n FROM occurrence_courses oc
-     JOIN group_courses gc ON gc.id = oc.group_course_id
-     JOIN enrolments e ON e.group_id = gc.group_id AND e.active
-     WHERE oc.id = $1 AND e.pupil_id = $2`,
-    [occurrenceCourseId, pupilId],
-  );
-  return (rows[0]?.n ?? 0) > 0;
 }
 
 const LEVELS: Level[] = ['support', 'core', 'challenge'];
@@ -207,7 +196,7 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (!p.success || !b.success) return reply.code(400).send('');
     const info = await ocInfo(p.data.id);
     if (!info) return reply.code(404).send('');
-    if (!(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
     await setPupilLevel(p.data.pid, info.groupCourseId, b.data.level);
     return reply.type('text/html').send(levelChips(p.data.id, p.data.pid, b.data.level));
   });
@@ -217,7 +206,7 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (!p.success) return reply.code(400).send('');
     const info = await ocInfo(p.data.id);
     if (!info || info.lessonPlanId == null) return reply.type('text/html').send('<p class="muted">No worksheet bound.</p>');
-    if (!(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).type('text/html').send('<p class="muted">Not in this class.</p>');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).type('text/html').send('<p class="muted">Not in this class.</p>');
     const ws = await getLessonWorksheet(info.groupCourseId, info.lessonPlanId);
     if (!ws) return reply.type('text/html').send('<p class="muted">No worksheet for this lesson.</p>');
     const level = await getPupilLevel(p.data.pid, info.groupCourseId);
@@ -245,8 +234,8 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
       const profile = await getProfile(p.data.pid);
       marksBlock = `<div class="pw-marks"><h4>Marks ${byKey.size ? '' : '<span class="muted">— not marked yet</span>'}</h4>${rowsHtml}
         <label class="pw-comment">Comment back to this pupil
-          <textarea rows="2" hx-post="/lesson/oc/${p.data.id}/pupil/${p.data.pid}/comment" hx-trigger="change" hx-swap="none" placeholder="a kind line they'll see with their marks">${esc(comment)}</textarea>
-          <span class="note-status" id="cmt-status"></span></label>
+          <textarea name="comment" rows="2" hx-post="/lesson/oc/${p.data.id}/pupil/${p.data.pid}/comment" hx-trigger="change" hx-swap="none" placeholder="a kind line they'll see with their marks">${esc(comment)}</textarea>
+          <span class="note-status" id="cmt-status-${p.data.pid}"></span></label>
         <div class="pw-profile" id="profile-${p.data.pid}">
           <strong>What works for me</strong> ${profile ? `<span class="muted">(${esc(profile.updatedAt)})</span>` : '<span class="muted">— not built yet</span>'}
           ${profile ? `<p class="rc-comment">${esc(profile.digest)}</p>` : ''}
@@ -284,7 +273,12 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     // the AI as a meaningless or mislabelled question). Checklist (task.*) ticks aren't questions.
     const inventory = renderWorksheet(ws.markdown, { mode: 'review' }).fields;
     const labelByKey = new Map(inventory.filter((f) => f.kind === 'text').map((f) => [f.key, f.label]));
-    const [answers, feedback] = await Promise.all([classAnswers(p.data.id), classFeedback(p.data.id)]);
+    const [answersRaw, feedbackRaw] = await Promise.all([classAnswers(p.data.id), classFeedback(p.data.id)]);
+    // SAFEGUARDING: a pupil may type a disclosure or an injection string into an answer/comment.
+    // Withhold any guard-matched text from the AI entirely — the same screen markOpen() applies —
+    // since pupil free-text has no per-row safeguarding flag of its own.
+    const answers = answersRaw.map((a) => ({ ...a, answers: a.answers.filter((v) => !guardMatch(v)) })).filter((a) => a.answers.length > 0);
+    const feedback = { ...feedbackRaw, comments: feedbackRaw.comments.filter((c) => !guardMatch(c)) };
     if (answers.length === 0 && feedback.ratings.length === 0 && feedback.liked.length === 0) {
       return reply.type('text/html').send('<p class="muted">No answers or feedback yet to summarise.</p>');
     }
@@ -388,7 +382,7 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     const p = z.object({ id: z.coerce.number().int().positive(), pid: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
     const info = await ocInfo(p.data.id);
-    if (!info || !(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    if (!info || !(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
     await confirmMarksForPupil(p.data.pid, p.data.id);
     return reply.type('text/html').send(await renderGrid(p.data.id, info));
   });
@@ -456,16 +450,16 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     const p = z.object({ id: z.coerce.number().int().positive(), pid: z.coerce.number().int().positive() }).safeParse(req.params);
     const b = z.object({ comment: z.string().max(2000) }).safeParse(req.body);
     if (!p.success || !b.success) return reply.code(400).send('');
-    if (!(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
     await setComment(p.data.pid, p.data.id, b.data.comment.trim());
-    return reply.type('text/html').send('<span class="note-status saved" id="cmt-status" hx-swap-oob="true">comment saved ✓</span>');
+    return reply.type('text/html').send(`<span class="note-status saved" id="cmt-status-${p.data.pid}" hx-swap-oob="true">comment saved ✓</span>`);
   });
 
   app.post('/lesson/oc/:id/pupil/:pid/profile', guard, async (req, reply) => {
     if (!(await marksEnabled())) return reply.code(403).send('');
     const p = z.object({ id: z.coerce.number().int().positive(), pid: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
-    if (!(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
     const r = await buildPupilProfile(p.data.pid);
     const prof = await getProfile(p.data.pid);
     return reply.type('text/html').send(`<div class="pw-profile" id="profile-${p.data.pid}">
@@ -480,7 +474,7 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     const p = z.object({ id: z.coerce.number().int().positive(), pid: z.coerce.number().int().positive() }).safeParse(req.params);
     const b = z.object({ answerId: z.coerce.number().int().positive(), marks: z.coerce.number().int().min(0) }).safeParse(req.body);
     if (!p.success || !b.success) return reply.code(400).send('');
-    if (!(await pupilInOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
     const n = await overrideMark(b.data.answerId, p.data.pid, p.data.id, b.data.marks, null);
     return reply.type('text/html').send(n > 0 ? '<span class="note-status saved">mark set ✓</span>' : '<span class="error">that answer isn\'t in this pupil\'s work</span>');
   });

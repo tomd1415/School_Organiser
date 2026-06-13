@@ -9,7 +9,7 @@ import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
 import { getLessonWorksheet, getLessonWorksheetMeta } from '../services/worksheet';
-import { renderWorksheet } from '../lib/worksheetForm';
+import { renderWorksheet, savedTick } from '../lib/worksheetForm';
 import {
   getAnswers,
   getPupilLevel,
@@ -18,6 +18,7 @@ import {
   isDone,
   getPupilFeedback,
   upsertPupilFeedback,
+  pupilCanAccessOc,
 } from '../repos/pupilWork';
 import { pupilLayout, pupilAccessEnabled } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
@@ -89,10 +90,13 @@ function feedbackWidget(oc: number, fb: { rating: number | null; liked: string; 
 function resultsCard(r: PupilResults): string {
   const mark = (a: number, t: number): string => (t > 0 && a >= t ? '<span class="rc-ok">✓</span>' : a <= 0 ? '<span class="rc-no">✗</span>' : '<span class="rc-part">◐</span>');
   const items = r.items
-    .map(
-      (i) => `<li class="rc-item">${mark(i.awarded, i.total)} <span class="rc-q">${esc(i.label)}</span>${r.showScores ? ` <span class="rc-score">${i.awarded}/${i.total}</span>` : ''}
-        ${i.feedback ? `<div class="rc-fb">${esc(i.feedback)}</div>` : ''}</li>`,
-    )
+    .map((i) => {
+      // Always give a kind line — never a bare ✗. Use the teacher/AI feedback if present, else a
+      // gentle default so a wrong answer still reads as encouragement, not just a red cross.
+      const fb = i.feedback || (i.awarded <= 0 && i.total > 0 ? 'Have another look at this one next time — you can do it.' : '');
+      return `<li class="rc-item">${mark(i.awarded, i.total)} <span class="rc-q">${esc(i.label)}</span>${r.showScores ? ` <span class="rc-score">${i.awarded}/${i.total}</span>` : ''}
+        ${fb ? `<div class="rc-fb">${esc(fb)}</div>` : ''}</li>`;
+    })
     .join('');
   return `<section class="pupil-results">
     <h2>Your feedback ${r.showScores ? `<span class="rc-total">${r.awarded}/${r.total}</span>` : ''}</h2>
@@ -195,7 +199,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const q = z.object({ oc: z.coerce.number().int().positive(), key: z.string().min(1).max(60) }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
     // The pupil may only write to a lesson their group is enrolled in (defence in depth).
-    if (!(await pupilOwnsOccurrenceCourse(pupilId, q.data.oc))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const b = z.object({ value: z.string().max(8000).optional() }).safeParse(req.body);
     const value = (b.success && b.data.value) || '';
     // Resolve the worksheet server-side for provenance — never trust a client-supplied resource id.
@@ -208,7 +212,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
       fieldKey: q.data.key,
       value,
     });
-    return reply.type('text/html').send('');
+    // OOB tick so the field that just saved reassures the pupil their answer was kept.
+    return reply.type('text/html').send(savedTick(q.data.key));
   });
 
   app.post('/me/done', { preHandler: app.csrfProtection }, async (req, reply) => {
@@ -217,7 +222,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     const b = z.object({ done: z.enum(['true', 'false']) }).safeParse(req.body);
     if (!q.success || !b.success) return reply.code(400).send('');
-    if (!(await pupilOwnsOccurrenceCourse(pupilId, q.data.oc))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const done = b.data.done === 'true';
     await setDone(pupilId, q.data.oc, done);
     // "Mark as pupils finish" (Q34): tapping Done triggers marking (objective now; open debounced).
@@ -243,7 +248,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
     if (req.session.get('role') !== 'pupil' || !pupilId) return reply.code(401).send('');
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    if (!(await pupilOwnsOccurrenceCourse(pupilId, q.data.oc))) return reply.code(403).send('');
+    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const body = (req.body ?? {}) as Record<string, unknown>;
     const toList = (v: unknown): string => {
       const arr = Array.isArray(v) ? v : v != null ? [v] : [];
@@ -268,17 +273,4 @@ async function worksheetForOccurrenceCourse(occurrenceCourseId: number): Promise
   if (!r || r.lessonPlanId == null) return null;
   const meta = await getLessonWorksheetMeta(Number(r.groupCourseId), Number(r.lessonPlanId));
   return meta ? { resourceId: meta.resourceId, versionNo: meta.versionNo } : null;
-}
-
-/** Defence in depth: the occurrence-course must belong to the pupil's enrolled group. */
-async function pupilOwnsOccurrenceCourse(pupilId: number, occurrenceCourseId: number): Promise<boolean> {
-  const { rows } = await pool.query<{ n: number }>(
-    `SELECT count(*)::int n
-     FROM occurrence_courses oc
-     JOIN group_courses gc ON gc.id = oc.group_course_id
-     JOIN enrolments e ON e.group_id = gc.group_id AND e.active
-     WHERE oc.id = $1 AND e.pupil_id = $2`,
-    [occurrenceCourseId, pupilId],
-  );
-  return (rows[0]?.n ?? 0) > 0;
 }

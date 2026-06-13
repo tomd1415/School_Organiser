@@ -75,6 +75,7 @@ export interface NoteListRow {
   date: string;
   courseName: string | null;
   groupName: string | null;
+  safeguarding: boolean;
 }
 
 export async function listGeneralNotes(filter: { courseId?: number; groupId?: number }): Promise<NoteListRow[]> {
@@ -89,7 +90,7 @@ export async function listGeneralNotes(filter: { courseId?: number; groupId?: nu
     conds.push(`n.group_id = $${params.length}`);
   }
   const { rows } = await pool.query<NoteListRow>(
-    `SELECT n.id, n.body,
+    `SELECT n.id, n.body, n.safeguarding,
             to_char(n.created_at AT TIME ZONE 'Europe/London', 'YYYY-MM-DD') AS date,
             c.name AS "courseName", g.name AS "groupName"
      FROM notes n

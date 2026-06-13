@@ -130,11 +130,14 @@ export async function occCoursePlan(occurrenceCourseId: number): Promise<{ group
   return rows[0] ?? null;
 }
 
-/** Which answer ids already have a mark — so a re-run only marks the new/unmarked ones. */
+/** Answer ids whose mark is LOCKED — confirmed by the teacher or a teacher override. A re-run
+ *  (e.g. after fixing the scheme) skips only these and re-marks the rest, so a corrected scheme
+ *  takes effect on still-suggested marks via writeMark's ON CONFLICT. */
 export async function alreadyMarkedAnswerIds(occurrenceCourseId: number): Promise<Set<number>> {
   const { rows } = await pool.query<{ id: number }>(
     `SELECT m.pupil_answer_id AS id FROM pupil_marks m
-     JOIN pupil_answers a ON a.id = m.pupil_answer_id WHERE a.occurrence_course_id = $1`,
+     JOIN pupil_answers a ON a.id = m.pupil_answer_id
+     WHERE a.occurrence_course_id = $1 AND (m.status = 'confirmed' OR m.marker = 'teacher')`,
     [occurrenceCourseId],
   );
   return new Set(rows.map((r) => r.id));

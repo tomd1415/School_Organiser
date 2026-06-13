@@ -82,6 +82,23 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
   await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024 } });
 
+  // HTMX 2.x won't swap a 4xx/5xx response, so a thrown handler error leaves the panel silently
+  // doing nothing. For HTMX requests, reply 200 with a small error fragment the target CAN swap,
+  // so the teacher always sees "something went wrong" instead of a dead button.
+  app.setErrorHandler((err, req, reply) => {
+    req.log.error({ err }, 'request handler error');
+    // Preserve a real client-error status (CSRF 403, validation 400, …) — only an unexpected
+    // throw is a 500. HTMX won't swap a non-2xx body, so for HTMX requests reply 200 with a
+    // fragment the target CAN swap (so the teacher sees "something went wrong", not a dead button)
+    // — but keep that to genuine handler crashes, so a 4xx still surfaces as the real status.
+    const code = (err as { statusCode?: number }).statusCode;
+    const status = typeof code === 'number' && code >= 400 ? code : 500;
+    if (req.headers['hx-request'] === 'true' && status >= 500) {
+      return reply.code(200).type('text/html').send('<p class="error">Something went wrong — please try again.</p>');
+    }
+    return reply.code(status).type('text/html').send('<p class="error">Something went wrong.</p>');
+  });
+
   // Limited roles (ta, pupil) are deny-by-default: anything off their allowlist bounces to
   // their home surface. Pupil sessions also idle out (shared classroom machines), and the
   // pupil-access master switch *evicts* live sessions when turned off — so the DPIA kill-switch

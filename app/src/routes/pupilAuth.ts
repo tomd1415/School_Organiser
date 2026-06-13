@@ -76,6 +76,9 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
 
   // Resume a remembered device → restore the pupil session (pupilId only; class via enrolment).
   app.post('/pupil/resume', { preHandler: app.csrfProtection }, async (req, reply) => {
+    // Pupil access is the master gate for ANY pupil session — check it FIRST so turning access off
+    // (the DPIA kill-switch) blocks a remembered-device resume even if the marks flag lags behind.
+    if (!(await pupilAccessEnabled())) return reply.redirect('/pupil');
     if (!(await marksEnabled())) return reply.redirect('/pupil');
     const secret = req.cookies?.[DEVICE_COOKIE];
     const pupilId = secret ? await resumeDevice(secret) : null;

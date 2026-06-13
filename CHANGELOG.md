@@ -7,6 +7,46 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Deep multi-lens review of Phases 8–9 → ship-blockers fixed
+
+Reviewed the pupil-facing code (Phases 8–9) from nine points of view — privacy/safeguarding,
+correctness, reliability, HTMX behaviour, SEND UX, security/authorisation, architecture,
+data-integrity, and the AI boundary — and fixed the load-bearing findings. **The privacy
+invariant held**: no path sends a pupil name to the AI. The fixes:
+
+- **🚨 Safeguarding leak on the AI class-summary (HIGH).** `/summarise` built its AI context from
+  raw pupil free-text, bypassing the content guard that `markOpen` applies — a pupil could type a
+  disclosure or an injection string into an *answer* and it would be sent. Now the same
+  `guardMatch` screen withholds guard-matched answers **and** feedback comments before any egress.
+  The term-summary note context likewise now carries each note's `safeguarding` flag so flagged
+  notes are withheld, not just redacted.
+- **Marking correctness (HIGH).** Editing a mark scheme now re-marks the **suggested** answers
+  (they were stuck on the stale mark); marking refuses to run against a **non-ready** scheme; the
+  worksheet field-key generator is **stable across the header-as-data⇄column-label flip and ragged
+  rows** (a re-version can't silently re-number rows and mis-attach saved answers/marks).
+- **Reliability (HIGH).** A failed `ai_calls` audit insert no longer re-logs a **successful billed
+  call** as an error (try/catch + log); a thrown handler now returns a swappable fragment so HTMX
+  panels show "something went wrong" instead of a dead button (while preserving real 4xx statuses
+  like CSRF 403); the debounced marking queue **logs** failures instead of swallowing them.
+- **Authorisation (MED, defence-in-depth).** `/pupil/resume` now re-checks the **pupil-access**
+  master switch first (not only the marks gate), so the DPIA kill-switch blocks a remembered-device
+  resume; turning pupil access **off cascades** marks off so the two gates can't diverge. The
+  duplicated pupil↔occurrence-course auth predicate (two copies) is now one canonical
+  `pupilCanAccessOc()` in `repos/pupilWork.ts`.
+- **SEND UX.** Wrong objective answers always get a **kind "have another look"** line (never a bare
+  ✗); worksheet fields show an instant **"saved ✓"** reassurance via an OOB swap; activity chips
+  light up the instant they're tapped (`:has(:checked)`, no server round-trip).
+- **Robustness.** `gateMark` coerces a **non-finite** AI mark/confidence to 0 / flags it (NaN was
+  slipping past the clamps); the comment textarea is now actually wired (`name` + per-pupil status).
+- **New safety-critical tests** locking these invariants: `markOpen` does nothing when the gate is
+  off (returns "nothing", not the no-key "unavailable"); `confirmMarksForPupil` never confirms
+  **needs-review** marks; `overrideMark` rejects a **forged** answer id (0 rows, no change); the
+  class-work screen **withholds a guard-matched answer** (stored raw, dropped at egress); plus
+  worksheet key flip-stability + ragged-row and `gateMark` NaN unit tests.
+- **237 unit / 145 integration green; typecheck clean.** No real AI calls in tests (forced-empty
+  key). Deferred (noted, lower-severity): raw-SQL-in-routes → repos refactor, per-autosave
+  worksheet-meta caching, leaver-purge, daily roster-enumeration cap, un-release confirm.
+
 ### 2026-06-13 — Phase 9 BUILT: auto-marking & the results loop (9.1–9.8)
 
 - **Migration `0022`** adds `mark_schemes`, `mark_scheme_points`, `pupil_marks`,
