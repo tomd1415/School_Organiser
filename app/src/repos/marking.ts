@@ -155,22 +155,23 @@ export interface MarkWrite {
   status: 'suggested' | 'confirmed';
   needsReview: boolean;
   feedback: string;
+  disclosure?: boolean; // 10.4: a guard-matched (safeguarding) answer — flagged distinctly
   historyAppend?: unknown;
 }
 
 /** Insert or replace the mark for one answer. Appends to the JSONB history audit trail. */
 export async function writeMark(m: MarkWrite): Promise<void> {
   await pool.query(
-    `INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, points_hit, evidence, marker, confidence, status, needs_review, feedback, history, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now())
+    `INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, points_hit, evidence, marker, confidence, status, needs_review, feedback, disclosure, history, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
      ON CONFLICT (pupil_answer_id) DO UPDATE SET
        marks_awarded = EXCLUDED.marks_awarded, marks_total = EXCLUDED.marks_total, points_hit = EXCLUDED.points_hit,
        evidence = EXCLUDED.evidence, marker = EXCLUDED.marker, confidence = EXCLUDED.confidence,
        status = EXCLUDED.status, needs_review = EXCLUDED.needs_review, feedback = EXCLUDED.feedback,
-       history = pupil_marks.history || EXCLUDED.history, updated_at = now()`,
+       disclosure = EXCLUDED.disclosure, history = pupil_marks.history || EXCLUDED.history, updated_at = now()`,
     [
       m.pupilAnswerId, m.marksAwarded, m.marksTotal, m.pointsHit, m.evidence, m.marker, m.confidence,
-      m.status, m.needsReview, m.feedback, JSON.stringify(m.historyAppend != null ? [m.historyAppend] : []),
+      m.status, m.needsReview, m.feedback, m.disclosure ?? false, JSON.stringify(m.historyAppend != null ? [m.historyAppend] : []),
     ],
   );
 }
@@ -345,4 +346,30 @@ export async function releaseMarks(occurrenceCourseId: number, release: boolean)
 export async function marksReleasedAt(occurrenceCourseId: number): Promise<Date | null> {
   const { rows } = await pool.query<{ at: Date | null }>(`SELECT marks_released_at AS at FROM occurrence_courses WHERE id = $1`, [occurrenceCourseId]);
   return rows[0]?.at ?? null;
+}
+
+// ── 10.9 Durable open-marking queue ────────────────────────────────────────────────────────────
+/** Queue (or push forward) the open-marking job for an occurrence-course; due `delayMs` from now.
+ *  A fresh "Done" tap re-arms the same row, so finishers batch behind the last one. */
+export async function enqueueOpenMark(occurrenceCourseId: number, delayMs: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO marking_queue (occurrence_course_id, due_at)
+     VALUES ($1, now() + ($2::bigint) * interval '1 millisecond')
+     ON CONFLICT (occurrence_course_id) DO UPDATE SET due_at = EXCLUDED.due_at`,
+    [occurrenceCourseId, delayMs],
+  );
+}
+
+/** Atomically claim every job that is now due (DELETE … RETURNING), so a job runs once even with
+ *  overlapping sweeps. Returns the occurrence-course ids to mark. */
+export async function claimDueMarkJobs(): Promise<number[]> {
+  const { rows } = await pool.query<{ occurrenceCourseId: number }>(
+    `DELETE FROM marking_queue WHERE due_at <= now() RETURNING occurrence_course_id AS "occurrenceCourseId"`,
+  );
+  return rows.map((r) => r.occurrenceCourseId);
+}
+
+/** Drop a job (e.g. the class switched to manual marking, or the oc was removed). */
+export async function dequeueOpenMark(occurrenceCourseId: number): Promise<void> {
+  await pool.query(`DELETE FROM marking_queue WHERE occurrence_course_id = $1`, [occurrenceCourseId]);
 }

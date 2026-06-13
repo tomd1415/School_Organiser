@@ -22,6 +22,21 @@ export function pupilLayout(body: string, csrf: string): string {
 <body class="pupil-body">
   <main class="pupil-main" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>${body}</main>
   <script src="/static/htmx.min.js"></script>
+  <script>
+  // 10.8 — gentle reassurance for SEND pupils: never lose typed work silently. A failed autosave
+  // (connection drop, timed-out session, server hiccup) shows a calm banner instead of nothing, and
+  // a beforeunload guard warns if they close the tab while an answer hasn't saved yet.
+  (function () {
+    function toast(m) { var t = document.getElementById('hx-toast'); if (!t) { t = document.createElement('div'); t.id = 'hx-toast'; t.className = 'hx-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = m; t.classList.add('show'); }
+    function clear() { var t = document.getElementById('hx-toast'); if (t) t.classList.remove('show'); }
+    var LOST = '⚠ Not saved yet — your work is still on the screen. Tell your teacher.';
+    ['htmx:sendError', 'htmx:responseError', 'htmx:timeout', 'app:save-failed'].forEach(function (ev) { document.body.addEventListener(ev, function () { toast(LOST); }); });
+    var dirty = false;
+    document.body.addEventListener('input', function (e) { if (e.target && e.target.classList && e.target.classList.contains('ws-input')) dirty = true; });
+    document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) { dirty = false; clear(); } });
+    window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  })();
+  </script>
 </body></html>`;
 }
 

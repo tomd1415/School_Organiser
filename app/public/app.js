@@ -53,4 +53,33 @@
   }
   document.body.addEventListener('htmx:afterRequest', requestDone);
   document.body.addEventListener('htmx:sendAbort', requestDone);
+
+  // 10.8 — never lose work silently. Autosaves use hx-swap="none", so a failed save (connection
+  // drop, server error, timeout) would otherwise show nothing. Surface a persistent banner; the
+  // typed text stays on screen (hx-swap="none" doesn't touch the field), so nothing is lost.
+  function saveToast(msg) {
+    var t = document.getElementById('hx-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'hx-toast';
+      t.className = 'hx-toast';
+      t.setAttribute('role', 'status');
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+  }
+  function clearToast() {
+    var t = document.getElementById('hx-toast');
+    if (t) t.classList.remove('show');
+  }
+  var LOST = '⚠ Not saved — your text is still on screen. Check the connection and try again.';
+  document.body.addEventListener('htmx:sendError', function () { saveToast(LOST); });
+  document.body.addEventListener('htmx:responseError', function () { saveToast(LOST); });
+  document.body.addEventListener('htmx:timeout', function () { saveToast('⚠ Still trying to save — your text is safe on screen.'); });
+  // A server crash on a background autosave returns a swallowed 200 fragment, so the route fires
+  // this HX-Trigger event instead (see server.ts error handler).
+  document.body.addEventListener('app:save-failed', function () { saveToast(LOST); });
+  // Any subsequent successful request means we're back — clear the banner.
+  document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) clearToast(); });
 })();

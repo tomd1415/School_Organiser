@@ -7,6 +7,37 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10 BUILT: disclosure register (10.4), durable marking queue (10.9), resilient autosave (10.8)
+
+Completes Track A + the Track B data-loss ship-blockers.
+
+- **10.4 Safeguarding disclosure lane + register** (migration `0025`). A guard-matched pupil answer
+  is now flagged **`pupil_marks.disclosure`** (distinct from the generic `needs_review`), and a new
+  teacher-only **`/safeguarding`** register ([routes/safeguarding.ts](../app/src/routes/safeguarding.ts),
+  [repos/safeguarding.ts](../app/src/repos/safeguarding.ts)) gathers all three flagged streams —
+  disclosure answers, safeguarding-flagged captured items (incl. the 10.5 email items) and TA
+  feedback — into one date-ordered list with a lazily-created **record-of-handling** overlay
+  (`safeguarding_review`: recorded / actioned / referred to DSL + a note). Nothing on it is ever
+  AI-bound. A new nav link with a "N new" badge. Integration test proves a guard-matched answer
+  becomes a disclosure (never a plain mark), surfaces in the register beside a flagged note, and the
+  status workflow drops it out of the "new" count.
+- **10.9 Durable open-marking queue** (migration `0026`). The "mark as pupils finish" open-answer
+  pass was an in-memory `setTimeout` a reboot dropped (contradicting the "survives a reboot" NFR).
+  It now persists to a **`marking_queue`** row (re-armed by each Done tap), and a **boot sweep +
+  30s tick** (`scheduleMarkingQueue` in server.ts) run due jobs via `claimDueMarkJobs()` (atomic
+  `DELETE … RETURNING`); `markOpen` is idempotent so a double-run is harmless. Test proves a job is
+  persisted, claimed exactly once when due, and left alone until due.
+- **10.8 Resilient autosave (pupil + teacher).** Session-kills now **`HX-Redirect`** for hx-requests
+  (HTMX can't follow a bare 302, so a background autosave used to fail silently) — proven by a test
+  that a pupil hx-request after access-off returns `HX-Redirect`, not 302. A failed save surfaces a
+  persistent "**Not saved — your text is still on screen**" banner (teacher `app.js`; a calmer
+  "tell your teacher" variant in the pupil layout, which also gets a `beforeunload` guard while a
+  field is unsaved); a server crash on a background autosave fires an `HX-Trigger: app:save-failed`
+  event so even the swallowed-200 case is surfaced.
+- **240 unit / 155 integration green; typecheck clean.** Remaining Phase 10: Track B 10.10
+  (optimistic-concurrency on irreplaceable text), then Tracks C (SEND accessibility), D (close the
+  loop), E (daily-driver polish), F (setup/scale).
+
 ### 2026-06-13 — Phase 10.2 BUILT: pupil erasure / anonymisation + per-pupil SAR export (migration `0024`)
 
 The biggest DPO gap closed. `DATA_MODEL`/`DPIA §7` promised "a deliberate, audited retention action"

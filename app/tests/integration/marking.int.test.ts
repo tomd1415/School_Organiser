@@ -7,6 +7,7 @@ import { saveAnswer } from '../../src/repos/pupilWork';
 import {
   upsertScheme, markSummaries, confirmAllConfident, getMarkingSettings, setMarkingSetting,
   releaseMarks, overrideMark, marksForPupil, answersForMarking, getScheme, confirmMarksForPupil,
+  enqueueOpenMark, claimDueMarkJobs, dequeueOpenMark,
 } from '../../src/repos/marking';
 import { markObjective, markOpen, pupilLessonResults } from '../../src/services/marking';
 import { classAnswers } from '../../src/repos/pupilWork';
@@ -178,6 +179,17 @@ describe('Phase 9 marking — safety invariants (integration)', () => {
     expect(await overrideMark(2_100_000_000, pupil, oc, 99, 'forged')).toBe(0); // answer id that isn't this pupil's
     const after = (await marksForPupil(pupil, oc)).find((m) => m.pupilAnswerId === realId)!;
     expect(after.feedback).not.toBe('forged'); // the real mark is untouched
+  });
+
+  it('the durable open-marking queue (10.9) persists a job and claims it once when due — survives a restart', async () => {
+    await dequeueOpenMark(oc);
+    await enqueueOpenMark(oc, -5_000); // due 5s ago (as if queued before a reboot)
+    const first = await claimDueMarkJobs();
+    expect(first).toContain(oc); // a fresh process would pick it up on its boot sweep
+    expect(await claimDueMarkJobs()).not.toContain(oc); // claimed exactly once (atomic DELETE…RETURNING)
+    await enqueueOpenMark(oc, 600_000); // re-armed far in the future by a later "Done" tap
+    expect(await claimDueMarkJobs()).not.toContain(oc); // not yet due → left alone
+    await dequeueOpenMark(oc);
   });
 
   it('class-work summary withholds a guard-matched pupil answer from the AI (stored raw, screened at egress)', async () => {

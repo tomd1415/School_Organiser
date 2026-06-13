@@ -209,7 +209,8 @@ export async function markOpen(occurrenceCourseId: number): Promise<OpenResult> 
         await writeMark({
           pupilAnswerId: a.pupilAnswerId, marksAwarded: 0, marksTotal, pointsHit: [], evidence: [],
           marker: 'auto', confidence: null, status: 'suggested', needsReview: true,
-          feedback: '', historyAppend: { guard: 'withheld from AI — needs your eyes' },
+          // 10.4: flag distinctly so it surfaces in the safeguarding register, not just the mark grid.
+          disclosure: true, feedback: '', historyAppend: { guard: 'withheld from AI — needs your eyes' },
         });
         flagged++;
       } else {

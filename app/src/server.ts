@@ -43,10 +43,12 @@ import { registerResourceRoutes } from './routes/resources';
 import { registerPupilAuthRoutes } from './routes/pupilAuth';
 import { registerMeRoutes } from './routes/me';
 import { registerPupilWorkRoutes } from './routes/pupilWork';
+import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { pupilCfg } from './auth/pupilAccessCache';
 import { teacherIdleMins } from './auth/teacherIdleCache';
 import { generateDueInstances } from './repos/recurringTasks';
+import { runDueMarkJobs } from './services/markingQueue';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
 import { localParts } from './lib/time';
@@ -95,6 +97,10 @@ export async function buildApp(): Promise<FastifyInstance> {
     const code = (err as { statusCode?: number }).statusCode;
     const status = typeof code === 'number' && code >= 400 ? code : 500;
     if (req.headers['hx-request'] === 'true' && status >= 500) {
+      // 10.8: a background autosave (hx-swap="none") swallows this fragment, so ALSO fire a client
+      // event — app.js / the pupil script surface a "not saved" banner so typed work is never lost
+      // silently. (HTMX dispatches HX-Trigger names as events on <body>.)
+      reply.header('HX-Trigger', 'app:save-failed');
       return reply.code(200).type('text/html').send('<p class="error">Something went wrong — please try again.</p>');
     }
     return reply.code(status).type('text/html').send('<p class="error">Something went wrong.</p>');
@@ -105,6 +111,17 @@ export async function buildApp(): Promise<FastifyInstance> {
   // pupil-access master switch *evicts* live sessions when turned off — so the DPIA kill-switch
   // actually revokes access, not just blocks new logins. The settings are cached (and invalidated
   // by the Settings handlers) so the hook rarely hits the DB. See auth/pupilAccessCache.
+  // 10.8: bounce a session-kill cleanly for BOTH navigations and background HTMX requests. HTMX
+  // can't follow a bare 302 on an hx POST (the autosave silently fails), so send HX-Redirect.
+  const bounce = (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply, url: string): void => {
+    if (req.headers['hx-request'] === 'true') {
+      reply.header('HX-Redirect', url);
+      void reply.code(200).type('text/html').send('');
+    } else {
+      void reply.redirect(url);
+    }
+  };
+
   app.addHook('onRequest', async (req, reply) => {
     const role = req.session?.get?.('role');
     // Teacher idle-logout (10.3): the privileged session must also time out on an unattended
@@ -116,7 +133,7 @@ export async function buildApp(): Promise<FastifyInstance> {
         const last = Number(req.session.get('lastSeen') ?? 0);
         if (last && Date.now() - last > mins * 60_000) {
           req.session.delete();
-          return reply.redirect('/login?timeout=1');
+          return bounce(req, reply, '/login?timeout=1');
         }
         req.session.set('lastSeen', Date.now());
       }
@@ -127,12 +144,12 @@ export async function buildApp(): Promise<FastifyInstance> {
       if (!cfg.accessOn) {
         // The teacher turned pupil access off (the DPIA gate) — kill the live session.
         req.session.delete();
-        return reply.redirect('/pupil');
+        return bounce(req, reply, '/pupil');
       }
       const last = Number(req.session.get('lastSeen') ?? 0);
       if (last && Date.now() - last > cfg.idleMins * 60_000) {
         req.session.delete();
-        return reply.redirect('/pupil?timeout=1');
+        return bounce(req, reply, '/pupil?timeout=1');
       }
       req.session.set('lastSeen', Date.now());
     }
@@ -168,6 +185,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerPupilAuthRoutes(app);
   registerMeRoutes(app);
   registerPupilWorkRoutes(app);
+  registerSafeguardingRoutes(app);
 
   return app;
 }
@@ -209,6 +227,21 @@ function scheduleEmailPoll(app: FastifyInstance): void {
   }, 60_000);
 }
 
+/** 10.9: run any due open-marking jobs on boot (catching up on what was queued while the process
+ * was down), then every 30s. Durable + idempotent — replaces the old in-memory setTimeout. */
+function scheduleMarkingQueue(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const n = await runDueMarkJobs();
+      if (n > 0) app.log.info(`marking: ran ${n} due open-mark job(s)`);
+    } catch (err) {
+      app.log.error({ err }, 'marking queue sweep crashed');
+    }
+  };
+  void run(); // boot sweep — catch up on jobs that came due during downtime
+  setInterval(() => void run(), 30_000);
+}
+
 /** Production entrypoint: migrate, then listen. */
 export async function start(): Promise<void> {
   await migrate();
@@ -217,6 +250,7 @@ export async function start(): Promise<void> {
     await app.listen({ port: appConfig.PORT, host: appConfig.HOST });
     scheduleRecurring(app);
     scheduleEmailPoll(app);
+    scheduleMarkingQueue(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

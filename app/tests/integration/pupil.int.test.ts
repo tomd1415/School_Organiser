@@ -173,6 +173,23 @@ describe('pupil login + surface (integration)', () => {
     }
   });
 
+  it('an HTMX request after access is turned off bounces via HX-Redirect, not a silent 302 (10.8)', async () => {
+    const session = await pupilLogin();
+    const { invalidatePupilCfg } = await import('../../src/auth/pupilAccessCache');
+    await setSetting('pupil_access_enabled', 'false');
+    invalidatePupilCfg();
+    try {
+      // A background autosave is an hx-request; HTMX can't follow a 302, so the kill must use
+      // HX-Redirect (200) — otherwise the pupil's save fails silently.
+      const after = await app.inject({ method: 'GET', url: '/me', headers: { cookie: session, 'hx-request': 'true' } });
+      expect(after.statusCode).toBe(200);
+      expect(after.headers['hx-redirect']).toBe('/pupil');
+    } finally {
+      await setSetting('pupil_access_enabled', 'true');
+      invalidatePupilCfg();
+    }
+  });
+
   it('a logged-in pupil reaches /me but nothing else', async () => {
     const session = await pupilLogin();
     const me = await app.inject({ method: 'GET', url: '/me', headers: { cookie: session } });
