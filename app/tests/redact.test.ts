@@ -72,3 +72,39 @@ describe('redact — the pupil-name boundary', () => {
     expect(redactNames('Ana and Anabel', r)).toBe('PUPIL_1 and Anabel'); // "Anabel" not matched
   });
 });
+
+// Forward-compat for Phase 9 (auto-marking) + the multi-teacher future: the redactor is purely
+// roster-driven, so the "no pupil name reaches an AI service" guarantee must hold UNCHANGED when
+// the roster grows from one teacher's class to a whole school. A pupil from another teacher's
+// class is just another roster entry — it must still be tokenised and caught on egress.
+describe('redact — holds at school-wide roster scale (multi-teacher forward-compat)', () => {
+  // ~200 pupils across notional classes, with deliberate first-name clashes + accented edges.
+  const school: RosterEntry[] = Array.from({ length: 200 }, (_, i) => ({
+    id: i + 1,
+    displayName: `Pupil${i + 1}`,
+    aiToken: `PUPIL_${i + 1}`,
+    active: true,
+  }));
+  school.push(
+    { id: 201, displayName: 'Sam', aiToken: 'PUPIL_201', active: true }, // 8-Computing
+    { id: 202, displayName: 'Sam Patel', aiToken: 'PUPIL_202', active: true }, // 9-Science (another teacher)
+    { id: 203, displayName: 'José', aiToken: 'PUPIL_203', active: true }, // 10-Art (accented edge)
+  );
+
+  it('tokenises a name from another class typed in an answer, and the egress assert catches it', () => {
+    const answer = 'In the group task I worked with Sam Patel and José from another class.';
+    expect(containsRosterName(answer, school)).toBe(true); // pre-redaction: a name is present
+    const out = redactNames(answer, school);
+    expect(containsRosterName(out, school)).toBe(false); // post-redaction: nothing survives
+    expect(out).toContain('PUPIL_202'); // Sam Patel
+    expect(out).toContain('PUPIL_203'); // José
+  });
+
+  it('longest-match ordering still holds at scale ("Sam Patel" before "Sam")', () => {
+    expect(redactNames('Sam Patel helped Sam', school)).toBe('PUPIL_202 helped PUPIL_201');
+  });
+
+  it('a clean (already-tokenised) string at school scale never trips the egress assert', () => {
+    expect(containsRosterName('PUPIL_202 worked with PUPIL_203 and PUPIL_5', school)).toBe(false);
+  });
+});

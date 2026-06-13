@@ -7,6 +7,26 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 9 reconciled with the multi-teacher future + forward-compat tests
+
+- **Verdict (independent three-lens audit): the multi-teacher v2 forces NO structural change to
+  the unstarted Phase 9 plan.** Phase 9 is already keyed off pupils / occurrences / resources
+  (never "the teacher"), so multi-teacher's ownership/RBAC layer is purely additive. Edits to
+  [PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md): corrected the stale **migration number** (`0019` →
+  `0022`, since 0019–0021 are Phase-8 fixes); added a **correctness note** that marking must
+  resolve the scheme via the *lesson instance* (`occurrence_course → lesson_plan → worksheet`),
+  **not** `pupil_answers.resource_id` (nullable provenance after the 0020 fix); deferred
+  **cross-subject sharing of the "what works for me" profile** to the multi-teacher plan's fresh
+  whole-school DPIA (not the 9.0 addendum); specified the **device cookie restores `pupilId` only**
+  (no class binding); and added a **§13 "Forward compatibility with the multi-teacher future"**
+  capturing the deliberate keying choices (pupil-keyed profile/devices, owner derived via the
+  occurrence/staff chain, roster-size-agnostic redaction).
+- **Tests:** the one buildable-now forward-compat test is **added** — egress holds at school-wide
+  roster scale (`redact.test.ts` + `classWork.test.ts`): with ~200 pupils across notional classes,
+  a name from *another teacher's class* typed in an answer is tokenised and the egress assert
+  catches it, and longest-match ordering holds at scale. The remaining forward-compat tests (which
+  need Phase 9 code) are specified in the plan's §10 test strategy. **213 unit / 135 integration.**
+
 ### 2026-06-13 — Login cards show the PIN + future multi-teacher plan (unnumbered)
 
 - **Login cards now print each pupil's actual PIN** instead of a `____` blank. PINs were stored

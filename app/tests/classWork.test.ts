@@ -34,6 +34,30 @@ describe('classWork — the egress boundary for pupil answers', () => {
     expect(joined).not.toMatch(/\bAda\b/);
   });
 
+  it('an other-class name in an answer is tokenised through the context[] path at school scale', () => {
+    // Phase 9 marking + the multi-teacher future reuse this exact context[] path with a
+    // school-wide roster. A pupil naming a classmate from ANOTHER teacher's class must still be
+    // tokenised before egress, and the assert must find nothing surviving.
+    const school = [
+      ...roster,
+      { id: 50, displayName: 'Priya', aiToken: 'PUPIL_50', active: true },
+      { id: 51, displayName: 'Priya Sharma', aiToken: 'PUPIL_51', active: true },
+    ];
+    const items = classWorkItems({
+      worksheetTitle: 'Lists',
+      questions: [{ label: 'Who helped you?', answers: ['Priya Sharma showed me', 'Ben and Priya'] }],
+      ratings: [3],
+      liked: [],
+      disliked: [],
+      comments: ['thanks to Priya Sharma'],
+    });
+    const redacted = withholdSafeguarding(items).map((i) => redactNames(i.text, school));
+    for (const text of redacted) expect(containsRosterName(text, school)).toBe(false);
+    const joined = redacted.join('\n');
+    expect(joined).toContain('PUPIL_51'); // Priya Sharma (longest-first)
+    expect(joined).not.toMatch(/\bPriya Sharma\b/);
+  });
+
   it('groups answers per question anonymously (no pupil identifier attached)', () => {
     const items = classWorkItems({
       worksheetTitle: 'Lists',

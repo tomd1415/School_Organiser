@@ -64,7 +64,7 @@ logged in. 9.6 is independent of marking and can ship any time after 9.0.
 
 ---
 
-## 2. Data model — migration `0019` (sketch; numbering follows wherever Phase 8's 0018 lands)
+## 2. Data model — migration `0022`+ (sketch; 0019–0021 are Phase-8 fixes, so the next free number is 0022)
 
 ```
 mark_schemes                 -- one per worksheet resource version
@@ -134,6 +134,15 @@ keep matching the scheme for the version the pupil actually saw. Adapted class c
 own schemes at generation time, exactly as masters do. One scheme covers all three
 differentiation levels (keys derive from the full document — Phase 8's slicing already
 guarantees this).
+
+> **Resolve the scheme via the lesson instance, NOT via `pupil_answers.resource_id`.** Phase 8's
+> migration `0019` re-keyed answers onto `(pupil_id, occurrence_course_id, field_key)` and `0020`
+> made `resource_id` nullable provenance (`ON DELETE SET NULL`, and a write after a master↔adapted
+> flip can carry a different/`NULL` resource). So marking must find the scheme the *same way the
+> pupil's worksheet is resolved* — `occurrence_course → bound lesson_plan → the class's current
+> worksheet resource + version` (the `getLessonWorksheet`/`…Meta` path) — and match answers by
+> `field_key`. Keying marking off `answer.resource_id` would silently miss flipped/blank-provenance
+> answers. This is the one place the Phase-8 fixes change a Phase-9 assumption.
 
 ---
 
@@ -231,7 +240,10 @@ theirs — a persistent cookie makes Windows login double as app login:
    `SameSite=Strict`, expiry = end of term).
 2. Next visit: valid cookie → a friendly **"Continue as Alex 👋"** screen — one tap in, with a
    clearly-visible **"Not me"** that drops to the normal class-code login (covers shared
-   profiles and borrowed seats).
+   profiles and borrowed seats). The cookie re-establishes **`pupilId` only** — lesson/class
+   resolution then runs exactly as a fresh login (`/me` resolves via the pupil's active
+   enrolments). The device row stores **no fixed class/group binding**, so it stays correct when
+   a pupil is in several classes — and forward-compatible with the multi-teacher one-account model.
 3. Idle-logout still ends *sessions* as in Phase 8 — the device cookie's whole point is that
    the next tap-in is instant.
 4. **Teacher controls:** a devices list per pupil (label + last used), one-click revoke,
@@ -317,6 +329,31 @@ theirs — a persistent cookie makes Windows login double as app login:
 - **Integration suites stay AI-free** as ever (empty key forced); one live smoke per AI slice
   via a throwaway `app/scripts/X-smoke.ts`, then deleted.
 
+**Forward-compatibility tests (multi-teacher — see §13).** Most need Phase 9 code, so they're
+specified here; the egress-at-scale one is buildable now and **already added**:
+
+- ✅ **Egress at school-wide-roster scale (built now)** — `redact.test.ts` and `classWork.test.ts`
+  prove that with a ~200-pupil multi-class roster, a name from *another teacher's class* typed in
+  an answer is tokenised and the egress assert catches it, and longest-match ordering holds at
+  scale. Locks the invariant that "no pupil name to AI" is roster-size/membership-agnostic.
+- **Schema shape (when 0022+ lands):** `pupil_profiles` PK is `pupil_id` alone (one row per pupil,
+  no course/teacher dimension); `pupil_devices` references only `pupil_id`; `mark_schemes` /
+  `pupil_marks` / `pupil_lesson_comments` have **no** owner/teacher/user column — documenting that
+  ownership is intentionally deferred to the future RBAC layer.
+- **Marking resolves via the lesson instance** (guards the §2 note): an answer whose
+  `resource_id` is `NULL` (post master↔adapted flip) still resolves to the right scheme via
+  `occurrence_course → lesson_plan → worksheet` and gets marked.
+- **Marks-rollup query shape:** review-grid / rollup queries join through
+  `group_courses`/`occurrence_courses`, never a global "all marks" SELECT — so a future
+  owner-scope `WHERE` is a drop-in.
+- **Device resume is class-agnostic:** resuming via cookie sets the pupil session with **no** fixed
+  group/class; `/me` resolves identically whether entered via class-code login or device cookie.
+  Account-disable and PIN-reset each revoke **all** of a pupil's device rows (cascade by
+  `pupil_id`); a revoked/expired `token_hash` no longer authenticates.
+- **Profile is pupil-keyed and owner-read:** the digest is queried/rendered only on the owning
+  teacher's surfaces and contains no roster name/token for any pupil (the cross-subject read case
+  is future-proofed by the same egress assertion).
+
 ---
 
 ## 11. Out of scope for Phase 9
@@ -327,6 +364,11 @@ theirs — a persistent cookie makes Windows login double as app login:
 - Internet exposure / homework from home (unchanged from Phase 8).
 - Auto-generated question *banks* (pgvector similarity et al.) — revisit only if worksheet
   generation stops being sufficient; `exam_questions` remains the reference design.
+- **Cross-subject aggregation or sharing of the "what works for me" profile (9.8)** — the profile
+  is built **single-teacher and pupil-keyed**, read only on the owning teacher's surfaces under
+  the 9.0 DPIA addendum. Letting *other* subjects' teachers see or feed it is the
+  [multi-teacher future](PHASE_MULTI_TEACHER_PLAN.md) §6, gated by **its** fresh whole-school DPIA
+  — **not** the Phase-9 addendum. (See §13.)
 
 ---
 
@@ -337,3 +379,31 @@ and immediately improves the teacher-facing answers doc (structured, editable). 
 **9.0 DPIA addendum** in parallel (it is the schedule risk, exactly as 8.0 was). Then 9.2 the
 moment Phase 8's answers exist, 9.3/9.4/9.5 as one arc, and 9.6 whenever convenient after 9.0
 — it is the slice pupils will feel first.
+
+## 13. Forward compatibility with the multi-teacher future
+
+Checked against [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md) (an independent
+three-lens audit, 2026-06-13): **the multi-teacher v2 forces NO structural change to this plan.**
+Phase 9 is already keyed exactly the way that future needs, because — like Phase 8 — every table
+hangs off pupils / occurrences / resources, never off "the teacher". The notes below are the
+deliberate choices that keep it that way; honour them when building.
+
+- **`pupil_profiles` is pupil-keyed (PK `pupil_id`) — the cross-subject bridge.** Never key it per
+  course or per teacher. When multi-teacher arrives, sharing the profile is a pure *read-access*
+  (RBAC) decision over an already-correct row, never a re-key or a merge. (The cross-subject
+  *sharing itself* is deferred and DPIA-gated to v2 — §11.)
+- **`pupil_devices` references only `pupil_id`** — no class/group/teacher binding. Resuming a
+  session restores `pupilId` and lets `/me` resolve via enrolments, so one device login works
+  school-wide once a pupil has one account. Disable / PIN-reset cascade revokes by **pupil
+  identity**, which survives the future fold into a unified `users` table.
+- **Marks and comments carry no owning-teacher column.** The owning teacher is derived through the
+  existing chain `pupil_marks → pupil_answers → occurrence_course → occurrence →
+  timetabled_lesson.staff_id` (comments via `occurrence_course`). v2 adds ownership *scoping* in
+  its RBAC layer (and an `owner_id` backfill on the shared tables), **not** a column here — so
+  review-grid / rollup queries must always join through `group_courses`/`occurrence_courses` (the
+  scopeable chain) and never assume a global "all marks are mine" SELECT.
+- **The AI boundary is roster-size-agnostic.** Redaction is purely roster-driven, so "no pupil
+  name reaches an AI service" holds unchanged when the roster goes school-wide; a name from
+  another teacher's class is just another roster entry. (Locked now by the egress-at-scale tests
+  in `redact.test.ts` / `classWork.test.ts`.) v2 will additionally add an *acting-user* column to
+  `ai_calls` for per-teacher spend attribution — that is a v2 change, out of scope here.
