@@ -152,6 +152,30 @@ remaining items stay a pick-by-pain list alongside Phase 8.*
 - ~~A TA read/feedback login~~ ✅ **built 2026-06-12** — separate TA password (Settings), locked-down read-only current/next-lesson view with structured feedback that feeds the teacher's lesson page and the adapt-next-lesson AI; per-TA logins follow with the pupil-login project.
 - Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue) —
   picked by what actually hurts in daily use.
+- ~~User-supplied AI key~~ ✅ **built 2026-06-13** — the teacher can paste their own Anthropic key
+  in **Settings → AI** (stored in the instance DB, like the mailbox password; `ANTHROPIC_API_KEY`
+  in `.env` still wins where set). Test mode never reads the stored key, so the suites stay
+  call-free.
+- **Multi-provider LLM selection (future, if wanted): Anthropic / OpenAI / Gemini.** Scoped, not
+  built. Recommended shape so it stays cheap and safe:
+  - Keep `callLLM` / `callLLMStructured` ([app/src/llm/client.ts](../app/src/llm/client.ts)) as the
+    single public wrapper — **the redaction / safeguarding-withholding / egress-assert / audit
+    boundary is provider-agnostic and must stay above the provider call**, so adding providers
+    never weakens "no pupil name reaches an AI service".
+  - Add a thin **provider-adapter** layer behind it: `complete(req)` + `completeStructured(req,
+    schema)` returning `{text|data, inputTokens, outputTokens}`, with an adapter per provider.
+    Anthropic already exists; OpenAI uses `response_format: json_schema`, Gemini uses
+    `responseSchema` — feed all three a JSON Schema produced once from the Zod schema (`z.toJSONSchema`).
+  - Prefer **plain `fetch` over each provider's HTTPS JSON API** rather than adding the `openai` /
+    `@google/generative-ai` packages — npm is unreachable on the school line, and this codebase
+    already hand-rolls libraries for that reason.
+  - Settings gain a **provider selector + per-provider key + per-provider model names** (the
+    `modelFor(role)` mapping and the cost table become per-provider).
+  - **Compliance, not just code:** each provider is a separate **data sub-processor**. Anthropic is
+    the only one named in [DPIA.md](DPIA.md) §6; enabling OpenAI/Gemini means adding them there and
+    confirming each one's no-training / data-processing terms. Decide *which* providers to enable
+    before building the selector.
+  - Rough size: **M** (≈1–2 days; build one provider at a time with a throwaway live smoke each).
 
 ## Phase 8 — Pupils: logins & in-app work *(BUILT 2026-06-13 — see [PHASE_8_PLAN.md](PHASE_8_PLAN.md))*
 

@@ -7,6 +7,25 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — User-supplied AI key (Settings → AI) + future multi-provider plan
+
+- **The teacher can now paste their own Anthropic API key in Settings → AI** instead of needing
+  `.env` access. Resolution mirrors the password model: `ANTHROPIC_API_KEY` in `.env` **wins**
+  where set (existing/ops-managed instances), otherwise the key stored in the `settings` table
+  (instance DB, LAN-only — same place as the mailbox password) is used; the wrapper rebuilds its
+  client when the key changes, so no restart is needed. The Settings field is read-only when the
+  key is env-managed (like the password form).
+- **Safety net preserved (belt-and-suspenders):** `resolveApiKey()` in
+  [client.ts](../app/src/llm/client.ts) **never consults the settings table in test mode**, so the
+  unit suite stays DB-free and the integration suite (which shares the real dev DB, where a key may
+  be stored) still cannot make a real provider call. Locked by a unit test (resolves `''` without a
+  DB read) and an integration test (a key stored via the route still resolves `''` in test).
+- **Future, documented not built — multi-provider LLM selection (Anthropic / OpenAI / Gemini):**
+  added to [ROADMAP.md](docs/ROADMAP.md) Phase 7 with the recommended shape — keep the single
+  redaction/audit wrapper, add `fetch`-based provider adapters behind it (no new npm deps, given
+  the school-line constraint), a per-provider settings selector, and a DPIA sub-processor entry per
+  provider enabled. SECURITY data-classification updated for the new key location.
+
 ### 2026-06-13 — Phase 8 second review: renderer + reliability fixes (migration `0020`)
 
 A second adversarial review (fix-regressions, renderer edge-cases, teacher-UI, performance, plus a

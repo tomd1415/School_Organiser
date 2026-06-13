@@ -11,8 +11,9 @@ setDefaultResultOrder('ipv4first');
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { ZodType } from 'zod/v4';
-import { ANTHROPIC_API_KEY, HAS_API_KEY, PRICE_PENCE_PER_MTOK, PROVIDER } from '../config/llm';
-import { aiEnabled, monthCapPence } from '../repos/settings';
+import { ANTHROPIC_API_KEY, PRICE_PENCE_PER_MTOK, PROVIDER } from '../config/llm';
+import { appConfig } from '../config/app';
+import { aiEnabled, getSetting, monthCapPence } from '../repos/settings';
 import { listRoster, type RosterEntry } from '../repos/pupils';
 import { insertAiCall, monthSpendPence, type AiCallRecord } from '../repos/aiCalls';
 import {
@@ -47,11 +48,35 @@ export interface LlmRequest {
   maxTokens?: number;
 }
 
+// The API key: the env var wins (existing instances / ops-managed), else the value the teacher
+// pastes into Settings. CRITICAL: in test mode we NEVER consult the settings table, so the
+// integration suite's forced-empty env key always holds and a key stored in the shared dev DB
+// can never cause a real provider call.
+export async function resolveApiKey(): Promise<string> {
+  if (ANTHROPIC_API_KEY) return ANTHROPIC_API_KEY;
+  if (appConfig.NODE_ENV === 'test') return '';
+  return (await getSetting('ai_api_key').catch(() => null)) || '';
+}
+
+/** Whether any usable key is configured (env or settings) — for routes' "AI unavailable" notes. */
+export async function aiKeyConfigured(): Promise<boolean> {
+  return (await resolveApiKey()).length > 0;
+}
+
+/** True when the key is fixed by the environment (so the Settings field is read-only, like the
+ * password form when APP_PASSWORD_HASH is set). */
+export const AI_KEY_ENV_MANAGED = ANTHROPIC_API_KEY.length > 0;
+
 let client: Anthropic | null = null;
-function sdk(): Anthropic {
+let clientKey = '';
+function sdk(apiKey: string): Anthropic {
   // The school line can crawl (6s+ round-trips) — give the SDK patience instead of insta-failing:
   // more retries with backoff, and a generous per-request timeout for the long generations.
-  client ??= new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 4, timeout: 180_000 });
+  // Rebuilt only when the resolved key changes (e.g. the teacher updates it in Settings).
+  if (!client || clientKey !== apiKey) {
+    client = new Anthropic({ apiKey, maxRetries: 4, timeout: 180_000 });
+    clientKey = apiKey;
+  }
   return client;
 }
 
@@ -78,12 +103,13 @@ async function audit(req: LlmRequest, fields: Partial<AiCallRecord> & Pick<AiCal
 
 type Prep =
   | { ok: false; status: LlmStatus; message: string }
-  | { ok: true; roster: RosterEntry[]; systemText: string; userText: string; requestRedacted: unknown };
+  | { ok: true; apiKey: string; roster: RosterEntry[]; systemText: string; userText: string; requestRedacted: unknown };
 
 // The shared boundary: availability gates → withhold safeguarding → redact names → egress-assert.
 // Nothing reaches a provider until this returns ok with an already-clean payload.
 async function prepare(req: LlmRequest): Promise<Prep> {
-  if (!HAS_API_KEY) return { ok: false, status: 'unavailable', message: 'No API key configured.' };
+  const apiKey = await resolveApiKey();
+  if (!apiKey) return { ok: false, status: 'unavailable', message: 'No API key configured.' };
   if (!(await aiEnabled())) return { ok: false, status: 'unavailable', message: 'AI is switched off in settings.' };
 
   const [cap, spent] = await Promise.all([monthCapPence(), monthSpendPence()]);
@@ -103,7 +129,7 @@ async function prepare(req: LlmRequest): Promise<Prep> {
     await audit(req, { status: 'blocked', error: 'redaction incomplete — refused' });
     return { ok: false, status: 'blocked', message: 'Redaction check failed; nothing was sent.' };
   }
-  return { ok: true, roster, systemText, userText, requestRedacted: { system: systemText, user: userText } };
+  return { ok: true, apiKey, roster, systemText, userText, requestRedacted: { system: systemText, user: userText } };
 }
 
 /** Free-text completion. Returns text with tokens re-expanded to names for display. */
@@ -111,7 +137,7 @@ export async function callLLM(req: LlmRequest): Promise<LlmResult> {
   const p = await prepare(req);
   if (!p.ok) return { status: p.status, text: null, message: p.message };
   try {
-    const res = await sdk().messages.create({
+    const res = await sdk(p.apiKey).messages.create({
       model: req.model,
       max_tokens: req.maxTokens ?? 8000,
       system: p.systemText,
@@ -150,7 +176,7 @@ function degradeMessage(raw: string): string {
   }
   if (/429|rate.?limit/i.test(raw)) return 'The AI service is rate-limiting us — wait a minute and try again.';
   if (/overloaded|529/i.test(raw)) return 'The AI service is overloaded right now — try again shortly.';
-  if (/401|403|authentication|invalid.*key/i.test(raw)) return 'The AI key was rejected — check ANTHROPIC_API_KEY in app/.env.';
+  if (/401|403|authentication|invalid.*key/i.test(raw)) return 'The AI key was rejected — check the API key in Settings → AI (or ANTHROPIC_API_KEY in app/.env, where that manages it).';
   return 'The AI service is unavailable right now.';
 }
 
@@ -159,7 +185,7 @@ export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>):
   const p = await prepare(req);
   if (!p.ok) return { status: p.status, data: null, message: p.message };
   try {
-    const res = await sdk().messages.parse({
+    const res = await sdk(p.apiKey).messages.parse({
       model: req.model,
       max_tokens: req.maxTokens ?? 8000,
       system: p.systemText,

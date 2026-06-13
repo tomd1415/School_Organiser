@@ -89,7 +89,7 @@ export function registerWelcomeRoutes(app: FastifyInstance): void {
           ${item(c.lessons > 0, '7 · The timetable', '/setup?tab=timetable', c.lessons ? `${c.lessons} slots filled` : 'put each class into its weekly slots')}
           ${item(c.kit > 0, '8 · Kit list (optional)', '/kit', c.kit ? `${c.kit} items` : 'the classroom equipment — every AI planning feature plans within it')}
           ${item(c.pupils > 0, '9 · Pupil roster (optional)', '/pupils', c.pupils ? `${c.pupils} pupils` : 'names-only; needed for the redaction boundary if you use AI')}
-          <li>${tick(false)} <span>10 · AI key (optional)</span> <span class="muted">— set <code>ANTHROPIC_API_KEY</code> in the instance's <code>.env</code> and restart; the app works fully without it</span></li>
+          <li>${tick(false)} <span>10 · AI key (optional)</span> <span class="muted">— paste an Anthropic key in <a href="/settings">Settings → AI</a> (or set <code>ANTHROPIC_API_KEY</code> in <code>.env</code>); the app works fully without it</span></li>
         </ol>
         ${
           done

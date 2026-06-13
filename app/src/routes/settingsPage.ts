@@ -12,6 +12,7 @@ import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
 import { createTaAccount, deleteTaAccount, listTaAccounts, setTaAccountActive, setTaAccountPassword, type TaAccount } from '../repos/taAccounts';
 import { invalidatePupilCfg } from '../auth/pupilAccessCache';
+import { AI_KEY_ENV_MANAGED } from '../llm/client';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
   const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
@@ -32,7 +33,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const envManaged = !!appConfig.APP_PASSWORD_HASH;
-      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast] = await Promise.all([
+      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey] = await Promise.all([
         getSetting('school_name'),
         getSetting('ai_enabled'),
         getSetting('ai_month_cap_pence'),
@@ -48,6 +49,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('email_poll_enabled'),
         getSetting('email_poll_minutes'),
         getSetting('email_last_poll'),
+        getSetting('ai_api_key'),
       ]);
       const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows] = await Promise.all([
         getSetting('pupil_access_enabled'),
@@ -64,7 +66,8 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
                (SELECT count(*)::int FROM ai_calls WHERE created_at > date_trunc('month', now())) AS "aiMonth",
                (SELECT pg_database_size(current_database()) / 1048576)::int AS "dbMb"`)
       ).rows[0]!;
-      const aiKeySet = !!process.env.ANTHROPIC_API_KEY;
+      const aiKeyFromSettings = !!(aiKey && aiKey.trim());
+      const aiKeySet = AI_KEY_ENV_MANAGED || aiKeyFromSettings;
       body = `
       <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Settings</h1>
@@ -89,8 +92,19 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         }
 
         <h2>AI</h2>
-        <p class="muted">Key: ${aiKeySet ? '✅ set (via .env)' : '— not set; all AI features degrade gracefully'} ·
-          every call is redacted, safeguarding-withheld and audited regardless.</p>
+        <p class="muted">Key: ${aiKeySet ? `✅ set (${AI_KEY_ENV_MANAGED ? 'via .env' : 'in Settings'})` : '— not set; all AI features degrade gracefully'} ·
+          provider: <strong>Anthropic (Claude)</strong> · every call is redacted, safeguarding-withheld and audited regardless.</p>
+        ${
+          AI_KEY_ENV_MANAGED
+            ? '<p class="muted">The API key is managed by <code>ANTHROPIC_API_KEY</code> in this instance\'s <code>.env</code>. Remove that variable to set the key here instead.</p>'
+            : `<form class="setup-add" hx-post="/settings/ai-key" hx-target="#ai-key-result" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+                <input type="password" name="key" placeholder="${aiKeyFromSettings ? 'replace stored Anthropic API key' : 'paste your Anthropic API key (sk-ant-…)'}" autocomplete="off">
+                <button type="submit" class="btn-secondary">${aiKeyFromSettings ? 'Update key' : 'Save key'}</button>
+                ${aiKeyFromSettings ? '<button type="submit" class="link danger" name="clear" value="1" formnovalidate>remove key</button>' : ''}
+              </form>
+              <p class="muted">Stored in this instance's database (LAN-only), like the email password. Get a key from <code>console.anthropic.com</code>.</p>
+              <div id="ai-key-result"></div>`
+        }
         <div class="setup-add">
           <label><input type="checkbox"${aiEnabled !== 'false' ? ' checked' : ''}
             hx-post="/settings/ai" hx-vals='js:{"key":"ai_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> AI features enabled</label>
@@ -217,6 +231,22 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (b.data.key === 'ai_month_cap_pence' && b.data.value.trim() !== '' && !(Number(b.data.value) > 0)) return reply.code(400).send('');
     await setSetting(b.data.key, b.data.value.trim());
     return reply.send('');
+  });
+
+  // The teacher's own API key (when not managed by .env). Stored in the instance DB, like the
+  // mailbox password. The wrapper picks it up on the next call (it rebuilds the client per key).
+  app.post('/settings/ai-key', guard, async (req, reply) => {
+    if (AI_KEY_ENV_MANAGED) return reply.code(403).type('text/html').send('<p class="muted">The key is managed by .env on this instance.</p>');
+    const b = z.object({ key: z.string().max(400).default(''), clear: z.string().optional() }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    if (b.data.clear === '1') {
+      await setSetting('ai_api_key', '');
+      return reply.type('text/html').send('<p class="adapt-note">AI key removed — AI features now degrade gracefully. Reload to update the status.</p>');
+    }
+    const key = b.data.key.trim();
+    if (key.length < 12) return reply.type('text/html').send('<p class="error">That doesn\'t look like a valid key.</p>');
+    await setSetting('ai_api_key', key);
+    return reply.type('text/html').send('<p class="adapt-note">AI key saved ✓ — Claude features are now live. (Reload to refresh the status line.)</p>');
   });
 
 

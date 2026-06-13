@@ -19,7 +19,8 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Pupil answers + lesson feedback (Phase 8) | **Sensitive** (pupil-authored) | PostgreSQL; reach AI only **aggregated per question + anonymised**, through the wrapper; never linked to a name on egress |
 | Pupil differentiation level (Phase 8) | **Sensitive** (attainment) | `pupil_levels`; server-side only, never sent to AI |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
-| Auth secrets (`SESSION_SECRET`, API keys) | Secret | `.env`, never committed |
+| Auth secrets (`SESSION_SECRET`) | Secret | `.env`, never committed |
+| AI provider API key | Secret | `ANTHROPIC_API_KEY` in `.env` where set (wins); otherwise the teacher's own key stored in the `settings` table (instance-local DB, LAN-only) — like the mailbox password. Test mode never reads the stored key, so tests can't make real calls |
 | Email-intake mailbox credentials | Secret | `settings` table (instance-local DB); use a **dedicated/forwarded mailbox with an app password**, never the main school account |
 
 ## Authentication & access

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { createPupil, listPupils, setPupilActive, type RosterEntry } from '../repos/pupils';
-import { HAS_API_KEY } from '../config/llm';
+import { aiKeyConfigured } from '../llm/client';
 import { getSetting } from '../repos/settings';
 import {
   listGroupLogins,
@@ -62,7 +62,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const pupils = await listPupils();
-      const keyNote = HAS_API_KEY
+      const keyNote = (await aiKeyConfigured())
         ? ''
         : ' <strong>No AI key is configured yet</strong>, so nothing is sent anywhere regardless.';
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
