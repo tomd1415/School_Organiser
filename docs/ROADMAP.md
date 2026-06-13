@@ -206,6 +206,16 @@ login). Absorbs the old 8.8 stretch list; design mines the sibling `exam_questio
 marking architecture. Gated on a **DPIA addendum** (attainment storage, anonymous answer text
 to the AI, the device credential).
 
+## Future (unnumbered) — Multi-teacher school server *(parked — see [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md))*
+
+**Deliberately unnumbered and not scheduled.** A v2 architecture: one shared school server, many
+teacher accounts, each pupil with a single school-wide account, and (opt-in) cross-subject signal
+to inform planning. It is a rearchitecture of auth + ownership + per-route authorization (roughly
+half the codebase), so it **will not be touched until the single-teacher tool is proven in real
+use** and a **fresh whole-school DPIA** (whole-school pupil data + cross-subject profiling) is
+signed. Recorded now only so single-teacher work doesn't foreclose it. The AI boundary is
+preserved and extended to a school-wide redaction roster — names still never reach an AI service.
+
 ## What MVP deliberately excludes
 
 Phase 1 has **no** tasks, AI, pupils-as-data, or full lesson-plan authoring. That is on

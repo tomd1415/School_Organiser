@@ -204,6 +204,15 @@ describe('teacher Pupil-work grid + AI loop (integration)', () => {
     expect(res.statusCode).toBe(403);
   });
 
+  it('printable login cards show the actual PIN (so pupils know it), not a blank', async () => {
+    const { setPupilPin } = await import('../../src/repos/pupilCredentials');
+    await setPupilPin(inPupil, '7531');
+    const res = await app.inject({ method: 'GET', url: `/pupils/cards/${groupId}`, headers: { cookie: teacherCookie } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('7531'); // the real PIN prints
+    expect(res.body).not.toContain('>____<'); // not the old blank placeholder
+  });
+
   it('the AI summary degrades gracefully when no key is configured (never 500)', async () => {
     const res = await app.inject({
       method: 'POST', url: `/lesson/oc/${occurrenceCourseId}/summarise`, headers: teacher(),

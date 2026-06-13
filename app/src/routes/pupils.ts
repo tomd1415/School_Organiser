@@ -29,8 +29,8 @@ function renderLoginPupil(groupId: number, p: PupilLoginRow): string {
     : p.locked
       ? '<span class="pin-locked">🔒 locked</span>'
       : p.enabled
-        ? '<span class="pin-ok">● PIN set</span>'
-        : '<span class="muted">disabled</span>';
+        ? `<span class="pin-ok">● PIN ${p.pin ? esc(p.pin) : 'set'}</span>`
+        : `<span class="muted">disabled${p.pin ? ` (PIN ${esc(p.pin)})` : ''}</span>`;
   return `<li class="pupil" id="login-${p.pupilId}">
     <span class="pupil-name">${esc(p.displayName)}</span> ${status}
     <button type="button" class="link" hx-post="/pupils/${p.pupilId}/pin" hx-prompt="New 4–6 digit PIN for ${esc(p.displayName)}" hx-target="#login-${p.pupilId}" hx-swap="outerHTML">${p.hasPin ? 'reset PIN' : 'set PIN'}</button>
@@ -197,8 +197,8 @@ export function registerPupilRoutes(app: FastifyInstance): void {
           <div class="lc-row"><span class="lc-k">Web page</span><span class="lc-v">${esc((req.headers.host ?? '') + '/pupil')}</span></div>
           <div class="lc-row"><span class="lc-k">Class code</span><span class="lc-v big">${esc(g.loginCode ?? '(set a code)')}</span></div>
           <div class="lc-row"><span class="lc-k">Your name</span><span class="lc-v">${esc(p.displayName)}</span></div>
-          <div class="lc-row"><span class="lc-k">PIN</span><span class="lc-v big">____</span></div>
-          <div class="lc-note">Keep your PIN secret. Write it in once you know it.</div>
+          <div class="lc-row"><span class="lc-k">PIN</span><span class="lc-v big">${p.pin ? esc(p.pin) : '____ (reset PIN to show)'}</span></div>
+          <div class="lc-note">Keep your PIN to yourself.</div>
         </div>`,
       )
       .join('');

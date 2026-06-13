@@ -13,6 +13,7 @@ export interface PupilLoginRow {
   hasPin: boolean;
   enabled: boolean;
   locked: boolean;
+  pin: string | null; // the PIN value, for the teacher-only printable cards + admin display
 }
 
 /** Current-year groups that have a login code, each with its enrolled pupils' credential state. */
@@ -34,12 +35,14 @@ export async function listGroupLogins(): Promise<GroupLogins[]> {
     hasPin: boolean;
     enabled: boolean;
     locked: boolean;
+    pin: string | null;
   }>(
     `SELECT g.id AS "groupId", g.name AS "groupName", g.login_code AS "loginCode",
             p.id AS "pupilId", p.display_name AS "displayName",
             (pc.pupil_id IS NOT NULL) AS "hasPin",
             COALESCE(pc.enabled, false) AS enabled,
-            COALESCE(pc.failed_count, 0) >= $1 AS locked
+            COALESCE(pc.failed_count, 0) >= $1 AS locked,
+            pc.pin AS pin
      FROM groups g
      LEFT JOIN enrolments e ON e.group_id = g.id AND e.active
      LEFT JOIN pupils p ON p.id = e.pupil_id
@@ -56,7 +59,7 @@ export async function listGroupLogins(): Promise<GroupLogins[]> {
       byGroup.set(r.groupId, grp);
     }
     if (r.pupilId != null) {
-      grp.pupils.push({ pupilId: r.pupilId, displayName: r.displayName!, hasPin: r.hasPin, enabled: r.enabled, locked: r.locked });
+      grp.pupils.push({ pupilId: r.pupilId, displayName: r.displayName!, hasPin: r.hasPin, enabled: r.enabled, locked: r.locked, pin: r.pin });
     }
   }
   return [...byGroup.values()];
@@ -99,11 +102,12 @@ export async function setGroupLoginCode(groupId: number, code: string | null): P
 }
 
 export async function setPupilPin(pupilId: number, pin: string): Promise<void> {
+  // Store the hash (for verification) AND the PIN value (so the teacher can print/read it).
   await pool.query(
-    `INSERT INTO pupil_credentials (pupil_id, pin_hash, enabled, failed_count, updated_at)
-     VALUES ($1, $2, true, 0, now())
-     ON CONFLICT (pupil_id) DO UPDATE SET pin_hash = EXCLUDED.pin_hash, enabled = true, failed_count = 0, updated_at = now()`,
-    [pupilId, hashPassword(pin)],
+    `INSERT INTO pupil_credentials (pupil_id, pin_hash, pin, enabled, failed_count, updated_at)
+     VALUES ($1, $2, $3, true, 0, now())
+     ON CONFLICT (pupil_id) DO UPDATE SET pin_hash = EXCLUDED.pin_hash, pin = EXCLUDED.pin, enabled = true, failed_count = 0, updated_at = now()`,
+    [pupilId, hashPassword(pin), pin],
   );
 }
 

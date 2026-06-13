@@ -58,6 +58,7 @@ Read in this order:
 | [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) | Build plan for Phase 6: in-app setup editors, the September rollover (new timetable every year; class-group knowledge follows the group), the onboarding wizard, and per-teacher instances. |
 | [docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md) | Build plan for Phase 8: pupil logins and in-app work — interactive worksheets, answers as data, teacher review, per-TA accounts. |
 | [docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md) | Build plan for Phase 9: auto-marking (deterministic + AI-suggested, teacher-released), results back to pupils, marks feeding the loop, "what works for me" profiles, stay-signed-in devices. |
+| [docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md) | **Unnumbered / parked** future v2: one shared school server, multiple teacher accounts, one account per pupil, opt-in cross-subject planning signal. Not started — gated on the single-teacher tool being proven and a fresh whole-school DPIA. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 
 ## Run it

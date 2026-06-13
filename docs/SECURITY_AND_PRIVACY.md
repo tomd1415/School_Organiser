@@ -15,7 +15,7 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Lesson plans, schemes, adaptations, resources, tasks | Internal | PostgreSQL / hosted resource store |
 | Equipment inventory (kit list) | Internal — no personal data | PostgreSQL; injected into AI planning calls |
 | TA lesson feedback | **Sensitive** (may describe pupils) | PostgreSQL; flows to adapt-lesson AI after redaction; **safeguarding-flagged feedback withheld entirely** |
-| Pupil PINs (Phase 8) | Secret | `pupil_credentials`; scrypt-hashed, never reversible; durable lockout after 5 fails |
+| Pupil PINs (Phase 8) | Secret (low-entropy) | `pupil_credentials`: scrypt **hash** (verification) **plus the PIN value** so the teacher can print/read it onto login cards. A 4–6 digit classroom PIN isn't a real secret here — LAN-only, rate-limited, lockout after 5 fails, shared machines, classmates known to each other; never sent to AI; shown only on teacher-authenticated surfaces |
 | Pupil answers + lesson feedback (Phase 8) | **Sensitive** (pupil-authored) | PostgreSQL; reach AI only **aggregated per question + anonymised**, through the wrapper; never linked to a name on egress |
 | Pupil differentiation level (Phase 8) | **Sensitive** (attainment) | `pupil_levels`; server-side only, never sent to AI |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |

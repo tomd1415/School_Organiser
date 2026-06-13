@@ -7,6 +7,25 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Login cards show the PIN + future multi-teacher plan (unnumbered)
+
+- **Login cards now print each pupil's actual PIN** instead of a `____` blank. PINs were stored
+  only as a one-way scrypt hash, so the card had nothing to show; migration `0021` adds a `pin`
+  column and `setPupilPin` stores the value alongside the hash (auth still verifies against the
+  hash). The PIN is also shown on the Pupils admin row. It's a 4–6 digit classroom PIN, displayed
+  only on teacher-authenticated surfaces, never sent to AI — documented as a low-entropy/LAN-only
+  trade-off in [SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md). (Pre-existing PINs show
+  `____ (reset PIN to show)` until re-set.) Locked by an integration test.
+- **[docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md) — new UNNUMBERED future
+  phase (plan-first, parked).** One shared school server, multiple teacher accounts, one school-
+  wide account per pupil, and opt-in cross-subject signal to inform planning. Grounded in a survey
+  of how single-tenant the code is today (no ownership columns anywhere; "teacher" = `staff.is_self`;
+  global roster; routes gated only by `authed`; one DB per teacher). Recommends shared-DB row-level
+  ownership + RBAC, a real `users`/accounts model, a school-wide redaction roster (AI boundary
+  preserved), and a **fresh whole-school DPIA** as a hard gate (cross-subject profiling of children).
+  Explicitly unnumbered/not-scheduled: won't be touched until the single-teacher tool is proven.
+  Referenced from README + ROADMAP.
+
 ### 2026-06-13 — User-supplied AI key (Settings → AI) + future multi-provider plan
 
 - **The teacher can now paste their own Anthropic API key in Settings → AI** instead of needing
