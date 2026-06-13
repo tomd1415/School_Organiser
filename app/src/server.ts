@@ -44,6 +44,7 @@ import { registerPupilAuthRoutes } from './routes/pupilAuth';
 import { registerMeRoutes } from './routes/me';
 import { registerPupilWorkRoutes } from './routes/pupilWork';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
+import { pupilCfg } from './auth/pupilAccessCache';
 import { generateDueInstances } from './repos/recurringTasks';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
@@ -84,25 +85,13 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Limited roles (ta, pupil) are deny-by-default: anything off their allowlist bounces to
   // their home surface. Pupil sessions also idle out (shared classroom machines), and the
   // pupil-access master switch *evicts* live sessions when turned off — so the DPIA kill-switch
-  // actually revokes access, not just blocks new logins. Both settings are cached briefly so the
-  // hook doesn't hit the DB on every request.
-  let pupilCfg = { idleMins: 20, accessOn: false, at: 0 };
-  const refreshPupilCfg = async (): Promise<typeof pupilCfg> => {
-    if (Date.now() - pupilCfg.at > 30_000) {
-      const [idle, access] = await Promise.all([
-        getSetting('pupil_idle_minutes').catch(() => null),
-        getSetting('pupil_access_enabled').catch(() => null),
-      ]);
-      const v = Number(idle);
-      pupilCfg = { idleMins: Number.isFinite(v) && v >= 1 ? v : 20, accessOn: access === 'true', at: Date.now() };
-    }
-    return pupilCfg;
-  };
+  // actually revokes access, not just blocks new logins. The settings are cached (and invalidated
+  // by the Settings handlers) so the hook rarely hits the DB. See auth/pupilAccessCache.
   app.addHook('onRequest', async (req, reply) => {
     const role = req.session?.get?.('role');
     if (!isLimitedRole(role)) return;
     if (role === 'pupil' && !req.url.startsWith('/static/')) {
-      const cfg = await refreshPupilCfg();
+      const cfg = await pupilCfg();
       if (!cfg.accessOn) {
         // The teacher turned pupil access off (the DPIA gate) — kill the live session.
         req.session.delete();

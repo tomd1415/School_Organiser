@@ -191,7 +191,9 @@ export function registerTaRoutes(app: FastifyInstance): void {
       if (q.success && q.data.lesson != null && q.data.date) {
         const l = await lessonById(q.data.lesson);
         const dayDiff = Math.abs((Date.parse(q.data.date) - Date.parse(state.isoDate)) / 86400000);
-        const allowed = l && dayDiff <= 31 && (taStaffId <= 0 || l.staffId === taStaffId || req.session.get('role') === 'teacher');
+        // A shared-password TA (taStaffId 0) gets no "my lessons" tab and may NOT deep-link to an
+        // arbitrary lesson by id — only named TAs (their own staff row) or the teacher peeking.
+        const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
         if (!l || !allowed) {
           body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
         } else {

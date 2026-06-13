@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/integration/**/*.test.ts'],
+    // All integration files hit the ONE shared dev DB, and some assert on global row counts
+    // (e.g. "converting without a key materialises nothing"). Run files serially so concurrent
+    // scratch-data churn in another file can't race those assertions.
+    fileParallelism: false,
     env: {
       NODE_ENV: 'test',
       SESSION_KEY: '0'.repeat(64),

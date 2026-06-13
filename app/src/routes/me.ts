@@ -7,8 +7,8 @@ import { esc } from '../lib/html';
 import { pool } from '../db/pool';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
-import { findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
-import { getLessonWorksheet } from '../services/worksheet';
+import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
+import { getLessonWorksheet, getLessonWorksheetMeta } from '../services/worksheet';
 import { renderWorksheet } from '../lib/worksheetForm';
 import {
   getAnswers,
@@ -122,32 +122,32 @@ export function registerMeRoutes(app: FastifyInstance): void {
         body = `${head}<section class="pupil-card"><h1>No lesson right now</h1>
           <p class="pupil-note">${state.isSchoolDay ? 'Check back when your lesson starts.' : 'No school today.'}</p></section>`;
       } else {
-        const occId = await findOrCreateOccurrence(lesson.lessonId, lesson.date);
+        // Read-first: only create+materialise the occurrence if it doesn't exist yet (avoids a
+        // write + row lock on every pupil GET once the lesson has been opened once).
+        const occId = (await findOccurrence(lesson.lessonId, lesson.date)) ?? (await findOrCreateOccurrence(lesson.lessonId, lesson.date));
         const sections = await getOccurrenceCourses(occId);
-        const blocks: string[] = [];
-        for (const s of sections) {
-          const oc = Number(s.occurrenceCourseId);
-          let inner = '';
-          if (s.lessonPlanId != null) {
-            const ws = await getLessonWorksheet(Number(s.groupCourseId), Number(s.lessonPlanId));
-            if (ws) {
-              const level = await getPupilLevel(pupilId, Number(s.groupCourseId));
-              const values = await getAnswers(pupilId, oc);
-              const rendered = renderWorksheet(ws.markdown, {
-                mode: 'form',
-                level,
-                values,
-                action: `/me/answer?oc=${oc}`,
-              });
-              inner = `<div class="ws-doc">${rendered.html}</div>
-                ${doneBlock(oc, await isDone(pupilId, oc))}
-                ${feedbackWidget(oc, await getPupilFeedback(pupilId, oc))}`;
+        const blocks = await Promise.all(
+          sections.map(async (s) => {
+            const oc = Number(s.occurrenceCourseId);
+            let inner = '';
+            if (s.lessonPlanId != null) {
+              const ws = await getLessonWorksheet(Number(s.groupCourseId), Number(s.lessonPlanId));
+              if (ws) {
+                // independent per-section reads — run them together, not one after another
+                const [level, values, done, fb] = await Promise.all([
+                  getPupilLevel(pupilId, Number(s.groupCourseId)),
+                  getAnswers(pupilId, oc),
+                  isDone(pupilId, oc),
+                  getPupilFeedback(pupilId, oc),
+                ]);
+                const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}` });
+                inner = `<div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+              }
             }
-          }
-          if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
-          blocks.push(`<section class="pupil-card pupil-work-card">
-            <h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`);
-        }
+            if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
+            return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`;
+          }),
+        );
         body = `${head}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
       }
     } catch (err) {
@@ -209,7 +209,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
   });
 }
 
-/** Resolve the worksheet bound to an occurrence-course (for answer provenance), or null. */
+/** Resolve the worksheet bound to an occurrence-course (for answer provenance), or null.
+ * Metadata only — no file read, since this runs on every autosave. */
 async function worksheetForOccurrenceCourse(occurrenceCourseId: number): Promise<{ resourceId: number; versionNo: number } | null> {
   const { rows } = await pool.query<{ groupCourseId: number; lessonPlanId: number | null }>(
     `SELECT group_course_id AS "groupCourseId", lesson_plan_id AS "lessonPlanId" FROM occurrence_courses WHERE id = $1`,
@@ -217,8 +218,8 @@ async function worksheetForOccurrenceCourse(occurrenceCourseId: number): Promise
   );
   const r = rows[0];
   if (!r || r.lessonPlanId == null) return null;
-  const ws = await getLessonWorksheet(Number(r.groupCourseId), Number(r.lessonPlanId));
-  return ws ? { resourceId: ws.resourceId, versionNo: ws.versionNo } : null;
+  const meta = await getLessonWorksheetMeta(Number(r.groupCourseId), Number(r.lessonPlanId));
+  return meta ? { resourceId: meta.resourceId, versionNo: meta.versionNo } : null;
 }
 
 /** Defence in depth: the occurrence-course must belong to the pupil's enrolled group. */

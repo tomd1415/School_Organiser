@@ -29,6 +29,16 @@ export async function findOrCreateOccurrence(lessonId: number, date: string): Pr
   return id;
 }
 
+/** Read-only: the occurrence id for a slot+date if it already exists (no write, no prep
+ * materialisation, no row lock) — for hot read paths like the pupil surface. */
+export async function findOccurrence(lessonId: number, date: string): Promise<number | null> {
+  const { rows } = await pool.query<{ id: number }>(
+    `SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2`,
+    [lessonId, date],
+  );
+  return rows[0]?.id ?? null;
+}
+
 export async function getOccurrenceHeader(occurrenceId: number): Promise<OccurrenceHeader | null> {
   const { rows } = await pool.query<OccurrenceHeader>(
     `SELECT o.id AS "occurrenceId", tl.id AS "lessonId",

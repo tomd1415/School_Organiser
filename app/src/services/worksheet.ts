@@ -5,15 +5,21 @@ import { getAdaptation } from '../repos/adaptations';
 import { getCurrentVersion, listResourcesForAdaptation, listResourcesForPlan, type LinkedResource } from '../repos/resources';
 import { readStored } from '../lib/resourceStore';
 
-export interface ResolvedWorksheet {
+export interface WorksheetMeta {
   resourceId: number;
   versionNo: number;
+  storagePath: string;
   title: string;
-  markdown: string;
   adapted: boolean;
 }
 
-export async function getLessonWorksheet(groupCourseId: number, lessonPlanId: number): Promise<ResolvedWorksheet | null> {
+export interface ResolvedWorksheet extends WorksheetMeta {
+  markdown: string;
+}
+
+/** Resolve WHICH worksheet (resource + current version) a class works from — no file read.
+ * Cheap enough to call on every autosave just to record answer provenance. */
+export async function getLessonWorksheetMeta(groupCourseId: number, lessonPlanId: number): Promise<WorksheetMeta | null> {
   const pick = (rs: LinkedResource[]): LinkedResource | undefined => rs.find((r) => r.kind === 'worksheet');
   const adaptation = await getAdaptation(groupCourseId, lessonPlanId);
   let res: LinkedResource | undefined;
@@ -26,11 +32,17 @@ export async function getLessonWorksheet(groupCourseId: number, lessonPlanId: nu
   if (!res) return null;
   const v = await getCurrentVersion(res.resourceId);
   if (!v) return null;
-  let markdown: string;
+  return { resourceId: res.resourceId, versionNo: v.versionNo, storagePath: v.storagePath, title: res.title, adapted };
+}
+
+/** As above, plus the worksheet markdown (reads the stored file). Use only when rendering. */
+export async function getLessonWorksheet(groupCourseId: number, lessonPlanId: number): Promise<ResolvedWorksheet | null> {
+  const meta = await getLessonWorksheetMeta(groupCourseId, lessonPlanId);
+  if (!meta) return null;
   try {
-    markdown = (await readStored(v.storagePath)).toString('utf8');
+    const markdown = (await readStored(meta.storagePath)).toString('utf8');
+    return { ...meta, markdown };
   } catch {
     return null;
   }
-  return { resourceId: res.resourceId, versionNo: v.versionNo, title: res.title, markdown, adapted };
 }

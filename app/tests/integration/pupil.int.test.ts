@@ -252,6 +252,124 @@ describe('pupil login + surface (integration)', () => {
     expect(await getPupilLevel(pupilId, groupCourseId)).toBe('support');
   });
 
+  it('changing a pupil level does NOT lose their saved answers (keys are level-independent)', async () => {
+    const { saveAnswer, getAnswers, setPupilLevel } = await import('../../src/repos/pupilWork');
+    await setPupilLevel(pupilId, groupCourseId, 'challenge');
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: 't9.r1.c2', value: 'kept' });
+    await setPupilLevel(pupilId, groupCourseId, 'support'); // re-slice
+    const answers = await getAnswers(pupilId, occurrenceCourseId);
+    expect(answers.get('t9.r1.c2')).toBe('kept'); // survives the level change
+  });
+
+  it('re-keyed answers survive a worksheet flip: same (pupil, oc, field) regardless of resource id', async () => {
+    const { saveAnswer, getAnswers } = await import('../../src/repos/pupilWork');
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: 't5.r1.c1', value: 'first' });
+    // the worksheet resolving to a different resource (master↔adapted) writes the SAME logical answer
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId: null, versionNo: 2, fieldKey: 't5.r1.c1', value: 'second' });
+    const answers = await getAnswers(pupilId, occurrenceCourseId);
+    expect(answers.get('t5.r1.c1')).toBe('second'); // one row per field, not two hidden by the flip
+  });
+
+  it('/pupil/names is rate-limited against class-code sweeping', async () => {
+    let throttled = false;
+    for (let i = 0; i < 25; i++) {
+      const page = await app.inject({ method: 'GET', url: '/pupil' });
+      const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']);
+      const res = await app.inject({
+        method: 'POST', url: '/pupil/names',
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `code=NOPE-${i}`,
+      });
+      if (res.body.includes('Too many tries')) { throttled = true; break; }
+    }
+    expect(throttled).toBe(true);
+  });
+
+  it('the PIN lockout surfaces the distinct "locked" message via the /pupil/login route', async () => {
+    const { setPupilPin, unlockPupil, resetRateLimiter } = {
+      ...(await import('../../src/repos/pupilCredentials')),
+      ...(await import('../../src/auth/rateLimit')),
+    };
+    await setPupilPin(otherPupilId, '2222');
+    const post = async (pin: string) => {
+      const page = await app.inject({ method: 'GET', url: '/pupil' });
+      const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']);
+      return app.inject({
+        method: 'POST', url: '/pupil/login',
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `pupil=${otherPupilId}&group=${groupId}&pin=${pin}`,
+      });
+    };
+    for (let i = 0; i < 5; i++) await post('0000'); // wrong PINs lock the account
+    const locked = await post('2222'); // even the correct PIN is now locked
+    expect(locked.body).toContain('is locked');
+    expect(locked.headers['hx-redirect']).toBeUndefined();
+    await unlockPupil(otherPupilId);
+    resetRateLimiter();
+  });
+
+  it('wrong-PIN, not-enrolled, and disabled all return the identical generic message (no oracle)', async () => {
+    const { setPupilPin, setPupilCredentialEnabled, resetRateLimiter } = {
+      ...(await import('../../src/repos/pupilCredentials')),
+      ...(await import('../../src/auth/rateLimit')),
+    };
+    resetRateLimiter();
+    await setPupilPin(pupilId, '3333');
+    const body = async (payload: string): Promise<string> => {
+      const page = await app.inject({ method: 'GET', url: '/pupil' });
+      const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']);
+      const r = await app.inject({ method: 'POST', url: '/pupil/login', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload });
+      return r.body.replace(/x-csrf-token":"[^"]+"/, 'TOKEN').replace(/value="[^"]+"/g, 'V'); // strip per-request token
+    };
+    const wrongPin = await body(`pupil=${pupilId}&group=${groupId}&pin=9999`);
+    // a group the pupil is not enrolled in
+    const otherGroup = await pool.query<{ id: number }>(`SELECT id FROM groups WHERE id <> $1 ORDER BY id LIMIT 1`, [groupId]);
+    const notEnrolled = await body(`pupil=${pupilId}&group=${otherGroup.rows[0]!.id}&pin=3333`);
+    await setPupilCredentialEnabled(pupilId, false);
+    const disabled = await body(`pupil=${pupilId}&group=${groupId}&pin=3333`);
+    await setPupilPin(pupilId, '4242'); // re-enable + restore the PIN used elsewhere
+    resetRateLimiter();
+    expect(wrongPin).toContain('check your PIN');
+    expect(notEnrolled).toBe(wrongPin); // structurally identical — no enumeration signal
+    expect(disabled).toBe(wrongPin);
+  });
+
+  it('saveAnswer clears seen_by_teacher only when the value actually changes', async () => {
+    const { saveAnswer, markAnswersSeen } = await import('../../src/repos/pupilWork');
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: 't7.r1.c1', value: 'same' });
+    await markAnswersSeen(occurrenceCourseId, pupilId);
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: 't7.r1.c1', value: 'same' }); // no-op re-save
+    let seen = await pool.query<{ s: boolean }>(`SELECT seen_by_teacher s FROM pupil_answers WHERE pupil_id=$1 AND occurrence_course_id=$2 AND field_key='t7.r1.c1'`, [pupilId, occurrenceCourseId]);
+    expect(seen.rows[0]!.s).toBe(true); // unchanged value did NOT re-flag
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: 't7.r1.c1', value: 'different' });
+    seen = await pool.query<{ s: boolean }>(`SELECT seen_by_teacher s FROM pupil_answers WHERE pupil_id=$1 AND occurrence_course_id=$2 AND field_key='t7.r1.c1'`, [pupilId, occurrenceCourseId]);
+    expect(seen.rows[0]!.s).toBe(false); // a real change re-flags as new
+  });
+
+  it('/me/feedback is one-per-lesson and whitelists activity chips', async () => {
+    const session = await pupilLogin();
+    const me = await app.inject({ method: 'GET', url: '/me', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(me.body)?.[1] ?? '';
+    const cookie = firstCookie(me.headers['set-cookie']) || session;
+    const send = (payload: string) => app.inject({ method: 'POST', url: `/me/feedback?oc=${occurrenceCourseId}`, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload });
+    await send('rating=2&liked=practical');
+    await send('rating=3&liked=cards&liked=bogus&comment=hi'); // second write overwrites; 'bogus' off-whitelist
+    const rows = await pool.query<{ rating: number; liked: string; comment: string }>(`SELECT rating, liked, comment FROM pupil_lesson_feedback WHERE pupil_id=$1 AND occurrence_course_id=$2`, [pupilId, occurrenceCourseId]);
+    expect(rows.rowCount).toBe(1); // UNIQUE upsert — one row per pupil per lesson
+    expect(rows.rows[0]!.rating).toBe(3); // overwritten
+    expect(rows.rows[0]!.liked).toBe('cards'); // 'bogus' dropped by the chip whitelist
+  });
+
+  it('/me/done and /me/feedback reject a non-pupil session (401)', async () => {
+    for (const url of [`/me/done?oc=${occurrenceCourseId}`, `/me/feedback?oc=${occurrenceCourseId}`]) {
+      const res = await app.inject({ method: 'POST', url, headers: { 'content-type': 'application/x-www-form-urlencoded' }, payload: 'done=true' });
+      expect([401, 403, 302]).toContain(res.statusCode); // never a successful write without a pupil session
+    }
+  });
+
   it('when pupil access is OFF, the login surface refuses', async () => {
     await setSetting('pupil_access_enabled', 'false');
     try {

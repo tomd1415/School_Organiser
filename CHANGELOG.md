@@ -7,6 +7,52 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 8 second review: renderer + reliability fixes (migration `0020`)
+
+A second adversarial review (fix-regressions, renderer edge-cases, teacher-UI, performance, plus a
+test-gap audit) found 24 more real issues; the load-bearing ones are fixed and locked with tests
+(**206 unit / 129 integration green**):
+
+- **Worksheet renderer (the pupil-facing core).** Four real parsing bugs that could blank or
+  corrupt a pupil's worksheet, all fixed in [worksheetForm.ts](../app/src/lib/worksheetForm.ts):
+  (1) an **unclosed code fence** used to swallow the next level's heading + table, leaving that
+  level's pupils a blank sheet — fences now only open if a closing fence follows (a stray ``` is
+  literal), so balanced fences (even with a `# Challenge:` comment) stay opaque while strays
+  don't eat the document; (2) a table **cell containing a pipe** (e.g. `` `a|b` ``) or an escaped
+  `\|` no longer splits into phantom columns (`cells()` is GFM-aware); (3) a **single-dash
+  separator** row `| - | - |` is stripped, not turned into a fillable row; (4) an answer table
+  with a **missing separator** still renders input cells instead of degrading to literal-pipe
+  prose. The markdown renderer now also recognises `~~~` fences.
+- **AI summary crash (HIGH, was hidden by the empty-key test env).** A successful (billed)
+  "summarise the class's work" then crashed inserting a `notes` row — `notes.kind` had no
+  `ai_summary` value. Migration `0020` allows it; the insert is also wrapped so a save failure
+  never loses a billed summary. The summary now also **drops answers whose field key isn't in the
+  current worksheet** (a re-versioned/adapted sheet could otherwise feed the AI mislabelled
+  questions).
+- **Migration `0020`** also changes `pupil_answers.resource_id` to **ON DELETE SET NULL** (after
+  0019 made it provenance, the inherited CASCADE could have deleted a pupil's answers if a
+  worksheet resource were ever hard-deleted).
+- **The DPIA kill-switch is now instant.** The lockdown hook's access/idle cache
+  ([pupilAccessCache.ts](../app/src/auth/pupilAccessCache.ts)) is **invalidated the moment** the
+  teacher toggles pupil access or idle-minutes, so disabling access evicts live sessions at once
+  rather than after a 30s TTL.
+- **Performance** (medium, LAN-scale but real): `/me` no longer reads the worksheet file or
+  fans out queries serially per section (read-first occurrence — no write/lock on the common
+  GET — plus `Promise.all`); the teacher grid parses the worksheet **once** instead of three
+  times; `listGroupLogins` is a single query instead of N+1; autosave already avoided the disk
+  read (metadata-only resolver).
+- **Smaller fixes:** a shared-password TA can no longer deep-link to an arbitrary lesson by id
+  (named-TA / teacher only); the pupil-idle field rejects empty values; the enable-pupil-access
+  form only reloads on success (shows the DPIA-ack error otherwise).
+- **Tests added:** renderer regressions (unclosed/balanced fence, pipe-in-cell, escaped pipe,
+  single-dash + missing separator); PIN lockout **via the HTTP route**; the login
+  enumeration-oracle (wrong/not-enrolled/disabled byte-identical); `seen_by_teacher` only clears
+  on a real change; the `/me/feedback` one-per-lesson upsert + chip whitelist; `/me/done`+
+  feedback role guards; a full teacher-side suite (review-grid math, level-chip + **IDOR**
+  enrolment check, read-back marks-seen, AI-summary **degrade path**, **named-TA** login); the
+  level-change-preserves-answers and resource-flip invariants; the `/pupil/names` rate limit.
+  Integration tests now run **serially** (shared dev DB) to remove a cross-file count race.
+
 ### 2026-06-13 — Phase 8 hardening: adversarial review + fixes (migration `0019`)
 
 An adversarial multi-agent review of the Phase 8 diff surfaced 21 confirmed issues; the load-bearing

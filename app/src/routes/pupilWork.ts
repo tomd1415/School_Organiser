@@ -69,11 +69,19 @@ function levelChips(oc: number, pid: number, current: Level): string {
 
 async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<string> {
   const rows = await pupilWorkRows(oc, info.groupCourseId);
-  // Total fillable fields per level (text inputs), so "n of m" matches the pupil's slice.
+  // Total fillable fields per level (text inputs), so "n of m" matches the pupil's slice. Parse
+  // the document ONCE and bucket fields by level (a slice = shared + that level), rather than
+  // rendering it three times.
   const totals: Record<Level, number> = { support: 0, core: 0, challenge: 0 };
   if (info.lessonPlanId != null) {
     const ws = await getLessonWorksheet(info.groupCourseId, info.lessonPlanId);
-    if (ws) for (const l of LEVELS) totals[l] = renderWorksheet(ws.markdown, { mode: 'review', level: l }).fields.filter((f) => f.kind === 'text').length;
+    if (ws) {
+      for (const f of renderWorksheet(ws.markdown, { mode: 'review' }).fields) {
+        if (f.kind !== 'text') continue;
+        if (f.level === 'shared') { totals.support++; totals.core++; totals.challenge++; }
+        else totals[f.level]++;
+      }
+    }
   }
   if (rows.length === 0) {
     return `<div class="pupil-work" id="pw-${oc}"><h3>Pupil work</h3><p class="muted">No pupils enrolled in this class yet.</p></div>`;
@@ -166,14 +174,19 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     const ws = await getLessonWorksheet(info.groupCourseId, info.lessonPlanId);
     if (!ws) return reply.type('text/html').send('<p class="muted">No worksheet for this lesson.</p>');
 
-    // Map field keys → question labels using the full-document field inventory.
+    // Map field keys → question labels using the CURRENT worksheet's field inventory. Answers are
+    // keyed on the lesson instance and survive a re-version/flip, so a stored key may no longer
+    // exist in the current document; drop those (their positional key would otherwise be sent to
+    // the AI as a meaningless or mislabelled question). Checklist (task.*) ticks aren't questions.
     const inventory = renderWorksheet(ws.markdown, { mode: 'review' }).fields;
-    const labelByKey = new Map(inventory.map((f) => [f.key, f.label]));
+    const labelByKey = new Map(inventory.filter((f) => f.kind === 'text').map((f) => [f.key, f.label]));
     const [answers, feedback] = await Promise.all([classAnswers(p.data.id), classFeedback(p.data.id)]);
     if (answers.length === 0 && feedback.ratings.length === 0 && feedback.liked.length === 0) {
       return reply.type('text/html').send('<p class="muted">No answers or feedback yet to summarise.</p>');
     }
-    const questions = answers.map((a) => ({ label: labelByKey.get(a.fieldKey) ?? a.fieldKey, answers: a.answers }));
+    const questions = answers
+      .filter((a) => labelByKey.has(a.fieldKey))
+      .map((a) => ({ label: labelByKey.get(a.fieldKey)!, answers: a.answers }));
     const result = await callLLM({
       feature: 'class_work',
       model: await modelFor('cheap'),
@@ -186,12 +199,17 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (result.status !== 'ok' || !result.text) {
       return reply.type('text/html').send(`<p class="error">${esc(result.message ?? 'AI unavailable right now.')}</p>`);
     }
-    // Store as a lesson note so "adapt from recent lessons" picks it up.
-    await pool.query(`INSERT INTO notes (kind, body, occurrence_id, course_id) VALUES ('ai_summary', $1, $2, $3)`, [
-      `Pupil work summary (${ws.title}):\n\n${result.text}`,
-      info.occurrenceId,
-      null,
-    ]);
+    // Store as a lesson note so "adapt from recent lessons" picks it up. Never let a note-save
+    // failure lose the (already billed) summary — show it regardless.
+    try {
+      await pool.query(`INSERT INTO notes (kind, body, occurrence_id, course_id) VALUES ('ai_summary', $1, $2, $3)`, [
+        `Pupil work summary (${ws.title}):\n\n${result.text}`,
+        info.occurrenceId,
+        null,
+      ]);
+    } catch (err) {
+      app.log.error({ err }, 'failed to save class-work summary note');
+    }
     const fbDigest = feedbackDigest(feedback);
     return reply.type('text/html').send(`<div class="pw-summary adapt-note">
       ${renderMarkdown(result.text)}

@@ -177,6 +177,96 @@ describe('worksheetForm — real-world structure (regression)', () => {
   });
 });
 
+describe('worksheetForm — parsing edge cases (2nd-review regressions)', () => {
+  it('an UNCLOSED code fence does not swallow the following level section', () => {
+    const src = `# Sheet
+
+## 🟢 Support
+| Q | Type your answer here |
+|---|---|
+| Easy one? | |
+
+\`\`\`python
+# an example with no closing fence
+## 🔴 Challenge
+| Q | Type your answer here |
+|---|---|
+| Hard one? | |
+`;
+    // Despite the stray ``` , the challenge slice must still expose its answer field.
+    const challenge = renderWorksheet(src, { mode: 'form', level: 'challenge' });
+    expect(challenge.fields.filter((f) => f.kind === 'text').length).toBeGreaterThanOrEqual(1);
+    expect(challenge.html).toContain('Hard one?');
+  });
+
+  it('a BALANCED fence whose comment contains a level word stays opaque (no false split)', () => {
+    const src = `# Sheet
+
+## 🔴 Challenge
+\`\`\`python
+# Challenge: build your own list
+# Step 1
+\`\`\`
+| Q | Type your answer here |
+|---|---|
+| Explain? | |
+`;
+    const challenge = renderWorksheet(src, { mode: 'form', level: 'challenge' });
+    expect(challenge.fields.filter((f) => f.kind === 'text').length).toBe(1);
+    expect(challenge.html).toContain('Explain?');
+  });
+
+  it('a table cell containing a pipe inside backticks is not split into phantom columns', () => {
+    const src = `# Sheet
+
+| Question | Type your answer here |
+|----------|----------------------|
+| What does \`a|b\` mean? | |
+`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text).toHaveLength(1); // one answer cell, not two phantom ones
+    expect(text[0]!.key).toBe('t1.r1.c2'); // stable key, not shifted to c3
+    expect(text[0]!.label).toContain('a|b'); // the pipe survives in the question label
+  });
+
+  it('an escaped pipe in a cell is treated as a literal pipe', () => {
+    const src = `# Sheet
+
+| Question | Type your answer here |
+|----------|----------------------|
+| Is a \\| a wall? | |
+`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    expect(r.fields.filter((f) => f.kind === 'text')).toHaveLength(1);
+  });
+
+  it('a single-dash separator row is stripped, not turned into a fillable row', () => {
+    const src = `# Sheet
+
+| Q | Type your answer here |
+| - | - |
+| Q1? | |
+`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text).toHaveLength(1); // only Q1, not the separator
+    expect(text[0]!.key).toBe('t1.r1.c2'); // Q1 at row 1, not row 2
+    expect(text[0]!.label).toContain('Q1');
+  });
+
+  it('an answer table with a MISSING separator still produces input cells (not prose)', () => {
+    const src = `# Sheet
+
+| Question | Type your answer here |
+| What is 2+2? | |
+`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    expect(r.fields.filter((f) => f.kind === 'text')).toHaveLength(1);
+    expect(r.html).toContain('<textarea');
+  });
+});
+
 describe('worksheetForm — robustness', () => {
   it('a sheet with no level headings is all shared (every pupil sees it whole)', () => {
     const flat = `# Quiz\n\n| Q | Type your answer here |\n|---|---|\n| 2+2? | |\n`;

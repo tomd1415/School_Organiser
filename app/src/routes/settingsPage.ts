@@ -11,6 +11,7 @@ import { getSetting, setSetting } from '../repos/settings';
 import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
 import { createTaAccount, deleteTaAccount, listTaAccounts, setTaAccountActive, setTaAccountPassword, type TaAccount } from '../repos/taAccounts';
+import { invalidatePupilCfg } from '../auth/pupilAccessCache';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
   const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
@@ -142,11 +143,13 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
                 <p class="muted"><strong>Off by default — the DPIA gate.</strong> Pupil credentials are a new category of personal data:
                   the DPIA's [CONFIRM] items must be completed and <strong>signed by the DPO and SLT</strong> before any pupil can log in
                   (docs/DPIA.md §8).</p>
-                <form hx-post="/settings/pupil-access" hx-swap="none" hx-on::after-request="location.reload()">
+                <form hx-post="/settings/pupil-access" hx-target="#pupil-access-result" hx-swap="innerHTML"
+                      hx-on::after-request="if(event.detail.successful)location.reload()">
                   <input type="hidden" name="enable" value="true">
                   <label><input type="checkbox" name="ack" value="yes" required> the DPIA has been signed off by the DPO and SLT</label>
                   <button type="submit" class="btn-secondary">Enable pupil access</button>
                 </form>
+                <div id="pupil-access-result"></div>
               </div>`
         }
         <div class="setup-add">
@@ -317,13 +320,17 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     } else {
       await setSetting('pupil_access_enabled', 'false');
     }
+    invalidatePupilCfg(); // take effect immediately — the kill-switch must evict live sessions at once
     return reply.send('');
   });
 
   app.post('/settings/pupil-idle', guard, async (req, reply) => {
+    // Reject empty/invalid so the field always reflects a real value (blank would render as a
+    // blank box even though 20 min is in force).
     const b = z.object({ value: z.string().max(10) }).safeParse(req.body);
-    if (!b.success || (b.data.value.trim() !== '' && !(Number(b.data.value) >= 1))) return reply.code(400).send('');
+    if (!b.success || !(Number(b.data.value.trim()) >= 1)) return reply.code(400).send('');
     await setSetting('pupil_idle_minutes', b.data.value.trim());
+    invalidatePupilCfg();
     return reply.type('text/html').send('<span class="note-status saved" id="pupil-status" hx-swap-oob="true">saved ✓</span>');
   });
 

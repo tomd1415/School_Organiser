@@ -24,29 +24,42 @@ export interface GroupLogins {
 }
 
 export async function listGroupLogins(): Promise<GroupLogins[]> {
-  const { rows: groups } = await pool.query<{ groupId: number; groupName: string; loginCode: string | null }>(
-    `SELECT g.id AS "groupId", g.name AS "groupName", g.login_code AS "loginCode"
+  // One query: current-year active groups joined to their enrolled pupils + credential state.
+  const { rows } = await pool.query<{
+    groupId: number;
+    groupName: string;
+    loginCode: string | null;
+    pupilId: number | null;
+    displayName: string | null;
+    hasPin: boolean;
+    enabled: boolean;
+    locked: boolean;
+  }>(
+    `SELECT g.id AS "groupId", g.name AS "groupName", g.login_code AS "loginCode",
+            p.id AS "pupilId", p.display_name AS "displayName",
+            (pc.pupil_id IS NOT NULL) AS "hasPin",
+            COALESCE(pc.enabled, false) AS enabled,
+            COALESCE(pc.failed_count, 0) >= $1 AS locked
      FROM groups g
+     LEFT JOIN enrolments e ON e.group_id = g.id AND e.active
+     LEFT JOIN pupils p ON p.id = e.pupil_id
+     LEFT JOIN pupil_credentials pc ON pc.pupil_id = p.id
      WHERE g.active AND g.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
-     ORDER BY g.name`,
+     ORDER BY g.name, p.display_name`,
+    [PIN_LOCK_AT],
   );
-  const out: GroupLogins[] = [];
-  for (const g of groups) {
-    const { rows: pupils } = await pool.query<PupilLoginRow>(
-      `SELECT p.id AS "pupilId", p.display_name AS "displayName",
-              (pc.pupil_id IS NOT NULL) AS "hasPin",
-              COALESCE(pc.enabled, false) AS enabled,
-              COALESCE(pc.failed_count, 0) >= $2 AS locked
-       FROM enrolments e
-       JOIN pupils p ON p.id = e.pupil_id
-       LEFT JOIN pupil_credentials pc ON pc.pupil_id = p.id
-       WHERE e.group_id = $1 AND e.active
-       ORDER BY p.display_name`,
-      [g.groupId, PIN_LOCK_AT],
-    );
-    out.push({ ...g, pupils });
+  const byGroup = new Map<number, GroupLogins>();
+  for (const r of rows) {
+    let grp = byGroup.get(r.groupId);
+    if (!grp) {
+      grp = { groupId: r.groupId, groupName: r.groupName, loginCode: r.loginCode, pupils: [] };
+      byGroup.set(r.groupId, grp);
+    }
+    if (r.pupilId != null) {
+      grp.pupils.push({ pupilId: r.pupilId, displayName: r.displayName!, hasPin: r.hasPin, enabled: r.enabled, locked: r.locked });
+    }
   }
-  return out;
+  return [...byGroup.values()];
 }
 
 /** The class a pupil types a code for → its enrolled, login-ready names (for "tap your name"). */

@@ -43,8 +43,35 @@ const TABLE_SEP = /^\s*\|?[\s:|-]+\|?\s*$/;
 const TASK = /^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/;
 const PLACEHOLDER = /type\b[^|]*\bhere/i;
 
+// GFM-aware cell split: a `|` only separates cells when it is NOT escaped (`\|`) and NOT inside an
+// inline-code span (`...`). Without this, a cell like "What does `a|b` mean?" splits into phantom
+// columns and corrupts the question/answer alignment and the stable field keys.
 function cells(row: string): string[] {
-  return row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
+  const inner = row.replace(/^\s*\|/, '').replace(/\|\s*$/, '');
+  const out: string[] = [];
+  let cur = '';
+  let inCode = false;
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i]!;
+    if (ch === '\\' && inner[i + 1] === '|') {
+      cur += '|';
+      i++;
+      continue;
+    }
+    if (ch === '`') {
+      inCode = !inCode;
+      cur += ch;
+      continue;
+    }
+    if (ch === '|' && !inCode) {
+      out.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  out.push(cur.trim());
+  return out;
 }
 
 function levelOf(headingText: string): Level | null {
@@ -68,11 +95,22 @@ function segment(src: string): { blocks: Block[]; levelDepth: number } {
   // Pre-scan (fence-aware): the heading depth at which level sections live (the shallowest level
   // heading). Skipping fences matters — a `# Challenge: ...` Python comment inside a code block
   // would otherwise be read as a depth-1 level heading and wreck the real `## ` partitioning.
+  // A fence delimiter only opens a fence if a matching closing delimiter follows; a stray
+  // (unclosed) ``` is treated as a literal line so it can't swallow the rest of the document
+  // (which would blank out the level living after it). Balanced fences stay fully opaque.
+  const FENCE = /^\s*(?:```|~~~)/;
+  const opensFence = (idx: number): boolean => {
+    for (let j = idx + 1; j < lines.length; j++) if (FENCE.test(lines[j]!)) return true;
+    return false;
+  };
+
   let levelDepth = 0;
   let scanFence = false;
-  for (const line of lines) {
-    if (/^\s*(?:```|~~~)/.test(line)) {
-      scanFence = !scanFence;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (FENCE.test(line)) {
+      if (scanFence) scanFence = false;
+      else if (opensFence(i)) scanFence = true; // stray opener → ignore, keep scanning
       continue;
     }
     if (scanFence) continue;
@@ -95,12 +133,23 @@ function segment(src: string): { blocks: Block[]; levelDepth: number } {
   let inFence = false;
   while (i < lines.length) {
     const line = lines[i]!;
+    const h = line.match(HEADING);
 
     // Code fences are opaque: a worksheet's example code is full of `#` (Python comments) and
-    // even `|` — none of which are structural. Keep fenced lines as content so renderMarkdown
-    // renders them read-only and they never reset the level.
-    if (/^\s*(?:```|~~~)/.test(line)) {
-      inFence = !inFence;
+    // even `|` — none of which are structural. But only a fence that actually CLOSES is opaque;
+    // a stray unclosed ``` is kept as a literal line (otherwise it would swallow the next level's
+    // heading + table and blank that pupil's slice). Balanced fences stay fully opaque, even when
+    // their comments contain a level word like "# Challenge:".
+    if (FENCE.test(line)) {
+      if (inFence) {
+        inFence = false;
+      } else if (opensFence(i)) {
+        inFence = true;
+      } else {
+        buf.push(line);
+        i++;
+        continue;
+      }
       buf.push(line);
       i++;
       continue;
@@ -111,7 +160,6 @@ function segment(src: string): { blocks: Block[]; levelDepth: number } {
       continue;
     }
 
-    const h = line.match(HEADING);
     // A section transition happens ONLY at the exact depth the level headings live at — so a
     // document `# Title` or a stray `# code comment` outside a fence never resets the level.
     if (h && levelDepth > 0 && h[1]!.length === levelDepth) {
@@ -134,7 +182,10 @@ function segment(src: string): { blocks: Block[]; levelDepth: number } {
       continue;
     }
 
-    if (TABLE_ROW.test(line) && i + 1 < lines.length && TABLE_SEP.test(lines[i + 1]!)) {
+    // A table is a run of ≥2 pipe rows (the 2nd may be a `|---|` separator, or — when the model
+    // omits it — another data row). Recognising separator-less tables stops an answer table
+    // silently degrading to literal-pipe prose with no input boxes.
+    if (TABLE_ROW.test(line) && i + 1 < lines.length && (TABLE_SEP.test(lines[i + 1]!) || TABLE_ROW.test(lines[i + 1]!))) {
       flush();
       const block: Block = { level: current, kind: 'table', lines: [] };
       while (i < lines.length && TABLE_ROW.test(lines[i]!)) {
@@ -173,7 +224,7 @@ function checkControl(key: string, label: string, opts: WorksheetOptions): strin
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none"> ${esc(label)}</label></li>`;
 }
 
-const SEP_CELL = /^:?-{2,}:?$/;
+const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
 /** Render a table block: answer cells become inputs, everything else stays a read-only table.

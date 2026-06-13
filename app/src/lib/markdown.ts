@@ -23,7 +23,7 @@ const TABLE_ROW = /^\s*\|(.+)\|\s*$/;
 const TABLE_SEP = /^\s*\|?[\s:|-]+\|?\s*$/;
 const QUOTE = /^>\s?(.*)$/;
 const HR = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
-const FENCE = /^```/;
+const FENCE = /^(?:```|~~~)/; // both code-fence styles, matching worksheetForm.segment()
 
 function cells(row: string): string[] {
   return row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
