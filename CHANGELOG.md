@@ -7,6 +7,40 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10 PLANNED: trustworthy in daily use (safety, reliability, access, the loop)
+
+Surveyed the built system from nine lenses (deferred-item comb of every prior plan + this CHANGELOG,
+roadmap-vs-spec, code-surface scan, ops/security audit, teacher daily workflow, SEND/accessibility)
+plus a three-persona critique (daily-driver teacher, safeguarding/DP lead, completeness critic) —
+96 candidate features — and wrote [docs/PHASE_10_PLAN.md](docs/PHASE_10_PLAN.md). **Single-teacher
+only; no multi-teacher work** (that stays parked in PHASE_MULTI_TEACHER_PLAN). The plan is six
+tracks, sequenced by pain, with Track A as the ship-first set:
+
+- **A — Make the privacy promises real** (the DPIA currently overstates the code): encrypt backups
+  and verify restores (verified: `backup.sh` is plain gzip/tar, but docs claim "encrypted nightly
+  pg_dump"); audited pupil **erasure / leaver anonymisation + per-pupil SAR export** (verified: a
+  naive `DELETE FROM pupils` throws on the Phase-2 RESTRICT FKs while Phase 8/9 tables CASCADE);
+  **teacher idle-logout** (only pupils idle-out today); a **safeguarding disclosure lane + register**
+  (a disclosure in an answer wears the same ⚠ as a benign mark flag); an **email-triage pre-egress
+  guard screen** (triage sends the full body to the AI to *decide* if it's safeguarding); an in-app
+  **AI audit-log viewer + live spend**; a retention sweep + editable guard patterns + lost-device
+  bulk-kill.
+- **B — Stop losing work**: resilient pupil + teacher autosave (both fail silently today); a
+  **durable, DB-backed open-marking queue** (the in-memory `setTimeout` is dropped on reboot,
+  contradicting the "survives a reboot" NFR); optimistic-concurrency on irreplaceable text.
+- **C — SEND accessibility**: read-aloud (Web Speech, no network/AI), text-size / dyslexia-font /
+  high-contrast / reduced-motion options, an in-lesson progress indicator, bigger tap targets.
+- **D — Close the loop**: retrieval-practice starters (the 9.9 stretch), the *standing* per-class
+  feedback digest (only the per-lesson half shipped), captured-item AI auto-categorise.
+- **E — Daily-driver friction**: global search (Spec Must), capture-from-anywhere + in-the-moment
+  prep, keyboard shortcuts/palette, live class monitor + marking backlog on Now, print/cover packs,
+  a per-pupil progress page, an activity countdown.
+- **F — Setup & scale + tech-debt**: MIS CSV import, onboarding/rollover extras + file-based scheme
+  share, and the noted tech-debt (raw SQL→repos, un-release confirm, roster-enumeration cap, health
+  depth). New tables sketched for migration `0024`+ (`marking_queue`, `safeguarding_review`,
+  `pupil_unit_signal`). Four open questions for the teacher recorded (retention period, erasure
+  default, idle minutes, backup-key handling).
+
 ### 2026-06-13 — Deep multi-lens review of Phases 8–9 → ship-blockers fixed
 
 Reviewed the pupil-facing code (Phases 8–9) from nine points of view — privacy/safeguarding,

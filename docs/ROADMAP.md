@@ -211,6 +211,25 @@ login). Absorbs the old 8.8 stretch list; design mines the sibling `exam_questio
 marking architecture. Gated on a **DPIA addendum** (attainment storage, anonymous answer text
 to the AI, the device credential).
 
+## Phase 10 — Trustworthy in daily use *(PLANNED 2026-06-13 — see [PHASE_10_PLAN.md](PHASE_10_PLAN.md))*
+
+*Status 2026-06-13: planned, plan-first; not started. Single-teacher only — no multi-teacher work.*
+
+**Goal:** Phases 8–9 put real children's PII and pupil-authored answers into the system; Phase 10
+pays the bill that created. **Make the privacy/safeguarding promises real** — the DPIA currently
+describes controls the code doesn't have: encrypted backups (today's `backup.sh` is plain
+gzip/tar), a pupil **erasure / SAR** path (a naive delete throws on the Phase-2 RESTRICT FKs), a
+**teacher idle-logout** (only pupils idle-out today), a **disclosure register** (a safeguarding
+disclosure in an answer currently wears the same ⚠ badge as a benign mark flag), and an in-app
+**AI audit-log viewer** (the DPIA's central evidence control surfaces only as a count). **Stop
+losing work** — pupil and teacher autosave both fail silently, and the open-marking queue is an
+in-memory timer a reboot drops. **SEND accessibility** the pupil surface lacks — read-aloud,
+text-size / dyslexia / high-contrast options, progress, calmer states. **Close the loop** the
+marking data enables — retrieval-practice starters (the 9.9 stretch) and the *standing* per-class
+feedback digest (only the per-lesson half shipped). Then **daily-driver polish** — global search,
+capture-from-anywhere, keyboard shortcuts, print packs — and **September setup** — MIS CSV import.
+A menu sequenced by pain, not an all-or-nothing gate; Track A ships first.
+
 ## Future (unnumbered) — Multi-teacher school server *(parked — see [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md))*
 
 **Deliberately unnumbered and not scheduled.** A v2 architecture: one shared school server, many
