@@ -37,10 +37,13 @@ function loginPage(csrfToken: string, error?: string): string {
 }
 
 export function registerAuthRoutes(app: FastifyInstance): void {
-  app.get('/login', async (_req, reply) => {
+  app.get('/login', async (req, reply) => {
     if (!(await configuredHash())) return reply.redirect('/welcome'); // brand-new instance
     const token = reply.generateCsrf();
-    return reply.type('text/html').send(loginPage(token));
+    // A teacher session that idled out (10.3) lands here with ?timeout=1 — say so kindly.
+    const timedOut = z.object({ timeout: z.string().optional() }).safeParse(req.query);
+    const note = timedOut.success && timedOut.data.timeout ? 'You were logged out after a period of inactivity. Log in again to carry on.' : undefined;
+    return reply.type('text/html').send(loginPage(token, note));
   });
 
   app.post('/login', { preHandler: app.csrfProtection }, async (req, reply) => {

@@ -45,6 +45,7 @@ import { registerMeRoutes } from './routes/me';
 import { registerPupilWorkRoutes } from './routes/pupilWork';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { pupilCfg } from './auth/pupilAccessCache';
+import { teacherIdleMins } from './auth/teacherIdleCache';
 import { generateDueInstances } from './repos/recurringTasks';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
@@ -106,6 +107,20 @@ export async function buildApp(): Promise<FastifyInstance> {
   // by the Settings handlers) so the hook rarely hits the DB. See auth/pupilAccessCache.
   app.addHook('onRequest', async (req, reply) => {
     const role = req.session?.get?.('role');
+    // Teacher idle-logout (10.3): the privileged session must also time out on an unattended
+    // classroom laptop — the control the threat model/DPIA R3 already claim. Pupils idle out below;
+    // this covers the teacher role (the most-privileged session). Configurable; 0 disables.
+    if (role === 'teacher' && !req.url.startsWith('/static/')) {
+      const mins = await teacherIdleMins();
+      if (mins > 0) {
+        const last = Number(req.session.get('lastSeen') ?? 0);
+        if (last && Date.now() - last > mins * 60_000) {
+          req.session.delete();
+          return reply.redirect('/login?timeout=1');
+        }
+        req.session.set('lastSeen', Date.now());
+      }
+    }
     if (!isLimitedRole(role)) return;
     if (role === 'pupil' && !req.url.startsWith('/static/')) {
       const cfg = await pupilCfg();

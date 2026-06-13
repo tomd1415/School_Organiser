@@ -13,6 +13,16 @@ import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { emailTriageSchema, type EmailTriage } from '../llm/schemas/emailTriage';
 import { EMAIL_TRIAGE_SYSTEM, EMAIL_TRIAGE_VERSION, emailTriageInstruction, emailTriageItems } from '../llm/prompts/emailTriage';
+import { guardMatch } from '../lib/markSafetyGate';
+
+/** 10.5 — the pre-egress safeguarding screen. Triage decides safeguarding by sending the body to
+ * the AI, so a disclosure would reach the model BEFORE any withholding could fire; and the
+ * redactor is roster-only, so a sibling/other-class child named in an email is never tokenised.
+ * Screen locally first: a trip means the email is filed as a flagged captured item with NO AI call
+ * at all. Returns the matched pattern (for the log) or null. */
+export function screenEmailForSafeguarding(subject: string | null, text: string): string | null {
+  return guardMatch(`${subject ?? ''}\n${text}`);
+}
 
 export interface EmailPollResult {
   ok: boolean;
@@ -119,6 +129,19 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
     const r = await pollMailbox(cfg, async (mail) => {
       const m = parseMime(mail.raw);
       const raw = mail.raw.toString('utf8').slice(0, 100_000);
+      // 10.5: screen for safeguarding BEFORE any AI egress. A trip is filed locally, flagged, and
+      // NEVER sent to the AI (it's withheld everywhere downstream by the safeguarding flag).
+      if (screenEmailForSafeguarding(m.subject, m.text)) {
+        await fileCaptured({
+          body: `⚠ Possible safeguarding content — screened on intake, NOT sent to AI.\nSubject: ${m.subject ?? '(none)'}${m.from ? `\nFrom: ${m.from}` : ''}\n\n${m.text.slice(0, 5000)}`,
+          category: 'safeguarding',
+          groupId: null,
+          safeguarding: true,
+        });
+        await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+        counts.awareness++;
+        return;
+      }
       const triage = await triageEmail(m, groups.map((g) => g.name));
       if (triage) {
         counts[await routeTriagedEmail(triage, m, raw, groups)]++;

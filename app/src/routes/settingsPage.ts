@@ -7,11 +7,13 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { hashPassword, verifyPassword } from '../lib/passwords';
 import { appConfig } from '../config/app';
-import { getSetting, setSetting } from '../repos/settings';
+import { getSetting, setSetting, monthCapPence } from '../repos/settings';
+import { monthSpendPence, listAiCalls, getAiCall, spendByFeatureThisMonth, aiCallFeatures } from '../repos/aiCalls';
 import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
 import { createTaAccount, deleteTaAccount, listTaAccounts, setTaAccountActive, setTaAccountPassword, type TaAccount } from '../repos/taAccounts';
 import { invalidatePupilCfg } from '../auth/pupilAccessCache';
+import { invalidateTeacherIdle } from '../auth/teacherIdleCache';
 import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
 
@@ -52,7 +54,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('email_last_poll'),
         getSetting('ai_api_key'),
       ]);
-      const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck] = await Promise.all([
+      const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck, teacherIdle] = await Promise.all([
         getSetting('pupil_access_enabled'),
         getSetting('pupil_idle_minutes'),
         getSetting('pupil_dpia_ack'),
@@ -61,7 +63,9 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         pool.query<{ id: number; name: string }>(`SELECT id, name FROM staff WHERE NOT is_self ORDER BY name`).then((r) => r.rows),
         getSetting('pupil_marks_enabled'),
         getSetting('pupil_marks_dpia_ack'),
+        getSetting('teacher_idle_minutes'),
       ]);
+      const backupVerified = await getSetting('backup_last_verified').catch(() => null);
       const health = (
         await pool.query<{ years: number; current: string | null; aiMonth: number; dbMb: number }>(`
         SELECT (SELECT count(*)::int FROM academic_years) AS years,
@@ -71,6 +75,12 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
       ).rows[0]!;
       const aiKeyFromSettings = !!(aiKey && aiKey.trim());
       const aiKeySet = AI_KEY_ENV_MANAGED || aiKeyFromSettings;
+      // 10.6: show spend vs the monthly cap so the budget isn't a surprise mid-lesson.
+      const [spentPence, capPence] = await Promise.all([monthSpendPence(), monthCapPence()]);
+      const usedPct = capPence > 0 ? Math.round((spentPence / capPence) * 100) : 0;
+      const spendNote = `<p class="muted ${usedPct >= 80 ? 'spend-warn' : ''}">AI spend this month:
+        <strong>£${(spentPence / 100).toFixed(2)}</strong> of £${(capPence / 100).toFixed(2)} (${usedPct}% used)
+        · <a href="/settings/ai-log">view the call log</a></p>`;
       body = `
       <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Settings</h1>
@@ -93,10 +103,17 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
                 <button type="submit" class="btn-secondary">Change password</button>
               </form><div id="pw-result"></div>`
         }
+        <div class="setup-add">
+          <label>Auto-logout after <input class="setup-num" style="width:4rem" value="${esc(teacherIdle ?? '30')}"
+            hx-post="/settings/teacher-idle" hx-vals='js:{"value":event.target.value}' hx-trigger="input changed delay:700ms, blur" hx-swap="none"> min of inactivity
+            <span class="muted">(your own session — 0 disables; protects an unattended classroom laptop)</span></label>
+          <span class="note-status" id="teacher-idle-status"></span>
+        </div>
 
         <h2>AI</h2>
         <p class="muted">Key: ${aiKeySet ? `✅ set (${AI_KEY_ENV_MANAGED ? 'via .env' : 'in Settings'})` : '— not set; all AI features degrade gracefully'} ·
           provider: <strong>Anthropic (Claude)</strong> · every call is redacted, safeguarding-withheld and audited regardless.</p>
+        ${spendNote}
         ${
           AI_KEY_ENV_MANAGED
             ? '<p class="muted">The API key is managed by <code>ANTHROPIC_API_KEY</code> in this instance\'s <code>.env</code>. Remove that variable to set the key here instead.</p>'
@@ -234,7 +251,8 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           <li>${health.current ? `✅ current year: <strong>${esc(health.current)}</strong>` : '⚠ no current academic year set'} (${health.years} year${health.years === 1 ? '' : 's'} in the database)</li>
           <li>📦 database size: ~${health.dbMb} MB</li>
           <li>🤖 AI calls this month: ${health.aiMonth}</li>
-          <li>💾 backups: run <code>scripts/backup.sh</code> on a schedule — restore drills are in <code>docs/RUNBOOK.md</code></li>
+          <li>💾 backups: run <code>scripts/backup.sh</code> on a schedule (encrypted at rest) — disaster recovery in <code>docs/RUNBOOK.md</code></li>
+          <li>${backupVerified ? `✅ last restore-drill verified: <strong>${esc(backupVerified)}</strong>` : '⚠ no verified restore yet — run <code>scripts/verify-backup.sh</code> (a backup you can\'t restore isn\'t a backup)'}</li>
         </ul>
         <p class="muted">Setup checklist: <a href="/welcome">/welcome</a> · September: <a href="/setup/rollover">rollover wizard</a></p>
       </section>`;
@@ -413,6 +431,17 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send('<span class="note-status saved" id="pupil-status" hx-swap-oob="true">saved ✓</span>');
   });
 
+  app.post('/settings/teacher-idle', guard, async (req, reply) => {
+    // 10.3: the teacher's own idle-logout. Accept any whole number ≥ 0 (0 = off); reject blanks/
+    // negatives so the field always reflects a real value.
+    const b = z.object({ value: z.string().max(10) }).safeParse(req.body);
+    const n = b.success ? Number(b.data.value.trim()) : NaN;
+    if (!Number.isInteger(n) || n < 0) return reply.code(400).send('');
+    await setSetting('teacher_idle_minutes', String(n));
+    invalidateTeacherIdle();
+    return reply.type('text/html').send('<span class="note-status saved" id="teacher-idle-status" hx-swap-oob="true">saved ✓</span>');
+  });
+
   app.post('/settings/password', guard, async (req, reply) => {
     if (appConfig.APP_PASSWORD_HASH) return reply.code(403).send('managed by .env');
     const b = z.object({ current: z.string(), next: z.string().min(8).max(200), next2: z.string() }).safeParse(req.body);
@@ -422,5 +451,124 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (!stored || !verifyPassword(b.data.current, stored)) return reply.type('text/html').send('<p class="error">Current password is wrong.</p>');
     await setSetting('auth_password_hash', hashPassword(b.data.next));
     return reply.type('text/html').send('<p class="adapt-note">Password changed ✓</p>');
+  });
+
+  // ── 10.6: the AI audit-log viewer — ai_calls is the DPIA's redaction-control evidence; this
+  // makes it reviewable in-app (was only a monthly count) with a spend rollup + DPO-evidence export.
+  const PAGE = 50;
+
+  app.get('/settings/ai-log', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({ feature: z.string().max(80).optional(), status: z.enum(['ok', 'error', 'blocked']).optional(), page: z.coerce.number().int().min(0).optional() })
+      .safeParse(req.query);
+    const f = q.success ? q.data : {};
+    const page = f.page ?? 0;
+    const [{ rows, total }, byFeature, features, capPence] = await Promise.all([
+      listAiCalls({ feature: f.feature, status: f.status, limit: PAGE, offset: page * PAGE }),
+      spendByFeatureThisMonth(),
+      aiCallFeatures(),
+      monthCapPence(),
+    ]);
+    const monthPence = byFeature.reduce((a, r) => a + r.pence, 0);
+    const opt = (v: string, sel: string | undefined, label: string): string => `<option value="${esc(v)}"${v === (sel ?? '') ? ' selected' : ''}>${esc(label)}</option>`;
+    const rollup = byFeature.length
+      ? `<table class="ai-rollup"><thead><tr><th>Feature</th><th>Calls</th><th>OK</th><th>Err</th><th>Blocked</th><th>Spend</th></tr></thead><tbody>
+          ${byFeature.map((r) => `<tr><td>${esc(r.feature)}</td><td>${r.calls}</td><td>${r.ok}</td><td>${r.errors}</td><td>${r.blocked}</td><td>£${(r.pence / 100).toFixed(2)}</td></tr>`).join('')}
+          <tr class="ai-rollup-total"><td>Total this month</td><td>${byFeature.reduce((a, r) => a + r.calls, 0)}</td><td colspan="3"></td><td>£${(monthPence / 100).toFixed(2)} / £${(capPence / 100).toFixed(2)}</td></tr>
+        </tbody></table>`
+      : '<p class="muted">No AI calls recorded yet.</p>';
+    const statusDot = (s: string): string => (s === 'ok' ? '🟢' : s === 'blocked' ? '🚫' : '🔴');
+    const body = rows.length
+      ? rows
+          .map(
+            (r) => `<tr>
+              <td class="muted">${esc(r.createdAt.slice(0, 16).replace('T', ' '))}</td>
+              <td>${esc(r.feature)}</td>
+              <td class="muted">${esc(r.model)}</td>
+              <td>${statusDot(r.status)} ${esc(r.status)}</td>
+              <td>${r.inputTokens ?? '–'}/${r.outputTokens ?? '–'}</td>
+              <td>${r.costPence != null ? '£' + (r.costPence / 100).toFixed(2) : '–'}</td>
+              <td><button type="button" class="link" hx-get="/settings/ai-log/${r.id}" hx-target="#aic-${r.id}" hx-swap="innerHTML">view</button>${r.error ? ` <span class="muted" title="${esc(r.error)}">⚠</span>` : ''}</td>
+            </tr><tr><td colspan="7"><div id="aic-${r.id}"></div></td></tr>`,
+          )
+          .join('')
+      : '<tr><td colspan="7" class="muted">No calls match.</td></tr>';
+    const qs = (extra: Record<string, string | number>): string => {
+      const p = new URLSearchParams();
+      if (f.feature) p.set('feature', f.feature);
+      if (f.status) p.set('status', f.status);
+      for (const [k, v] of Object.entries(extra)) p.set(k, String(v));
+      return p.toString();
+    };
+    const lastPage = Math.max(0, Math.ceil(total / PAGE) - 1);
+    reply.type('text/html').send(
+      layout({
+        title: 'AI call log',
+        body: `<section class="card setup">
+          <p><a href="/settings">← Settings</a></p>
+          <h1>AI call log</h1>
+          <p class="muted">Every AI call is recorded here with its <strong>redacted</strong> request — the evidence that
+            no pupil name leaves the building (the audit stores the redacted payload only). ${total} call(s) total.</p>
+          <h2>This month by feature</h2>
+          ${rollup}
+          <h2>Recent calls</h2>
+          <form method="get" action="/settings/ai-log" class="setup-add">
+            <label>Feature <select name="feature"><option value="">all</option>${features.map((x) => opt(x, f.feature, x)).join('')}</select></label>
+            <label>Status <select name="status">${['', 'ok', 'error', 'blocked'].map((x) => opt(x, f.status, x || 'all')).join('')}</select></label>
+            <button type="submit" class="btn-secondary">Filter</button>
+            <a class="link" href="/settings/ai-log.csv?${qs({})}">⬇ CSV</a>
+            <a class="link" href="/settings/ai-log.json?${qs({})}">⬇ JSON</a>
+          </form>
+          <table class="ai-log"><thead><tr><th>When</th><th>Feature</th><th>Model</th><th>Status</th><th>Tok in/out</th><th>Cost</th><th></th></tr></thead>
+            <tbody>${body}</tbody></table>
+          <p class="pager">
+            ${page > 0 ? `<a class="link" href="/settings/ai-log?${qs({ page: page - 1 })}">← newer</a>` : ''}
+            <span class="muted">page ${page + 1} of ${lastPage + 1}</span>
+            ${page < lastPage ? `<a class="link" href="/settings/ai-log?${qs({ page: page + 1 })}">older →</a>` : ''}
+          </p>
+        </section>`,
+      }),
+    );
+  });
+
+  app.get('/settings/ai-log/:id', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const call = await getAiCall(p.data.id);
+    if (!call) return reply.type('text/html').send('<p class="muted">Not found.</p>');
+    const pretty = (v: unknown): string => esc(JSON.stringify(v, null, 2) ?? 'null');
+    return reply.type('text/html').send(`<div class="ai-detail">
+      <h4>Redacted request <span class="muted">(what was actually sent — names already tokenised)</span></h4>
+      <pre>${pretty(call.requestRedacted)}</pre>
+      <h4>Response</h4>
+      <pre>${pretty(call.response)}</pre>
+      ${call.error ? `<p class="error">${esc(call.error)}</p>` : ''}
+    </div>`);
+  });
+
+  // CSV/JSON export of the (filtered) call metadata for DPO evidence — metadata only, no payloads.
+  const exportCells = async (req: { query: unknown }): Promise<Awaited<ReturnType<typeof listAiCalls>>['rows']> => {
+    const q = z.object({ feature: z.string().max(80).optional(), status: z.enum(['ok', 'error', 'blocked']).optional() }).safeParse(req.query);
+    const f = q.success ? q.data : {};
+    return (await listAiCalls({ feature: f.feature, status: f.status, limit: 100_000, offset: 0 })).rows;
+  };
+
+  app.get('/settings/ai-log.csv', { preHandler: requireAuth }, async (req, reply) => {
+    const rows = await exportCells(req);
+    // Quote + neutralise CSV formula-injection (mirror the marks CSV escape).
+    const c = (s: string): string => {
+      const v = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+      return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const lines = ['when,feature,model,status,input_tokens,output_tokens,cost_pence,error'];
+    for (const r of rows) {
+      lines.push([c(r.createdAt), c(r.feature), c(r.model), c(r.status), r.inputTokens ?? '', r.outputTokens ?? '', r.costPence ?? '', c(r.error ?? '')].join(','));
+    }
+    return reply.type('text/csv').header('content-disposition', 'attachment; filename="ai-calls.csv"').send(lines.join('\n') + '\n');
+  });
+
+  app.get('/settings/ai-log.json', { preHandler: requireAuth }, async (req, reply) => {
+    const rows = await exportCells(req);
+    return reply.type('application/json').header('content-disposition', 'attachment; filename="ai-calls.json"').send(JSON.stringify(rows, null, 2));
   });
 }

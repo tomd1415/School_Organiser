@@ -59,19 +59,67 @@ The app restarts automatically (`restart: unless-stopped`) and re-runs migration
 Notes and resource files are irreplaceable. `scripts/backup.sh` dumps the database **and**
 snapshots the resource file-store volume, pruning to the most recent 14 of each.
 
+**The dumps are encrypted at rest (10.1)** — they contain every pupil name, note, answer, mark
+*and* the IMAP/AI secrets in the settings table, so the script **refuses to write plaintext** on a
+server. Choose one mechanism via the environment (the cron job needs it in its env too):
+
+```bash
+# Preferred — age (encrypt-only public key; the server never holds the decrypt secret):
+age-keygen -o /root/.organiser-backup.key          # do this ONCE, keep the key file OFF the server
+#   → prints "Public key: age1…"; the secret is in the file.
+export BACKUP_AGE_RECIPIENT=age1…                  # the public key, set on the backup server
+# Restoring later needs the secret key file:
+export BACKUP_AGE_IDENTITY=/secure/offline/.organiser-backup.key
+
+# Or — gpg symmetric (simpler, but the box holds the passphrase):
+export BACKUP_GPG_PASSPHRASE='a long passphrase the school stores in its password manager'
+```
+
+> **Key handling:** keep the age **secret key** (or the gpg passphrase) somewhere the school
+> controls and that is **not** the same server — e.g. the school password manager / IT safe. A
+> backup you can decrypt but an attacker can't is the whole point; a backup *you* can't decrypt is
+> useless. Record who holds it.
+
 ```bash
 scripts/backup.sh                          # writes to ./backups (override with BACKUP_DIR=)
-# cron (weekdays 19:15):
-15 19 * * 1-5 /full/path/School_Organiser/scripts/backup.sh
+# cron (weekdays 19:15) — put the encryption env in the crontab or a sourced env file:
+15 19 * * 1-5 BACKUP_AGE_RECIPIENT=age1… /full/path/School_Organiser/scripts/backup.sh
+# monthly restore-drill (proves the backups actually restore; stamps Settings → Data health):
+30 19 1 * *  BACKUP_AGE_IDENTITY=/secure/.key /full/path/School_Organiser/scripts/verify-backup.sh
 ```
 
-Point `BACKUP_DIR` at a location the school's existing off-site regime already sweeps.
+Point `BACKUP_DIR` at a location the school's existing off-site regime already sweeps. For **local
+dev only**, `BACKUP_ALLOW_PLAINTEXT=1` lets the script write an unencrypted dump.
 
-### Restore (test this at least once)
+### Restore
+
+The artifact suffix selects decryption automatically (`.age` → `BACKUP_AGE_IDENTITY`,
+`.gpg` → `BACKUP_GPG_PASSPHRASE`, `.gz` → plaintext):
 
 ```bash
-scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz
+scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz.age
 ```
+
+### Verify a restore actually works (don't trust an untested backup)
+
+`scripts/verify-backup.sh` restores the **newest** dump into a throwaway scratch database, asserts
+the core tables came back non-empty, drops the scratch DB, and writes a dated PASS/FAIL to
+`backups/verify.log` plus a `backup_last_verified` row shown on **Settings → Data health**.
+
+```bash
+scripts/verify-backup.sh                   # safe — never touches the live `organiser` database
+```
+
+### Disaster recovery (bare server → running app)
+
+1. Install Docker + Compose; clone the repo; create `app/.env` (`SESSION_KEY`, `APP_PASSWORD_HASH`
+   or set a password via `/welcome`, `ANTHROPIC_API_KEY` if used).
+2. `docker compose up -d --build` (migrations run on boot — this creates an empty schema).
+3. Restore the DB over it: `scripts/restore.sh backups/db-LATEST.sql.gz.age` (this brings back the
+   settings table — IMAP/AI secrets included — so the app is configured as it was).
+4. Restore the resource files:
+   `(age -d -i "$BACKUP_AGE_IDENTITY" < backups/resources-LATEST.tar.gz.age) | tar xz -C data/resources`
+5. Restart the stack and confirm `/healthz` and a couple of lessons/notes load.
 
 ## Troubleshooting
 

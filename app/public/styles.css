@@ -790,3 +790,12 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .ap-q { border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 0.8rem; page-break-inside: avoid; }
 .ap-qh { font-weight: 700; }
 .ap-a { margin: 0.3rem 0; }
+
+/* 10.6 — AI call-log viewer */
+.spend-warn { color: #b45309; font-weight: 600; }
+.ai-log, .ai-rollup { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.92rem; }
+.ai-log th, .ai-log td, .ai-rollup th, .ai-rollup td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--line); }
+.ai-rollup-total td { font-weight: 700; border-top: 2px solid var(--line); }
+.ai-detail { background: #f6f8fb; border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.ai-detail pre { white-space: pre-wrap; word-break: break-word; max-height: 22rem; overflow: auto; font-size: 0.82rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem; }
+.pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.6rem; }

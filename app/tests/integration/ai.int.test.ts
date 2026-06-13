@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
 import { createPupil, listRoster, setPupilActive } from '../../src/repos/pupils';
-import { insertAiCall, monthSpendPence } from '../../src/repos/aiCalls';
+import { insertAiCall, monthSpendPence, listAiCalls, getAiCall, spendByFeatureThisMonth } from '../../src/repos/aiCalls';
 import { callLLM } from '../../src/llm/client';
 
 // The AI key is forced empty in vitest.integration.config.ts, so callLLM never hits the network.
@@ -40,6 +40,24 @@ describe('AI boundary (integration — needs the dev DB up)', () => {
       error: null,
     });
     expect(await monthSpendPence()).toBeGreaterThanOrEqual(1.23);
+  });
+
+  it('the audit-log viewer reads back: filter by feature, expand the redacted payload, spend rollup', async () => {
+    await insertAiCall({ feature: 'zz_log_test', provider: 'anthropic', model: 'claude-haiku-4-5', promptVersion: 'v1', requestRedacted: { user: 'note about PUPIL_9' }, response: { text: 'hi' }, inputTokens: 7, outputTokens: 3, costPence: 0.5, status: 'ok', error: null });
+    await insertAiCall({ feature: 'zz_log_test', provider: 'anthropic', model: 'claude-haiku-4-5', promptVersion: 'v1', requestRedacted: {}, response: null, inputTokens: null, outputTokens: null, costPence: null, status: 'blocked', error: 'monthly cap reached' });
+    const page = await listAiCalls({ feature: 'zz_log_test', limit: 50, offset: 0 });
+    expect(page.total).toBe(2);
+    expect(page.rows[0]!.feature).toBe('zz_log_test'); // newest first, only this feature
+    const okOnly = await listAiCalls({ feature: 'zz_log_test', status: 'ok', limit: 50, offset: 0 });
+    expect(okOnly.total).toBe(1);
+    const detail = await getAiCall(page.rows[0]!.id);
+    expect(detail).not.toBeNull();
+    expect(JSON.stringify(detail!.requestRedacted)).not.toMatch(/[A-Z][a-z]+ [A-Z][a-z]+/); // no real "First Last" — redacted only
+    const byFeature = await spendByFeatureThisMonth();
+    const mine = byFeature.find((r) => r.feature === 'zz_log_test')!;
+    expect(mine.calls).toBe(2);
+    expect(mine.blocked).toBe(1);
+    await pool.query(`DELETE FROM ai_calls WHERE feature = 'zz_log_test'`);
   });
 
   it('callLLM degrades to "unavailable" with no API key — no network, no spend', async () => {

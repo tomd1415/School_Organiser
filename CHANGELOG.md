@@ -7,6 +7,36 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10 BUILDING: Track A no-migration ship-blockers (10.1, 10.3, 10.5, 10.6)
+
+Started implementing Phase 10 in the recommended order. The four Track-A slices that need **no
+schema migration** are done and tested (**240 unit / 146 integration green; typecheck clean**) —
+each closes a gap where the DPIA/security docs described a control the code didn't have:
+
+- **10.1 Encrypted backups + restore-drill + DR runbook.** `backup.sh` now encrypts both the
+  `pg_dump` and the resources tar at rest (`age` recipient preferred, `gpg` symmetric fallback) and
+  **refuses to write plaintext** unless `BACKUP_ALLOW_PLAINTEXT=1` (dev only). `restore.sh` decrypts
+  by file suffix. New `verify-backup.sh` restores the newest dump into a throwaway scratch DB,
+  asserts the core tables, and stamps `backup_last_verified` (now shown on Settings → Data health).
+  RUNBOOK gains a key-handling note + a bare-server "Disaster recovery" section. Exercised
+  end-to-end against the dev stack (restore-drill PASS).
+- **10.3 Teacher idle-logout.** The `onRequest` idle plumbing (was pupil-only) now also expires a
+  **teacher** session after N minutes idle (default 30; 0 disables) — the unattended-classroom-laptop
+  control the threat model/DPIA R3 already claimed. Configurable in Settings; `/login?timeout=1`
+  shows a kind note. New cached getter `auth/teacherIdleCache.ts`.
+- **10.5 Email-triage pre-egress safeguarding screen.** Inbound email is now `guardMatch`-screened
+  **before** any AI call; a trip is filed as a safeguarding-flagged captured item with **zero** AI
+  egress (triage previously sent the full body to the model to *decide* if it was safeguarding).
+- **10.6 In-app AI audit-log viewer + live spend.** New `/settings/ai-log` — paginated `ai_calls`
+  with expandable redacted request/response, feature/status filters, a per-feature month spend
+  roll-up, and CSV/JSON export for the DPO; the Settings AI panel now shows "£X of £Y this month
+  (Z% used)" with an amber near-cap state. Read-only over `ai_calls` (the redaction-control evidence).
+
+Remaining Track A needs migration `0024`: **10.2** (pupil erasure/anonymise + SAR export) and
+**10.4** (disclosure register); plus **10.9** (durable marking queue, migration) and **10.8**
+(resilient autosave, no migration). New tests: AI-log repo round-trip (filter/expand/rollup) and
+the email pre-egress screen.
+
 ### 2026-06-13 — Phase 10 PLANNED: trustworthy in daily use (safety, reliability, access, the loop)
 
 Surveyed the built system from nine lenses (deferred-item comb of every prior plan + this CHANGELOG,

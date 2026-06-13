@@ -121,10 +121,16 @@ contacts a provider (Anthropic Claude). Before any request it, in order:
 This is proven by automated **egress tests** that fail the build if a roster name or flagged item
 could escape ([app/tests/redact.test.ts](../app/tests/redact.test.ts)). The cohort teaching-context
 (R6) is **aggregate prose only**, stored per course, never per pupil, and passes through the same
-redaction path. Further measures: LAN-only, authenticated single account, `HttpOnly`/`Secure`/
-`SameSite=Strict` session, all POSTs CSRF-protected, outbound HTTPS to Anthropic only (R3); encrypted
-nightly backups inheriting the school's off-site regime (R4); no silent deletion, deliberate audited
-retention actions (R5). See [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for the full controls.
+redaction path. **Inbound email is `guardMatch`-screened *before* any AI call** (Phase 10.5): a
+forwarded email touching welfare is filed as a flagged captured item with **zero** AI egress, rather
+than relying on the model to classify it after the body was already sent. Further measures: LAN-only,
+authenticated single account, `HttpOnly`/`Secure`/`SameSite=Strict` session, all POSTs
+CSRF-protected, outbound HTTPS to Anthropic only; a **teacher idle-logout** in addition to the 12h
+absolute session (Phase 10.3) so an unattended classroom laptop locks itself (R3); **encrypted
+nightly backups** (`age`/`gpg` at rest, the script refuses plaintext) with a monthly automated
+restore-drill (Phase 10.1, R4); no silent deletion, deliberate audited retention actions (R5); and
+the **`ai_calls` audit is reviewable in-app** (Settings → AI call log) as DPO evidence (Phase 10.6).
+See [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for the full controls.
 
 ## 6. Sub-processors
 

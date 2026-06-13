@@ -1,5 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { parseEmail } from '../src/services/emailIntake';
+import { screenEmailForSafeguarding } from '../src/services/emailPoll';
+
+describe('screenEmailForSafeguarding (10.5 — pre-egress safeguarding screen)', () => {
+  it('trips on a disclosure in the body so it is never sent to the AI', () => {
+    expect(screenEmailForSafeguarding('Worried about a pupil', 'She told me she is not safe at home.')).toBe('not safe');
+  });
+  it('trips on a disclosure in the subject too', () => {
+    expect(screenEmailForSafeguarding('A pupil said they want to hurt myself', 'see attached')).toBe('hurt myself');
+  });
+  it('passes an ordinary admin email through to normal triage', () => {
+    expect(screenEmailForSafeguarding('Y10 trip consent', 'Please collect the forms by Friday.')).toBeNull();
+  });
+});
 
 describe('parseEmail', () => {
   it('uses the Subject line as the title and the rest as detail', () => {
