@@ -7,6 +7,31 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10 BUILT: optimistic concurrency (10.10) + close-the-loop (10.16, 10.17)
+
+- **10.10 Optimistic-concurrency on irreplaceable notes.** Note autosaves were blind last-write-wins,
+  so a stale tab (phone + desktop + tabs-open-all-day) could silently clobber a newer edit. The Notes
+  page now round-trips a `rev` token (the note's `updated_at`, microsecond-formatted): a guarded
+  `UPDATE … WHERE updated_at = $rev` refuses a stale write and surfaces "⚠ edited elsewhere — your
+  text is kept; reload to merge", advancing the client's token via an OOB swap on each successful
+  save. `rev` is **optional** on `NoteItem`, so lesson/Now/tasks/schemes keep working unchanged and
+  can adopt the same hook later. Integration test proves a stale tab can't overwrite a newer edit.
+- **10.16 Standing per-class feedback digest.** Phase 8 promised feedback shapes lessons two ways;
+  only the per-lesson half shipped. New `classFeedbackAllTime(groupCourseId)` aggregates a class's
+  feedback across **all** its lessons, and a **📊 Feedback so far** button on the *Pupil work* panel
+  turns it into a one-line digest ("This class tends to enjoy practical, cards; less keen on typing")
+  with one-click append to the per-class teaching context every planning call reads. Pure arithmetic
+  (no AI, no pupil identity); the digest helper moved to a unit-tested `lib/feedbackDigest.ts`.
+- **10.17 Captured-item AI auto-categorise.** A **✨ Suggest** button on a captured note asks a cheap
+  model to suggest category + resurface date + class (mirrors `email_triage`). **Safeguarding is
+  screened locally first** (the 10.5 model): a disclosure-tripping note is filed as safeguarding with
+  **zero** AI call. The result is applied as editable fields — a suggestion, not a decision.
+  Integration test proves the guard pre-screen flags a disclosure with no `ai_calls` row.
+- **243 unit / 158 integration green; typecheck clean.** Track D's **10.15** (retrieval-practice
+  starters) is next — deferred to its own focused turn as it needs cross-occurrence worksheet/label
+  reconstruction. *(The live AI path for 10.17 degrades to "unavailable" in tests, as always; verify
+  against a real key with a throwaway smoke script.)*
+
 ### 2026-06-13 — Phase 10 Track C BUILT: SEND accessibility on the pupil surface (10.11–10.13)
 
 The surface built *for* SEND learners now actually fits them. All client-side, no network, no AI;

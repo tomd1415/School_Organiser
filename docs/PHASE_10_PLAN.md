@@ -1,10 +1,11 @@
 # Phase 10 — Trustworthy in daily use: safety, reliability & access
 
-> **Status (2026-06-13): BUILDING — Track A (10.1–10.6), the Track B ship-blockers (10.8, 10.9), and
-> Track C (10.11 read-aloud, 10.12 display preferences, 10.13 progress/motion/touch) are DONE and
-> tested (240 unit / 156 integration green; typecheck clean; migrations `0024`–`0026`). Remaining:
-> Track B 10.10 (optimistic-concurrency), Track C 10.14 (input alternatives — stretch), then Tracks
-> D (close the loop), E (daily-driver), F (setup/scale).** The original plan follows.
+> **Status (2026-06-13): BUILDING — Track A (10.1–10.6), all of Track B (10.8, 10.9, 10.10), Track C
+> (10.11–10.13), and Track D's 10.16 (standing feedback digest) + 10.17 (captured auto-categorise)
+> are DONE and tested (243 unit / 158 integration green; typecheck clean; migrations `0024`–`0026`).
+> Remaining: Track D 10.15 (retrieval-practice starters — the involved one, next), Track C 10.14
+> (input alternatives — stretch), then Tracks E (daily-driver) and F (setup/scale).** The original
+> plan follows.
 >
 > **Status (2026-06-13): PLANNED, plan-first — for review before any code.**
 > Phases 8–9 put **real children's PII and pupil-authored answers** into the system (logins, PINs,
@@ -84,7 +85,7 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 |---|---|---|---|---|---|
 | **10.8** | **Resilient autosave (pupil + teacher)** — pupil: idle/kill branch returns an **HX-Redirect** (HTMX can't follow a bare 302 on a background POST), a failed `/me/answer` surfaces a calm "not saved — your work is still on screen, tell your teacher" near the field, and a `beforeunload` guard while a field is dirty; teacher: actually populate the `note-status` span ("saving…/saved ✓/NOT saved — copy your text") and add global `htmx:responseError`/`sendError` handlers that keep the typed text | both autosaves fail invisibly today; the NFR calls notes "irreplaceable", and anxious SEND pupils silently losing typed work is the worst failure mode | M | 🔴 | ✅ |
 | **10.9** | **Durable open-marking queue** — persist pending open-mark jobs (`occurrence_course` + `due_at`) to a small table; a boot-time sweep runs any that came due while the process was down; the debounce becomes a DB-backed claim (idempotent — `markOpen` only marks unmarked answers) | the "mark as pupils finish" pass is an in-memory `setTimeout` Map with `unref()` — a reboot/`./start.sh`/crash during a live lesson silently drops every pending mark, contradicting "survives a server reboot" | M | 🟠 | ✅ |
-| **10.10** | **Optimistic-concurrency guard on irreplaceable text** — send the loaded `updated_at` with the autosave; `UPDATE … WHERE id=$1 AND updated_at=$expected`; 0 rows → 409 surfaced as "edited elsewhere — your text is kept, reload to merge" | every note/task/scheme autosave is a blind last-write-wins UPDATE; single-teacher ≠ single-session (phone capture + desktop + tabs-open-all-day), so a stale tab clobbers newer edits | S | 🟡 | ⬜ |
+| **10.10** | **Optimistic-concurrency guard on irreplaceable text** — send the loaded `updated_at` with the autosave; `UPDATE … WHERE id=$1 AND updated_at=$expected`; 0 rows → 409 surfaced as "edited elsewhere — your text is kept, reload to merge" | every note/task/scheme autosave is a blind last-write-wins UPDATE; single-teacher ≠ single-session (phone capture + desktop + tabs-open-all-day), so a stale tab clobbers newer edits | S | 🟡 | ✅ |
 
 ### Track C — SEND accessibility on the pupil surface *(core to the app's purpose, currently absent)*
 
@@ -100,8 +101,8 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
 | **10.15** | **Retrieval-practice starters (the Phase 9.9 stretch)** — query a class's recently low-success questions (already computed for the adapt summary, anonymous) and (a) pass them into the draft/adapt prompt context, and (b) a lesson-page "open with 3 questions this class got wrong" generator | Phase 9 stores per-question marks + misconceptions but `draftLesson`/`adaptLesson` prompts have no "got wrong recently" input; the loop never closes into spaced retrieval | M | 🟠 | ⬜ |
-| **10.16** | **Standing per-class feedback digest** — aggregate a class's feedback *across all its lessons* (ratings spread, enjoyed/disliked chips, by level) into a standing digest, offered as a one-click append/update to the per-class teaching-context every planning call already reads | Phase 8 promised feedback shapes lessons *two* ways; only the per-lesson half shipped — the over-time "consistently loves practical, rates long typing lowest" digest is missing | M | 🟠 | ⬜ |
-| **10.17** | **Captured-item AI auto-categorise** — a cheap structured call on capture suggesting category + resurface date + the safeguarding flag (teacher confirms; once flagged, withheld forever); mirror the existing `email_triage` classifier | `captured.ts` still has zero AI; Spec 5.17 (M) promised auto-filing. The `email_triage` pattern proves the shape works | S | 🟡 | ⬜ |
+| **10.16** | **Standing per-class feedback digest** — aggregate a class's feedback *across all its lessons* (ratings spread, enjoyed/disliked chips, by level) into a standing digest, offered as a one-click append/update to the per-class teaching-context every planning call already reads | Phase 8 promised feedback shapes lessons *two* ways; only the per-lesson half shipped — the over-time "consistently loves practical, rates long typing lowest" digest is missing | M | 🟠 | ✅ |
+| **10.17** | **Captured-item AI auto-categorise** — a cheap structured call on capture suggesting category + resurface date + the safeguarding flag (teacher confirms; once flagged, withheld forever); mirror the existing `email_triage` classifier | `captured.ts` still has zero AI; Spec 5.17 (M) promised auto-filing. The `email_triage` pattern proves the shape works | S | 🟡 | ✅ |
 | **10.18** | *(stretch)* **Estimate calibration + time report** — a `/time` weekly roll-up of work-block actuals + per-task-type estimate-vs-actual (pure SQL); optional AI duration suggestion (durations+tags only, no names) | `estimate_min`/`actual_seconds` are captured but never fed back; Spec 5.16/5.6 promised the report and calibration | M | ⚪ | ⬜ |
 
 ### Track E — Daily-driver friction *(Phase 7 polish + Spec Musts)*

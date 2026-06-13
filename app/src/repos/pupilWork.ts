@@ -204,11 +204,7 @@ export interface ClassFeedbackAgg {
   comments: string[];
 }
 
-export async function classFeedback(occurrenceCourseId: number): Promise<ClassFeedbackAgg> {
-  const { rows } = await pool.query<{ rating: number | null; liked: string; disliked: string; comment: string }>(
-    `SELECT rating, liked, disliked, comment FROM pupil_lesson_feedback WHERE occurrence_course_id = $1`,
-    [occurrenceCourseId],
-  );
+function aggFeedback(rows: Array<{ rating: number | null; liked: string; disliked: string; comment: string }>): ClassFeedbackAgg {
   const ratings: number[] = [];
   const liked: string[] = [];
   const disliked: string[] = [];
@@ -220,4 +216,25 @@ export async function classFeedback(occurrenceCourseId: number): Promise<ClassFe
     if (r.comment.trim()) comments.push(r.comment.trim());
   }
   return { ratings, liked, disliked, comments };
+}
+
+export async function classFeedback(occurrenceCourseId: number): Promise<ClassFeedbackAgg> {
+  const { rows } = await pool.query<{ rating: number | null; liked: string; disliked: string; comment: string }>(
+    `SELECT rating, liked, disliked, comment FROM pupil_lesson_feedback WHERE occurrence_course_id = $1`,
+    [occurrenceCourseId],
+  );
+  return aggFeedback(rows);
+}
+
+/** 10.16 — a class's feedback across ALL its lessons (the standing, over-time picture), for the
+ *  one-click teaching-context digest. Cohort-level aggregate only; never per-pupil. */
+export async function classFeedbackAllTime(groupCourseId: number): Promise<ClassFeedbackAgg> {
+  const { rows } = await pool.query<{ rating: number | null; liked: string; disliked: string; comment: string }>(
+    `SELECT f.rating, f.liked, f.disliked, f.comment
+     FROM pupil_lesson_feedback f
+     JOIN occurrence_courses oc ON oc.id = f.occurrence_course_id
+     WHERE oc.group_course_id = $1`,
+    [groupCourseId],
+  );
+  return aggFeedback(rows);
 }

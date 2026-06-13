@@ -105,7 +105,7 @@ export async function routeTriagedEmail(
     return 'awareness';
   }
   if (t.route === 'note') {
-    const id = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) });
+    const { id } = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) });
     await updateNoteBody(id, `${t.title}\n${detailText}`);
     await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
     return 'note';

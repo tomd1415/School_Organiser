@@ -31,6 +31,7 @@ export function renderCapturedItem(item: CapturedItem, groups: GroupOpt[]): stri
       <span class="note-status" id="cap-${item.id}-status"></span>
     </div>
     <div class="task-actions">
+      <button type="button" class="link" hx-post="/captured/${item.id}/suggest" hx-target="#cap-${item.id}" hx-swap="outerHTML" hx-disabled-elt="this" title="AI suggests a category, date and class (safeguarding stays local)">✨ Suggest</button>
       <button type="button" class="link" hx-post="/captured/${item.id}/to-task" hx-target="#cap-${item.id}" hx-swap="outerHTML">→ make a task</button>
       <button type="button" class="link danger" hx-post="/captured/${item.id}/flag/archived" hx-target="#cap-${item.id}" hx-swap="outerHTML">archive</button>
     </div>

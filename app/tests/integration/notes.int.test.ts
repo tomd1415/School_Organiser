@@ -44,7 +44,7 @@ describe('notes (integration — needs the dev DB up)', () => {
   });
 
   it('creates, autosaves and deletes a note', async () => {
-    const id = await createNote({ kind: 'lesson', occurrenceId });
+    const { id } = await createNote({ kind: 'lesson', occurrenceId });
     await updateNoteBody(id, 'good engagement, got to star/mesh');
     const { rows } = await pool.query<{ body: string }>(`SELECT body FROM notes WHERE id = $1`, [id]);
     expect(rows[0]?.body).toBe('good engagement, got to star/mesh');
@@ -53,8 +53,25 @@ describe('notes (integration — needs the dev DB up)', () => {
     expect(after.rowCount).toBe(0);
   });
 
+  it('optimistic concurrency (10.10): a stale tab cannot clobber a newer note edit', async () => {
+    const { id, rev: rev1 } = await createNote({ kind: 'lesson', occurrenceId });
+    const r1 = await updateNoteBody(id, 'first edit', rev1);
+    expect(r1.ok).toBe(true);
+    expect(r1.rev).not.toBe(rev1); // the token advanced
+    // A second tab still holding rev1 tries to save — refused, body unchanged.
+    const stale = await updateNoteBody(id, 'clobber from a stale tab', rev1);
+    expect(stale.ok).toBe(false);
+    expect((await pool.query<{ body: string }>(`SELECT body FROM notes WHERE id=$1`, [id])).rows[0]!.body).toBe('first edit');
+    // The up-to-date tab (holding the advanced token) saves fine.
+    const r2 = await updateNoteBody(id, 'second edit', r1.rev!);
+    expect(r2.ok).toBe(true);
+    // No token → plain last-write-wins (surfaces that haven't adopted the guard).
+    expect((await updateNoteBody(id, 'no-guard edit')).ok).toBe(true);
+    await deleteNote(id);
+  });
+
   it('adds and toggles a follow-up, which cascades on note delete', async () => {
-    const id = await createNote({ kind: 'lesson', occurrenceId });
+    const { id } = await createNote({ kind: 'lesson', occurrenceId });
     const fu = await addFollowup(id, 'reteach subnetting');
     expect(fu.done).toBe(false);
     const toggled = await toggleFollowup(fu.id);

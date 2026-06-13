@@ -610,6 +610,29 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('captured ✨ Suggest flags a disclosure LOCALLY with no AI call (10.17 + 10.5 model)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/captured', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    const create = await app.inject({ method: 'POST', url: '/captured', headers: { cookie, 'x-csrf-token': token } });
+    const id = /id="cap-(\d+)"/.exec(create.body)?.[1];
+    expect(id).toBeTruthy();
+    try {
+      await app.inject({ method: 'POST', url: `/captured/${id}`, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('worried — a pupil said they want to hurt myself at home') });
+      const sug = await app.inject({ method: 'POST', url: `/captured/${id}/suggest`, headers: { cookie, 'x-csrf-token': token } });
+      expect(sug.statusCode).toBe(200);
+      const { getCaptured } = await import('../../src/repos/captured');
+      const item = await getCaptured(Number(id));
+      expect(item!.safeguarding).toBe(true); // flagged locally
+      expect(item!.category).toBe('safeguarding');
+      // The disclosure was NEVER sent to the AI to be categorised.
+      const ai = await pool.query(`SELECT 1 FROM ai_calls WHERE feature = 'captured_categorise' AND created_at > now() - interval '2 minutes'`);
+      expect(ai.rowCount).toBe(0);
+    } finally {
+      await pool.query(`DELETE FROM notes WHERE id = $1`, [id]);
+    }
+  });
+
   it('AI call log page renders (10.6 — regression: timestamptz must be string-formatted, not a Date)', async () => {
     const { insertAiCall } = await import('../../src/repos/aiCalls');
     await insertAiCall({ feature: 'zz_screen_log', provider: 'anthropic', model: 'claude-haiku-4-5', promptVersion: 'v1', requestRedacted: { user: 'x' }, response: { text: 'y' }, inputTokens: 1, outputTokens: 1, costPence: 0.1, status: 'ok', error: null });

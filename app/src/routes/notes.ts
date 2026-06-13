@@ -11,7 +11,7 @@ import {
   toggleFollowup,
   updateNoteBody,
 } from '../repos/notes';
-import { renderFollowup, renderNewNoteButton, renderNoteItem, renderNotesList, renderSavedStatus } from '../lib/notesView';
+import { renderFollowup, renderNewNoteButton, renderNoteItem, renderNotesList, renderSavedStatus, renderRevUpdate, renderConflictStatus } from '../lib/notesView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -29,22 +29,27 @@ export function registerNoteRoutes(app: FastifyInstance): void {
       })
       .safeParse(req.body);
     if (!parsed.success) return reply.code(400).send('');
-    const id = await createNote({
+    const { id, rev } = await createNote({
       kind: parsed.data.kind,
       occurrenceId: parsed.data.occurrence ?? null,
       courseId: parsed.data.course ?? null,
       groupId: parsed.data.group ?? null,
     });
-    return reply.type('text/html').send(renderNoteItem({ id, body: '', time: 'now', followups: [] }));
+    return reply.type('text/html').send(renderNoteItem({ id, body: '', time: 'now', followups: [], rev }));
   });
 
-  // Autosave the body. Returns just an out-of-band "saved" flash (textarea untouched).
+  // Autosave the body (10.10: optimistic-concurrency when the client sends its loaded `rev`). Returns
+  // an out-of-band "saved" flash + the advanced rev, or a conflict flash if a newer edit exists.
   app.post('/notes/:id', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
-    const body = z.object({ body: z.string().max(20000).default('') }).safeParse(req.body);
+    const body = z.object({ body: z.string().max(20000).default(''), rev: z.string().max(40).optional() }).safeParse(req.body);
     if (!id.success || !body.success) return reply.code(400).send('');
-    await updateNoteBody(id.data.id, body.data.body);
-    return reply.type('text/html').send(renderSavedStatus(`note-${id.data.id}-status`));
+    const statusId = `note-${id.data.id}-status`;
+    const res = await updateNoteBody(id.data.id, body.data.body, body.data.rev);
+    if (!res.ok && body.data.rev != null) {
+      return reply.type('text/html').send(renderConflictStatus(statusId));
+    }
+    return reply.type('text/html').send(renderSavedStatus(statusId) + (res.rev != null ? renderRevUpdate(id.data.id, res.rev) : ''));
   });
 
   app.post('/notes/:id/delete', guard, async (req, reply) => {
@@ -87,7 +92,7 @@ export function registerNoteRoutes(app: FastifyInstance): void {
     let listHtml: string;
     try {
       const rows = await listGeneralNotes(filter);
-      const items = rows.map((n) => ({ id: n.id, body: n.body, time: n.date, followups: [] }));
+      const items = rows.map((n) => ({ id: n.id, body: n.body, time: n.date, followups: [], rev: n.rev }));
       listHtml = renderNotesList('notes-list-general', items);
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');

@@ -1,12 +1,17 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
-import { layout } from '../lib/html';
+import { esc, layout } from '../lib/html';
 import { listGroups } from '../repos/tasks';
-import { createCaptured, listCaptured, promoteCapturedToTask, toggleCapturedFlag, updateCapturedField } from '../repos/captured';
+import { createCaptured, getCaptured, listCaptured, promoteCapturedToTask, toggleCapturedFlag, updateCapturedField } from '../repos/captured';
 import { renderCapturedItem, renderCapturedList, renderNewCapturedButton } from '../lib/capturedView';
 import { CAPTURED_CATEGORIES, CATEGORY_LABELS } from '../services/captured';
 import { renderSavedStatus } from '../lib/notesView';
+import { callLLMStructured } from '../llm/client';
+import { modelFor } from '../repos/settings';
+import { guardMatch } from '../lib/markSafetyGate';
+import { CAPTURED_CATEGORISE_SYSTEM, CAPTURED_CATEGORISE_VERSION, capturedInstruction, capturedItems } from '../llm/prompts/capturedCategorise';
+import { capturedCategoriseSchema } from '../llm/schemas/capturedCategorise';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -74,5 +79,47 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     if (!id.success) return reply.code(400).send('');
     await promoteCapturedToTask(id.data.id);
     return reply.type('text/html').send(''); // archived + moved to Tasks
+  });
+
+  // 10.17 — AI suggests category / resurface date / class for a captured note. SAFEGUARDING is
+  // screened LOCALLY first (the 10.5 model): a disclosure-tripping note is flagged without any AI
+  // call. The teacher always sees the result as editable fields — a suggestion, not a decision.
+  app.post('/captured/:id/suggest', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const item = await getCaptured(id.data.id);
+    if (!item) return reply.code(404).send('');
+    const groups = await listGroups();
+    if (!item.body.trim()) return reply.type('text/html').send(renderCapturedItem(item, groups));
+
+    if (guardMatch(item.body)) {
+      // Possible disclosure — never send it to the AI. File it as safeguarding locally.
+      await updateCapturedField(id.data.id, 'category', 'safeguarding');
+      if (!item.safeguarding) await toggleCapturedFlag(id.data.id, 'safeguarding');
+      return reply.type('text/html').send(renderCapturedItem((await getCaptured(id.data.id)) ?? item, groups));
+    }
+
+    const result = await callLLMStructured(
+      {
+        feature: 'captured_categorise',
+        model: await modelFor('cheap'),
+        promptVersion: CAPTURED_CATEGORISE_VERSION,
+        system: CAPTURED_CATEGORISE_SYSTEM,
+        context: capturedItems(item.body),
+        instruction: capturedInstruction(new Date().toISOString().slice(0, 10), groups.map((g) => g.name)),
+        maxTokens: 300,
+      },
+      capturedCategoriseSchema,
+    );
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(renderCapturedItem(item, groups) + `<span class="note-status conflict" id="cap-${id.data.id}-status" hx-swap-oob="true">${esc(result.message ?? 'AI unavailable')}</span>`);
+    }
+    const s = result.data;
+    await updateCapturedField(id.data.id, 'category', s.category);
+    if (s.surfaceOn && /^\d{4}-\d{2}-\d{2}$/.test(s.surfaceOn)) await updateCapturedField(id.data.id, 'surface_on', s.surfaceOn);
+    const g = s.groupName ? groups.find((x) => x.name.toLowerCase() === s.groupName!.toLowerCase()) : null;
+    if (g) await updateCapturedField(id.data.id, 'group_id', String(g.id));
+    if (s.safeguarding && !item.safeguarding) await toggleCapturedFlag(id.data.id, 'safeguarding');
+    return reply.type('text/html').send(renderCapturedItem((await getCaptured(id.data.id)) ?? item, groups) + `<span class="note-status saved" id="cap-${id.data.id}-status" hx-swap-oob="true">✨ suggested — adjust if needed</span>`);
   });
 }

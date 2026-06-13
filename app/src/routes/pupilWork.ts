@@ -17,8 +17,10 @@ import {
   markAnswersSeen,
   classAnswers,
   classFeedback,
+  classFeedbackAllTime,
   pupilCanAccessOc,
 } from '../repos/pupilWork';
+import { feedbackDigest } from '../lib/feedbackDigest';
 import { getGroupTeachingContext, setGroupTeachingContext } from '../repos/adaptations';
 import { getLessonWorksheetMeta } from '../services/worksheet';
 import { pupilAccessEnabled } from './pupilAuth';
@@ -141,6 +143,7 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
     <div class="pw-actions">
       <button type="button" class="link" hx-post="/lesson/oc/${oc}/seen" hx-target="#pw-${oc}" hx-swap="outerHTML">mark all seen</button>
       <button type="button" class="link fu-ai" hx-post="/lesson/oc/${oc}/summarise" hx-target="#pw-summary-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">✨ Summarise the class's work (AI)</button>
+      <button type="button" class="link" hx-post="/lesson/oc/${oc}/standing-digest" hx-target="#pw-summary-${oc}" hx-swap="innerHTML" title="this class's feedback across all its lessons → teaching context">📊 Feedback so far</button>
       ${info.lessonPlanId != null ? `<a class="link" href="/lesson/oc/${oc}/answer-pack" target="_blank" rel="noopener">🖨 answer pack</a> <a class="link" href="/lesson/oc/${oc}/marks.csv">⬇ marks CSV</a>` : ''}
     </div>
     ${marking ? renderMarkingBar(oc, info, scheme, settings!, released) : `<p class="muted pw-gate">Auto-marking is off — enable it in <a href="/settings">Settings → Auto-marking</a> (needs DPIA addendum sign-off).</p>`}
@@ -321,6 +324,20 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
       <p class="muted">Saved to this lesson's notes — "adapt from recent lessons" will use it.</p>
       ${fbDigest ? `<button type="button" class="link" hx-post="/lesson/oc/${p.data.id}/context-append" hx-vals='${esc(JSON.stringify({ text: fbDigest }))}' hx-target="this" hx-swap="outerHTML">＋ add "${esc(fbDigest)}" to this class's teaching context</button>` : ''}
     </div>`);
+  });
+
+  // 10.16 — the STANDING (over-time) feedback digest: aggregate this class's feedback across ALL its
+  // lessons into a one-liner the teacher can append to the per-class teaching context every planning
+  // call reads. Cohort-level, no AI, no pupil identity.
+  app.post('/lesson/oc/:id/standing-digest', guard, async (req, reply) => {
+    const p = ocParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const info = await ocInfo(p.data.id);
+    if (!info) return reply.code(404).send('');
+    const digest = feedbackDigest(await classFeedbackAllTime(info.groupCourseId));
+    if (!digest) return reply.type('text/html').send('<p class="muted">Not enough lesson feedback yet to summarise this class.</p>');
+    return reply.type('text/html').send(`<p class="adapt-note">${esc(digest)}</p>
+      <button type="button" class="link" hx-post="/lesson/oc/${p.data.id}/context-append" hx-vals='${esc(JSON.stringify({ text: digest }))}' hx-target="this" hx-swap="outerHTML">＋ add to this class's teaching context</button>`);
   });
 
   app.post('/lesson/oc/:id/context-append', guard, async (req, reply) => {
@@ -584,18 +601,3 @@ async function pupilWorkRowsWithMarks(oc: number): Promise<Array<{ displayName: 
   return grid.map((g) => ({ displayName: g.displayName, awarded: sums.get(g.pupilId)?.awarded ?? 0, total: sums.get(g.pupilId)?.total ?? 0 }));
 }
 
-/** A one-line standing digest from the feedback, e.g. "Tends to enjoy practical, cards; rates typing lowest." */
-function feedbackDigest(fb: { ratings: number[]; liked: string[]; disliked: string[] }): string | null {
-  const top = (xs: string[]): string[] => {
-    const m = new Map<string, number>();
-    for (const x of xs) m.set(x, (m.get(x) ?? 0) + 1);
-    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => k);
-  };
-  const liked = top(fb.liked);
-  const disliked = top(fb.disliked);
-  if (liked.length === 0 && disliked.length === 0) return null;
-  const parts: string[] = [];
-  if (liked.length) parts.push(`tends to enjoy ${liked.join(', ')}`);
-  if (disliked.length) parts.push(`less keen on ${disliked.join(', ')}`);
-  return `This class ${parts.join('; ')}.`;
-}
