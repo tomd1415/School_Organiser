@@ -7,6 +7,74 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 8 hardening: adversarial review + fixes (migration `0019`)
+
+An adversarial multi-agent review of the Phase 8 diff surfaced 21 confirmed issues; the load-bearing
+ones are fixed:
+
+- **Redaction boundary (HIGH).** JS `\b` is ASCII-only, so a pupil name whose first/last character
+  is accented (José, Zoë, André) slipped past **both** `redactNames` and the `containsRosterName`
+  egress assert — a real-name-to-AI hole. Both now use Unicode-aware boundaries
+  ([app/src/services/redact.ts](../app/src/services/redact.ts)). Also: the redaction roster now
+  **includes inactive (left) pupils**, who keep their real name until anonymisation — so a leaver's
+  name typed into an answer is still caught.
+- **Pupil-auth disclosure/abuse (HIGH/MED).** `/pupil/pin` no longer reveals a name for a pupil
+  outside the class code used (was an unauthenticated full-roster enumeration); `/pupil/names`,
+  `/pupil/pin` are rate-limited; the login failure message is now **generic** (no wrong-vs-disabled
+  enumeration oracle), and the per-IP PIN limiter is **no longer reset by a successful login** (it
+  enabled cross-pupil PIN spraying / class-lockout DoS).
+- **The DPIA kill-switch now evicts live sessions (MED).** Turning pupil access off (or idle-out)
+  deletes an already-authenticated pupil session at the lockdown hook, not just blocks new logins.
+- **Answer keying (MED).** Answers are now keyed on the **lesson instance**
+  (`pupil_id, occurrence_course_id, field_key`; migration `0019`) instead of the worksheet
+  resource/version — so they survive a class's worksheet resolving master↔adapted or being
+  re-versioned (previously those flips silently hid a pupil's earlier work). `resource_id`/
+  `version_no` become provenance; `/me/answer` resolves the worksheet **server-side** (no trust in
+  client-supplied ids).
+- **Smaller correctness fixes.** Teacher per-pupil handlers now verify the pupil is enrolled in the
+  occurrence's group (IDOR); the completion count counts text fields only (tick-boxes no longer
+  inflate "n of m"); a re-blur of an unchanged answer no longer re-flags it as new; `/me` resolves
+  form/tutor-period worksheets and prefers the teacher's own row when a group sits in a slot twice.
+- Tests added/updated for every fix (accented-name redaction, generic login message, access-off
+  eviction, `/pupil/pin` scoping, inactive-roster redaction). **200 unit / 115 integration green.**
+
+### 2026-06-13 — Phase 8 BUILT: pupil logins & in-app work (8.1–8.7)
+
+- **Migration `0018`** adds `ta_accounts`, `pupil_credentials`, `pupil_answers`, `pupil_done`,
+  `pupil_levels`, `pupil_lesson_feedback`, and `groups.login_code`.
+- **8.1 Roles** — a shared deny-by-default lockdown helper ([app/src/auth/lockdown.ts](../app/src/auth/lockdown.ts))
+  now covers both `ta` and `pupil`; login is **rate-limited** (per-IP sliding window) with a
+  **durable per-pupil PIN lockout**; pupil sessions **idle out** on shared machines. **Per-TA
+  named accounts** replace the shared TA password (the old one still works until cleared), and a
+  linked staff row gives the TA a **"my upcoming lessons"** tab.
+- **8.2 Pupil login** — SEND-friendly **class code → tap your name → PIN** ([/pupil](../app/src/routes/pupilAuth.ts)).
+  The Pupils page grows a **logins admin** (per-class code, per-pupil PIN set/reset, enable/disable,
+  unlock) and **printable login cards**.
+- **8.3/8.4 The `/me` surface** — one screen: the pupil's class lesson now, the worksheet as a
+  **form sliced to their level** (unlabelled), per-field **autosave** to `pupil_answers`, a
+  self-declared **Done ✓**. New renderer [app/src/lib/worksheetForm.ts](../app/src/lib/worksheetForm.ts):
+  field keys from the full document (stable across slices), fence-aware level detection, safe
+  fallback to the whole sheet when a worksheet isn't cleanly sectioned. Pupils get **no
+  `/resources/*` access**; answer writes are checked against enrolment.
+- **8.5 Feedback widget** — emoji rating + tap-the-chips (enjoyed/disliked) + optional comment,
+  one editable row per lesson.
+- **8.6 Teacher review** — the lesson page gains a lazy **Pupil work** panel: completion grid
+  (level chip 🟢🟡🔴 click-to-change, fields done, Done ✓, rating, last-saved), read-back of any
+  pupil's sheet (marks their answers seen), "mark all seen".
+- **8.7 The loop** — "✨ Summarise the class's work" aggregates answers **per question,
+  anonymised** + the feedback, through the standard wrapper (`class_work@1`), writes the summary
+  to the lesson's notes (so "adapt from recent lessons" reads it), and offers a one-click
+  feedback digest into the class teaching-context.
+- **The DPIA gate is enforced in code**: pupil access is a **Settings master switch, off by
+  default**, and turning it on **requires confirming DPO/SLT sign-off**; with it off, `/pupil`
+  refuses and the logins admin is hidden. Generation prompt bumped to `lesson_resources@5`
+  (levels as strict `## 🟢/🟡/🔴` sections so slicing is reliable).
+- **Tests**: +5 unit files / cases (worksheet renderer incl. real-worksheet regression, rate
+  limiter, class-work egress) and a pupil integration suite (login, lockdown, autosave +
+  ownership 403, lockout, levels). **198 unit / 113 integration green; typecheck clean.**
+  Verified the renderer against real generated worksheets in the dev DB (level partitioning
+  6/11/15-style) and booted the app live.
+
 ### 2026-06-12 — Q29–Q37 answered: all Phase 8/9 plan decisions made
 
 - All nine open questions decided by the teacher (canonical record:

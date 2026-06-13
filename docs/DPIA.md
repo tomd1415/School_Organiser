@@ -25,7 +25,15 @@
 - **Review cadence:** termly, and before any change that widens the scope of processing (notably any
   move to pupil-facing logins, or storing per-pupil progress/SEND data). **The planned Phase 8
   (pupil logins + answers) requires completing this DPIA's [CONFIRM] items and DPO sign-off first
-  — pupil-authored answers are a new category of personal data.** **The planned Phase 9
+  — pupil-authored answers are a new category of personal data.**
+- **Built 2026-06-13 (Phase 8, behind the gate):** the pupil-login code is in place but **disabled
+  by default**. Enabling it is a deliberate Settings action that **requires the teacher to confirm
+  DPO/SLT sign-off** (recorded as `pupil_dpia_ack`); until then `/pupil` refuses and no
+  `pupil_credentials` row can be created. So this DPIA's completion remains the precondition for
+  any real pupil use — now enforced in code, not only in process. New personal data once enabled:
+  pupil **PINs** (hashed), pupil **answers** (`pupil_answers`), per-pupil **differentiation level**
+  (`pupil_levels`), and **lesson feedback** (`pupil_lesson_feedback`). The AI boundary is unchanged
+  — answers reach the AI only **aggregated per question and anonymised**, through the same wrapper. **The planned Phase 9
   (auto-marking) additionally requires an addendum before build: per-pupil attainment records are
   stored (server-side only); identity-free pupil answer text goes to the AI sub-processor for
   marking (anonymous slots, roster redaction still applied inside the text, pattern-screened

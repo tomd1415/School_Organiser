@@ -1,11 +1,17 @@
 # Phase 8 — Pupils: logins & in-app work
 
-> **Status (2026-06-12): planned, plan-first — for review before any code.**
-> The destination the teacher named: *"the system allowing pupils to log in and answer questions
-> on the system."* This is the long-deferred pupil-facing project (2.11), now next in line.
+> **Status (2026-06-13): BUILT (8.1–8.7), behind a DPIA master switch (8.0 still required before
+> real use).** Migration `0018` adds the tables; named TA accounts, the SEND pupil login
+> (class-code → name → PIN), the locked-down `/me` surface, interactive worksheets sliced to each
+> pupil's level, the Done ✓ + feedback widgets, the teacher review grid, and the AI class-work
+> summary are all in and tested (198 unit / 113 integration). **Pupil access is OFF by default**
+> and the Settings toggle that turns it on *requires the teacher to confirm DPO/SLT sign-off* — so
+> no pupil credential can exist until the DPIA gate (8.0) is genuinely cleared. The original
+> plan-first design follows.
+>
 > **Hard gate: no pupil credential exists until the DPIA's [CONFIRM] items are completed and the
 > DPO/SLT have signed (§8 of [DPIA.md](DPIA.md))** — pupil-authored answers are a new category of
-> personal data.
+> personal data. This is enforced in code by the "Pupil access" master switch on the Settings page.
 
 Everything this phase needs is already in place on the teacher side: per-lesson **worksheets are
 generated as structured Markdown** (three differentiation levels, computer-completable answer
@@ -34,17 +40,27 @@ safeguarding content withheld), LAN-only deployment, one instance per teacher.
 
 ## 1. Build order (each slice a reviewable commit)
 
-| # | Slice | Delivers | Size |
-|---|---|---|---|
-| **8.0** | **DPIA completion + sign-off** (external) | the legal/safeguarding gate: [CONFIRM] fields, retention for pupil answers, DPO/SLT signatures | S (but blocking) |
-| **8.1** | **Roles done properly** — shared lockdown helper for `ta`/`pupil` roles, login rate-limiting + lockout, short pupil sessions + idle logout (shared classroom machines), per-TA **named accounts** (replacing the shared TA password) with "my upcoming lessons" | the safe foundation | M |
-| **8.2** | **Pupil credentials + admin** — class-code → pick-your-name → PIN login (SEND-friendly, see §4); Pupils page grows per-pupil PIN set/reset, enable/disable, printable login cards | pupils can get in | M |
-| **8.3** | **The pupil surface** — `/me`: today's lesson for *their* class (via enrolments → group → timetable), the live worksheet (class copy where one exists, else master), big type, zero navigation | pupils see the right thing | M |
-| **8.4** | **Interactive worksheets, sliced per pupil** — form mode (answer cells → inputs, `- [ ]` → live tick-boxes, per-field autosave to `pupil_answers`), and **each pupil receives ONLY their assigned level's section** (🟢/🟡/🔴) plus the shared parts — the level set per pupil per course by the teacher | "answer questions on the system", pitched right | L |
-| **8.5** | **Pupil lesson feedback** — a tiny SEND-friendly widget after the work: an emoji rating (😀🙂😐🙁), tap-the-chips for what they enjoyed/disliked (practical · typing · cards · video · drawing · talking · worksheet…), optional short comment | pupils' voice, captured in seconds | S |
-| **8.6** | **Teacher review** — the lesson page gains *Pupil work*: completion grid (pupil × progress), open any sheet read-only, mark seen, **set/change each pupil's level** (🟢🟡🔴 chips, live), and the class's feedback at a glance | the payoff screen | M |
-| **8.7** | **Answers + feedback → the loop** — aggregated, name-redacted summaries of the class's answers (stuck points, common wrong turns) **and** its feedback (what they enjoyed/disliked) feed `adapt_lesson` history and a "✨ summarise the class's work" action; over time the feedback shapes the class teaching-context ("this class loves practical, hates long typing") | the loop closes on real pupil signal | M |
-| **8.8** | *(stretch — promoted to [Phase 9](PHASE_9_PLAN.md), 2026-06-12)* auto-marking, teacher comment back to pupil, the "what works for me" profile and the printable answer pack are now a phase of their own; the kiosk-per-room idea is replaced there by per-pupil **stay-signed-in-on-this-computer** (one teaching room, so the pupil-bound version is the useful one) | → Phase 9 | — |
+| # | Slice | Delivers | Size | Status |
+|---|---|---|---|---|
+| **8.0** | **DPIA completion + sign-off** (external) | the legal/safeguarding gate: [CONFIRM] fields, retention for pupil answers, DPO/SLT signatures | S (but blocking) | ⏳ external — enforced by the master switch |
+| **8.1** | **Roles done properly** — shared lockdown helper for `ta`/`pupil` roles, login rate-limiting + lockout, short pupil sessions + idle logout (shared classroom machines), per-TA **named accounts** (replacing the shared TA password) with "my upcoming lessons" | the safe foundation | M | ✅ built |
+| **8.2** | **Pupil credentials + admin** — class-code → pick-your-name → PIN login (SEND-friendly, see §4); Pupils page grows per-pupil PIN set/reset, enable/disable, printable login cards | pupils can get in | M | ✅ built |
+| **8.3** | **The pupil surface** — `/me`: today's lesson for *their* class (via enrolments → group → timetable), the live worksheet (class copy where one exists, else master), big type, zero navigation | pupils see the right thing | M | ✅ built |
+| **8.4** | **Interactive worksheets, sliced per pupil** — form mode (answer cells → inputs, `- [ ]` → live tick-boxes, per-field autosave to `pupil_answers`), and **each pupil receives ONLY their assigned level's section** (🟢/🟡/🔴) plus the shared parts — the level set per pupil per course by the teacher | "answer questions on the system", pitched right | L | ✅ built |
+| **8.5** | **Pupil lesson feedback** — a tiny SEND-friendly widget after the work: an emoji rating (😀🙂😐🙁), tap-the-chips for what they enjoyed/disliked (practical · typing · cards · video · drawing · talking · worksheet…), optional short comment | pupils' voice, captured in seconds | S | ✅ built |
+| **8.6** | **Teacher review** — the lesson page gains *Pupil work*: completion grid (pupil × progress), open any sheet read-only, mark seen, **set/change each pupil's level** (🟢🟡🔴 chips, live), and the class's feedback at a glance | the payoff screen | M | ✅ built |
+| **8.7** | **Answers + feedback → the loop** — aggregated, name-redacted summaries of the class's answers (stuck points, common wrong turns) **and** its feedback (what they enjoyed/disliked) feed `adapt_lesson` history and a "✨ summarise the class's work" action; over time the feedback shapes the class teaching-context ("this class loves practical, hates long typing") | the loop closes on real pupil signal | M | ✅ built |
+| **8.8** | *(stretch — promoted to [Phase 9](PHASE_9_PLAN.md), 2026-06-12)* auto-marking, teacher comment back to pupil, the "what works for me" profile and the printable answer pack are now a phase of their own; the kiosk-per-room idea is replaced there by per-pupil **stay-signed-in-on-this-computer** (one teaching room, so the pupil-bound version is the useful one) | → Phase 9 | — | → Phase 9 |
+
+**As-built notes (2026-06-13).** The worksheet form renderer ([app/src/lib/worksheetForm.ts](../app/src/lib/worksheetForm.ts))
+derives field keys from the full document and slices to a level by detecting `## 🟢/🟡/🔴`
+sections — it is fence-aware (a `#` Python comment inside a fenced code block never resets the
+level) and **falls back safely to showing the whole sheet** when a worksheet doesn't cleanly
+separate the three levels (the pupil sees more, never the wrong content). The generation prompt
+(`lesson_resources@5`) was tightened to emit the three levels as strict `## ` sections with all of
+a level's answer tables underneath, so newly generated worksheets slice reliably. Pupils get **no
+`/resources/*` access** — worksheet content is rendered server-side into `/me`. Answer writes are
+checked against the pupil's enrolment (`pupilOwnsOccurrenceCourse`) as defence in depth.
 
 Strict order: 8.0 gates 8.2+ (8.1 can build concurrently with sign-off in progress).
 

@@ -13,6 +13,16 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Unicode-aware word boundary. JS `\b` only treats ASCII [A-Za-z0-9_] as word chars, so a name
+// whose first or last character is accented (José, Zoë, André) has NO `\b` at that edge — the
+// name would slip past both redaction AND the egress assert. These lookarounds count any Unicode
+// letter/number/underscore as a word char, so accented edges are bounded correctly while
+// "Samuel" is still NOT matched by a "Sam" entry (the following 'u' is a letter).
+const WORD = '[\\p{L}\\p{N}_]';
+function nameRegExp(name: string, flags: string): RegExp {
+  return new RegExp(`(?<!${WORD})${escapeRegExp(name)}(?!${WORD})`, flags);
+}
+
 /** Drop every safeguarding-flagged item entirely. A flagged item must never reach a provider. */
 export function withholdSafeguarding<T extends { safeguarding?: boolean }>(items: T[]): T[] {
   return items.filter((i) => !i.safeguarding);
@@ -25,7 +35,7 @@ export function redactNames(text: string, roster: RosterEntry[]): string {
   for (const p of orderedRoster(roster)) {
     const name = p.displayName.trim();
     if (!name) continue;
-    out = out.replace(new RegExp(`\\b${escapeRegExp(name)}\\b`, 'gi'), p.aiToken);
+    out = out.replace(nameRegExp(name, 'giu'), p.aiToken);
   }
   return out;
 }
@@ -41,7 +51,7 @@ export function expandTokens(text: string, roster: RosterEntry[]): string {
 export function containsRosterName(text: string, roster: RosterEntry[]): boolean {
   return roster.some((p) => {
     const name = p.displayName.trim();
-    return name.length > 0 && new RegExp(`\\b${escapeRegExp(name)}\\b`, 'i').test(text);
+    return name.length > 0 && nameRegExp(name, 'iu').test(text);
   });
 }
 

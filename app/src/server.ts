@@ -40,6 +40,10 @@ import { registerSettingsRoutes } from './routes/settingsPage';
 import { registerGroupHistoryRoutes } from './routes/groupHistory';
 import { registerTaRoutes } from './routes/ta';
 import { registerResourceRoutes } from './routes/resources';
+import { registerPupilAuthRoutes } from './routes/pupilAuth';
+import { registerMeRoutes } from './routes/me';
+import { registerPupilWorkRoutes } from './routes/pupilWork';
+import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { generateDueInstances } from './repos/recurringTasks';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
@@ -77,13 +81,41 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
   await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024 } });
 
-  // TA sessions are deny-by-default: only the TA view, feedback, logout and linked resource
-  // files. Everything else bounces back to /ta.
-  const TA_ALLOWED = [/^\/ta($|\/|\?)/, /^\/login/, /^\/logout/, /^\/static\//, /^\/healthz/, /^\/resources\/\d+\/(view|download|present|download\.docx)$/];
-  app.addHook('onRequest', async (req, reply) => {
-    if (req.session?.get?.('role') === 'ta' && !TA_ALLOWED.some((re) => re.test(req.url))) {
-      return reply.redirect('/ta');
+  // Limited roles (ta, pupil) are deny-by-default: anything off their allowlist bounces to
+  // their home surface. Pupil sessions also idle out (shared classroom machines), and the
+  // pupil-access master switch *evicts* live sessions when turned off — so the DPIA kill-switch
+  // actually revokes access, not just blocks new logins. Both settings are cached briefly so the
+  // hook doesn't hit the DB on every request.
+  let pupilCfg = { idleMins: 20, accessOn: false, at: 0 };
+  const refreshPupilCfg = async (): Promise<typeof pupilCfg> => {
+    if (Date.now() - pupilCfg.at > 30_000) {
+      const [idle, access] = await Promise.all([
+        getSetting('pupil_idle_minutes').catch(() => null),
+        getSetting('pupil_access_enabled').catch(() => null),
+      ]);
+      const v = Number(idle);
+      pupilCfg = { idleMins: Number.isFinite(v) && v >= 1 ? v : 20, accessOn: access === 'true', at: Date.now() };
     }
+    return pupilCfg;
+  };
+  app.addHook('onRequest', async (req, reply) => {
+    const role = req.session?.get?.('role');
+    if (!isLimitedRole(role)) return;
+    if (role === 'pupil' && !req.url.startsWith('/static/')) {
+      const cfg = await refreshPupilCfg();
+      if (!cfg.accessOn) {
+        // The teacher turned pupil access off (the DPIA gate) — kill the live session.
+        req.session.delete();
+        return reply.redirect('/pupil');
+      }
+      const last = Number(req.session.get('lastSeen') ?? 0);
+      if (last && Date.now() - last > cfg.idleMins * 60_000) {
+        req.session.delete();
+        return reply.redirect('/pupil?timeout=1');
+      }
+      req.session.set('lastSeen', Date.now());
+    }
+    if (!roleAllows(role, req.url)) return reply.redirect(ROLE_HOME[role]);
   });
 
   registerHealthRoutes(app);
@@ -112,6 +144,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerGroupHistoryRoutes(app);
   registerTaRoutes(app);
   registerResourceRoutes(app);
+  registerPupilAuthRoutes(app);
+  registerMeRoutes(app);
+  registerPupilWorkRoutes(app);
 
   return app;
 }

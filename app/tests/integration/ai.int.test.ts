@@ -14,13 +14,15 @@ describe('AI boundary (integration — needs the dev DB up)', () => {
     await pool.end();
   });
 
-  it('createPupil assigns a stable PUPIL_<n> token; archived pupils drop out of the roster', async () => {
+  it('createPupil assigns a stable PUPIL_<n> token; archived pupils STAY in the redaction roster', async () => {
     const p = await createPupil('Zzz Testpupil');
     created.push(p.id);
     expect(p.aiToken).toMatch(/^PUPIL_\d+$/);
     expect((await listRoster()).some((r) => r.id === p.id)).toBe(true);
     await setPupilActive(p.id, false);
-    expect((await listRoster()).some((r) => r.id === p.id)).toBe(false);
+    // Leavers keep their real name in the DB until a deliberate anonymisation, so they must
+    // still be redacted/caught on egress — listRoster intentionally includes inactive pupils.
+    expect((await listRoster()).some((r) => r.id === p.id)).toBe(true);
   });
 
   it('ai_calls audit inserts (redacted only) and month spend sums', async () => {

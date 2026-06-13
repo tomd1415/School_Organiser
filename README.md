@@ -17,7 +17,11 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 > live; lessons default to **3-level differentiation** (Support/Core/Challenge around each
 > class's recorded ability midpoint), generated resources preview/present in-browser and export
 > to Word, and an in-lesson tracker doubles as the stopping point. Log in over the LAN
-> (`./start.sh`). Next: **pupil logins** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)), then
+> (`./start.sh`). **Phase 8 — pupil logins** is now **built** ([docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md)):
+> pupils log in (class code → tap your name → PIN) and fill in their worksheet **sliced to their
+> level**, with a Done ✓ and a tap-the-faces feedback widget; the teacher gets a live completion
+> grid and an AI "summarise the class's work" that feeds the adapt loop — all behind a
+> **DPIA-gated master switch that is off until DPO/SLT sign-off is confirmed**. Next:
 > **auto-marking & the results loop** ([docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md)).
 
 ## The one-sentence pitch

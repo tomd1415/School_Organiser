@@ -223,6 +223,7 @@ function renderSection(
         <span class="note-status" id="oc-${oc}-status"></span>
       </label>
       ${renderTaFeedback(taFb)}
+      <div class="pupil-work-panel" hx-get="/lesson/oc/${oc}/pupil-work" hx-trigger="load" hx-swap="innerHTML"></div>
       <p class="ld-slot-links">
         <a class="link" href="/map?slot=${slotKey}">📅 term map for this class →</a>
         ${s.lessonPlanId != null ? `<button type="button" class="link" hx-post="/map/shift" hx-vals='{"slot":"${slotKey}","date":"${esc(slot.date)}"}'

@@ -10,6 +10,18 @@ import { appConfig } from '../config/app';
 import { getSetting, setSetting } from '../repos/settings';
 import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
+import { createTaAccount, deleteTaAccount, listTaAccounts, setTaAccountActive, setTaAccountPassword, type TaAccount } from '../repos/taAccounts';
+
+function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
+  const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
+  return `<li class="pupil${a.active ? '' : ' inactive'}" id="ta-acct-${a.id}">
+    <span class="pupil-name">${esc(a.name)}</span>
+    ${staffName ? `<span class="muted">↔ ${esc(staffName)}</span>` : '<span class="muted">no staff link</span>'}
+    <button type="button" class="link" hx-post="/settings/ta-account/${a.id}/active" hx-vals='{"active":"${a.active ? 'false' : 'true'}"}' hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">${a.active ? 'disable' : 'enable'}</button>
+    <button type="button" class="link" hx-post="/settings/ta-account/${a.id}/password" hx-prompt="New password for ${esc(a.name)} (8+ characters)" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">reset password</button>
+    <button type="button" class="link danger" hx-post="/settings/ta-account/${a.id}/delete" hx-confirm="Delete ${esc(a.name)}'s login?" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">✕</button>
+  </li>`;
+}
 
 export function registerSettingsRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
@@ -35,6 +47,14 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('email_poll_enabled'),
         getSetting('email_poll_minutes'),
         getSetting('email_last_poll'),
+      ]);
+      const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows] = await Promise.all([
+        getSetting('pupil_access_enabled'),
+        getSetting('pupil_idle_minutes'),
+        getSetting('pupil_dpia_ack'),
+        getSetting('ta_password_hash'),
+        listTaAccounts(),
+        pool.query<{ id: number; name: string }>(`SELECT id, name FROM staff WHERE NOT is_self ORDER BY name`).then((r) => r.rows),
       ]);
       const health = (
         await pool.query<{ years: number; current: string | null; aiMonth: number; dbMb: number }>(`
@@ -87,15 +107,54 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         <span class="note-status" id="ai-status"></span>
 
         <h2>TA access</h2>
-        <p class="muted">A separate password TAs use on the normal login page. They land on a <strong>read-only view of the current lesson</strong>
-          (plan + resources, option to peek at the next lesson) with a feedback form — nothing else is reachable. Feedback shows on your lesson
-          page and feeds the adapt-next-lesson AI (safeguarding-flagged feedback stays out of AI).</p>
-        <form class="setup-add" hx-post="/settings/ta-password" hx-target="#ta-pw-result" hx-swap="innerHTML">
-          <input type="password" name="next" placeholder="new TA password (8+)" minlength="8" autocomplete="new-password">
-          <button type="submit" class="btn-secondary">Set TA password</button>
-          <button type="submit" class="btn-secondary" name="clear" value="1" formnovalidate>Disable TA access</button>
+        <p class="muted">Each TA gets their <strong>own password</strong> for the normal login page and lands on a
+          <strong>read-only view of the current lesson</strong> (plan + resources, peek at the next) with a feedback form —
+          nothing else is reachable. Feedback shows on your lesson page and feeds the adapt-next-lesson AI
+          (safeguarding-flagged feedback stays out of AI). Linking a TA to their staff row adds a
+          <strong>"my upcoming lessons"</strong> tab to their view.</p>
+        <ul class="pupil-list" id="ta-accounts">${taAccounts.map((a) => renderTaAccount(a, staffRows)).join('') || '<li class="muted">No TA accounts yet.</li>'}</ul>
+        <form class="setup-add" hx-post="/settings/ta-account" hx-target="#ta-accounts" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful) this.reset()">
+          <input name="name" placeholder="TA name" required maxlength="80">
+          <select name="staff">
+            <option value="">— staff link (optional) —</option>
+            ${staffRows.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
+          </select>
+          <input type="password" name="password" placeholder="their password (8+)" minlength="8" required autocomplete="new-password">
+          <button type="submit" class="btn-secondary">Add TA account</button>
         </form>
-        <div id="ta-pw-result"></div>
+        <div id="ta-pw-result">${
+          taLegacy && taLegacy.trim() !== ''
+            ? `<p class="muted">⚠ The old <strong>shared TA password</strong> is still set and still works.
+                Once every TA has their own account above, retire it:
+                <button type="button" class="link danger" hx-post="/settings/ta-password" hx-vals='{"clear":"1"}' hx-target="#ta-pw-result" hx-swap="innerHTML">clear shared password</button></p>`
+            : ''
+        }</div>
+
+        <h2>Pupil access</h2>
+        <p class="muted">Pupils log in with <strong>class code → tap your name → PIN</strong> and see only <code>/me</code>:
+          their class's live worksheet to type into, a Done ✓ button and a quick lesson-feedback widget. Manage PINs and
+          class codes on the <a href="/pupils">Pupils page</a>.</p>
+        ${
+          pupilOn === 'true'
+            ? `<p class="adapt-note">✅ Pupil access is <strong>enabled</strong>${dpiaAck ? ` (DPIA sign-off acknowledged ${esc(dpiaAck.slice(0, 10))})` : ''}.
+                <button type="button" class="link danger" hx-post="/settings/pupil-access" hx-vals='{"enable":"false"}' hx-swap="none" hx-on::after-request="location.reload()">Disable</button></p>`
+            : `<div class="setup-add">
+                <p class="muted"><strong>Off by default — the DPIA gate.</strong> Pupil credentials are a new category of personal data:
+                  the DPIA's [CONFIRM] items must be completed and <strong>signed by the DPO and SLT</strong> before any pupil can log in
+                  (docs/DPIA.md §8).</p>
+                <form hx-post="/settings/pupil-access" hx-swap="none" hx-on::after-request="location.reload()">
+                  <input type="hidden" name="enable" value="true">
+                  <label><input type="checkbox" name="ack" value="yes" required> the DPIA has been signed off by the DPO and SLT</label>
+                  <button type="submit" class="btn-secondary">Enable pupil access</button>
+                </form>
+              </div>`
+        }
+        <div class="setup-add">
+          <label>Pupil idle logout <input class="setup-num" style="width:4rem" value="${esc(pupilIdle ?? '20')}"
+            hx-post="/settings/pupil-idle" hx-vals='js:{"value":event.target.value}' hx-trigger="input changed delay:700ms, blur" hx-swap="none"> min
+            <span class="muted">(classroom-only use → relaxed default)</span></label>
+          <span class="note-status" id="pupil-status"></span>
+        </div>
 
         <h2>Email intake</h2>
         <p class="muted">Emails arriving in this mailbox become inbox tasks automatically (the paste box still works too).
@@ -198,6 +257,74 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (b.data.next.length < 8) return reply.type('text/html').send('<p class="error">TA password needs 8+ characters.</p>');
     await setSetting('ta_password_hash', hashPassword(b.data.next));
     return reply.type('text/html').send('<p class="adapt-note">TA password set ✓ — share it with your TAs; they log in on the normal page.</p>');
+  });
+
+  // ── Named TA accounts (8.1) ────────────────────────────────────────────────────────────────
+  const staffList = async (): Promise<{ id: number; name: string }[]> =>
+    (await pool.query<{ id: number; name: string }>(`SELECT id, name FROM staff WHERE NOT is_self ORDER BY name`)).rows;
+
+  app.post('/settings/ta-account', guard, async (req, reply) => {
+    const b = z
+      .object({ name: z.string().trim().min(1).max(80), staff: z.string().default(''), password: z.string().min(8).max(200) })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).type('text/html').send('');
+    const staffId = b.data.staff !== '' ? Number(b.data.staff) : null;
+    try {
+      const acct = await createTaAccount(b.data.name, hashPassword(b.data.password), staffId);
+      return reply.type('text/html').send(renderTaAccount(acct, await staffList()));
+    } catch {
+      return reply.code(400).type('text/html').send('<li class="error">That name is already taken.</li>');
+    }
+  });
+
+  app.post('/settings/ta-account/:id/active', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ active: z.enum(['true', 'false']) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await setTaAccountActive(p.data.id, b.data.active === 'true');
+    const acct = (await listTaAccounts()).find((a) => a.id === p.data.id);
+    return reply.type('text/html').send(acct ? renderTaAccount(acct, await staffList()) : '');
+  });
+
+  app.post('/settings/ta-account/:id/password', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const prompt = (req.headers['hx-prompt'] ?? '') as string;
+    const acct = (await listTaAccounts()).find((a) => a.id === p.data.id);
+    if (!acct) return reply.code(404).send('');
+    if (prompt.length < 8) {
+      return reply.type('text/html').send(renderTaAccount(acct, await staffList()).replace('</li>', ' <span class="error">password needs 8+ characters</span></li>'));
+    }
+    await setTaAccountPassword(p.data.id, hashPassword(prompt));
+    return reply.type('text/html').send(renderTaAccount(acct, await staffList()).replace('</li>', ' <span class="note-status saved">password set ✓</span></li>'));
+  });
+
+  app.post('/settings/ta-account/:id/delete', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    await deleteTaAccount(p.data.id);
+    return reply.type('text/html').send('');
+  });
+
+  // ── Pupil access (8.2): the DPIA-gated master switch ──────────────────────────────────────
+  app.post('/settings/pupil-access', guard, async (req, reply) => {
+    const b = z.object({ enable: z.enum(['true', 'false']), ack: z.string().optional() }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    if (b.data.enable === 'true') {
+      if (b.data.ack !== 'yes') return reply.code(400).type('text/html').send('<p class="error">Tick the DPIA sign-off box first.</p>');
+      await setSetting('pupil_access_enabled', 'true');
+      await setSetting('pupil_dpia_ack', new Date().toISOString());
+    } else {
+      await setSetting('pupil_access_enabled', 'false');
+    }
+    return reply.send('');
+  });
+
+  app.post('/settings/pupil-idle', guard, async (req, reply) => {
+    const b = z.object({ value: z.string().max(10) }).safeParse(req.body);
+    if (!b.success || (b.data.value.trim() !== '' && !(Number(b.data.value) >= 1))) return reply.code(400).send('');
+    await setSetting('pupil_idle_minutes', b.data.value.trim());
+    return reply.type('text/html').send('<span class="note-status saved" id="pupil-status" hx-swap-oob="true">saved ✓</span>');
   });
 
   app.post('/settings/password', guard, async (req, reply) => {

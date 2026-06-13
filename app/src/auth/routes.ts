@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { appConfig } from '../config/app';
 import { verifyPassword } from '../lib/passwords';
 import { getSetting } from '../repos/settings';
+import { verifyTaLogin } from '../repos/taAccounts';
+import { allowAttempt, clearAttempts } from './rateLimit';
 import { esc, layout } from '../lib/html';
 
 /** The configured password hash: the env var wins (existing instances); otherwise the value the
@@ -42,19 +44,35 @@ export function registerAuthRoutes(app: FastifyInstance): void {
   });
 
   app.post('/login', { preHandler: app.csrfProtection }, async (req, reply) => {
+    // Rate-limit by caller address: 10 attempts a minute is generous for humans, hostile to scripts.
+    if (!allowAttempt(`login:${req.ip}`, 10, 60_000)) {
+      return reply.code(429).type('text/html').send(loginPage(reply.generateCsrf(), 'Too many attempts — wait a minute and try again.'));
+    }
     const parsed = z.object({ password: z.string().min(1) }).safeParse(req.body);
     if (!parsed.success) {
       return reply.code(400).type('text/html').send(loginPage(reply.generateCsrf(), 'Enter a password.'));
     }
     const hash = await configuredHash();
     if (hash && verifyPassword(parsed.data.password, hash)) {
+      clearAttempts(`login:${req.ip}`);
       req.session.set('authed', true);
       req.session.set('role', 'teacher');
       return reply.redirect('/');
     }
-    // TA access: a separate password the teacher sets in Settings routes into the locked-down view
+    // Named TA accounts (8.1) — each TA has their own password, set on the Settings page.
+    const ta = await verifyTaLogin(parsed.data.password).catch(() => null);
+    if (ta) {
+      clearAttempts(`login:${req.ip}`);
+      req.session.set('authed', true);
+      req.session.set('role', 'ta');
+      req.session.set('taName', ta.name);
+      req.session.set('taStaffId', ta.staffId ?? 0);
+      return reply.redirect('/ta');
+    }
+    // Legacy shared TA password — still honoured until the teacher clears it in Settings.
     const taHash = await getSetting('ta_password_hash').catch(() => null);
     if (taHash && taHash.trim() !== '' && verifyPassword(parsed.data.password, taHash)) {
+      clearAttempts(`login:${req.ip}`);
       req.session.set('authed', true);
       req.session.set('role', 'ta');
       return reply.redirect('/ta');
@@ -63,7 +81,8 @@ export function registerAuthRoutes(app: FastifyInstance): void {
   });
 
   app.post('/logout', { preHandler: app.csrfProtection }, async (req, reply) => {
+    const wasPupil = req.session.get('role') === 'pupil';
     req.session.delete();
-    return reply.redirect('/login');
+    return reply.redirect(wasPupil ? '/pupil' : '/login');
   });
 }

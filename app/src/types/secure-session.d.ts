@@ -4,6 +4,13 @@ import '@fastify/secure-session';
 declare module '@fastify/secure-session' {
   interface SessionData {
     authed: boolean;
-    role: 'teacher' | 'ta';
+    role: 'teacher' | 'ta' | 'pupil';
+    // Named TA accounts (8.1)
+    taName: string;
+    taStaffId: number;
+    // Pupil sessions (8.2/8.3) + shared-machine idle logout
+    pupilId: number;
+    pupilGroupId: number;
+    lastSeen: number;
   }
 }

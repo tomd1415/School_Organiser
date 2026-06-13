@@ -29,11 +29,13 @@ export async function listPupils(): Promise<RosterEntry[]> {
   return rows;
 }
 
-// The roster the redactor matches against — active pupils only, longest name first so that
-// "Samantha" is tokenised before "Sam".
+// The roster the redactor matches against — EVERY pupil, not just active ones, longest name
+// first so "Samantha" is tokenised before "Sam". Inactive (left) pupils keep their real name in
+// the DB until a deliberate anonymisation action, so they must still be redacted: a current pupil
+// could type a leaver's name into an answer, and the egress assert must still catch it.
 export async function listRoster(): Promise<RosterEntry[]> {
   const { rows } = await pool.query<RosterEntry>(
-    `SELECT ${ROW} FROM pupils WHERE active ORDER BY length(display_name) DESC, id`,
+    `SELECT ${ROW} FROM pupils ORDER BY length(display_name) DESC, id`,
   );
   return rows;
 }

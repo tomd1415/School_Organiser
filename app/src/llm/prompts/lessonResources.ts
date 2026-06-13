@@ -2,7 +2,7 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@4'; // @4: 3-level differentiation (Support/Core/Challenge) is the default
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@5'; // @5: levels as strict "## 🟢/🟡/🔴" sections so per-pupil slicing is reliable (@4: 3-level differentiation default)
 
 export const LESSON_RESOURCES_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
@@ -19,8 +19,14 @@ export const LESSON_RESOURCES_SYSTEM =
   'name here | / | Date | Type the date here |) — and say "type" not "write"; chunked numbered ' +
   'tasks, one instruction per line, low cognitive load, a ' +
   'tick-box success checklist (- [ ]) at the end — and the worksheet contains THREE clearly ' +
-  'labelled sections: "🟢 Support", "🟡 Core", "🔴 Challenge" — different work at three ability ' +
-  'levels that all meet the same objectives (Core at the class midpoint); (3) "support" — the standalone heavily-scaffolded sheet for pupils who need their own version ' +
+  'labelled sections, EACH a level-2 heading written EXACTLY "## 🟢 Support", "## 🟡 Core", ' +
+  '"## 🔴 Challenge" (in that order) — different work at three ability ' +
+  'levels that all meet the same objectives (Core at the class midpoint). CRITICAL for per-pupil ' +
+  'delivery: ALL of a level\'s questions, answer tables and its own success checklist must sit ' +
+  'UNDER that level\'s "## " heading — never put answer tables in a shared area between or after ' +
+  'the level sections, because each pupil is shown only their level\'s section. Shared content ' +
+  '(title, instructions, the name/date table) goes BEFORE the first "## 🟢 Support" heading; ' +
+  '(3) "support" — the standalone heavily-scaffolded sheet for pupils who need their own version ' +
   'harder (sentence starters typed into the answer cells, word bank, a worked example, fewer ' +
   'steps), still computer-completable; and where it helps (4) "answers" — concise teacher answer ' +
   'notes. Match the lesson outline step by step; plan within the equipment listed; plain UK ' +

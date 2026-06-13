@@ -52,4 +52,23 @@ describe('redact — the pupil-name boundary', () => {
     expect(redactNames('anything goes here', [])).toBe('anything goes here');
     expect(containsRosterName('anything goes here', [])).toBe(false);
   });
+
+  // Regression: JS `\b` is ASCII-only, so accented edges (José, Zoë) used to slip past BOTH
+  // redaction and the egress assert — breaking the one rule. Unicode-aware boundaries fix it.
+  it('redacts names whose first/last character is accented', () => {
+    const accented = [
+      { id: 10, displayName: 'José', aiToken: 'PUPIL_10', active: true },
+      { id: 11, displayName: 'Zoë', aiToken: 'PUPIL_11', active: true },
+      { id: 12, displayName: 'André', aiToken: 'PUPIL_12', active: true },
+    ];
+    const out = redactNames('I sat with José and Zoë, then André helped', accented);
+    expect(out).toBe('I sat with PUPIL_10 and PUPIL_11, then PUPIL_12 helped');
+    expect(containsRosterName('next to José today', accented)).toBe(true); // the assert also catches it
+    expect(containsRosterName('next to PUPIL_10 today', accented)).toBe(false);
+  });
+
+  it('still word-bounds accented names (internal accents, ASCII edges untouched)', () => {
+    const r = [{ id: 1, displayName: 'Ana', aiToken: 'PUPIL_1', active: true }];
+    expect(redactNames('Ana and Anabel', r)).toBe('PUPIL_1 and Anabel'); // "Anabel" not matched
+  });
 });

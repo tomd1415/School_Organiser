@@ -153,14 +153,19 @@ remaining items stay a pick-by-pain list alongside Phase 8.*
 - Selected items from SPECIFICATION §8 (homework tracking, key dates, duty rota, print queue) —
   picked by what actually hurts in daily use.
 
-## Phase 8 — Pupils: logins & in-app work *(planned 2026-06-12 — see [PHASE_8_PLAN.md](PHASE_8_PLAN.md))*
+## Phase 8 — Pupils: logins & in-app work *(BUILT 2026-06-13 — see [PHASE_8_PLAN.md](PHASE_8_PLAN.md))*
 
 **Goal:** pupils log in and DO the work in the app — the long-deferred pupil-facing project
 (2.11). Interactive worksheets **sliced to each pupil's assigned level** (🟢🟡🔴, set per course
 from the review grid), answers stored per pupil, live completion for the teacher, a tap-the-faces
 **pupil feedback widget** (rating + enjoyed/disliked activity chips), per-TA accounts — and both
 the answers and the feedback feeding the adapt-next-lesson loop and, over time, the class
-teaching-context — behind a DPIA-signed-off, deny-by-default pupil role.
+teaching-context — behind a deny-by-default pupil role.
+
+*Status 2026-06-13: 8.1–8.7 built and tested (migration 0018; 198 unit / 113 integration green).
+**Pupil access is OFF by default** — the Settings master switch that enables it requires the
+teacher to confirm DPO/SLT DPIA sign-off, so 8.0 (the external gate) still governs real use. 8.8
+became [Phase 9](PHASE_9_PLAN.md).*
 
 ## Phase 9 — Auto-marking & the results loop *(planned 2026-06-12 — see [PHASE_9_PLAN.md](PHASE_9_PLAN.md))*
 

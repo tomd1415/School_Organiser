@@ -6,7 +6,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { esc } from '../lib/html';
-import { resolveNow } from '../services/clock';
+import { classifyDay, resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
 import { getEffectiveLesson } from '../repos/adaptations';
@@ -115,12 +115,68 @@ async function renderLessonBlock(l: SlotLesson, date: string, csrf: string): Pro
     ${parts.join('') || '<p class="muted">No courses attached to this lesson.</p>'}`;
 }
 
+/** One timetabled lesson by id, in the SlotLesson shape renderLessonBlock expects. */
+async function lessonById(lessonId: number): Promise<(SlotLesson & { staffId: number; weekday: number }) | null> {
+  const { rows } = await pool.query<SlotLesson & { staffId: number; weekday: number }>(
+    `SELECT tl.id AS "lessonId", g.name AS "groupName", r.name AS "roomName",
+            p.label, to_char(p.start_time,'HH24:MI') AS start, to_char(p.end_time,'HH24:MI') AS "end",
+            s.is_self AS "isSelf", s.name AS "staffName", s.id AS "staffId", p.weekday
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     JOIN staff s ON s.id = tl.staff_id
+     LEFT JOIN groups g ON g.id = tl.group_id
+     LEFT JOIN rooms r ON r.id = tl.room_id
+     WHERE tl.id = $1`,
+    [lessonId],
+  );
+  return rows[0] ?? null;
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)) + days));
+  return d.toISOString().slice(0, 10);
+}
+
+/** The named TA's lessons over the next two weeks of school days — "my upcoming lessons" (8.1). */
+async function renderMyLessons(staffId: number, fromIso: string, terms: Parameters<typeof classifyDay>[2]): Promise<string> {
+  const { rows } = await pool.query<{ lessonId: number; weekday: number; label: string; start: string; groupName: string | null }>(
+    `SELECT tl.id AS "lessonId", p.weekday, p.label, to_char(p.start_time,'HH24:MI') AS start, g.name AS "groupName"
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     LEFT JOIN groups g ON g.id = tl.group_id
+     WHERE tl.staff_id = $1 AND tl.purpose IN ('teaching', 'form')
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+     ORDER BY p.weekday, p.slot_order`,
+    [staffId],
+  );
+  const items: string[] = [];
+  for (let d = 0; d < 14 && items.length < 12; d++) {
+    const iso = addDaysIso(fromIso, d);
+    const dow = new Date(`${iso}T12:00:00Z`).getUTCDay() === 0 ? 7 : new Date(`${iso}T12:00:00Z`).getUTCDay();
+    if (!classifyDay(iso, dow, terms).isSchoolDay) continue;
+    for (const r of rows.filter((x) => x.weekday === dow)) {
+      items.push(`<li><a href="/ta?lesson=${r.lessonId}&date=${iso}">${esc(iso)}${d === 0 ? ' (today)' : ''} · ${esc(r.label)} ${esc(r.start)} · ${esc(r.groupName ?? 'lesson')}</a></li>`);
+    }
+  }
+  return `<h1>My upcoming lessons</h1>
+    ${items.length ? `<ul class="ta-mine">${items.join('')}</ul>` : '<p class="muted">Nothing timetabled for you in the next two weeks.</p>'}
+    <p class="muted">Open one to read its plan and resources ahead of time.</p>`;
+}
+
 export function registerTaRoutes(app: FastifyInstance): void {
   app.get('/ta', async (req, reply) => {
     if (!requireTa(req)) return reply.redirect('/login');
     const csrf = reply.generateCsrf();
-    const q = z.object({ which: z.enum(['now', 'next']).optional() }).safeParse(req.query);
+    const q = z
+      .object({
+        which: z.enum(['now', 'next', 'mine']).optional(),
+        lesson: z.coerce.number().int().positive().optional(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      })
+      .safeParse(req.query);
     const which = (q.success && q.data.which) || 'now';
+    const taStaffId = Number(req.session.get('taStaffId') ?? 0);
+    const taName = req.session.get('taName');
     let body: string;
     try {
       const ctx = await getClockContext();
@@ -128,7 +184,29 @@ export function registerTaRoutes(app: FastifyInstance): void {
       const tabs = `<nav class="task-tabs">
         <a href="/ta"${which === 'now' ? ' class="active"' : ''}>This lesson</a>
         <a href="/ta?which=next"${which === 'next' ? ' class="active"' : ''}>Next lesson (if you're early)</a>
+        ${taStaffId > 0 ? `<a href="/ta?which=mine"${which === 'mine' ? ' class="active"' : ''}>My lessons</a>` : ''}
       </nav>`;
+
+      // A specific upcoming lesson, opened from "my lessons" (read-only, ±31 days sanity bound).
+      if (q.success && q.data.lesson != null && q.data.date) {
+        const l = await lessonById(q.data.lesson);
+        const dayDiff = Math.abs((Date.parse(q.data.date) - Date.parse(state.isoDate)) / 86400000);
+        const allowed = l && dayDiff <= 31 && (taStaffId <= 0 || l.staffId === taStaffId || req.session.get('role') === 'teacher');
+        if (!l || !allowed) {
+          body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
+        } else {
+          const block = await renderLessonBlock(l, q.data.date, csrf);
+          body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
+            <p class="ld-meta">Preparing ahead: <strong>${esc(q.data.date)}</strong></p>${block}</section>`;
+        }
+        return reply.type('text/html').send(taLayout(body, csrf));
+      }
+
+      if (which === 'mine' && taStaffId > 0) {
+        body = `<section class="card ta">${tabs}${await renderMyLessons(taStaffId, state.isoDate, ctx.terms)}
+          ${typeof taName === 'string' && taName ? `<p class="muted">Signed in as ${esc(taName)}.</p>` : ''}</section>`;
+        return reply.type('text/html').send(taLayout(body, csrf));
+      }
       let chosen: { weekday: number; slotOrder: number; date: string } | null = null;
       if (which === 'now' && state.isSchoolDay && state.current && state.current.slotType === 'lesson') {
         chosen = { weekday: state.weekday, slotOrder: state.current.slotOrder, date: state.isoDate };

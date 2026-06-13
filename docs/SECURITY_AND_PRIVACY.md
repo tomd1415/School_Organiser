@@ -15,6 +15,9 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Lesson plans, schemes, adaptations, resources, tasks | Internal | PostgreSQL / hosted resource store |
 | Equipment inventory (kit list) | Internal — no personal data | PostgreSQL; injected into AI planning calls |
 | TA lesson feedback | **Sensitive** (may describe pupils) | PostgreSQL; flows to adapt-lesson AI after redaction; **safeguarding-flagged feedback withheld entirely** |
+| Pupil PINs (Phase 8) | Secret | `pupil_credentials`; scrypt-hashed, never reversible; durable lockout after 5 fails |
+| Pupil answers + lesson feedback (Phase 8) | **Sensitive** (pupil-authored) | PostgreSQL; reach AI only **aggregated per question + anonymised**, through the wrapper; never linked to a name on egress |
+| Pupil differentiation level (Phase 8) | **Sensitive** (attainment) | `pupil_levels`; server-side only, never sent to AI |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
 | Auth secrets (`SESSION_SECRET`, API keys) | Secret | `.env`, never committed |
 | Email-intake mailbox credentials | Secret | `settings` table (instance-local DB); use a **dedicated/forwarded mailbox with an app password**, never the main school account |
@@ -27,11 +30,18 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 - All POSTs CSRF-protected.
 - Password hashed (argon2/bcrypt). Lockout after repeated failures.
 - The app is **not exposed to the public internet**; only outbound HTTPS to the AI provider.
-- **TA access (built 2026-06-12):** a separate TA password (set in Settings) routes into a
-  deny-by-default role — only the read-only current/next-lesson view, its linked resources and
-  the feedback form are reachable; teacher notes, pupils, settings and everything else bounce.
-  TA feedback can be safeguarding-flagged, which withholds it from all AI calls. Per-TA accounts
-  arrive with the pupil-login project.
+- **TA access (built 2026-06-12; per-TA named accounts 2026-06-13):** TAs log in with their own
+  password (set in Settings) into a deny-by-default role — only the read-only current/next-lesson
+  view, its linked resources, the feedback form (and, if their account links a staff row, "my
+  upcoming lessons") are reachable; everything else bounces. TA feedback can be
+  safeguarding-flagged, which withholds it from all AI calls.
+- **Pupil access (built 2026-06-13, off by default):** a deny-by-default `pupil` role reaching
+  only `/me` and its autosave endpoints — **no `/resources/*`** (worksheet content is rendered
+  server-side). Login is **class code → tap your name → PIN**, rate-limited per IP with a durable
+  per-pupil lockout; sessions idle out on shared classroom machines. The whole surface is gated by
+  a **Settings master switch that stays off until the teacher confirms DPIA/DPO sign-off** — until
+  then no pupil credential can be created. Pupils only ever see their own work; answer writes are
+  checked against the pupil's enrolment, not just the session.
 
 ## The pupil-name rule (the one that must never break)
 

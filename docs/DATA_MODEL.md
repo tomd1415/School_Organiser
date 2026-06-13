@@ -623,6 +623,51 @@ wins); `setup_complete`; `ta_password_hash` (empty ⇒ TA access disabled); and 
 group — `email_imap_host` / `email_imap_port` / `email_imap_user` / `email_imap_password` /
 `email_imap_folder` / `email_imap_tls`, `email_poll_enabled` / `email_poll_minutes`, and
 `email_last_poll` (the human-readable status line every poll writes, success or failure).
+Phase 8 adds `pupil_access_enabled` (the DPIA-gated master switch — `'true'` only after the
+teacher confirms DPO/SLT sign-off), `pupil_dpia_ack` (ISO timestamp of that confirmation), and
+`pupil_idle_minutes` (the shared-machine idle-logout default).
+
+## K. Phase 8 — pupils log in & do the work (migration `0018`)
+
+```text
+ta_accounts(id, name UNIQUE, staff_id FK→staff ON DELETE SET NULL,
+            password_hash, active, created_at)     -- named TA logins; the shared password retires
+
+pupil_credentials(pupil_id PK FK→pupils ON DELETE CASCADE,
+            pin_hash,                               -- scrypt, like every credential
+            enabled, failed_count,                  -- locked at 5 until the teacher unlocks
+            updated_at)                             -- created ONLY once pupil access is enabled
+
+groups.login_code TEXT                              -- the class code (UNIQUE where set); NULL ⇒ no pupil login
+
+pupil_answers(id, pupil_id FK, occurrence_course_id FK, resource_id FK NULL, version_no NULL,
+            field_key,                              -- deterministic "t2.r3.c1" / "task.4" from the doc structure
+            value DEFAULT '', seen_by_teacher, updated_at,
+            UNIQUE(pupil_id, occurrence_course_id, field_key))  -- 0019: keyed on the lesson instance, not the resource_id
+
+pupil_done(pupil_id, occurrence_course_id, done_at, PK(pupil_id, occurrence_course_id))  -- self-declared Done ✓
+
+pupil_levels(pupil_id FK, group_course_id FK, level CHECK in (support|core|challenge), updated_at,
+            PK(pupil_id, group_course_id))          -- no row ⇒ core; the slice the pupil receives
+
+pupil_lesson_feedback(id, pupil_id FK, occurrence_course_id FK,
+            rating CHECK 1..4, liked DEFAULT '', disliked DEFAULT '', comment DEFAULT '', updated_at,
+            UNIQUE(pupil_id, occurrence_course_id)) -- one editable row per pupil per lesson
+```
+
+**Pupils never reach `/resources/*`** — worksheet content is rendered server-side into `/me`,
+sliced to the pupil's `pupil_levels` row. Answer writes are checked against the pupil's active
+enrolment, not just the session, and the worksheet resource is resolved **server-side** for
+provenance (the client never supplies a resource id). Field keys derive from the **full**
+worksheet structure so the teacher's read-back aligns whichever slice the pupil saw. Answers are
+**keyed on the lesson instance** (`pupil_id, occurrence_course_id, field_key` — migration `0019`),
+not the worksheet resource, so they survive the class's worksheet resolving to a master vs an
+adapted copy or being re-versioned; `resource_id`/`version_no` are recorded as provenance only.
+The AI class-work summary (`class_work@1`) sends answers **grouped per question, anonymised**,
+through the one wrapper — so a classmate's (or a left pupil's) name typed into an answer is still
+tokenised before egress. The redaction roster includes **inactive** pupils for exactly that
+reason, and name matching is **Unicode-aware** (accented names like José/Zoë are bounded
+correctly, where JS `\b` previously failed open).
 
 ## Key modelling decisions (for discussion)
 
