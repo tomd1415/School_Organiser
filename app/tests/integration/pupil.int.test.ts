@@ -109,6 +109,16 @@ async function pupilLogin(): Promise<string> {
 }
 
 describe('pupil login + surface (integration)', () => {
+  it('the pupil page carries the reading-help toolbar and serves pupil.js (Track C accessibility)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/pupil' });
+    expect(page.body).toContain('class="a11y-bar"');
+    expect(page.body).toContain('data-a11y="speak"'); // read-aloud control
+    expect(page.body).toContain('/static/pupil.js');
+    const js = await app.inject({ method: 'GET', url: '/static/pupil.js' });
+    expect(js.statusCode).toBe(200);
+    expect(js.body).toContain('speechSynthesis'); // 10.11 read-aloud is wired
+  });
+
   it('resolves a class code to the pick-your-name list', async () => {
     const page = await app.inject({ method: 'GET', url: '/pupil' });
     const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';

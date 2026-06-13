@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10 Track C BUILT: SEND accessibility on the pupil surface (10.11–10.13)
+
+The surface built *for* SEND learners now actually fits them. All client-side, no network, no AI;
+choices persist in `localStorage` and apply before first paint. A new **reading-help toolbar** on
+every pupil page (login + work), driven by [public/pupil.js](../app/public/pupil.js):
+
+- **10.11 Read-aloud** — toggle 🔊, then tap any words (question, instruction, feedback) to hear them
+  via the browser Web Speech API (`speechSynthesis`, rate 0.9 — kinder for SEND/EAL). Controls still
+  act normally; nothing leaves the page.
+- **10.12 Display preferences** — A−/A+ **text size** (scales the root, so everything grows together),
+  an **easy-read** dyslexia-friendly font + spacing (Atkinson/OpenDyslexic → Comic Sans/Verdana
+  fallback), **high-contrast**, and a **Calm** (reduced-motion) toggle. Applied as `data-*` on
+  `<html>` so there's no markup churn and no flash on load.
+- **10.13 Progress, motion & touch** — an encouraging **"You've done X of Y — keep going!"** chip per
+  worksheet (computed client-side, instant, no round-trip; "All done — great work!" when complete);
+  a global `@media (prefers-reduced-motion: reduce)` block (plus the in-app Calm toggle for classroom
+  machines that don't set the OS preference); bigger checkbox tap targets (≥44px, whole-row tappable);
+  and a clear `:focus-visible` ring on pupil controls.
+- The 10.8 autosave-resilience script moved into `pupil.js` (was inline). Render-path test added
+  (toolbar present, `/static/pupil.js` served + contains the read-aloud wiring).
+- **240 unit / 156 integration green; typecheck clean.** 10.14 (word-banks / multiple-choice input
+  alternatives + picture PIN) remains a stretch.
+
 ### 2026-06-13 — Phase 10 BUILT: disclosure register (10.4), durable marking queue (10.9), resilient autosave (10.8)
 
 Completes Track A + the Track B data-loss ship-blockers.

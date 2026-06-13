@@ -1,10 +1,10 @@
 # Phase 10 — Trustworthy in daily use: safety, reliability & access
 
-> **Status (2026-06-13): BUILDING — all of Track A (10.1–10.6) + the Track B ship-blockers (10.8
-> resilient autosave, 10.9 durable marking queue) are DONE and tested (240 unit / 155 integration
-> green; typecheck clean; migrations `0024`–`0026`). Remaining: Track B 10.10 (optimistic-concurrency),
-> then Tracks C (SEND accessibility), D (close the loop), E (daily-driver), F (setup/scale).** The
-> original plan follows.
+> **Status (2026-06-13): BUILDING — Track A (10.1–10.6), the Track B ship-blockers (10.8, 10.9), and
+> Track C (10.11 read-aloud, 10.12 display preferences, 10.13 progress/motion/touch) are DONE and
+> tested (240 unit / 156 integration green; typecheck clean; migrations `0024`–`0026`). Remaining:
+> Track B 10.10 (optimistic-concurrency), Track C 10.14 (input alternatives — stretch), then Tracks
+> D (close the loop), E (daily-driver), F (setup/scale).** The original plan follows.
 >
 > **Status (2026-06-13): PLANNED, plan-first — for review before any code.**
 > Phases 8–9 put **real children's PII and pupil-authored answers** into the system (logins, PINs,
@@ -90,9 +90,9 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **10.11** | **Read-aloud (text-to-speech)** — a small script loaded *only* in `pupilLayout` using the browser Web Speech API; a speaker button beside each question/prompt/checklist item and on the released feedback line; per-pupil on/off + rate in `localStorage` | the surface has no read-aloud at all; SEND/low-literacy pupils must decode every question and their feedback unaided. **No network, no AI, nothing leaves the page** | M | 🟠 | ⬜ |
-| **10.12** | **Pupil display preferences** — an accessibility toolbar on `/me` and the login: A/A+/A++ text scale, a dyslexia-friendly toggle (line-height + letter-spacing + a self-hosted OpenDyslexic/Atkinson face), a high-contrast theme, and a reduced-motion switch; persisted in `localStorage`, applied as a `data-*` attribute + CSS-var overrides (no markup churn) | a single fixed `:root` theme, one `system-ui` font, fixed `1.05rem` inputs — a pupil who needs bigger text or a dyslexia face has no way to get it | M | 🟠 | ⬜ |
-| **10.13** | **Progress, motion & touch** — an encouraging "You've answered 3 of 6 — keep going!" chip/bar (OOB-updated on each autosave, computed from the slice's `fields`); a `@media (prefers-reduced-motion)` block over the four current animations; bigger checkbox hit-areas (≥44px, whole-row tappable) and a clear `:focus-visible` ring; calmer scaffolded empty/no-lesson/error states | progress lives only on the teacher grid; animations have no reduced-motion guard; worksheet checkboxes are 1.3rem with no focus ring — all harder for imprecise motor control and attention/vestibular needs | M | 🟠 | ⬜ |
+| **10.11** | **Read-aloud (text-to-speech)** — a small script loaded *only* in `pupilLayout` using the browser Web Speech API; a speaker button beside each question/prompt/checklist item and on the released feedback line; per-pupil on/off + rate in `localStorage` | the surface has no read-aloud at all; SEND/low-literacy pupils must decode every question and their feedback unaided. **No network, no AI, nothing leaves the page** | M | 🟠 | ✅ |
+| **10.12** | **Pupil display preferences** — an accessibility toolbar on `/me` and the login: A/A+/A++ text scale, a dyslexia-friendly toggle (line-height + letter-spacing + a self-hosted OpenDyslexic/Atkinson face), a high-contrast theme, and a reduced-motion switch; persisted in `localStorage`, applied as a `data-*` attribute + CSS-var overrides (no markup churn) | a single fixed `:root` theme, one `system-ui` font, fixed `1.05rem` inputs — a pupil who needs bigger text or a dyslexia face has no way to get it | M | 🟠 | ✅ |
+| **10.13** | **Progress, motion & touch** — an encouraging "You've answered 3 of 6 — keep going!" chip/bar (OOB-updated on each autosave, computed from the slice's `fields`); a `@media (prefers-reduced-motion)` block over the four current animations; bigger checkbox hit-areas (≥44px, whole-row tappable) and a clear `:focus-visible` ring; calmer scaffolded empty/no-lesson/error states | progress lives only on the teacher grid; animations have no reduced-motion guard; worksheet checkboxes are 1.3rem with no focus ring — all harder for imprecise motor control and attention/vestibular needs | M | 🟠 | ✅ |
 | **10.14** | *(stretch)* **Input alternatives** — word banks / tap-to-answer multiple-choice as a per-field worksheet option; a **picture/avatar PIN** option for pre-literacy and EAL pupils | reduces the typing/literacy barrier for the pupils least able to type answers; larger change to the worksheet renderer + login | L | ⚪ | ⬜ |
 
 ### Track D — Close the feedback loop *(the data exists; the loop doesn't close)*

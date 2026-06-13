@@ -823,3 +823,57 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
   background: #7f1d1d; color: #fff; padding: 0.6rem 1rem; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   font-size: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .hx-toast.show { opacity: 1; }
+
+/* ── Track C — SEND accessibility on the pupil surface ────────────────────────────────────────── */
+/* 10.12 reading-help toolbar (on every pupil page) */
+.a11y-bar { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; padding: 0.5rem 0.8rem; background: #1f2937; color: #fff; position: sticky; top: 0; z-index: 50; }
+.a11y-title { font-size: 0.85rem; opacity: 0.85; margin-right: 0.2rem; }
+.a11y-btn { font: inherit; font-size: 0.95rem; padding: 0.4rem 0.7rem; min-height: 40px; border: 2px solid transparent; border-radius: 8px; background: #374151; color: #fff; cursor: pointer; }
+.a11y-btn:hover { background: #4b5563; }
+.a11y-btn.on { background: #fde68a; color: #1f2937; border-color: #f59e0b; }
+.a11y-speak-hint { display: none; font-size: 0.85rem; color: #fde68a; }
+[data-speak="on"] .a11y-speak-hint { display: inline; }
+
+/* 10.12 text size — scale the root so every rem on the pupil page grows together */
+html[data-textscale="1"] { font-size: 112%; }
+html[data-textscale="2"] { font-size: 125%; }
+html[data-textscale="3"] { font-size: 142%; }
+
+/* 10.12 easy-read (dyslexia-friendly) font + spacing. Self-hosted faces preferred; Comic Sans /
+   Verdana are widely present on school machines and genuinely easier for many dyslexic readers. */
+[data-font="dyslexic"] .pupil-main, [data-font="dyslexic"] .a11y-bar {
+  font-family: "Atkinson Hyperlegible", "OpenDyslexic", "Comic Sans MS", Verdana, sans-serif;
+  letter-spacing: 0.03em; word-spacing: 0.08em; line-height: 1.7;
+}
+
+/* 10.12 high-contrast */
+[data-contrast="high"] .pupil-main { background: #fff; color: #000; }
+[data-contrast="high"] .pupil-card { background: #fff; border: 2px solid #000; }
+[data-contrast="high"] .ws-input { border: 2px solid #000; background: #fff; color: #000; }
+[data-contrast="high"] .pupil-go, [data-contrast="high"] .done-btn { background: #000; color: #fff; }
+
+/* 10.11 read-aloud: a brief highlight on the spoken block */
+.speak-flash { background: #fff3bf; border-radius: 4px; box-shadow: 0 0 0 3px #fff3bf; }
+[data-speak="on"] .pupil-main h1, [data-speak="on"] .pupil-main p,
+[data-speak="on"] .pupil-main td, [data-speak="on"] .pupil-main .rc-fb { cursor: pointer; }
+
+/* 10.13 encouraging progress chip */
+.ws-progress { margin: 0 0 0.6rem; font-weight: 700; color: var(--accent); background: #eef4ff; border-radius: 8px; padding: 0.4rem 0.7rem; display: inline-block; }
+.ws-progress:empty { display: none; }
+.ws-progress-done { color: #2e7d32; background: #eafaea; }
+
+/* 10.13 bigger tap targets + a clear keyboard focus ring on the pupil surface */
+.pupil-main .ws-check label { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; cursor: pointer; }
+.pupil-main .ws-check input { width: 1.6rem; height: 1.6rem; }
+.pupil-main :focus-visible, .a11y-btn:focus-visible, .pupil-go:focus-visible, .pupil-logout:focus-visible {
+  outline: 3px solid #f59e0b; outline-offset: 2px;
+}
+
+/* 10.13 reduced motion — honour the OS setting, and the in-app "Calm" toggle for classroom machines
+   that don't set it. (opacity in @keyframes is a cheap composite-only animation; disabling is safe.) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+[data-motion="reduce"] *, [data-motion="reduce"] *::before, [data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important;
+}

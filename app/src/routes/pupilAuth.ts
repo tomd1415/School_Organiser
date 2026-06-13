@@ -15,28 +15,35 @@ export async function pupilAccessEnabled(): Promise<boolean> {
   return (await getSetting('pupil_access_enabled').catch(() => null)) === 'true';
 }
 
+// The reading-help toolbar (10.11/10.12/10.13) — on every pupil page (login + work). Pure
+// client-side; choices persist in localStorage and are applied before paint by the head script.
+const A11Y_BAR = `<div class="a11y-bar" role="toolbar" aria-label="Reading help">
+  <span class="a11y-title">Reading help:</span>
+  <button type="button" class="a11y-btn" data-a11y="text-down" title="Smaller text" aria-label="Smaller text">A−</button>
+  <button type="button" class="a11y-btn" data-a11y="text-up" title="Bigger text" aria-label="Bigger text">A+</button>
+  <button type="button" class="a11y-btn" data-a11y="speak" title="Read aloud — then tap any words to hear them" aria-pressed="false">🔊 Read aloud</button>
+  <button type="button" class="a11y-btn" data-a11y="font" title="Easy-read font" aria-pressed="false">Aa easy-read</button>
+  <button type="button" class="a11y-btn" data-a11y="contrast" title="High contrast" aria-pressed="false">◐ Contrast</button>
+  <button type="button" class="a11y-btn" data-a11y="motion" title="Calm — less movement" aria-pressed="false">🌊 Calm</button>
+  <span class="a11y-speak-hint">Tap any words to hear them.</span>
+</div>`;
+
 export function pupilLayout(body: string, csrf: string): string {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My work · School Organiser</title><link rel="stylesheet" href="/static/styles.css"></head>
+<title>My work · School Organiser</title>
+<script>
+// Apply saved reading-help preferences BEFORE first paint (no flash). Tiny + inline by necessity.
+(function () { try { var d = document.documentElement, s = localStorage;
+  ['textscale','font','contrast','motion','speak'].forEach(function (k) { var v = s.getItem('a11y.' + k); if (v) d.setAttribute('data-' + k, v); });
+} catch (e) {} })();
+</script>
+<link rel="stylesheet" href="/static/styles.css"></head>
 <body class="pupil-body">
+  ${A11Y_BAR}
   <main class="pupil-main" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>${body}</main>
   <script src="/static/htmx.min.js"></script>
-  <script>
-  // 10.8 — gentle reassurance for SEND pupils: never lose typed work silently. A failed autosave
-  // (connection drop, timed-out session, server hiccup) shows a calm banner instead of nothing, and
-  // a beforeunload guard warns if they close the tab while an answer hasn't saved yet.
-  (function () {
-    function toast(m) { var t = document.getElementById('hx-toast'); if (!t) { t = document.createElement('div'); t.id = 'hx-toast'; t.className = 'hx-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = m; t.classList.add('show'); }
-    function clear() { var t = document.getElementById('hx-toast'); if (t) t.classList.remove('show'); }
-    var LOST = '⚠ Not saved yet — your work is still on the screen. Tell your teacher.';
-    ['htmx:sendError', 'htmx:responseError', 'htmx:timeout', 'app:save-failed'].forEach(function (ev) { document.body.addEventListener(ev, function () { toast(LOST); }); });
-    var dirty = false;
-    document.body.addEventListener('input', function (e) { if (e.target && e.target.classList && e.target.classList.contains('ws-input')) dirty = true; });
-    document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) { dirty = false; clear(); } });
-    window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-  })();
-  </script>
+  <script src="/static/pupil.js"></script>
 </body></html>`;
 }
 

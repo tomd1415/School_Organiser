@@ -177,7 +177,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
                 ]);
                 const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}` });
                 const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
-                inner = `${results ? resultsCard(results) : ''}<div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
+                inner = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p><div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
               }
             }
             if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
