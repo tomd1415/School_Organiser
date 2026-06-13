@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { createPupil, listPupils, setPupilActive, type RosterEntry } from '../repos/pupils';
+import { createPupil, listPupils, setPupilActive, disposePupil, listDisposals, exportPupilRecord, type RosterEntry } from '../repos/pupils';
 import { aiKeyConfigured } from '../llm/client';
 import { getSetting } from '../repos/settings';
 import {
@@ -21,7 +21,31 @@ function renderPupil(p: RosterEntry): string {
     <span class="pupil-name">${esc(p.displayName)}</span>
     <span class="muted pupil-token">${esc(p.aiToken)}</span>
     <button type="button" class="link" hx-post="/pupils/${p.id}/${p.active ? 'deactivate' : 'activate'}" hx-target="#pupil-${p.id}" hx-swap="outerHTML">${p.active ? 'archive' : 'restore'}</button>
+    <a class="link" href="/pupils/${p.id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
+    <button type="button" class="link" title="leaver: remove name + login, keep cohort data"
+      hx-post="/pupils/${p.id}/anonymise" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
+      hx-confirm="Anonymise ${esc(p.displayName)}? Their name, login and 'what works for me' profile are removed; their answers/marks stay but no longer named. This cannot be undone.">anonymise…</button>
+    <button type="button" class="link danger" title="permanently erase ALL of this pupil's data"
+      hx-post="/pupils/${p.id}/erase" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
+      hx-prompt="PERMANENT erasure of ${esc(p.displayName)} — every answer, mark, feedback, profile and login. Type ${esc(p.aiToken)} to confirm.">erase…</button>
   </li>`;
+}
+
+function renderDisposals(rows: Array<{ aiToken: string; action: string; detail: unknown; createdAt: string }>): string {
+  const items = rows
+    .map((r) => {
+      const counts = Object.entries((r.detail ?? {}) as Record<string, number>)
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${k}: ${n}`)
+        .join(', ');
+      return `<li><span class="muted">${esc(r.createdAt.slice(0, 16).replace('T', ' '))}</span> — <strong>${esc(r.action)}</strong> ${esc(r.aiToken)}${counts ? ` <span class="muted">(${esc(counts)})</span>` : ''}</li>`;
+    })
+    .join('');
+  return `<div id="disposal-log">${
+    rows.length
+      ? `<details class="disposal-log"><summary>Disposal log (${rows.length}) — the audited retention evidence</summary><ul>${items}</ul></details>`
+      : ''
+  }</div>`;
 }
 
 function renderLoginPupil(groupId: number, p: PupilLoginRow): string {
@@ -76,6 +100,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
           <button type="submit" class="btn-secondary">Add</button>
         </form>
         <ul class="pupil-list" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
+        ${renderDisposals(await listDisposals())}
       </section>`;
 
       // Phase 8.2: pupil logins, grouped by class. Shown once pupil access is enabled in Settings.
@@ -121,6 +146,45 @@ export function registerPupilRoutes(app: FastifyInstance): void {
       return reply.type('text/html').send(p ? renderPupil(p) : '');
     });
   }
+
+  // 10.2: leaver anonymise — name/login/profile go, cohort data stays (now nameless). Audited.
+  app.post('/pupils/:id/anonymise', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await disposePupil(id.data.id, 'anonymise');
+    if (!r) return reply.type('text/html').send('');
+    const p = (await listPupils()).find((x) => x.id === id.data.id);
+    // Replace the row (now showing the token, archived) and refresh the disposal log out-of-band.
+    return reply.type('text/html').send(`${p ? renderPupil(p) : ''}${renderDisposals(await listDisposals()).replace('<div id="disposal-log">', '<div id="disposal-log" hx-swap-oob="true">')}`);
+  });
+
+  // 10.2: full right-to-erasure (SAR). Requires the teacher to re-type the pupil's token (via the
+  // hx-prompt), so a misclick can't wipe a child's whole record. Audited; the row vanishes.
+  app.post('/pupils/:id/erase', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const typed = (req.headers['hx-prompt'] ?? '').toString().trim();
+    const p = (await listPupils()).find((x) => x.id === id.data.id);
+    if (!p) return reply.type('text/html').send(''); // already gone
+    if (typed.toUpperCase() !== p.aiToken.toUpperCase()) {
+      // Mismatch → refuse, re-render the row unchanged with a small inline note.
+      return reply.type('text/html').send(`${renderPupil(p)}<li class="error" id="erase-err-${p.id}">Erase cancelled — the typed token didn't match ${esc(p.aiToken)}.</li>`);
+    }
+    await disposePupil(id.data.id, 'erase');
+    return reply.type('text/html').send(renderDisposals(await listDisposals()).replace('<div id="disposal-log">', '<div id="disposal-log" hx-swap-oob="true">'));
+  });
+
+  // 10.2: per-pupil SAR export — one child's full record as JSON (names shown: their own data).
+  app.get('/pupils/:id/export', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const record = await exportPupilRecord(id.data.id);
+    if (!record) return reply.code(404).type('text/html').send('<p class="muted">No such pupil.</p>');
+    return reply
+      .type('application/json')
+      .header('content-disposition', `attachment; filename="pupil-${id.data.id}-record.json"`)
+      .send(JSON.stringify(record, null, 2));
+  });
 
   // ── Phase 8.2: pupil login admin (PINs, class codes, lockout, login cards) ──────────────────
   const pinGate = async (reply: import('fastify').FastifyReply): Promise<boolean> => {

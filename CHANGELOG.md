@@ -7,6 +7,36 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10.2 BUILT: pupil erasure / anonymisation + per-pupil SAR export (migration `0024`)
+
+The biggest DPO gap closed. `DATA_MODEL`/`DPIA §7` promised "a deliberate, audited retention action"
+but only archive existed — and a naive `DELETE FROM pupils` *throws*, because the Phase-2 tables
+(enrolments/notes/tasks/events/note_pupil_mentions) reference `pupils` with the default RESTRICT
+while the Phase 8/9 tables CASCADE.
+
+- **`disposePupil(id, mode)`** ([repos/pupils.ts](../app/src/repos/pupils.ts)) — one transaction,
+  two modes, both audited into the new **`pupil_disposals`** table (migration `0024`; records the
+  kept `ai_token` + per-table counts, **never** the removed name):
+  - **erase** (full right-to-erasure / SAR): deletes the RESTRICT blockers (enrolments, mentions),
+    **detaches** the nullable links (`notes`/`tasks`/`events` `pupil_id` → NULL, so the teacher's own
+    records survive), then `DELETE FROM pupils` lets the CASCADE tables (answers→marks, credentials,
+    devices, profiles, feedback, levels, comments) clear.
+  - **anonymise** (a leaver kept for cohort history): scrubs identity + login + the "what works for
+    me" profile + teacher comments; sets `display_name = ai_token` (so the name leaves the redaction
+    roster) and archives; **keeps** answers/marks/feedback, now nameless.
+- **Per-pupil SAR export** — `GET /pupils/:id/export` ([routes/pupils.ts](../app/src/routes/pupils.ts))
+  assembles one child's full record (enrolments, linked notes, mentions, answers, marks, feedback,
+  teacher comments, profile) as a JSON download; names shown (it's the data subject's own data).
+- **UI** — each roster row gets "⬇ data" (SAR), "anonymise…" (confirm) and "erase…" (must re-type
+  the pupil's token via `hx-prompt`, so a misclick can't wipe a record); a collapsible **disposal
+  log** on the Pupils page is the audited retention evidence.
+- **Tests**: a new `disposals.int.test.ts` proves erase succeeds *despite* the RESTRICT FKs, detaches
+  notes/tasks/events, clears the CASCADE data, removes the name from the roster, and audits; that
+  anonymise keeps cohort data while scrubbing identity; and that the SAR export gathers the record.
+  Plus a regression guard: the `/settings/ai-log` page must render (a `timestamptz` returned raw is a
+  JS `Date`, not a string — now `to_char`-formatted in `listDisposals`/`listAiCalls`/`getAiCall`).
+- **240 unit / 150 integration green; typecheck clean.**
+
 ### 2026-06-13 — Phase 10 BUILDING: Track A no-migration ship-blockers (10.1, 10.3, 10.5, 10.6)
 
 Started implementing Phase 10 in the recommended order. The four Track-A slices that need **no

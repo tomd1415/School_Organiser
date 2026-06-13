@@ -85,7 +85,7 @@ export async function listAiCalls(f: AiCallFilter): Promise<{ rows: AiCallRow[];
   );
   const limited = [...params, f.limit, f.offset];
   const { rows } = await pool.query<AiCallRow>(
-    `SELECT id, created_at AS "createdAt", feature, model, status,
+    `SELECT id, to_char(created_at, 'YYYY-MM-DD HH24:MI') AS "createdAt", feature, model, status,
             input_tokens AS "inputTokens", output_tokens AS "outputTokens",
             cost_pence AS "costPence", error
      FROM ai_calls ${clause}
@@ -99,7 +99,7 @@ export async function listAiCalls(f: AiCallFilter): Promise<{ rows: AiCallRow[];
 /** One call with its stored redacted request + response (for the expand view / DPO evidence). */
 export async function getAiCall(id: number): Promise<AiCallDetail | null> {
   const { rows } = await pool.query<AiCallDetail>(
-    `SELECT id, created_at AS "createdAt", feature, model, status,
+    `SELECT id, to_char(created_at, 'YYYY-MM-DD HH24:MI') AS "createdAt", feature, model, status,
             input_tokens AS "inputTokens", output_tokens AS "outputTokens",
             cost_pence AS "costPence", error, prompt_version AS "promptVersion",
             request_redacted AS "requestRedacted", response

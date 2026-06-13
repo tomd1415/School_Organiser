@@ -1,9 +1,10 @@
 # Phase 10 — Trustworthy in daily use: safety, reliability & access
 
-> **Status (2026-06-13): BUILDING — Track A's no-migration ship-blockers done (10.1, 10.3, 10.5,
-> 10.6), tested (240 unit / 146 integration green; typecheck clean). Remaining: the migration-bearing
-> slices 10.2 (erasure/SAR) + 10.4 (disclosure register) + 10.9 (durable queue), and 10.8 (resilient
-> autosave), then Tracks C–F.** The original plan follows.
+> **Status (2026-06-13): BUILDING — Track A's privacy ship-blockers done: 10.1, 10.3, 10.5, 10.6
+> (no migration) and 10.2 (erasure/anonymise + SAR export, migration `0024`). Tested (240 unit /
+> 150 integration green; typecheck clean). Remaining Track A/B: 10.4 (disclosure register, migration),
+> 10.9 (durable marking queue, migration), 10.8 (resilient autosave), then Tracks C–F.** The original
+> plan follows.
 >
 > **Status (2026-06-13): PLANNED, plan-first — for review before any code.**
 > Phases 8–9 put **real children's PII and pupil-authored answers** into the system (logins, PINs,
@@ -70,7 +71,7 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
 | **10.1** | **Encrypt backups + verify restores** — `age`/`gpg` over the `pg_dump` *and* the resources tar in `backup.sh`/`restore.sh`; a `verify-backup.sh` that restores into a throwaway DB and asserts row counts; a "Disaster recovery" RUNBOOK section; "last backup / last verified" on the Data-health panel | `backup.sh` is plain `gzip`+`tar` but `DPIA.md`/`SECURITY_AND_PRIVACY.md` claim "encrypted nightly pg_dump" — the dumps hold every name, answer, mark **and** the IMAP/AI secrets in plaintext | M | 🔴 | ✅ |
-| **10.2** | **Pupil erasure / leaver anonymisation (audited) + per-pupil SAR export** — a guarded, transactional "erase pupil" that nulls/reassigns the **RESTRICT** refs then lets the **CASCADE** tables clear, anonymises the roster row (keep `ai_token` so redaction history holds), writes a disposal audit row; plus `/pupils/:id/export` gathering one child's full record | `DATA_MODEL.md`/`DPIA §7` promise "a deliberate, audited retention action" — but only archive exists, and a naive `DELETE` *throws* on the `0003` RESTRICT FKs (enrolments/notes/tasks/events). The SAR claim is aspirational for pupil-authored data | L | 🔴 | ⬜ |
+| **10.2** | **Pupil erasure / leaver anonymisation (audited) + per-pupil SAR export** — a guarded, transactional "erase pupil" that nulls/reassigns the **RESTRICT** refs then lets the **CASCADE** tables clear, anonymises the roster row (keep `ai_token` so redaction history holds), writes a disposal audit row; plus `/pupils/:id/export` gathering one child's full record | `DATA_MODEL.md`/`DPIA §7` promise "a deliberate, audited retention action" — but only archive exists, and a naive `DELETE` *throws* on the `0003` RESTRICT FKs (enrolments/notes/tasks/events). The SAR claim is aspirational for pupil-authored data | L | 🔴 | ✅ |
 | **10.3** | **Teacher idle-logout** — extend the `onRequest` idle plumbing (currently `role==='pupil'` only) to the teacher role; configurable minutes in Settings | `SECURITY` threat model + `DPIA R3` claim session-timeout mitigates the unattended-laptop risk; in code the teacher session is 12h absolute with **no** idle timeout — the account that sees the most PII | S | 🔴 | ✅ |
 | **10.4** | **Safeguarding disclosure lane + register** — tag guard-matched answers distinctly (not the generic `needsReview`); one teacher-only **register** UNIONing flagged answers + captured items + TA feedback + email, each with verbatim text, source, timestamp and an audited "recorded / actioned / referred to DSL on `<date>`" state | A disclosure ("not safe", "hurt myself") wears the *same* ⚠ badge as a benign clipped mark and can be lost in the noise; there is no record-of-handling anywhere | M | 🔴 | ⬜ |
 | **10.5** | **Email-triage pre-egress screen** — run `guardMatch` over subject+body *before* the AI call; a trip files a safeguarding-flagged captured item with **no** AI call (reuse the "AI unavailable → plain task" path); optional settings list of non-roster names to redact | Triage currently sends the **full email body** to the AI to *decide* if it's safeguarding — disclosure reaches the model before withholding can fire; and the redactor is roster-only, so a sibling/other-class child named in an email is never tokenised | M | 🔴 | ✅ |

@@ -610,6 +610,19 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('AI call log page renders (10.6 — regression: timestamptz must be string-formatted, not a Date)', async () => {
+    const { insertAiCall } = await import('../../src/repos/aiCalls');
+    await insertAiCall({ feature: 'zz_screen_log', provider: 'anthropic', model: 'claude-haiku-4-5', promptVersion: 'v1', requestRedacted: { user: 'x' }, response: { text: 'y' }, inputTokens: 1, outputTokens: 1, costPence: 0.1, status: 'ok', error: null });
+    try {
+      const r = await app.inject({ method: 'GET', url: '/settings/ai-log', headers: { cookie: session } });
+      expect(r.statusCode).toBe(200);
+      expect(r.body).toContain('AI call log'); // rendered, didn't fall to the error fragment
+      expect(r.body).toContain('zz_screen_log');
+    } finally {
+      await pool.query(`DELETE FROM ai_calls WHERE feature = 'zz_screen_log'`);
+    }
+  });
+
   it('Pupil archive/restore re-renders the row (regression: BIGINT id comparison)', async () => {
     const { createPupil } = await import('../../src/repos/pupils');
     const pupil = await createPupil('TEST Pupilrow');
