@@ -437,6 +437,7 @@ export async function getPlanRow(id: number): Promise<PlanRow | null> {
 }
 
 export interface PlanContext {
+  courseId: number;
   courseName: string;
   unitTitle: string;
   planTitle: string;
@@ -447,8 +448,8 @@ export interface PlanContext {
 // Context for the AI draft-lesson feature: where this plan sits in the scheme + its siblings,
 // plus the course's teaching-context (cohort/pedagogy guidance auto-applied to AI output).
 export async function getPlanContext(id: number): Promise<PlanContext | null> {
-  const { rows } = await pool.query<{ courseName: string; unitTitle: string; planTitle: string; teachingContext: string | null }>(
-    `SELECT c.name AS "courseName", u.title AS "unitTitle", lp.title AS "planTitle",
+  const { rows } = await pool.query<{ courseId: number; courseName: string; unitTitle: string; planTitle: string; teachingContext: string | null }>(
+    `SELECT c.id AS "courseId", c.name AS "courseName", u.title AS "unitTitle", lp.title AS "planTitle",
             c.teaching_context AS "teachingContext"
      FROM lesson_plans lp
      JOIN units u ON u.id = lp.unit_id

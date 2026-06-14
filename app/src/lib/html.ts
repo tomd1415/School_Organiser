@@ -1,3 +1,5 @@
+import { renderNav, navClientJson } from './nav';
+
 const ENTITIES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -39,7 +41,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <header class="topbar"${authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : ''}>
     <div class="bar-left">
       <a class="brand" href="/">School Organiser</a>
-      ${authed ? '<nav class="nav"><a href="/">Now</a><a href="/focus">Focus</a><a href="/timetable">Timetable</a><a href="/oversee">Oversee</a><a href="/tasks">Tasks</a><a href="/recurring">Recurring</a><a href="/events">Events</a><a href="/time">Time</a><a href="/captured">Captured</a><a href="/pupils">Pupils</a><a href="/safeguarding">Safeguarding</a><a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/map">Map</a><a href="/kit">Kit</a><a href="/resources">Resources</a><a href="/setup">Setup</a><a href="/settings">Settings</a></nav>' : ''}
+      ${authed ? renderNav() : ''}
     </div>
     ${
       authed
@@ -63,7 +65,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
     ${logout}
   </header>
   <main>${body}</main>
-  ${authed ? '<script src="/static/htmx.min.js"></script>\n  <script src="/static/app.js" defer></script>' : ''}
+  ${authed ? `<script>window.__NAV__=${navClientJson()};</script>\n  <script src="/static/htmx.min.js"></script>\n  <script src="/static/app.js" defer></script>` : ''}
 </body>
 </html>`;
 }

@@ -16,6 +16,7 @@ import { invalidatePupilCfg } from '../auth/pupilAccessCache';
 import { invalidateTeacherIdle } from '../auth/teacherIdleCache';
 import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
+import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily } from '../lib/nav';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
   const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
@@ -36,7 +37,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const envManaged = !!appConfig.APP_PASSWORD_HASH;
-      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey] = await Promise.all([
+      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey, stylePrefs, featurePrefs] = await Promise.all([
         getSetting('school_name'),
         getSetting('ai_enabled'),
         getSetting('ai_month_cap_pence'),
@@ -53,6 +54,8 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('email_poll_minutes'),
         getSetting('email_last_poll'),
         getSetting('ai_api_key'),
+        getSetting('ai_style_prefs'),
+        getSetting('ai_feature_prefs'),
       ]);
       const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck, teacherIdle] = await Promise.all([
         getSetting('pupil_access_enabled'),
@@ -81,6 +84,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
       const spendNote = `<p class="muted ${usedPct >= 80 ? 'spend-warn' : ''}">AI spend this month:
         <strong>£${(spentPence / 100).toFixed(2)}</strong> of £${(capPence / 100).toFixed(2)} (${usedPct}% used)
         · <a href="/settings/ai-log">view the call log</a></p>`;
+      const navDailySet = new Set(getNavDailyHrefs());
       body = `
       <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Settings</h1>
@@ -91,6 +95,15 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             hx-post="/settings/school" hx-trigger="input changed delay:700ms, blur" hx-swap="none">
           <span class="note-status" id="school-status"></span>
         </label>
+
+        <h2>Navigation</h2>
+        <p class="muted">Pick which links stay on the always-visible bar; the rest fold into the
+          "⚙ Setup &amp; admin" menu. Default: Now, Focus, Timetable, Tasks, Captured.</p>
+        <form class="setup-add nav-config" hx-post="/settings/nav" hx-target="#nav-status" hx-swap="innerHTML">
+          ${NAV_MODEL.map((i) => `<label class="nav-config-item"><input type="checkbox" name="daily" value="${esc(i.href)}"${navDailySet.has(i.href) ? ' checked' : ''}> ${esc(i.label)}</label>`).join('')}
+          <button type="submit" class="btn-secondary">Save navigation</button>
+          <span class="note-status" id="nav-status"></span>
+        </form>
 
         <h2>Password</h2>
         ${
@@ -138,6 +151,15 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_plan","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
           <label>Cheap model <input value="${esc(mCheap ?? '')}" placeholder="claude-haiku-4-5"
             hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_cheap","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
+        </div>
+        <p class="muted">Standing instructions sent with every lesson/scheme/resource generation
+          (cohort-level — <strong>never name a pupil</strong>). Style shapes <em>how</em> things are
+          written; features are things to always include where they fit, without lengthening the lesson.</p>
+        <div class="setup-add" style="flex-direction:column;align-items:stretch;max-width:42rem">
+          <label>Style preferences<br><textarea name="value" rows="3" maxlength="2000" placeholder="e.g. plain step-by-step language, UK spelling, short sentences, define new words"
+            hx-post="/settings/ai" hx-vals='js:{"key":"ai_style_prefs"}' hx-trigger="input changed delay:800ms, blur" hx-swap="none">${esc(stylePrefs ?? '')}</textarea></label>
+          <label>Always-include features<br><textarea name="value" rows="3" maxlength="2000" placeholder="e.g. a retrieval starter, a clear learning objective, a plenary check"
+            hx-post="/settings/ai" hx-vals='js:{"key":"ai_feature_prefs"}' hx-trigger="input changed delay:800ms, blur" hx-swap="none">${esc(featurePrefs ?? '')}</textarea></label>
         </div>
         <span class="note-status" id="ai-status"></span>
 
@@ -271,9 +293,34 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send('<span class="note-status saved" id="school-status" hx-swap-oob="true">saved ✓</span>');
   });
 
-  app.post('/settings/ai', guard, async (req, reply) => {
-    const b = z.object({ key: z.enum(['ai_enabled', 'ai_month_cap_pence', 'ai_model_plan', 'ai_model_design', 'ai_model_cheap']), value: z.string().max(100) }).safeParse(req.body);
+  // Configurable daily-nav set (idea 6). The submitted `daily` checkboxes are the always-visible
+  // links; the rest fold into the "Setup & admin" menu. Unknowns are dropped and an empty set falls
+  // back to the default, so the bar can never end up empty or pointing at a page that doesn't exist.
+  app.post('/settings/nav', guard, async (req, reply) => {
+    const b = z.object({ daily: z.union([z.string(), z.array(z.string())]).optional() }).safeParse(req.body);
     if (!b.success) return reply.code(400).send('');
+    const raw = b.data.daily === undefined ? [] : Array.isArray(b.data.daily) ? b.data.daily : [b.data.daily];
+    const clean = sanitiseDaily(raw);
+    await setSetting('nav_daily', JSON.stringify(clean));
+    setNavDailyOverride(clean); // write-through: the next full page render reflects it immediately
+    return reply.type('text/html').send('<span class="ok">Saved ✓ — reload any page to see the new bar.</span>');
+  });
+
+  // Per-key length caps — the start of the registry-validated settings endpoint the later ideas
+  // (5/4/8/9) also need: the key must be known and the value must fit its own cap (the free-text
+  // standing prefs get a generous 2000, the model ids / numbers stay short).
+  const AI_KEY_CAP: Record<string, number> = {
+    ai_enabled: 5,
+    ai_month_cap_pence: 12,
+    ai_model_plan: 100,
+    ai_model_design: 100,
+    ai_model_cheap: 100,
+    ai_style_prefs: 2000, // idea 3 — standing style prefs (free text)
+    ai_feature_prefs: 2000, // idea 3 — standing feature requirements (free text)
+  };
+  app.post('/settings/ai', guard, async (req, reply) => {
+    const b = z.object({ key: z.string(), value: z.string().max(2000) }).safeParse(req.body);
+    if (!b.success || !(b.data.key in AI_KEY_CAP) || b.data.value.length > AI_KEY_CAP[b.data.key]!) return reply.code(400).send('');
     if (b.data.key === 'ai_month_cap_pence' && b.data.value.trim() !== '' && !(Number(b.data.value) > 0)) return reply.code(400).send('');
     await setSetting(b.data.key, b.data.value.trim());
     return reply.send('');

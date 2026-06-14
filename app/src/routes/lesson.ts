@@ -42,6 +42,8 @@ import {
 } from '../repos/adaptations';
 import { getCourseTeachingContext } from '../repos/schemes';
 import { abilityItem, groupContextItems } from '../llm/prompts/teachingContext';
+import { standingPrefItems } from '../services/standingPrefs';
+import { conceptItemsFor } from '../services/teachingConcepts';
 import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
@@ -358,6 +360,8 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
     }
   }
 
+  const standing = await standingPrefItems();
+  const concepts = await conceptItemsFor(info.courseId);
   const modelChoice = await modelFor('plan');
   const courseCtx = await getCourseTeachingContext(info.courseId);
   const groupCtx = await getGroupTeachingContext(gc);
@@ -371,6 +375,8 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
         promptVersion: ADAPT_RESOURCES_VERSION,
         system: ADAPT_RESOURCES_SYSTEM,
         context: [
+          ...standing,
+          ...concepts,
           ...groupContextItems(courseCtx, groupCtx),
           ...abilityItem(ability),
           ...equipmentItem(equipment),
@@ -700,6 +706,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         promptVersion: ADAPT_LESSON_VERSION,
         system: ADAPT_LESSON_SYSTEM,
         context: [
+          ...(await standingPrefItems()),
+          ...(await conceptItemsFor(info.courseId)),
           ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
           ...abilityItem(await getGroupAbility(gc)),
           ...equipmentItem(await listActiveEquipment()),
@@ -764,6 +772,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         promptVersion: IMPROVE_MASTER_VERSION,
         system: IMPROVE_MASTER_SYSTEM,
         context: [
+          ...(await standingPrefItems()),
           // The MASTER serves every class, so only the course-level context applies here — the
           // class-specific text would pull the canonical lesson towards one group.
           ...groupContextItems(await getCourseTeachingContext(info.courseId), null),

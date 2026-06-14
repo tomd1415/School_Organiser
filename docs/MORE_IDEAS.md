@@ -1,5 +1,19 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
+> **Status (2026-06-14): Wave 0 + Wave 1 (ideas 3 & 1.1) BUILT.** The typed `NAV_MODEL` extraction
+> (idea 11), the configurable daily-vs-setup nav (idea 6), standing style/feature prefs (idea 3,
+> global) and the teaching-concepts library (idea 1.1) are shipped and tested — **269 unit / 182
+> integration green; typecheck clean; migration `0028` (`teaching_concepts`)**. Settings →
+> **Navigation** picks the always-visible links (default: the leaner five — Now, Focus, Timetable,
+> Tasks, Captured); the rest fold into a "⚙ Setup & admin" menu, with the keyboard map + cheat-sheet
+> now derived from the one [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Standing
+> prefs (Settings → AI) and course-scoped/global teaching concepts (the new **/concepts** page) both
+> ride the `context[]` seam into the planning/authoring generators — redacted, withheld and audited
+> like every input — and `/settings/ai` is now registry-validated with per-key caps (the seam ideas
+> 5/4/8/9 reuse). The swappable-themes stretch (idea 11 tail), the idea-3b per-course override and
+> idea-1.2 weave-into-existing are **not** built; Wave 1 finishes with idea 7 (guided cohort-access).
+> The original plan follows.
+>
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
 > disclosure register, durable marking, SEND accessibility — migrations `0024`–`0027`). Phase 11
@@ -73,16 +87,17 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **11** | **Typed `NAV_MODEL` extraction** — pull the inline 18-link nav string in [html.ts](../app/src/lib/html.ts) and the duplicated `g`+letter map in [app.js](../app/public/app.js) into one `app/src/lib/nav.ts` `{href,label,key,group}[]`, emitted as inline JSON so the two lists can never drift | Two hand-maintained nav lists already drift — the keyboard jump and the rendered link set are separate strings; this is the proven single-source-of-truth cure and a behaviour-neutral refactor | M | 🔴 | ⬜ |
-| **6** | **Calm daily-vs-setup nav** — render `group:'daily'` inline, fold `group:'setup'` into a `<details>` "⚙ Setup & admin" menu with friendly hints (reuse the `/welcome` checklist copy), add nav active-state | Teacher feedback: the flat 18-link bar is overwhelming; setup/admin clutters the daily drivers. Built on the Wave-0 model so it is additive | M | 🟠 | ⬜ |
+| **11** | **Typed `NAV_MODEL` extraction** — pull the inline 18-link nav string in [html.ts](../app/src/lib/html.ts) and the duplicated `g`+letter map in [app.js](../app/public/app.js) into one `app/src/lib/nav.ts` `{href,label,key,group}[]`, emitted as inline JSON so the two lists can never drift | Two hand-maintained nav lists already drift — the keyboard jump and the rendered link set are separate strings; this is the proven single-source-of-truth cure and a behaviour-neutral refactor | M | 🔴 | ✅ |
+| **6** | **Calm, configurable daily-vs-setup nav** — render the daily set inline (**default the leaner five**: Now, Focus, Timetable, Tasks, Captured), fold the rest into a `<details>` "⚙ Setup & admin" menu with friendly hints (reuse the `/welcome` checklist copy); add a Settings control to pick which links are always visible (a `nav_daily` setting the `NAV_MODEL` reads) + nav active-state | Teacher feedback: the flat 18-link bar is overwhelming. Decided 2026-06-14: leaner-five default, **teacher-configurable** so the daily set changes without code; built on the Wave-0 model so it is additive | M | 🟠 | ✅ |
 | **11** | *(stretch)* **Swappable themes** — `[data-theme]` blocks overriding the 8 `:root` CSS vars + a toggle, reusing the pupil-surface theming precedent (`pupil.js` `data-*` + `localStorage` + pre-paint script) | Lets the look be redesigned/varied without touching routes/services/repos; the deferrable tail of idea 11 | M | ⚪ | ⬜ |
 
 ### Wave 1 — `context[]` builder quick wins *(one seam, near-zero risk)*
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **3** | **Standing style & feature prefs** — `styleItems()` builder + two `settings` rows (`ai_style_prefs`, `ai_feature_prefs`) + extend the `/settings/ai` Zod enum, spread into all six planning call sites | Nothing lets the teacher set standing intent today; S-effort, no new table, influences *every* planning feature at once, and forces the registry-validated settings endpoint Waves 2/4/5 all need | S | 🔴 | ⬜ |
-| **1.1** | **Teaching-concepts library (weave-on-generate)** — `teaching_concepts` table + `repos/concepts.ts` + `/concepts` admin (clone of the kit/equipment pattern) + `conceptItems()` spread into the four generation sites | Closes a gap: there is no place to bank cohort-level teaching ideas the AI should weave in; pure additive plumbing, empty library is a literal no-op | M | 🟠 | ⬜ |
+| **3** | **Standing style & feature prefs (global)** — `styleItems()` builder + two `settings` rows (`ai_style_prefs`, `ai_feature_prefs`) + extend the `/settings/ai` Zod enum, spread into all six planning call sites | Nothing lets the teacher set standing intent today; S-effort, no new table, influences *every* planning feature at once, and forces the registry-validated settings endpoint Waves 2/4/5 all need | S | 🔴 | ✅ |
+| **3b** | **Per-course pref override** — course-scoped `ai_style_prefs_course_<id>` / `ai_feature_prefs_course_<id>` keys via the same registry-validated dynamic-key endpoint as idea 5 (no new table), with the override form in the course editor; `styleItems()` merges course-over-global | Decided 2026-06-14: prefs are global **+ per-course**. The global base (above) ships first; this adds e.g. GCSE-vs-KS3 tone/feature differences | M | 🟡 | ⬜ |
+| **1.1** | **Teaching-concepts library (weave-on-generate)** — `teaching_concepts` table + `repos/concepts.ts` + `/concepts` admin (clone of the kit/equipment pattern) + `conceptItems()` spread into the four generation sites | Closes a gap: there is no place to bank cohort-level teaching ideas the AI should weave in; pure additive plumbing, empty library is a literal no-op | M | 🟠 | ✅ |
 | **7** | **Guided cohort-access questions (no AI)** — a `group_courses.guided_access` JSONB form + deterministic `accessConstraints.ts` that derives one `[access]`-sentinel line into the existing per-class `teaching_context` | Turns "min 18pt, no two-column" cohort needs into a constraint every class-targeted generation honours via `groupContextItems()` — and the first slice uses **no AI at all** | S | 🟠 | ⬜ |
 | **1.2** | *(stretch)* **Weave concepts into an existing lesson** — `weave_concepts` feature reusing the `improve_master` propose-then-apply flow, instructed to rebalance within `duration_min` not lengthen | The harder half of idea 1; soft "don't lengthen" constraint needs smoke-testing before it's trusted | M | 🟡 | ⬜ |
 
@@ -128,10 +143,12 @@ the main project risk and idea 5 is what lets you throttle it.
 
 Every one of the eleven designs independently proposed `0028` — there can be only one. **Assign
 sequential numbers in build order**; the table below shows the build-order assignment, not eleven
-collisions. Much of Phase 11 needs **no schema**: ideas 3 (two `settings` rows), 5 (dynamic
-`ai_model_feature_*` settings keys + an `ai_models_catalog` cache), and 6/11 (theme prefs in
-`localStorage` / `settings`, nav model in code) add no tables; idea 2 derives pace entirely at read
-time. The genuinely new tables, in build order:
+collisions. Much of Phase 11 needs **no schema**: idea 3 (global base = two `settings` rows; the
+per-course override (3b) rides the same dynamic registry-validated settings-key pattern as idea 5 —
+no new table), idea 5 (dynamic `ai_model_feature_*` keys + an `ai_models_catalog` cache), and ideas
+6/11 (the configurable daily set in a `nav_daily` setting, theme prefs in `localStorage` / `settings`,
+nav model in code) add no core tables; idea 2 derives pace entirely at read time. The genuinely new
+tables, in build order:
 
 ```
 teaching_concepts             -- idea 1.1 (mig 0028): cohort teaching ideas to weave in
@@ -299,20 +316,22 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
 
 ## 6. Open questions for the teacher (before building Wave 0/1)
 
-1. **Daily-vs-setup nav split (idea 6)** — confirm the daily set. Proposed: Now, Focus, Timetable,
-   Tasks, Captured, Schemes, Map daily; everything else (Setup, Settings, Oversee, Recurring, Events,
-   Time, Pupils, Safeguarding, Notes, Kit, Resources) folded into "Setup & admin". Is Notes/Captured
-   a daily driver or admin?
-2. **Concept scope (idea 1)** — are teaching concepts global only, or course-scoped (`course_id` NULL
-   vs set)? The table supports both; the answer picks the list call and the UI filter. Does v1 need a
-   per-concept "always include" flag or is plain active/archive enough?
-3. **Standing-prefs scope (idea 3)** — one global pair of prefs, or also a per-course override? Global
-   is the S-effort first cut. Should style apply to the cheap triage features (`email_triage`,
-   `captured_categorise`) too, or planning/authoring only? (Recommended: planning/authoring only.)
-4. **Guided-access home (idea 7)** — does `guided_access` live on `group_courses` (resets when a
-   class is re-created each year) or on the longer-lived group, given the year-on-year-editable
-   requirement? Confirm the final question set (VI count→font, attention→task length, typing
-   tolerance, reading age, EAL, dyslexia-friendly).
+1. **Daily-vs-setup nav split (idea 6) — decided (2026-06-14): leaner five, but configurable.** The
+   default daily set is the **leaner five** — Now, Focus, Timetable, Tasks, Captured — with everything
+   else folded into "⚙ Setup & admin". **The split is teacher-configurable**: Settings gets a control
+   to pick which links are always visible, stored as a `nav_daily` setting the `NAV_MODEL` reads, so
+   the default can change without code. See Wave 0.
+2. **Concept scope (idea 1) — decided (2026-06-14): course-scoped with optional global.** A concept is
+   tied to one course or applies to all (`course_id` NULL); the AI weaves in the ones relevant to the
+   lesson's course. v1 keeps plain active/archive — no per-concept "always include" flag.
+3. **Standing-prefs scope (idea 3) — decided (2026-06-14): global base + per-course override.** Ship
+   the **global** pair first (the S first slice, idea 3); add per-course overrides as a follow-on
+   (idea 3b) that layers over the global base. Applies to planning/authoring features only, not the
+   cheap triage features (`email_triage`, `captured_categorise`).
+4. **Guided-access home (idea 7) — decided (2026-06-14): on `group_courses`.** Lives with the
+   per-class `teaching_context` the generators already read; the September rollover wizard carries it
+   forward (as it does adaptations), so it survives year-on-year. Still to confirm: the final question
+   set (VI count→font, attention→task length, typing tolerance, reading age, EAL, dyslexia-friendly).
 5. **Spec-point granularity & exam boundary (idea 10)** — seed full OCR J277 sub-statements
    (token-heavy) or topic-level headings (cheaper)? Where does the "leave space for revision"
    boundary come from — a new `courses.exam_date`, the academic-year end, or a prompt heuristic? Does
@@ -344,10 +363,12 @@ backlog from becoming eleven parallel re-implementations.
   [html.ts](../app/src/lib/html.ts) nav string + the [app.js](../app/public/app.js) keyboard map into
   `nav.ts`, emitting the map as inline JSON so the two lists can never drift again.
 - **A registry-validated settings-write endpoint** — idea 3 must widen the fixed 5-key `/settings/ai`
-  Zod enum (capped at 100 chars); idea 5 writes free-form `ai_model_feature_<feature>` keys; ideas
-  4/8/9/10/11 add `ai_review_enabled` / `doc_role` / `ui_theme`. Writing arbitrary settings keys from
-  the UI is a footgun — build **one** endpoint that validates `key` against a known registry with
-  per-key length caps and route all of these through it.
+  Zod enum (capped at 100 chars); idea 3b writes per-course `ai_style_prefs_course_<id>` keys; idea 5
+  writes free-form `ai_model_feature_<feature>` keys; ideas 6/4/8/9/10/11 add `nav_daily` /
+  `ai_review_enabled` / `doc_role` / `ui_theme`. Writing arbitrary settings keys from the UI is a
+  footgun — build **one** endpoint that validates `key` against a known registry (with per-key length
+  caps, and an `_<id>`/`_<feature>` suffix pattern for the dynamic families) and route all of these
+  through it.
 - **The propose-then-apply flow** — `improve_master`'s `/lesson/plan/:id/apply-improvement` (writes
   via `updatePlanField`) is reused by idea 1.2 (`weave_concepts`) and idea 8 (apply-review to master
   via `updatePlanField`, to a class via `upsertAdaptation`). Reuse the endpoint and the panel pattern;

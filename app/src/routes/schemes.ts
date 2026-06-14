@@ -68,6 +68,8 @@ import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayFo
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
+import { standingPrefItems } from '../services/standingPrefs';
+import { conceptItemsFor } from '../services/teachingConcepts';
 import { modelFor } from '../repos/settings';
 import { listGeneralNotes } from '../repos/notes';
 import { callLLM, callLLMStructured } from '../llm/client';
@@ -107,6 +109,8 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
         promptVersion: LESSON_RESOURCES_VERSION,
         system: LESSON_RESOURCES_SYSTEM,
         context: [
+          ...standing,
+          ...concepts,
           ...teachingContextItems(ctx.teachingContext),
           ...equipmentItem(equipment),
           ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
@@ -116,6 +120,8 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
       },
       lessonResourcesSchema,
     );
+  const standing = await standingPrefItems();
+  const concepts = await conceptItemsFor(ctx.courseId);
   const modelChoice = await modelFor('plan');
   const equipment = await listActiveEquipment();
   let result = await callOnce();
@@ -287,6 +293,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         promptVersion: AUTHOR_SCHEME_VERSION,
         system: AUTHOR_SCHEME_SYSTEM,
         context: [
+          ...(await standingPrefItems()),
           ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
           ...curriculumHistoryItems(await getCourseCurriculumHistory(q.data.course)),
           ...equipmentItem(await listActiveEquipment()),
@@ -366,6 +373,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         promptVersion: CONVERT_UNIT_VERSION,
         system: CONVERT_UNIT_SYSTEM,
         context: [
+          ...(await standingPrefItems()),
           ...teachingContextItems(await getCourseTeachingContext(courseId)),
           ...curriculumHistoryItems(await getCourseCurriculumHistory(courseId)),
           ...equipmentItem(await listActiveEquipment()),
@@ -638,7 +646,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelFor('plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
-        context: [...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
+        context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
         instruction: 'Draft the lesson now.',
         maxTokens: 4000,
       },

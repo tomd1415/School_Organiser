@@ -85,7 +85,11 @@
 
   // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a
   // page; `?` shows the cheat-sheet; Esc closes things. The principle is "nothing requires the mouse".
-  var NAV = { h: '/', t: '/timetable', f: '/focus', k: '/tasks', s: '/schemes', p: '/pupils', c: '/captured', e: '/events', r: '/resources', m: '/map', g: '/safeguarding' };
+  // The jump map + cheat-sheet both derive from window.__NAV__ (emitted by the server from
+  // src/lib/nav.ts) so the keyboard shortcuts can never drift from the rendered nav.
+  var NAV_ITEMS = Array.isArray(window.__NAV__) ? window.__NAV__ : [];
+  var NAV = {};
+  NAV_ITEMS.forEach(function (i) { if (i && i.key) NAV[i.key] = i.href; });
   function searchEl() { return document.getElementById('global-search'); }
   function focusSearch() { var s = searchEl(); if (s) { s.focus(); s.select(); } }
   function closeSearch() { var r = document.getElementById('search-results'); if (r) r.innerHTML = ''; }
@@ -95,12 +99,12 @@
     var c = document.createElement('div');
     c.id = 'kbd-cheat';
     c.className = 'kbd-cheat';
+    var jumps = NAV_ITEMS.map(function (i) { return '<kbd>' + i.key + '</kbd> ' + i.label; }).join(' · ');
     c.innerHTML =
       '<div class="kbd-card"><h2>Keyboard shortcuts</h2><ul>' +
       '<li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> — search</li>' +
       '<li><kbd>n</kbd> — new note</li>' +
-      '<li><kbd>g</kbd> then: <kbd>h</kbd> Now · <kbd>t</kbd> Timetable · <kbd>f</kbd> Focus · <kbd>k</kbd> Tasks</li>' +
-      '<li><kbd>g</kbd> then: <kbd>s</kbd> Schemes · <kbd>p</kbd> Pupils · <kbd>c</kbd> Captured · <kbd>e</kbd> Events · <kbd>r</kbd> Resources · <kbd>m</kbd> Map · <kbd>g</kbd> Safeguarding</li>' +
+      (jumps ? '<li><kbd>g</kbd> then: ' + jumps + '</li>' : '') +
       '<li><kbd>Esc</kbd> — close</li></ul><p class="muted">press ? to toggle</p></div>';
     c.addEventListener('click', closeCheat);
     document.body.appendChild(c);
@@ -121,6 +125,23 @@
   });
   // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
+
+  // idea 6 — mark the current page in the nav (a link on the bar, or one inside the Setup menu).
+  (function () {
+    var path = location.pathname;
+    var best = null;
+    var links = document.querySelectorAll('.nav a[href]');
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href');
+      var match = href === '/' ? path === '/' : path === href || path.indexOf(href + '/') === 0;
+      if (match && (!best || href.length > best.getAttribute('href').length)) best = links[i];
+    }
+    if (best) {
+      best.classList.add('active');
+      var det = best.closest('.nav-more');
+      if (det) { var sum = det.querySelector('summary'); if (sum) sum.classList.add('active-within'); }
+    }
+  })();
 
   // 10.25 — activity/starter countdown timer (Spec 5.16). Pure client-side; set N minutes, it counts
   // down on the lesson page and can go full-screen on the board; a gentle flash at zero.

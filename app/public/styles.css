@@ -73,9 +73,22 @@ button.link { background: none; color: var(--accent); padding: 0; }
 
 /* top-bar nav */
 .bar-left { display: flex; align-items: center; gap: 1.25rem; }
-.nav { display: flex; gap: 1rem; }
+.nav { display: flex; gap: 1rem; align-items: center; }
 .nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.95rem; }
 .nav a:hover { color: var(--ink); }
+/* idea 6 — current page gets a clear marker; works for links in the bar and inside the menu. */
+.nav a.active { color: var(--ink); }
+.nav > a.active { box-shadow: inset 0 -2px 0 var(--accent); }
+/* idea 6 — the "Setup & admin" dropdown holding the non-daily links. */
+.nav-more { position: relative; }
+.nav-more > summary { cursor: pointer; color: var(--muted); font-weight: 600; font-size: 0.95rem; list-style: none; -webkit-user-select: none; user-select: none; white-space: nowrap; }
+.nav-more > summary::-webkit-details-marker { display: none; }
+.nav-more > summary:hover, .nav-more > summary.active-within { color: var(--ink); }
+.nav-more-panel { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 60; display: flex; flex-direction: column; gap: 0.55rem; min-width: 11rem; padding: 0.7rem 0.9rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12); }
+.nav-more-panel a { white-space: nowrap; }
+/* idea 6 — the Settings picker for which links are pinned to the bar. */
+.nav-config { flex-wrap: wrap; align-items: center; gap: 0.4rem 1rem; }
+.nav-config-item { font-weight: 500; white-space: nowrap; }
 
 /* timetable grid */
 main:has(.tt) { max-width: 76rem; }
