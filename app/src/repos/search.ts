@@ -44,7 +44,7 @@ export async function searchEverything(query: string): Promise<SearchResults> {
     ...events.rows.map((r) => ({ type: 'Event', label: r.title, sub: r.kind, href: '/events' })),
     ...plans.rows.map((r) => ({ type: 'Lesson', label: r.title, sub: null, href: '/schemes' })),
     ...resources.rows.map((r) => ({ type: 'Resource', label: r.title, sub: r.kind, href: `/resources/${r.id}/view` })),
-    ...pupils.rows.map((r) => ({ type: 'Pupil', label: r.display_name, sub: null, href: '/pupils' })),
+    ...pupils.rows.map((r) => ({ type: 'Pupil', label: r.display_name, sub: null, href: `/pupils/${r.id}` })),
   ];
   return { hits, total: hits.length };
 }

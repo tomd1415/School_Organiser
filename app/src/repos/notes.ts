@@ -7,6 +7,7 @@ export interface NewNoteInput {
   occurrenceId?: number | null;
   courseId?: number | null;
   groupId?: number | null;
+  pupilId?: number | null; // 10.24: a running note about one pupil (per-pupil page)
 }
 
 // 10.10: an opaque optimistic-concurrency token = the note's updated_at, formatted identically on
@@ -15,9 +16,9 @@ const REV = `to_char(updated_at, 'YYYY-MM-DD"T"HH24:MI:SS.US')`;
 
 export async function createNote(input: NewNoteInput): Promise<{ id: number; rev: string }> {
   const { rows } = await pool.query<{ id: number; rev: string }>(
-    `INSERT INTO notes (kind, body, occurrence_id, course_id, group_id)
-     VALUES ($1, '', $2, $3, $4) RETURNING id, ${REV} AS rev`,
-    [input.kind, input.occurrenceId ?? null, input.courseId ?? null, input.groupId ?? null],
+    `INSERT INTO notes (kind, body, occurrence_id, course_id, group_id, pupil_id)
+     VALUES ($1, '', $2, $3, $4, $5) RETURNING id, ${REV} AS rev`,
+    [input.kind, input.occurrenceId ?? null, input.courseId ?? null, input.groupId ?? null, input.pupilId ?? null],
   );
   const row = rows[0];
   if (!row) throw new Error('failed to create note');

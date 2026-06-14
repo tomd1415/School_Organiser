@@ -610,6 +610,46 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('per-pupil page renders, adds a note, and sets a unit signal (10.24)', async () => {
+    const { createPupil } = await import('../../src/repos/pupils');
+    const p = await createPupil('TEST PupilPage');
+    try {
+      const page = await app.inject({ method: 'GET', url: `/pupils/${p.id}`, headers: { cookie: session } });
+      expect(page.statusCode).toBe(200);
+      expect(page.body).toContain('TEST PupilPage');
+      expect(page.body).toContain('Progress by unit');
+      expect(page.body).toContain('Marks history');
+      const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+      const cookie = firstCookie(page.headers['set-cookie']) || session;
+      const note = await app.inject({ method: 'POST', url: `/pupils/${p.id}/note`, headers: { cookie, 'x-csrf-token': token } });
+      expect(note.body).toContain('<textarea'); // a fresh note item to type into
+      expect((await pool.query(`SELECT 1 FROM notes WHERE pupil_id = $1`, [p.id])).rowCount).toBe(1);
+      const u = await pool.query<{ id: number }>(`SELECT id FROM units ORDER BY id LIMIT 1`);
+      if (u.rows[0]) {
+        await app.inject({ method: 'POST', url: `/pupils/${p.id}/unit-signal`, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: `unit=${u.rows[0].id}&signal=on_track` });
+        expect((await pool.query(`SELECT signal FROM pupil_unit_signal WHERE pupil_id = $1`, [p.id])).rows[0]?.signal).toBe('on_track');
+      }
+    } finally {
+      await pool.query(`DELETE FROM notes WHERE pupil_id = $1`, [p.id]); // RESTRICT FK → clear before pupil
+      await pool.query(`DELETE FROM pupils WHERE id = $1`, [p.id]); // pupil_unit_signal CASCADEs
+    }
+  });
+
+  it('print packs render (10.23 — single lesson + today briefing)', async () => {
+    const lid = Number((await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`)).rows[0]!.id);
+    try {
+      const one = await app.inject({ method: 'GET', url: `/lesson/print?lesson=${lid}&date=${ADAPT_DATE}`, headers: { cookie: session } });
+      expect(one.statusCode).toBe(200);
+      expect(one.body).toContain('window.print()');
+      expect(one.body).toContain('lesson-print');
+      const today = await app.inject({ method: 'GET', url: `/today/print?date=${ADAPT_DATE}`, headers: { cookie: session } });
+      expect(today.statusCode).toBe(200);
+      expect(today.body).toContain('Cover / briefing');
+    } finally {
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = $1`, [ADAPT_DATE]);
+    }
+  });
+
   it('topbar quick-capture writes a note and global search finds it (10.19 / 10.20)', async () => {
     const page = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
     const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';

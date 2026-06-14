@@ -63,6 +63,8 @@ import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
+import { getTimetabledLessons, getPeriodDefinitions } from '../repos/timetable';
+import { localParts, weekdayOf } from '../lib/time';
 import { formatObjectives, formatOutline, outlineSteps } from '../lib/formatLesson';
 
 const TZ = 'Europe/London';
@@ -313,7 +315,7 @@ function renderDetail(
     <section class="ld" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <p class="kicker">${flag}${h.isSelf ? 'Lesson' : 'Lesson I oversee'}</p>
       <h1>${heading}</h1>
-      <p class="ld-meta">${meta}</p>
+      <p class="ld-meta">${meta} · <a class="link" href="/lesson/print?lesson=${h.lessonId}&date=${esc(h.date)}" target="_blank" rel="noopener">🖨 print plan</a> · <a class="link" href="/today/print?date=${esc(h.date)}" target="_blank" rel="noopener">🖨 today / cover</a></p>
       <div class="act-timer" data-timer>
         <span class="act-timer-display" data-timer-display>—:—</span>
         <button type="button" class="link" data-timer-set="5">5m</button>
@@ -835,4 +837,67 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     await deleteException(p.data.id);
     return reply.send('');
   });
+
+  // ── 10.23 Print packs: a clean printable plan for one lesson, and a one-page "today" briefing a
+  // cover teacher can carry. Reuse the cards-page chrome + window.print().
+  app.get('/lesson/print', { preHandler: requireAuth }, async (req, reply) => {
+    const parsed = Query.safeParse(req.query);
+    if (!parsed.success) return reply.code(400).type('text/html').send('<p>Bad lesson reference.</p>');
+    const block = await lessonPrintBlock(parsed.data.lesson, parsed.data.date);
+    return reply.type('text/html').send(printPage('Lesson plan', block || '<p>No lesson here.</p>'));
+  });
+
+  app.get('/today/print', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).safeParse(req.query);
+    const date = (q.success && q.data.date) || localParts(new Date(), 'Europe/London').isoDate;
+    const weekday = weekdayOf(date);
+    const [lessons, periods] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions()]);
+    const order = new Map(periods.map((p) => [`${p.weekday}:${p.slotOrder}`, p.slotOrder]));
+    const todays = lessons
+      .filter((l) => l.weekday === weekday && l.isSelf && (l.purpose === 'teaching' || l.purpose === 'form'))
+      .sort((a, b) => (order.get(`${a.weekday}:${a.slotOrder}`) ?? 0) - (order.get(`${b.weekday}:${b.slotOrder}`) ?? 0));
+    const blocks = (await Promise.all(todays.map((l) => lessonPrintBlock(l.lessonId, date)))).filter(Boolean);
+    const body = blocks.length ? blocks.join('') : '<p>No lessons timetabled for this day.</p>';
+    return reply.type('text/html').send(printPage(`Cover / briefing — ${date}`, body));
+  });
+}
+
+/** A standalone printable page (cards-page chrome, like the answer pack). */
+function printPage(title: string, body: string): string {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)} · School Organiser</title>
+    <link rel="stylesheet" href="/static/styles.css"></head>
+    <body class="cards-page"><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(title)}</div>
+    <div class="lesson-print">${body}</div></body></html>`;
+}
+
+/** One lesson rendered for print: each course section's effective plan, resources and last stop. */
+async function lessonPrintBlock(lessonId: number, date: string): Promise<string> {
+  const occId = await findOrCreateOccurrence(lessonId, date);
+  const header = await getOccurrenceHeader(occId);
+  if (!header) return '';
+  const [courses, lastStops] = await Promise.all([getOccurrenceCourses(occId), getLastStoppingPoints(lessonId, date)]);
+  const detail = buildLessonDetail(header, courses, lastStops);
+  const sections = await Promise.all(
+    detail.sections.map(async (s) => {
+      let obj = s.planObjectives;
+      let out = s.planOutline;
+      let res: LinkedResource[] = [];
+      if (s.lessonPlanId != null) {
+        const eff = await getEffectiveLesson(s.groupCourseId, s.lessonPlanId, { objectives: s.planObjectives, outline: s.planOutline });
+        obj = eff.objectives;
+        out = eff.outline;
+        res = await listResourcesForPlan(s.lessonPlanId);
+      }
+      return `<section class="lp-sec">
+        <h2>${esc(s.courseName)}${s.planTitle ? ` — ${esc(s.planTitle)}` : ''}</h2>
+        ${obj ? `<h3>Objectives</h3><div class="lp-text">${esc(obj)}</div>` : ''}
+        ${out ? `<h3>Outline</h3><div class="lp-text">${esc(out)}</div>` : ''}
+        ${res.length ? `<h3>Resources</h3><ul>${res.map((r) => `<li>${esc(r.title)}</li>`).join('')}</ul>` : ''}
+        ${s.lastStop ? `<p class="muted">Last time: ${esc(s.lastStop.stoppingPoint)} (${esc(s.lastStop.date)})</p>` : ''}
+        ${s.lessonPlanId == null ? '<p class="muted">No plan bound to this lesson yet.</p>' : ''}
+      </section>`;
+    }),
+  );
+  const when = `${header.periodLabel} ${header.start}–${header.end}${header.roomName ? ` · ${header.roomName}` : ''}`;
+  return `<article class="lp-lesson"><h1>${esc(header.groupName ?? purposeLabel(header.purpose))} <span class="lp-when">${esc(when)}</span></h1>${sections.join('')}</article>`;
 }

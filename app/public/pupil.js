@@ -95,6 +95,44 @@
     updateProgress();
   }
 
+  // ── 10.14 picture PIN: tapping an emoji key types its digit into the PIN box (login surface) ────
+  document.addEventListener('click', function (e) {
+    var key = e.target.closest('[data-digit], [data-pin-back]');
+    if (!key) return;
+    var pin = document.querySelector('.pupil-pin');
+    if (!pin) return;
+    e.preventDefault();
+    if (key.hasAttribute('data-pin-back')) pin.value = pin.value.slice(0, -1);
+    else if (pin.value.length < 12) pin.value += key.getAttribute('data-digit');
+  });
+
+  // ── 10.14 word banks: a "Word bank: a, b, c" line becomes tappable chips that insert into the
+  // last answer box you touched — a scaffold for pupils who find typing hard. No answers revealed
+  // (the teacher chooses the words); pure client-side, fires the autosave like normal typing.
+  if (main) {
+    var lastField = null;
+    main.addEventListener('focusin', function (e) { if (e.target.classList && e.target.classList.contains('ws-input')) lastField = e.target; });
+    main.querySelectorAll('.pupil-work-card p').forEach(function (p) {
+      var m = /^\s*word bank\s*:\s*(.+)$/i.exec(p.textContent || '');
+      if (!m) return;
+      var words = m[1].split(/[,;]/).map(function (w) { return w.trim(); }).filter(Boolean);
+      if (words.length === 0) return;
+      var bank = document.createElement('div');
+      bank.className = 'word-bank';
+      bank.innerHTML = words.map(function (w) { return '<button type="button" class="word-chip">' + w.replace(/[&<>"]/g, '') + '</button>'; }).join('');
+      bank.addEventListener('click', function (e) {
+        var chip = e.target.closest('.word-chip');
+        if (!chip) return;
+        var f = lastField || main.querySelector('.ws-input');
+        if (!f) return;
+        f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + chip.textContent;
+        f.focus();
+        f.dispatchEvent(new Event('input', { bubbles: true })); // trigger the autosave
+      });
+      p.insertAdjacentElement('afterend', bank);
+    });
+  }
+
   // ── 10.8 never lose typed work silently (calm banner + unsaved-on-close guard) ─────────────────
   function toast(m) {
     var t = document.getElementById('hx-toast');

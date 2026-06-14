@@ -238,7 +238,21 @@ function pinForm(csrf: string, pupilId: number, groupId: number, name: string, e
       <input type="hidden" name="group" value="${groupId}">
       <input name="pin" class="pupil-pin" inputmode="numeric" autocomplete="off" pattern="[0-9]*" autofocus required placeholder="PIN">
       <button type="submit" class="pupil-go">Go →</button>
+      ${pinKeypad()}
     </form>
     <button type="button" class="link" hx-get="/pupil/restart" hx-target="#pupil-step" hx-swap="outerHTML">← not me</button>
   </section>`;
+}
+
+// 10.14 — a picture PIN: an opt-in emoji keypad where each picture is a fixed digit, so a
+// pre-literacy / EAL pupil can be told "tap dog, cat, sun" instead of reading numbers. It enters the
+// SAME numeric PIN (no new credential); pupil.js maps taps → digits in the PIN box.
+const DIGIT_EMOJI = ['🍎', '🐶', '🐱', '⭐', '🌞', '🐟', '🌈', '🚀', '🎈', '🦋']; // index = digit 0–9
+function pinKeypad(): string {
+  const key = (d: number): string => `<button type="button" class="pin-key" data-digit="${d}"><span class="pe">${DIGIT_EMOJI[d]}</span><span class="pd">${d}</span></button>`;
+  const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(key).join('');
+  return `<details class="pin-pictures">
+    <summary>🖼️ Use pictures</summary>
+    <div class="pin-pad" data-pinpad>${keys}<button type="button" class="pin-key pin-back" data-pin-back>⌫</button></div>
+  </details>`;
 }

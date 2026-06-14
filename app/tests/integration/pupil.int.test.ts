@@ -117,6 +117,24 @@ describe('pupil login + surface (integration)', () => {
     const js = await app.inject({ method: 'GET', url: '/static/pupil.js' });
     expect(js.statusCode).toBe(200);
     expect(js.body).toContain('speechSynthesis'); // 10.11 read-aloud is wired
+    expect(js.body).toContain('word-bank'); // 10.14 word-bank chips wired
+    expect(js.body).toContain('data-pin-back'); // 10.14 picture-PIN keypad wired
+  });
+
+  it('the PIN step offers a picture (emoji) keypad — same numeric PIN (10.14)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/pupil' });
+    const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']);
+    const pin = await app.inject({
+      method: 'POST',
+      url: '/pupil/pin',
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `pupil=${pupilId}&group=${groupId}`,
+    });
+    expect(pin.statusCode).toBe(200);
+    expect(pin.body).toContain('data-pinpad'); // the emoji keypad
+    expect(pin.body).toContain('data-digit="0"'); // each picture maps to a digit
+    expect(pin.body).toContain('name="pin"'); // still the same numeric PIN field
   });
 
   it('resolves a class code to the pick-your-name list', async () => {

@@ -7,6 +7,30 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Phase 10: print packs (10.23), per-pupil page (10.24), input alternatives + picture PIN (10.14)
+
+Track E finished (bar the deferred coverage strip) and the Track C stretch landed.
+
+- **10.23 Print packs.** `/lesson/print?lesson=&date=` renders a clean printable plan (each course
+  section's effective objectives + outline + resources + last stopping point); `/today/print` rolls
+  the day's lessons into one **cover / briefing sheet**. Reuse the cards-page chrome + `window.print()`.
+  🖨 links on the lesson page.
+- **10.24 Per-pupil page** (Spec 5.7). A teacher-only `/pupils/:id` with a **running notes** thread
+  (notes linked by `pupil_id`, autosaved + clobber-guarded via 10.10), a **marks history** table
+  (confirmed marks per lesson), and a one-tap **per-unit traffic-light** (🔴 behind / 🟡 on-track /
+  🟢 exceeding — migration `0027` `pupil_unit_signal`). Roster names + search pupil-hits now link
+  here. Never AI-bound as an individual.
+- **10.14 Input alternatives + picture PIN** (the Track C stretch). A **picture PIN**: an opt-in
+  emoji keypad on login where each picture is a fixed digit, so a pre-literacy / EAL pupil can be
+  told "tap dog, cat, sun" — it enters the *same* numeric PIN (no new credential). And **word-bank
+  chips**: a `Word bank: a, b, c` line in a worksheet becomes tappable chips that insert into the
+  last answer box (client-side, fires the autosave; no answers revealed — the teacher chooses the
+  words). Both pupil-surface, in `pupil.js`.
+- **243 unit / 165 integration green; typecheck clean.** New tests: print packs render; per-pupil
+  page renders + adds a note + sets a unit signal; the PIN step offers the emoji keypad; `pupil.js`
+  carries the word-bank + keypad wiring. **Only Track F (setup/scale) and the deferred 10.25
+  planning-coverage strip remain in Phase 10.**
+
 ### 2026-06-14 — Phase 10 Track E: live class monitor + marks backlog (10.22), activity timer (10.25)
 
 - **10.22 Live class monitor + marks backlog.** The *Pupil work* grid now **auto-refreshes during a

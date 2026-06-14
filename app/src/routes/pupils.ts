@@ -15,10 +15,13 @@ import {
   type PupilLoginRow,
 } from '../repos/pupilCredentials';
 import { revokeAllDevices } from '../repos/pupilDevices';
+import { createNote } from '../repos/notes';
+import { renderNoteItem, renderNotesList } from '../lib/notesView';
+import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
 
 function renderPupil(p: RosterEntry): string {
   return `<li class="pupil${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
-    <span class="pupil-name">${esc(p.displayName)}</span>
+    <a class="pupil-name" href="/pupils/${p.id}">${esc(p.displayName)}</a>
     <span class="muted pupil-token">${esc(p.aiToken)}</span>
     <button type="button" class="link" hx-post="/pupils/${p.id}/${p.active ? 'deactivate' : 'activate'}" hx-target="#pupil-${p.id}" hx-swap="outerHTML">${p.active ? 'archive' : 'restore'}</button>
     <a class="link" href="/pupils/${p.id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
@@ -29,6 +32,19 @@ function renderPupil(p: RosterEntry): string {
       hx-post="/pupils/${p.id}/erase" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
       hx-prompt="PERMANENT erasure of ${esc(p.displayName)} — every answer, mark, feedback, profile and login. Type ${esc(p.aiToken)} to confirm.">erase…</button>
   </li>`;
+}
+
+// 10.24 — one unit's traffic-light row (🔴 behind / 🟡 on-track / 🟢 exceeding), one tap to set.
+const SIGNALS: Array<{ v: UnitSignal; emoji: string; label: string }> = [
+  { v: 'behind', emoji: '🔴', label: 'behind' },
+  { v: 'on_track', emoji: '🟡', label: 'on track' },
+  { v: 'exceeding', emoji: '🟢', label: 'exceeding' },
+];
+function renderUnitSignal(pupilId: number, u: PupilUnitRow): string {
+  const btns = SIGNALS.map(
+    (s) => `<button type="button" class="sig-btn${u.signal === s.v ? ' on' : ''}" title="${s.label}" hx-post="/pupils/${pupilId}/unit-signal" hx-vals='{"unit":${u.unitId},"signal":"${s.v}"}' hx-target="#usig-${u.unitId}" hx-swap="outerHTML">${s.emoji}</button>`,
+  ).join('');
+  return `<li id="usig-${u.unitId}" class="sig-row"><span class="sig-unit"><span class="muted">${esc(u.course)}</span> ${esc(u.title)}</span><span class="sig-btns">${btns}</span></li>`;
 }
 
 function renderDisposals(rows: Array<{ aiToken: string; action: string; detail: unknown; createdAt: string }>): string {
@@ -184,6 +200,62 @@ export function registerPupilRoutes(app: FastifyInstance): void {
       .type('application/json')
       .header('content-disposition', `attachment; filename="pupil-${id.data.id}-record.json"`)
       .send(JSON.stringify(record, null, 2));
+  });
+
+  // ── 10.24: the per-pupil page — running notes, marks history, per-unit traffic-light. Teacher-only;
+  // never AI-bound as an individual. (Note GET /pupils/:id sits after the literal /pupils/cards etc.)
+  app.get('/pupils/:id', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const csrf = reply.generateCsrf();
+    let body: string;
+    try {
+      const pupil = (await listPupils()).find((p) => p.id === id.data.id);
+      if (!pupil) return reply.code(404).type('text/html').send(layout({ title: 'Pupil', body: '<section class="card"><p class="muted">No such pupil.</p></section>', authed: true, csrfToken: csrf }));
+      const [notes, history, units] = await Promise.all([listPupilNotes(id.data.id), pupilMarksHistory(id.data.id), pupilUnits(id.data.id)]);
+      const noteItems = notes.map((n) => ({ id: n.id, body: n.body, time: n.date, followups: [], rev: n.rev }));
+      const histRows = history.length
+        ? `<table class="pp-marks"><thead><tr><th>Date</th><th>Course</th><th>Marks</th></tr></thead><tbody>${history
+            .map((h) => `<tr><td class="muted">${esc(h.date)}</td><td>${esc(h.course)}</td><td>${h.awarded}/${h.total}</td></tr>`)
+            .join('')}</tbody></table>`
+        : '<p class="muted">No confirmed marks yet.</p>';
+      const unitRows = units.length ? `<ul class="sig-list">${units.map((u) => renderUnitSignal(id.data.id, u)).join('')}</ul>` : '<p class="muted">No units in this pupil\'s courses yet.</p>';
+      body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        <p><a href="/pupils">← Pupils</a></p>
+        <h1>${esc(pupil.displayName)} <span class="muted pupil-token">${esc(pupil.aiToken)}</span></h1>
+        <p class="muted">Your private record for this pupil — running notes, attainment and where they're at per unit. None of this is ever sent to an AI as an individual.</p>
+
+        <h2>Notes</h2>
+        <button type="button" class="btn-secondary" hx-post="/pupils/${id.data.id}/note" hx-target="#pupil-notes" hx-swap="afterbegin">＋ New note</button>
+        ${renderNotesList('pupil-notes', noteItems)}
+
+        <h2>Progress by unit</h2>
+        ${unitRows}
+
+        <h2>Marks history</h2>
+        ${histRows}
+      </section>`;
+    } catch (err) {
+      app.log.error({ err }, 'per-pupil page render failed');
+      body = '<section class="card"><h1>Pupil</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
+    }
+    return reply.type('text/html').send(layout({ title: 'Pupil', body, authed: true, csrfToken: csrf }));
+  });
+
+  app.post('/pupils/:id/note', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const { id: noteId, rev } = await createNote({ kind: 'general', pupilId: id.data.id });
+    return reply.type('text/html').send(renderNoteItem({ id: noteId, body: '', time: 'now', followups: [], rev }));
+  });
+
+  app.post('/pupils/:id/unit-signal', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    const b = z.object({ unit: z.coerce.number().int().positive(), signal: z.enum(['behind', 'on_track', 'exceeding']) }).safeParse(req.body);
+    if (!id.success || !b.success) return reply.code(400).send('');
+    await setUnitSignal(id.data.id, b.data.unit, b.data.signal as UnitSignal);
+    const u = (await pupilUnits(id.data.id)).find((x) => x.unitId === b.data.unit);
+    return reply.type('text/html').send(u ? renderUnitSignal(id.data.id, u) : '');
   });
 
   // ── Phase 8.2: pupil login admin (PINs, class codes, lockout, login cards) ──────────────────
