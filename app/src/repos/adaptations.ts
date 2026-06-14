@@ -160,6 +160,16 @@ export async function setGuidedAccess(groupCourseId: number, answers: GuidedAcce
   ]);
 }
 
+// Phase 11 — one-shot flag for auto-adapting a class's scheme once it first has context (+ a scheme).
+export async function groupCourseAutoAdapted(groupCourseId: number): Promise<boolean> {
+  const { rows } = await pool.query<{ x: boolean }>(`SELECT scheme_auto_adapted AS x FROM group_courses WHERE id = $1`, [groupCourseId]);
+  return rows[0]?.x ?? true; // unknown class → treat as done so we never fire against a missing row
+}
+
+export async function setGroupCourseAutoAdapted(groupCourseId: number, value: boolean): Promise<void> {
+  await pool.query(`UPDATE group_courses SET scheme_auto_adapted = $2 WHERE id = $1`, [groupCourseId, value]);
+}
+
 // idea 2 — recent lessons for a class that carry a pace signal: the step the class reached
 // (progress_step) and the plan outline it was reached against. Only rows with a recorded step count;
 // the master plan outline is a reasonable proxy for the planned-step count (the soft band tolerates it).

@@ -11,7 +11,9 @@ import {
   setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../repos/occurrence';
-import { getLessonPlan, listCoursePlans, updatePlanField } from '../repos/schemes';
+import { getLessonPlan, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
+import { schemeLessons } from '../repos/specPoints';
+import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
 import {
   addVersion,
   createResource,
@@ -47,12 +49,10 @@ import { abilityItem, groupContextItems } from '../llm/prompts/teachingContext';
 import { standingPrefItems } from '../services/standingPrefs';
 import { conceptItemsFor } from '../services/teachingConcepts';
 import { accessItemsFor } from '../services/accessConstraints';
-import { paceItemsFor } from '../services/pacing';
 import type { GuidedAccess } from '../llm/prompts/accessConstraints';
 import { callLLMStructured } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
-import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
-import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, historyItems, lessonItem } from '../llm/prompts/adaptLesson';
+import { historyItems } from '../llm/prompts/adaptLesson';
 import { recentClassMisses } from '../services/marking';
 import { marksEnabled } from '../auth/marksGate';
 import { retrievalStarterSchema } from '../llm/schemas/retrievalStarter';
@@ -147,7 +147,7 @@ function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: st
           <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
         </form>
       </details>
-      <button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt from recent lessons (AI)</button>
+      <button type="button" class="link fu-ai" title="Re-pitch this lesson for this class from its teaching context, ability and access needs — and its recent lessons where there are any (AI)" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt for this class (AI)</button>
       <button type="button" class="link fu-ai" title="3 quick recall questions re-testing what this class got wrong recently (AI)" hx-post="/lesson/gc/${gc}/retrieval-starter" hx-target="#starter-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">🔁 Retrieval starter (AI)</button>
       <div id="starter-${gc}-${lp}"></div>
       ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
@@ -649,6 +649,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           <span class="note-status" id="group-access-${p.data.gc}-status"></span>
         </form>
       </details>
+      <p class="adapt-scheme-row"><button type="button" class="link fu-ai" title="Adapt every lesson of this class's scheme from its context — AI, one call per lesson" hx-post="/lesson/gc/${p.data.gc}/adapt-scheme" hx-target="#scheme-adapt-${p.data.gc}" hx-swap="innerHTML" hx-confirm="Adapt ALL of this class's scheme lessons from its context? That's one AI call per lesson." hx-disabled-elt="this">✨ Adapt whole scheme for this class (AI)</button> <span id="scheme-adapt-${p.data.gc}"></span></p>
       <span class="note-status" id="group-ctx-${p.data.gc}-status"></span>`);
   });
 
@@ -665,6 +666,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const b = z.object({ text: z.string().max(4000) }).safeParse(req.body);
     if (!p.success || !b.success) return reply.code(400).send('');
     await setGroupTeachingContext(p.data.gc, b.data.text);
+    // Auto-adapt this class's scheme the FIRST time it has substantial context (one-shot; background;
+    // self-stops at the £ cap). The flag in maybeAutoAdaptScheme prevents re-firing on later edits.
+    if (b.data.text.trim().length >= 30) void maybeAutoAdaptScheme(p.data.gc).catch((err) => app.log.error({ err }, 'auto scheme-adapt failed'));
     return reply.type('text/html').send(renderSavedStatus(`group-ctx-${p.data.gc}-status`));
   });
 
@@ -733,59 +737,32 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const p = AdaptParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
     const { gc, lp } = p.data;
-    const [master, current, info, history] = await Promise.all([
-      getLessonPlan(lp),
-      getAdaptation(gc, lp),
-      getGroupCourseInfo(gc),
-      recentGroupHistory(gc),
-    ]);
-    if (!master || !info) return reply.code(404).send('');
+    const outcome = await adaptLessonForClass(gc, lp); // adapts from recent lessons, else class context
+    if (outcome.status === 'notfound') return reply.code(404).send('');
+    const master = await getLessonPlan(lp);
+    if (!master) return reply.code(404).send('');
     const eff = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
+    const msg =
+      outcome.status === 'ok'
+        ? 'adapted ✓ — review and edit below; the change log records it'
+        : outcome.status === 'skip'
+          ? "Nothing to adapt from yet — add this class's teaching context, ability or access needs (the “this class's teaching context” panel), or teach a lesson, then try again."
+          : (outcome.message ?? 'AI unavailable — nothing changed.');
+    return reply.type('text/html').send(renderAdaptation(gc, lp, eff, msg));
+  });
 
-    if (history.length === 0) {
-      return reply.type('text/html').send(renderAdaptation(gc, lp, eff, 'No recent lessons recorded for this group yet — teach one (stopping point / notes) first.'));
-    }
-
-    // 10.15: make adapt misconception-aware — fold in what this class recently got wrong (anonymous).
-    const misses = (await marksEnabled()) ? await recentClassMisses(gc) : [];
-
-    const result = await callLLMStructured(
-      {
-        feature: 'adapt_lesson',
-        model: await modelForFeature('adapt_lesson', 'plan'),
-        promptVersion: ADAPT_LESSON_VERSION,
-        system: ADAPT_LESSON_SYSTEM,
-        context: [
-          ...(await standingPrefItems()),
-          ...(await conceptItemsFor(info.courseId)),
-          ...(await accessItemsFor(gc)),
-          ...(await paceItemsFor(gc)),
-          ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
-          ...abilityItem(await getGroupAbility(gc)),
-          ...equipmentItem(await listActiveEquipment()),
-          lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),
-          ...historyItems(history),
-          ...(misses.length ? [missesItem(misses)] : []),
-        ],
-        instruction: adaptLessonInstruction(info.courseName, info.groupName),
-        maxTokens: 4000,
-      },
-      adaptLessonSchema,
-    );
-    if (result.status !== 'ok' || !result.data) {
-      return reply.type('text/html').send(renderAdaptation(gc, lp, eff, result.message ?? 'AI unavailable — nothing changed.'));
-    }
-    await upsertAdaptation({
-      groupCourseId: gc,
-      lessonPlanId: lp,
-      objectives: result.data.objectives.trim() || null,
-      outline: result.data.outline.trim() || null,
-      adaptationNote: result.data.adaptationNote.trim() || null,
-      changeSummary: `AI: ${result.data.changeSummary.trim() || 'adapted from recent lessons'}`,
-      author: 'ai',
-    });
-    const updated = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
-    return reply.type('text/html').send(renderAdaptation(gc, lp, updated, 'adapted ✓ — review and edit below; the change log records it'));
+  // Adapt EVERY lesson of this class's scheme (idea: enable adapt for schemes). Confirmed by the
+  // button; runs in the background and self-stops at the £ cap (each call checks it via the wrapper).
+  app.post('/lesson/gc/:gc/adapt-scheme', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const info = await getGroupCourseInfo(p.data.gc);
+    const scheme = info ? await getActiveScheme(info.courseId) : null;
+    if (!scheme) return reply.type('text/html').send('<p class="muted">No active scheme of work for this class yet.</p>');
+    const lessons = await schemeLessons(scheme.id);
+    if (lessons.length === 0) return reply.type('text/html').send('<p class="muted">This scheme has no lessons yet.</p>');
+    void adaptSchemeForClass(p.data.gc).catch((err) => app.log.error({ err }, 'scheme adapt (manual) failed'));
+    return reply.type('text/html').send(`<p class="ok">Adapting ${lessons.length} lesson${lessons.length === 1 ? '' : 's'} for this class in the background — refresh in a minute to see them.</p>`);
   });
 
 

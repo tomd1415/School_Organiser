@@ -383,18 +383,25 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const post = (url: string) =>
       app.inject({ method: 'POST', url, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: '' });
     try {
-      // no taught lessons for this gc in the past → friendly message, no AI call attempted
+      // no taught lessons AND no class context → friendly "nothing to adapt from" message, no AI call
       const gcFresh = await pool.query<{ id: number }>(
         `SELECT gc.id FROM group_courses gc
-         WHERE NOT EXISTS (
+         WHERE gc.teaching_context IS NULL AND gc.ability_midpoint IS NULL AND gc.guided_access IS NULL
+           AND NOT EXISTS (
            SELECT 1 FROM occurrence_courses oc JOIN lesson_occurrences o ON o.id = oc.occurrence_id
            WHERE oc.group_course_id = gc.id AND o.date <= CURRENT_DATE
              AND (oc.stopping_point IS NOT NULL OR EXISTS (SELECT 1 FROM notes n WHERE n.occurrence_id = o.id AND n.body <> '')))
          LIMIT 1`,
       );
       if (gcFresh.rows[0]) {
-        const r0 = await post(`/lesson/adapt/${Number(gcFresh.rows[0].id)}/${planId}/ai`);
-        expect(r0.body).toContain('No recent lessons recorded');
+        const fid = Number(gcFresh.rows[0].id);
+        const r0 = await post(`/lesson/adapt/${fid}/${planId}/ai`);
+        expect(r0.body).toContain('Nothing to adapt from yet'); // no history + no context → refuse
+        // ...but WITH class context (still no history) it now PROCEEDS to adapt (AI off → degrade, not refuse).
+        await pool.query(`UPDATE group_courses SET teaching_context = $2 WHERE id = $1`, [fid, 'This class needs short chunked tasks and lots of recap.']);
+        const r1 = await post(`/lesson/adapt/${fid}/${planId}/ai`);
+        expect(r1.body).not.toContain('Nothing to adapt from yet');
+        await pool.query(`UPDATE group_courses SET teaching_context = NULL WHERE id = $1`, [fid]);
       }
       // give OUR gc some history (past occurrence with a stopping point), then the AI gate degrades
       const occ = await pool.query<{ id: number }>(
