@@ -253,6 +253,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           <li>🤖 AI calls this month: ${health.aiMonth}</li>
           <li>💾 backups: run <code>scripts/backup.sh</code> on a schedule (encrypted at rest) — disaster recovery in <code>docs/RUNBOOK.md</code></li>
           <li>${backupVerified ? `✅ last restore-drill verified: <strong>${esc(backupVerified)}</strong>` : '⚠ no verified restore yet — run <code>scripts/verify-backup.sh</code> (a backup you can\'t restore isn\'t a backup)'}</li>
+          <li>${emOn === 'true' ? `📧 email intake: ${emLast ? esc(emLast) : 'on, not polled yet'}` : '📧 email intake off'}</li>
         </ul>
         <p class="muted">Setup checklist: <a href="/welcome">/welcome</a> · September: <a href="/setup/rollover">rollover wizard</a></p>
       </section>`;

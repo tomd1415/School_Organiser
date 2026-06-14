@@ -206,6 +206,7 @@ export function renderAllSchemes(schemes: SchemeListRow[], currentId?: number): 
       (s) => `<li${Number(s.id) === currentId ? ' class="current"' : ''}>
         <a href="/schemes?course=${s.courseId}&scheme=${s.id}">${esc(s.title)}</a>
         <span class="muted">· ${esc(s.courseName)} · ${s.units}u / ${s.plans}L</span> ${chips(s.labels)}
+        <a class="link" href="/schemes/${s.id}/export" title="export this scheme to a file to share with a colleague">⬇ share</a>
       </li>`,
     )
     .join('');

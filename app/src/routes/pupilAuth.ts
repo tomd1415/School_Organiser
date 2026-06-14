@@ -133,8 +133,9 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
     // Throttle class-code guessing — without this, a script can sweep codes and harvest each
     // matched class's roster (the names list is intentionally shown, but not to be brute-forced).
-    if (!allowAttempt(`code:${req.ip}`, 20, 60_000)) {
-      return reply.type('text/html').send(stepError(csrf, 'Too many tries — wait a minute and start again.'));
+    // A per-minute burst cap AND a daily cap (10.28) — the latter stops a slow all-day sweep.
+    if (!allowAttempt(`code:${req.ip}`, 20, 60_000) || !allowAttempt(`codeday:${req.ip}`, 300, 86_400_000)) {
+      return reply.type('text/html').send(stepError(csrf, 'Too many tries — wait a while and start again.'));
     }
     const b = z.object({ code: z.string().min(1).max(40) }).safeParse(req.body);
     if (!b.success) return reply.type('text/html').send(stepError(csrf, 'Type your class code.'));

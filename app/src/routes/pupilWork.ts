@@ -189,7 +189,7 @@ function renderMarkingBar(oc: number, info: OcInfo, scheme: Awaited<ReturnType<t
        <button type="button" class="link" hx-post="/lesson/oc/${oc}/confirm-all" hx-target="#pw-${oc}" hx-swap="outerHTML">confirm all confident</button>`;
   const releaseBtn =
     settings.resultsMode === 'on_release'
-      ? ` <button type="button" class="link" hx-post="/lesson/oc/${oc}/release" hx-vals='{"release":"${released ? 'false' : 'true'}"}' hx-target="#pw-${oc}" hx-swap="outerHTML">${released ? 'un-release marks' : '📣 Release marks to pupils'}</button>`
+      ? ` <button type="button" class="link" hx-post="/lesson/oc/${oc}/release" hx-vals='{"release":"${released ? 'false' : 'true'}"}' hx-target="#pw-${oc}" hx-swap="outerHTML"${released ? ' hx-confirm="Hide these marks from pupils again? They may already have seen them."' : ''}>${released ? 'un-release marks' : '📣 Release marks to pupils'}</button>`
       : `<span class="muted" title="results show as you confirm">results: instant</span>`;
   const sel = (key: string, val: string, opts: Array<[string, string]>): string =>
     `<select hx-post="/lesson/oc/${oc}/mark-setting" hx-vals='js:{"key":"${key}","value":event.target.value}' hx-trigger="change" hx-swap="none">${opts.map(([v, label]) => `<option value="${v}"${v === val ? ' selected' : ''}>${label}</option>`).join('')}</select>`;

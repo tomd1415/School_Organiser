@@ -7,6 +7,9 @@ import {
   addUnit,
   cloneSchemeNewVersion,
   createScheme,
+  exportScheme,
+  importScheme,
+  type SchemeExport,
   deletePlan,
   deleteScheme,
   deleteUnit,
@@ -201,6 +204,16 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             ${tree}
             <h2 class="sch-divider">Add or import content</h2>
             ${renderConvertPanel(courseId, courseSlots, today)}
+            <details class="scheme-import">
+              <summary>📥 Import a shared scheme (from a colleague's file)</summary>
+              <p class="muted">Paste a scheme JSON exported from another instance (the ⬇ share link below). It's added as a new scheme on <strong>${esc(current?.name ?? '')}</strong> — no pupil data, nothing sent anywhere.</p>
+              <form hx-post="/schemes/import" hx-target="#scheme-import-result" hx-swap="innerHTML">
+                <input type="hidden" name="course" value="${courseId}">
+                <textarea name="json" rows="5" placeholder='{"version":1,"schemeTitle":"…","units":[…]}' style="width:100%"></textarea>
+                <button type="submit" class="btn-secondary">Import scheme</button>
+              </form>
+              <div id="scheme-import-result"></div>
+            </details>
             <h2 class="sch-divider">Reference &amp; admin</h2>
             <details class="kit-avail" id="kit-avail">
               <summary>🔧 Kit available</summary>
@@ -214,6 +227,35 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       body = `<section class="card"><h1>Schemes of work</h1><p class="muted">Unavailable — the database is not reachable.</p></section>`;
     }
     return reply.type('text/html').send(layout({ title: 'Schemes', body, authed: true, csrfToken: csrf }));
+  });
+
+  // 10.27 — export one scheme to a JSON file a colleague can import (no pupil data; file-based).
+  app.get('/schemes/:id/export', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const data = await exportScheme(p.data.id);
+    if (!data) return reply.code(404).type('text/html').send('<p class="muted">No such scheme.</p>');
+    return reply
+      .type('application/json')
+      .header('content-disposition', `attachment; filename="scheme-${p.data.id}.json"`)
+      .send(JSON.stringify(data, null, 2));
+  });
+
+  app.post('/schemes/import', guard, async (req, reply) => {
+    const b = z.object({ course: z.coerce.number().int().positive(), json: z.string().max(2_000_000) }).safeParse(req.body);
+    if (!b.success) return reply.code(400).type('text/html').send('<p class="error">Nothing to import.</p>');
+    let data: SchemeExport;
+    try {
+      const parsed = JSON.parse(b.data.json) as SchemeExport;
+      if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.units)) throw new Error('shape');
+      data = parsed;
+    } catch {
+      return reply.type('text/html').send('<p class="error">That doesn\'t look like a scheme export (need a version-1 JSON with units).</p>');
+    }
+    const schemeId = await importScheme(b.data.course, data);
+    if (!schemeId) return reply.type('text/html').send('<p class="error">Could not import — the course is missing.</p>');
+    const lessons = data.units.reduce((n, u) => n + (u.lessons?.length ?? 0), 0);
+    return reply.type('text/html').send(`<p class="adapt-note">Imported "${esc(data.schemeTitle)}" — ${data.units.length} unit(s), ${lessons} lesson(s). <a href="/schemes?course=${b.data.course}&scheme=${schemeId}">Open it →</a></p>`);
   });
 
   app.post('/schemes/create', guard, async (req, reply) => {

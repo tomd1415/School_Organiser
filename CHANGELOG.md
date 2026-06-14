@@ -7,6 +7,38 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Phase 10 Track F BUILT → Phase 10 complete: MIS import (10.26), scheme sharing (10.27), tech-debt (10.28)
+
+The last track. **Phase 10 is now complete** across all six tracks (with a few documented optional
+follow-ons noted below).
+
+- **10.26 MIS CSV import** — paste a SIMS/Arbor (or any) export on the Pupils page; a dependency-free
+  CSV parser ([lib/csv.ts](../app/src/lib/csv.ts)) + tolerant importer ([services/misImport.ts](../app/src/services/misImport.ts))
+  detect a name column (or Forename + Surname) and a class/group column, then create/match pupils,
+  classes and enrolments — **idempotent** (re-importing a corrected file matches by name, no
+  duplicates). Names stay local; nothing sent anywhere. The single biggest September setup friction,
+  gone.
+- **10.27 File-based scheme sharing** — `⬇ share` exports one scheme to JSON (full content: units +
+  lessons with objectives + outline, no pupil data); a 📥 import box on the Schemes page brings a
+  colleague's file in as a new scheme on the current course. No cross-instance network. Round-trip
+  proven by test (`exportScheme`/`importScheme`).
+- **10.28 Tech-debt quick wins** — un-release now asks for confirmation (pupils may already have seen
+  the marks); a **daily** roster-enumeration cap (300/day per IP) added alongside the per-minute burst
+  cap on `/pupil/names`; the Data-health panel now shows the email-intake status at a glance.
+- **246 unit / 169 integration green; typecheck clean.** New tests: CSV parser (quotes/escapes/CRLF),
+  MIS import (create + idempotent + bad-columns), scheme export/import round-trip.
+
+**Optional follow-ons left for later** (low value or large internal churn, none user-blocking):
+the 10.27 onboarding micro-conveniences (day-shape templates, sample-data mode, rollover
+carry-adaptations / recurring-pattern copy / one-click next-year); the 10.28 raw-SQL→repos refactor
+and per-autosave worksheet-meta caching; the 10.25 **planning-coverage** strip (needs forward
+timetable projection — future occurrences aren't materialised as rows); and a full multiple-choice
+worksheet input type for 10.14 (needs the worksheet parser + generator).
+
+**Phase 10 in total:** migrations `0024`–`0027`; every slice tested; the AI boundary and the
+no-pupil-name-to-AI / withhold-safeguarding invariants held throughout. Single-teacher only —
+multi-teacher remains parked in PHASE_MULTI_TEACHER_PLAN.
+
 ### 2026-06-14 — Phase 10: print packs (10.23), per-pupil page (10.24), input alternatives + picture PIN (10.14)
 
 Track E finished (bar the deferred coverage strip) and the Track C stretch landed.

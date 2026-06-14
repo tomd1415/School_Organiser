@@ -18,6 +18,7 @@ import { revokeAllDevices } from '../repos/pupilDevices';
 import { createNote } from '../repos/notes';
 import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
+import { importRoster } from '../services/misImport';
 
 function renderPupil(p: RosterEntry): string {
   return `<li class="pupil${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
@@ -116,6 +117,17 @@ export function registerPupilRoutes(app: FastifyInstance): void {
           <button type="submit" class="btn-secondary">Add</button>
         </form>
         <ul class="pupil-list" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
+        <details class="mis-import">
+          <summary>⬆ Import from MIS (CSV)</summary>
+          <p class="muted">Paste a SIMS/Arbor export (or any CSV). Needs a <strong>name</strong> column (or
+            Forename + Surname) and a <strong>class/group</strong> column. Re-importing a corrected file is safe —
+            pupils and classes are matched by name, never duplicated. Names stay local; nothing is sent anywhere.</p>
+          <form hx-post="/pupils/import" hx-target="#mis-result" hx-swap="innerHTML">
+            <textarea name="csv" rows="6" placeholder="Name,Class&#10;Alex Smith,8B&#10;Sam Jones,8B" style="width:100%"></textarea>
+            <button type="submit" class="btn-secondary">Import</button>
+          </form>
+          <div id="mis-result"></div>
+        </details>
         ${renderDisposals(await listDisposals())}
       </section>`;
 
@@ -145,6 +157,15 @@ export function registerPupilRoutes(app: FastifyInstance): void {
     const b = z.object({ name: z.string().trim().min(1).max(120) }).safeParse(req.body);
     if (!b.success) return reply.code(400).send('');
     return reply.type('text/html').send(renderPupil(await createPupil(b.data.name)));
+  });
+
+  // 10.26 — import a roster from an MIS CSV export (idempotent; matched by name).
+  app.post('/pupils/import', guard, async (req, reply) => {
+    const b = z.object({ csv: z.string().max(1_000_000) }).safeParse(req.body);
+    if (!b.success) return reply.code(400).type('text/html').send('<p class="error">Nothing to import.</p>');
+    const r = await importRoster(b.data.csv);
+    if (!r.ok) return reply.type('text/html').send(`<p class="error">${esc(r.message)}</p>`);
+    return reply.type('text/html').send(`<p class="adapt-note">${esc(r.message)}</p><p class="muted"><a href="/pupils">Refresh the roster</a> to see them.</p>`);
   });
 
   for (const [verb, active] of [

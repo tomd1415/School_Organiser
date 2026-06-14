@@ -948,3 +948,6 @@ html[data-textscale="3"] { font-size: 142%; }
 .pin-key:active { background: #eef4ff; }
 .word-bank { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.3rem 0 0.6rem; }
 .word-chip { font: inherit; cursor: pointer; border: 2px solid var(--accent); border-radius: 999px; background: #eef4ff; padding: 0.3rem 0.7rem; min-height: 2.4rem; }
+
+/* 10.26/10.27 — import boxes */
+.mis-import textarea, .scheme-import textarea { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem; }

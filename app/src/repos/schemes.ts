@@ -208,6 +208,80 @@ export async function listPlansForScheme(schemeId: number): Promise<PlanRow[]> {
   return rows;
 }
 
+// ── 10.27 File-based scheme sharing — export one scheme to JSON, import it into another instance.
+// No pupil data, no cross-instance network: a colleague shares a file. Carries the full content
+// (units + lessons with objectives + outline), not just titles.
+export interface SchemeExport {
+  version: 1;
+  schemeTitle: string;
+  courseName: string;
+  units: Array<{ title: string; lessons: Array<{ title: string; objectives: string | null; outline: string | null }> }>;
+}
+
+export async function exportScheme(schemeId: number): Promise<SchemeExport | null> {
+  const s = await pool.query<{ title: string; courseName: string }>(
+    `SELECT s.title, c.name AS "courseName" FROM schemes_of_work s JOIN courses c ON c.id = s.course_id WHERE s.id = $1`,
+    [schemeId],
+  );
+  if (!s.rows[0]) return null;
+  const [units, plans] = await Promise.all([listUnits(schemeId), listPlansForScheme(schemeId)]);
+  const plansByUnit = new Map<number, PlanRow[]>();
+  for (const p of plans) {
+    if (p.unitId == null) continue;
+    const arr = plansByUnit.get(p.unitId);
+    if (arr) arr.push(p);
+    else plansByUnit.set(p.unitId, [p]);
+  }
+  return {
+    version: 1,
+    schemeTitle: s.rows[0].title,
+    courseName: s.rows[0].courseName,
+    units: units.map((u) => ({
+      title: u.title,
+      lessons: (plansByUnit.get(u.id) ?? [])
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((p) => ({ title: p.title, objectives: p.objectives, outline: p.outline })),
+    })),
+  };
+}
+
+/** Import a shared scheme into a course (creates scheme + units + plans with their content). */
+export async function importScheme(courseId: number, data: SchemeExport): Promise<number | null> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const course = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
+    if (!course.rows[0]) { await client.query('ROLLBACK'); return null; }
+    const s = await client.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title) VALUES ($1, $2) RETURNING id`,
+      [courseId, (data.schemeTitle || `${course.rows[0].name} — Scheme of Work`).slice(0, 200)],
+    );
+    const schemeId = s.rows[0]!.id;
+    let uOrder = 0;
+    for (const u of data.units ?? []) {
+      const ur = await client.query<{ id: number }>(
+        `INSERT INTO units (scheme_id, title, display_order) VALUES ($1, $2, $3) RETURNING id`,
+        [schemeId, (u.title ?? 'Unit').slice(0, 200), uOrder++],
+      );
+      const unitId = ur.rows[0]!.id;
+      let pOrder = 0;
+      for (const lesson of u.lessons ?? []) {
+        await client.query(
+          `INSERT INTO lesson_plans (unit_id, course_id, title, objectives, outline, display_order) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [unitId, courseId, (lesson.title ?? 'Lesson').slice(0, 200), lesson.objectives ?? null, lesson.outline ?? null, pOrder++],
+        );
+      }
+    }
+    await client.query('COMMIT');
+    return schemeId;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 // 5.3: append a converted unit (full lessons, objectives + outline) to an existing scheme,
 // atomically. Returns the new unit id, or null if the scheme is gone.
 export async function materialiseUnit(

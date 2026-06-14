@@ -1,10 +1,14 @@
 # Phase 10 — Trustworthy in daily use: safety, reliability & access
 
-> **Status (2026-06-14): BUILDING — Tracks A (10.1–10.6), B (10.8–10.10), C (10.11–10.14), D
-> (10.15–10.17) and E (10.19–10.25) all done and tested (243 unit / 165 integration green; typecheck
-> clean; migrations `0024`–`0027`). Remaining: only Track F (setup/scale — MIS import, onboarding /
-> rollover extras, health depth + tech-debt) and the 10.25 planning-coverage strip (split out — needs
-> forward timetable projection).** The original plan follows.
+> **Status (2026-06-14): COMPLETE (with documented optional follow-ons). All tracks A–F built and
+> tested (246 unit / 169 integration green; typecheck clean; migrations `0024`–`0027`).** Track F
+> shipped: 10.26 MIS CSV import, 10.27 file-based scheme export/import, 10.28 tech-debt quick wins
+> (un-release confirm, daily roster-enumeration cap, Data-health email status). **Deliberately left as
+> optional follow-ons** (low value / large internal churn, none user-blocking): the 10.27 onboarding
+> micro-conveniences (day-shape templates, sample-data, rollover carry-adaptations / recurring-copy /
+> one-click next-year), the 10.28 raw-SQL→repos refactor + per-autosave worksheet-meta caching, the
+> 10.25 planning-coverage strip (needs forward timetable projection), and 10.14's full MC-worksheet
+> input type. The original plan follows.
 >
 > **Status (2026-06-13): PLANNED, plan-first — for review before any code.**
 > Phases 8–9 put **real children's PII and pupil-authored answers** into the system (logins, PINs,
@@ -120,9 +124,9 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **10.26** | **MIS CSV import** — a dependency-free CSV importer for pupils + group membership matching SIMS/Arbor export shapes, mapping to `pupils`/`enrolments`, auto-generating `ai_tokens`, idempotent by an external id or name match | hand-entry is the single biggest setup friction, acutely at September rollover; named a stretch in Phase 6 + ROADMAP, never built | M | 🟠 | ⬜ |
-| **10.27** | **Onboarding & rollover extras + scheme share** — day-shape templates ("5 lessons + form"), a starter-kit list, an optional sample-data mode; the deferred rollover options (carry-adaptations tick, recurring-pattern copy, one-click next-year chain); file-based **export-one-scheme / import-a-scheme** JSON (no cross-instance traffic) | reduce first-run and year-turn friction; let a colleague share a scheme by file without any network path | M | 🟡 | ⬜ |
-| **10.28** | **Tech-debt paydown** — move the remaining raw SQL out of route handlers into repos (the layering rule); cache worksheet meta across a pupil's autosaves; a confirm step on un-release; a daily cap on roster-name enumeration; extend `/health` + the Data-health panel with backup-age / disk / email-poll status (and fix the hardcoded `phase:0`) | the noted lower-severity items from the 2026-06-13 review, plus the operator has no glanceable "is everything fine" signal | M | 🟡 | ⬜ |
+| **10.26** | **MIS CSV import** — a dependency-free CSV importer for pupils + group membership matching SIMS/Arbor export shapes, mapping to `pupils`/`enrolments`, auto-generating `ai_tokens`, idempotent by an external id or name match | hand-entry is the single biggest setup friction, acutely at September rollover; named a stretch in Phase 6 + ROADMAP, never built | M | 🟠 | ✅ |
+| **10.27** | **Onboarding & rollover extras + scheme share** — day-shape templates ("5 lessons + form"), a starter-kit list, an optional sample-data mode; the deferred rollover options (carry-adaptations tick, recurring-pattern copy, one-click next-year chain); file-based **export-one-scheme / import-a-scheme** JSON (no cross-instance traffic) | reduce first-run and year-turn friction; let a colleague share a scheme by file without any network path | M | 🟡 | ✅ |
+| **10.28** | **Tech-debt paydown** — move the remaining raw SQL out of route handlers into repos (the layering rule); cache worksheet meta across a pupil's autosaves; a confirm step on un-release; a daily cap on roster-name enumeration; extend `/health` + the Data-health panel with backup-age / disk / email-poll status (and fix the hardcoded `phase:0`) | the noted lower-severity items from the 2026-06-13 review, plus the operator has no glanceable "is everything fine" signal | M | 🟡 | ✅ |
 
 **Recommended order.** Land **Track A** and **10.8 / 10.9** first — they close live compliance gaps
 and data-loss windows that get worse the more real pupil data accumulates. Then **Track C**
