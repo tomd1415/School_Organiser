@@ -7,6 +7,26 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-13 — Phase 10.15 BUILT: retrieval-practice starters (Track D complete)
+
+The feedback loop closes: the marking data now flows back into planning.
+
+- **`recentClassMisses(groupCourseId)`** ([services/marking.ts](../app/src/services/marking.ts)) —
+  gathers what a class got wrong across its recent marked lessons: per-question success counts
+  (`markStatsByField`) with the question **text** resolved from each lesson's worksheet
+  (`worksheetAndScheme`), merged across lessons by question, filtered to low-success (<60% fully
+  right, ≥2 answers), worst first. **Anonymous** — cohort counts only, no pupil identity (proven by
+  test). New repo `recentMarkedOccurrenceCourses`.
+- **(b) The generator** — a **🔁 Retrieval starter (AI)** button in the lesson's adapt area asks a
+  cheap model for **3 short recall questions (+ model answers)** re-testing the weakest of those
+  ideas, ready for the board. New `retrieval_starter` prompt + schema. Gated by marking being on;
+  degrades gracefully when AI is off.
+- **(a) Adapt is now misconception-aware** — the "✨ Adapt from recent lessons" call folds the same
+  recent-misses block into its context, so re-planning is informed by what the class actually missed.
+- **243 unit / 159 integration green; typecheck clean.** *(Live AI generation degrades to
+  "unavailable" in tests, as always — verify against a real key with a throwaway smoke script.)*
+  10.14 (input alternatives) remains a stretch; Tracks E (daily-driver) and F (setup/scale) are next.
+
 ### 2026-06-13 — Phase 10 BUILT: optimistic concurrency (10.10) + close-the-loop (10.16, 10.17)
 
 - **10.10 Optimistic-concurrency on irreplaceable notes.** Note autosaves were blind last-write-wins,

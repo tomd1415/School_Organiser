@@ -201,4 +201,25 @@ describe('Phase 9 marking — safety invariants (integration)', () => {
     const screened = raw.map((a) => ({ ...a, answers: a.answers.filter((v) => !guardMatch(v)) })).filter((a) => a.answers.length > 0);
     expect(screened.flatMap((a) => a.answers).join(' | ')).not.toContain('hurt myself');
   });
+
+  it('recentClassMisses (10.15) surfaces a low-success question by its worksheet label, anonymously', async () => {
+    // A second pupil gets the same question wrong → the class "missed" it (Ada full + Ben zero).
+    const ben = Number((await pool.query<{ id: number }>(`INSERT INTO pupils (display_name, ai_token) VALUES ('ZZM Ben','PUPIL_ZM2') RETURNING id`)).rows[0]!.id);
+    const ansId = Number((await pool.query<{ id: number }>(`INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value) VALUES ($1,$2,$3,1,'t1.r1.c2','no idea') RETURNING id`, [ben, oc, resourceId])).rows[0]!.id);
+    await pool.query(`INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, marker, status) VALUES ($1, 0, 2, 'ai', 'suggested')`, [ansId]);
+    try {
+      const { recentClassMisses } = await import('../../src/services/marking');
+      const misses = await recentClassMisses(gc);
+      const m = misses.find((x) => x.question.toLowerCase().includes('list')); // "What is a list?"
+      expect(m).toBeDefined();
+      expect(m!.zero).toBeGreaterThanOrEqual(1);
+      expect(m!.total).toBeGreaterThanOrEqual(2);
+      // It carries cohort counts only — no pupil name anywhere in the structure.
+      expect(JSON.stringify(misses)).not.toContain('ZZM');
+    } finally {
+      await pool.query(`DELETE FROM pupil_marks WHERE pupil_answer_id=$1`, [ansId]);
+      await pool.query(`DELETE FROM pupil_answers WHERE id=$1`, [ansId]);
+      await pool.query(`DELETE FROM pupils WHERE id=$1`, [ben]);
+    }
+  });
 });

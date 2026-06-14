@@ -288,6 +288,21 @@ export interface FieldStat {
   partial: number;
   zero: number;
 }
+/** 10.15 — the group-course's recent occurrence-courses that actually have marks, newest first.
+ *  Source of "what this class got wrong recently" for retrieval-practice starters + adapt context. */
+export async function recentMarkedOccurrenceCourses(groupCourseId: number, limit: number): Promise<number[]> {
+  const { rows } = await pool.query<{ id: number }>(
+    `SELECT oc.id FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     WHERE oc.group_course_id = $1
+       AND EXISTS (SELECT 1 FROM pupil_answers a JOIN pupil_marks m ON m.pupil_answer_id = a.id WHERE a.occurrence_course_id = oc.id)
+     ORDER BY o.date DESC, oc.id DESC
+     LIMIT $2`,
+    [groupCourseId, limit],
+  );
+  return rows.map((r) => r.id);
+}
+
 export async function markStatsByField(occurrenceCourseId: number): Promise<FieldStat[]> {
   const { rows } = await pool.query<FieldStat>(
     `SELECT a.field_key AS "fieldKey",

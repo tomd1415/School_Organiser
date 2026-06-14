@@ -13,8 +13,10 @@ import {
   getComment,
   getMarkingSettings,
   getScheme,
+  markStatsByField,
   marksReleasedAt,
   occCoursePlan,
+  recentMarkedOccurrenceCourses,
   setSchemeStatus,
   upsertScheme,
   writeMark,
@@ -279,6 +281,45 @@ export async function markAll(occurrenceCourseId: number): Promise<{ objective: 
 }
 
 /** The worksheet + its scheme (with labels) for the inline editor / answer pack. Null if no plan/ws. */
+// ── 10.15 Retrieval-practice starters: what this class recently got wrong ───────────────────────
+export interface MissQuestion {
+  question: string;
+  full: number;
+  partial: number;
+  zero: number;
+  total: number;
+}
+
+/** The questions this class got wrong across its recent marked lessons — anonymous (cohort counts
+ *  only, no pupil identity), question text resolved from each lesson's worksheet, merged across
+ *  lessons by question, worst first. Empty when there isn't enough marked work yet. */
+export async function recentClassMisses(groupCourseId: number, maxOccurrences = 5, maxQuestions = 8): Promise<MissQuestion[]> {
+  const ocs = await recentMarkedOccurrenceCourses(groupCourseId, maxOccurrences);
+  const byQuestion = new Map<string, MissQuestion>();
+  for (const oc of ocs) {
+    const [stats, ws] = await Promise.all([markStatsByField(oc), worksheetAndScheme(oc)]);
+    if (!ws) continue;
+    for (const s of stats) {
+      const label = ws.labelByKey.get(s.fieldKey);
+      if (!label) continue; // checklist ticks / unmapped keys aren't questions
+      const total = s.full + s.partial + s.zero;
+      if (total < 2) continue; // too few answers to read anything into
+      const key = label.toLowerCase().trim();
+      const agg = byQuestion.get(key) ?? { question: label, full: 0, partial: 0, zero: 0, total: 0 };
+      agg.full += s.full;
+      agg.partial += s.partial;
+      agg.zero += s.zero;
+      agg.total += total;
+      byQuestion.set(key, agg);
+    }
+  }
+  const missWeight = (q: MissQuestion): number => (q.zero + 0.5 * q.partial) / q.total;
+  return [...byQuestion.values()]
+    .filter((q) => q.full / q.total < 0.6) // fewer than ~60% got it fully right
+    .sort((a, b) => missWeight(b) - missWeight(a))
+    .slice(0, maxQuestions);
+}
+
 export async function worksheetAndScheme(occurrenceCourseId: number): Promise<{
   resourceId: number;
   versionNo: number;

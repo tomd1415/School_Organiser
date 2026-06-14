@@ -46,6 +46,10 @@ import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
 import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, historyItems, lessonItem } from '../llm/prompts/adaptLesson';
+import { recentClassMisses } from '../services/marking';
+import { marksEnabled } from '../auth/marksGate';
+import { retrievalStarterSchema } from '../llm/schemas/retrievalStarter';
+import { RETRIEVAL_STARTER_SYSTEM, RETRIEVAL_STARTER_VERSION, RETRIEVAL_STARTER_INSTRUCTION, missesItem } from '../llm/prompts/retrievalStarter';
 import { improveMasterSchema } from '../llm/schemas/improveMaster';
 import { IMPROVE_MASTER_INSTRUCTION, IMPROVE_MASTER_SYSTEM, IMPROVE_MASTER_VERSION, masterPairItems } from '../llm/prompts/improveMaster';
 import { listActiveEquipment } from '../repos/equipment';
@@ -135,6 +139,8 @@ function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: st
         </form>
       </details>
       <button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt from recent lessons (AI)</button>
+      <button type="button" class="link fu-ai" title="3 quick recall questions re-testing what this class got wrong recently (AI)" hx-post="/lesson/gc/${gc}/retrieval-starter" hx-target="#starter-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">🔁 Retrieval starter (AI)</button>
+      <div id="starter-${gc}-${lp}"></div>
       ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
       <button type="button" class="link fu-ai" title="re-make the lesson's documents for this class from the master sheets + this adapted version; re-running updates them"
         hx-post="/lesson/adapt/${gc}/${lp}/resources-ai" hx-target="#adapt-res-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">📄 Adapt resources for this class (AI)</button>
@@ -626,6 +632,37 @@ export function registerLessonRoutes(app: FastifyInstance): void {
   // 5.5: the feedback loop — AI adapts this lesson for THIS group from its recent lessons
   // (stopping points + notes). Inputs go through the one wrapper: names redacted, safeguarding-
   // flagged notes withheld entirely, call audited. The master is never touched.
+  // 10.15 — retrieval-practice starter: 3 quick recall questions re-testing what this class got
+  // wrong recently. Cohort-level misses only (no pupil identity); gated by marking being on.
+  app.post('/lesson/gc/:gc/retrieval-starter', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    if (!(await marksEnabled())) return reply.type('text/html').send('<p class="muted">Auto-marking is off — no marked work to build a starter from yet.</p>');
+    const info = await getGroupCourseInfo(p.data.gc);
+    if (!info) return reply.code(404).send('');
+    const misses = await recentClassMisses(p.data.gc);
+    if (misses.length === 0) return reply.type('text/html').send('<p class="muted">Not enough recently-marked work to build a starter yet — mark a lesson or two first.</p>');
+    const result = await callLLMStructured(
+      {
+        feature: 'retrieval_starter',
+        model: await modelFor('cheap'),
+        promptVersion: RETRIEVAL_STARTER_VERSION,
+        system: RETRIEVAL_STARTER_SYSTEM,
+        context: [missesItem(misses)],
+        instruction: RETRIEVAL_STARTER_INSTRUCTION,
+        maxTokens: 800,
+      },
+      retrievalStarterSchema,
+    );
+    if (result.status !== 'ok' || !result.data) {
+      return reply.type('text/html').send(`<p class="error">${esc(result.message ?? 'AI unavailable right now.')}</p>`);
+    }
+    const items = result.data.questions
+      .map((q, i) => `<li><strong>${i + 1}. ${esc(q.question)}</strong><br><span class="muted">answer: ${esc(q.answer)}</span></li>`)
+      .join('');
+    return reply.type('text/html').send(`<div class="retrieval-starter"><p class="adapt-note">🔁 Starter — recall what this class found hard recently:</p><ol class="starter-list">${items}</ol></div>`);
+  });
+
   app.post('/lesson/adapt/:gc/:lp/ai', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
     const p = AdaptParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
@@ -643,6 +680,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       return reply.type('text/html').send(renderAdaptation(gc, lp, eff, 'No recent lessons recorded for this group yet — teach one (stopping point / notes) first.'));
     }
 
+    // 10.15: make adapt misconception-aware — fold in what this class recently got wrong (anonymous).
+    const misses = (await marksEnabled()) ? await recentClassMisses(gc) : [];
+
     const result = await callLLMStructured(
       {
         feature: 'adapt_lesson',
@@ -655,6 +695,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           ...equipmentItem(await listActiveEquipment()),
           lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),
           ...historyItems(history),
+          ...(misses.length ? [missesItem(misses)] : []),
         ],
         instruction: adaptLessonInstruction(info.courseName, info.groupName),
         maxTokens: 4000,
