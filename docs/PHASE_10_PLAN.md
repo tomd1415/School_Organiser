@@ -1,11 +1,11 @@
 # Phase 10 — Trustworthy in daily use: safety, reliability & access
 
 > **Status (2026-06-14): BUILDING — Tracks A (10.1–10.6), B (10.8–10.10), C (10.11–10.13), D
-> (10.15–10.17) done, plus Track E's front door (10.19 global search, 10.20 capture-anywhere +
-> in-the-moment prep, 10.21 keyboard/cheat-sheet). Tested (243 unit / 161 integration green; typecheck
-> clean; migrations `0024`–`0026`). Remaining: Track E 10.22 (live monitor), 10.23 (print packs),
-> 10.24 (per-pupil page), 10.25 (timer + coverage); Track C 10.14 (input alternatives — stretch);
-> Track F (setup/scale).** The original plan follows.
+> (10.15–10.17) done; Track E 10.19–10.22 + 10.25 done (global search, capture-anywhere + prep,
+> keyboard, live class monitor + marks-waiting card, activity timer). Tested (243 unit / 162
+> integration green; typecheck clean; migrations `0024`–`0026`). Remaining: Track E 10.23 (print
+> packs), 10.24 (per-pupil page), the 10.25 planning-coverage strip (needs timetable projection);
+> Track C 10.14 (stretch); Track F (setup/scale).** The original plan follows.
 >
 > **Status (2026-06-13): PLANNED, plan-first — for review before any code.**
 > Phases 8–9 put **real children's PII and pupil-authored answers** into the system (logins, PINs,
@@ -112,10 +112,10 @@ L ≈ 3+ days. **Priority**: 🔴 ship-blocker (do before pupil data scales), �
 | **10.19** | **Global search / jump-to** — a `/search` route + top-bar box (focus with `/`) running ILIKE/FTS across notes, tasks, captured, events, lesson plans, resources and group/course names, returning grouped deep links | Spec 5.11 is a **Must** ("one search box that finds lessons, notes, tasks, resources, pupils"); there is no search anywhere — you must know which of 17 pages a thing lives on. Pupil results are local-only, never sent to AI | M | 🟠 | ✅ |
 | **10.20** | **Capture-from-anywhere + in-the-moment prep** — a persistent "+ capture" control in the topbar (writes straight to the captured store via the 10.17 path) on every authed page; `POST` routes to **add** a one-off "before the bell" prep item / day-checklist item inline from the lesson and Now screens | Spec 5.17 (M) "frictionless capture" / 5.4 (C) "single keystroke from anywhere" — today capture needs a trip to `/captured`, and prep items are toggle-only (can't add "print 8 worksheets for Y10" against a lesson) | M | 🟠 | ✅ |
 | **10.21** | **Keyboard shortcuts + command palette** — extend `app.js` (only `n`=new-note today) with `g n/t/f/k` jumps, `?` cheat-sheet, `/` to focus search, and a `Ctrl/⌘-K` palette listing classes-today + nav targets | the stated principle is "keyboard-fast, nothing requires the mouse"; for a tool opened in short bursts all day this is a daily multiplier | S | 🟡 | ✅ |
-| **10.22** | **Live class monitor + marking backlog** — an opt-in signature-guarded poll on the `#pw-{oc}` grid (the pattern Now/Focus already use) so completion/saved/done/marks refresh during the lesson; a "Marks waiting" card on Now/Focus (suggested / needs-review / confirmed-but-unreleased counts, deep-linked), gated off when auto-marking is off | the grid loads once and goes stale the moment the teacher walks away; unconfirmed AI marks pile up across classes with no daily surfacing | M | 🟡 | ⬜ |
+| **10.22** | **Live class monitor + marking backlog** — an opt-in signature-guarded poll on the `#pw-{oc}` grid (the pattern Now/Focus already use) so completion/saved/done/marks refresh during the lesson; a "Marks waiting" card on Now/Focus (suggested / needs-review / confirmed-but-unreleased counts, deep-linked), gated off when auto-marking is off | the grid loads once and goes stale the moment the teacher walks away; unconfirmed AI marks pile up across classes with no daily surfacing | M | 🟡 | ✅ |
 | **10.23** | **Print packs** — `/lesson/:id/print` (effective plan + resources + last stopping-point), `/today/print` (all of today's own + overseen lessons as a cover/briefing sheet), and a "Cover for `<date>`" pack reusing the TA effective-plan view + print CSS | the teacher can print pupil cards and answer packs but **not their own lesson** or a cover sheet to hand a cover teacher; cover-setting is an unbuilt same-morning need | M | 🟡 | ⬜ |
 | **10.24** | **Per-pupil page (progress + notes)** — one pupil's running notes (reuse the **existing** `notes.pupil_id` FK), their marks history (from `pupilLessonResults`), and a one-tap per-unit traffic-light signal (on-track/behind/exceeding); teacher-only, never AI-fed as an individual | Spec 5.7 (S/C) is unbuilt — the Pupils page is login-only, marking is per-lesson, and there is nowhere to see one pupil's trajectory or jot a standing note | M | 🟡 | ⬜ |
-| **10.25** | **Activity countdown + planning-coverage** — a set-N-minutes starter/activity countdown on the lesson page (castable big on the deck view); a coverage strip listing the next N school-day occurrences (own + overseen) with **no plan bound**, one click to bind | Spec 5.16 marks the activity timer a **Must**; unbound lessons (esp. TA-overseen) are only discovered when opened, often too late | S | 🟡 | ⬜ |
+| **10.25** | **Activity countdown + planning-coverage** — a set-N-minutes starter/activity countdown on the lesson page (castable big on the deck view); a coverage strip listing the next N school-day occurrences (own + overseen) with **no plan bound**, one click to bind | Spec 5.16 marks the activity timer a **Must**; unbound lessons (esp. TA-overseen) are only discovered when opened, often too late | S | 🟡 | ✅ |
 
 ### Track F — Setup, scale & tech-debt
 

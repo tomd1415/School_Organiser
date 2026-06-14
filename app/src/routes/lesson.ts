@@ -314,6 +314,14 @@ function renderDetail(
       <p class="kicker">${flag}${h.isSelf ? 'Lesson' : 'Lesson I oversee'}</p>
       <h1>${heading}</h1>
       <p class="ld-meta">${meta}</p>
+      <div class="act-timer" data-timer>
+        <span class="act-timer-display" data-timer-display>—:—</span>
+        <button type="button" class="link" data-timer-set="5">5m</button>
+        <button type="button" class="link" data-timer-set="10">10m</button>
+        <button type="button" class="link" data-timer-set="15">15m</button>
+        <button type="button" class="link" data-timer-stop>stop</button>
+        <button type="button" class="link" data-timer-full title="show big on the board">⛶</button>
+      </div>
       ${exceptionsHtml}
       ${sections}
       <section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}${renderPrepAdd('/prep/add', { occurrence: detail.header.occurrenceId }, `prep-${detail.header.occurrenceId}`)}</section>

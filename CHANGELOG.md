@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Phase 10 Track E: live class monitor + marks backlog (10.22), activity timer (10.25)
+
+- **10.22 Live class monitor + marks backlog.** The *Pupil work* grid now **auto-refreshes during a
+  lesson** via a signature-guarded 30s poll: when nothing changed the route returns **204** so HTMX
+  leaves the grid (and any open read-back) untouched; only real activity (a pupil saved / finished /
+  a mark landed) re-renders. A **"Marks waiting"** card on Now lists recent classes with marks to
+  confirm or results to release (`marksBacklog`, gated by auto-marking), so unconfirmed AI marks
+  can't pile up unseen. Deep-links to each lesson.
+- **10.25 Activity/starter countdown timer** (Spec 5.16 Must). A set-N-minutes timer on the lesson
+  page (5/10/15m presets, stop) that counts down and can go **full-screen on the board** (⛶), with a
+  gentle flash at zero. Pure client-side (`app.js`), no persistence.
+- **243 unit / 162 integration green; typecheck clean.** New test: `marksBacklog` lists a recent
+  class with marks waiting. **Deferred:** the 10.25 *planning-coverage* strip (upcoming lessons with
+  no plan bound) needs forward timetable projection — future occurrences aren't materialised as rows
+  yet — so it's split out for its own design. Remaining Track E: 10.23 (print/cover packs), 10.24
+  (per-pupil page); then 10.14 (stretch) and Track F.
+
 ### 2026-06-14 — Phase 10 Track E front door BUILT: global search (10.19), capture-anywhere (10.20), keyboard (10.21)
 
 The "command centre" finally has a front door — the Spec-Must / Phase-7 polish that was deferred.

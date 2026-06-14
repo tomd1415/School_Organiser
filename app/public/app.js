@@ -121,4 +121,55 @@
   });
   // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
+
+  // 10.25 — activity/starter countdown timer (Spec 5.16). Pure client-side; set N minutes, it counts
+  // down on the lesson page and can go full-screen on the board; a gentle flash at zero.
+  (function () {
+    var bar = document.querySelector('[data-timer]');
+    if (!bar) return;
+    var display = bar.querySelector('[data-timer-display]');
+    var endAt = 0;
+    var tick = null;
+    var full = null;
+    function fmt(ms) {
+      if (ms < 0) ms = 0;
+      var s = Math.round(ms / 1000);
+      return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+    }
+    function paint() {
+      var left = endAt - Date.now();
+      var text = fmt(left);
+      if (display) display.textContent = text;
+      if (full) full.querySelector('.act-full-time').textContent = text;
+      if (left <= 0) {
+        clearInterval(tick); tick = null;
+        bar.classList.add('act-done');
+        if (full) full.classList.add('act-done');
+      }
+    }
+    function start(mins) {
+      endAt = Date.now() + mins * 60000;
+      bar.classList.remove('act-done');
+      if (full) full.classList.remove('act-done');
+      clearInterval(tick);
+      paint();
+      tick = setInterval(paint, 1000);
+    }
+    function stop() { clearInterval(tick); tick = null; endAt = 0; bar.classList.remove('act-done'); if (display) display.textContent = '—:—'; closeFull(); }
+    function openFull() {
+      if (full) return;
+      full = document.createElement('div');
+      full.className = 'act-full';
+      full.innerHTML = '<div class="act-full-time">' + (display ? display.textContent : '—:—') + '</div><p class="muted">tap to close</p>';
+      full.addEventListener('click', closeFull);
+      document.body.appendChild(full);
+    }
+    function closeFull() { if (full) { full.remove(); full = null; } }
+    bar.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t.hasAttribute('data-timer-set')) start(parseInt(t.getAttribute('data-timer-set'), 10));
+      else if (t.hasAttribute('data-timer-stop')) stop();
+      else if (t.hasAttribute('data-timer-full')) openFull();
+    });
+  })();
 })();

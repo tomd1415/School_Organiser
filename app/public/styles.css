@@ -905,3 +905,16 @@ html[data-textscale="3"] { font-size: 142%; }
 
 /* 10.20 — inline "+ add" prep input */
 .prep-add input[type=text] { font: inherit; padding: 0.3rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; width: 100%; max-width: 22rem; margin-top: 0.3rem; }
+
+/* 10.22 — live grid badge + marks-waiting card */
+.pw-live { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: #2e7d32; border: 1px solid #b6e0b6; border-radius: 999px; padding: 0 0.4rem; vertical-align: middle; }
+.now-marks .bell-list a { font-weight: 600; }
+
+/* 10.25 — activity/starter countdown timer */
+.act-timer { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: 8px; margin: 0.3rem 0 0.6rem; }
+.act-timer-display { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; min-width: 3.2rem; }
+.act-timer.act-done { background: #fff3bf; animation: act-flash 0.8s ease-in-out 3; }
+@keyframes act-flash { 50% { background: #ffe066; } }
+.act-full { position: fixed; inset: 0; background: #111; color: #fff; z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+.act-full-time { font-size: 22vw; font-variant-numeric: tabular-nums; font-weight: 800; }
+.act-full.act-done { background: #7a5c00; }

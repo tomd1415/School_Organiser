@@ -19,6 +19,8 @@ import { listUpcoming } from '../repos/events';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
 import { getDayChecklist, type PrepItem } from '../repos/prep';
+import { marksEnabled } from '../auth/marksGate';
+import { marksBacklog, type MarksBacklogRow } from '../repos/marking';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
@@ -252,6 +254,21 @@ function renderHeadsUp(items: CapturedItem[]): string {
   </div>`;
 }
 
+// 10.22 — the marking backlog, so unconfirmed AI marks / unreleased results can't pile up unseen.
+function renderMarksWaiting(rows: MarksBacklogRow[]): string {
+  if (rows.length === 0) return '';
+  const items = rows
+    .map((r) => {
+      const bits: string[] = [];
+      if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
+      if (r.unreleased) bits.push('ready to release');
+      const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
+      return `<li><a href="/lesson?lesson=${r.lessonId}&date=${esc(r.date)}">${esc(r.groupName)} · ${esc(r.courseName)}</a> <span class="muted">${esc(bits.join(', '))}</span>${flag}</li>`;
+    })
+    .join('');
+  return `<div class="now-card now-marks"><p class="kicker">Marks waiting</p><ul class="bell-list">${items}</ul></div>`;
+}
+
 function renderDayCard(part: 'start' | 'end', items: PrepItem[], date: string): string {
   return `<div class="now-card now-bell">
     <p class="kicker">${part === 'start' ? 'Start of day' : 'End of day'}</p>
@@ -320,6 +337,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const exToday = (await listExceptionsBetween(state.isoDate, state.isoDate)).length;
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
+      const marksWaiting = (await marksEnabled()) ? await marksBacklog() : [];
 
       // The "next session" card for the right column.
       let nextCard: string;
@@ -363,6 +381,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           </div>
           <div class="now-col now-col-next">
             ${nextCard}
+            ${renderMarksWaiting(marksWaiting)}
             ${renderBell(bell)}
             ${renderComingUp(events, state.isoDate)}
             ${renderHeadsUp(heads)}

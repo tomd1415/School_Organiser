@@ -91,6 +91,32 @@ function markCell(oc: number, pid: number, s: MarkSummary | undefined, released:
   return `<td class="pw-mark">${score}${flags}${released ? ' <span class="mk-released" title="released to pupil">📣</span>' : ''}${confirm}</td>`;
 }
 
+// 10.22 — a cheap signature of what the grid is showing, so the live poll only re-renders on REAL
+// change (a pupil saved / finished / a mark landed). When unchanged the route returns 204 and HTMX
+// leaves the grid — and any open read-back — untouched.
+function hashStr(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+function gridSigFrom(rows: Array<{ pupilId: number; filled: number; done: boolean; unseen: number; rating: number | null; lastSaved: string | null }>, summaries: Map<number, { marked: number; suggested: number; needsReview: number }>, released: boolean): string {
+  const raw =
+    rows
+      .map((r) => {
+        const s = summaries.get(r.pupilId);
+        return `${r.pupilId}.${r.filled}.${r.done ? 1 : 0}.${r.unseen}.${s?.marked ?? 0}.${s?.suggested ?? 0}.${s?.needsReview ?? 0}.${r.rating ?? 0}.${r.lastSaved ?? ''}`;
+      })
+      .join('|') + (released ? '|R' : '');
+  return hashStr(raw);
+}
+async function gridSignature(oc: number, info: OcInfo): Promise<string> {
+  const rows = await pupilWorkRows(oc, info.groupCourseId);
+  const marking = await marksEnabled();
+  const summaries = marking ? await markSummaries(oc) : new Map();
+  const released = marking ? (await marksReleasedAt(oc)) != null : false;
+  return gridSigFrom(rows, summaries, released);
+}
+
 async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<string> {
   const rows = await pupilWorkRows(oc, info.groupCourseId);
   // Total fillable fields per level (text inputs), so "n of m" matches the pupil's slice. Parse
@@ -120,6 +146,7 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
   const released = marking ? (await marksReleasedAt(oc)) != null : false;
   const showScores = settings?.showScores ?? false;
 
+  const sig = gridSigFrom(rows, summaries, released);
   const totalUnseen = rows.reduce((a, r) => a + r.unseen, 0);
   const body = rows
     .map((r) => {
@@ -136,8 +163,8 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
     })
     .join('');
 
-  return `<div class="pupil-work" id="pw-${oc}">
-    <h3>Pupil work ${totalUnseen > 0 ? `<span class="pw-new-count">${totalUnseen} new</span>` : ''}</h3>
+  return `<div class="pupil-work" id="pw-${oc}" hx-get="/lesson/oc/${oc}/pupil-work?sig=${sig}" hx-trigger="every 30s" hx-swap="outerHTML">
+    <h3>Pupil work <span class="pw-live" title="updates automatically during the lesson">live</span> ${totalUnseen > 0 ? `<span class="pw-new-count">${totalUnseen} new</span>` : ''}</h3>
     ${msg ? `<p class="adapt-note">${esc(msg)}</p>` : ''}
     <table class="pw-grid"><thead><tr><th>Pupil</th><th>Level</th><th>Done fields</th><th>Done ✓</th>${marking ? '<th>Marks</th>' : ''}<th>Lesson</th><th>Saved</th></tr></thead><tbody>${body}</tbody></table>
     <div class="pw-actions">
@@ -190,6 +217,10 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (!p.success) return reply.code(400).send('');
     const info = await ocInfo(p.data.id);
     if (!info) return reply.type('text/html').send('');
+    // 10.22: the live poll sends its last-seen signature — unchanged → 204 (HTMX won't swap, so an
+    // open read-back / in-progress action is never disrupted). Only real activity re-renders.
+    const sig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
+    if (sig !== null && sig === (await gridSignature(p.data.id, info))) return reply.code(204).send();
     return reply.type('text/html').send(await renderGrid(p.data.id, info));
   });
 

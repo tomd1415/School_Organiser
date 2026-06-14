@@ -288,6 +288,42 @@ export interface FieldStat {
   partial: number;
   zero: number;
 }
+// 10.22 — the marking backlog across recent classes: lessons with suggested marks to confirm, or
+// confirmed marks not yet released. Surfaced on Now so unconfirmed AI marks can't pile up unseen.
+export interface MarksBacklogRow {
+  occurrenceCourseId: number;
+  courseName: string;
+  groupName: string;
+  date: string;
+  lessonId: number;
+  suggested: number;
+  needsReview: number;
+  unreleased: boolean;
+}
+export async function marksBacklog(): Promise<MarksBacklogRow[]> {
+  const { rows } = await pool.query<MarksBacklogRow>(
+    `SELECT oc.id AS "occurrenceCourseId", c.name AS "courseName", g.name AS "groupName",
+            to_char(o.date, 'YYYY-MM-DD') AS date, o.timetabled_lesson_id AS "lessonId",
+            count(*) FILTER (WHERE m.status = 'suggested')::int AS suggested,
+            count(*) FILTER (WHERE m.needs_review)::int AS "needsReview",
+            (oc.marks_released_at IS NULL AND count(*) FILTER (WHERE m.status = 'confirmed') > 0) AS unreleased
+     FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     JOIN group_courses gc ON gc.id = oc.group_course_id
+     JOIN groups g ON g.id = gc.group_id
+     JOIN courses c ON c.id = gc.course_id
+     JOIN pupil_answers a ON a.occurrence_course_id = oc.id
+     JOIN pupil_marks m ON m.pupil_answer_id = a.id
+     WHERE o.date >= (now() - interval '21 days')::date
+     GROUP BY oc.id, c.name, g.name, o.date, o.timetabled_lesson_id, oc.marks_released_at
+     HAVING count(*) FILTER (WHERE m.status = 'suggested') > 0
+         OR (oc.marks_released_at IS NULL AND count(*) FILTER (WHERE m.status = 'confirmed') > 0)
+     ORDER BY o.date DESC
+     LIMIT 12`,
+  );
+  return rows;
+}
+
 /** 10.15 — the group-course's recent occurrence-courses that actually have marks, newest first.
  *  Source of "what this class got wrong recently" for retrieval-practice starters + adapt context. */
 export async function recentMarkedOccurrenceCourses(groupCourseId: number, limit: number): Promise<number[]> {
