@@ -49,7 +49,7 @@ import { conceptItemsFor } from '../services/teachingConcepts';
 import { accessItemsFor } from '../services/accessConstraints';
 import type { GuidedAccess } from '../llm/prompts/accessConstraints';
 import { callLLMStructured } from '../llm/client';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
 import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, historyItems, lessonItem } from '../llm/prompts/adaptLesson';
 import { recentClassMisses } from '../services/marking';
@@ -367,7 +367,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
   const standing = await standingPrefItems();
   const concepts = await conceptItemsFor(info.courseId);
   const access = await accessItemsFor(gc);
-  const modelChoice = await modelFor('plan');
+  const modelChoice = await modelForFeature('adapt_resources', 'plan');
   const courseCtx = await getCourseTeachingContext(info.courseId);
   const groupCtx = await getGroupTeachingContext(gc);
   const ability = await getGroupAbility(gc);
@@ -710,7 +710,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'retrieval_starter',
-        model: await modelFor('cheap'),
+        model: await modelForFeature('retrieval_starter', 'cheap'),
         promptVersion: RETRIEVAL_STARTER_VERSION,
         system: RETRIEVAL_STARTER_SYSTEM,
         context: [missesItem(misses)],
@@ -751,7 +751,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'adapt_lesson',
-        model: await modelFor('plan'),
+        model: await modelForFeature('adapt_lesson', 'plan'),
         promptVersion: ADAPT_LESSON_VERSION,
         system: ADAPT_LESSON_SYSTEM,
         context: [
@@ -818,7 +818,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'improve_master',
-        model: await modelFor('plan'),
+        model: await modelForFeature('improve_master', 'plan'),
         promptVersion: IMPROVE_MASTER_VERSION,
         system: IMPROVE_MASTER_SYSTEM,
         context: [

@@ -19,7 +19,7 @@ import { renderGenerateForm, renderResourceItem, renderResourceListPaged, render
 import { renderMarkdown } from '../lib/markdown';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { callLLMStructured } from '../llm/client';
 import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
@@ -98,7 +98,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'generate_resource',
-        model: await modelFor('plan'),
+        model: await modelForFeature('generate_resource', 'plan'),
         promptVersion: GENERATE_RESOURCE_VERSION,
         system: GENERATE_RESOURCE_SYSTEM,
         context: [...equipmentItem(await listActiveEquipment()), { text: b.data.brief }],

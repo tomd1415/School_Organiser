@@ -7,7 +7,8 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { hashPassword, verifyPassword } from '../lib/passwords';
 import { appConfig } from '../config/app';
-import { getSetting, setSetting, monthCapPence } from '../repos/settings';
+import { getSetting, setSetting, monthCapPence, getFeatureModelOverrides } from '../repos/settings';
+import { AI_FEATURES, MODEL_OPTIONS, KNOWN_MODEL_IDS, isFeatureModelKey } from '../llm/features';
 import { monthSpendPence, listAiCalls, getAiCall, spendByFeatureThisMonth, aiCallFeatures } from '../repos/aiCalls';
 import { pollEmailOnce } from '../services/emailPoll';
 import { pool } from '../db/pool';
@@ -27,6 +28,28 @@ function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): s
     <button type="button" class="link" hx-post="/settings/ta-account/${a.id}/password" hx-prompt="New password for ${esc(a.name)} (8+ characters)" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">reset password</button>
     <button type="button" class="link danger" hx-post="/settings/ta-account/${a.id}/delete" hx-confirm="Delete ${esc(a.name)}'s login?" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">✕</button>
   </li>`;
+}
+
+// idea 5 — the per-feature model picker. Each feature defaults to its role model; the teacher can
+// override individually. Only priced models are offered so cost estimates and the cap stay accurate.
+function renderFeatureModelPicker(overrides: Record<string, string>): string {
+  const rows = AI_FEATURES.map((f) => {
+    const sel = overrides[f.key] ?? '';
+    const opts = [`<option value=""${sel === '' ? ' selected' : ''}>Default — ${f.role} model</option>`]
+      .concat(MODEL_OPTIONS.map((m) => `<option value="${m.id}"${sel === m.id ? ' selected' : ''}>${esc(m.label)}</option>`))
+      .join('');
+    return `<label class="adapt-l">${esc(f.label)}${f.note ? ` <span class="muted">(${esc(f.note)})</span>` : ''}
+      <select hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_feature_${f.key}","value":event.target.value}' hx-trigger="change" hx-swap="none">${opts}</select></label>`;
+  }).join('');
+  return `<details class="ai-feature-models">
+    <summary>Per-feature models (advanced)</summary>
+    <p class="muted">Every feature uses its role model above by default. Override one if you want it
+      cheaper or stronger — e.g. dial a feature down to Haiku, or push scheme authoring to Opus. Only
+      models we have pricing for are listed, so the spend cap stays accurate. Tiers: <strong>Opus</strong>
+      strongest/priciest · <strong>Sonnet</strong> balanced · <strong>Haiku</strong> fastest/cheapest.</p>
+    ${rows}
+    <span class="note-status" id="ai-feat-status"></span>
+  </details>`;
 }
 
 export function registerSettingsRoutes(app: FastifyInstance): void {
@@ -85,6 +108,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         <strong>£${(spentPence / 100).toFixed(2)}</strong> of £${(capPence / 100).toFixed(2)} (${usedPct}% used)
         · <a href="/settings/ai-log">view the call log</a></p>`;
       const navDailySet = new Set(getNavDailyHrefs());
+      const featureModelPicker = renderFeatureModelPicker(await getFeatureModelOverrides());
       body = `
       <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Settings</h1>
@@ -152,6 +176,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           <label>Cheap model <input value="${esc(mCheap ?? '')}" placeholder="claude-haiku-4-5"
             hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_cheap","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
         </div>
+        ${featureModelPicker}
         <p class="muted">Standing instructions sent with every lesson/scheme/resource generation
           (cohort-level — <strong>never name a pupil</strong>). Style shapes <em>how</em> things are
           written; features are things to always include where they fit, without lengthening the lesson.</p>
@@ -320,7 +345,12 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
   };
   app.post('/settings/ai', guard, async (req, reply) => {
     const b = z.object({ key: z.string(), value: z.string().max(2000) }).safeParse(req.body);
-    if (!b.success || !(b.data.key in AI_KEY_CAP) || b.data.value.length > AI_KEY_CAP[b.data.key]!) return reply.code(400).send('');
+    if (!b.success) return reply.code(400).send('');
+    // Known fixed keys carry their own cap; per-feature model keys (idea 5) are allowed dynamically
+    // but their value must be empty (= use the role default) or a model we have pricing for.
+    const cap = b.data.key in AI_KEY_CAP ? AI_KEY_CAP[b.data.key]! : isFeatureModelKey(b.data.key) ? 100 : null;
+    if (cap === null || b.data.value.length > cap) return reply.code(400).send('');
+    if (isFeatureModelKey(b.data.key) && b.data.value.trim() !== '' && !KNOWN_MODEL_IDS.has(b.data.value.trim())) return reply.code(400).send('');
     if (b.data.key === 'ai_month_cap_pence' && b.data.value.trim() !== '' && !(Number(b.data.value) > 0)) return reply.code(400).send('');
     await setSetting(b.data.key, b.data.value.trim());
     return reply.send('');

@@ -10,7 +10,7 @@ import { fileCaptured } from '../repos/captured';
 import { createNote, updateNoteBody } from '../repos/notes';
 import { getSetting, setSetting } from '../repos/settings';
 import { callLLMStructured } from '../llm/client';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { emailTriageSchema, type EmailTriage } from '../llm/schemas/emailTriage';
 import { EMAIL_TRIAGE_SYSTEM, EMAIL_TRIAGE_VERSION, emailTriageInstruction, emailTriageItems } from '../llm/prompts/emailTriage';
 import { guardMatch } from '../lib/markSafetyGate';
@@ -57,7 +57,7 @@ async function triageEmail(m: ParsedMime, groupNames: string[]): Promise<EmailTr
   const result = await callLLMStructured(
     {
       feature: 'email_triage',
-      model: await modelFor('cheap'),
+      model: await modelForFeature('email_triage', 'cheap'),
       promptVersion: EMAIL_TRIAGE_VERSION,
       system: EMAIL_TRIAGE_SYSTEM,
       context: emailTriageItems({ subject: m.subject, from: m.from, text: m.text }),

@@ -16,7 +16,7 @@ import {
   toggleSubtaskDone,
   type SubStep,
 } from '../repos/tasks';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
 import { callLLMStructured } from '../llm/client';
@@ -163,7 +163,7 @@ export function registerFocusRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'task_breakdown',
-        model: await modelFor('cheap'),
+        model: await modelForFeature('task_breakdown', 'cheap'),
         promptVersion: TASK_BREAKDOWN_VERSION,
         system: TASK_BREAKDOWN_SYSTEM,
         context: [{ text: taskBreakdownInstruction(task.title, task.context) }],

@@ -26,7 +26,7 @@ import { getLessonWorksheetMeta } from '../services/worksheet';
 import { pupilAccessEnabled } from './pupilAuth';
 import { marksEnabled } from '../auth/marksGate';
 import { callLLM } from '../llm/client';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { CLASS_WORK_SYSTEM, CLASS_WORK_VERSION, CLASS_WORK_INSTRUCTION, classWorkItems } from '../llm/prompts/classWork';
 import {
   getScheme,
@@ -355,7 +355,7 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
       });
     const result = await callLLM({
       feature: 'class_work',
-      model: await modelFor('cheap'),
+      model: await modelForFeature('class_work', 'cheap'),
       promptVersion: CLASS_WORK_VERSION,
       system: CLASS_WORK_SYSTEM,
       context: classWorkItems({ worksheetTitle: ws.title, questions, ratings: feedback.ratings, liked: feedback.liked, disliked: feedback.disliked, comments: feedback.comments }),

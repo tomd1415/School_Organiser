@@ -1,8 +1,8 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0 & 1 COMPLETE (ideas 11, 6, 3, 1.1, 7).** Shipped and tested —
-> **273 unit / 186 integration green; typecheck clean; migrations `0028` (`teaching_concepts`) &
-> `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
+> **Status (2026-06-14): Waves 0 & 1 COMPLETE + Wave 2 (idea 5) BUILT (ideas 11, 6, 3, 1.1, 7, 5).**
+> Shipped and tested — **277 unit / 191 integration green; typecheck clean; migrations `0028`
+> (`teaching_concepts`) & `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
 > [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
@@ -10,10 +10,14 @@
 > → AI, all generators), course-scoped/global teaching concepts (the new **/concepts** page, the four
 > lesson-content generators), and per-class access constraints (a questionnaire on the class context
 > editor → `adapt_lesson`/`adapt_resources`) — each redacted, withheld and audited like every input,
-> each a no-op until filled. `/settings/ai` is now registry-validated with per-key caps (the seam
-> ideas 5/4/8/9 reuse). **Not** built: the swappable-themes stretch (idea 11 tail), the idea-3b
-> per-course override and idea-1.2 weave-into-existing. **Next: Wave 2 — idea 5 (per-feature model
-> choice).** The original plan follows.
+> each a no-op until filled. `/settings/ai` is now registry-validated with per-key caps. **Wave 2
+> (idea 5):** every one of the 17 AI features can override its model in Settings → AI (priced models
+> only, so the £ cap stays accurate) via `modelForFeature()`; unset = its role default, i.e. today's
+> behaviour — this lands the cost lever *before* the expensive Opus reviewer. **Not** built: the
+> swappable-themes stretch (idea 11 tail), the idea-3b per-course override, idea-1.2
+> weave-into-existing, and idea 5's provider "refresh model list". **Next: idea 2 (pace-aware sizing),
+> then the Wave 4 coverage backbone (idea 10 → 9), then the Wave 5 reviewer (8 + 4).** The original
+> plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -106,7 +110,7 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **5** | **Per-feature model selection** — `modelForFeature(feature, fallbackRole)` over the existing `modelFor(role)`; a `FEATURES` registry with per-feature pros/cons; a provider-refreshable model list cached in `settings`; a per-feature picker in Settings | Backward-compatible (unset = today exactly); lands *before* the Opus reviewer so a feature can be dialled to Sonnet/Haiku, materially de-risking idea 4/8 cost | M | 🟡 | ⬜ |
+| **5** | **Per-feature model selection** — `modelForFeature(feature, fallbackRole)` over `modelFor(role)`; an `AI_FEATURES` registry (17 features) + a per-feature picker in Settings → AI, restricted to the priced models (Opus/Sonnet/Haiku) so the cap stays accurate; overrides stored as registry-validated `ai_model_feature_<key>` keys | Backward-compatible (unset = today exactly); lands *before* the Opus reviewer so a feature can be dialled to Haiku/Sonnet, materially de-risking idea 4/8 cost. Decided 2026-06-14: per-feature, priced-models-only (provider refresh deferred) | M | 🟡 | ✅ |
 
 ### Wave 3 — Pace-aware sizing *(needs the tracker data in real use)*
 
@@ -340,9 +344,10 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
 6. **PDF extraction approach (idea 9)** — `pdfjs-dist` (heavier, better layout) vs `pdf-parse`
    (simpler) vs routing through the existing Gotenberg sidecar then extracting? The "preview extracted
    text before use" control is essential, not optional, given multi-column spec PDFs.
-7. **Per-feature model granularity (idea 5)** — is per-feature the right level, or per-role with a
-   few overrides? Should novel (non-priced) model ids be selectable at all, or restricted to ids in
-   `PRICE_PENCE_PER_MTOK` so the spend cap stays meaningful?
+7. **Per-feature model granularity (idea 5) — decided (2026-06-14): per-feature, priced models only.**
+   All 17 features can override their model; the picker offers only ids in `PRICE_PENCE_PER_MTOK`
+   (Opus/Sonnet/Haiku) so the spend cap stays meaningful. A provider "refresh model list" + selecting
+   arbitrary ids is **deferred** (revisit if a model we want ships before we re-price).
 8. **Reviewer cost posture (idea 8/4)** — manual-trigger only for v1 (recommended)? Skip targets that
    already have an `open` finding to avoid double-spend? It ships **off** behind `ai_review_enabled`
    either way, per the DPIA off-by-default posture.

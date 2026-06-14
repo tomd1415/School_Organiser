@@ -23,7 +23,7 @@ import {
   type SchemePoint,
 } from '../repos/marking';
 import { callLLM, callLLMStructured } from '../llm/client';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { marksEnabled } from '../auth/marksGate';
 import { pool } from '../db/pool';
 import { profileInputs, setProfile } from '../repos/pupilProfiles';
@@ -92,7 +92,7 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
   const result = await callLLMStructured(
     {
       feature: 'mark_scheme',
-      model: await modelFor('plan'),
+      model: await modelForFeature('mark_scheme', 'plan'),
       promptVersion: MARK_SCHEME_VERSION,
       system: MARK_SCHEME_SYSTEM,
       context: markSchemeItems({
@@ -231,7 +231,7 @@ export async function markOpen(occurrenceCourseId: number): Promise<OpenResult> 
     const result = await callLLMStructured(
       {
         feature: 'mark_answers',
-        model: await modelFor('cheap'),
+        model: await modelForFeature('mark_answers', 'cheap'),
         promptVersion: MARK_ANSWERS_VERSION,
         system: MARK_ANSWERS_SYSTEM,
         context: markAnswersItems({
@@ -353,7 +353,7 @@ export async function buildPupilProfile(pupilId: number): Promise<{ ok: boolean;
   }
   const result = await callLLM({
     feature: 'pupil_profile',
-    model: await modelFor('cheap'),
+    model: await modelForFeature('pupil_profile', 'cheap'),
     promptVersion: PUPIL_PROFILE_VERSION,
     system: PUPIL_PROFILE_SYSTEM,
     context: pupilProfileItems(inputs),

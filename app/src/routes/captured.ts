@@ -8,7 +8,7 @@ import { renderCapturedItem, renderCapturedList, renderNewCapturedButton } from 
 import { CAPTURED_CATEGORIES, CATEGORY_LABELS } from '../services/captured';
 import { renderSavedStatus } from '../lib/notesView';
 import { callLLMStructured } from '../llm/client';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { guardMatch } from '../lib/markSafetyGate';
 import { CAPTURED_CATEGORISE_SYSTEM, CAPTURED_CATEGORISE_VERSION, capturedInstruction, capturedItems } from '../llm/prompts/capturedCategorise';
 import { capturedCategoriseSchema } from '../llm/schemas/capturedCategorise';
@@ -112,7 +112,7 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'captured_categorise',
-        model: await modelFor('cheap'),
+        model: await modelForFeature('captured_categorise', 'cheap'),
         promptVersion: CAPTURED_CATEGORISE_VERSION,
         system: CAPTURED_CATEGORISE_SYSTEM,
         context: capturedItems(item.body),

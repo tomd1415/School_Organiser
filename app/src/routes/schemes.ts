@@ -70,7 +70,7 @@ import { renderSavedStatus } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
 import { standingPrefItems } from '../services/standingPrefs';
 import { conceptItemsFor } from '../services/teachingConcepts';
-import { modelFor } from '../repos/settings';
+import { modelForFeature } from '../repos/settings';
 import { listGeneralNotes } from '../repos/notes';
 import { callLLM, callLLMStructured } from '../llm/client';
 import { TERM_SUMMARY_INSTRUCTION, TERM_SUMMARY_SYSTEM, TERM_SUMMARY_VERSION } from '../llm/prompts/termSummary';
@@ -122,7 +122,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
     );
   const standing = await standingPrefItems();
   const concepts = await conceptItemsFor(ctx.courseId);
-  const modelChoice = await modelFor('plan');
+  const modelChoice = await modelForFeature('lesson_resources', 'plan');
   const equipment = await listActiveEquipment();
   let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
@@ -289,7 +289,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'author_scheme',
-        model: await modelFor('design'), // Opus — heavy curriculum design
+        model: await modelForFeature('author_scheme', 'design'), // Opus — heavy curriculum design
         promptVersion: AUTHOR_SCHEME_VERSION,
         system: AUTHOR_SCHEME_SYSTEM,
         context: [
@@ -369,7 +369,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'convert_unit',
-        model: await modelFor('plan'), // Sonnet — structured adaptation of a known sequence
+        model: await modelForFeature('convert_unit', 'plan'), // Sonnet — structured adaptation of a known sequence
         promptVersion: CONVERT_UNIT_VERSION,
         system: CONVERT_UNIT_SYSTEM,
         context: [
@@ -468,7 +468,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     }
     const result = await callLLM({
       feature: 'term_summary',
-      model: await modelFor('plan'),
+      model: await modelForFeature('term_summary', 'plan'),
       promptVersion: TERM_SUMMARY_VERSION,
       system: TERM_SUMMARY_SYSTEM,
       context: notes.map((n) => ({ text: n.body, safeguarding: n.safeguarding })),
@@ -643,7 +643,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const result = await callLLMStructured(
       {
         feature: 'draft_lesson',
-        model: await modelFor('plan'),
+        model: await modelForFeature('draft_lesson', 'plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
         context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
