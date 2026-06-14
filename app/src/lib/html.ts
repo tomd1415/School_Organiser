@@ -1,4 +1,4 @@
-import { renderNav, navClientJson } from './nav';
+import { renderRail, navClientJson, getExperienceMode } from './nav';
 
 const ENTITIES: Record<string, string> = {
   '&': '&amp;',
@@ -20,8 +20,10 @@ interface LayoutOptions {
   csrfToken?: string;
 }
 
-/** The single page chrome. Server-rendered; HTMX is added in Phase 1. */
+/** The single page chrome (Rail & Stage): a persistent left nav rail + a main "stage" pane. */
 export function layout({ title, body, authed = false, csrfToken }: LayoutOptions): string {
+  const exp = getExperienceMode();
+  const csrfHdr = authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : '';
   const logout =
     authed && csrfToken
       ? `<form method="post" action="/logout" class="inline">
@@ -29,6 +31,35 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
            <button class="link">Log out</button>
          </form>`
       : '';
+  const railFoot =
+    authed && csrfToken
+      ? `<div class="rail-foot"${csrfHdr}>
+          <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
+            <input type="hidden" name="experience" value="${exp === 'power' ? 'everyday' : 'power'}">
+            <button type="submit" class="link rail-exp" title="${exp === 'power' ? 'Hide the advanced tools again' : 'Reveal planning, authoring and admin tools'}">${exp === 'power' ? '◧ Advanced tools: on' : '▸ Show advanced tools'}</button>
+          </form>
+          <a class="rail-link rail-gear" href="/settings">⚙ Settings</a>
+          ${logout}
+        </div>`
+      : '';
+  const stageTop = authed
+    ? `<header class="stage-top"${csrfHdr}>
+        <div class="search-box">
+          <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search…  /" autocomplete="off" aria-label="Search everything"
+            hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
+          <div id="search-results" class="search-results"></div>
+        </div>
+        <button type="button" id="note-btn" class="qc-btn" title="Quick note — I'll work out where it goes (or press n)">📝 Note</button>
+        <details class="quick-capture">
+          <summary class="qc-btn" title="Jot something to deal with later">＋ Capture</summary>
+          <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+            <textarea name="body" rows="2" placeholder="Something you were told…" autocomplete="off"></textarea>
+            <button type="submit" class="btn-secondary">Capture</button>
+            <span id="qc-status"></span>
+          </form>
+        </details>
+      </header>`
+    : '';
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -37,35 +68,18 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <title>${esc(title)} · School Organiser</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
-  <header class="topbar"${authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : ''}>
-    <div class="bar-left">
+<body data-experience="${esc(exp)}">
+  <div class="app${authed ? '' : ' app-bare'}">
+    <aside class="rail-wrap">
       <a class="brand" href="/">School Organiser</a>
-      ${authed ? renderNav() : ''}
+      ${authed ? renderRail(exp) : ''}
+      ${railFoot}
+    </aside>
+    <div class="stage">
+      ${stageTop}
+      <main>${body}</main>
     </div>
-    ${
-      authed
-        ? `<div class="bar-tools">
-            <div class="search-box">
-              <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search…  /" autocomplete="off" aria-label="Search everything"
-                hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
-              <div id="search-results" class="search-results"></div>
-            </div>
-            <button type="button" id="note-btn" class="qc-btn" title="Quick note — I'll work out where it goes (or press n)">📝 Note</button>
-            <details class="quick-capture">
-              <summary class="qc-btn" title="Jot something to deal with later">＋ Capture</summary>
-              <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
-                <textarea name="body" rows="2" placeholder="Something you were told…" autocomplete="off"></textarea>
-                <button type="submit" class="btn-secondary">Capture</button>
-                <span id="qc-status"></span>
-              </form>
-            </details>
-          </div>`
-        : ''
-    }
-    ${logout}
-  </header>
-  <main>${body}</main>
+  </div>
   ${
     authed && csrfToken
       ? `<dialog id="note-modal" class="note-modal" hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'>

@@ -105,11 +105,13 @@ function renderCurrentCard(
   state: NowState,
 ): string {
   const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
+  // The resume point is the single most useful mid-lesson fact — promote it from a muted footnote to a
+  // prominent boxed line so it's the first thing the eye lands on at the bell.
   const lastLines = courses
     .map((c) => {
       const ls = lastByGc.get(c.groupCourseId);
       return ls
-        ? `<p class="ld-last"><strong>${esc(c.courseName)}</strong> — last time → ${esc(ls.stoppingPoint)} <span class="muted">(${esc(ls.date)})</span></p>`
+        ? `<div class="now-resume"><span class="now-resume-k">Last time</span> ${current.courses.length > 1 ? `<strong>${esc(c.courseName)}</strong> → ` : ''}${esc(ls.stoppingPoint)} <span class="muted">(${esc(ls.date)})</span></div>`
         : '';
     })
     .join('');
@@ -205,76 +207,67 @@ function renderDayList(
   </div>`;
 }
 
-function renderBell(tasks: BellTask[]): string {
-  if (tasks.length === 0) return '';
-  const items = tasks
-    .map(
-      (t) =>
-        `<li id="bell-${t.id}" class="bell-task"><button type="button" class="link" title="Done" hx-post="/tasks/${t.id}/done" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button> <span>${esc(t.title)}</span> <span class="muted bell-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span></li>`,
-    )
-    .join('');
-  return `<div class="now-card now-bell">
-    <p class="kicker">Before the next bell</p>
-    <ul class="bell-list">${items}</ul>
-    <p><a href="/tasks">All tasks →</a></p>
+// Rail & Stage redesign — the six flickering right-column cards (Marks, Bell, Coming-up, Heads-up …)
+// collapse into ONE calm "Needs me" list: ≤6 one-line rows, urgency-sorted, each tagged with its
+// source, safeguarding pinned first and visually alarming. Each row keeps its native action (the bell
+// ✓-done, the marks link), so nothing is lost — only the noise.
+interface NeedsRow {
+  rank: number; // 0 = safeguarding (always top), then overdue/urgent → routine
+  html: string;
+}
+
+function needsMeRows(marks: MarksBacklogRow[], bell: BellTask[], events: UpcomingEvent[], heads: CapturedItem[], today: string): NeedsRow[] {
+  const rows: NeedsRow[] = [];
+  for (const i of heads.filter((h) => h.safeguarding)) {
+    rows.push({ rank: 0, html: `<li class="nm-row nm-sg"><span class="nm-tag nm-tag-sg">⚑ safeguarding</span><span class="nm-text">${esc(i.body || '(flagged note)')}</span></li>` });
+  }
+  for (const t of bell) {
+    rows.push({
+      rank: 1,
+      html: `<li id="bell-${t.id}" class="nm-row"><button type="button" class="link nm-done" title="Mark done" aria-label="Mark done" hx-post="/tasks/${t.id}/done" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button><span class="nm-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span><span class="nm-text">${esc(t.title)}</span></li>`,
+    });
+  }
+  for (const e of dueSoon(events, today).slice(0, 6)) {
+    const d = e.date ? daysUntil(e.date, today) : 0;
+    const when = d < 0 ? `${-d}d overdue` : d === 0 ? 'today' : `in ${d}d`;
+    rows.push({ rank: d < 0 ? 1 : 3, html: `<li class="nm-row"><span class="nm-tag">event</span><span class="nm-text">${esc(e.title)} <span class="muted">· ${esc(when)}</span></span></li>` });
+  }
+  for (const r of marks) {
+    const bits: string[] = [];
+    if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
+    if (r.unreleased) bits.push('ready to release');
+    const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
+    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><a class="nm-text" href="/lesson?lesson=${r.lessonId}&date=${esc(r.date)}">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</a></li>` });
+  }
+  for (const i of heads.filter((h) => !h.safeguarding).slice(0, 6)) {
+    rows.push({ rank: 4, html: `<li class="nm-row"><span class="nm-tag">heads-up</span><span class="nm-text">${esc(i.body || '(captured note)')}${i.groupName ? ` <span class="muted">· ${esc(i.groupName)}</span>` : ''}</span></li>` });
+  }
+  return rows.sort((a, b) => a.rank - b.rank);
+}
+
+function renderNeedsMe(marks: MarksBacklogRow[], bell: BellTask[], events: UpcomingEvent[], heads: CapturedItem[], today: string): string {
+  const rows = needsMeRows(marks, bell, events, heads, today);
+  if (rows.length === 0) {
+    return `<div class="now-card now-needs"><p class="kicker">Needs me</p><p class="muted nm-clear">Nothing needs you before the bell. ✓</p></div>`;
+  }
+  const CAP = 6;
+  const shown = rows.slice(0, CAP).map((r) => r.html).join('');
+  const more = rows.length > CAP ? `<li class="nm-row nm-more muted">+ ${rows.length - CAP} more</li>` : '';
+  return `<div class="now-card now-needs">
+    <p class="kicker">Needs me</p>
+    <ul class="nm-list">${shown}${more}</ul>
+    <p class="nm-foot"><a href="/tasks">Tasks</a> · <a href="/events">Events</a> · <a href="/captured">Captured</a></p>
   </div>`;
 }
 
-function renderComingUp(events: UpcomingEvent[], today: string): string {
-  const soon = dueSoon(events, today);
-  if (soon.length === 0) return '';
-  const items = soon
-    .slice(0, 6)
-    .map((e) => {
-      const d = e.date ? daysUntil(e.date, today) : 0;
-      const when = d < 0 ? `${-d}d overdue` : d === 0 ? 'today' : `in ${d}d`;
-      return `<li><span>${esc(e.title)}</span><span class="coming-when">${esc(when)}</span></li>`;
-    })
-    .join('');
-  return `<div class="now-card now-bell">
-    <p class="kicker">Coming up</p>
-    <ul class="coming-list">${items}</ul>
-    <p><a href="/events">All events →</a></p>
-  </div>`;
-}
-
-function renderHeadsUp(items: CapturedItem[]): string {
-  if (items.length === 0) return '';
-  const lis = items
-    .slice(0, 6)
-    .map(
-      (i) =>
-        `<li${i.safeguarding ? ' class="sg"' : ''}><span>${esc(i.body || '(captured note)')}</span>${i.groupName ? `<span class="muted bell-tag">${esc(i.groupName)}</span>` : ''}</li>`,
-    )
-    .join('');
-  return `<div class="now-card now-bell">
-    <p class="kicker">Heads up</p>
-    <ul class="bell-list">${lis}</ul>
-    <p><a href="/captured">All captured →</a></p>
-  </div>`;
-}
-
-// 10.22 — the marking backlog, so unconfirmed AI marks / unreleased results can't pile up unseen.
-function renderMarksWaiting(rows: MarksBacklogRow[]): string {
-  if (rows.length === 0) return '';
-  const items = rows
-    .map((r) => {
-      const bits: string[] = [];
-      if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
-      if (r.unreleased) bits.push('ready to release');
-      const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
-      return `<li><a href="/lesson?lesson=${r.lessonId}&date=${esc(r.date)}">${esc(r.groupName)} · ${esc(r.courseName)}</a> <span class="muted">${esc(bits.join(', '))}</span>${flag}</li>`;
-    })
-    .join('');
-  return `<div class="now-card now-marks"><p class="kicker">Marks waiting</p><ul class="bell-list">${items}</ul></div>`;
-}
-
+// The start/end-of-day checklist isn't lesson-live content, so it leaves the live column and sits in a
+// collapsed disclosure — one click away without competing for the eye.
 function renderDayCard(part: 'start' | 'end', items: PrepItem[], date: string): string {
-  return `<div class="now-card now-bell">
-    <p class="kicker">${part === 'start' ? 'Start of day' : 'End of day'}</p>
+  return `<details class="now-card now-daycard">
+    <summary>${part === 'start' ? 'Start-of-day checklist' : 'End-of-day checklist'}${items.length ? ` (${items.length})` : ''}</summary>
     ${renderPrepList(items, '/day-checklist', 'day', `day-${part}`)}
     ${renderPrepAdd('/day-checklist/add', { date, part }, `day-${part}`)}
-  </div>`;
+  </details>`;
 }
 
 async function resolveNowLessons(now: Date) {
@@ -381,10 +374,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           </div>
           <div class="now-col now-col-next">
             ${nextCard}
-            ${renderMarksWaiting(marksWaiting)}
-            ${renderBell(bell)}
-            ${renderComingUp(events, state.isoDate)}
-            ${renderHeadsUp(heads)}
+            ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
             ${renderDayCard(dayPart, dayItems, state.isoDate)}
           </div>
         </div>

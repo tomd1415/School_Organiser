@@ -9,38 +9,44 @@
 // slice 2 (idea 6) uses it + a `nav_daily` setting to fold 'setup' links into a menu.
 
 export type NavGroup = 'daily' | 'setup';
+// Rail & Stage redesign — `tier` gates the rail's "Advanced" section: 'power' items appear only when
+// the teacher has turned advanced tools on (the `experience` switch). 'everyday' items always show.
+export type NavTier = 'everyday' | 'power';
 
 export interface NavItem {
   href: string;
   label: string;
   key?: string; // single-letter `g`+key jump shortcut, if any
-  group: NavGroup; // 'daily' = always on the bar; 'setup' = foldable into the menu (slice 2)
+  group: NavGroup; // legacy daily/setup grouping — still drives the configurable "Today" pin set (nav_daily)
+  tier: NavTier; // 'power' = lives in the rail's "Advanced" section, hidden until advanced tools are on
 }
 
 // Labels/keys match the old hand-written nav; `key` values are exactly the old app.js NAV map (11
 // links carry a `g`+letter shortcut). `group` follows the decided default daily set (Now, Focus,
-// Timetable, Tasks, Captured); everything else is 'setup'. /concepts (idea 1.1) was added here.
+// Timetable, Tasks, Captured) and still drives the configurable Today pins. `tier` is the rail's
+// everyday-vs-advanced split: the expert-set-up pages (Pupils, Concepts, Kit, Recurring, Time, Setup,
+// Settings) are 'power' and fold into the Advanced section. /concepts (idea 1.1) was added here.
 export const NAV_MODEL: readonly NavItem[] = [
-  { href: '/', label: 'Now', key: 'h', group: 'daily' },
-  { href: '/focus', label: 'Focus', key: 'f', group: 'daily' },
-  { href: '/timetable', label: 'Timetable', key: 't', group: 'daily' },
-  { href: '/oversee', label: 'Oversee', group: 'setup' },
-  { href: '/tasks', label: 'Tasks', key: 'k', group: 'daily' },
-  { href: '/recurring', label: 'Recurring', group: 'setup' },
-  { href: '/events', label: 'Events', key: 'e', group: 'setup' },
-  { href: '/time', label: 'Time', group: 'setup' },
-  { href: '/captured', label: 'Captured', key: 'c', group: 'daily' },
-  { href: '/pupils', label: 'Pupils', key: 'p', group: 'setup' },
-  { href: '/safeguarding', label: 'Safeguarding', key: 'g', group: 'setup' },
-  { href: '/notes', label: 'Notes', group: 'setup' },
-  { href: '/schemes', label: 'Schemes', key: 's', group: 'setup' },
-  { href: '/concepts', label: 'Concepts', group: 'setup' },
-  { href: '/coverage', label: 'Coverage', group: 'setup' },
-  { href: '/map', label: 'Map', key: 'm', group: 'setup' },
-  { href: '/kit', label: 'Kit', group: 'setup' },
-  { href: '/resources', label: 'Resources', key: 'r', group: 'setup' },
-  { href: '/setup', label: 'Setup', group: 'setup' },
-  { href: '/settings', label: 'Settings', group: 'setup' },
+  { href: '/', label: 'Now', key: 'h', group: 'daily', tier: 'everyday' },
+  { href: '/focus', label: 'Focus', key: 'f', group: 'daily', tier: 'everyday' },
+  { href: '/timetable', label: 'Timetable', key: 't', group: 'daily', tier: 'everyday' },
+  { href: '/oversee', label: 'Oversee', group: 'setup', tier: 'everyday' },
+  { href: '/tasks', label: 'Tasks', key: 'k', group: 'daily', tier: 'everyday' },
+  { href: '/recurring', label: 'Recurring', group: 'setup', tier: 'power' },
+  { href: '/events', label: 'Events', key: 'e', group: 'setup', tier: 'everyday' },
+  { href: '/time', label: 'Time', group: 'setup', tier: 'power' },
+  { href: '/captured', label: 'Captured', key: 'c', group: 'daily', tier: 'everyday' },
+  { href: '/pupils', label: 'Pupils', key: 'p', group: 'setup', tier: 'power' },
+  { href: '/safeguarding', label: 'Safeguarding', key: 'g', group: 'setup', tier: 'everyday' },
+  { href: '/notes', label: 'Notes', group: 'setup', tier: 'everyday' },
+  { href: '/schemes', label: 'Schemes', key: 's', group: 'setup', tier: 'everyday' },
+  { href: '/concepts', label: 'Concepts', group: 'setup', tier: 'power' },
+  { href: '/coverage', label: 'Coverage', group: 'setup', tier: 'everyday' },
+  { href: '/map', label: 'Map', key: 'm', group: 'setup', tier: 'everyday' },
+  { href: '/kit', label: 'Kit', group: 'setup', tier: 'power' },
+  { href: '/resources', label: 'Resources', key: 'r', group: 'setup', tier: 'everyday' },
+  { href: '/setup', label: 'Setup', group: 'setup', tier: 'power' },
+  { href: '/settings', label: 'Settings', group: 'setup', tier: 'power' },
 ];
 
 // The daily set is teacher-configurable (idea 6). It's a write-through in-memory value, not a TTL
@@ -68,16 +74,56 @@ export function getNavDailyHrefs(): string[] {
   return navDailyOverride ? [...navDailyOverride] : [...DEFAULT_DAILY];
 }
 
-/** Render the top-bar nav: the daily set inline, the rest folded into a "Setup & admin" menu. */
-export function renderNav(dailyHrefs: readonly string[] = getNavDailyHrefs()): string {
-  const daily = new Set(dailyHrefs.length ? dailyHrefs : DEFAULT_DAILY);
+// Rail & Stage redesign — the "experience" switch: 'everyday' (default) hides the Advanced rail
+// section and pre-collapses advanced controls; 'power' reveals them. A write-through in-memory value
+// (same machinery + rationale as navDailyOverride): layout() reads it synchronously; server.ts primes
+// it at boot and the Settings handler updates it on save.
+export type Experience = 'everyday' | 'power';
+let experienceMode: Experience = 'everyday';
+
+export function setExperienceMode(mode: Experience | string | null): void {
+  experienceMode = mode === 'power' ? 'power' : 'everyday';
+}
+
+export function getExperienceMode(): Experience {
+  return experienceMode;
+}
+
+const SAFEGUARDING_HREF = '/safeguarding';
+
+/**
+ * Render the persistent left navigation rail (Rail & Stage). Three groups:
+ *  • Today — the configurable pin set (nav_daily; default the leaner five), always shown.
+ *  • Safeguarding — pinned on its own, always visible, never gated (SEND non-negotiable).
+ *  • Plan — everyday pages not pinned to Today, in a collapsible section.
+ *  • Advanced — 'power'-tier pages, shown only when the experience switch is on.
+ * Active-state is applied client-side by app.js (it reads window.__NAV__ + the path), so this stays
+ * a pure, path-free render — exactly like the old top bar.
+ */
+export function renderRail(
+  experience: Experience = getExperienceMode(),
+  dailyHrefs: readonly string[] = getNavDailyHrefs(),
+): string {
+  const daily = new Set((dailyHrefs.length ? dailyHrefs : DEFAULT_DAILY).filter((h) => h !== SAFEGUARDING_HREF));
   const link = (i: NavItem) => `<a href="${i.href}">${i.label}</a>`;
-  const inline = NAV_MODEL.filter((i) => daily.has(i.href)).map(link).join('');
-  const folded = NAV_MODEL.filter((i) => !daily.has(i.href)).map(link).join('');
-  const menu = folded
-    ? `<details class="nav-more"><summary>⚙ Setup &amp; admin</summary><div class="nav-more-panel">${folded}</div></details>`
+  const today = NAV_MODEL.filter((i) => daily.has(i.href));
+  const plan = NAV_MODEL.filter((i) => !daily.has(i.href) && i.tier !== 'power' && i.href !== SAFEGUARDING_HREF);
+  const advanced = NAV_MODEL.filter((i) => i.tier === 'power' && !daily.has(i.href) && i.href !== SAFEGUARDING_HREF);
+
+  const planSec = plan.length
+    ? `<details class="rail-sec rail-plan" open><summary>Plan</summary><div class="rail-links">${plan.map(link).join('')}</div></details>`
     : '';
-  return `<nav class="nav">${inline}${menu}</nav>`;
+  const advSec =
+    experience === 'power' && advanced.length
+      ? `<details class="rail-sec rail-adv" open><summary>Advanced</summary><div class="rail-links">${advanced.map(link).join('')}</div></details>`
+      : '';
+
+  return `<nav class="rail" aria-label="Main navigation">
+    <div class="rail-sec rail-today"><span class="rail-h">Today</span><div class="rail-links">${today.map(link).join('')}</div></div>
+    <a class="rail-link rail-sg" href="${SAFEGUARDING_HREF}">⚑ Safeguarding</a>
+    ${planSec}
+    ${advSec}
+  </nav>`;
 }
 
 /** The keyed items, for the client's `g`+letter jump map and the shortcut cheat-sheet. */

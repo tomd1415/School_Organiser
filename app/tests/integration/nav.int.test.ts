@@ -3,12 +3,14 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { getSetting } from '../../src/repos/settings';
-import { setNavDailyOverride } from '../../src/lib/nav';
+import { setNavDailyOverride, setExperienceMode } from '../../src/lib/nav';
 
-// idea 6 — the configurable daily-vs-setup nav: saving a daily set persists it AND the very next
-// page render (the layout chrome) reflects it via the write-through value, with no reboot.
+// idea 6 + Rail & Stage: saving a daily set pins items into the rail's "Today" group AND the very next
+// page render reflects it via the write-through value, with no reboot; the experience switch reveals
+// the Advanced rail section the same way.
 let app: FastifyInstance;
 let saved: string | null = null;
+let savedExp: string | null = null;
 let cookie = '';
 let token = '';
 
@@ -19,6 +21,7 @@ function firstCookie(setCookie: string | string[] | undefined): string {
 
 beforeAll(async () => {
   saved = await getSetting('nav_daily');
+  savedExp = await getSetting('experience');
   app = await buildApp();
   await app.ready();
   const page = await app.inject({ method: 'GET', url: '/login' });
@@ -36,12 +39,17 @@ afterAll(async () => {
   if (saved === null) await pool.query(`DELETE FROM settings WHERE key = 'nav_daily'`);
   else await pool.query(`UPDATE settings SET value = $1 WHERE key = 'nav_daily'`, [saved]);
   setNavDailyOverride(saved ? (JSON.parse(saved) as string[]) : null); // leave the in-memory value as we found it
+  if (savedExp === null) await pool.query(`DELETE FROM settings WHERE key = 'experience'`);
+  else await pool.query(`UPDATE settings SET value = $1 WHERE key = 'experience'`, [savedExp]);
+  setExperienceMode(savedExp);
   await app.close();
   await pool.end();
 });
 
 const saveNav = (payload: string) =>
   app.inject({ method: 'POST', url: '/settings/nav', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload });
+const setExp = (experience: string) =>
+  app.inject({ method: 'POST', url: '/settings/experience', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: `experience=${experience}` });
 
 describe('configurable nav (integration)', () => {
   it('the Settings page offers the navigation picker with every link as a checkbox', async () => {
@@ -57,19 +65,47 @@ describe('configurable nav (integration)', () => {
     expect(JSON.parse((await getSetting('nav_daily')) ?? '[]')).toEqual(['/', '/schemes']);
   });
 
-  it('the next page render reflects the new daily set with no reboot', async () => {
+  it('the next page render pins the new set into the rail Today group with no reboot', async () => {
     const res = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
-    // Now and Schemes are pinned; the rest fold into the Setup & admin menu.
-    expect(res.body).toContain('<a href="/">Now</a><a href="/schemes">Schemes</a><details class="nav-more">');
-    expect(res.body).toContain('⚙ Setup &amp; admin');
+    expect(res.body).toContain('class="rail"');
+    expect(res.body).toContain('<a href="/">Now</a>');
+    expect(res.body).toContain('<a href="/schemes">Schemes</a>'); // pinned into Today
+    expect(res.body).toContain('class="rail-link rail-sg" href="/safeguarding"'); // always pinned
     expect(res.body).toContain('window.__NAV__='); // the keyboard map is emitted for app.js
   });
 
-  it('an empty submission falls back to the default daily set (the bar is never empty)', async () => {
+  it('an empty submission falls back to the default daily set (Today is never empty)', async () => {
     const res = await saveNav('');
     expect(res.statusCode).toBe(200);
     expect(JSON.parse((await getSetting('nav_daily')) ?? '[]')).toEqual([]);
     const home = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
-    expect(home.body).toContain('<a href="/">Now</a><a href="/focus">Focus</a>'); // default five inline
+    for (const h of ['/', '/focus', '/timetable', '/tasks', '/captured']) {
+      expect(home.body).toContain(`<a href="${h}">`); // the default five back in Today
+    }
+  });
+});
+
+describe('experience switch (integration)', () => {
+  it('everyday (default) hides the Advanced rail section and its pages', async () => {
+    await setExp('everyday');
+    const res = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
+    expect(res.body).toContain('data-experience="everyday"');
+    expect(res.body).not.toContain('rail-adv');
+    expect(res.body).not.toContain('<a href="/setup">'); // a power page, hidden in everyday
+  });
+
+  it('flipping to power reveals the Advanced section + its pages on the next render', async () => {
+    const res = await setExp('power');
+    expect(res.statusCode).toBe(200);
+    const home = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
+    expect(home.body).toContain('data-experience="power"');
+    expect(home.body).toContain('rail-adv');
+    expect(home.body).toContain('<a href="/setup">');
+    expect(home.body).toContain('<a href="/settings">');
+  });
+
+  it('rejects a bogus experience value', async () => {
+    const res = await setExp('wizard');
+    expect(res.statusCode).toBe(400);
   });
 });

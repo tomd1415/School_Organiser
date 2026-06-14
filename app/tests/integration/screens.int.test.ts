@@ -83,13 +83,14 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('ld-res'); // bound plan's resources surface here (3.8)
   });
 
-  it('Now page renders two columns with the next-session card (5.2 layout)', async () => {
+  it('Now page renders two columns with the next-session + unified "Needs me" card (Rail & Stage)', async () => {
     const res = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('now-cols'); // two-column wrapper
     expect(res.body).toContain('now-col-now'); // current lesson, left
     expect(res.body).toContain('now-col-next'); // what's next, right
     expect(res.body).toContain('now-next'); // the next-session card itself
+    expect(res.body).toContain('now-needs'); // the six right-column cards collapsed into one
   });
 
   it('Lesson detail shows the per-group adaptation block, and adapt round-trips (5.2)', async () => {

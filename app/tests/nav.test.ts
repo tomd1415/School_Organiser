@@ -1,47 +1,101 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { NAV_MODEL, renderNav, navClientModel, navClientJson, sanitiseDaily, setNavDailyOverride, getNavDailyHrefs } from '../src/lib/nav';
+import {
+  NAV_MODEL,
+  renderRail,
+  navClientModel,
+  navClientJson,
+  sanitiseDaily,
+  setNavDailyOverride,
+  getNavDailyHrefs,
+  setExperienceMode,
+  getExperienceMode,
+} from '../src/lib/nav';
 
 const ALL_HREFS = NAV_MODEL.map((i) => i.href);
 const DEFAULT_DAILY = ['/', '/focus', '/timetable', '/tasks', '/captured'];
+const ADVANCED = ['/recurring', '/time', '/pupils', '/concepts', '/kit', '/setup', '/settings'];
 
-// renderNav reads module-level override state; always reset it.
-afterEach(() => setNavDailyOverride(null));
+// renderRail reads module-level override + experience state; always reset both.
+afterEach(() => {
+  setNavDailyOverride(null);
+  setExperienceMode('everyday');
+});
 
 describe('nav model (single source of truth)', () => {
-  it('default render: the leaner-five daily set inline + the rest in a "Setup & admin" menu', () => {
-    const expected =
-      '<nav class="nav">' +
-      '<a href="/">Now</a><a href="/focus">Focus</a><a href="/timetable">Timetable</a>' +
-      '<a href="/tasks">Tasks</a><a href="/captured">Captured</a>' +
-      '<details class="nav-more"><summary>⚙ Setup &amp; admin</summary><div class="nav-more-panel">' +
-      '<a href="/oversee">Oversee</a><a href="/recurring">Recurring</a><a href="/events">Events</a>' +
-      '<a href="/time">Time</a><a href="/pupils">Pupils</a><a href="/safeguarding">Safeguarding</a>' +
-      '<a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/coverage">Coverage</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
-      '<a href="/resources">Resources</a><a href="/setup">Setup</a><a href="/settings">Settings</a>' +
-      '</div></details></nav>';
-    expect(renderNav()).toBe(expected);
+  it('has a tier on every item, and the advanced (power) set is the expert-setup pages', () => {
+    expect(NAV_MODEL.every((i) => i.tier === 'everyday' || i.tier === 'power')).toBe(true);
+    expect(NAV_MODEL.filter((i) => i.tier === 'power').map((i) => i.href).sort()).toEqual([...ADVANCED].sort());
   });
 
-  it('pinning all links = the old flat 18-link bar (no menu)', () => {
-    const flat =
-      '<nav class="nav"><a href="/">Now</a><a href="/focus">Focus</a><a href="/timetable">Timetable</a>' +
-      '<a href="/oversee">Oversee</a><a href="/tasks">Tasks</a><a href="/recurring">Recurring</a>' +
-      '<a href="/events">Events</a><a href="/time">Time</a><a href="/captured">Captured</a>' +
-      '<a href="/pupils">Pupils</a><a href="/safeguarding">Safeguarding</a><a href="/notes">Notes</a>' +
-      '<a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/coverage">Coverage</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
-      '<a href="/resources">Resources</a><a href="/setup">Setup</a><a href="/settings">Settings</a></nav>';
-    expect(renderNav(ALL_HREFS)).toBe(flat);
-    expect(renderNav(ALL_HREFS)).not.toContain('nav-more'); // every link pinned ⇒ no menu
+  it('hrefs are unique and the daily default is exactly the leaner five', () => {
+    expect(new Set(ALL_HREFS).size).toBe(ALL_HREFS.length);
+    expect(NAV_MODEL.filter((i) => i.group === 'daily').map((i) => i.href)).toEqual(DEFAULT_DAILY);
+  });
+});
+
+describe('renderRail (Rail & Stage)', () => {
+  it('everyday: Today = the leaner five, a pinned Safeguarding link, a Plan section, NO Advanced', () => {
+    const html = renderRail('everyday');
+    expect(html).toContain('class="rail"');
+    for (const h of DEFAULT_DAILY) expect(html).toContain(`<a href="${h}">`);
+    expect(html).toContain('<span class="rail-h">Today</span>');
+    expect(html).toContain('class="rail-link rail-sg" href="/safeguarding"');
+    expect(html).toContain('<details class="rail-sec rail-plan"');
+    expect(html).toContain('<a href="/schemes">Schemes</a>'); // a Plan item
+    // Advanced is hidden in everyday mode — neither the section nor its pages render.
+    expect(html).not.toContain('rail-adv');
+    for (const h of ADVANCED) expect(html).not.toContain(`<a href="${h}">`);
   });
 
-  it('renders a custom subset inline and folds the rest, both in NAV_MODEL order', () => {
-    const html = renderNav(['/schemes', '/']); // out of order on input
-    const menuStart = html.indexOf('nav-more');
-    expect(html.indexOf('>Now<')).toBeLessThan(html.indexOf('>Schemes<')); // restored to model order
-    expect(html.indexOf('>Schemes<')).toBeLessThan(menuStart); // both daily, before the menu
-    expect(html.indexOf('>Focus<')).toBeGreaterThan(menuStart); // Focus folded into the menu
+  it('power: the Advanced section appears with the expert-setup pages', () => {
+    const html = renderRail('power');
+    expect(html).toContain('<details class="rail-sec rail-adv"');
+    for (const h of ADVANCED) expect(html).toContain(`<a href="${h}">`);
   });
 
+  it('Safeguarding is pinned exactly once and never duplicated into Today/Plan', () => {
+    const html = renderRail('power');
+    expect(html.match(/href="\/safeguarding"/g)).toHaveLength(1);
+  });
+
+  it('the configurable daily set pins items into Today, ahead of the Plan section', () => {
+    setNavDailyOverride(['/', '/schemes']);
+    const html = renderRail('everyday');
+    const schemes = html.indexOf('>Schemes<');
+    const planSummary = html.indexOf('<summary>Plan</summary>');
+    expect(schemes).toBeGreaterThan(-1);
+    expect(planSummary).toBeGreaterThan(-1);
+    expect(schemes).toBeLessThan(planSummary); // pinned Schemes sits in Today, before Plan
+  });
+
+  it('pinning all links puts every page in Today (the rail still renders them all)', () => {
+    const html = renderRail('power', ALL_HREFS);
+    for (const h of ALL_HREFS) expect(html).toContain(`href="${h}"`);
+  });
+});
+
+describe('experience switch (write-through)', () => {
+  it('defaults to everyday and round-trips power/everyday/garbage', () => {
+    expect(getExperienceMode()).toBe('everyday');
+    setExperienceMode('power');
+    expect(getExperienceMode()).toBe('power');
+    setExperienceMode('everyday');
+    expect(getExperienceMode()).toBe('everyday');
+    setExperienceMode('nonsense');
+    expect(getExperienceMode()).toBe('everyday'); // anything but 'power' = everyday
+    setExperienceMode(null);
+    expect(getExperienceMode()).toBe('everyday');
+  });
+
+  it('renderRail defaults its experience arg from the write-through value', () => {
+    setExperienceMode('power');
+    expect(renderRail()).toContain('rail-adv');
+    setExperienceMode('everyday');
+    expect(renderRail()).not.toContain('rail-adv');
+  });
+});
+
+describe('nav_daily configuration (unchanged machinery)', () => {
   it('sanitiseDaily drops unknown hrefs and restores NAV_MODEL order', () => {
     expect(sanitiseDaily(['/captured', '/nope', '/'])).toEqual(['/', '/captured']);
     expect(sanitiseDaily([])).toEqual([]);
@@ -50,19 +104,14 @@ describe('nav model (single source of truth)', () => {
   it('setNavDailyOverride round-trips; empty/unknown-only falls back to the default', () => {
     setNavDailyOverride(['/', '/schemes']);
     expect(getNavDailyHrefs()).toEqual(['/', '/schemes']);
-    setNavDailyOverride([]); // empty ⇒ default (the bar can never be empty)
+    setNavDailyOverride([]);
     expect(getNavDailyHrefs()).toEqual(DEFAULT_DAILY);
     setNavDailyOverride(['/unknown-only']);
     expect(getNavDailyHrefs()).toEqual(DEFAULT_DAILY);
   });
+});
 
-  it('the configured set drives renderNav() (write-through, no DB)', () => {
-    setNavDailyOverride(['/']);
-    const html = renderNav();
-    expect(html).toContain('<a href="/">Now</a><details'); // only Now is daily
-    expect(html).toContain('<a href="/focus">Focus</a>'); // Focus now lives in the menu
-  });
-
+describe('client jump-map (unchanged)', () => {
   it('the client jump map is exactly the old app.js NAV object', () => {
     const map: Record<string, string> = {};
     for (const i of navClientModel()) map[i.key] = i.href;
@@ -83,10 +132,5 @@ describe('nav model (single source of truth)', () => {
     const json = navClientJson();
     expect(json).not.toContain('<');
     expect(JSON.parse(json)).toEqual(navClientModel());
-  });
-
-  it('hrefs are unique and the daily default is exactly the leaner five', () => {
-    expect(new Set(ALL_HREFS).size).toBe(ALL_HREFS.length);
-    expect(NAV_MODEL.filter((i) => i.group === 'daily').map((i) => i.href)).toEqual(DEFAULT_DAILY);
   });
 });

@@ -137,11 +137,12 @@
   // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
 
-  // idea 6 — mark the current page in the nav (a link on the bar, or one inside the Setup menu).
+  // Mark the current page in the left rail (a Today link, or one inside a Plan/Advanced section).
+  // Longest matching href wins so e.g. /settings beats / for /settings/ai-log.
   (function () {
     var path = location.pathname;
     var best = null;
-    var links = document.querySelectorAll('.nav a[href]');
+    var links = document.querySelectorAll('.rail a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href');
       var match = href === '/' ? path === '/' : path === href || path.indexOf(href + '/') === 0;
@@ -149,8 +150,9 @@
     }
     if (best) {
       best.classList.add('active');
-      var det = best.closest('.nav-more');
-      if (det) { var sum = det.querySelector('summary'); if (sum) sum.classList.add('active-within'); }
+      best.setAttribute('aria-current', 'page');
+      var det = best.closest('.rail-sec');
+      if (det && det.tagName === 'DETAILS') { det.open = true; var sum = det.querySelector('summary'); if (sum) sum.classList.add('active-within'); }
     }
   })();
 

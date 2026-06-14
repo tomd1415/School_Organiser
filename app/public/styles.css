@@ -1,39 +1,102 @@
 :root {
-  --bg: #f6f7f9;
+  /* Rail & Stage palette — calm and WCAG-AA on white. */
+  --bg: #f5f7fa;
   --card: #ffffff;
-  --ink: #1c2430;
-  --muted: #67727f;
-  --accent: #2d6cdf;
+  --ink: #1b2430;          /* ~13.6:1 on card */
+  --muted: #5b6675;        /* raised for AA at small sizes (~5:1 on card) */
+  --accent: #2563eb;       /* AA on white from 14px */
+  --accent-soft: #eef4ff;  /* hover / selected tint */
   --error: #c0392b;
-  --line: #e3e7ec;
+  --danger: #c0392b;
+  --good: #2f7d32;
+  --warn: #b45309;
+  --line: #e2e7ee;
+  --rail: #f0f3f8;         /* rail surface, distinct from the stage */
+  --rail-w: 14rem;
+  /* Type scale (Rail & Stage) */
+  --fs-hero: 2.6rem;       /* Now group name */
+  --fs-h1: 1.6rem;
+  --fs-h2: 1.2rem;
+  --fs-body: 1.0625rem;    /* 17px base */
+  --fs-meta: 0.9rem;       /* ~14.5px — nothing below this for content */
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 12px;
+  --tap: 44px;             /* minimum interactive target */
+}
+
+/* High-contrast theme (a11y toolbar, Slice 5) — opt-in via [data-theme]. */
+[data-theme="contrast"] {
+  --bg: #ffffff; --card: #ffffff; --ink: #000000; --muted: #303a46;
+  --accent: #0b40b6; --accent-soft: #e6edff; --line: #6b7480;
+  --rail: #f0f0f0;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: var(--fs-body)/1.6 var(--font-ui);
   color: var(--ink);
   background: var(--bg);
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.25rem;
-  background: var(--card);
-  border-bottom: 1px solid var(--line);
+/* ── Rail & Stage shell ───────────────────────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: var(--rail-w) 1fr; min-height: 100vh; }
+.app-bare { grid-template-columns: 1fr; }              /* login / unauthed — no rail */
+.app-bare .rail-wrap { display: none; }
+
+.rail-wrap {
+  position: sticky; top: 0; align-self: start; height: 100vh;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  padding: 0.9rem 0.7rem; background: var(--rail); border-right: 1px solid var(--line);
+  overflow-y: auto;
 }
+.brand { font-weight: 700; text-decoration: none; color: var(--ink); padding: 0.3rem 0.5rem 0.6rem; font-size: 1.05rem; }
 
-.brand { font-weight: 700; text-decoration: none; color: var(--ink); }
+.rail { display: flex; flex-direction: column; gap: 0.5rem; }
+.rail-sec { display: flex; flex-direction: column; }
+.rail-today { gap: 0.1rem; }
+.rail-h { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 700; padding: 0.2rem 0.6rem; }
+.rail-links { display: flex; flex-direction: column; }
+.rail a, .rail-link { display: flex; align-items: center; min-height: var(--tap); padding: 0.2rem 0.6rem; border-radius: 8px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--fs-meta); }
+.rail a:hover, .rail-link:hover { background: var(--accent-soft); }
+.rail a.active { background: var(--accent-soft); color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.rail-sg { color: var(--danger); font-weight: 700; }
+.rail-sg.active, .rail-sg:hover { background: #fdecea; box-shadow: inset 3px 0 0 var(--danger); }
+.rail-sec > summary { cursor: pointer; list-style: none; color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; padding: 0.45rem 0.6rem; min-height: var(--tap); display: flex; align-items: center; }
+.rail-sec > summary::-webkit-details-marker { display: none; }
+.rail-sec > summary::before { content: "▸ "; }
+.rail-sec[open] > summary::before { content: "▾ "; }
+.rail-sec > summary.active-within { color: var(--accent); }
 
-main { max-width: 60rem; margin: 2rem auto; padding: 0 1.25rem; }
-/* Work surfaces get the full width of the school monitor: they fill a portrait 1080×1920 screen
-   edge-to-edge and sit at a comfortable ~1170px centred on landscape 1920×1080. Reading-focused
-   pages (notes, tasks, login) stay at the narrower 60rem measure. */
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
+.rail-exp { text-align: left; font-size: var(--fs-meta); font-weight: 600; padding: 0.4rem 0.6rem; min-height: var(--tap); }
+.rail-foot .inline { display: block; }
+.rail-foot .inline button { min-height: var(--tap); padding: 0.4rem 0.6rem; }
+
+/* The stage — the working pane. */
+.stage { min-width: 0; display: flex; flex-direction: column; }
+.stage-top { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.25rem; background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 50; }
+.stage-top .search-box { flex: 1; max-width: 32rem; }
+
+main { width: 100%; max-width: 60rem; margin: 1.5rem auto; padding: 0 1.25rem; }
+/* Work surfaces get more width; reading-focused pages stay at the narrower measure. */
 main:has(.now-screen), main:has(.ld), main:has(.map), main:has(.kit),
 main:has(.scheme-course), main:has(#res-list) { max-width: 73rem; }
+
+/* Narrow screens: the rail collapses to the top as a horizontal scroller. */
+@media (max-width: 56rem) {
+  .app { grid-template-columns: 1fr; }
+  .rail-wrap { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; overflow: visible; }
+  .rail { flex-direction: row; flex-wrap: wrap; gap: 0.25rem; }
+  .rail-sec, .rail-today, .rail-links { flex-direction: row; flex-wrap: wrap; }
+  .rail-h { display: none; }
+  .rail-foot { margin: 0; border: 0; flex-direction: row; }
+}
+
+/* Visible keyboard focus everywhere (a11y). */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
 
 .card {
   background: var(--card);
@@ -192,7 +255,27 @@ a.tt-lesson:hover { background: #eef3fc; }
 .now-strip .now-week { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
 .now-strip a { color: var(--accent); font-weight: 600; }
 .now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
-.now-card h1 { margin: 0.25rem 0 0.4rem; }
+/* Rail & Stage — the current group name is the single dominant element, readable across the room. */
+.now-card h1 { margin: 0.1rem 0 0.5rem; font-size: var(--fs-hero); font-weight: 700; line-height: 1.05; }
+/* The resume point: promoted from a muted footnote to a prominent boxed line. */
+.now-resume { margin: 0.5rem 0; padding: 0.6rem 0.85rem; background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 8px; font-size: 1.05rem; }
+.now-resume-k { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.72rem; color: var(--accent); margin-right: 0.35rem; }
+/* The unified "Needs me" list (replaces the six right-column cards). */
+.now-needs { margin-top: 1rem; }
+.nm-list { list-style: none; padding: 0; margin: 0.5rem 0 0.6rem; }
+.nm-row { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.45rem 0; border-top: 1px solid var(--line); font-size: var(--fs-meta); }
+.nm-row:first-child { border-top: 0; }
+.nm-tag { flex: none; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 700; min-width: 4.5rem; }
+.nm-tag-sg { color: var(--danger); }
+.nm-text { min-width: 0; }
+a.nm-text { color: var(--accent); text-decoration: none; }
+.nm-sg { background: #fdecea; border-radius: 6px; padding-left: 0.4rem; padding-right: 0.4rem; }
+.nm-done { flex: none; font-size: 1.05rem; min-width: 1.4rem; min-height: 1.4rem; }
+.nm-clear { margin: 0.5rem 0 0; }
+.nm-foot { margin: 0; font-size: var(--fs-meta); }
+.nm-foot a { color: var(--accent); text-decoration: none; }
+.now-daycard { margin-top: 1rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0.5rem 1rem; }
+.now-daycard > summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 0.4rem 0; }
 .now-notes { margin-top: 1.1rem; }
 
 /* tasks */
@@ -487,8 +570,9 @@ a.tt-lesson:hover { background: #eef3fc; }
 
 /* ── print: cover sheets, the week grid and the medium-term plan ─────────────────────────── */
 @media print {
-  .topbar, .nav, button, .btn-secondary, .link, .now-focus, .map-pick, .kit-add, .kit-filter,
+  .rail-wrap, .stage-top, button, .btn-secondary, .link, .now-focus, .map-pick, .kit-add, .kit-filter,
   .res-upload, .res-search, .fu-form, .note-status, .timer-banner, summary { display: none !important; }
+  .app { display: block; }
   details { display: block; }
   details > *:not(summary) { display: block; }
   body { background: #fff; color: #000; font-size: 11pt; }

@@ -17,7 +17,7 @@ import { invalidatePupilCfg } from '../auth/pupilAccessCache';
 import { invalidateTeacherIdle } from '../auth/teacherIdleCache';
 import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
-import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily } from '../lib/nav';
+import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily, setExperienceMode } from '../lib/nav';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
   const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
@@ -340,6 +340,16 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     await setSetting('nav_daily', JSON.stringify(clean));
     setNavDailyOverride(clean); // write-through: the next full page render reflects it immediately
     return reply.type('text/html').send('<span class="ok">Saved ✓ — reload any page to see the new bar.</span>');
+  });
+
+  // Rail & Stage — the experience switch (everyday | power). Flipped from the rail footer; write-through
+  // so the next render reflects it. Reveals/hides the Advanced rail section + advanced in-page controls.
+  app.post('/settings/experience', guard, async (req, reply) => {
+    const b = z.object({ experience: z.enum(['everyday', 'power']) }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    await setSetting('experience', b.data.experience);
+    setExperienceMode(b.data.experience);
+    return reply.send('');
   });
 
   // Per-key length caps — the start of the registry-validated settings endpoint the later ideas

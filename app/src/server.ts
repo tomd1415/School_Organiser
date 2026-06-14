@@ -55,7 +55,7 @@ import { generateDueInstances } from './repos/recurringTasks';
 import { runDueMarkJobs } from './services/markingQueue';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
-import { setNavDailyOverride } from './lib/nav';
+import { setNavDailyOverride, setExperienceMode } from './lib/nav';
 import { localParts } from './lib/time';
 
 /** Build the Fastify instance with all plugins and routes, without listening. */
@@ -255,13 +255,18 @@ function scheduleMarkingQueue(app: FastifyInstance): void {
 export async function start(): Promise<void> {
   await migrate();
   const app = await buildApp();
-  // Prime the teacher-configurable daily-nav set (idea 6) from settings, once, into the write-through
-  // value renderNav() reads (layout() is synchronous and can't await). Bad/missing JSON → default.
+  // Prime the teacher-configurable daily-nav set (idea 6) + the Rail & Stage experience switch from
+  // settings, once, into the write-through values layout() reads (it is synchronous and can't await).
   try {
     const navRaw = await getSetting('nav_daily');
     if (navRaw) setNavDailyOverride(JSON.parse(navRaw) as string[]);
   } catch (err) {
     app.log.warn({ err }, 'nav_daily preload failed; using the default daily set');
+  }
+  try {
+    setExperienceMode(await getSetting('experience'));
+  } catch (err) {
+    app.log.warn({ err }, 'experience preload failed; defaulting to everyday');
   }
   try {
     await app.listen({ port: appConfig.PORT, host: appConfig.HOST });
