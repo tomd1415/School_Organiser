@@ -7,6 +7,25 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Bug fix: lesson-resource generation dropped all but one slide
+
+Generating a lesson's resources sometimes produced a slide deck with only one slide. Root cause
+(confirmed from the `ai_calls` audit, row #298): the model occasionally returns the deck as several
+`slides` entries — **one slide per entry** — and `tidyResourceSet` kept only the LONGEST entry per
+kind, discarding the rest, so a 4-slide deck collapsed to 1. Not a token/truncation issue (output
+was well under the cap). Fixed three ways + regression tests:
+
+- **`tidyResourceSet` now MERGES same-kind entries** (new `mergeResourceContents`): drops entries
+  wholly contained in a longer one (the cumulative-draft pathology it already guarded) and
+  **concatenates the remaining distinct pieces**, rebuilding a deck split across entries (slides split
+  on `##` headings, so each piece's heading survives).
+- **Prompts hardened** (`lesson_resources@6`, `adapt_resources@5`): "return EXACTLY ONE entry per
+  kind; ALL slides in the single `slides` document — never one entry per slide".
+- **`max_tokens` raised 16000 → 32000** for both resource generators (truncation insurance; cost
+  scales with actual use, not the cap).
+- Regression tests (`app/tests/lessonResources.test.ts`) reproduce the one-slide-per-entry pathology
+  and assert the full deck is rebuilt; a one-off live generation confirmed a 10-slide deck end-to-end.
+
 ### 2026-06-14 — Whole-project review (6 lenses) → fixes
 
 A six-lens parallel review (AI/privacy boundary, security/authz, SQL/data-integrity, marking

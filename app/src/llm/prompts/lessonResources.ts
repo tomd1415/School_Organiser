@@ -2,13 +2,15 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@5'; // @5: levels as strict "## 🟢/🟡/🔴" sections so per-pupil slicing is reliable (@4: 3-level differentiation default)
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@6'; // @6: ALL slides in ONE entry (fix one-slide-per-entry deck loss). @5: strict "## 🟢/🟡/🔴" level sections.
 
 export const LESSON_RESOURCES_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use ' +
-  'resources for ONE lesson, as Markdown. Produce: (1) "slides" — presentation slides, one `##` ' +
-  'heading per slide (it becomes a real slide shown full-screen): a large supporting visual as an ' +
+  'resources for ONE lesson, as Markdown. Produce: (1) "slides" — presentation slides as a SINGLE ' +
+  '"slides" document containing ALL slides, one `##` heading per slide (many `## ` headings in that ' +
+  'one entry — NEVER return one slide per entry or several "slides" entries): each `##` heading ' +
+  'becomes a real slide shown full-screen, with a large supporting visual as an ' +
   'emoji on its own line straight after each heading (e.g. 📬 or 🖥️ — pick one that genuinely ' +
   'supports the idea), then at most 4 short bullets in large-print-friendly language, a *Say:* ' +
   'line of teacher talking points, and a `> key idea` callout where one exists; ' +

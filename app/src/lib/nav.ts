@@ -35,6 +35,7 @@ export const NAV_MODEL: readonly NavItem[] = [
   { href: '/notes', label: 'Notes', group: 'setup' },
   { href: '/schemes', label: 'Schemes', key: 's', group: 'setup' },
   { href: '/concepts', label: 'Concepts', group: 'setup' },
+  { href: '/coverage', label: 'Coverage', group: 'setup' },
   { href: '/map', label: 'Map', key: 'm', group: 'setup' },
   { href: '/kit', label: 'Kit', group: 'setup' },
   { href: '/resources', label: 'Resources', key: 'r', group: 'setup' },

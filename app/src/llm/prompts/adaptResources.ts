@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@4'; // @4: 3-level differentiation kept through adaptation
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@5'; // @5: ALL slides in ONE entry (fix one-slide-per-entry deck loss). @4: 3-level differentiation kept through adaptation
 
 export const ADAPT_RESOURCES_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
@@ -15,11 +15,12 @@ export const ADAPT_RESOURCES_SYSTEM =
   'sheet low cognitive load with one instruction per line. Worksheets are COMPLETED ON A ' +
   'COMPUTER: typed answers into two-column tables (question | "Type your answer here" cell), ' +
   'NEVER blank lines or underscore runs anywhere — the name/date header is a typed table too — ' +
-  'and say "type" not "write". Slides are real presentation ' +
-  'slides: one `##` per slide, a supporting emoji visual on its own line after each heading, at ' +
-  'most 4 short bullets, a *Say:* line. Produce the same set: "slides", "worksheet", "support", ' +
-  'and "answers" where useful. If a master document is missing, create that document from the ' +
-  'adapted outline. Plain UK English; never reference an individual pupil.';
+  'and say "type" not "write". Slides are real presentation slides as a SINGLE "slides" document ' +
+  'containing ALL slides — one `##` per slide (many `## ` headings in that one entry; NEVER one slide ' +
+  'per entry or several "slides" entries), a supporting emoji visual on its own line after each ' +
+  'heading, at most 4 short bullets, a *Say:* line. Produce EXACTLY ONE entry per kind: "slides", ' +
+  '"worksheet", "support", and "answers" where useful. If a master document is missing, create that ' +
+  'document from the adapted outline. Plain UK English; never reference an individual pupil.';
 
 /** The class's effective lesson + each master document (capped) as separate context items. */
 export function adaptResourceItems(

@@ -509,12 +509,25 @@ export async function cloneSchemeNewVersion(schemeId: number): Promise<number | 
     );
     const newUnitId = nu.rows[0]?.id;
     if (newUnitId === undefined) continue;
-    await pool.query(
-      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min)
-       SELECT $1, course_id, title, display_order, objectives, outline, duration_min
-       FROM lesson_plans WHERE unit_id = $2`,
-      [newUnitId, u.id],
-    );
+    // Copy each plan individually so we know the old→new id, then carry its spec-point coverage
+    // mappings forward (idea 10). A bulk INSERT…SELECT would lose the id link and reset coverage to
+    // zero on every version bump.
+    const oldPlans = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`, [u.id]);
+    for (const op of oldPlans.rows) {
+      const np = await pool.query<{ id: number }>(
+        `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min)
+         SELECT $1, course_id, title, display_order, objectives, outline, duration_min FROM lesson_plans WHERE id = $2
+         RETURNING id`,
+        [newUnitId, op.id],
+      );
+      const newPlanId = np.rows[0]?.id;
+      if (newPlanId === undefined) continue;
+      await pool.query(
+        `INSERT INTO lesson_plan_spec_points (lesson_plan_id, spec_point_id, source)
+         SELECT $1, spec_point_id, source FROM lesson_plan_spec_points WHERE lesson_plan_id = $2`,
+        [newPlanId, op.id],
+      );
+    }
   }
   return newSchemeId;
 }

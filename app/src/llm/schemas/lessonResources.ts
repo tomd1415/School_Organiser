@@ -11,7 +11,10 @@ export const lessonResourcesSchema = z.object({
         ),
         title: z.string().describe('short human title, e.g. "Slides — Website building blocks"'),
         content: z.string().describe(
-          'the COMPLETE Markdown document, ready to use — one whole document per entry, never a partial or progressive draft, never content repeated from another entry',
+          'the COMPLETE Markdown document, ready to use. Return EXACTLY ONE entry per kind: the "slides" ' +
+            'entry must contain ALL the slides in this single content (multiple `## ` slide headings) — do NOT ' +
+            'return one entry per slide, or several "slides" entries. Never a partial or progressive draft, ' +
+            'never content repeated from another entry',
         ),
       }),
     )
@@ -39,23 +42,42 @@ export interface TidyResource {
   content: string;
 }
 
-/** Defend against model pathologies seen in the wild: several entries of the SAME kind that are
- * cumulative drafts of one document (keep only the longest), empty entries, and over-long sets.
- * Returns the cleaned set plus which core documents are missing (caller may retry once). */
+/** Merge same-kind entries into ONE document per kind. Two model pathologies are seen in the wild and
+ * BOTH must be handled or a deck silently loses slides:
+ *   - cumulative drafts: several same-kind entries, each a fuller version of one doc → keep the superset.
+ *   - split pieces: one slide (or section) PER entry → these must be CONCATENATED, not dropped.
+ * Earlier this kept only the LONGEST entry per kind, which turned a multi-slide deck returned as
+ * one-slide-per-entry into a single slide (the reported bug). We now drop entries wholly contained in
+ * a longer one (draft fragments) and join the remaining distinct pieces with a blank line — slides
+ * split on `## ` headings, so each piece's heading survives and the whole deck is rebuilt. */
+export function mergeResourceContents(contents: string[]): string {
+  const trimmed = contents.map((c) => c.trim()).filter(Boolean);
+  const kept = trimmed.filter((c, i) => !trimmed.some((o, j) => j !== i && o.length > c.length && o.includes(c)));
+  const seen = new Set<string>();
+  return kept.filter((c) => (seen.has(c) ? false : (seen.add(c), true))).join('\n\n');
+}
+
+/** Clean the model's resource set: merge per kind (see mergeResourceContents), drop empties, cap at 4.
+ * Returns the cleaned set plus which core documents are missing entirely (caller may retry once). */
 export function tidyResourceSet(resources: Array<{ kind: string; title: string; content: string }>): {
   docs: TidyResource[];
   missing: string[];
 } {
-  const byKind = new Map<string, TidyResource>();
+  const contentsByKind = new Map<string, string[]>();
+  const titleByKind = new Map<string, string>();
   for (const r of resources) {
     if (!r.content?.trim()) continue;
     const kind = normaliseResourceKind(r.kind);
-    const existing = byKind.get(kind);
-    if (!existing || r.content.length > existing.content.length) {
-      byKind.set(kind, { kind, title: r.title, content: r.content });
-    }
+    const arr = contentsByKind.get(kind) ?? [];
+    arr.push(r.content);
+    contentsByKind.set(kind, arr);
+    if (!titleByKind.has(kind)) titleByKind.set(kind, r.title);
   }
-  const docs = [...byKind.values()].slice(0, 4);
-  const missing = ['slides', 'worksheet'].filter((k) => !byKind.has(k));
+  const docs: TidyResource[] = [...contentsByKind.entries()].slice(0, 4).map(([kind, contents]) => ({
+    kind: kind as TidyResource['kind'],
+    title: titleByKind.get(kind) ?? kind,
+    content: mergeResourceContents(contents),
+  }));
+  const missing = ['slides', 'worksheet'].filter((k) => !contentsByKind.has(k));
   return { docs, missing };
 }

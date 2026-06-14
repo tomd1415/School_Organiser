@@ -16,7 +16,7 @@ describe('nav model (single source of truth)', () => {
       '<details class="nav-more"><summary>⚙ Setup &amp; admin</summary><div class="nav-more-panel">' +
       '<a href="/oversee">Oversee</a><a href="/recurring">Recurring</a><a href="/events">Events</a>' +
       '<a href="/time">Time</a><a href="/pupils">Pupils</a><a href="/safeguarding">Safeguarding</a>' +
-      '<a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
+      '<a href="/notes">Notes</a><a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/coverage">Coverage</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
       '<a href="/resources">Resources</a><a href="/setup">Setup</a><a href="/settings">Settings</a>' +
       '</div></details></nav>';
     expect(renderNav()).toBe(expected);
@@ -28,7 +28,7 @@ describe('nav model (single source of truth)', () => {
       '<a href="/oversee">Oversee</a><a href="/tasks">Tasks</a><a href="/recurring">Recurring</a>' +
       '<a href="/events">Events</a><a href="/time">Time</a><a href="/captured">Captured</a>' +
       '<a href="/pupils">Pupils</a><a href="/safeguarding">Safeguarding</a><a href="/notes">Notes</a>' +
-      '<a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
+      '<a href="/schemes">Schemes</a><a href="/concepts">Concepts</a><a href="/coverage">Coverage</a><a href="/map">Map</a><a href="/kit">Kit</a>' +
       '<a href="/resources">Resources</a><a href="/setup">Setup</a><a href="/settings">Settings</a></nav>';
     expect(renderNav(ALL_HREFS)).toBe(flat);
     expect(renderNav(ALL_HREFS)).not.toContain('nav-more'); // every link pinned ⇒ no menu

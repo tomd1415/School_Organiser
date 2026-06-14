@@ -116,7 +116,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
           ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
         ],
         instruction: LESSON_RESOURCES_INSTRUCTION,
-        maxTokens: 16000, // four full documents need room — a tight cap makes the model drop one
+        maxTokens: 32000, // generous: four full docs incl. a multi-slide deck must never truncate (cost scales with actual use, not the cap)
       },
       lessonResourcesSchema,
     );

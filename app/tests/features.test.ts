@@ -7,12 +7,12 @@ const EXPECTED_KEYS = [
   'author_scheme', 'draft_lesson', 'adapt_lesson', 'adapt_resources', 'improve_master',
   'lesson_resources', 'convert_unit', 'generate_resource', 'term_summary', 'mark_scheme',
   'captured_categorise', 'task_breakdown', 'retrieval_starter', 'class_work', 'mark_answers',
-  'pupil_profile', 'email_triage', 'note_route',
+  'pupil_profile', 'email_triage', 'note_route', 'coverage_check',
 ];
 
 describe('AI feature registry (idea 5)', () => {
   it('lists exactly the known features, with unique keys and valid roles', () => {
-    expect(AI_FEATURES).toHaveLength(18);
+    expect(AI_FEATURES).toHaveLength(19);
     expect(new Set(AI_FEATURES.map((f) => f.key))).toEqual(new Set(EXPECTED_KEYS));
     expect(AI_FEATURES.every((f) => ['plan', 'design', 'cheap'].includes(f.role))).toBe(true);
   });
@@ -30,6 +30,6 @@ describe('AI feature registry (idea 5)', () => {
 
   it('every offered model is one we have pricing for (cost + cap stay accurate)', () => {
     for (const m of MODEL_OPTIONS) expect(KNOWN_MODEL_IDS.has(m.id)).toBe(true);
-    expect(FEATURE_KEYS.size).toBe(18);
+    expect(FEATURE_KEYS.size).toBe(19);
   });
 });

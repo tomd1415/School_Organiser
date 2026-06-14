@@ -105,6 +105,17 @@ button.link { background: none; color: var(--accent); padding: 0; }
 .note-dest-kind { display: inline-block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; background: var(--accent); color: #fff; border-radius: 4px; padding: 0.05rem 0.35rem; vertical-align: middle; }
 .ok { color: #1f7a3d; }
 
+/* idea 10 — coverage page */
+.cov-summary { font-size: 1.05rem; }
+.cov-gap { color: var(--error); }
+.cov-uncovered { margin: 0.3rem 0 0.8rem; padding-left: 1.2rem; color: var(--ink); }
+.cov-uncovered li { margin: 0.15rem 0; }
+.cov-lesson { border-top: 1px solid var(--line); padding: 0.35rem 0; }
+.cov-lesson > summary { cursor: pointer; }
+.cov-checklist { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0 0.5rem 1rem; }
+.cov-check { font-weight: 400; }
+.cov-points code, .cov-uncovered code, .cov-check code { color: var(--muted); }
+
 /* timetable grid */
 main:has(.tt) { max-width: 76rem; }
 .tt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }

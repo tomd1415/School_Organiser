@@ -393,7 +393,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
           ),
         ],
         instruction: adaptResourcesInstruction(info.groupName),
-        maxTokens: 16000,
+        maxTokens: 32000, // generous: a full adapted set incl. a multi-slide deck must never truncate
       },
       lessonResourcesSchema,
     );

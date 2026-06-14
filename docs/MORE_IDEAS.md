@@ -1,8 +1,9 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–3 + idea 12 BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2, 12).**
-> Shipped and tested — **288 unit / 199 integration green; typecheck clean; migrations `0028`
-> (`teaching_concepts`) & `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
+> **Status (2026-06-14): Waves 0–3 + idea 12 + idea 10 slices 1 & 2a BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 10a, 10·2a).**
+> Shipped and tested — **297 unit / 208 integration green; typecheck clean; migrations `0028`–`0031`
+> (`teaching_concepts`, `group_courses.guided_access`, `course_spec_points` + `lesson_plan_spec_points`,
+> `courses.exam_date`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
 > [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
@@ -20,8 +21,13 @@
 > weave-into-existing, and idea 5's provider "refresh model list". **Idea 12 (smart capture) is built:**
 > the 📝 Note button + `n` open a pop-up anywhere; on save `note_route` proposes 1–3 destinations
 > (task / event / captured / general note) you tick to confirm, a 🔒 toggle keeps a note private (never
-> sent), and AI-off falls back to general notes. **Next: the Wave 4 coverage backbone (idea 10 → 9),
-> then the Wave 5 reviewer (8 + 4).** The original plan follows.
+> sent), and AI-off falls back to general notes. **Wave 4 (idea 10 slice 1):** the new **/coverage**
+> page is the AI-free spec-point source of truth — paste a course's spec, tick which lessons cover each
+> point, see what's not yet covered; the rollover now carries coverage forward. **Slice 2a:** a "✨
+> Suggest coverage for the gaps" button (cheap `coverage_check`) maps each uncovered point to the
+> best-fitting lesson for the teacher to tick-confirm, plus a per-course exam date. **Next: idea 10
+> slice 2b (`author_scheme@4` cover-every-point + revision unit + coverage-drop warning), then idea 9
+> (official docs), then the Wave 5 reviewer (8 + 4).** The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -133,8 +139,9 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **10** | **Spec-point library + deterministic coverage map** — `course_spec_points` + `lesson_plan_spec_points` + a paste-import parser + an AI-free `schemeCoverage()` query + read-only coverage panel | Closes the biggest planning gap: "what must be covered" exists nowhere today. The first slice is **AI-free** and the durable backbone everything else builds on | L | 🟠 | ⬜ |
-| **10** | **AI coverage authoring + gap-check** — `author_scheme@4` covers every spec point and emits a revision unit for exam courses; a cheap `coverage_check` critic maps uncovered points to likely lessons; edits that drop coverage warn inline (no AI) | Makes the AI author honour the source-of-truth and flags coverage loss on every later edit — teacher confirms each mapping | L | 🟡 | ⬜ |
+| **10** | **Spec-point library + deterministic coverage map** — `course_spec_points` + `lesson_plan_spec_points` (mig `0030`), a paste-import parser, an AI-free `schemeCoverage()` query, and the **/coverage** page (paste spec points, tick which lessons cover each, see what's not yet covered); `cloneSchemeNewVersion` now **copies the mappings** on a version bump | Closes the biggest planning gap: "what must be covered" existed nowhere. **AI-free** durable backbone everything else builds on; the rollover-copy was the flagged trap | L | 🟠 | ✅ |
+| **10** | **AI gap-filler + exam date (2a)** — a cheap `coverage_check` critic maps each uncovered spec point to the best-fitting existing lesson (or "needs a new lesson"), shown as tick-to-apply suggestions on **/coverage**; a per-course `exam_date` (mig `0031`) | Closes gaps fast — the teacher confirms each mapping; degrades to "AI is off" cleanly | M | 🟡 | ✅ |
+| **10** | **AI coverage authoring + drop-warning (2b)** — `author_scheme@4` covers **every** spec point + emits a revision unit before `exam_date` on exam courses (auto-mapping the new lessons); deleting the sole coverer of a point warns inline (no AI) | Makes the AI author honour the source of truth and flags coverage loss on later edits | L | 🟡 | ⬜ |
 | **9** | **Official course documents + text extraction** — `doc_role` tag on `resources` + `course_doc_text` sidecar + `docText.ts` (mammoth/pdfjs/Gotenberg fallback) + `courseDocItems()` into authoring | Lets the AI cite the *real* spec; the heaviest L (new deps, PDF extraction quirks). An enhancer that can later auto-seed idea 10, **not** a prerequisite for it | L | 🟡 | ⬜ |
 
 ### Wave 5 — AI reviewer *(unify ideas 8 + 4, cost-gated, build last)*
@@ -359,10 +366,11 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
    per-class `teaching_context` the generators already read; the September rollover wizard carries it
    forward (as it does adaptations), so it survives year-on-year. Still to confirm: the final question
    set (VI count→font, attention→task length, typing tolerance, reading age, EAL, dyslexia-friendly).
-5. **Spec-point granularity & exam boundary (idea 10)** — seed full OCR J277 sub-statements
-   (token-heavy) or topic-level headings (cheaper)? Where does the "leave space for revision"
-   boundary come from — a new `courses.exam_date`, the academic-year end, or a prompt heuristic? Does
-   coverage account for *delivery* (was the covering lesson taught) or plan-level mapping only for v1?
+5. **Spec-point granularity & exam boundary (idea 10) — decided (2026-06-14).** (a) **Sub-statement
+   level** — the AI authors/checks against the finest spec statements so nothing slips through; slice 2
+   batches by topic to keep tokens down. (b) **A per-course `courses.exam_date`** (new column,
+   mig `0031`) — revision time is reserved before it on exam courses. (c) **Plan-level mapping** — a
+   lesson mapped to a point counts as covering it (delivery-aware counting stays a later option).
 6. **PDF extraction approach (idea 9)** — `pdfjs-dist` (heavier, better layout) vs `pdf-parse`
    (simpler) vs routing through the existing Gotenberg sidecar then extracting? The "preview extracted
    text before use" control is essential, not optional, given multi-column spec PDFs.
