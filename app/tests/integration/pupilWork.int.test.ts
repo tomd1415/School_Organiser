@@ -173,6 +173,20 @@ describe('teacher Pupil-work grid + AI loop (integration)', () => {
     expect(res.body).toContain('😀'); // rating 4
   });
 
+  it('the live poll returns 204 when unchanged and only the live fragment (not the read-back) when changed (10.22)', async () => {
+    const full = await app.inject({ method: 'GET', url: `/lesson/oc/${occurrenceCourseId}/pupil-work`, headers: { cookie: teacherCookie } });
+    expect(full.body).toContain(`id="pw-live-${occurrenceCourseId}"`); // the polled inner
+    expect(full.body).toContain(`id="pw-readback-${occurrenceCourseId}"`); // read-back is part of the full panel
+    const sig = /pupil-work\?sig=([a-z0-9]+)"/.exec(full.body)?.[1] ?? '';
+    expect(sig).not.toBe('');
+    const unchanged = await app.inject({ method: 'GET', url: `/lesson/oc/${occurrenceCourseId}/pupil-work?sig=${sig}`, headers: { cookie: teacherCookie } });
+    expect(unchanged.statusCode).toBe(204); // nothing changed → no swap, read-back preserved
+    const changed = await app.inject({ method: 'GET', url: `/lesson/oc/${occurrenceCourseId}/pupil-work?sig=stale`, headers: { cookie: teacherCookie } });
+    expect(changed.statusCode).toBe(200);
+    expect(changed.body).toContain(`id="pw-live-${occurrenceCourseId}"`); // the live fragment
+    expect(changed.body).not.toContain(`id="pw-readback-${occurrenceCourseId}"`); // but NOT the read-back (left untouched)
+  });
+
   it('changes a pupil level, but refuses a pupil not enrolled in the class (IDOR)', async () => {
     const ok = await app.inject({
       method: 'POST', url: `/lesson/oc/${occurrenceCourseId}/pupil/${inPupil}/level`,

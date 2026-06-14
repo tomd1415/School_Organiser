@@ -907,7 +907,7 @@ html[data-textscale="3"] { font-size: 142%; }
 .prep-add input[type=text] { font: inherit; padding: 0.3rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; width: 100%; max-width: 22rem; margin-top: 0.3rem; }
 
 /* 10.22 — live grid badge + marks-waiting card */
-.pw-live { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: #2e7d32; border: 1px solid #b6e0b6; border-radius: 999px; padding: 0 0.4rem; vertical-align: middle; }
+.pw-live-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: #2e7d32; border: 1px solid #b6e0b6; border-radius: 999px; padding: 0 0.4rem; vertical-align: middle; }
 .now-marks .bell-list a { font-weight: 600; }
 
 /* 10.25 — activity/starter countdown timer */

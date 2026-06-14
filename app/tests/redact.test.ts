@@ -67,6 +67,17 @@ describe('redact — the pupil-name boundary', () => {
     expect(containsRosterName('next to PUPIL_10 today', accented)).toBe(false);
   });
 
+  // Regression: a DECOMPOSED (NFD) accent in the incoming text (routine from macOS / PDF / MIS-export
+  // paste) must still match an NFC-stored name — otherwise the real name reaches the AI AND the egress
+  // assert misses it. Both sides are NFC-normalised at the boundary.
+  it('redacts/catches a name even when the text uses decomposed (NFD) accents', () => {
+    const roster = [{ id: 9, displayName: 'José Múñoz'.normalize('NFC'), aiToken: 'PUPIL_9', active: true }];
+    const nfdText = 'note about José Múñoz today'.normalize('NFD');
+    expect(redactNames(nfdText, roster)).toContain('PUPIL_9');
+    expect(redactNames(nfdText, roster)).not.toMatch(/Mu/); // the name is gone
+    expect(containsRosterName(nfdText, roster)).toBe(true); // egress assert catches the NFD form too
+  });
+
   it('still word-bounds accented names (internal accents, ASCII edges untouched)', () => {
     const r = [{ id: 1, displayName: 'Ana', aiToken: 'PUPIL_1', active: true }];
     expect(redactNames('Ana and Anabel', r)).toBe('PUPIL_1 and Anabel'); // "Anabel" not matched

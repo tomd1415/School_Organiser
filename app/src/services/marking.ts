@@ -133,6 +133,9 @@ export interface ObjectiveResult {
 /** Mark every objective answer deterministically (only the not-yet-marked ones). Returns the count
  *  marked and how many open answers remain for the AI pass. Safe to call repeatedly. */
 export async function markObjective(occurrenceCourseId: number): Promise<ObjectiveResult> {
+  // Defence in depth: like markOpen, refuse to write any per-pupil attainment when the DPIA gate is
+  // off — so a future caller can't store marks behind the teacher's back.
+  if (!(await marksEnabled())) return { marked: 0, openAnswers: 0 };
   const r = await resolve(occurrenceCourseId);
   if (!r) return { marked: 0, openAnswers: 0 };
   const done = await alreadyMarkedAnswerIds(occurrenceCourseId);

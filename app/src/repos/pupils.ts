@@ -13,7 +13,9 @@ const ROW = `id, display_name AS "displayName", ai_token AS "aiToken", active`;
 // ever sees in place of the name (SECURITY_AND_PRIVACY §"The pupil-name rule"). Names-only
 // roster: no enrolments, no DPIA-heavy fields (the minimal slice agreed for Phase 4).
 export async function createPupil(displayName: string): Promise<RosterEntry> {
-  const name = displayName.trim();
+  // NFC-normalise so the stored name matches the redaction boundary (which compares in NFC) — a
+  // decomposed (NFD) paste otherwise stores a form that later redaction/egress checks can't match.
+  const name = displayName.normalize('NFC').trim();
   if (!name) throw new Error('display name required');
   const { rows } = await pool.query<RosterEntry>(
     `INSERT INTO pupils (display_name, ai_token)
@@ -92,6 +94,9 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
       counts.tasks_detached = await rowsAffected(client, `UPDATE tasks SET pupil_id = NULL WHERE pupil_id = $1`, [id]);
       counts.events_detached = await rowsAffected(client, `UPDATE events SET pupil_id = NULL WHERE pupil_id = $1`, [id]);
       counts.answers = (await client.query<{ n: number }>(`SELECT count(*)::int n FROM pupil_answers WHERE pupil_id = $1`, [id])).rows[0]!.n;
+      // safeguarding_review has a polymorphic (FK-less) source_id, so the answer cascade won't clear
+      // its 'answer' rows — do it explicitly here, while the answers still exist to resolve the ids.
+      counts.sgReviews = await rowsAffected(client, `DELETE FROM safeguarding_review WHERE source_type = 'answer' AND source_id IN (SELECT id FROM pupil_answers WHERE pupil_id = $1)`, [id]);
       counts.deleted = await rowsAffected(client, `DELETE FROM pupils WHERE id = $1`, [id]); // CASCADE clears the rest
     }
 

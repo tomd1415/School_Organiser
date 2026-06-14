@@ -41,6 +41,7 @@ import {
   marksForPupil,
   overrideMark,
   setMarkingSetting,
+  dequeueOpenMarkForGroupCourse,
   updateSchemePoint,
   markStatsByField,
   type MarkSummary,
@@ -99,12 +100,18 @@ function hashStr(s: string): string {
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
   return (h >>> 0).toString(36);
 }
-function gridSigFrom(rows: Array<{ pupilId: number; filled: number; done: boolean; unseen: number; rating: number | null; lastSaved: string | null }>, summaries: Map<number, { marked: number; suggested: number; needsReview: number }>, released: boolean): string {
+function gridSigFrom(
+  rows: Array<{ pupilId: number; filled: number; done: boolean; unseen: number; rating: number | null; lastSaved: string | null }>,
+  summaries: Map<number, { marked: number; suggested: number; needsReview: number; awarded: number; total: number }>,
+  released: boolean,
+): string {
   const raw =
     rows
       .map((r) => {
         const s = summaries.get(r.pupilId);
-        return `${r.pupilId}.${r.filled}.${r.done ? 1 : 0}.${r.unseen}.${s?.marked ?? 0}.${s?.suggested ?? 0}.${s?.needsReview ?? 0}.${r.rating ?? 0}.${r.lastSaved ?? ''}`;
+        // include awarded/total so re-overriding an already-confirmed mark (which leaves marked/
+        // suggested/needsReview unchanged but changes the score) still triggers a live refresh.
+        return `${r.pupilId}.${r.filled}.${r.done ? 1 : 0}.${r.unseen}.${s?.marked ?? 0}.${s?.suggested ?? 0}.${s?.needsReview ?? 0}.${s?.awarded ?? 0}.${s?.total ?? 0}.${r.rating ?? 0}.${r.lastSaved ?? ''}`;
       })
       .join('|') + (released ? '|R' : '');
   return hashStr(raw);
@@ -117,7 +124,17 @@ async function gridSignature(oc: number, info: OcInfo): Promise<string> {
   return gridSigFrom(rows, summaries, released);
 }
 
+interface BuiltGrid {
+  full: string; // the whole panel (#pw-oc): live grid + actions + marking bar + summary + read-back
+  live: string; // ONLY the polled #pw-live-oc (heading + table) — what the 30s poll swaps
+  sig: string;
+}
+
 async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<string> {
+  return (await buildGrid(oc, info, msg)).full;
+}
+
+async function buildGrid(oc: number, info: OcInfo, msg?: string): Promise<BuiltGrid> {
   const rows = await pupilWorkRows(oc, info.groupCourseId);
   // Total fillable fields per level (text inputs), so "n of m" matches the pupil's slice. Parse
   // the document ONCE and bucket fields by level (a slice = shared + that level).
@@ -135,7 +152,8 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
     }
   }
   if (rows.length === 0) {
-    return `<div class="pupil-work" id="pw-${oc}"><h3>Pupil work</h3><p class="muted">No pupils enrolled in this class yet.</p></div>`;
+    const empty = `<div class="pupil-work" id="pw-${oc}"><h3>Pupil work</h3><p class="muted">No pupils enrolled in this class yet.</p></div>`;
+    return { full: empty, live: empty, sig: 'none' };
   }
 
   // Marking surface (gated by the DPIA addendum). Only shown when the gate is on.
@@ -163,10 +181,15 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
     })
     .join('');
 
-  return `<div class="pupil-work" id="pw-${oc}" hx-get="/lesson/oc/${oc}/pupil-work?sig=${sig}" hx-trigger="every 30s" hx-swap="outerHTML">
-    <h3>Pupil work <span class="pw-live" title="updates automatically during the lesson">live</span> ${totalUnseen > 0 ? `<span class="pw-new-count">${totalUnseen} new</span>` : ''}</h3>
+  // The LIVE, polled part — heading + table only. The poll swaps THIS, so an open read-back / mark
+  // message / scheme editor (all outside it, below) survive a refresh during the lesson.
+  const live = `<div class="pw-live" id="pw-live-${oc}" hx-get="/lesson/oc/${oc}/pupil-work?sig=${sig}" hx-trigger="every 30s" hx-swap="outerHTML">
+    <h3>Pupil work <span class="pw-live-badge" title="updates automatically during the lesson">live</span> ${totalUnseen > 0 ? `<span class="pw-new-count">${totalUnseen} new</span>` : ''}</h3>
     ${msg ? `<p class="adapt-note">${esc(msg)}</p>` : ''}
     <table class="pw-grid"><thead><tr><th>Pupil</th><th>Level</th><th>Done fields</th><th>Done ✓</th>${marking ? '<th>Marks</th>' : ''}<th>Lesson</th><th>Saved</th></tr></thead><tbody>${body}</tbody></table>
+  </div>`;
+  const full = `<div class="pupil-work" id="pw-${oc}">
+    ${live}
     <div class="pw-actions">
       <button type="button" class="link" hx-post="/lesson/oc/${oc}/seen" hx-target="#pw-${oc}" hx-swap="outerHTML">mark all seen</button>
       <button type="button" class="link fu-ai" hx-post="/lesson/oc/${oc}/summarise" hx-target="#pw-summary-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">✨ Summarise the class's work (AI)</button>
@@ -177,6 +200,7 @@ async function renderGrid(oc: number, info: OcInfo, msg?: string): Promise<strin
     <div id="pw-summary-${oc}"></div>
     <div id="pw-readback-${oc}" class="pw-readback"></div>
   </div>`;
+  return { full, live, sig };
 }
 
 function renderMarkingBar(oc: number, info: OcInfo, scheme: Awaited<ReturnType<typeof getScheme>>, settings: import('../repos/marking').MarkingSettings, released: boolean): string {
@@ -217,11 +241,14 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (!p.success) return reply.code(400).send('');
     const info = await ocInfo(p.data.id);
     if (!info) return reply.type('text/html').send('');
-    // 10.22: the live poll sends its last-seen signature — unchanged → 204 (HTMX won't swap, so an
-    // open read-back / in-progress action is never disrupted). Only real activity re-renders.
+    // No sig → the initial panel load or a manual refresh: render the WHOLE panel (.full).
+    // With a sig → the 30s live poll: unchanged → 204 (HTMX won't swap, so an open read-back / in-
+    // progress action is never disrupted); changed → swap ONLY the #pw-live-oc inner (heading +
+    // table), leaving the read-back/summary/marking below it untouched.
     const sig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
-    if (sig !== null && sig === (await gridSignature(p.data.id, info))) return reply.code(204).send();
-    return reply.type('text/html').send(await renderGrid(p.data.id, info));
+    if (sig === null) return reply.type('text/html').send((await buildGrid(p.data.id, info)).full);
+    if (sig === (await gridSignature(p.data.id, info))) return reply.code(204).send();
+    return reply.type('text/html').send((await buildGrid(p.data.id, info)).live);
   });
 
   app.post('/lesson/oc/:id/pupil/:pid/level', guard, async (req, reply) => {
@@ -455,6 +482,9 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (!info) return reply.code(404).send('');
     const value = b.data.key === 'showScores' || b.data.key === 'devicesEnabled' ? b.data.value === 'true' : b.data.value;
     await setMarkingSetting(info.groupCourseId, b.data.key, value);
+    // Switching to manual must also drop any open-mark jobs already queued for finishers, so they
+    // don't still get an automatic AI pass after the teacher turned auto-marking off for the class.
+    if (b.data.key === 'markingTrigger' && value === 'manual') await dequeueOpenMarkForGroupCourse(info.groupCourseId);
     // Turning remembered devices OFF revokes the ones already issued for this class — the policy
     // must take effect on existing devices, not just block new ones.
     if (b.data.key === 'devicesEnabled' && value === false) {

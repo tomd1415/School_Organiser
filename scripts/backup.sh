@@ -44,13 +44,26 @@ fi
 mkdir -p "$BACKUP_DIR"
 cd "$APP_DIR"
 
+# Write to dot-prefixed temp files first, then mv into place ONLY after the whole pipeline succeeds
+# and the artifact is non-empty. Without this, the `>` truncates the target before the pipeline runs,
+# so a failed pg_dump (db down/restarting) would leave a valid-looking but EMPTY/partial backup that
+# sorts as the newest — and restore/verify would happily pick it. The temp names start with "." so the
+# db-* / resources-* prune+restore globs never see them; a trap clears them on any failure (set -e).
+TMP_DB="$BACKUP_DIR/.tmp-db-$STAMP"
+TMP_RES="$BACKUP_DIR/.tmp-res-$STAMP"
+trap 'rm -f "$TMP_DB" "$TMP_RES"' EXIT
+RESOURCE_DIR="${RESOURCE_DIR:-$ROOT/data/resources}"
+
 echo "[backup] dumping database -> db-$STAMP.sql.gz$EXT"
-docker compose exec -T db pg_dump -U organiser organiser | gzip | enc > "$BACKUP_DIR/db-$STAMP.sql.gz$EXT"
+docker compose exec -T db pg_dump -U organiser organiser | gzip | enc > "$TMP_DB"
+[ -s "$TMP_DB" ] || { echo "[backup] DB dump produced no data — aborting (no backup written)" >&2; exit 1; }
+mv "$TMP_DB" "$BACKUP_DIR/db-$STAMP.sql.gz$EXT"
 
 echo "[backup] snapshotting resource file-store -> resources-$STAMP.tar.gz$EXT"
 # The store is a bind-mounted host directory (app/docker-compose.yml), so tar it directly.
-RESOURCE_DIR="${RESOURCE_DIR:-$ROOT/data/resources}"
-tar czf - -C "$RESOURCE_DIR" . | enc > "$BACKUP_DIR/resources-$STAMP.tar.gz$EXT"
+tar czf - -C "$RESOURCE_DIR" . | enc > "$TMP_RES"
+[ -s "$TMP_RES" ] || { echo "[backup] resources archive empty — aborting" >&2; exit 1; }
+mv "$TMP_RES" "$BACKUP_DIR/resources-$STAMP.tar.gz$EXT"
 
 echo "[backup] pruning to the most recent $KEEP of each (all suffixes)"
 ls -1t "$BACKUP_DIR"/db-*.sql.gz*        2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f

@@ -119,7 +119,13 @@
       if (words.length === 0) return;
       var bank = document.createElement('div');
       bank.className = 'word-bank';
-      bank.innerHTML = words.map(function (w) { return '<button type="button" class="word-chip">' + w.replace(/[&<>"]/g, '') + '</button>'; }).join('');
+      words.forEach(function (w) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'word-chip';
+        b.textContent = w; // textContent keeps the word verbatim (R&D, <tag>) and is XSS-safe
+        bank.appendChild(b);
+      });
       bank.addEventListener('click', function (e) {
         var chip = e.target.closest('.word-chip');
         if (!chip) return;

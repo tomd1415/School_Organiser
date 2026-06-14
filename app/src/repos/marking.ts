@@ -424,3 +424,9 @@ export async function claimDueMarkJobs(): Promise<number[]> {
 export async function dequeueOpenMark(occurrenceCourseId: number): Promise<void> {
   await pool.query(`DELETE FROM marking_queue WHERE occurrence_course_id = $1`, [occurrenceCourseId]);
 }
+
+/** Drop every pending open-mark job for a whole class — used when it switches to manual marking,
+ *  so finishers queued just before the switch don't still get an automatic AI pass. */
+export async function dequeueOpenMarkForGroupCourse(groupCourseId: number): Promise<void> {
+  await pool.query(`DELETE FROM marking_queue WHERE occurrence_course_id IN (SELECT id FROM occurrence_courses WHERE group_course_id = $1)`, [groupCourseId]);
+}

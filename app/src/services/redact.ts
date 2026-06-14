@@ -29,11 +29,14 @@ export function withholdSafeguarding<T extends { safeguarding?: boolean }>(items
 }
 
 /** Replace each roster display_name with its ai_token. Longest name first ("Samantha" before
- *  "Sam"); case-insensitive and word-bounded so "Samuel" is untouched by a "Sam" entry. */
+ *  "Sam"); case-insensitive and word-bounded so "Samuel" is untouched by a "Sam" entry.
+ *  Both text and names are NFC-normalised first: decomposed input (NFD — routine from macOS /
+ *  PDF / MIS-export paste, e.g. "José" as J o s e + combining ´) would otherwise NOT match an
+ *  NFC-stored name and slip past BOTH redaction and the egress assert. */
 export function redactNames(text: string, roster: RosterEntry[]): string {
-  let out = text;
+  let out = text.normalize('NFC');
   for (const p of orderedRoster(roster)) {
-    const name = p.displayName.trim();
+    const name = p.displayName.normalize('NFC').trim();
     if (!name) continue;
     out = out.replace(nameRegExp(name, 'giu'), p.aiToken);
   }
@@ -47,11 +50,13 @@ export function expandTokens(text: string, roster: RosterEntry[]): string {
   return out;
 }
 
-/** The egress assertion: does any roster name still appear? The wrapper refuses to send if so. */
+/** The egress assertion: does any roster name still appear? The wrapper refuses to send if so.
+ *  NFC-normalised on both sides to match redactNames (so an NFD name can't sneak past here either). */
 export function containsRosterName(text: string, roster: RosterEntry[]): boolean {
+  const t = text.normalize('NFC');
   return roster.some((p) => {
-    const name = p.displayName.trim();
-    return name.length > 0 && nameRegExp(name, 'iu').test(text);
+    const name = p.displayName.normalize('NFC').trim();
+    return name.length > 0 && nameRegExp(name, 'iu').test(t);
   });
 }
 

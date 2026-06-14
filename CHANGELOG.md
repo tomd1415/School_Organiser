@@ -7,6 +7,41 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Whole-project review (6 lenses) → fixes
+
+A six-lens parallel review (AI/privacy boundary, security/authz, SQL/data-integrity, marking
+correctness, reliability/HTMX/client-JS, ops/build/tests) of the entire project. The security and
+authz model came back clean (no auth-bypass/IDOR/CSRF/injection). Fixes applied:
+
+- **🚨 CRITICAL — redaction bypass on decomposed (NFD) unicode.** A pupil name typed/pasted in NFD
+  form ("José" as `J o s e` + combining ´ — routine from macOS / PDF / MIS-export paste) did **not**
+  match the NFC-stored roster name, so it slipped past BOTH `redactNames` and the `containsRosterName`
+  egress assert — the real name would reach the AI. Now both the text and the names are
+  NFC-normalised at the boundary ([services/redact.ts](../app/src/services/redact.ts)), and
+  `createPupil` stores names NFC. Proven by a new regression test. This was a genuine breach of the
+  no-name-to-AI invariant.
+- **HIGH — `backup.sh` could leave a truncated/empty dump as the "newest" backup.** The `>` truncated
+  the target before the pipeline ran, so a failed `pg_dump` left a valid-looking but empty `.age`/`.gpg`
+  file that restore/verify would pick. Now each artifact is written to a dot-prefixed temp (invisible
+  to the `db-*`/`resources-*` globs) and `mv`d into place only after the pipeline succeeds and the
+  file is non-empty; a trap clears partials.
+- **MED — a class switched to "manual" still auto-marked its in-flight finishers.** Queued open-mark
+  jobs weren't dropped on the switch; now `dequeueOpenMarkForGroupCourse` runs from `/mark-setting`.
+- **MED — `safeguarding_review` rows orphaned by pupil erasure** (polymorphic FK-less `source_id`) are
+  now cleared in `disposePupil`'s erase branch.
+- **LOW-MED — the live pupil-work grid:** its signature now includes `awarded/total` (so re-overriding
+  an already-confirmed mark refreshes), and the read-back / summary / marking bar moved **outside** the
+  polled element (`renderGrid` → `buildGrid` with a nested `#pw-live-oc`) so a 30s refresh during a
+  lesson no longer wipes an open read-back. New test covers the 204-unchanged / live-fragment-on-change
+  behaviour (it caught a regression in the fix — the initial load must return the full panel).
+- **LOW — `markObjective` now self-gates on `marksEnabled()`** (defence in depth); word-bank chips
+  build via `createElement`/`textContent` (preserves `R&D`, XSS-safe); a failed note autosave never
+  flashes a misleading "saved ✓".
+- **247 unit / 170 integration green; typecheck clean.** Noted (not fixed — low value / larger):
+  `cloneSchemeNewVersion`+`deleteUnit` not transactional, `restore.sh` needs an empty DB (or `--clean`),
+  the AI-client *success* path is untested (mockable), and a few minor LOW items (welcome sets no
+  explicit role, `/pupil/pin` per-class enumeration, resources LIKE-escaping, email-poll cadence drift).
+
 ### 2026-06-14 — Phase 10 Track F BUILT → Phase 10 complete: MIS import (10.26), scheme sharing (10.27), tech-debt (10.28)
 
 The last track. **Phase 10 is now complete** across all six tracks (with a few documented optional

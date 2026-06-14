@@ -46,7 +46,9 @@ export function registerNoteRoutes(app: FastifyInstance): void {
     if (!id.success || !body.success) return reply.code(400).send('');
     const statusId = `note-${id.data.id}-status`;
     const res = await updateNoteBody(id.data.id, body.data.body, body.data.rev);
-    if (!res.ok && body.data.rev != null) {
+    if (!res.ok) {
+      // Either a stale-tab clobber (rev mismatch) or the note was deleted elsewhere — never flash
+      // "saved ✓" for a write that didn't land. The typed text stays on screen.
       return reply.type('text/html').send(renderConflictStatus(statusId));
     }
     return reply.type('text/html').send(renderSavedStatus(statusId) + (res.rev != null ? renderRevUpdate(id.data.id, res.rev) : ''));
