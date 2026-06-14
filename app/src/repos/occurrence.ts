@@ -4,6 +4,15 @@ import { pool } from '../db/pool';
 import { materialiseOccurrencePrep } from './prep';
 import type { LastStop, NoteView, OccurrenceCourseRow, OccurrenceHeader } from '../services/occurrence';
 
+/** How many class-lessons the teacher has actually taught (recorded a stopping point or progress for)
+ *  — the signal behind the earned "unlock advanced tools" nudge. */
+export async function countTaughtLessons(): Promise<number> {
+  const { rows } = await pool.query<{ n: number }>(
+    `SELECT count(*)::int AS n FROM occurrence_courses WHERE stopping_point IS NOT NULL OR progress_step IS NOT NULL`,
+  );
+  return rows[0]?.n ?? 0;
+}
+
 /** Find-or-create the occurrence for a slot on a date, and materialise its courses. */
 export async function findOrCreateOccurrence(lessonId: number, date: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(

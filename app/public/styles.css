@@ -1,3 +1,16 @@
+/* Atkinson Hyperlegible — SIL OFL, Braille Institute. Self-hosted (no external request at runtime);
+   chosen for SEND legibility / character disambiguation. See public/fonts/…LICENSE.txt. */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url("/static/fonts/atkinson-hyperlegible-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url("/static/fonts/atkinson-hyperlegible-700.woff2") format("woff2");
+}
+
 :root {
   /* Rail & Stage palette — calm and WCAG-AA on white. */
   --bg: #f5f7fa;
@@ -19,17 +32,22 @@
   --fs-h2: 1.2rem;
   --fs-body: 1.0625rem;    /* 17px base */
   --fs-meta: 0.9rem;       /* ~14.5px — nothing below this for content */
-  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-ui: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius: 12px;
   --tap: 44px;             /* minimum interactive target */
 }
 
-/* High-contrast theme (a11y toolbar, Slice 5) — opt-in via [data-theme]. */
+/* a11y toolbar (Slice 5) — client preferences applied as <html data-*> by a pre-paint script.
+   High-contrast is token-only (safe on the white-surfaced components); text-size scales every rem by
+   adjusting the root font-size; font swaps the Atkinson default back to the OS stack. */
 [data-theme="contrast"] {
   --bg: #ffffff; --card: #ffffff; --ink: #000000; --muted: #303a46;
   --accent: #0b40b6; --accent-soft: #e6edff; --line: #6b7480;
-  --rail: #f0f0f0;
+  --rail: #eeeeee;
 }
+html[data-font="system"] { --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+html[data-fontsize="large"] { font-size: 112.5%; }   /* 16 → 18px base; all rem sizes scale with it */
+html[data-fontsize="larger"] { font-size: 125%; }     /* 16 → 20px base */
 
 * { box-sizing: border-box; }
 
@@ -73,6 +91,14 @@ body {
 .rail-exp { text-align: left; font-size: var(--fs-meta); font-weight: 600; padding: 0.4rem 0.6rem; min-height: var(--tap); }
 .rail-foot .inline { display: block; }
 .rail-foot .inline button { min-height: var(--tap); padding: 0.4rem 0.6rem; }
+/* a11y toolbar (text size · contrast · font) in the rail footer. */
+.a11y > summary { cursor: pointer; list-style: none; color: var(--muted); font-weight: 600; font-size: var(--fs-meta); padding: 0.4rem 0.6rem; min-height: var(--tap); display: flex; align-items: center; }
+.a11y > summary::-webkit-details-marker { display: none; }
+.a11y-panel { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.3rem 0.5rem 0.5rem; }
+.a11y-row { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.a11y-row > span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; flex-basis: 100%; }
+.a11y-row button { font: inherit; font-size: var(--fs-meta); min-height: 2rem; padding: 0.25rem 0.55rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); cursor: pointer; }
+.a11y-row button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 
 /* The stage — the working pane. */
 .stage { min-width: 0; display: flex; flex-direction: column; }
@@ -276,6 +302,11 @@ a.nm-text { color: var(--accent); text-decoration: none; }
 .nm-foot a { color: var(--accent); text-decoration: none; }
 .now-daycard { margin-top: 1rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0.5rem 1rem; }
 .now-daycard > summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 0.4rem 0; }
+
+/* The earned-unlock nudge: a single calm, dismissible banner — never auto-promotes, never repeats. */
+.exp-nudge { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; padding: 0.6rem 0.95rem; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 10px; }
+.exp-nudge-text { font-weight: 600; }
+.exp-nudge form { display: inline; margin: 0; }
 
 /* Experience-gated disclosures (Rail & Stage): advanced tools fold away for the everyday teacher and
    pre-open in power mode. Calm accent summary; the lesson's mid-teaching view stays uncluttered. */

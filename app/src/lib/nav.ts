@@ -89,6 +89,13 @@ export function getExperienceMode(): Experience {
   return experienceMode;
 }
 
+// Earned, opt-in unlock: once the teacher has taught enough lessons, offer (once, dismissibly) to
+// reveal the advanced tools — never auto-promote, never nag. Pure so it's unit-testable.
+export const EXPERIENCE_NUDGE_AT = 20;
+export function shouldShowExperienceNudge(experience: Experience, dismissed: boolean, lessonsTaught: number, threshold = EXPERIENCE_NUDGE_AT): boolean {
+  return experience === 'everyday' && !dismissed && lessonsTaught >= threshold;
+}
+
 const SAFEGUARDING_HREF = '/safeguarding';
 
 /**

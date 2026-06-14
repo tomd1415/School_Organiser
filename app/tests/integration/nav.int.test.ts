@@ -11,6 +11,7 @@ import { setNavDailyOverride, setExperienceMode } from '../../src/lib/nav';
 let app: FastifyInstance;
 let saved: string | null = null;
 let savedExp: string | null = null;
+let savedNudge: string | null = null;
 let cookie = '';
 let token = '';
 
@@ -22,6 +23,7 @@ function firstCookie(setCookie: string | string[] | undefined): string {
 beforeAll(async () => {
   saved = await getSetting('nav_daily');
   savedExp = await getSetting('experience');
+  savedNudge = await getSetting('experience_nudge_dismissed');
   app = await buildApp();
   await app.ready();
   const page = await app.inject({ method: 'GET', url: '/login' });
@@ -42,6 +44,8 @@ afterAll(async () => {
   if (savedExp === null) await pool.query(`DELETE FROM settings WHERE key = 'experience'`);
   else await pool.query(`UPDATE settings SET value = $1 WHERE key = 'experience'`, [savedExp]);
   setExperienceMode(savedExp);
+  if (savedNudge === null) await pool.query(`DELETE FROM settings WHERE key = 'experience_nudge_dismissed'`);
+  else await pool.query(`UPDATE settings SET value = $1 WHERE key = 'experience_nudge_dismissed'`, [savedNudge]);
   await app.close();
   await pool.end();
 });
@@ -107,5 +111,11 @@ describe('experience switch (integration)', () => {
   it('rejects a bogus experience value', async () => {
     const res = await setExp('wizard');
     expect(res.statusCode).toBe(400);
+  });
+
+  it('dismissing the earned-unlock nudge persists the choice', async () => {
+    const res = await app.inject({ method: 'POST', url: '/settings/experience-nudge/dismiss', headers: { cookie, 'x-csrf-token': token } });
+    expect(res.statusCode).toBe(200);
+    expect(await getSetting('experience_nudge_dismissed')).toBe('true');
   });
 });

@@ -4,11 +4,14 @@ import { esc, layout } from '../lib/html';
 import { resolveNow, termProgress, type NowState, type TermDate } from '../services/clock';
 import { getClockContext, getSelfLessonAt, type NowLesson } from '../repos/clock';
 import {
+  countTaughtLessons,
   findOrCreateOccurrence,
   getLastStoppingPoints,
   getOccurrenceCourses,
   getOccurrenceNotes,
 } from '../repos/occurrence';
+import { getSetting } from '../repos/settings';
+import { getExperienceMode, shouldShowExperienceNudge, EXPERIENCE_NUDGE_AT } from '../lib/nav';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { renderNewNoteButton, renderNotesList, type FollowupItem, type NoteItem } from '../lib/notesView';
 import type { LastStop, OccurrenceCourseRow } from '../services/occurrence';
@@ -327,6 +330,13 @@ export function registerNowRoutes(app: FastifyInstance): void {
         .map(([gid]) => gid);
       const heads = resurfacing(captured, state.isoDate, todayGroupIds);
 
+      // Earned-unlock nudge: only do the count query when it could actually show (everyday + not yet
+      // dismissed), so the common path stays cheap.
+      const experience = getExperienceMode();
+      const nudgeDismissed = (await getSetting('experience_nudge_dismissed').catch(() => null)) === 'true';
+      const showNudge =
+        experience === 'everyday' && !nudgeDismissed && shouldShowExperienceNudge(experience, false, await countTaughtLessons());
+
       const exToday = (await listExceptionsBetween(state.isoDate, state.isoDate)).length;
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
@@ -365,6 +375,18 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz, ctx.terms)}
+        ${
+          showNudge
+            ? `<div class="exp-nudge" id="exp-nudge">
+                <span class="exp-nudge-text">✨ You've taught ${EXPERIENCE_NUDGE_AT}+ lessons — ready for the planning &amp; AI tools?</span>
+                <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
+                  <input type="hidden" name="experience" value="power">
+                  <button type="submit" class="btn-secondary">Turn on advanced tools</button>
+                </form>
+                <button type="button" class="link" hx-post="/settings/experience-nudge/dismiss" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
+              </div>`
+            : ''
+        }
         ${exToday ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>` : ''}
         <div class="now-cols">
           <div class="now-col now-col-now">

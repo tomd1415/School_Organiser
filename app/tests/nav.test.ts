@@ -9,6 +9,8 @@ import {
   getNavDailyHrefs,
   setExperienceMode,
   getExperienceMode,
+  shouldShowExperienceNudge,
+  EXPERIENCE_NUDGE_AT,
 } from '../src/lib/nav';
 
 const ALL_HREFS = NAV_MODEL.map((i) => i.href);
@@ -92,6 +94,15 @@ describe('experience switch (write-through)', () => {
     expect(renderRail()).toContain('rail-adv');
     setExperienceMode('everyday');
     expect(renderRail()).not.toContain('rail-adv');
+  });
+});
+
+describe('earned-unlock nudge gate', () => {
+  it('shows only for an everyday teacher, not dismissed, at/over the threshold', () => {
+    expect(shouldShowExperienceNudge('everyday', false, EXPERIENCE_NUDGE_AT)).toBe(true);
+    expect(shouldShowExperienceNudge('everyday', false, EXPERIENCE_NUDGE_AT - 1)).toBe(false); // below threshold
+    expect(shouldShowExperienceNudge('everyday', true, EXPERIENCE_NUDGE_AT)).toBe(false); // dismissed
+    expect(shouldShowExperienceNudge('power', false, EXPERIENCE_NUDGE_AT * 10)).toBe(false); // already power
   });
 });
 

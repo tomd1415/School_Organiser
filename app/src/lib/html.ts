@@ -39,6 +39,27 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
             <button type="submit" class="link rail-exp" title="${exp === 'power' ? 'Hide the advanced tools again' : 'Reveal planning, authoring and admin tools'}">${exp === 'power' ? '◧ Advanced tools: on' : '▸ Show advanced tools'}</button>
           </form>
           <a class="rail-link rail-gear" href="/settings">⚙ Settings</a>
+          <details class="a11y">
+            <summary>Aa · accessibility</summary>
+            <div class="a11y-panel">
+              <div class="a11y-row" data-a11y="fontsize">
+                <span>Text size</span>
+                <button type="button" data-val="">A</button>
+                <button type="button" data-val="large">A+</button>
+                <button type="button" data-val="larger">A++</button>
+              </div>
+              <div class="a11y-row" data-a11y="theme">
+                <span>Contrast</span>
+                <button type="button" data-val="">Standard</button>
+                <button type="button" data-val="contrast">High</button>
+              </div>
+              <div class="a11y-row" data-a11y="font">
+                <span>Font</span>
+                <button type="button" data-val="" title="Atkinson Hyperlegible — built for legibility">Legible</button>
+                <button type="button" data-val="system">System</button>
+              </div>
+            </div>
+          </details>
           ${logout}
         </div>`
       : '';
@@ -66,6 +87,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${esc(title)} · School Organiser</title>
+  <script>(function(){try{var d=document.documentElement,s=window.localStorage;var m={theme:'data-theme',fontsize:'data-fontsize',font:'data-font'};for(var k in m){var v=s.getItem('a11y-'+k);if(v)d.setAttribute(m[k],v);}}catch(e){}})();</script>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body data-experience="${esc(exp)}">

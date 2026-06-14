@@ -1,0 +1,10 @@
+Atkinson Hyperlegible font
+Copyright (c) Braille Institute of America, Inc.
+
+Licensed under the SIL Open Font License, Version 1.1 (OFL-1.1).
+Full licence text: https://openfontlicense.org
+Font home: https://brailleinstitute.org/freefont
+
+Designed for maximum legibility and character disambiguation for low-vision
+readers — chosen here as the default UI typeface for SEND accessibility.
+Self-hosted (vendored woff2) so the app makes no external font request at runtime.

@@ -352,6 +352,13 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     return reply.send('');
   });
 
+  // Dismiss the earned-unlock nudge (once; never shown again). Separate from turning power on, so
+  // "not now" is a real, remembered choice.
+  app.post('/settings/experience-nudge/dismiss', guard, async (_req, reply) => {
+    await setSetting('experience_nudge_dismissed', 'true');
+    return reply.send('');
+  });
+
   // Per-key length caps — the start of the registry-validated settings endpoint the later ideas
   // (5/4/8/9) also need: the key must be known and the value must fit its own cap (the free-text
   // standing prefs get a generous 2000, the model ids / numbers stay short).

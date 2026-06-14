@@ -91,6 +91,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('now-col-next'); // what's next, right
     expect(res.body).toContain('now-next'); // the next-session card itself
     expect(res.body).toContain('now-needs'); // the six right-column cards collapsed into one
+    expect(res.body).toContain('data-a11y="theme"'); // the rail-footer accessibility toolbar (Slice 5)
+    expect(res.body).toContain("getItem('a11y-'"); // the pre-paint preference script
   });
 
   it('Lesson detail shows the per-group adaptation block, and adapt round-trips (5.2)', async () => {

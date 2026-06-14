@@ -160,6 +160,40 @@
     document.body.addEventListener('htmx:afterSwap', function (e) { if (e.target && e.target.id === 'search-results') clearActive(results()); });
   })();
 
+  // a11y toolbar: text-size / contrast / font preferences, persisted in localStorage and applied as
+  // <html data-*> (the pre-paint script in <head> applies them on first load so there's no flash).
+  (function () {
+    var ATTR = { fontsize: 'data-fontsize', theme: 'data-theme', font: 'data-font' };
+    function mark(kind) {
+      var row = document.querySelector('.a11y-row[data-a11y="' + kind + '"]');
+      if (!row) return;
+      var cur = '';
+      try { cur = localStorage.getItem('a11y-' + kind) || ''; } catch (e) {}
+      var btns = row.querySelectorAll('button[data-val]');
+      for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-val') === cur ? 'true' : 'false');
+    }
+    function apply(kind, val) {
+      var attr = ATTR[kind];
+      if (!attr) return;
+      try {
+        if (val) { document.documentElement.setAttribute(attr, val); localStorage.setItem('a11y-' + kind, val); }
+        else { document.documentElement.removeAttribute(attr); localStorage.removeItem('a11y-' + kind); }
+      } catch (e) {}
+      mark(kind);
+    }
+    var rows = document.querySelectorAll('.a11y-row[data-a11y]');
+    for (var i = 0; i < rows.length; i++) {
+      (function (row) {
+        var kind = row.getAttribute('data-a11y');
+        row.addEventListener('click', function (e) {
+          var b = e.target.closest ? e.target.closest('button[data-val]') : null;
+          if (b) apply(kind, b.getAttribute('data-val'));
+        });
+        mark(kind);
+      })(row);
+    }
+  })();
+
   // Mark the current page in the left rail (a Today link, or one inside a Plan/Advanced section).
   // Longest matching href wins so e.g. /settings beats / for /settings/ai-log.
   (function () {
