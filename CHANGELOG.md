@@ -7,6 +7,26 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Phase 10 Track E front door BUILT: global search (10.19), capture-anywhere (10.20), keyboard (10.21)
+
+The "command centre" finally has a front door — the Spec-Must / Phase-7 polish that was deferred.
+
+- **10.19 Global search.** A topbar search box (`/` or Ctrl/⌘-K to focus) with a live dropdown of
+  deep links across **notes, tasks, captured, events, lesson plans, resources and pupils** — plain
+  ILIKE, teacher-only, no AI ([repos/search.ts](../app/src/repos/search.ts), [routes/search.ts](../app/src/routes/search.ts)).
+  Safeguarding-flagged notes still appear (it's the teacher's own surface; only ever withheld from AI).
+- **10.20 Capture-from-anywhere + in-the-moment prep.** A **＋ Capture** popover in the topbar writes
+  straight to the captured store from any page (no context switch). And the **"Before the bell"**
+  block (lesson) + the **start/end-of-day** cards (Now) gain an inline **"+ add an item"** so a one-off
+  ("print 8 worksheets for Y10") can be added in the moment — `addOccurrencePrep` / `addDayChecklist`.
+- **10.21 Keyboard-fast navigation.** `app.js` gains `g`-then-letter jumps (`g h` Now, `g t` Timetable,
+  `g f` Focus, `g k` Tasks, `g s` Schemes, `g p` Pupils, `g c` Captured, `g e` Events, `g r` Resources,
+  `g m` Map, `g g` Safeguarding), `/` and Ctrl/⌘-K to search, `?` for a cheat-sheet overlay, Esc to close.
+- **243 unit / 161 integration green; typecheck clean.** New tests: quick-capture writes a note that
+  global search then finds; the prep-add repo functions. Remaining Track E: 10.22 (live class monitor +
+  marking backlog), 10.23 (print/cover packs), 10.24 (per-pupil page), 10.25 (activity timer +
+  planning-coverage); then 10.14 (input alternatives) and Track F.
+
 ### 2026-06-13 — Phase 10.15 BUILT: retrieval-practice starters (Track D complete)
 
 The feedback loop closes: the marking data now flows back into planning.

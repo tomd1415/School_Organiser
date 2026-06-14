@@ -82,4 +82,43 @@
   document.body.addEventListener('app:save-failed', function () { saveToast(LOST); });
   // Any subsequent successful request means we're back — clear the banner.
   document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) clearToast(); });
+
+  // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a
+  // page; `?` shows the cheat-sheet; Esc closes things. The principle is "nothing requires the mouse".
+  var NAV = { h: '/', t: '/timetable', f: '/focus', k: '/tasks', s: '/schemes', p: '/pupils', c: '/captured', e: '/events', r: '/resources', m: '/map', g: '/safeguarding' };
+  function searchEl() { return document.getElementById('global-search'); }
+  function focusSearch() { var s = searchEl(); if (s) { s.focus(); s.select(); } }
+  function closeSearch() { var r = document.getElementById('search-results'); if (r) r.innerHTML = ''; }
+  function closeCheat() { var c = document.getElementById('kbd-cheat'); if (c) c.remove(); }
+  function toggleCheat() {
+    if (document.getElementById('kbd-cheat')) { closeCheat(); return; }
+    var c = document.createElement('div');
+    c.id = 'kbd-cheat';
+    c.className = 'kbd-cheat';
+    c.innerHTML =
+      '<div class="kbd-card"><h2>Keyboard shortcuts</h2><ul>' +
+      '<li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> — search</li>' +
+      '<li><kbd>n</kbd> — new note</li>' +
+      '<li><kbd>g</kbd> then: <kbd>h</kbd> Now · <kbd>t</kbd> Timetable · <kbd>f</kbd> Focus · <kbd>k</kbd> Tasks</li>' +
+      '<li><kbd>g</kbd> then: <kbd>s</kbd> Schemes · <kbd>p</kbd> Pupils · <kbd>c</kbd> Captured · <kbd>e</kbd> Events · <kbd>r</kbd> Resources · <kbd>m</kbd> Map · <kbd>g</kbd> Safeguarding</li>' +
+      '<li><kbd>Esc</kbd> — close</li></ul><p class="muted">press ? to toggle</p></div>';
+    c.addEventListener('click', closeCheat);
+    document.body.appendChild(c);
+  }
+  var pendingG = false;
+  var gTimer = null;
+  document.addEventListener('keydown', function (e) {
+    if (isTyping(document.activeElement)) {
+      if (e.key === 'Escape') { closeSearch(); if (document.activeElement) document.activeElement.blur(); }
+      return;
+    }
+    if (e.key === '/') { e.preventDefault(); focusSearch(); return; }
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); focusSearch(); return; }
+    if (e.key === '?') { e.preventDefault(); toggleCheat(); return; }
+    if (e.key === 'Escape') { closeCheat(); closeSearch(); return; }
+    if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) { pendingG = true; clearTimeout(gTimer); gTimer = setTimeout(function () { pendingG = false; }, 1200); return; }
+    if (pendingG) { pendingG = false; clearTimeout(gTimer); var dest = NAV[e.key]; if (dest) { e.preventDefault(); location.href = dest; } return; }
+  });
+  // Click outside the search box closes its dropdown.
+  document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
 })();

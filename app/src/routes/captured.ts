@@ -45,6 +45,16 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf }));
   });
 
+  // 10.20 — capture from ANYWHERE: the topbar quick-capture box writes straight to the store, so a
+  // mid-corridor "jot this now" never needs a context switch to /captured. Empty input is ignored.
+  app.post('/capture-quick', guard, async (req, reply) => {
+    const b = z.object({ body: z.string().max(2000).optional() }).safeParse(req.body);
+    const text = (b.success && b.data.body ? b.data.body : '').trim();
+    if (!text) return reply.type('text/html').send('<span class="qc-status">type something first</span>');
+    await createCaptured(text);
+    return reply.type('text/html').send('<span class="qc-status saved">captured ✓ — find it in <a href="/captured">Captured</a></span>');
+  });
+
   app.post('/captured', guard, async (_req, reply) => {
     const id = await createCaptured('');
     const groups = await listGroups();

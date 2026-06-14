@@ -37,6 +37,26 @@ export async function toggleOccurrencePrep(id: number): Promise<PrepItem | null>
   return rows[0] ?? null;
 }
 
+/** 10.20 — add a one-off "before the bell" item to a specific lesson, in the moment. */
+export async function addOccurrencePrep(occurrenceId: number, text: string): Promise<PrepItem> {
+  const { rows } = await pool.query<PrepItem>(
+    `INSERT INTO occurrence_prep (occurrence_id, text, source) VALUES ($1, $2, 'manual') RETURNING id, text, done`,
+    [occurrenceId, text],
+  );
+  return rows[0]!;
+}
+
+/** 10.20 — add a one-off start/end-of-day checklist item. */
+export async function addDayChecklist(date: string, part: 'start' | 'end', text: string): Promise<PrepItem> {
+  const { rows } = await pool.query<PrepItem>(
+    `INSERT INTO day_checklist (date, part, text, display_order)
+     VALUES ($1::date, $2, $3, COALESCE((SELECT max(display_order) + 1 FROM day_checklist WHERE date = $1::date AND part = $2), 100))
+     RETURNING id, text, done`,
+    [date, part, text],
+  );
+  return rows[0]!;
+}
+
 async function readDay(date: string, part: 'start' | 'end'): Promise<PrepItem[]> {
   const { rows } = await pool.query<PrepItem>(
     `SELECT id, text, done FROM day_checklist WHERE date = $1::date AND part = $2 ORDER BY display_order, id`,

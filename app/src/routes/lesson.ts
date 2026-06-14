@@ -62,7 +62,7 @@ import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
-import { renderPrepList } from '../lib/prepView';
+import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { formatObjectives, formatOutline, outlineSteps } from '../lib/formatLesson';
 
 const TZ = 'Europe/London';
@@ -316,7 +316,7 @@ function renderDetail(
       <p class="ld-meta">${meta}</p>
       ${exceptionsHtml}
       ${sections}
-      ${prep.length ? `<section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}</section>` : ''}
+      <section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}${renderPrepAdd('/prep/add', { occurrence: detail.header.occurrenceId }, `prep-${detail.header.occurrenceId}`)}</section>
       <section class="ld-notesblock">
         <div class="ld-notes-head"><h2>Notes</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: h.occurrenceId })}</div>
         ${renderNotesList(listId, notes)}

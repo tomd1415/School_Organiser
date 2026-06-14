@@ -44,6 +44,7 @@ import { registerPupilAuthRoutes } from './routes/pupilAuth';
 import { registerMeRoutes } from './routes/me';
 import { registerPupilWorkRoutes } from './routes/pupilWork';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
+import { registerSearchRoutes } from './routes/search';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { pupilCfg } from './auth/pupilAccessCache';
 import { teacherIdleMins } from './auth/teacherIdleCache';
@@ -186,6 +187,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerMeRoutes(app);
   registerPupilWorkRoutes(app);
   registerSafeguardingRoutes(app);
+  registerSearchRoutes(app);
 
   return app;
 }

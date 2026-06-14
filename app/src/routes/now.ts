@@ -19,7 +19,7 @@ import { listUpcoming } from '../repos/events';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
 import { getDayChecklist, type PrepItem } from '../repos/prep';
-import { renderPrepList } from '../lib/prepView';
+import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
 import { listExceptionsBetween } from '../repos/exceptions';
@@ -252,11 +252,11 @@ function renderHeadsUp(items: CapturedItem[]): string {
   </div>`;
 }
 
-function renderDayCard(part: 'start' | 'end', items: PrepItem[]): string {
-  if (items.length === 0) return '';
+function renderDayCard(part: 'start' | 'end', items: PrepItem[], date: string): string {
   return `<div class="now-card now-bell">
     <p class="kicker">${part === 'start' ? 'Start of day' : 'End of day'}</p>
     ${renderPrepList(items, '/day-checklist', 'day', `day-${part}`)}
+    ${renderPrepAdd('/day-checklist/add', { date, part }, `day-${part}`)}
   </div>`;
 }
 
@@ -366,7 +366,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
             ${renderBell(bell)}
             ${renderComingUp(events, state.isoDate)}
             ${renderHeadsUp(heads)}
-            ${renderDayCard(dayPart, dayItems)}
+            ${renderDayCard(dayPart, dayItems, state.isoDate)}
           </div>
         </div>
       </section>`;

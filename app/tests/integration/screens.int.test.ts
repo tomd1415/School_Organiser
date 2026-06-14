@@ -610,6 +610,25 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('topbar quick-capture writes a note and global search finds it (10.19 / 10.20)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    expect(page.body).toContain('id="global-search"'); // the front-door search box is in the topbar
+    const cap = await app.inject({ method: 'POST', url: '/capture-quick', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('ZZSEARCH unicorn reminder') });
+    expect(cap.body).toContain('captured ✓');
+    try {
+      const res = await app.inject({ method: 'GET', url: '/search?q=unicorn', headers: { cookie } });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain('unicorn');
+      expect(res.body).toContain('Captured');
+      const tooShort = await app.inject({ method: 'GET', url: '/search?q=u', headers: { cookie } });
+      expect(tooShort.body).toBe(''); // <2 chars → no query
+    } finally {
+      await pool.query(`DELETE FROM notes WHERE body LIKE 'ZZSEARCH%'`);
+    }
+  });
+
   it('captured ✨ Suggest flags a disclosure LOCALLY with no AI call (10.17 + 10.5 model)', async () => {
     const page = await app.inject({ method: 'GET', url: '/captured', headers: { cookie: session } });
     const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
