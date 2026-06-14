@@ -82,6 +82,28 @@ describe('redact — the pupil-name boundary', () => {
     const r = [{ id: 1, displayName: 'Ana', aiToken: 'PUPIL_1', active: true }];
     expect(redactNames('Ana and Anabel', r)).toBe('PUPIL_1 and Anabel'); // "Anabel" not matched
   });
+
+  // Regression: a multi-word name written with a non-breaking space / tab / double space (routine from
+  // Word/Outlook/PDF paste, MIS-export CSV, or pupil-typed answers) must STILL be tokenised + caught.
+  // A literal single space in the stored name used to miss these — leaking the full name to the AI.
+  it('redacts/catches a multi-word name across non-breaking spaces, tabs and double spaces', () => {
+    for (const sep of [' ', '\t', '  ', '   ']) {
+      const text = `worked with Samantha${sep}Jones today`;
+      expect(redactNames(text, roster)).toBe('worked with PUPIL_2 today');
+      expect(containsRosterName(text, roster)).toBe(true); // the egress assert catches it too
+    }
+  });
+
+  // Regression: tokens are expanded longest-first so a shorter token can't corrupt a longer one
+  // (PUPIL_1 is a prefix of PUPIL_10). With 10+ pupils this used to render "PUPIL_10" as <name-1> + "0".
+  it('expandTokens does not let PUPIL_1 corrupt PUPIL_10 / PUPIL_11 (10+ roster)', () => {
+    const big = [
+      { id: 1, displayName: 'Alex', aiToken: 'PUPIL_1', active: true },
+      { id: 10, displayName: 'Bo', aiToken: 'PUPIL_10', active: true },
+      { id: 11, displayName: 'Cy', aiToken: 'PUPIL_11', active: true },
+    ];
+    expect(expandTokens('PUPIL_1, PUPIL_10 and PUPIL_11', big)).toBe('Alex, Bo and Cy');
+  });
 });
 
 // Forward-compat for Phase 9 (auto-marking) + the multi-teacher future: the redactor is purely

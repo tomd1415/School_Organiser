@@ -20,7 +20,12 @@ function escapeRegExp(s: string): string {
 // "Samuel" is still NOT matched by a "Sam" entry (the following 'u' is a letter).
 const WORD = '[\\p{L}\\p{N}_]';
 function nameRegExp(name: string, flags: string): RegExp {
-  return new RegExp(`(?<!${WORD})${escapeRegExp(name)}(?!${WORD})`, flags);
+  // Each whitespace run in the name matches ANY whitespace run in the text (\s also covers the
+  // non-breaking space U+00A0, tabs, and double spaces — all routine in pasted email / MIS-export /
+  // pupil-typed text). A literal single space would miss those, letting a multi-word name slip past
+  // BOTH redaction and the egress assert. Tokens are escaped; the separators become \s+.
+  const pattern = name.split(/\s+/).map(escapeRegExp).join('\\s+');
+  return new RegExp(`(?<!${WORD})${pattern}(?!${WORD})`, flags);
 }
 
 /** Drop every safeguarding-flagged item entirely. A flagged item must never reach a provider. */
@@ -43,10 +48,14 @@ export function redactNames(text: string, roster: RosterEntry[]): string {
   return out;
 }
 
-/** Re-expand tokens back to names — FOR DISPLAY ONLY, after a call returns. */
+/** Re-expand tokens back to names — FOR DISPLAY ONLY, after a call returns. Longest token first so a
+ *  shorter token can't corrupt a longer one (PUPIL_1 is a prefix of PUPIL_10 — without this, a roster
+ *  of 10+ pupils renders "PUPIL_10" as <name-of-1> + "0"). */
 export function expandTokens(text: string, roster: RosterEntry[]): string {
   let out = text;
-  for (const p of roster) out = out.split(p.aiToken).join(p.displayName);
+  for (const p of [...roster].sort((a, b) => b.aiToken.length - a.aiToken.length)) {
+    out = out.split(p.aiToken).join(p.displayName);
+  }
   return out;
 }
 
