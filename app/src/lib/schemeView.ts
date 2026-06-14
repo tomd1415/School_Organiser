@@ -5,6 +5,40 @@ import type { SchemeListRow } from '../repos/schemes';
 import type { CourseSlot, LaidLesson } from '../repos/delivery';
 import { weekdayName } from '../services/delivery';
 import type { UnitCandidate } from '../services/convertUnit';
+import type { ReviewRow } from '../repos/reviews';
+
+// Wave 5 — the advisory AI review card shown under a lesson on the Schemes page. It only ever
+// suggests: the teacher Applies the rewrite to the master (reusing updatePlanField) or Dismisses it.
+const VERDICT_LABEL: Record<string, string> = { keep: '✓ keep', tweak: '✎ tweak', rework: '⚠ rework' };
+
+export function renderReview(r: ReviewRow): string {
+  const findings = r.findings
+    .map((f) => `<li><strong>${esc(f.issue)}</strong> — ${esc(f.fix)}</li>`)
+    .join('');
+  const canApply = r.verdict !== 'keep' && !!((r.suggestedObjectives ?? '').trim() || (r.suggestedOutline ?? '').trim());
+  return `<div class="review-card" id="review-${r.id}">
+    <p class="review-head"><span class="review-verdict review-${esc(r.verdict)}">🔎 ${VERDICT_LABEL[r.verdict] ?? esc(r.verdict)}</span> ${esc(r.rationale ?? '')}</p>
+    ${findings ? `<ol class="review-findings">${findings}</ol>` : ''}
+    ${
+      canApply
+        ? `<details class="review-suggestion">
+            <summary>see the suggested rewrite</summary>
+            <label class="adapt-l">Suggested objectives<textarea rows="3" readonly>${esc(r.suggestedObjectives ?? '')}</textarea></label>
+            <label class="adapt-l">Suggested outline<textarea rows="5" readonly>${esc(r.suggestedOutline ?? '')}</textarea></label>
+          </details>`
+        : ''
+    }
+    <div class="review-actions">
+      ${
+        canApply
+          ? `<button type="button" class="btn-secondary" hx-post="/schemes/review/${r.id}/apply" hx-target="#plan-${r.lessonPlanId}" hx-swap="outerHTML"
+              hx-confirm="Apply this review to the master lesson? Every class then starts from the updated version (a class's own adaptation still applies).">⬆ Apply to master</button>`
+          : ''
+      }
+      <button type="button" class="link" hx-post="/schemes/review/${r.id}/dismiss" hx-target="#review-${r.id}" hx-swap="outerHTML">✕ dismiss</button>
+    </div>
+  </div>`;
+}
 
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
   return `<span class="row-actions">
@@ -14,11 +48,12 @@ function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string 
   </span>`;
 }
 
-export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: string } = {}): string {
+export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: string; reviewOpen?: boolean } = {}): string {
   const save = (t: string) => `hx-post="/schemes/plan/${p.id}" hx-swap="none" hx-trigger="${t}"`;
   return `<li class="plan" id="plan-${p.id}">
     <div class="row-head">
       <input class="plan-title" type="text" name="title" value="${esc(p.title)}" placeholder="Lesson plan…" ${save('input changed delay:600ms, blur')}>
+      ${opts.reviewOpen ? '<span class="review-flag" title="This lesson has an open AI review">🔎</span>' : ''}
       <span class="note-status" id="plan-${p.id}-status"></span>
       ${rowActions('plan', p.id, 'Delete this lesson plan?')}
     </div>
@@ -34,8 +69,11 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
         <button type="button" class="btn-secondary" hx-post="/schemes/plan/${p.id}/draft" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Draft with AI</button>
         <button type="button" class="btn-secondary" title="slides outline + worksheet + support version + answers — stored and linked to this lesson; re-running updates the versions"
           hx-post="/schemes/plan/${p.id}/resources-ai" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">📄 Generate resources</button>
+        <button type="button" class="btn-secondary" title="an AI second opinion on this upcoming lesson, judged against the spec — it suggests; you apply or dismiss (only when the reviewer is enabled in Settings → AI)"
+          hx-post="/schemes/plan/${p.id}/review-ai" hx-target="#plan-${p.id}-review" hx-swap="innerHTML" hx-disabled-elt="this">🔎 Review (AI)</button>
         <span class="plan-draft-status" id="plan-${p.id}-draft">${esc(opts.draftStatus ?? '')}</span>
       </div>
+      <div class="plan-review" id="plan-${p.id}-review"${opts.reviewOpen ? ` hx-get="/schemes/plan/${p.id}/review" hx-trigger="load" hx-swap="innerHTML"` : ''}></div>
       <details class="adapt-edit"${p.objectives || p.outline ? '' : ' open'}>
         <summary>✏ edit objectives / outline / duration</summary>
         <label>Objectives<textarea name="objectives" rows="2" ${save('input changed delay:800ms, blur')}>${esc(p.objectives ?? '')}</textarea></label>
@@ -50,7 +88,7 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
   </li>`;
 }
 
-function renderUnit(u: UnitWithPlans): string {
+function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>): string {
   const save = (t: string) => `hx-post="/schemes/unit/${u.id}" hx-swap="none" hx-trigger="${t}"`;
   return `<section class="unit" id="unit-${u.id}">
     <div class="row-head">
@@ -58,11 +96,14 @@ function renderUnit(u: UnitWithPlans): string {
       <span class="note-status" id="unit-${u.id}-status"></span>
       ${rowActions('unit', u.id, 'Delete this unit and its plans?')}
     </div>
-    <ol class="plans">${u.plans.map((p) => renderPlan(p)).join('')}</ol>
+    <ol class="plans">${u.plans.map((p) => renderPlan(p, { reviewOpen: openReviews.has(p.id) })).join('')}</ol>
     <button type="button" class="link" hx-post="/schemes/unit/${u.id}/plan" hx-target="#scheme-tree" hx-swap="outerHTML">＋ lesson plan</button>
     <button type="button" class="link" title="one AI call per lesson; existing documents get new versions"
       hx-post="/schemes/unit/${u.id}/resources-ai" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="this"
       hx-confirm="Generate/update the resource set (slides, worksheet, support, answers) for EVERY lesson in this unit? One AI call per lesson — this can take a few minutes.">📄 resources for all lessons</button>
+    <button type="button" class="link" title="an AI second opinion on every upcoming lesson in this unit — it suggests; you apply or dismiss each (only when the reviewer is on in Settings → AI)"
+      hx-post="/schemes/unit/${u.id}/review-ai" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="this"
+      hx-confirm="Review EVERY lesson in this unit with AI? One call per lesson (lessons that already have an open review are skipped). It only suggests — nothing changes until you apply a review.">🔎 review all lessons</button>
     <details class="unit-lay" id="unit-${u.id}-lay">
       <summary>📅 Lay into a group's calendar</summary>
       <div class="unit-lay-body" hx-get="/schemes/unit/${u.id}/lay-form" hx-trigger="toggle from:#unit-${u.id}-lay once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading slots…</span></div>
@@ -97,7 +138,7 @@ export function renderLayResult(laid: LaidLesson[], totalLessons: number): strin
   return `<div class="lay-result"><p><strong>Laid ${laid.length} lesson${laid.length === 1 ? '' : 's'} into the calendar:</strong></p><ol class="lay-list">${rows}</ol>${short}</div>`;
 }
 
-export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): string {
+export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[], openReviews: ReadonlySet<number> = new Set()): string {
   const toggles =
     tree.length > 0
       ? `<p class="tree-tools muted">
@@ -107,7 +148,7 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[]): s
       : '';
   return `<div id="scheme-tree">
     ${toggles}
-    ${tree.map(renderUnit).join('')}
+    ${tree.map((u) => renderUnit(u, openReviews)).join('')}
     <button type="button" class="btn-secondary" hx-post="/schemes/${scheme.id}/unit" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
   </div>`;
 }

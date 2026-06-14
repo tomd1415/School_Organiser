@@ -33,6 +33,7 @@ export const AI_FEATURES: readonly FeatureDef[] = [
   { key: 'email_triage', label: 'Triage a forwarded email', role: 'cheap' },
   { key: 'note_route', label: 'Smart-file a quick note', role: 'cheap' },
   { key: 'coverage_check', label: 'Suggest coverage for spec gaps', role: 'cheap' },
+  { key: 'review_lesson', label: 'Review a lesson (AI second opinion)', role: 'plan', note: 'Critiques an upcoming lesson against the spec — Sonnet by default; push to Opus for a deeper review.' },
 ];
 
 export const FEATURE_KEYS: ReadonlySet<string> = new Set(AI_FEATURES.map((f) => f.key));

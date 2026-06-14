@@ -316,6 +316,21 @@ a.tt-lesson:hover { background: #eef3fc; }
 .adapt-log summary { cursor: pointer; color: var(--accent); }
 .adapt-hist { list-style: none; padding: 0; margin: 0.3rem 0 0; }
 .adapt-hist li { padding: 0.15rem 0; border-top: 1px solid var(--line); }
+/* Wave 5: the advisory AI review card (Schemes page) + heads-up flags */
+.plan-review:empty { display: none; }
+.review-card { margin-top: 0.5rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--bg); }
+.review-head { margin: 0; font-size: 0.86rem; }
+.review-verdict { font-weight: 700; margin-right: 0.35rem; }
+.review-verdict.review-keep { color: var(--muted); }
+.review-verdict.review-tweak { color: var(--accent); }
+.review-verdict.review-rework { color: #b91c1c; }
+.review-findings { margin: 0.35rem 0 0; padding-left: 1.1rem; font-size: 0.84rem; }
+.review-findings li { padding: 0.1rem 0; }
+.review-suggestion { margin-top: 0.4rem; font-size: 0.82rem; }
+.review-suggestion summary { cursor: pointer; color: var(--accent); }
+.review-actions { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.45rem; }
+.review-flag { margin-left: 0.3rem; cursor: default; }
+.ld-review-flag { font-size: 0.82rem; margin: 0.3rem 0 0; color: var(--accent); }
 /* lesson screen: bound plan's resources (read-only) */
 .ld-res { margin: 0.4rem 0; font-size: 0.85rem; }
 .ld-res-label { font-weight: 700; }

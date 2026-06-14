@@ -60,7 +60,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const envManaged = !!appConfig.APP_PASSWORD_HASH;
-      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey, stylePrefs, featurePrefs] = await Promise.all([
+      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey, stylePrefs, featurePrefs, reviewOn] = await Promise.all([
         getSetting('school_name'),
         getSetting('ai_enabled'),
         getSetting('ai_month_cap_pence'),
@@ -79,6 +79,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('ai_api_key'),
         getSetting('ai_style_prefs'),
         getSetting('ai_feature_prefs'),
+        getSetting('ai_review_enabled'),
       ]);
       const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck, teacherIdle] = await Promise.all([
         getSetting('pupil_access_enabled'),
@@ -177,6 +178,16 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_cheap","value":event.target.value}' hx-trigger="change" hx-swap="none"></label>
         </div>
         ${featureModelPicker}
+        <div class="setup-add" style="flex-direction:column;align-items:stretch;max-width:42rem">
+          <label><input type="checkbox"${reviewOn === 'true' ? ' checked' : ''}
+            hx-post="/settings/ai" hx-vals='js:{"key":"ai_review_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none">
+            AI lesson reviewer <strong>(off by default)</strong></label>
+          <p class="muted">A second opinion on an <strong>upcoming, not-yet-taught</strong> lesson, judged against the
+            spec and any uploaded documents. It only ever <em>suggests</em> — you Apply or Dismiss each review on the
+            Schemes page; the master lesson is never changed automatically. Runs on the <strong>Planning</strong> model
+            by default (Sonnet); push "Review a lesson" to Opus above for a deeper, pricier review. Manual-trigger only,
+            and a whole-unit sweep self-stops at the monthly cap.</p>
+        </div>
         <p class="muted">Standing instructions sent with every lesson/scheme/resource generation
           (cohort-level — <strong>never name a pupil</strong>). Style shapes <em>how</em> things are
           written; features are things to always include where they fit, without lengthening the lesson.</p>
@@ -342,6 +353,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     ai_model_cheap: 100,
     ai_style_prefs: 2000, // idea 3 — standing style prefs (free text)
     ai_feature_prefs: 2000, // idea 3 — standing feature requirements (free text)
+    ai_review_enabled: 5, // Wave 5 — the advisory reviewer master switch (off by default)
   };
   app.post('/settings/ai', guard, async (req, reply) => {
     const b = z.object({ key: z.string(), value: z.string().max(2000) }).safeParse(req.body);

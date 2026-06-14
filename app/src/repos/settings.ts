@@ -27,6 +27,12 @@ export async function aiEnabled(): Promise<boolean> {
   return (await getSetting('ai_enabled')) !== 'false';
 }
 
+// Phase 11 Wave 5 — the advisory lesson reviewer is OFF by default (unlike the master AI switch): its
+// Opus-capable cost is the project's named #1 risk, so it does nothing until the teacher opts in.
+export async function aiReviewEnabled(): Promise<boolean> {
+  return (await getSetting('ai_review_enabled')) === 'true';
+}
+
 export async function modelFor(role: ModelRole): Promise<string> {
   const key = role === 'plan' ? 'ai_model_plan' : role === 'design' ? 'ai_model_design' : 'ai_model_cheap';
   return (await getSetting(key)) ?? DEFAULT_MODELS[role];

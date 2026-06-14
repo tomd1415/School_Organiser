@@ -1,10 +1,10 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–4 + ideas 12, 13, 14 COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 13, 14, 10, 9). Only Wave 5 (the reviewer) remains.**
-> Shipped and tested — **318 unit / 222 integration green; typecheck clean; migrations `0028`–`0034`
+> **Status (2026-06-14): Waves 0–5 + ideas 12, 13, 14 COMPLETE — Phase 11 done (the Wave 5 reviewer shipped as the lean idea-8 cut; idea 4 deliberately deferred).**
+> Shipped and tested — **326 unit / 235 integration green; typecheck clean; migrations `0028`–`0036`
 > (`teaching_concepts`, `group_courses.guided_access`, `course_spec_points` + `lesson_plan_spec_points`,
 > `courses.exam_date`, `group_courses.scheme_auto_adapted`, `group_courses.covered_summary`,
-> `course_documents`); new dep `pdfjs-dist`@3 for PDF text**. Settings → **Navigation** picks the always-visible links
+> `course_documents`, `lesson_reviews` + its one-open-per-plan unique index); new dep `pdfjs-dist`@3 for PDF text**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
 > [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
@@ -31,8 +31,17 @@
 > ends with a revision unit before the exam date; deleting the sole coverer of a point warns it's now
 > uncovered. **Idea 9 (official course documents):** upload the spec / examiners' reports / past papers
 > on **/coverage** — text extracted (pdfjs / Gotenberg), previewed/editable, and a capped slice fed into
-> `author_scheme` + `draft_lesson`. **Only Wave 5 remains — the opt-in, off-by-default Opus reviewer
-> (unify ideas 8 + 4).** The original plan follows.
+> `author_scheme` + `draft_lesson`. **Wave 5 (idea 8, lean cut) is built:** an opt-in, **off-by-default**
+> advisory reviewer (`review_lesson`) that critiques a NOT-YET-TAUGHT master lesson against the spec +
+> uploaded documents and stores a verdict (keep/tweak/rework) + ≤3 findings + a full suggested rewrite
+> the teacher **Applies or Dismisses** on the Schemes page (the master is never changed automatically;
+> a 🔎 flag + a read-only heads-up surface on the lesson page). Defaults to the **Planning (Sonnet)**
+> model — push it to Opus per-feature for a deeper review; manual-trigger only, the per-unit sweep
+> self-stops at the £ cap and skips lessons that already have an open review, and a new **pre-call cap
+> estimate** means one in-flight (Opus) call can't overshoot. **Deliberately deferred (was idea 4):**
+> the whole-curriculum sampler, scheme-level review, and finding **re-injection** into the cheap models
+> — gated on `lesson_reviews.status` (applied vs dismissed) proving the findings actually get acted on.
+> The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -168,8 +177,8 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **8** | **Untaught-review sweep (master scope)** — one `lesson_reviews` table (idea 8's FK schema), a `review_lesson` Opus feature, a per-unit sweep mirroring the `resources-ai` loop, advisory findings applied via the existing `apply-improvement` endpoint | The most actionable reviewer cut: critique not-yet-taught lessons against the latest info; off-by-default, cost-gated, never mutates the master until the teacher clicks Apply | M | 🟡 | ⬜ |
-| **4** | *(stretch)* **Random spot-check sweep + scheme review + finding re-injection** — fold idea 4's `~1/3` schemes / `~1/6` lessons sampler, scheme-level `review_scheme`, and the "feed findings back to the cheap models" loop onto idea 8's table | The richer reviewer behaviours layered onto the shared store; expensive and the self-reference loop needs care, so it ships last | L | ⚪ | ⬜ |
+| **8** | **Untaught-review sweep (master scope)** — `lesson_reviews` table (mig `0035`), a `review_lesson` feature (**Sonnet default**, opt up to Opus), a per-unit sweep mirroring the `resources-ai` loop, advisory findings (verdict + ≤3 findings + full suggested rewrite) applied via the existing `apply-improvement` path on the Schemes page; off-by-default behind `ai_review_enabled`; pre-call cap estimate so one Opus call can't overshoot; lesson-page 🔎 heads-up | The most actionable reviewer cut: critique not-yet-taught lessons against the spec/docs; never mutates the master until the teacher clicks Apply. **Built as the lean cut** — Sonnet default + next-unit scope + a hard 1-verdict/≤3-finding contract pre-empt the cost and ignored-clutter risks | M | 🟡 | ✅ |
+| **4** | *(deferred — gated on adoption)* **Random spot-check sweep + scheme review + finding re-injection** — fold idea 4's `~1/3` schemes / `~1/6` lessons sampler, scheme-level `review_scheme`, and the "feed findings back to the cheap models" loop onto idea 8's table | The richer reviewer behaviours; expensive and the self-reference loop compounds error, so it ships only once `lesson_reviews.status` shows idea-8 findings are actually applied (not dismissed) | L | ⚪ | ⬜ |
 
 **Recommended order.** Land **Wave 0** (the nav-model refactor — no AI, no migration, fixes a real
 drift bug) and **idea 3** first: idea 3 is the highest priority-to-effort ratio in the set and the

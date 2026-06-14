@@ -81,6 +81,9 @@ import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction, s
 import { listSpecPoints, getCourseExamDate, specPointsSolelyCoveredByPlan } from '../repos/specPoints';
 import { listCourseDocsWithContent } from '../repos/courseDocs';
 import { courseDocItems } from '../llm/prompts/courseDocs';
+import { reviewLessonMaster, reviewUnitMaster } from '../services/reviewLesson';
+import { getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
+import { renderReview } from '../lib/schemeView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -88,7 +91,8 @@ const dir = z.enum(['up', 'down']);
 async function treeHtml(schemeId: number): Promise<string> {
   const [scheme, units, plans] = await Promise.all([getScheme(schemeId), listUnits(schemeId), listPlansForScheme(schemeId)]);
   if (!scheme) return '<div id="scheme-tree"><p class="muted">Scheme not found.</p></div>';
-  return renderSchemeTree(scheme, buildSchemeTree(units, plans));
+  const openReviews = await openReviewPlanIds(plans.map((p) => p.id));
+  return renderSchemeTree(scheme, buildSchemeTree(units, plans), openReviews);
 }
 
 
@@ -463,6 +467,68 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const tree = sid ? await treeHtml(sid) : '<div id="scheme-tree"></div>';
     const note = `<p class="adapt-note">unit resources: ${done} lesson${done === 1 ? '' : 's'} done${skipped ? `, ${skipped} skipped` : ''}</p>`;
     return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
+  });
+
+  // ── Wave 5: the advisory lesson reviewer (idea 8, lean cut; off by default) ───────────────────
+  // Review ONE upcoming lesson at master scope; render the resulting open review into its slot.
+  app.post('/schemes/plan/:id/review-ai', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const o = await reviewLessonMaster(id.data.id);
+    if (o.status === 'ok') {
+      const review = await getOpenReviewForPlan(id.data.id);
+      return reply.type('text/html').send(review ? renderReview(review) : '');
+    }
+    return reply.type('text/html').send(`<span class="muted">${esc(o.message ?? 'No review produced.')}</span>`);
+  });
+
+  // The current open review for a lesson (lazy-loaded when the tree shows the 🔎 flag).
+  app.get('/schemes/plan/:id/review', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const review = await getOpenReviewForPlan(id.data.id);
+    return reply.type('text/html').send(review ? renderReview(review) : '');
+  });
+
+  // Review EVERY lesson in a unit (mirrors the resources-ai sweep; self-stops at the cap, skips lessons
+  // that already have an open review).
+  app.post('/schemes/unit/:id/review-ai', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await reviewUnitMaster(id.data.id);
+    const sid = await schemeIdForUnit(id.data.id);
+    const tree = sid ? await treeHtml(sid) : '<div id="scheme-tree"></div>';
+    const note = r.disabled
+      ? '<p class="adapt-note">The AI reviewer is off — turn it on in <a href="/settings">Settings → AI</a> first.</p>'
+      : `<p class="adapt-note">unit review: ${r.reviewed} lesson${r.reviewed === 1 ? '' : 's'} reviewed${r.skipped ? `, ${r.skipped} skipped` : ''}${r.stopped ? ' (stopped — AI unavailable or the monthly cap is reached)' : ''}. Open a lesson to see its findings.</p>`;
+    return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
+  });
+
+  // Apply a review's suggested rewrite to the MASTER lesson (teacher decision; affects every class).
+  app.post('/schemes/review/:id/apply', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const review = await getReview(id.data.id);
+    if (!review || review.status !== 'open') return reply.type('text/html').send('<span class="muted">That review is no longer open.</span>');
+    const obj = (review.suggestedObjectives ?? '').trim();
+    const out = (review.suggestedOutline ?? '').trim();
+    if (obj) await updatePlanField(review.lessonPlanId, 'objectives', obj);
+    if (out) await updatePlanField(review.lessonPlanId, 'outline', out);
+    await setReviewStatus(id.data.id, 'applied');
+    const updated = await getPlanRow(review.lessonPlanId);
+    if (!updated) return reply.code(404).send('');
+    return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: 'review applied to the master ✓' }));
+  });
+
+  // Dismiss a review (the lesson is unchanged). Guarded like apply: only an OPEN review can be
+  // dismissed, so an already-applied review can't be flipped and a stale/replayed id is a clean no-op.
+  app.post('/schemes/review/:id/dismiss', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const review = await getReview(id.data.id);
+    if (!review || review.status !== 'open') return reply.type('text/html').send('<p class="muted">That review is no longer open.</p>');
+    await setReviewStatus(id.data.id, 'dismissed');
+    return reply.type('text/html').send('<p class="muted">Review dismissed.</p>');
   });
 
   // Summarise a course's notes with AI (4.5).

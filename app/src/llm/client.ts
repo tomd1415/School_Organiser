@@ -46,6 +46,10 @@ export interface LlmRequest {
   context: RedactableItem[]; // free-text context; flagged items withheld, names redacted
   instruction: string; // the question/instruction, appended after the context
   maxTokens?: number;
+  // Wave 5: an optional conservative cost estimate for THIS call. The monthly cap is otherwise checked
+  // only at the START of a call, so one in-flight pricey (Opus) call could overshoot. When set, prepare()
+  // refuses if this call would push spend past the cap — so the most expensive feature can't blow it.
+  estimatedCostPence?: number;
 }
 
 // The API key: the env var wins (existing instances / ops-managed), else the value the teacher
@@ -85,6 +89,13 @@ function estimateCostPence(model: string, inTok: number, outTok: number): number
   return Number(((inTok * p.input + outTok * p.output) / 1_000_000).toFixed(2));
 }
 
+// Pure cap test (Wave 5). The cap is a hard ceiling: refuse if we're already at it, OR if a caller's
+// declared estimate for THIS call would cross it. Without the estimate, behaviour is exactly as before
+// (block only once spend has reached the cap), so existing callers are unaffected.
+export function overMonthlyCap(spent: number, cap: number, estimatePence = 0): boolean {
+  return spent >= cap || spent + estimatePence > cap;
+}
+
 async function audit(req: LlmRequest, fields: Partial<AiCallRecord> & Pick<AiCallRecord, 'status'>): Promise<void> {
   // The audit write must NEVER throw into the caller — otherwise a failed insert after a SUCCESSFUL
   // (billed) provider call would be caught by the caller's try and re-logged as an 'error',
@@ -120,7 +131,7 @@ async function prepare(req: LlmRequest): Promise<Prep> {
   if (!(await aiEnabled())) return { ok: false, status: 'unavailable', message: 'AI is switched off in settings.' };
 
   const [cap, spent] = await Promise.all([monthCapPence(), monthSpendPence()]);
-  if (spent >= cap) {
+  if (overMonthlyCap(spent, cap, req.estimatedCostPence ?? 0)) {
     await audit(req, { status: 'blocked', error: 'monthly cap reached' });
     return { ok: false, status: 'blocked', message: `Monthly AI budget (£${Math.round(cap / 100)}) reached.` };
   }

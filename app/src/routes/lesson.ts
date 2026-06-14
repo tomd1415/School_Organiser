@@ -13,6 +13,7 @@ import {
 } from '../repos/occurrence';
 import { getLessonPlan, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
 import { schemeLessons } from '../repos/specPoints';
+import { getOpenReviewForPlan } from '../repos/reviews';
 import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
 import { runClassIntake, applyClassIntake } from '../services/classIntake';
 import {
@@ -243,6 +244,7 @@ function renderSection(
               : `<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
         }
       </div>
+      ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -887,6 +889,20 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           <button type="button" class="link" onclick="this.closest('.improve-prop').remove()">✕ discard</button>
         </form>
       </div>`);
+  });
+
+  // Wave 5: a compact heads-up when an upcoming lesson has an open AI review. The full review (with
+  // Apply / Dismiss) lives on the Schemes page; here it is read-only so the teacher sees it where they
+  // look before teaching. Lazy-loaded so the lesson page costs nothing when there's no review.
+  app.get('/lesson/plan/:id/review-flag', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const review = await getOpenReviewForPlan(p.data.id);
+    if (!review) return reply.type('text/html').send('');
+    const label = review.verdict === 'keep' ? 'keep' : review.verdict === 'tweak' ? 'tweak' : 'rework';
+    return reply
+      .type('text/html')
+      .send(`<p class="ld-review-flag">🔎 AI review (${esc(label)}) ready for this lesson — <a href="/schemes">open it on Schemes</a> to apply or dismiss.</p>`);
   });
 
   // Apply an accepted master improvement (teacher decision; the master changes for every group).

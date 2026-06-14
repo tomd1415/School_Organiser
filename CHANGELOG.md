@@ -7,6 +7,47 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Phase 11 Wave 5: the advisory AI lesson reviewer (lean idea-8 cut)
+
+A second opinion on an **upcoming, not-yet-taught** lesson — the one thing the planning pipeline
+didn't do (it generates and checks coverage, but never critiqued lesson *quality* before teaching).
+Shipped as the **lean cut** all three review lenses converged on, not the plan's full "8+4" wave: the
+expensive idea-4 tail (whole-curriculum sampler, scheme-level review, finding re-injection into the
+cheap models) is **deliberately deferred** until adoption data justifies it.
+
+- **New `review_lesson` feature** ([services/reviewLesson.ts](../app/src/services/reviewLesson.ts),
+  [prompts](../app/src/llm/prompts/lessonReview.ts) `review_lesson@1`,
+  [schema](../app/src/llm/schemas/lessonReview.ts)): critiques a master lesson against its spec points
+  and any uploaded official documents, returning a **hard contract** — one verdict (keep/tweak/rework),
+  **at most 3** findings (worst first), and a full suggested rewrite. The tight cap is deliberate: a
+  long list of low-stakes tweaks is the ignored-clutter failure mode.
+- **Off by default** behind `ai_review_enabled` (Settings → AI), unlike the master AI switch — its
+  Opus-capable cost is the project's named #1 risk. **Defaults to the Planning (Sonnet) model**; push
+  "Review a lesson" to Opus per-feature for a deeper, pricier review.
+- **Advisory only** — the master is never changed automatically. On the **Schemes page** each lesson
+  gets a 🔎 Review (AI) button and a per-unit "review all lessons" sweep; an open review shows inline
+  with **Apply to master** (reuses `updatePlanField`) / **Dismiss**. A read-only 🔎 heads-up surfaces
+  on the lesson page where the teacher looks before teaching. New `lesson_reviews` table (mig `0035`),
+  master scope only in v1 (`group_course_id` reserved, always NULL).
+- **Cost cannot run away:** manual-trigger only; the per-unit sweep self-stops at the £ cap and skips
+  lessons that already have an open review; and a new **pre-call cap estimate**
+  ([client.ts](../app/src/llm/client.ts) `overMonthlyCap`) refuses a call that *would* cross the cap —
+  closing the gap where the cap was only checked at a call's start, so one in-flight Opus call could
+  overshoot.
+- **Privacy guardrail:** every reviewer input rides `context[]` (so it inherits redact → withhold →
+  egress-assert → audit); the system string is a static constant carrying the cohort-prose rule.
+- **Hardened by an adversarial self-review** (4-lens workflow, each finding independently verified):
+  the per-call cost estimate is now a true conservative ceiling (output term = the call's `max_tokens`;
+  docs fed to the reviewer capped) so the cap guard can't be beaten; a **partial unique index**
+  (mig `0036`, one open master review per lesson) + `ON CONFLICT DO NOTHING` make the check-then-insert
+  race-proof; the dismiss route is guarded like apply (only an open review can be dismissed); and a
+  mid-run "reviewer switched off" now stops the unit sweep (was miscounted as a skip).
+- Tests: unit ([lessonReview.test.ts](../app/tests/lessonReview.test.ts) — the ≤3 contract, the
+  context-not-system construction, the cap guard) + integration
+  ([reviews.int.test.ts](../app/tests/integration/reviews.int.test.ts) — off-by-default gating, the
+  data layer, the race-proof duplicate skip, apply-writes-to-master, guarded dismiss, and the sweep's
+  self-stop/skip). **326 unit / 235 integration green; typecheck clean.**
+
 ### 2026-06-14 — Bug fix: class lesson-resource generation now uses (and links to) the class's revised plan
 
 When generating resources for a lesson **with a class**, it wasn't clear whether the class's revised
