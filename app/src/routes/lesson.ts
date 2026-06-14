@@ -47,6 +47,7 @@ import { abilityItem, groupContextItems } from '../llm/prompts/teachingContext';
 import { standingPrefItems } from '../services/standingPrefs';
 import { conceptItemsFor } from '../services/teachingConcepts';
 import { accessItemsFor } from '../services/accessConstraints';
+import { paceItemsFor } from '../services/pacing';
 import type { GuidedAccess } from '../llm/prompts/accessConstraints';
 import { callLLMStructured } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
@@ -758,6 +759,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           ...(await standingPrefItems()),
           ...(await conceptItemsFor(info.courseId)),
           ...(await accessItemsFor(gc)),
+          ...(await paceItemsFor(gc)),
           ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
           ...abilityItem(await getGroupAbility(gc)),
           ...equipmentItem(await listActiveEquipment()),

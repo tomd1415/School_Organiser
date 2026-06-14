@@ -1,7 +1,7 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0 & 1 COMPLETE + Wave 2 (idea 5) BUILT (ideas 11, 6, 3, 1.1, 7, 5).**
-> Shipped and tested — **277 unit / 191 integration green; typecheck clean; migrations `0028`
+> **Status (2026-06-14): Waves 0–3 BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2).**
+> Shipped and tested — **284 unit / 193 integration green; typecheck clean; migrations `0028`
 > (`teaching_concepts`) & `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
@@ -13,11 +13,12 @@
 > each a no-op until filled. `/settings/ai` is now registry-validated with per-key caps. **Wave 2
 > (idea 5):** every one of the 17 AI features can override its model in Settings → AI (priced models
 > only, so the £ cap stays accurate) via `modelForFeature()`; unset = its role default, i.e. today's
-> behaviour — this lands the cost lever *before* the expensive Opus reviewer. **Not** built: the
-> swappable-themes stretch (idea 11 tail), the idea-3b per-course override, idea-1.2
-> weave-into-existing, and idea 5's provider "refresh model list". **Next: idea 2 (pace-aware sizing),
-> then the Wave 4 coverage backbone (idea 10 → 9), then the Wave 5 reviewer (8 + 4).** The original
-> plan follows.
+> behaviour — this lands the cost lever *before* the expensive Opus reviewer. **Wave 3 (idea 2):** a
+> pace nudge in `adapt_lesson` — when a class reliably under-runs (≥2 tracked lessons, soft band, no-op
+> otherwise) the prompt is told to plan fewer, smaller activities and keep the duration. **Not** built:
+> the swappable-themes stretch (idea 11 tail), the idea-3b per-course override, idea-1.2
+> weave-into-existing, and idea 5's provider "refresh model list". **Next: the Wave 4 coverage backbone
+> (idea 10 → 9), then the Wave 5 reviewer (8 + 4).** The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -116,7 +117,7 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 
 | # | Slice | Why it matters | Size | Pri | Status |
 |---|---|---|---|---|---|
-| **2** | **Pace ratio → sizing directive** — pure `pacing.ts` `classifyPace()` over `occurrence_courses.progress_step` vs a re-computed planned-step count, surfaced as a cohort `paceItem()` in the `adapt_lesson` context | The tracker captures where a class gets to but it never feeds sizing; a slow class still gets a full-length plan. Riskiest cheap idea — the signal is noisy, so gate it hard | M | 🟡 | ⬜ |
+| **2** | **Pace ratio → sizing directive** — pure `classifyPace()` over `occurrence_courses.progress_step` vs the planned-step count (`outlineSteps()`), surfaced as a cohort `paceItems()` in the `adapt_lesson` context | The tracker captured where a class gets to but never fed sizing. Gated hard: **≥2 samples, under-running only, a soft band (not a %), ratio capped, no-op otherwise** — a slow class now gets a "plan fewer activities, keep the duration" nudge | M | 🟡 | ✅ |
 
 ### Wave 4 — Coverage & document backbone *(the big rocks, strict order)*
 

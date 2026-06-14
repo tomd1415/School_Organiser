@@ -160,6 +160,23 @@ export async function setGuidedAccess(groupCourseId: number, answers: GuidedAcce
   ]);
 }
 
+// idea 2 — recent lessons for a class that carry a pace signal: the step the class reached
+// (progress_step) and the plan outline it was reached against. Only rows with a recorded step count;
+// the master plan outline is a reasonable proxy for the planned-step count (the soft band tolerates it).
+export async function recentPaceSamples(groupCourseId: number, limit = 6): Promise<Array<{ progressStep: number | null; outline: string | null }>> {
+  const { rows } = await pool.query<{ progressStep: number | null; outline: string | null }>(
+    `SELECT oc.progress_step AS "progressStep", lp.outline AS outline
+     FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
+     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE AND oc.progress_step IS NOT NULL
+     ORDER BY o.date DESC
+     LIMIT $2`,
+    [groupCourseId, limit],
+  );
+  return rows;
+}
+
 /** The class's recorded ability midpoint — the anchor the three differentiation levels sit around. */
 export async function getGroupAbility(groupCourseId: number): Promise<string | null> {
   const { rows } = await pool.query<{ a: string | null }>(`SELECT ability_midpoint a FROM group_courses WHERE id = $1`, [groupCourseId]);
