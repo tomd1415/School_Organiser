@@ -79,6 +79,8 @@ import { DRAFT_LESSON_SYSTEM, DRAFT_LESSON_VERSION, draftLessonInstruction } fro
 import { authorSchemeSchema } from '../llm/schemas/authorScheme';
 import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction, specPointsItems } from '../llm/prompts/authorScheme';
 import { listSpecPoints, getCourseExamDate, specPointsSolelyCoveredByPlan } from '../repos/specPoints';
+import { listCourseDocsWithContent } from '../repos/courseDocs';
+import { courseDocItems } from '../llm/prompts/courseDocs';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -300,6 +302,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
           ...curriculumHistoryItems(await getCourseCurriculumHistory(q.data.course)),
           ...specPointsItems(specPts),
+          ...courseDocItems(await listCourseDocsWithContent(q.data.course)),
           ...equipmentItem(await listActiveEquipment()),
           { text: authorSchemeInstruction(course.name, b.data.brief, examDate) },
         ],
@@ -658,7 +661,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelForFeature('draft_lesson', 'plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
-        context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
+        context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...courseDocItems(await listCourseDocsWithContent(ctx.courseId), 3000), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
         instruction: 'Draft the lesson now.',
         maxTokens: 4000,
       },

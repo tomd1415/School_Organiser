@@ -1,9 +1,10 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–3 + ideas 12, 13, 14 + idea 10 (all slices) COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 13, 14, 10).**
-> Shipped and tested — **314 unit / 218 integration green; typecheck clean; migrations `0028`–`0033`
+> **Status (2026-06-14): Waves 0–4 + ideas 12, 13, 14 COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 13, 14, 10, 9). Only Wave 5 (the reviewer) remains.**
+> Shipped and tested — **318 unit / 222 integration green; typecheck clean; migrations `0028`–`0034`
 > (`teaching_concepts`, `group_courses.guided_access`, `course_spec_points` + `lesson_plan_spec_points`,
-> `courses.exam_date`, `group_courses.scheme_auto_adapted`, `group_courses.covered_summary`)**. Settings → **Navigation** picks the always-visible links
+> `courses.exam_date`, `group_courses.scheme_auto_adapted`, `group_courses.covered_summary`,
+> `course_documents`); new dep `pdfjs-dist`@3 for PDF text**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
 > [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
@@ -28,9 +29,10 @@
 > best-fitting lesson for the teacher to tick-confirm, plus a per-course exam date. **Slice 2b:**
 > `author_scheme@4` now covers every spec point (each authored lesson auto-mapped to its codes) and
 > ends with a revision unit before the exam date; deleting the sole coverer of a point warns it's now
-> uncovered. **Idea 10 is complete. Next: idea 9 (upload official course docs — spec / examiners'
-> reports / past papers — referenced when authoring), then the Wave 5 reviewer (8 + 4).** The original
-> plan follows.
+> uncovered. **Idea 9 (official course documents):** upload the spec / examiners' reports / past papers
+> on **/coverage** — text extracted (pdfjs / Gotenberg), previewed/editable, and a capped slice fed into
+> `author_scheme` + `draft_lesson`. **Only Wave 5 remains — the opt-in, off-by-default Opus reviewer
+> (unify ideas 8 + 4).** The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -160,7 +162,7 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 | **10** | **Spec-point library + deterministic coverage map** — `course_spec_points` + `lesson_plan_spec_points` (mig `0030`), a paste-import parser, an AI-free `schemeCoverage()` query, and the **/coverage** page (paste spec points, tick which lessons cover each, see what's not yet covered); `cloneSchemeNewVersion` now **copies the mappings** on a version bump | Closes the biggest planning gap: "what must be covered" existed nowhere. **AI-free** durable backbone everything else builds on; the rollover-copy was the flagged trap | L | 🟠 | ✅ |
 | **10** | **AI gap-filler + exam date (2a)** — a cheap `coverage_check` critic maps each uncovered spec point to the best-fitting existing lesson (or "needs a new lesson"), shown as tick-to-apply suggestions on **/coverage**; a per-course `exam_date` (mig `0031`) | Closes gaps fast — the teacher confirms each mapping; degrades to "AI is off" cleanly | M | 🟡 | ✅ |
 | **10** | **AI coverage authoring + drop-warning (2b)** — `author_scheme@4` covers **every** spec point + emits a revision unit before `exam_date` on exam courses, with `materialiseScheme` **auto-mapping** each authored lesson to the codes it carries; deleting the sole coverer of a point warns inline (no AI) | Makes the AI author honour the source of truth and flags coverage loss on later edits | L | 🟡 | ✅ |
-| **9** | **Official course documents + text extraction** — `doc_role` tag on `resources` + `course_doc_text` sidecar + `docText.ts` (mammoth/pdfjs/Gotenberg fallback) + `courseDocItems()` into authoring | Lets the AI cite the *real* spec; the heaviest L (new deps, PDF extraction quirks). An enhancer that can later auto-seed idea 10, **not** a prerequisite for it | L | 🟡 | ⬜ |
+| **9** | **Official course documents + text extraction** — `course_documents` table (mig `0034`) + `docText.ts` (pdfjs-dist v3 for PDFs, the existing Gotenberg sidecar for Office, direct for text); upload / extract / preview-edit on **/coverage**; `courseDocItems()` (capped) into `author_scheme` + `draft_lesson` | Lets the AI cite the *real* spec / examiners' reports / past papers; extraction is previewed/editable (PDFs come out rough) and only a capped slice is sent | L | 🟡 | ✅ |
 
 ### Wave 5 — AI reviewer *(unify ideas 8 + 4, cost-gated, build last)*
 
@@ -389,9 +391,11 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
    batches by topic to keep tokens down. (b) **A per-course `courses.exam_date`** (new column,
    mig `0031`) — revision time is reserved before it on exam courses. (c) **Plan-level mapping** — a
    lesson mapped to a point counts as covering it (delivery-aware counting stays a later option).
-6. **PDF extraction approach (idea 9)** — `pdfjs-dist` (heavier, better layout) vs `pdf-parse`
-   (simpler) vs routing through the existing Gotenberg sidecar then extracting? The "preview extracted
-   text before use" control is essential, not optional, given multi-column spec PDFs.
+6. **PDF extraction approach (idea 9) — decided (2026-06-14) & built: `pdfjs-dist`.** Pinned to **v3**
+   (its CJS legacy build `require()`s cleanly under our `module: commonjs`, unlike ESM-only v4 — verified
+   working in this Node env by a one-off smoke). PDFs → pdfjs; **Office files → the existing Gotenberg
+   sidecar (→ PDF) → pdfjs**; text files read directly. The extracted text is always **previewed/editable**
+   before the AI uses it, and only a **capped slice** is sent (no embeddings — §5).
 7. **Per-feature model granularity (idea 5) — decided (2026-06-14): per-feature, priced models only.**
    All 17 features can override their model; the picker offers only ids in `PRICE_PENCE_PER_MTOK`
    (Opus/Sonnet/Haiku) so the spend cap stays meaningful. A provider "refresh model list" + selecting

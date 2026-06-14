@@ -26,8 +26,47 @@ import {
   type CoverageRow,
   type SchemeLessonRow,
 } from '../repos/specPoints';
+import { extractDocText } from '../lib/docText';
+import { addCourseDoc, listCourseDocs, getCourseDoc, getCourseDocCourse, updateCourseDocContent, deleteCourseDoc, isDocRole, type CourseDocRow } from '../repos/courseDocs';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
+
+const DOC_ROLE_LABEL: Record<string, string> = { spec: 'Spec', examiners_report: "Examiners'", past_paper: 'Past paper', reference: 'Reference' };
+
+function renderDocEditor(doc: { id: number; content: string }): string {
+  return `<textarea class="cov-doc-text" name="text" rows="8" placeholder="extracted text (edit / paste here if extraction was empty)…"
+      hx-post="/coverage/doc/${doc.id}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(doc.content)}</textarea>
+    <p><button type="button" class="link danger" hx-post="/coverage/doc/${doc.id}/delete" hx-target="#cov-docs" hx-swap="outerHTML" hx-confirm="Delete this document?">delete</button>
+      <span class="note-status" id="cov-doc-${doc.id}-status"></span></p>`;
+}
+
+function renderDocList(docs: CourseDocRow[]): string {
+  if (!docs.length) return '<p class="muted">No documents yet — upload the spec, an examiners\' report or a past paper.</p>';
+  return docs
+    .map(
+      (d) => `<details class="cov-doc" id="cov-doc-${d.id}">
+      <summary><span class="note-dest-kind">${esc(DOC_ROLE_LABEL[d.role] ?? d.role)}</span> ${esc(d.title)} <span class="muted">${d.charCount.toLocaleString()} chars${d.charCount === 0 ? ' — extraction empty, open to paste' : ''}</span></summary>
+      <div hx-get="/coverage/doc/${d.id}" hx-trigger="toggle once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+    </details>`,
+    )
+    .join('');
+}
+
+async function docsSection(courseId: number): Promise<string> {
+  const roleOpts = Object.entries(DOC_ROLE_LABEL).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('');
+  return `<div id="cov-docs">
+    <h2>Official documents</h2>
+    <p class="muted">Upload the spec, examiners' reports or past papers. The text is extracted and given to the AI when it authors schemes/lessons for this course. Open one to preview/edit — extraction can be rough.</p>
+    <form class="setup-add" hx-post="/coverage/doc/upload" hx-encoding="multipart/form-data" hx-target="#cov-docs" hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+      <input type="hidden" name="course" value="${courseId}">
+      <select name="role">${roleOpts}</select>
+      <input type="text" name="title" placeholder="title… e.g. OCR J277 specification" required maxlength="200">
+      <input type="file" name="file" accept=".pdf,.docx,.doc,.txt,.md,.odt,.rtf,.pptx" required>
+      <button type="submit" class="btn-secondary">Upload &amp; extract</button>
+    </form>
+    ${renderDocList(await listCourseDocs(courseId))}
+  </div>`;
+}
 
 function renderCovBody(courseId: number, points: SpecPointRow[], scheme: SchemeLike | null, coverage: CoverageRow[], lessons: SchemeLessonRow[]): string {
   const list = points.length
@@ -129,7 +168,8 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
             </form>
             <p class="muted">Re-importing updates titles and order without duplicating (matched by code). A line keeps its code (e.g. <code>1.1.1</code>) if it has one.</p>
           </details>
-          ${await bodyFor(courseId)}`
+          ${await bodyFor(courseId)}
+          ${await docsSection(courseId)}`
         : '<p class="muted">No courses yet — add one in Setup first.</p>';
       body = `
         <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
@@ -154,6 +194,44 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
     if (!b.success) return reply.code(400).send('');
     await importSpecPoints(b.data.course, parseSpecPoints(b.data.text));
     return reply.type('text/html').send(await bodyFor(b.data.course));
+  });
+
+  // idea 9 — official course documents: upload + extract, edit the text, delete.
+  app.post('/coverage/doc/upload', guard, async (req, reply) => {
+    const data = await req.file();
+    if (!data) return reply.code(400).type('text/html').send('<p class="error">No file received.</p>');
+    const buf = await data.toBuffer();
+    const fields = data.fields as Record<string, { value?: string } | undefined>;
+    const course = Number(fields.course?.value);
+    const role = (fields.role?.value ?? '').trim();
+    const title = (fields.title?.value ?? data.filename ?? 'Document').trim();
+    if (!Number.isInteger(course) || course <= 0 || !isDocRole(role)) return reply.code(400).type('text/html').send('<p class="error">Pick a course and a document type.</p>');
+    const content = await extractDocText(buf, data.filename || 'file').catch(() => '');
+    await addCourseDoc(course, role, title || 'Document', content);
+    return reply.type('text/html').send(await docsSection(course));
+  });
+
+  app.get('/coverage/doc/:id', { preHandler: requireAuth }, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const doc = await getCourseDoc(p.data.id);
+    return reply.type('text/html').send(doc ? renderDocEditor(doc) : '<p class="muted">Document not found.</p>');
+  });
+
+  app.post('/coverage/doc/:id', guard, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    const b = z.object({ text: z.string().max(500000) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await updateCourseDocContent(p.data.id, b.data.text);
+    return reply.type('text/html').send(renderSavedStatus(`cov-doc-${p.data.id}-status`));
+  });
+
+  app.post('/coverage/doc/:id/delete', guard, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const course = await getCourseDocCourse(p.data.id);
+    await deleteCourseDoc(p.data.id);
+    return reply.type('text/html').send(course == null ? '<div id="cov-docs"></div>' : await docsSection(course));
   });
 
   app.post('/coverage/exam-date', guard, async (req, reply) => {
