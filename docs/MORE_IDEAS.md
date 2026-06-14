@@ -1,7 +1,7 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–3 BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2).**
-> Shipped and tested — **284 unit / 193 integration green; typecheck clean; migrations `0028`
+> **Status (2026-06-14): Waves 0–3 + idea 12 BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2, 12).**
+> Shipped and tested — **288 unit / 199 integration green; typecheck clean; migrations `0028`
 > (`teaching_concepts`) & `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
@@ -17,8 +17,11 @@
 > pace nudge in `adapt_lesson` — when a class reliably under-runs (≥2 tracked lessons, soft band, no-op
 > otherwise) the prompt is told to plan fewer, smaller activities and keep the duration. **Not** built:
 > the swappable-themes stretch (idea 11 tail), the idea-3b per-course override, idea-1.2
-> weave-into-existing, and idea 5's provider "refresh model list". **Next: the Wave 4 coverage backbone
-> (idea 10 → 9), then the Wave 5 reviewer (8 + 4).** The original plan follows.
+> weave-into-existing, and idea 5's provider "refresh model list". **Idea 12 (smart capture) is built:**
+> the 📝 Note button + `n` open a pop-up anywhere; on save `note_route` proposes 1–3 destinations
+> (task / event / captured / general note) you tick to confirm, a 🔒 toggle keeps a note private (never
+> sent), and AI-off falls back to general notes. **Next: the Wave 4 coverage backbone (idea 10 → 9),
+> then the Wave 5 reviewer (8 + 4).** The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -119,6 +122,13 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 |---|---|---|---|---|---|
 | **2** | **Pace ratio → sizing directive** — pure `classifyPace()` over `occurrence_courses.progress_step` vs the planned-step count (`outlineSteps()`), surfaced as a cohort `paceItems()` in the `adapt_lesson` context | The tracker captured where a class gets to but never fed sizing. Gated hard: **≥2 samples, under-running only, a soft band (not a %), ratio capped, no-op otherwise** — a slow class now gets a "plan fewer activities, keep the duration" nudge | M | 🟡 | ✅ |
 
+### Wave 3b — Smart capture *(idea 12 — user-requested; the manual-note sibling of email triage)*
+
+| # | Slice | Why it matters | Size | Pri | Status |
+|---|---|---|---|---|---|
+| **12** | **Notes pop-up + AI auto-filing** — the 📝 Note button & the `n` shortcut open a modal anywhere; on save a new `note_route` feature (cheap) proposes **1–3** destinations (task / event / captured / general note), shown as **tick-to-confirm** cards before they're created via the existing `createTask` / `createEventFromIntake` / `fileCaptured` / `createNote` repos | A jotted note must currently be filed by hand. This is `email_triage`'s routing applied to **manual** input, extended to **multiple destinations**; reuses the whole triage apply-path, so the new work was the multi-destination schema + the modal + a confirm step | M | 🟠 | ✅ |
+| **12** | *(safe default)* **Private toggle + general-notes fallback** — a 🔒 "keep private" toggle files the note as a flagged captured item (safeguarding register, **never sent to AI**); AI off / unsure / "just add" → straight into general notes. The pop-up always saves *somewhere* | The capture box can't lose what you typed, and a sensitive note is withheld from routing by the teacher's choice (the reliable point to decide it) | S | 🔴 | ✅ |
+
 ### Wave 4 — Coverage & document backbone *(the big rocks, strict order)*
 
 | # | Slice | Why it matters | Size | Pri | Status |
@@ -151,10 +161,11 @@ Every one of the eleven designs independently proposed `0028` — there can be o
 sequential numbers in build order**; the table below shows the build-order assignment, not eleven
 collisions. Much of Phase 11 needs **no schema**: idea 3 (global base = two `settings` rows; the
 per-course override (3b) rides the same dynamic registry-validated settings-key pattern as idea 5 —
-no new table), idea 5 (dynamic `ai_model_feature_*` keys + an `ai_models_catalog` cache), and ideas
+no new table), idea 5 (dynamic `ai_model_feature_*` keys — priced models only, no catalog), ideas
 6/11 (the configurable daily set in a `nav_daily` setting, theme prefs in `localStorage` / `settings`,
-nav model in code) add no core tables; idea 2 derives pace entirely at read time. The genuinely new
-tables, in build order:
+nav model in code), and idea 12 (smart capture writes to the existing task / event / captured / note
+entities) add no core tables; idea 2 derives pace entirely at read time. The genuinely new tables, in
+build order:
 
 ```
 teaching_concepts             -- idea 1.1 (mig 0028): cohort teaching ideas to weave in
@@ -258,9 +269,14 @@ containsRosterName egress-assert → audit`:
   **withhold** safeguarding-flagged notes/feedback entirely, not merely redact them — plus the
   *anonymous* cohort `missesItem` `adapt_lesson` already uses. Findings are stored, never
   auto-applied.
-- **Idea 5's `listProviderModels()`** is the one genuinely new wrapper method, and it sends **no
-  payload at all** — just lists model ids/display names — returning `[]` when unkeyed or in
-  `NODE_ENV=test`. The hand-authored pros/cons text is local; no AI generates it.
+- **Idea 5 adds no AI surface** — `modelForFeature()` just chooses which model id a feature hands to
+  the existing wrapper; the picker offers a fixed, priced list (the live provider-refresh was dropped,
+  §6 Q7).
+- **Idea 12's `note_route`** is a new `callLLMStructured` feature (cheap model, like `email_triage` /
+  `captured_categorise`): the typed note rides `context[]`, names are redacted, and a
+  **safeguarding-flagged note is withheld from routing entirely** — filed straight to general notes
+  (and the safeguarding register) instead, never sent. Routing only *proposes* destinations; the
+  teacher confirms before anything is created.
 
 **The cohort-prose rule is socially enforced (a UI hint), not code-enforced.** The teaching-concepts
 body, standing prefs, guided-access answers and spec-point titles are free text that *could* contain
@@ -317,6 +333,11 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
   (retrieval-starter / exit-ticket toggles) only if the model ignores prose requests.
 - **Auto-seeding spec points from uploaded docs** (idea 9 → idea 10) — idea 10 works fully via
   paste-import without idea 9; the auto-seed is an enhancer, not a dependency.
+- **Smart capture → per-class teaching-context destination** (idea 12) — routing a note into a
+  class's `teaching_context` needs resolving a specific `group_course` (class + course) from free
+  text, which is ambiguous. v1 routes to task / event / captured / general note (exactly
+  `email_triage`'s set); the teaching-context destination waits until there's a clean way to pick the
+  class+course (e.g. a class picker in the modal).
 
 ---
 
@@ -352,6 +373,13 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
 8. **Reviewer cost posture (idea 8/4)** — manual-trigger only for v1 (recommended)? Skip targets that
    already have an `open` finding to avoid double-spend? It ships **off** behind `ai_review_enabled`
    either way, per the DPIA off-by-default posture.
+9. **Smart capture (idea 12) — decided (2026-06-14) & built.** (a) **Confirm-before-create** — the
+   pop-up shows tick-to-confirm cards; nothing is created until you click Create. (b) v1 destinations:
+   **task / event / captured / general note** (per-class teaching-context deferred — see §5). (c) The
+   `n` shortcut + the 📝 Note button open the modal **everywhere** (replacing the old `n`=inline-new-note);
+   the inline new-note buttons on lesson/notes pages remain. (d) **≤3** destinations per note. Plus a
+   teacher **🔒 keep-private** toggle that skips AI entirely (the reliable point to withhold a
+   safeguarding note, since free text can't be pre-classified safely).
 
 ---
 

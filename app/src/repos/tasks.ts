@@ -27,8 +27,8 @@ export async function listGroups(): Promise<GroupOpt[]> {
   return rows;
 }
 
-export async function createTask(title: string): Promise<number> {
-  const { rows } = await pool.query<{ id: number }>(`INSERT INTO tasks (title) VALUES ($1) RETURNING id`, [title]);
+export async function createTask(title: string, detail?: string | null): Promise<number> {
+  const { rows } = await pool.query<{ id: number }>(`INSERT INTO tasks (title, detail) VALUES ($1, $2) RETURNING id`, [title, detail ?? null]);
   const id = rows[0]?.id;
   if (id === undefined) throw new Error('failed to create task');
   return id;

@@ -5,17 +5,28 @@
     return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
 
-  // `n` from anywhere opens a new note: click the page's [data-new-note] button
-  // if present (lesson / Now / general notes), otherwise go to the notes page.
+  // idea 12 — `n` (and the 📝 Note button) open the smart-capture modal anywhere: type a note and
+  // the AI works out where it goes. Falls back to the notes page if the dialog isn't supported/present.
+  function openNoteModal() {
+    var d = document.getElementById('note-modal');
+    if (!d || typeof d.showModal !== 'function') {
+      location.href = '/notes';
+      return;
+    }
+    var body = document.getElementById('note-modal-body');
+    if (body) body.innerHTML = '';
+    var form = document.getElementById('note-modal-form');
+    if (form && typeof form.reset === 'function') form.reset();
+    if (!d.open) d.showModal();
+    var ta = d.querySelector('textarea[name="text"]');
+    if (ta) ta.focus();
+  }
+  var noteBtn = document.getElementById('note-btn');
+  if (noteBtn) noteBtn.addEventListener('click', openNoteModal);
   document.addEventListener('keydown', function (e) {
     if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey && !isTyping(document.activeElement)) {
-      var btn = document.querySelector('[data-new-note]');
-      if (btn) {
-        e.preventDefault();
-        btn.click();
-      } else if (!location.pathname.startsWith('/notes')) {
-        location.href = '/notes';
-      }
+      e.preventDefault();
+      openNoteModal();
     }
   });
 

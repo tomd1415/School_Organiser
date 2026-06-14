@@ -65,7 +65,8 @@ describe('teaching concepts (integration)', () => {
     const id = rows[0]!.id;
     const res = await app.inject({ method: 'POST', url: `/concepts/${id}/archive`, headers: { cookie, 'x-csrf-token': token } });
     expect(res.statusCode).toBe(200);
-    const items = await conceptItemsFor(999999);
-    expect(items).toEqual([]); // archived ⇒ not woven in
+    // Robust to any real concepts the teacher has added: this one must no longer be woven in.
+    const joined = (await conceptItemsFor(999999)).map((i) => i.text).join('\n');
+    expect(joined).not.toContain(`${TAG} CPU as office`);
   });
 });

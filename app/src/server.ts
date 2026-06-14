@@ -34,6 +34,7 @@ import { registerSchemeRoutes } from './routes/schemes';
 import { registerMapRoutes } from './routes/map';
 import { registerKitRoutes } from './routes/kit';
 import { registerConceptRoutes } from './routes/concepts';
+import { registerNoteCaptureRoutes } from './routes/noteCapture';
 import { registerSetupRoutes } from './routes/setup';
 import { registerRolloverRoutes } from './routes/rollover';
 import { registerWelcomeRoutes } from './routes/welcome';
@@ -179,6 +180,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerMapRoutes(app);
   registerKitRoutes(app);
   registerConceptRoutes(app);
+  registerNoteCaptureRoutes(app);
   registerSetupRoutes(app);
   registerRolloverRoutes(app);
   registerWelcomeRoutes(app);

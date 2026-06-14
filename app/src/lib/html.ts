@@ -51,6 +51,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
                 hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
               <div id="search-results" class="search-results"></div>
             </div>
+            <button type="button" id="note-btn" class="qc-btn" title="Quick note — I'll work out where it goes (or press n)">📝 Note</button>
             <details class="quick-capture">
               <summary class="qc-btn" title="Jot something to deal with later">＋ Capture</summary>
               <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
@@ -65,6 +66,25 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
     ${logout}
   </header>
   <main>${body}</main>
+  ${
+    authed && csrfToken
+      ? `<dialog id="note-modal" class="note-modal" hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'>
+    <div class="note-modal-card">
+      <button type="button" class="note-modal-x" aria-label="Close" onclick="this.closest('dialog').close()">✕</button>
+      <h2>Quick note</h2>
+      <form id="note-modal-form" hx-post="/note/route" hx-target="#note-modal-body" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+        <textarea name="text" rows="4" placeholder="Jot anything — I'll work out where it goes…"></textarea>
+        <label class="note-private"><input type="checkbox" name="private" value="on"> 🔒 keep private (safeguarding — don't send to AI)</label>
+        <div class="note-modal-actions">
+          <button type="submit" class="btn-secondary">File it ✨</button>
+          <button type="button" class="link" hx-post="/note/route/plain" hx-include="#note-modal-form" hx-target="#note-modal-body" hx-swap="innerHTML">just add to notes</button>
+        </div>
+      </form>
+      <div id="note-modal-body" aria-live="polite"></div>
+    </div>
+  </dialog>`
+      : ''
+  }
   ${authed ? `<script>window.__NAV__=${navClientJson()};</script>\n  <script src="/static/htmx.min.js"></script>\n  <script src="/static/app.js" defer></script>` : ''}
 </body>
 </html>`;
