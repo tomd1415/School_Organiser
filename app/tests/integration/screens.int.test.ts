@@ -679,6 +679,13 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       expect(res.body).toContain('Captured');
       const tooShort = await app.inject({ method: 'GET', url: '/search?q=u', headers: { cookie } });
       expect(tooShort.body).toBe(''); // <2 chars → no query
+      // Command palette: the dropdown also offers "go to" destinations — including pages hidden from
+      // the everyday rail (Coverage is in Plan, Settings in Advanced), so nothing is ever unreachable.
+      const palette = await app.inject({ method: 'GET', url: '/search?q=cover', headers: { cookie } });
+      expect(palette.body).toContain('search-nav');
+      expect(palette.body).toContain('href="/coverage"');
+      const settings = await app.inject({ method: 'GET', url: '/search?q=settings', headers: { cookie } });
+      expect(settings.body).toContain('href="/settings"');
     } finally {
       await pool.query(`DELETE FROM notes WHERE body LIKE 'ZZSEARCH%'`);
     }

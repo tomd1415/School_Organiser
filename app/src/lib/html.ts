@@ -45,7 +45,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   const stageTop = authed
     ? `<header class="stage-top"${csrfHdr}>
         <div class="search-box">
-          <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search…  /" autocomplete="off" aria-label="Search everything"
+          <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search or jump to a page…  press /" autocomplete="off" aria-label="Search or jump to a page"
             hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
           <div id="search-results" class="search-results"></div>
         </div>

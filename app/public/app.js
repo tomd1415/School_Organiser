@@ -113,7 +113,7 @@
     var jumps = NAV_ITEMS.map(function (i) { return '<kbd>' + i.key + '</kbd> ' + i.label; }).join(' · ');
     c.innerHTML =
       '<div class="kbd-card"><h2>Keyboard shortcuts</h2><ul>' +
-      '<li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> — search</li>' +
+      '<li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> — search or jump to any page (↑↓ then ↵)</li>' +
       '<li><kbd>n</kbd> — new note</li>' +
       (jumps ? '<li><kbd>g</kbd> then: ' + jumps + '</li>' : '') +
       '<li><kbd>Esc</kbd> — close</li></ul><p class="muted">press ? to toggle</p></div>';
@@ -136,6 +136,29 @@
   });
   // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
+
+  // Command palette: arrow-key + Enter navigation through the live "go to … / results" dropdown.
+  (function () {
+    function results() {
+      var nodes = document.querySelectorAll('#search-results .search-hit');
+      var arr = [];
+      for (var i = 0; i < nodes.length; i++) arr.push(nodes[i]);
+      return arr;
+    }
+    function activeIndex(list) { for (var i = 0; i < list.length; i++) if (list[i].classList.contains('kbd-active')) return i; return -1; }
+    function clearActive(list) { for (var i = 0; i < list.length; i++) list[i].classList.remove('kbd-active'); }
+    document.addEventListener('keydown', function (e) {
+      var box = document.getElementById('global-search');
+      if (!box || document.activeElement !== box) return;
+      var list = results();
+      if (!list.length) return;
+      var idx = activeIndex(list);
+      if (e.key === 'ArrowDown') { e.preventDefault(); clearActive(list); var n = list[(idx + 1) % list.length]; n.classList.add('kbd-active'); n.scrollIntoView({ block: 'nearest' }); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); clearActive(list); var p = list[(idx - 1 + list.length) % list.length]; p.classList.add('kbd-active'); p.scrollIntoView({ block: 'nearest' }); }
+      else if (e.key === 'Enter') { var t = idx >= 0 ? list[idx] : list[0]; if (t) { e.preventDefault(); window.location.href = t.getAttribute('href'); } }
+    });
+    document.body.addEventListener('htmx:afterSwap', function (e) { if (e.target && e.target.id === 'search-results') clearActive(results()); });
+  })();
 
   // Mark the current page in the left rail (a Today link, or one inside a Plan/Advanced section).
   // Longest matching href wins so e.g. /settings beats / for /settings/ai-log.

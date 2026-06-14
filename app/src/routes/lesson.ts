@@ -14,6 +14,7 @@ import {
 import { getLessonPlan, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
 import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
+import { getExperienceMode } from '../lib/nav';
 import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
 import { runClassIntake, applyClassIntake } from '../services/classIntake';
 import {
@@ -142,29 +143,37 @@ function adaptView(gc: number, lp: number, eff: EffectiveLesson, oob = false): s
 }
 
 function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string): string {
+  // Rail & Stage declutter: the status (whether this class has a revised version) + the read-only view
+  // stay visible, but the EDITOR, AI tools and change log fold into one "Adapt & AI tools" disclosure —
+  // closed by default for the everyday teacher (so a fresh lesson never looks unfinished), pre-opened
+  // only when advanced tools are on. Nothing is removed; the mid-lesson view is just calmer.
+  const power = getExperienceMode() === 'power';
   return `<div class="adapt" id="adapt-${gc}-${lp}">
       ${adaptMeta(gc, lp, eff.adapted)}
       ${eff.adaptationNote ? `<p class="adapt-note">${esc(eff.adaptationNote)}</p>` : ''}
       ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
       ${adaptView(gc, lp, eff)}
-      <details class="adapt-edit"${eff.adapted ? '' : ' open'}>
-        <summary>✏ ${eff.adapted ? "edit this group's version" : 'adapt it for this group'}</summary>
-        <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
-          <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
-          <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
-        </form>
-      </details>
-      <button type="button" class="link fu-ai" title="Re-pitch this lesson for this class from its teaching context, ability and access needs — and its recent lessons where there are any (AI)" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt for this class (AI)</button>
-      <button type="button" class="link fu-ai" title="3 quick recall questions re-testing what this class got wrong recently (AI)" hx-post="/lesson/gc/${gc}/retrieval-starter" hx-target="#starter-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">🔁 Retrieval starter (AI)</button>
-      <div id="starter-${gc}-${lp}"></div>
-      ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
-      <button type="button" class="link fu-ai" title="re-make the lesson's documents for this class from the master sheets + this adapted version; re-running updates them"
-        hx-post="/lesson/adapt/${gc}/${lp}/resources-ai" hx-target="#adapt-res-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">📄 Adapt resources for this class (AI)</button>
-      <span id="adapt-res-${gc}-${lp}"></span>` : ''}
-      <div id="adapt-${gc}-${lp}-proposal"></div>
-      <details class="adapt-log" id="adapt-${gc}-${lp}-log">
-        <summary>change log</summary>
-        <div hx-get="/lesson/adapt/${gc}/${lp}/history" hx-trigger="toggle from:#adapt-${gc}-${lp}-log once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+      <details class="advanced ld-adapt-tools"${power ? ' open' : ''}>
+        <summary>🛠 Adapt &amp; AI tools</summary>
+        <details class="adapt-edit">
+          <summary>✏ ${eff.adapted ? "edit this group's version" : 'adapt it for this group'}</summary>
+          <form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1200ms from:textarea, blur from:textarea" hx-swap="none">
+            <label class="adapt-l">Objectives — for this group<textarea name="objectives" rows="2" placeholder="(inherits the master)">${esc(eff.objectives ?? '')}</textarea></label>
+            <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
+          </form>
+        </details>
+        <button type="button" class="link fu-ai" title="Re-pitch this lesson for this class from its teaching context, ability and access needs — and its recent lessons where there are any (AI)" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt for this class (AI)</button>
+        <button type="button" class="link fu-ai" title="3 quick recall questions re-testing what this class got wrong recently (AI)" hx-post="/lesson/gc/${gc}/retrieval-starter" hx-target="#starter-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">🔁 Retrieval starter (AI)</button>
+        <div id="starter-${gc}-${lp}"></div>
+        ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
+        <button type="button" class="link fu-ai" title="re-make the lesson's documents for this class from the master sheets + this adapted version; re-running updates them"
+          hx-post="/lesson/adapt/${gc}/${lp}/resources-ai" hx-target="#adapt-res-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">📄 Adapt resources for this class (AI)</button>
+        <span id="adapt-res-${gc}-${lp}"></span>` : ''}
+        <div id="adapt-${gc}-${lp}-proposal"></div>
+        <details class="adapt-log" id="adapt-${gc}-${lp}-log">
+          <summary>change log</summary>
+          <div hx-get="/lesson/adapt/${gc}/${lp}/history" hx-trigger="toggle from:#adapt-${gc}-${lp}-log once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+        </details>
       </details>
     </div>`;
 }
@@ -216,6 +225,7 @@ function renderSection(
 ): string {
   const colour = s.colour ?? '#94a3b8';
   const oc = s.occurrenceCourseId;
+  const power = getExperienceMode() === 'power';
   const slotKey = `${slot.lessonId}:${s.groupCourseId}`;
   const planOpts =
     `<option value=""${s.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>` +
@@ -259,10 +269,14 @@ function renderSection(
           hx-confirm="Didn't finish? This lesson repeats at the next ${esc(s.courseName)} slot and everything after shifts back one school week (holidays skipped)."
           title="repeat this lesson next week and shift the rest">↻ continue next week</button>` : ''}
       </p>
-      <details class="group-ctx" id="group-ctx-${s.groupCourseId}">
+      ${
+        power
+          ? `<details class="group-ctx advanced" id="group-ctx-${s.groupCourseId}">
         <summary>this class's teaching context</summary>
         <div hx-get="/lesson/group-context/${s.groupCourseId}" hx-trigger="toggle from:#group-ctx-${s.groupCourseId} once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
-      </details>
+      </details>`
+          : ''
+      }
     </section>`;
 }
 
