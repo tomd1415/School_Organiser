@@ -32,6 +32,8 @@ import {
   getGroupAbility,
   getGroupCourseInfo,
   getGroupTeachingContext,
+  getGuidedAccess,
+  setGuidedAccess,
   setGroupAbility,
   listAdaptationHistory,
   recentGroupHistory,
@@ -44,6 +46,8 @@ import { getCourseTeachingContext } from '../repos/schemes';
 import { abilityItem, groupContextItems } from '../llm/prompts/teachingContext';
 import { standingPrefItems } from '../services/standingPrefs';
 import { conceptItemsFor } from '../services/teachingConcepts';
+import { accessItemsFor } from '../services/accessConstraints';
+import type { GuidedAccess } from '../llm/prompts/accessConstraints';
 import { callLLMStructured } from '../llm/client';
 import { modelFor } from '../repos/settings';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
@@ -362,6 +366,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
 
   const standing = await standingPrefItems();
   const concepts = await conceptItemsFor(info.courseId);
+  const access = await accessItemsFor(gc);
   const modelChoice = await modelFor('plan');
   const courseCtx = await getCourseTeachingContext(info.courseId);
   const groupCtx = await getGroupTeachingContext(gc);
@@ -377,6 +382,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
         context: [
           ...standing,
           ...concepts,
+          ...access,
           ...groupContextItems(courseCtx, groupCtx),
           ...abilityItem(ability),
           ...equipmentItem(equipment),
@@ -617,7 +623,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
   app.get('/lesson/group-context/:gc', { preHandler: requireAuth }, async (req, reply) => {
     const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
-    const [text, ability] = await Promise.all([getGroupTeachingContext(p.data.gc), getGroupAbility(p.data.gc)]);
+    const [text, ability, guided] = await Promise.all([getGroupTeachingContext(p.data.gc), getGroupAbility(p.data.gc), getGuidedAccess(p.data.gc)]);
+    const ga = guided ?? {};
+    const ck = (v: unknown): string => (v ? ' checked' : '');
     return reply.type('text/html').send(`
       <p class="muted group-ctx-hint">Adds to the course context when adapting for this class. Describe the class as a whole — never an individual pupil.</p>
       <textarea name="text" rows="3" placeholder="e.g. this class needs shorter tasks and a movement break mid-lesson…"
@@ -626,6 +634,20 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         <input name="text" value="${esc(ability ?? '')}" placeholder="e.g. working at Entry Level 3 / emerging GCSE grade 2"
           hx-post="/lesson/group-ability/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">
       </label>
+      <details class="guided-access">
+        <summary>access needs (optional — shapes generated lessons &amp; resources for this class)</summary>
+        <form class="guided-access-form" hx-post="/lesson/group-access/${p.data.gc}" hx-trigger="change" hx-swap="none">
+          <label class="adapt-l">Minimum font size (pt)
+            <input type="number" name="viFont" min="10" max="48" value="${ga.viFont ?? ''}" placeholder="e.g. 18"></label>
+          <label><input type="checkbox" name="shortAttention"${ck(ga.shortAttention)}> very short attention spans — shorter, chunked tasks</label>
+          <label><input type="checkbox" name="eal"${ck(ga.eal)}> EAL learners — define key terms, avoid idioms</label>
+          <label><input type="checkbox" name="dyslexiaFriendly"${ck(ga.dyslexiaFriendly)}> dyslexia-friendly layout</label>
+          <label><input type="checkbox" name="lowTyping"${ck(ga.lowTyping)}> limited typing fluency — prefer click / drag / multiple-choice</label>
+          <label class="adapt-l">Target reading age
+            <input name="readingAge" maxlength="40" value="${esc(ga.readingAge ?? '')}" placeholder="e.g. 8"></label>
+          <span class="note-status" id="group-access-${p.data.gc}-status"></span>
+        </form>
+      </details>
       <span class="note-status" id="group-ctx-${p.data.gc}-status"></span>`);
   });
 
@@ -643,6 +665,33 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     if (!p.success || !b.success) return reply.code(400).send('');
     await setGroupTeachingContext(p.data.gc, b.data.text);
     return reply.type('text/html').send(renderSavedStatus(`group-ctx-${p.data.gc}-status`));
+  });
+
+  // idea 7 — save the per-class guided-access questionnaire. Fields are parsed as strings (unchecked
+  // boxes simply don't submit); only set values are stored, so clearing a field removes it.
+  app.post('/lesson/group-access/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z
+      .object({
+        viFont: z.string().max(6).optional(),
+        shortAttention: z.string().optional(),
+        eal: z.string().optional(),
+        dyslexiaFriendly: z.string().optional(),
+        lowTyping: z.string().optional(),
+        readingAge: z.string().max(40).optional(),
+      })
+      .safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const a: GuidedAccess = {};
+    const font = b.data.viFont && b.data.viFont.trim() !== '' ? Number(b.data.viFont) : NaN;
+    if (Number.isFinite(font) && font >= 8 && font <= 72) a.viFont = Math.round(font);
+    if (b.data.shortAttention) a.shortAttention = true;
+    if (b.data.eal) a.eal = true;
+    if (b.data.dyslexiaFriendly) a.dyslexiaFriendly = true;
+    if (b.data.lowTyping) a.lowTyping = true;
+    if (b.data.readingAge && b.data.readingAge.trim()) a.readingAge = b.data.readingAge.trim();
+    await setGuidedAccess(p.data.gc, a);
+    return reply.type('text/html').send(renderSavedStatus(`group-access-${p.data.gc}-status`));
   });
 
   // 5.5: the feedback loop — AI adapts this lesson for THIS group from its recent lessons
@@ -708,6 +757,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         context: [
           ...(await standingPrefItems()),
           ...(await conceptItemsFor(info.courseId)),
+          ...(await accessItemsFor(gc)),
           ...groupContextItems(await getCourseTeachingContext(info.courseId), await getGroupTeachingContext(gc)),
           ...abilityItem(await getGroupAbility(gc)),
           ...equipmentItem(await listActiveEquipment()),

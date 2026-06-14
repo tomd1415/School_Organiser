@@ -1,18 +1,19 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Wave 0 + Wave 1 (ideas 3 & 1.1) BUILT.** The typed `NAV_MODEL` extraction
-> (idea 11), the configurable daily-vs-setup nav (idea 6), standing style/feature prefs (idea 3,
-> global) and the teaching-concepts library (idea 1.1) are shipped and tested — **269 unit / 182
-> integration green; typecheck clean; migration `0028` (`teaching_concepts`)**. Settings →
-> **Navigation** picks the always-visible links (default: the leaner five — Now, Focus, Timetable,
-> Tasks, Captured); the rest fold into a "⚙ Setup & admin" menu, with the keyboard map + cheat-sheet
-> now derived from the one [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Standing
-> prefs (Settings → AI) and course-scoped/global teaching concepts (the new **/concepts** page) both
-> ride the `context[]` seam into the planning/authoring generators — redacted, withheld and audited
-> like every input — and `/settings/ai` is now registry-validated with per-key caps (the seam ideas
-> 5/4/8/9 reuse). The swappable-themes stretch (idea 11 tail), the idea-3b per-course override and
-> idea-1.2 weave-into-existing are **not** built; Wave 1 finishes with idea 7 (guided cohort-access).
-> The original plan follows.
+> **Status (2026-06-14): Waves 0 & 1 COMPLETE (ideas 11, 6, 3, 1.1, 7).** Shipped and tested —
+> **273 unit / 186 integration green; typecheck clean; migrations `0028` (`teaching_concepts`) &
+> `0029` (`group_courses.guided_access`)**. Settings → **Navigation** picks the always-visible links
+> (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
+> admin" menu, with the keyboard map + cheat-sheet now derived from the one
+> [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
+> the `context[]` seam into the planning/authoring generators — standing style/feature prefs (Settings
+> → AI, all generators), course-scoped/global teaching concepts (the new **/concepts** page, the four
+> lesson-content generators), and per-class access constraints (a questionnaire on the class context
+> editor → `adapt_lesson`/`adapt_resources`) — each redacted, withheld and audited like every input,
+> each a no-op until filled. `/settings/ai` is now registry-validated with per-key caps (the seam
+> ideas 5/4/8/9 reuse). **Not** built: the swappable-themes stretch (idea 11 tail), the idea-3b
+> per-course override and idea-1.2 weave-into-existing. **Next: Wave 2 — idea 5 (per-feature model
+> choice).** The original plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -98,7 +99,7 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 | **3** | **Standing style & feature prefs (global)** — `styleItems()` builder + two `settings` rows (`ai_style_prefs`, `ai_feature_prefs`) + extend the `/settings/ai` Zod enum, spread into all six planning call sites | Nothing lets the teacher set standing intent today; S-effort, no new table, influences *every* planning feature at once, and forces the registry-validated settings endpoint Waves 2/4/5 all need | S | 🔴 | ✅ |
 | **3b** | **Per-course pref override** — course-scoped `ai_style_prefs_course_<id>` / `ai_feature_prefs_course_<id>` keys via the same registry-validated dynamic-key endpoint as idea 5 (no new table), with the override form in the course editor; `styleItems()` merges course-over-global | Decided 2026-06-14: prefs are global **+ per-course**. The global base (above) ships first; this adds e.g. GCSE-vs-KS3 tone/feature differences | M | 🟡 | ⬜ |
 | **1.1** | **Teaching-concepts library (weave-on-generate)** — `teaching_concepts` table + `repos/concepts.ts` + `/concepts` admin (clone of the kit/equipment pattern) + `conceptItems()` spread into the four generation sites | Closes a gap: there is no place to bank cohort-level teaching ideas the AI should weave in; pure additive plumbing, empty library is a literal no-op | M | 🟠 | ✅ |
-| **7** | **Guided cohort-access questions (no AI)** — a `group_courses.guided_access` JSONB form + deterministic `accessConstraints.ts` that derives one `[access]`-sentinel line into the existing per-class `teaching_context` | Turns "min 18pt, no two-column" cohort needs into a constraint every class-targeted generation honours via `groupContextItems()` — and the first slice uses **no AI at all** | S | 🟠 | ⬜ |
+| **7** | **Guided cohort-access questions (no AI)** — a `group_courses.guided_access` JSONB questionnaire (VI→min font, short attention, reading age, EAL, dyslexia-friendly, low typing) on the per-class context editor + deterministic `accessConstraints.ts` deriving a cohort constraint **`context[]` item** spread into the class-scoped generators (`adapt_lesson`/`adapt_resources`) | Turns "min 18pt, shorter tasks" cohort needs into a constraint every class-targeted generation honours — deterministic, **no AI at all** (cleaner than a sentinel line in `teaching_context`) | S | 🟠 | ✅ |
 | **1.2** | *(stretch)* **Weave concepts into an existing lesson** — `weave_concepts` feature reusing the `improve_master` propose-then-apply flow, instructed to rebalance within `duration_min` not lengthen | The harder half of idea 1; soft "don't lengthen" constraint needs smoke-testing before it's trusted | M | 🟡 | ⬜ |
 
 ### Wave 2 — Cost/depth control *(config layer, unblocks the expensive waves)*

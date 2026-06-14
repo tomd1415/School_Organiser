@@ -2,6 +2,7 @@
 // a group stores only its overrides. Resolution: a group's effective lesson = its adaptation where
 // present, else the master. Every change is logged (lesson_adaptation_history).
 import { pool } from '../db/pool';
+import type { GuidedAccess } from '../llm/prompts/accessConstraints';
 
 export interface MasterContent {
   objectives: string | null;
@@ -139,6 +140,24 @@ export async function getGroupTeachingContext(groupCourseId: number): Promise<st
 
 export async function setGroupTeachingContext(groupCourseId: number, text: string): Promise<void> {
   await pool.query(`UPDATE group_courses SET teaching_context = $2 WHERE id = $1`, [groupCourseId, text.trim() || null]);
+}
+
+// idea 7 — the per-class guided-access questionnaire (optional). Raw answers as JSONB; a deterministic
+// builder derives the constraint lines the AI sees. An empty object stores NULL (a no-op).
+export async function getGuidedAccess(groupCourseId: number): Promise<GuidedAccess | null> {
+  const { rows } = await pool.query<{ guidedAccess: GuidedAccess | null }>(
+    `SELECT guided_access AS "guidedAccess" FROM group_courses WHERE id = $1`,
+    [groupCourseId],
+  );
+  return rows[0]?.guidedAccess ?? null;
+}
+
+export async function setGuidedAccess(groupCourseId: number, answers: GuidedAccess): Promise<void> {
+  const empty = !answers || Object.keys(answers).length === 0;
+  await pool.query(`UPDATE group_courses SET guided_access = $2::jsonb WHERE id = $1`, [
+    groupCourseId,
+    empty ? null : JSON.stringify(answers),
+  ]);
 }
 
 /** The class's recorded ability midpoint — the anchor the three differentiation levels sit around. */
