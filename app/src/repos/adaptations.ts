@@ -160,6 +160,16 @@ export async function setGuidedAccess(groupCourseId: number, answers: GuidedAcce
   ]);
 }
 
+// Phase 11 — the class-intake "covered so far" summary (free prose; fed to planning).
+export async function getCoveredSummary(groupCourseId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ s: string | null }>(`SELECT covered_summary AS s FROM group_courses WHERE id = $1`, [groupCourseId]);
+  return rows[0]?.s ?? null;
+}
+
+export async function setCoveredSummary(groupCourseId: number, text: string): Promise<void> {
+  await pool.query(`UPDATE group_courses SET covered_summary = $2 WHERE id = $1`, [groupCourseId, text.trim() || null]);
+}
+
 // Phase 11 — one-shot flag for auto-adapting a class's scheme once it first has context (+ a scheme).
 export async function groupCourseAutoAdapted(groupCourseId: number): Promise<boolean> {
   const { rows } = await pool.query<{ x: boolean }>(`SELECT scheme_auto_adapted AS x FROM group_courses WHERE id = $1`, [groupCourseId]);

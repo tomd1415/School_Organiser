@@ -18,6 +18,13 @@ export function groupContextItems(courseText: string | null | undefined, groupTe
   return items;
 }
 
+// What this class has already covered (from the class-intake tool). Helps the AI build on prior
+// learning rather than re-teach it. Cohort-level only.
+export function coveredItems(summary: string | null | undefined): RedactableItem[] {
+  const s = (summary ?? '').trim();
+  return s ? [{ text: `WHAT THIS CLASS HAS COVERED SO FAR — build on it; don't re-teach unless a deliberate recap:\n${s}` }] : [];
+}
+
 // The recorded class ability midpoint: Core work pitches HERE; Support sits below it, Challenge
 // above. Cohort-level only — never an individual pupil.
 export function abilityItem(midpoint: string | null | undefined): RedactableItem[] {

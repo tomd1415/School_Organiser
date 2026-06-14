@@ -4,7 +4,7 @@
 import { callLLMStructured } from '../llm/client';
 import { ADAPT_LESSON_SYSTEM, ADAPT_LESSON_VERSION, adaptLessonInstruction, lessonItem, historyItems } from '../llm/prompts/adaptLesson';
 import { adaptLessonSchema } from '../llm/schemas/adaptLesson';
-import { groupContextItems, abilityItem } from '../llm/prompts/teachingContext';
+import { groupContextItems, abilityItem, coveredItems } from '../llm/prompts/teachingContext';
 import { equipmentItem } from '../llm/prompts/equipment';
 import { missesItem } from '../llm/prompts/retrievalStarter';
 import { standingPrefItems } from './standingPrefs';
@@ -25,6 +25,7 @@ import {
   upsertAdaptation,
   groupCourseAutoAdapted,
   setGroupCourseAutoAdapted,
+  getCoveredSummary,
 } from '../repos/adaptations';
 import { getActiveScheme, getCourseTeachingContext, getLessonPlan } from '../repos/schemes';
 import { schemeLessons } from '../repos/specPoints';
@@ -38,18 +39,19 @@ export interface AdaptOutcome {
 
 /** Adapt ONE master lesson for one class. Pure of HTTP — the route renders from the outcome. */
 export async function adaptLessonForClass(gc: number, lp: number): Promise<AdaptOutcome> {
-  const [master, info, history, groupCtx, ability, guided] = await Promise.all([
+  const [master, info, history, groupCtx, ability, guided, covered] = await Promise.all([
     getLessonPlan(lp),
     getGroupCourseInfo(gc),
     recentGroupHistory(gc),
     getGroupTeachingContext(gc),
     getGroupAbility(gc),
     getGuidedAccess(gc),
+    getCoveredSummary(gc),
   ]);
   if (!master || !info) return { status: 'notfound', hadHistory: false };
   const hadHistory = history.length > 0;
 
-  const hasClassContext = !!((groupCtx && groupCtx.trim()) || (ability && ability.trim()) || (guided && Object.keys(guided).length > 0));
+  const hasClassContext = !!((groupCtx && groupCtx.trim()) || (covered && covered.trim()) || (ability && ability.trim()) || (guided && Object.keys(guided).length > 0));
   if (!hadHistory && !hasClassContext) return { status: 'skip', hadHistory };
 
   const eff = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
@@ -68,6 +70,7 @@ export async function adaptLessonForClass(gc: number, lp: number): Promise<Adapt
         ...(await accessItemsFor(gc)),
         ...(await paceItemsFor(gc)),
         ...groupContextItems(courseCtx, groupCtx),
+        ...coveredItems(covered),
         ...abilityItem(ability),
         ...equipmentItem(await listActiveEquipment()),
         lessonItem(master.title, eff.objectives, eff.outline, eff.adapted),

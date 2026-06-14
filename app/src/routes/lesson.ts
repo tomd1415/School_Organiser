@@ -14,6 +14,7 @@ import {
 import { getLessonPlan, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
 import { schemeLessons } from '../repos/specPoints';
 import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
+import { runClassIntake, applyClassIntake } from '../services/classIntake';
 import {
   addVersion,
   createResource,
@@ -42,6 +43,8 @@ import {
   resetAdaptation,
   setGroupTeachingContext,
   upsertAdaptation,
+  getCoveredSummary,
+  setCoveredSummary,
   type EffectiveLesson,
 } from '../repos/adaptations';
 import { getCourseTeachingContext } from '../repos/schemes';
@@ -621,23 +624,35 @@ export function registerLessonRoutes(app: FastifyInstance): void {
 
   // 5.9: per-class teaching-context — cohort-level prose only (never an individual pupil); adds to
   // the course context when the AI adapts for this group.
-  app.get('/lesson/group-context/:gc', { preHandler: requireAuth }, async (req, reply) => {
-    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
-    if (!p.success) return reply.code(400).send('');
-    const [text, ability, guided] = await Promise.all([getGroupTeachingContext(p.data.gc), getGroupAbility(p.data.gc), getGuidedAccess(p.data.gc)]);
+  const renderGroupContextFragment = async (gc: number, intakeStatus = ''): Promise<string> => {
+    const [text, ability, guided, covered] = await Promise.all([getGroupTeachingContext(gc), getGroupAbility(gc), getGuidedAccess(gc), getCoveredSummary(gc)]);
     const ga = guided ?? {};
     const ck = (v: unknown): string => (v ? ' checked' : '');
-    return reply.type('text/html').send(`
+    return `<div id="group-ctx-frag-${gc}">
+      <details class="class-intake">
+        <summary>✨ Set up this class from a description (AI)</summary>
+        <p class="muted">Paste what you know about this class — approach, what they've covered, ability, needs. Opus fills the teaching context, a "covered so far" summary, ability and access below (then edit). Cohort-level — never name a pupil.</p>
+        <form hx-post="/lesson/group-context/${gc}/intake" hx-target="#group-ctx-frag-${gc}" hx-swap="outerHTML" hx-disabled-elt="find button"
+          hx-confirm="Fill this class's context, ability and access from this description? It replaces the current values.">
+          <textarea name="text" rows="5" placeholder="e.g. Year 9 set 3, 8 pupils. Covered binary and the CPU last term; found hexadecimal hard. Mostly Entry Level 3; a couple need larger font; short attention — keep tasks to ~10 min…"></textarea>
+          <button type="submit" class="btn-secondary">Process with AI</button>
+          <span class="note-status" id="intake-${gc}-status">${intakeStatus}</span>
+        </form>
+      </details>
       <p class="muted group-ctx-hint">Adds to the course context when adapting for this class. Describe the class as a whole — never an individual pupil.</p>
       <textarea name="text" rows="3" placeholder="e.g. this class needs shorter tasks and a movement break mid-lesson…"
-        hx-post="/lesson/group-context/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(text ?? '')}</textarea>
+        hx-post="/lesson/group-context/${gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(text ?? '')}</textarea>
+      <label class="adapt-l">Covered so far — what this class has already done (the AI builds on it, won't re-teach)
+        <textarea name="text" rows="2" placeholder="e.g. binary, the CPU, basic algorithms — found hexadecimal hard"
+          hx-post="/lesson/group-covered/${gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(covered ?? '')}</textarea>
+      </label>
       <label class="adapt-l">Ability midpoint — Core work pitches here (Support below, Challenge above)
         <input name="text" value="${esc(ability ?? '')}" placeholder="e.g. working at Entry Level 3 / emerging GCSE grade 2"
-          hx-post="/lesson/group-ability/${p.data.gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">
+          hx-post="/lesson/group-ability/${gc}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">
       </label>
       <details class="guided-access">
         <summary>access needs (optional — shapes generated lessons &amp; resources for this class)</summary>
-        <form class="guided-access-form" hx-post="/lesson/group-access/${p.data.gc}" hx-trigger="change" hx-swap="none">
+        <form class="guided-access-form" hx-post="/lesson/group-access/${gc}" hx-trigger="change" hx-swap="none">
           <label class="adapt-l">Minimum font size (pt)
             <input type="number" name="viFont" min="10" max="48" value="${ga.viFont ?? ''}" placeholder="e.g. 18"></label>
           <label><input type="checkbox" name="shortAttention"${ck(ga.shortAttention)}> very short attention spans — shorter, chunked tasks</label>
@@ -646,11 +661,44 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           <label><input type="checkbox" name="lowTyping"${ck(ga.lowTyping)}> limited typing fluency — prefer click / drag / multiple-choice</label>
           <label class="adapt-l">Target reading age
             <input name="readingAge" maxlength="40" value="${esc(ga.readingAge ?? '')}" placeholder="e.g. 8"></label>
-          <span class="note-status" id="group-access-${p.data.gc}-status"></span>
+          <span class="note-status" id="group-access-${gc}-status"></span>
         </form>
       </details>
-      <p class="adapt-scheme-row"><button type="button" class="link fu-ai" title="Adapt every lesson of this class's scheme from its context — AI, one call per lesson" hx-post="/lesson/gc/${p.data.gc}/adapt-scheme" hx-target="#scheme-adapt-${p.data.gc}" hx-swap="innerHTML" hx-confirm="Adapt ALL of this class's scheme lessons from its context? That's one AI call per lesson." hx-disabled-elt="this">✨ Adapt whole scheme for this class (AI)</button> <span id="scheme-adapt-${p.data.gc}"></span></p>
-      <span class="note-status" id="group-ctx-${p.data.gc}-status"></span>`);
+      <p class="adapt-scheme-row"><button type="button" class="link fu-ai" title="Adapt every lesson of this class's scheme from its context — AI, one call per lesson" hx-post="/lesson/gc/${gc}/adapt-scheme" hx-target="#scheme-adapt-${gc}" hx-swap="innerHTML" hx-confirm="Adapt ALL of this class's scheme lessons from its context? That's one AI call per lesson." hx-disabled-elt="this">✨ Adapt whole scheme for this class (AI)</button> <span id="scheme-adapt-${gc}"></span></p>
+      <span class="note-status" id="group-ctx-${gc}-status"></span>
+    </div>`;
+  };
+
+  app.get('/lesson/group-context/:gc', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    return reply.type('text/html').send(await renderGroupContextFragment(p.data.gc));
+  });
+
+  // Class-intake (idea: set up a class from a free-text description). Opus → the per-class fields;
+  // then fire the one-shot scheme-adapt (context is now set). Re-renders the panel with what it filled.
+  app.post('/lesson/group-context/:gc/intake', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ text: z.string().max(8000) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const gc = p.data.gc;
+    if (!b.data.text.trim()) return reply.type('text/html').send(await renderGroupContextFragment(gc, 'type a description first'));
+    const r = await runClassIntake(b.data.text);
+    if (r.status !== 'ok' || !r.data) {
+      const why = r.status === 'unavailable' ? 'AI is off — turn it on in Settings → AI.' : (r.message ?? 'AI could not process that — try again.');
+      return reply.type('text/html').send(await renderGroupContextFragment(gc, esc(why)));
+    }
+    await applyClassIntake(gc, r.data);
+    void maybeAutoAdaptScheme(gc).catch((err) => app.log.error({ err }, 'auto scheme-adapt after intake failed'));
+    return reply.type('text/html').send(await renderGroupContextFragment(gc, 'filled ✓ — review &amp; edit below'));
+  });
+
+  app.post('/lesson/group-covered/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ text: z.string().max(4000) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await setCoveredSummary(p.data.gc, b.data.text);
+    return reply.type('text/html').send(renderSavedStatus(`group-ctx-${p.data.gc}-status`));
   });
 
   app.post('/lesson/group-ability/:gc', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {

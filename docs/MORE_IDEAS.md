@@ -1,9 +1,9 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–3 + idea 12 + idea 13 + idea 10 (all slices) COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 13, 10).**
-> Shipped and tested — **310 unit / 214 integration green; typecheck clean; migrations `0028`–`0032`
+> **Status (2026-06-14): Waves 0–3 + ideas 12, 13, 14 + idea 10 (all slices) COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 13, 14, 10).**
+> Shipped and tested — **314 unit / 218 integration green; typecheck clean; migrations `0028`–`0033`
 > (`teaching_concepts`, `group_courses.guided_access`, `course_spec_points` + `lesson_plan_spec_points`,
-> `courses.exam_date`, `group_courses.scheme_auto_adapted`)**. Settings → **Navigation** picks the always-visible links
+> `courses.exam_date`, `group_courses.scheme_auto_adapted`, `group_courses.covered_summary`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
 > admin" menu, with the keyboard map + cheat-sheet now derived from the one
 > [nav.ts](../app/src/lib/nav.ts) model so they can never drift. Three new cohort-level inputs ride
@@ -145,6 +145,13 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 | **13** | **Adapt a lesson from class context (not just recent lessons)** — `adapt_lesson@3` + the route now adapt from the class's teaching context / ability / access needs when there are no recent lessons; only refuses when there's genuinely nothing. Button renamed **"Adapt for this class"** | A fresh class (no taught lessons yet) couldn't be adapted for at all — the old gate refused. Now class context alone is enough | S | 🟠 | ✅ |
 | **13** | **Adapt the whole scheme for a class** — extracted `adaptLessonForClass` + `adaptSchemeForClass` (batch); a **"✨ Adapt whole scheme for this class"** button (confirm; background; self-stops at the £ cap) on the class-context panel | Tailors a class's whole scheme in one go, not lesson-by-lesson | M | 🟠 | ✅ |
 | **13** | **Auto-adapt once context is set** — the first time a class has BOTH a scheme and substantial teaching context, the whole-scheme adapt fires automatically in the background (one-shot flag `group_courses.scheme_auto_adapted`, mig `0032`); re-runnable by hand | "Make it automatic when assigning a scheme to a class", without burning AI calls before there's any context | S | 🟠 | ✅ |
+
+### Wave 3d — Class intake from a description *(idea 14 — user-requested; "what has this class covered")*
+
+| # | Slice | Why it matters | Size | Pri | Status |
+|---|---|---|---|---|---|
+| **14** | **Set up a class from a free-text description (Opus → JSON)** — a "✨ Set up this class from a description" box on the class-context panel; `class_intake` (Opus) reads the paste into a cohort **teaching context**, a **covered-so-far** summary (new `group_courses.covered_summary`, mig `0033`), the **ability midpoint**, and the **access needs** — filling the fields for the teacher to review/edit, then firing the one-shot scheme-adapt | Each class arrives mid-stream with a different history; pasting it once and having Opus fill the structured fields is far faster than hand-entering each, and captures "what they've covered up to this point" at first setup | M | 🟠 | ✅ |
+| **14** | **Covered-so-far feeds planning** — `coveredItems()` spreads the covered summary into `adapt_lesson` context (build on prior learning, don't re-teach); editable on the panel | Makes the captured history actually shape generated lessons | S | 🟠 | ✅ |
 
 ### Wave 4 — Coverage & document backbone *(the big rocks, strict order)*
 
@@ -405,6 +412,13 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
     button; it **confirms + runs in the background and self-stops at the £ cap** (each lesson is one
     AI call). There is no separate "assign scheme to class" action — a class inherits its course's
     scheme — so the trigger is "context is set", not a dedicated assignment step.
+11. **Class intake from a description (idea 14) — built (2026-06-14).** A free-text box on the
+    class-context panel; **Opus** (`class_intake`) returns JSON for the per-class fields (teaching
+    context, covered-so-far, ability, access needs) and **fills them for the teacher to review/edit**
+    (it replaces existing values; confirm warns of this), then fires the one-shot scheme-adapt. The
+    description rides `context[]` (names redacted); outputs are cohort-level. The "covered so far"
+    summary (`group_courses.covered_summary`) also feeds `adapt_lesson` so generation builds on prior
+    learning.
 
 ---
 
