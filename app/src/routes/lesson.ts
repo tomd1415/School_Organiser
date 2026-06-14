@@ -110,11 +110,14 @@ function errorPage(reply: { generateCsrf: () => string }, code: number, message:
   return { code, html: layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }) };
 }
 
-function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false): string {
+function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false, adapted = false): string {
+  // When the class has its own adaptation, this shows the EFFECTIVE (revised) plan, badged — so it's
+  // clear the lesson, the tracker and resource generation all use this class's version, not the master.
+  const badge = adapted ? '<span class="adapt-badge on" title="This class has its own revised version — shown here and used when generating this class\'s resources">✏ this class’s revised plan</span> ' : '';
   const detail =
     `${objectives ? `<div class="oc-block"><span class="oc-label">Objectives</span>${formatObjectives(objectives)}</div>` : ''}` +
     `${outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(outline)}</div>` : ''}`;
-  const inner = title ? detail || '<span class="muted">(plan has no detail yet)</span>' : '<span class="muted">No plan bound.</span>';
+  const inner = title ? badge + (detail || '<span class="muted">(plan has no detail yet)</span>') : '<span class="muted">No plan bound.</span>';
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
 
@@ -227,12 +230,18 @@ function renderSection(
         <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
-      ${renderPlanContent(oc, s.planTitle, s.planObjectives, s.planOutline)}
+      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, eff?.adapted ? eff.outline : s.planOutline, false, eff?.adapted ?? false)}
       ${renderTracker(oc, outlineSteps((eff?.adapted ? eff.outline : null) ?? s.planOutline), s.progressStep)}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
       <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}
         ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
-        ${s.lessonPlanId != null ? `<button type="button" class="link" title="slides + worksheet + support + answers for this lesson (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate/update (AI)</button><span id="res-gen-${oc}"></span>` : ''}
+        ${
+          s.lessonPlanId == null
+            ? ''
+            : eff?.adapted
+              ? `<button type="button" class="link" title="Generate slides/worksheet/support/answers from THIS CLASS'S revised plan, linked to this class (AI)" hx-post="/lesson/adapt/${s.groupCourseId}/${s.lessonPlanId}/resources-ai" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate for this class (AI)</button><span id="res-gen-${oc}"></span>`
+              : `<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
+        }
       </div>
       ${last}
       <label class="stop-label">Stopping point

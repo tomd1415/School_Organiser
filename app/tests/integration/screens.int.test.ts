@@ -117,6 +117,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       expect(page.statusCode).toBe(200);
       expect(page.body).toContain(`id="adapt-${gc}-${planId}"`);
       expect(page.body).toContain('following the master');
+      // not adapted yet → resource generation uses the master plan
+      expect(page.body).toContain(`/schemes/plan/${planId}/resources-ai`);
       const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
       const cookie = firstCookie(page.headers['set-cookie']) || session;
       // 2) adapt for this group
@@ -132,6 +134,11 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       const page2 = await app.inject({ method: 'GET', url: `/lesson?lesson=${lessonId}&date=${ADAPT_DATE}`, headers: { cookie: session } });
       expect(page2.body).toContain('GROUP only');
       expect(page2.body).toContain('adapted for this group');
+      // regression: once a class has its own adaptation, the lesson shows the REVISED plan and the
+      // resource-generate action is FOR THE CLASS (links to the adaptation), not the shared master.
+      expect(page2.body).toContain('revised plan');
+      expect(page2.body).toContain(`/lesson/adapt/${gc}/${planId}/resources-ai`);
+      expect(page2.body).not.toContain(`/schemes/plan/${planId}/resources-ai`);
       const hist = await app.inject({ method: 'GET', url: `/lesson/adapt/${gc}/${planId}/history`, headers: { cookie: session } });
       expect(hist.body).toContain('teacher edit');
     } finally {

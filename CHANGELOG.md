@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-14 — Bug fix: class lesson-resource generation now uses (and links to) the class's revised plan
+
+When generating resources for a lesson **with a class**, it wasn't clear whether the class's revised
+(adapted) plan was being used, and the resulting resources weren't connected to that revised plan.
+Root cause: the lesson-detail "generate resources (AI)" button always posted the **master** path
+(`/schemes/plan/:lp/resources-ai`) even when the class had its own adaptation, and the lesson panel
+showed the master plan's objectives/outline. Fixed:
+
+- **The lesson panel now shows the class's revised plan when one exists** — objectives/outline come
+  from the effective (adapted) lesson, with a "✏ this class's revised plan" badge so it's obvious
+  which version is in play ([routes/lesson.ts](../app/src/routes/lesson.ts), `renderPlanContent`).
+- **The generate button branches by class** — when the class has an adaptation it posts the class
+  path (`/lesson/adapt/:gc/:lp/resources-ai`, labelled "generate for this class"), which generates
+  from the adapted content and links each resource to the **adaptation** (not the master plan);
+  otherwise it falls back to the master path.
+- Regression tests: render-level assertions in
+  [screens.int.test.ts](../app/tests/integration/screens.int.test.ts) (the adapted lesson shows the
+  badge + class path and no longer offers the master path), and a data-layer separation test in
+  [adaptations.int.test.ts](../app/tests/integration/adaptations.int.test.ts) proving a class-linked
+  resource is returned by `listResourcesForAdaptation` but **not** `listResourcesForPlan`, and vice
+  versa — the two stores never bleed into each other.
+
 ### 2026-06-14 — Bug fix: lesson-resource generation dropped all but one slide
 
 Generating a lesson's resources sometimes produced a slide deck with only one slide. Root cause

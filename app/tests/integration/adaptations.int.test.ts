@@ -7,6 +7,13 @@ import {
   resetAdaptation,
   upsertAdaptation,
 } from '../../src/repos/adaptations';
+import {
+  createResource,
+  linkResourceToAdaptation,
+  linkResourceToPlan,
+  listResourcesForAdaptation,
+  listResourcesForPlan,
+} from '../../src/repos/resources';
 
 // 5.1: per-group adaptation of a master lesson. Uses an existing group_course (read-only) and a
 // throwaway master lesson, so the seeded data is never touched.
@@ -46,7 +53,7 @@ describe('lesson adaptations (5.1 — integration, needs the dev DB up)', () => 
     await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [lessonPlanId]);
     await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
     await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
-    await pool.end();
+    // pool is closed once, in the final describe's afterAll below.
   });
 
   it('falls back to the master when there is no adaptation', async () => {
@@ -119,5 +126,89 @@ describe('lesson adaptations (5.1 — integration, needs the dev DB up)', () => 
     expect(eff.objectives).toBe('MASTER objectives');
     const hist = await listAdaptationHistory(a!.id);
     expect(hist.length).toBe(0); // cascaded away with the adaptation
+  });
+});
+
+// Regression — class-adapted resources must belong to the class's adaptation, NOT the master plan.
+// (The teacher reported that resources generated for a class were not connected to the revised
+// lesson plan. The class-path generator links to the adaptation; this proves the two stores never
+// bleed into each other.) Self-contained setup so it never depends on the suite above.
+describe('adapted resources are scoped to the class, not the master plan (regression)', () => {
+  let gcId = 0;
+  let planId = 0;
+  let unit = 0;
+  let scheme = 0;
+  let adaptationId = 0;
+  const masterResIds: number[] = [];
+  const classResIds: number[] = [];
+
+  beforeAll(async () => {
+    const gc = await pool.query<{ id: number; course_id: number }>(
+      `SELECT id, course_id FROM group_courses ORDER BY id LIMIT 1`,
+    );
+    gcId = Number(gc.rows[0]!.id);
+    const courseId = Number(gc.rows[0]!.course_id);
+    const s = await pool.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'TEST res-scope scheme', 98, false) RETURNING id`,
+      [courseId],
+    );
+    scheme = Number(s.rows[0]!.id);
+    const u = await pool.query<{ id: number }>(
+      `INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'TEST res-scope unit', 1) RETURNING id`,
+      [scheme],
+    );
+    unit = Number(u.rows[0]!.id);
+    const p = await pool.query<{ id: number }>(
+      `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline)
+       VALUES ($1, $2, 'TEST res-scope master', 1, 'MASTER objectives', 'MASTER outline') RETURNING id`,
+      [unit, courseId],
+    );
+    planId = Number(p.rows[0]!.id);
+    await upsertAdaptation({
+      groupCourseId: gcId,
+      lessonPlanId: planId,
+      objectives: 'GROUP objectives',
+      outline: 'GROUP outline',
+      adaptationNote: null,
+      changeSummary: 'set up for res-scope test',
+    });
+    adaptationId = (await getAdaptation(gcId, planId))!.id;
+  });
+
+  afterAll(async () => {
+    const all = [...masterResIds, ...classResIds];
+    if (all.length) {
+      await pool.query(`DELETE FROM resource_links WHERE resource_id = ANY($1)`, [all]);
+      await pool.query(`DELETE FROM resources WHERE id = ANY($1)`, [all]);
+    }
+    await pool.query(`DELETE FROM lesson_adaptations WHERE group_course_id = $1 AND lesson_plan_id = $2`, [gcId, planId]);
+    await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [planId]);
+    await pool.query(`DELETE FROM units WHERE id = $1`, [unit]);
+    await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [scheme]);
+    await pool.end();
+  });
+
+  it('a resource generated for the class is returned for the adaptation, not the master plan', async () => {
+    const id = await createResource('TEST class deck', 'slides', null, 'ai_generated');
+    classResIds.push(id);
+    await linkResourceToAdaptation(id, adaptationId);
+
+    const forClass = await listResourcesForAdaptation(adaptationId);
+    expect(forClass.map((r) => r.resourceId)).toContain(id);
+
+    const forMaster = await listResourcesForPlan(planId);
+    expect(forMaster.map((r) => r.resourceId)).not.toContain(id);
+  });
+
+  it('a master resource is returned for the plan, not the class adaptation', async () => {
+    const id = await createResource('TEST master deck', 'slides', null, 'ai_generated');
+    masterResIds.push(id);
+    await linkResourceToPlan(id, planId);
+
+    const forMaster = await listResourcesForPlan(planId);
+    expect(forMaster.map((r) => r.resourceId)).toContain(id);
+
+    const forClass = await listResourcesForAdaptation(adaptationId);
+    expect(forClass.map((r) => r.resourceId)).not.toContain(id);
   });
 });
