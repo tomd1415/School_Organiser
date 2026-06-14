@@ -77,7 +77,8 @@ import { TERM_SUMMARY_INSTRUCTION, TERM_SUMMARY_SYSTEM, TERM_SUMMARY_VERSION } f
 import { draftLessonSchema } from '../llm/schemas/draftLesson';
 import { DRAFT_LESSON_SYSTEM, DRAFT_LESSON_VERSION, draftLessonInstruction } from '../llm/prompts/draftLesson';
 import { authorSchemeSchema } from '../llm/schemas/authorScheme';
-import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction } from '../llm/prompts/authorScheme';
+import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction, specPointsItems } from '../llm/prompts/authorScheme';
+import { listSpecPoints, getCourseExamDate, specPointsSolelyCoveredByPlan } from '../repos/specPoints';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -285,6 +286,8 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     // courses.id is BIGINT → pg returns it as a string, so coerce before comparing.
     const course = (await listCourses()).find((c) => Number(c.id) === q.data.course);
     if (!course) return reply.code(404).send('');
+    // idea 10 slice 2b — feed the course's spec points (cover every one) + exam date (revision unit).
+    const [specPts, examDate] = await Promise.all([listSpecPoints(q.data.course), getCourseExamDate(q.data.course)]);
 
     const result = await callLLMStructured(
       {
@@ -296,11 +299,12 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           ...(await standingPrefItems()),
           ...teachingContextItems(await getCourseTeachingContext(q.data.course)),
           ...curriculumHistoryItems(await getCourseCurriculumHistory(q.data.course)),
+          ...specPointsItems(specPts),
           ...equipmentItem(await listActiveEquipment()),
-          { text: authorSchemeInstruction(course.name, b.data.brief) },
+          { text: authorSchemeInstruction(course.name, b.data.brief, examDate) },
         ],
         instruction: 'Design the scheme now.',
-        maxTokens: 8000,
+        maxTokens: 16000, // covering every spec point with per-lesson codes needs room (generous; cost scales with use)
       },
       authorSchemeSchema,
     );
@@ -616,8 +620,16 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
     const sid = await schemeIdForPlan(id.data.id);
+    // idea 10 slice 2b — warn (not silently) when this delete leaves a spec point with no coverage.
+    const orphaned = sid ? await specPointsSolelyCoveredByPlan(id.data.id) : [];
     await deletePlan(id.data.id);
-    return reply.type('text/html').send(sid ? await treeHtml(sid) : '');
+    let html = sid ? await treeHtml(sid) : '';
+    if (orphaned.length && html.includes('<div id="scheme-tree">')) {
+      const names = orphaned.map((p) => esc(p.code === p.title ? p.title : p.code)).join(', ');
+      const warn = `<div class="cov-drop-warn">⚠ That lesson was the only one covering ${orphaned.length} spec point${orphaned.length === 1 ? '' : 's'} — now uncovered: ${names}. <a class="link" href="/coverage">review coverage →</a></div>`;
+      html = html.replace('<div id="scheme-tree">', `<div id="scheme-tree">${warn}`);
+    }
+    return reply.type('text/html').send(html);
   });
 
   app.post('/schemes/plan/:id', guard, async (req, reply) => {

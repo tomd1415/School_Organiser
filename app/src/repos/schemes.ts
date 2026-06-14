@@ -143,9 +143,14 @@ export async function createScheme(courseId: number): Promise<number | null> {
   return rows[0]?.id ?? null;
 }
 
+export interface AuthoredLesson {
+  title: string;
+  specPoints?: string[]; // spec-point codes this lesson covers (idea 10 slice 2b) — auto-mapped
+}
+
 export interface AuthoredUnit {
   title: string;
-  lessons: string[];
+  lessons: Array<string | AuthoredLesson>; // string = title only (back-compat); object carries coverage
 }
 
 // Create a whole scheme (scheme + units + lesson plans) atomically from an AI-authored skeleton.
@@ -164,6 +169,9 @@ export async function materialiseScheme(courseId: number, title: string, units: 
       [courseId, title || `${course.rows[0].name} — Scheme of Work`],
     );
     const schemeId = s.rows[0]!.id;
+    // idea 10 slice 2b — resolve spec-point codes → ids once so AI-authored lessons auto-map coverage.
+    const sp = await client.query<{ id: number; code: string }>(`SELECT id, lower(code) AS code FROM course_spec_points WHERE course_id = $1 AND active`, [courseId]);
+    const codeToId = new Map(sp.rows.map((r) => [r.code, r.id]));
     let uOrder = 0;
     for (const u of units) {
       const ur = await client.query<{ id: number }>(
@@ -173,10 +181,17 @@ export async function materialiseScheme(courseId: number, title: string, units: 
       const unitId = ur.rows[0]!.id;
       let pOrder = 0;
       for (const lesson of u.lessons) {
-        await client.query(
-          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, $3, $4)`,
-          [unitId, courseId, lesson.slice(0, 200), pOrder++],
+        const lessonTitle = typeof lesson === 'string' ? lesson : lesson.title;
+        const codes = typeof lesson === 'string' ? [] : lesson.specPoints ?? [];
+        const pr = await client.query<{ id: number }>(
+          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, $3, $4) RETURNING id`,
+          [unitId, courseId, (lessonTitle ?? '').slice(0, 200), pOrder++],
         );
+        const planId = pr.rows[0]!.id;
+        for (const code of codes) {
+          const spid = codeToId.get(code.trim().toLowerCase());
+          if (spid) await client.query(`INSERT INTO lesson_plan_spec_points (lesson_plan_id, spec_point_id, source) VALUES ($1, $2, 'ai') ON CONFLICT DO NOTHING`, [planId, spid]);
+        }
       }
     }
     await client.query('COMMIT');

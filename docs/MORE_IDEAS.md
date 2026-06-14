@@ -1,7 +1,7 @@
 # Phase 11 — Sharper planning & a calmer surface: the teacher's idea backlog, sequenced
 
-> **Status (2026-06-14): Waves 0–3 + idea 12 + idea 10 slices 1 & 2a BUILT (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 10a, 10·2a).**
-> Shipped and tested — **297 unit / 208 integration green; typecheck clean; migrations `0028`–`0031`
+> **Status (2026-06-14): Waves 0–3 + idea 12 + idea 10 (all slices) COMPLETE (ideas 11, 6, 3, 1.1, 7, 5, 2, 12, 10).**
+> Shipped and tested — **310 unit / 211 integration green; typecheck clean; migrations `0028`–`0031`
 > (`teaching_concepts`, `group_courses.guided_access`, `course_spec_points` + `lesson_plan_spec_points`,
 > `courses.exam_date`)**. Settings → **Navigation** picks the always-visible links
 > (default: the leaner five — Now, Focus, Timetable, Tasks, Captured); the rest fold into a "⚙ Setup &
@@ -25,9 +25,12 @@
 > page is the AI-free spec-point source of truth — paste a course's spec, tick which lessons cover each
 > point, see what's not yet covered; the rollover now carries coverage forward. **Slice 2a:** a "✨
 > Suggest coverage for the gaps" button (cheap `coverage_check`) maps each uncovered point to the
-> best-fitting lesson for the teacher to tick-confirm, plus a per-course exam date. **Next: idea 10
-> slice 2b (`author_scheme@4` cover-every-point + revision unit + coverage-drop warning), then idea 9
-> (official docs), then the Wave 5 reviewer (8 + 4).** The original plan follows.
+> best-fitting lesson for the teacher to tick-confirm, plus a per-course exam date. **Slice 2b:**
+> `author_scheme@4` now covers every spec point (each authored lesson auto-mapped to its codes) and
+> ends with a revision unit before the exam date; deleting the sole coverer of a point warns it's now
+> uncovered. **Idea 10 is complete. Next: idea 9 (upload official course docs — spec / examiners'
+> reports / past papers — referenced when authoring), then the Wave 5 reviewer (8 + 4).** The original
+> plan follows.
 >
 > **Status (2026-06-14): PLANNED, plan-first — for review before any code.**
 > Phase 10 made the system *trustworthy* with real pupil data (encrypted backups, erasure/SAR,
@@ -141,7 +144,7 @@ teacher recognises the list; they are grouped into the six waves the sequencing 
 |---|---|---|---|---|---|
 | **10** | **Spec-point library + deterministic coverage map** — `course_spec_points` + `lesson_plan_spec_points` (mig `0030`), a paste-import parser, an AI-free `schemeCoverage()` query, and the **/coverage** page (paste spec points, tick which lessons cover each, see what's not yet covered); `cloneSchemeNewVersion` now **copies the mappings** on a version bump | Closes the biggest planning gap: "what must be covered" existed nowhere. **AI-free** durable backbone everything else builds on; the rollover-copy was the flagged trap | L | 🟠 | ✅ |
 | **10** | **AI gap-filler + exam date (2a)** — a cheap `coverage_check` critic maps each uncovered spec point to the best-fitting existing lesson (or "needs a new lesson"), shown as tick-to-apply suggestions on **/coverage**; a per-course `exam_date` (mig `0031`) | Closes gaps fast — the teacher confirms each mapping; degrades to "AI is off" cleanly | M | 🟡 | ✅ |
-| **10** | **AI coverage authoring + drop-warning (2b)** — `author_scheme@4` covers **every** spec point + emits a revision unit before `exam_date` on exam courses (auto-mapping the new lessons); deleting the sole coverer of a point warns inline (no AI) | Makes the AI author honour the source of truth and flags coverage loss on later edits | L | 🟡 | ⬜ |
+| **10** | **AI coverage authoring + drop-warning (2b)** — `author_scheme@4` covers **every** spec point + emits a revision unit before `exam_date` on exam courses, with `materialiseScheme` **auto-mapping** each authored lesson to the codes it carries; deleting the sole coverer of a point warns inline (no AI) | Makes the AI author honour the source of truth and flags coverage loss on later edits | L | 🟡 | ✅ |
 | **9** | **Official course documents + text extraction** — `doc_role` tag on `resources` + `course_doc_text` sidecar + `docText.ts` (mammoth/pdfjs/Gotenberg fallback) + `courseDocItems()` into authoring | Lets the AI cite the *real* spec; the heaviest L (new deps, PDF extraction quirks). An enhancer that can later auto-seed idea 10, **not** a prerequisite for it | L | 🟡 | ⬜ |
 
 ### Wave 5 — AI reviewer *(unify ideas 8 + 4, cost-gated, build last)*

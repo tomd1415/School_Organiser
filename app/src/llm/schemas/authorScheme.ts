@@ -8,7 +8,16 @@ export const authorSchemeSchema = z.object({
     .array(
       z.object({
         title: z.string().describe('the unit title'),
-        lessons: z.array(z.string()).describe('ordered lesson titles for this unit'),
+        lessons: z
+          .array(
+            z.object({
+              title: z.string().describe('the lesson title'),
+              specPoints: z
+                .array(z.string())
+                .describe('the spec-point CODES this lesson covers, taken EXACTLY from the provided spec-point list (e.g. ["1.1.1","1.1.2"]); use [] when the course has no spec points or the lesson covers none'),
+            }),
+          )
+          .describe('ordered lessons for this unit'),
       }),
     )
     .describe('the units of the scheme, in teaching order'),

@@ -115,6 +115,7 @@ button.link { background: none; color: var(--accent); padding: 0; }
 .cov-checklist { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0 0.5rem 1rem; }
 .cov-check { font-weight: 400; }
 .cov-points code, .cov-uncovered code, .cov-check code { color: var(--muted); }
+.cov-drop-warn { background: #fff4e5; border: 1px solid #f0c98a; color: #7a4a00; border-radius: 8px; padding: 0.5rem 0.8rem; margin: 0 0 0.8rem; font-size: 0.95rem; }
 
 /* timetable grid */
 main:has(.tt) { max-width: 76rem; }

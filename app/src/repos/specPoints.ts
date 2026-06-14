@@ -111,6 +111,27 @@ export async function setCourseExamDate(courseId: number, iso: string | null): P
 }
 
 // idea 10 slice 2 — the scheme's lessons with objectives, for the AI gap-filler to match points to.
+// idea 10 slice 2b — spec points that ONLY this lesson covers within its scheme; deleting it would
+// leave them uncovered (the coverage-drop warning).
+export async function specPointsSolelyCoveredByPlan(planId: number): Promise<Array<{ code: string; title: string }>> {
+  const { rows } = await pool.query<{ code: string; title: string }>(
+    `SELECT sp.code, sp.title
+     FROM lesson_plan_spec_points m
+     JOIN course_spec_points sp ON sp.id = m.spec_point_id AND sp.active
+     WHERE m.lesson_plan_id = $1
+       AND NOT EXISTS (
+         SELECT 1 FROM lesson_plan_spec_points m2
+         JOIN lesson_plans lp2 ON lp2.id = m2.lesson_plan_id
+         JOIN units u2 ON u2.id = lp2.unit_id
+         WHERE m2.spec_point_id = sp.id AND m2.lesson_plan_id <> $1
+           AND u2.scheme_id = (SELECT u.scheme_id FROM lesson_plans lp JOIN units u ON u.id = lp.unit_id WHERE lp.id = $1)
+       )
+     ORDER BY sp.display_order, sp.id`,
+    [planId],
+  );
+  return rows;
+}
+
 export async function schemeLessonsDetailed(schemeId: number): Promise<Array<{ id: number; title: string; objectives: string | null }>> {
   const { rows } = await pool.query<{ id: number; title: string; objectives: string | null }>(
     `SELECT lp.id, lp.title, lp.objectives FROM lesson_plans lp JOIN units u ON u.id = lp.unit_id
