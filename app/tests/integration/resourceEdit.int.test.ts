@@ -43,11 +43,19 @@ const post = (url: string, payload: string) =>
   app.inject({ method: 'POST', url, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload });
 
 describe('resource editing (integration)', () => {
-  it('the editor page shows the raw Markdown in an editable area', async () => {
-    const r = await app.inject({ method: 'GET', url: `/resources/${rid}/edit`, headers: { cookie } });
+  it('the raw-Markdown editor (?raw=1) shows the source in an editable area', async () => {
+    // /edit now defaults to the block editor; ?raw=1 is the raw-Markdown escape hatch.
+    const r = await app.inject({ method: 'GET', url: `/resources/${rid}/edit?raw=1`, headers: { cookie } });
     expect(r.statusCode).toBe(200);
     expect(r.body).toContain('md-edit-area');
     expect(r.body).toContain('Old question?'); // the current content is loaded for editing
+  });
+
+  it('the editor page defaults to the block editor', async () => {
+    const r = await app.inject({ method: 'GET', url: `/resources/${rid}/edit`, headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    expect(r.body).toContain('ws-ed-list');
+    expect(r.body).toContain('window.__WSBLOCKS__');
   });
 
   it('live preview renders a worksheet "as it appears" (an answer box), without saving', async () => {

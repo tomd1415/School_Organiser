@@ -18,7 +18,8 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
-import { renderWorksheet } from '../lib/worksheetForm';
+import { renderWorksheet, type Level } from '../lib/worksheetForm';
+import { parseBlocks, serialiseBlocks, blocksSchema } from '../lib/worksheetBlocks';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
 import { modelForFeature } from '../repos/settings';
@@ -62,11 +63,11 @@ function renderSlidesPreview(text: string): string {
   return `<div class="edit-slides">${cards || '<p class="muted">Start a slide with a <code>## heading</code>.</p>'}</div>`;
 }
 
-/** The "as it appears" preview for a resource's content, by kind. */
-function previewForKind(kind: string, title: string, text: string): string {
+/** The "as it appears" preview for a resource's content, by kind. With a level, a worksheet previews
+ * just that level's pupil view (the block editor's level focus); without, the whole document. */
+function previewForKind(kind: string, title: string, text: string, level?: Level): string {
   if (kind === 'worksheet' || /worksheet/i.test(title)) {
-    // Whole document (every level), inert — so the teacher sees all of what they're editing.
-    return `<div class="ws-doc ws-doc-preview">${renderWorksheet(text, { mode: 'preview' }).html}</div>`;
+    return `<div class="ws-doc ws-doc-preview">${renderWorksheet(text, { mode: 'preview', level }).html}</div>`;
   }
   if (kind === 'slides') return renderSlidesPreview(text);
   return `<div class="md-doc">${renderMarkdown(text)}</div>`;
@@ -95,6 +96,39 @@ function renderEditor(id: number, r: { title: string; kind: string; versionNo: n
         <span class="muted edit-hint">Edits are saved as a new version — the old one is kept.</span>
       </div>
     </form>
+  </article>`;
+}
+
+/** The block (WYSIWYG-style) editor: each instruction / question / screenshot / heading / image is an
+ * editable card (worksheetEditor.js), drag images straight in, reorder, change type, focus a level.
+ * The parsed blocks are seeded inline; the client serialises back to Markdown on save (server side via
+ * /edit-blocks) so auto-marking field keys are preserved. A "raw markdown" link is the escape hatch. */
+function renderBlockEditor(id: number, r: { title: string; kind: string; versionNo: number | null }, text: string, csrf: string): string {
+  const blocks = parseBlocks(text);
+  const json = JSON.stringify(blocks).replace(/</g, '\\u003c');
+  return `<article class="card ws-ed" data-res="${id}">
+    <div class="md-head">
+      <span class="muted">✏ Editing: ${esc(r.title)} · v${r.versionNo ?? 1}</span>
+      <span class="md-head-actions">
+        ${r.kind === 'slides' ? `<a class="link" href="/resources/${id}/present" target="_blank" rel="noopener">▶ present</a>` : ''}
+        <a class="link" href="/resources/${id}/edit?raw=1">✎ raw markdown</a>
+        <a class="link" href="/resources/${id}/view">↩ back to view</a>
+      </span>
+    </div>
+    <div class="ws-ed-bar">
+      <span class="ws-ed-levels">Show: <button type="button" class="ws-ed-lvl on" data-lvl="all">All</button><button type="button" class="ws-ed-lvl" data-lvl="support">🟢 Support</button><button type="button" class="ws-ed-lvl" data-lvl="core">🟡 Core</button><button type="button" class="ws-ed-lvl" data-lvl="challenge">🔴 Challenge</button></span>
+      <span class="ws-ed-acts">
+        <button type="button" class="btn-soft" id="ws-ed-preview-toggle">👁 Preview</button>
+        <button type="button" class="btn" id="ws-ed-save">💾 Save</button>
+        <span id="ws-ed-status" class="note-status" aria-live="polite"></span>
+      </span>
+    </div>
+    <div class="ws-ed-grid">
+      <div id="ws-ed-list" class="ws-ed-list" aria-label="Worksheet blocks"></div>
+      <div id="ws-ed-preview" class="ws-ed-preview" hidden></div>
+    </div>
+    <script>window.__WSRES__=${id};window.__WSKIND__=${JSON.stringify(r.kind)};window.__WSCSRF__=${JSON.stringify(csrf)};window.__WSBLOCKS__=${json};</script>
+    <script src="/static/worksheetEditor.js" defer></script>
   </article>`;
 }
 
@@ -223,7 +257,41 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       return reply.code(404).send('The stored file is missing from the resource store.');
     }
     const csrf = reply.generateCsrf();
-    return reply.type('text/html').send(layout({ title: `Edit · ${r.title}`, body: renderEditor(id.data.id, r, text, csrf), authed: true, csrfToken: csrf }));
+    // Default to the block (WYSIWYG-style) editor; ?raw=1 is the raw-Markdown escape hatch.
+    const raw = (req.query as { raw?: unknown })?.raw === '1';
+    const body = raw ? renderEditor(id.data.id, r, text, csrf) : renderBlockEditor(id.data.id, r, text, csrf);
+    return reply.type('text/html').send(layout({ title: `Edit · ${r.title}`, body, authed: true, csrfToken: csrf }));
+  });
+
+  // Live preview for the block editor: serialise the posted blocks → render the pupil view (a level
+  // focus shows just that level). Never saves.
+  app.post('/resources/:id/preview-blocks', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await getResource(id.data.id);
+    if (!r) return reply.code(404).send('');
+    const body = (req.body ?? {}) as { blocks?: unknown; level?: unknown };
+    const parsed = blocksSchema.safeParse(body.blocks);
+    if (!parsed.success) return reply.code(400).type('text/html').send('<p class="muted">Could not preview.</p>');
+    const level = body.level === 'support' || body.level === 'core' || body.level === 'challenge' ? body.level : undefined;
+    return reply.type('text/html').send(previewForKind(r.kind, r.title, serialiseBlocks(parsed.data), level));
+  });
+
+  // Save the edited blocks → serialise to Markdown → a NEW version (reversible; marking keys preserved).
+  app.post('/resources/:id/edit-blocks', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await getResource(id.data.id);
+    if (!r) return reply.code(404).send('');
+    if (previewKind(r.mimeType, r.title) !== 'markdown') return reply.code(400).type('application/json').send(JSON.stringify({ error: 'not editable' }));
+    const parsed = blocksSchema.safeParse((req.body as { blocks?: unknown })?.blocks);
+    if (!parsed.success) return reply.code(400).type('application/json').send(JSON.stringify({ error: 'bad blocks' }));
+    const nextNo = (r.versionNo ?? 0) + 1;
+    const buf = Buffer.from(serialiseBlocks(parsed.data), 'utf8');
+    const rel = relPathFor(id.data.id, nextNo, r.title);
+    await storeBuffer(rel, buf);
+    await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser (blocks)');
+    return reply.type('application/json').send(JSON.stringify({ ok: true, version: nextNo }));
   });
 
   // Live "as it appears" preview while typing — renders only, never saves.
@@ -251,6 +319,45 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     await storeBuffer(rel, buf);
     await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser');
     return reply.type('text/html').send(`<span class="note-status saved">saved ✓ — now v${nextNo}</span>`);
+  });
+
+  // Upload an image for the worksheet editor (teacher drags/drops a picture in). Stored as an image
+  // resource; returns the URL to embed. Served via /lesson-image (below) so PUPILS and TAs can see it.
+  const EDITOR_IMG_EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
+  app.post('/resources/:id/image', guard, async (req, reply) => {
+    const data = await req.file();
+    if (!data) return reply.code(400).send('no image');
+    const ext = EDITOR_IMG_EXT[data.mimetype];
+    if (!ext) return reply.code(400).send('that file type isn’t allowed'); // raster only; no SVG
+    const buf = await data.toBuffer();
+    if (buf.length > 12 * 1024 * 1024) return reply.code(413).send('that image is too big');
+    const name = safeFilename(data.filename || `image.${ext}`);
+    const imgId = await createResource(name, 'image', data.mimetype, 'uploaded');
+    const rel = relPathFor(imgId, 1, name);
+    await storeBuffer(rel, buf);
+    await addVersion(imgId, rel, buf.length, checksum(buf), 'teacher', 'worksheet image');
+    return reply.type('application/json').send(JSON.stringify({ url: `/lesson-image/${imgId}`, alt: name.replace(/\.[a-z0-9]+$/i, '') }));
+  });
+
+  // Serve a lesson illustration image (kind='image' only) inline, to ANY authed session — pupils and
+  // TAs included (these are teaching visuals, not pupil work). Kind-gated so it can't fetch a
+  // worksheet/answers/ta_notes doc; SVG forced to download (stored-XSS), nosniff on everything.
+  app.get('/lesson-image/:id', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v || r.kind !== 'image') return reply.code(404).send('Not found');
+    const isSvg = /svg/i.test(r.mimeType ?? '') || /\.svg$/i.test(r.title);
+    try {
+      const buf = await readStored(v.storagePath);
+      return reply
+        .header('Content-Disposition', `${isSvg ? 'attachment' : 'inline'}; filename="${encodeURIComponent(r.title)}"`)
+        .header('X-Content-Type-Options', 'nosniff')
+        .type(r.mimeType ?? 'application/octet-stream')
+        .send(buf);
+    } catch {
+      return reply.code(404).send('Not found');
+    }
   });
 
 

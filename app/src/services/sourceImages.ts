@@ -112,7 +112,7 @@ export async function ensureSourceImagesForPlan(planId: number): Promise<SourceI
         await addVersion(id, rel, img.bytes.length, img.sha, 'teacher', `image from source: ${r.title}`);
         await linkResourceToPlan(id, planId);
       }
-      out.push({ id, label: img.name, url: `/resources/${id}/view` });
+      out.push({ id, label: img.name, url: `/lesson-image/${id}` }); // pupil/TA-accessible (see /lesson-image)
     }
   }
   return out;

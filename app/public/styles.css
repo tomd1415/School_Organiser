@@ -979,6 +979,43 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .edit-slide { border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.8rem; background: #fcfdff; }
 .edit-slide h2 { margin-top: 0; }
 @media (max-width: 900px) { .md-edit-grid { grid-template-columns: 1fr; } }
+/* Block (WYSIWYG-style) worksheet editor. */
+.ws-ed-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--line); margin-bottom: 0.8rem; position: sticky; top: 0; background: var(--card); z-index: 2; }
+.ws-ed-levels { font-size: 0.85rem; display: inline-flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; }
+.ws-ed-lvl { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0.25rem 0.7rem; }
+.ws-ed-lvl.on { background: var(--accent-soft); border-color: var(--accent); font-weight: 700; }
+.ws-ed-acts { display: inline-flex; gap: 0.6rem; align-items: center; }
+.ws-ed-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.ws-ed-grid:has(.ws-ed-preview:not([hidden])) { grid-template-columns: 1fr 1fr; }
+.ws-ed-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.ws-ed-card { border: 1px solid var(--line); border-left: 4px solid #cbd5e1; border-radius: 10px; padding: 0.5rem 0.8rem 0.7rem; background: var(--card); }
+.ws-ed-card-text { border-left-color: #5b8def; background: #f6f9fe; }
+.ws-ed-card-note { border-left-color: #e0b53d; background: #fffaf0; }
+.ws-ed-card-qtable { border-left-color: #caa92e; background: #fffdf3; }
+.ws-ed-card-image, .ws-ed-card-placeholder { border-left-color: #4a9d5b; background: #f3faf4; }
+.ws-ed-card-heading { border-left-color: #8b8f9c; background: #fafbfc; }
+.ws-ed-cardhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+.ws-ed-type { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--muted); }
+.ws-ed-ctrls { display: inline-flex; gap: 0.15rem; }
+.ws-ed-ctrl { font: inherit; cursor: pointer; border: 1px solid transparent; background: none; border-radius: 6px; padding: 0.1rem 0.4rem; color: var(--muted); }
+.ws-ed-ctrl:hover { background: var(--accent-soft); color: var(--ink); }
+.ws-ed-ta { width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; resize: vertical; min-height: 2.6rem; background: #fff; }
+.ws-ed-input { width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.55rem; background: #fff; }
+.ws-ed-headrow { display: flex; gap: 0.5rem; }
+.ws-ed-depth { font: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem; }
+.ws-ed-rows, .ws-ed-items { display: flex; flex-direction: column; gap: 0.4rem; }
+.ws-ed-qrow, .ws-ed-itemrow { display: flex; gap: 0.4rem; align-items: center; }
+.ws-ed-kind { white-space: nowrap; }
+.ws-ed-rm { color: #b4451f; padding: 0.1rem 0.4rem; }
+.ws-ed-rowbar { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+.ws-ed-img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; margin-bottom: 0.4rem; }
+.ws-ed-ph { font-style: italic; color: #8a6d1a; margin: 0 0 0.4rem; }
+.ws-ed-drop { border: 2px dashed #7bbf7b; background: #eef8ee; border-radius: 8px; padding: 0.7rem; text-align: center; cursor: pointer; color: #2e6b2e; font-size: 0.9rem; }
+.ws-ed-drop.is-drop { background: #ddeedd; border-color: #2e8b2e; }
+.ws-ed-add { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0; padding: 0.6rem; border: 1px dashed var(--line); border-radius: 10px; }
+.ws-ed-additem { margin-top: 0.4rem; }
+.ws-ed-preview { border: 1px solid var(--line); border-radius: 10px; padding: 0.9rem; background: #fcfdff; max-height: 78vh; overflow: auto; }
+@media (max-width: 900px) { .ws-ed-grid:has(.ws-ed-preview:not([hidden])) { grid-template-columns: 1fr; } }
 .ws-check input { width: 1.3rem; height: 1.3rem; vertical-align: middle; }
 .ws-review .ws-answer { background: #f3faf3; border: 1px solid #d5e8d5; border-radius: 6px; padding: 0.4rem 0.5rem; white-space: pre-wrap; }
 .ws-review .ws-answer.ws-empty { background: #fafafa; border-style: dashed; color: var(--muted); }
