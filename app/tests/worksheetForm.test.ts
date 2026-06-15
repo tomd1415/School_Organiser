@@ -128,6 +128,55 @@ describe('worksheetForm — form vs review mode', () => {
   });
 });
 
+describe('worksheetForm — choice fields (multiple-choice / true-false)', () => {
+  const MD = `# Quiz
+
+| Question | Type your answer here |
+|---|---|
+| Which part does calculations? | ( ) RAM ( ) CPU ( ) SSD |
+| The CPU has cores. | ( ) True ( ) False |
+`;
+
+  it('a "( ) a ( ) b" cell becomes a choice field carrying its options on a stable t.r.c key', () => {
+    const choices = renderWorksheet(MD, { mode: 'review' }).fields.filter((f) => f.kind === 'choice');
+    expect(choices).toHaveLength(2);
+    expect(choices[0]!.key).toBe('t1.r1.c2');
+    expect(choices[0]!.options).toEqual(['RAM', 'CPU', 'SSD']);
+    expect(choices[1]!.options).toEqual(['True', 'False']);
+    // the canonical "Type your answer here" header must NOT be promoted to a data row (no phantom r0)
+    expect(renderWorksheet(MD, { mode: 'review' }).fields.some((f) => f.key === 't1.r0.c2')).toBe(false);
+  });
+
+  it('form mode renders an autosaving radio group per question', () => {
+    const r = renderWorksheet(MD, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).toContain('type="radio"');
+    expect(r.html).toContain('name="value"');
+    expect(r.html).toContain('<fieldset class="ws-choice"');
+    expect(r.html).toContain('hx-post="/me/answer?oc=5&amp;key=t1.r1.c2"');
+    expect(r.html).toContain('value="CPU"');
+  });
+
+  it('review marks the chosen option, form pre-checks it, preview is inert', () => {
+    const values = new Map([['t1.r1.c2', 'CPU']]);
+    const review = renderWorksheet(MD, { mode: 'review', values });
+    expect(review.html).toContain('chosen');
+    expect(review.html).not.toContain('type="radio"');
+    const form = renderWorksheet(MD, { mode: 'form', values, action: '/me/answer' });
+    expect(form.html).toMatch(/value="CPU"\s+checked/);
+    expect(renderWorksheet(MD, { mode: 'preview' }).html).toContain('disabled');
+  });
+
+  it('choice field keys are identical full vs level-sliced', () => {
+    const levelled = `## 🟢 Support\n\n| Question | Type your answer here |\n|---|---|\n| Easy pick | ( ) a ( ) b |\n\n## 🟡 Core\n\n| Question | Type your answer here |\n|---|---|\n| Core pick | ( ) x ( ) y |\n`;
+    const full = renderWorksheet(levelled, { mode: 'review' });
+    const core = renderWorksheet(levelled, { mode: 'review', level: 'core' });
+    const inFull = full.fields.find((f) => f.label.includes('Core pick'))!;
+    const inCore = core.fields.find((f) => f.label.includes('Core pick'))!;
+    expect(inCore.key).toBe(inFull.key);
+    expect(inCore.kind).toBe('choice');
+  });
+});
+
 // Locks the structure real generated worksheets use: level "## " sections, "###" subtasks,
 // fenced code containing `#` Python comments and the word "Challenge", and answer tables inside
 // each level — the exact shapes that previously broke level detection.

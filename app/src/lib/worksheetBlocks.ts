@@ -7,10 +7,18 @@
 // kept verbatim in a `raw`/`rawtable` block, so the round-trip is lossless even when parsing is coarse.
 import * as z from 'zod/v4';
 
+// A Q&A table row: a typed answer, a screenshot paste, or a multiple-choice pick (options carried so
+// the editor can edit them and serialise round-trips the cell). `options` is present only on choice rows.
+export interface QRow {
+  q: string;
+  kind: 'text' | 'screenshot' | 'choice';
+  options?: string[];
+}
+
 export type Block =
   | { type: 'heading'; depth: number; text: string }
   | { type: 'text'; text: string } // prose / numbered steps — instructions, etc. (verbatim run)
-  | { type: 'qtable'; rows: Array<{ q: string; kind: 'text' | 'screenshot' }> } // a clean Q&A answer table
+  | { type: 'qtable'; rows: QRow[] } // a clean Q&A answer table (typed / screenshot / multiple-choice)
   | { type: 'rawtable'; md: string } // any other table (name/date, reference, ragged) — verbatim
   | { type: 'checklist'; items: string[] } // - [ ] success criteria
   | { type: 'note'; text: string } // > callout / key idea
@@ -21,7 +29,10 @@ export type Block =
 export const blockSchema: z.ZodType<Block> = z.union([
   z.object({ type: z.literal('heading'), depth: z.number().int().min(1).max(6), text: z.string() }),
   z.object({ type: z.literal('text'), text: z.string() }),
-  z.object({ type: z.literal('qtable'), rows: z.array(z.object({ q: z.string(), kind: z.enum(['text', 'screenshot']) })) }),
+  z.object({
+    type: z.literal('qtable'),
+    rows: z.array(z.object({ q: z.string(), kind: z.enum(['text', 'screenshot', 'choice']), options: z.array(z.string()).optional() })),
+  }),
   z.object({ type: z.literal('rawtable'), md: z.string() }),
   z.object({ type: z.literal('checklist'), items: z.array(z.string()) }),
   z.object({ type: z.literal('note'), text: z.string() }),
@@ -41,13 +52,17 @@ const IMAGE_ONLY = /^!\[([^\]]*)\]\(([^)\s]+)\)\s*$/;
 const SHOW = /\[show:\s*([^\]]+)\]/i;
 const SCREENSHOT = /📷|🖼|\bpaste\b[^|]*\b(?:screenshot|image|picture|photo|work)\b|\b(?:screenshot|image|photo)\b[^|]*\bhere\b/i;
 const PROMPT = /^\s*(?:type|write|paste|draw|sketch|enter|fill)\b|\b(?:your|my)\s+answers?\b|\banswer\s*(?:here|below)\b/i;
+// A multiple-choice answer cell — kept in sync with worksheetForm.ts (the round-trip oracle guards drift).
+const CHOICE_MARK = /\(\s*\)/g;
+const isChoiceCell = (s: string): boolean => (s.match(CHOICE_MARK) ?? []).length >= 2;
+const choiceOptions = (s: string): string[] => s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
 
 const splitCells = (row: string): string[] => row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
 
 /** A table is a clean Q&A answer table iff: 2 columns, a header naming the answer column LAST (or
  * body answer cells), ≥1 body row, and the answer column's body cells are empty / a placeholder /
  * a screenshot prompt. Then each body row becomes a {q, kind}. Otherwise null (keep it verbatim). */
-function asQTable(tableLines: string[]): Array<{ q: string; kind: 'text' | 'screenshot' }> | null {
+function asQTable(tableLines: string[]): QRow[] | null {
   const rows = tableLines.map(splitCells);
   if (rows.length < 2) return null;
   const header = rows[0]!;
@@ -56,16 +71,25 @@ function asQTable(tableLines: string[]): Array<{ q: string; kind: 'text' | 'scre
   if (body.length === 0) return null;
   const headerAnswerLast = PROMPT.test(header[1]!) || SCREENSHOT.test(header[1]!);
   // Every body row must be "question | answer cell" with a NON-EMPTY question and an answer cell that
-  // is EMPTY (pupil types here) or a screenshot prompt. A cell pre-filled with a "type … here"
-  // placeholder is the name/date layout-A shape (header-as-data) — NOT a Q&A table — so it must NOT be
-  // captured here (that would drop the header row + change the field keys); it stays a verbatim rawtable.
+  // is EMPTY (pupil types here), a screenshot prompt, or a multiple-choice list ("( ) a ( ) b"). A cell
+  // pre-filled with a "type … here" placeholder is the name/date layout-A shape (header-as-data) — NOT
+  // a Q&A table — so it must NOT be captured here (that would drop the header row + change the field
+  // keys); it stays a verbatim rawtable.
   const okRows = body.every((r) => {
     const q = (r[0] ?? '').trim();
     const a = (r[1] ?? '').trim();
-    return q !== '' && (a === '' || SCREENSHOT.test(a));
+    return q !== '' && (a === '' || SCREENSHOT.test(a) || isChoiceCell(a));
   });
-  if (!headerAnswerLast || !okRows) return null;
-  return body.map((r) => ({ q: r[0]!.trim(), kind: SCREENSHOT.test(r[1] ?? '') ? 'screenshot' : 'text' }));
+  // A screenshot/choice answer column is self-identifying, so it qualifies even when the header isn't
+  // the canonical "type your answer here" — but an all-empty (typed) column still needs that header so
+  // a 2-col reference table isn't mistaken for Q&A.
+  const bodyMarked = body.every((r) => SCREENSHOT.test(r[1] ?? '') || isChoiceCell(r[1] ?? ''));
+  if (!(headerAnswerLast || bodyMarked) || !okRows) return null;
+  return body.map((r) => {
+    const a = (r[1] ?? '').trim();
+    if (isChoiceCell(a)) return { q: r[0]!.trim(), kind: 'choice', options: choiceOptions(a) };
+    return { q: r[0]!.trim(), kind: SCREENSHOT.test(a) ? 'screenshot' : 'text' };
+  });
 }
 
 /** Markdown → blocks. Fence-aware; unmodellable content falls back to verbatim `raw`/`rawtable`. */
@@ -175,11 +199,15 @@ export function serialiseBlocks(blocks: Block[]): string {
       case 'checklist':
         parts.push(b.items.map((it) => `- [ ] ${it}`).join('\n'));
         break;
-      case 'qtable':
-        parts.push(
-          ['| Question | Type your answer here |', '|---|---|', ...b.rows.map((r) => `| ${r.q} | ${r.kind === 'screenshot' ? '📷 Paste a screenshot here' : ''} |`)].join('\n'),
-        );
+      case 'qtable': {
+        const answerCell = (r: QRow): string => {
+          if (r.kind === 'screenshot') return '📷 Paste a screenshot here';
+          if (r.kind === 'choice') return (r.options ?? []).map((o) => `( ) ${o}`).join(' ');
+          return '';
+        };
+        parts.push(['| Question | Type your answer here |', '|---|---|', ...b.rows.map((r) => `| ${r.q} | ${answerCell(r)} |`)].join('\n'));
         break;
+      }
       case 'rawtable':
       case 'raw':
         parts.push(b.md);

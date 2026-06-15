@@ -101,7 +101,7 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
         worksheetTitle: ws.title,
         worksheetMarkdown: ws.markdown,
         answersMarkdown: answersMd,
-        fields: fields.map((f) => ({ key: f.key, label: f.label, kindHint: f.kind === 'image' ? 'text' : f.kind })),
+        fields: fields.map((f) => ({ key: f.key, label: f.label, kindHint: f.kind === 'image' ? 'text' : f.kind, options: f.options })),
       }),
       instruction: MARK_SCHEME_INSTRUCTION,
       maxTokens: 6000,

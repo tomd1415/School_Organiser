@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@6'; // @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@7'; // @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
 
 export const ADAPT_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents for ONE ' +
@@ -18,11 +18,14 @@ export const ADAPT_RESOURCES_SYSTEM =
   '(2) "worksheet" — the PUPIL sheet (pupils ONLY see this): NO TA notes, NO answers. A short shared ' +
   'title/intro first, then three sections headed EXACTLY "## 🟢 Support", "## 🟡 Core", "## 🔴 Challenge"; ' +
   'all of a level\'s work under its heading. Use typed blocks: numbered INSTRUCTIONS; QUESTIONS as a ' +
-  'two-column table (question | empty "Type your answer here" cell); SCREENSHOT tasks as a table whose ' +
+  'two-column table (question | empty "Type your answer here" cell); MULTIPLE-CHOICE / TRUE-FALSE as a ' +
+  'table whose right cell lists 2–4 options each preceded by "( )" ("( ) RAM ( ) CPU ( ) SSD"); ' +
+  'SCREENSHOT tasks as a table whose ' +
   'right cell is EXACTLY "📷 Paste a screenshot here"; a "- [ ]" success checklist per level. NEVER blank ' +
   'lines/underscores as answer spaces; say "type" not "write"; no name/date header (auto-filled online).\n' +
   '(3) "ta_notes" — SEPARATE TA/teacher guidance (how to support each level, misconceptions, expected ' +
-  'answers), never shown to pupils. (4) "answers" — concise teacher answer notes.\n' +
+  'answers), never shown to pupils. (4) "answers" — concise teacher answer notes; for each ' +
+  'multiple-choice / true-false question state the correct option exactly as written.\n' +
   'If a master document is missing, create it from the adapted outline. Where a visual is needed but ' +
   'absent, use a `> 🖼️ [show: …]` placeholder. Plain UK English; never reference an individual pupil.';
 

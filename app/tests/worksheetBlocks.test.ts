@@ -67,6 +67,18 @@ Type your answers in the boxes.
     expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
     expect(parseBlocks(md).some((b) => b.type === 'raw')).toBe(true);
   });
+
+  it('multiple-choice and true/false cells stay choice fields with the same keys', () => {
+    const md = `## 🟢 Support
+
+| Question | Type your answer here |
+|---|---|
+| Which part does calculations? | ( ) RAM ( ) CPU ( ) SSD |
+| True or false: the CPU has cores. | ( ) True ( ) False |
+`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect((fieldSig(md).match(/:choice/g) ?? []).length).toBe(2);
+  });
 });
 
 describe('worksheetBlocks — parse classifies blocks', () => {
@@ -107,6 +119,25 @@ Do this first.
   it('blocksSchema validates a parsed document (so the editor can post it back safely)', () => {
     const b = parseBlocks(`# T\n\n| Q | Type your answer here |\n|---|---|\n| Why? | |\n`);
     expect(blocksSchema.safeParse(b).success).toBe(true);
+  });
+
+  it('parses a multiple-choice answer cell into a choice row with options', () => {
+    const b = parseBlocks(`| Question | Type your answer here |\n|---|---|\n| Which is volatile? | ( ) RAM ( ) ROM |\n`);
+    const qt = b.find((x) => x.type === 'qtable') as Extract<Block, { type: 'qtable' }>;
+    expect(qt).toBeTruthy();
+    expect(qt.rows[0]!.kind).toBe('choice');
+    expect(qt.rows[0]!.options).toEqual(['RAM', 'ROM']);
+  });
+
+  it('serialises a choice row back to "( ) option" cells', () => {
+    const md = serialiseBlocks([{ type: 'qtable', rows: [{ q: 'Pick the CPU', kind: 'choice', options: ['RAM', 'CPU', 'SSD'] }] }]);
+    expect(md).toContain('| Pick the CPU | ( ) RAM ( ) CPU ( ) SSD |');
+    expect(fieldSig(md)).toContain(':choice');
+  });
+
+  it('captures a choice table even when the header is not the canonical "type here"', () => {
+    const b = parseBlocks(`| Question | Answer |\n|---|---|\n| Pick one | ( ) a ( ) b |\n`);
+    expect(b.some((x) => x.type === 'qtable')).toBe(true);
   });
 
   it('an edited block list serialises to the canonical answer-table shape', () => {

@@ -14,9 +14,10 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image';
+  kind: 'text' | 'check' | 'image' | 'choice';
   level: BlockLevel;
   label: string;
+  options?: string[]; // choice fields only — the selectable options, in source order
 }
 
 export interface WorksheetRender {
@@ -63,6 +64,17 @@ const PLACEHOLDER_CELL = /^\s*(?:type|write|paste|draw|sketch|enter)\b.{0,20}\b(
 // A SCREENSHOT-paste answer cell: the pupil pastes/drops an image of their work rather than typing.
 // Paste-specific so a question that merely mentions "a screenshot" stays a normal text answer.
 const SCREENSHOT = /📷|🖼|\bpaste\b[^|]*\b(?:screenshot|image|picture|photo|work)\b|\b(?:screenshot|image|photo)\b[^|]*\bhere\b/i;
+// A MULTIPLE-CHOICE / true-false answer cell: ≥2 radio markers "( )" each preceding an option, e.g.
+// "( ) RAM ( ) CPU ( ) SSD" or "( ) True ( ) False". An empty "( )" (or "()") is the marker; an
+// option may itself contain non-empty parens like "(CPU)" without being mistaken for a marker.
+const CHOICE_MARK = /\(\s*\)/g;
+function isChoiceCell(s: string): boolean {
+  return (s.match(CHOICE_MARK) ?? []).length >= 2;
+}
+/** Split a choice cell into its options (the text after each "( )" marker), in source order. */
+function choiceOptions(s: string): string[] {
+  return s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
+}
 
 /** Image-gap placeholders the generator leaves where a visual is needed but none was sourced
  * (`> 🖼️ [show: a binary-to-denary diagram]`). Returns the descriptions — the teacher's "add an
@@ -311,6 +323,35 @@ function imageControl(key: string, label: string, opts: WorksheetOptions): strin
   </div>`;
 }
 
+/** A multiple-choice / true-false answer: the pupil picks ONE option (radio). The saved value is the
+ * chosen option's TEXT (so marking compares it directly against the scheme's `choice` expected). Each
+ * question is its own <form>/<fieldset> so the radio group is scoped and an accessible group name is
+ * announced; in form mode a change autosaves via the same /me/answer endpoint as a typed answer. */
+function choiceControl(key: string, label: string, options: string[], opts: WorksheetOptions): string {
+  const value = (opts.values?.get(key) ?? '').trim();
+  const isChosen = (o: string): boolean => o.trim().toLowerCase() === value.toLowerCase() && value !== '';
+  if (opts.mode === 'review') {
+    if (value === '') return `<div class="ws-answer ws-empty">—</div>`;
+    const items = options
+      .map((o) => `<li class="ws-choice-opt${isChosen(o) ? ' chosen' : ''}">${isChosen(o) ? '◉' : '○'} ${esc(o)}</li>`)
+      .join('');
+    return `<ul class="ws-choice ws-choice-review">${items}</ul>`;
+  }
+  const disabled = opts.mode === 'preview' ? ' disabled' : '';
+  const items = options
+    .map(
+      (o, i) =>
+        `<li class="ws-choice-opt"><label><input type="radio" name="value" id="ws-${esc(key)}-${i}" value="${esc(o)}"${
+          isChosen(o) ? ' checked' : ''
+        }${disabled}> <span>${esc(o)}</span></label></li>`,
+    )
+    .join('');
+  const group = `<fieldset class="ws-choice"><legend class="ws-sr-only">${esc(label || 'Choose one')}</legend><ul class="ws-choice-opts">${items}</ul></fieldset>`;
+  if (opts.mode === 'preview') return group;
+  // form: a per-question form scopes the radio group and autosaves the chosen option on change.
+  return `<form class="ws-choice-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none">${group}<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></form>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -324,7 +365,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
   const answerCol = header.map((c) => PROMPT.test(c) || SCREENSHOT.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c)));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {
@@ -337,8 +378,19 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // not Q&A. Also when there are no body rows at all (e.g. "| Screenshot | Paste here |") — then the
   // header IS the only fillable row, so render it as data or there'd be nowhere to type.
   const headerHasPlaceholder = header.some((c) => PLACEHOLDER.test(c));
-  const answerColHasEmptyBody = answerCol.some((isA, c) => isA && bodyRows.some((r) => (r[c] ?? '').trim() === ''));
-  const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasEmptyBody;
+  // An answer column "has a body slot to fill" when a body cell is empty, a screenshot prompt, or a
+  // multiple-choice list — i.e. an input rather than text. Name/date layout-A instead has TEXT
+  // placeholders in the cells, so this stays false and the header is (correctly) the data row. (Just
+  // testing for emptiness would misfire on an all-screenshot / all-choice Q&A table — no empty cells —
+  // and wrongly promote the "Type your answer here" header to a data row.)
+  const answerColHasFillBody = answerCol.some((isA, c) =>
+    isA &&
+    bodyRows.some((r) => {
+      const v = (r[c] ?? '').trim();
+      return v === '' || SCREENSHOT.test(v) || isChoiceCell(v);
+    }),
+  );
+  const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasFillBody;
 
   const theadCells = headerIsData ? null : header;
   // Iterate the FULL column count (header or widest row) so a ragged row missing its trailing
@@ -361,7 +413,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // cell that is itself a placeholder. A filled, non-placeholder cell is preserved as text — so
       // a reference column that merely shares an answer column's table never loses its content.
       const shot = SCREENSHOT.test(cell);
-      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot)) || placeholder || shot;
+      const cho = isChoiceCell(cell);
+      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho)) || placeholder || shot || cho;
       if (!isInput) return `<td>${esc(cell)}</td>`;
       const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
       const label = row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? (theadCells?.[c] ?? '');
@@ -383,9 +436,17 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
           return `<td class="ws-answer-cell"><div class="ws-answer ws-auto" title="filled in automatically">${esc(auto)}</div></td>`;
         }
       }
-      // A screenshot-paste cell becomes an image field (pupil pastes a picture of their work);
-      // everything else is a typed answer. Same key scheme either way → marking is unaffected.
+      // A screenshot-paste cell becomes an image field (pupil pastes a picture of their work); a
+      // "( ) a ( ) b" cell becomes a multiple-choice field; everything else is a typed answer. Same
+      // key scheme for all → marking is unaffected.
       const isShot = shot || SCREENSHOT.test(theadCells?.[c] ?? '') || SCREENSHOT.test(label);
+      if (cho && !isShot) {
+        const options = choiceOptions(cell);
+        if (options.length >= 2) {
+          localFields.push({ key, kind: 'choice', level: block.level, label, options });
+          return `<td class="ws-answer-cell ws-choice-cell">${choiceControl(key, label, options, opts)}</td>`;
+        }
+      }
       localFields.push({ key, kind: isShot ? 'image' : 'text', level: block.level, label });
       const control = isShot ? imageControl(key, label, opts) : textControl(key, label, placeholder ? cell : '', opts);
       return `<td class="ws-answer-cell${isShot ? ' ws-shot-cell' : ''}">${control}</td>`;

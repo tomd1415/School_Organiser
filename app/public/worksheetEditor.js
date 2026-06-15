@@ -93,9 +93,11 @@
       body.appendChild(qs);
       var aq = el('button', 'btn-soft', '+ question'); aq.type = 'button';
       aq.addEventListener('click', function () { b.rows.push({ q: '', kind: 'text' }); render(); markDirty(); });
+      var ac = el('button', 'btn-soft', '+ multiple choice'); ac.type = 'button';
+      ac.addEventListener('click', function () { b.rows.push({ q: '', kind: 'choice', options: ['', ''] }); render(); markDirty(); });
       var as = el('button', 'btn-soft', '+ screenshot task'); as.type = 'button';
       as.addEventListener('click', function () { b.rows.push({ q: '', kind: 'screenshot' }); render(); markDirty(); });
-      var bar = el('div', 'ws-ed-rowbar'); bar.appendChild(aq); bar.appendChild(as); body.appendChild(bar);
+      var bar = el('div', 'ws-ed-rowbar'); bar.appendChild(aq); bar.appendChild(ac); bar.appendChild(as); body.appendChild(bar);
     }
     return body;
   }
@@ -113,14 +115,46 @@
 
   function qRow(b, k) {
     var row = el('div', 'ws-ed-qrow');
-    row.appendChild(inputFor(function () { return b.rows[k].q; }, function (v) { b.rows[k].q = v; }, 'question / instruction for the answer'));
-    var toggle = el('button', 'btn-soft ws-ed-kind', b.rows[k].kind === 'screenshot' ? '📷 screenshot' : '✍️ typed'); toggle.type = 'button';
-    toggle.title = 'Switch between a typed answer and a paste-a-screenshot answer';
-    toggle.addEventListener('click', function () { b.rows[k].kind = b.rows[k].kind === 'screenshot' ? 'text' : 'screenshot'; toggle.textContent = b.rows[k].kind === 'screenshot' ? '📷 screenshot' : '✍️ typed'; markDirty(); });
-    row.appendChild(toggle);
+    var top = el('div', 'ws-ed-qtop');
+    top.appendChild(inputFor(function () { return b.rows[k].q; }, function (v) { b.rows[k].q = v; }, 'question / instruction for the answer'));
+    // kind selector: a typed answer, a paste-a-screenshot answer, or multiple-choice options.
+    var kindSel = el('select', 'ws-ed-kind');
+    [['✍️ typed', 'text'], ['◉ multiple choice', 'choice'], ['📷 screenshot', 'screenshot']].forEach(function (o) {
+      var op = document.createElement('option'); op.value = o[1]; op.textContent = o[0]; if (b.rows[k].kind === o[1]) op.selected = true; kindSel.appendChild(op);
+    });
+    kindSel.title = 'How the pupil answers this question';
+    kindSel.addEventListener('change', function () {
+      b.rows[k].kind = kindSel.value;
+      if (b.rows[k].kind === 'choice') { if (!(b.rows[k].options && b.rows[k].options.length)) b.rows[k].options = ['', '']; }
+      else { delete b.rows[k].options; }
+      render(); markDirty();
+    });
+    top.appendChild(kindSel);
     var rm = el('button', 'link ws-ed-rm', '✕'); rm.type = 'button';
     rm.addEventListener('click', function () { b.rows.splice(k, 1); render(); markDirty(); });
-    row.appendChild(rm);
+    top.appendChild(rm);
+    row.appendChild(top);
+    // Multiple-choice: an option list the pupil picks ONE of. The correct answer goes in the answers
+    // doc, not here — so there is no "mark correct" control on the pupil-facing worksheet.
+    if (b.rows[k].kind === 'choice') {
+      var opts = el('div', 'ws-ed-opts');
+      (b.rows[k].options || []).forEach(function (o, oi) {
+        var orow = el('div', 'ws-ed-optrow');
+        orow.appendChild(el('span', 'ws-ed-optmark', '○'));
+        orow.appendChild(inputFor(function () { return b.rows[k].options[oi]; }, function (v) { b.rows[k].options[oi] = v; }, 'option ' + (oi + 1)));
+        var orm = el('button', 'link ws-ed-rm', '✕'); orm.type = 'button';
+        orm.addEventListener('click', function () { b.rows[k].options.splice(oi, 1); render(); markDirty(); });
+        orow.appendChild(orm);
+        opts.appendChild(orow);
+      });
+      var addOpt = el('button', 'btn-soft ws-ed-addopt', '+ option'); addOpt.type = 'button';
+      addOpt.addEventListener('click', function () { b.rows[k].options.push(''); render(); markDirty(); });
+      opts.appendChild(addOpt);
+      var tf = el('button', 'btn-soft', 'True / False'); tf.type = 'button'; tf.title = 'Set the options to True and False';
+      tf.addEventListener('click', function () { b.rows[k].options = ['True', 'False']; render(); markDirty(); });
+      opts.appendChild(tf);
+      row.appendChild(opts);
+    }
     return row;
   }
 
@@ -196,6 +230,8 @@
   [
     ['+ Instructions', function () { addBlock({ type: 'text', text: '' }); }],
     ['+ Question', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'text' }] }); }],
+    ['+ Multiple choice', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['', '', ''] }] }); }],
+    ['+ True / False', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['True', 'False'] }] }); }],
     ['+ Screenshot task', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'screenshot' }] }); }],
     ['+ Checklist', function () { addBlock({ type: 'checklist', items: [''] }); }],
     ['+ Heading', function () { addBlock({ type: 'heading', depth: 2, text: '' }); }],
