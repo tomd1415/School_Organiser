@@ -72,7 +72,7 @@ async function buildInner(now: Date, modeOverride: FocusMode | null): Promise<{ 
   // What's on screen: the picked task + the effective mode. The poll re-renders only when this shifts.
   const sig = `${picked?.id ?? 'none'}|${mode}`;
   const pollUrl = `/focus/inner?sig=${encodeURIComponent(sig)}${modeOverride ? `&mode=${modeOverride}` : ''}`;
-  const poller = `<div class="focus-poll" hx-get="${pollUrl}" hx-trigger="every 45s" hx-target="#focus-inner" hx-swap="innerHTML" style="display:none"></div>`;
+  const poller = `<div class="focus-poll" data-bg-poll hx-get="${pollUrl}" hx-trigger="every 45s" hx-target="#focus-inner" hx-swap="innerHTML" style="display:none"></div>`;
 
   const tab = (m: FocusMode, label: string) =>
     `<a href="/focus?mode=${m}"${m === mode ? ' class="active"' : ''}>${label}</a>`;

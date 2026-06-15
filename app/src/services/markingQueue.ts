@@ -9,6 +9,7 @@ import { getMarkingSettings, occCoursePlan, enqueueOpenMark, claimDueMarkJobs } 
 import { markObjective, markOpen } from './marking';
 
 const DEBOUNCE_MS = 120_000;
+const RETRY_MS = 300_000; // re-arm a job whose AI pass couldn't run (transient outage), so marks aren't dropped
 
 export async function onPupilDone(occurrenceCourseId: number): Promise<void> {
   if (!(await marksEnabled())) return;
@@ -32,12 +33,21 @@ export async function onPupilDone(occurrenceCourseId: number): Promise<void> {
 export async function runDueMarkJobs(): Promise<number> {
   const due = await claimDueMarkJobs();
   for (const oc of due) {
-    // Log failures (and a non-ok status) so a class's written answers can't silently go unmarked.
-    await markOpen(oc)
-      .then((r) => {
-        if (r.status === 'unavailable') console.error(`[marking] open pass for oc ${oc} unavailable: ${r.message ?? ''}`);
-      })
-      .catch((e) => console.error('[marking] open pass failed:', (e as Error).message));
+    // claimDueMarkJobs already DELETED the job. If the AI pass can't run (transient outage — the
+    // wrapper returns 'unavailable', e.g. the IPv6 blackhole in client.ts), RE-ARM it instead of
+    // dropping the class's written answers. markOpen is idempotent and the queue is one-job-per-oc, so
+    // a re-arm can't pile up; when AI is genuinely off the wrapper short-circuits, so the retry is a
+    // cheap no-op until AI returns (or the class switches to manual, which clears the job).
+    try {
+      const r = await markOpen(oc);
+      if (r.status === 'unavailable') {
+        console.error(`[marking] open pass for oc ${oc} unavailable: ${r.message ?? ''} — re-arming`);
+        await enqueueOpenMark(oc, RETRY_MS).catch(() => {});
+      }
+    } catch (e) {
+      console.error('[marking] open pass failed:', (e as Error).message, '— re-arming');
+      await enqueueOpenMark(oc, RETRY_MS).catch(() => {});
+    }
   }
   return due.length;
 }

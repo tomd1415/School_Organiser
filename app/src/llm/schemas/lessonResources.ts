@@ -52,7 +52,10 @@ export interface TidyResource {
  * split on `## ` headings, so each piece's heading survives and the whole deck is rebuilt. */
 export function mergeResourceContents(contents: string[]): string {
   const trimmed = contents.map((c) => c.trim()).filter(Boolean);
-  const kept = trimmed.filter((c, i) => !trimmed.some((o, j) => j !== i && o.length > c.length && o.includes(c)));
+  // Drop a cumulative-draft fragment: an earlier draft is a PREFIX of a fuller later one (drafts grow by
+  // appending). Using startsWith — not includes — avoids dropping a DISTINCT slide whose text merely
+  // appears verbatim inside a longer slide (data loss is worse than the rare duplicate).
+  const kept = trimmed.filter((c, i) => !trimmed.some((o, j) => j !== i && o.length > c.length && o.startsWith(c)));
   const seen = new Set<string>();
   return kept.filter((c) => (seen.has(c) ? false : (seen.add(c), true))).join('\n\n');
 }
@@ -73,11 +76,20 @@ export function tidyResourceSet(resources: Array<{ kind: string; title: string; 
     contentsByKind.set(kind, arr);
     if (!titleByKind.has(kind)) titleByKind.set(kind, r.title);
   }
-  const docs: TidyResource[] = [...contentsByKind.entries()].slice(0, 4).map(([kind, contents]) => ({
-    kind: kind as TidyResource['kind'],
-    title: titleByKind.get(kind) ?? kind,
-    content: mergeResourceContents(contents),
-  }));
-  const missing = ['slides', 'worksheet'].filter((k) => !contentsByKind.has(k));
+  // Keep the four core kinds ahead of any stray 'document' before the cap, so an extra entry is what
+  // gets dropped — never slides/worksheet. Then compute `missing` from the kept docs (not the raw map),
+  // so we can never report a set complete while the slice has silently dropped a core document.
+  const CORE = ['slides', 'worksheet', 'support', 'answers'];
+  const rank = (k: string): number => (CORE.indexOf(k) === -1 ? CORE.length : CORE.indexOf(k));
+  const docs: TidyResource[] = [...contentsByKind.entries()]
+    .sort((a, b) => rank(a[0]) - rank(b[0]))
+    .slice(0, 4)
+    .map(([kind, contents]) => ({
+      kind: kind as TidyResource['kind'],
+      title: titleByKind.get(kind) ?? kind,
+      content: mergeResourceContents(contents),
+    }));
+  const have = new Set<string>(docs.map((d) => d.kind));
+  const missing = ['slides', 'worksheet'].filter((k) => !have.has(k));
   return { docs, missing };
 }

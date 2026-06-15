@@ -394,13 +394,38 @@ export async function updatePlanField(id: number, field: string, value: string |
   return true;
 }
 
+// occurrence_courses.lesson_plan_id is RESTRICT, so a plan that's been taught can't be deleted until
+// the binding is nulled first (mirrors deleteScheme). Without this, deleting a taught lesson/unit 500s.
+// Transactional so a mid-way failure can't leave a half-deleted unit.
 export async function deleteUnit(id: number): Promise<void> {
-  await pool.query(`DELETE FROM lesson_plans WHERE unit_id = $1`, [id]);
-  await pool.query(`DELETE FROM units WHERE id = $1`, [id]);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE lesson_plan_id IN (SELECT id FROM lesson_plans WHERE unit_id = $1)`, [id]);
+    await client.query(`DELETE FROM lesson_plans WHERE unit_id = $1`, [id]);
+    await client.query(`DELETE FROM units WHERE id = $1`, [id]);
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function deletePlan(id: number): Promise<void> {
-  await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [id]);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE lesson_plan_id = $1`, [id]);
+    await client.query(`DELETE FROM lesson_plans WHERE id = $1`, [id]);
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function swapOrder(table: 'units' | 'lesson_plans', siblingFilter: string, id: number, dir: 'up' | 'down'): Promise<void> {

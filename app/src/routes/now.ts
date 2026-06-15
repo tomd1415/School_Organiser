@@ -94,7 +94,7 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
     nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${esc(lessonName(next))} <a href="${href}">open</a>`;
   }
 
-  return `<div id="now-strip" class="now-strip" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML">
+  return `<div id="now-strip" class="now-strip" data-bg-poll hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML">
     <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}
   </div>`;
 }

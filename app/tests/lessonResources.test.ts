@@ -64,6 +64,24 @@ describe('tidyResourceSet — the reported "only the first slide" bug', () => {
     expect(tidyResourceSet(r).docs).toHaveLength(4);
   });
 
+  it('keeps the core kinds past the cap (never silently drops the worksheet while reporting complete)', () => {
+    // The model returns an extra 'document' FIRST and the worksheet LAST. The cap must drop the extra,
+    // not a core doc — and `missing` must reflect what was actually kept.
+    const r = [
+      { kind: 'reference doc', title: 'Doc', content: 'extra' }, // normalises to 'document'
+      { kind: 'slides', title: 'S', content: '## A' },
+      { kind: 'support', title: 'Sup', content: 'sup' },
+      { kind: 'answers', title: 'Ans', content: 'ans' },
+      { kind: 'worksheet', title: 'W', content: 'ws' },
+    ];
+    const { docs, missing } = tidyResourceSet(r);
+    const kinds = docs.map((d) => d.kind);
+    expect(kinds).toContain('worksheet'); // core kept...
+    expect(kinds).toContain('slides');
+    expect(kinds).not.toContain('document'); // ...the extra is what's dropped
+    expect(missing).toEqual([]); // and missing is computed from the kept docs, so it can't lie
+  });
+
   it('normaliseResourceKind maps the strays the model produces', () => {
     expect(normaliseResourceKind('Support worksheet')).toBe('support');
     expect(normaliseResourceKind('answer key')).toBe('answers');
@@ -75,8 +93,14 @@ describe('mergeResourceContents', () => {
   it('concatenates disjoint pieces with a blank line (preserving `## ` headings)', () => {
     expect(mergeResourceContents(['## A\n\nx', '## B\n\ny'])).toBe('## A\n\nx\n\n## B\n\ny');
   });
-  it('drops a piece wholly contained in a longer one', () => {
+  it('drops a cumulative-draft fragment (an earlier draft that is a PREFIX of a fuller one)', () => {
     expect(mergeResourceContents(['## A', '## A\n\n## B'])).toBe('## A\n\n## B');
+  });
+  it('keeps a distinct piece that is a verbatim substring but NOT a prefix of a longer one', () => {
+    // 'Star topology' appears inside the longer slide but is a DIFFERENT slide — dropping it lost a slide.
+    const a = 'Star topology';
+    const b = '## Topologies\n\nStar topology and Bus';
+    expect(mergeResourceContents([a, b])).toBe(a + '\n\n' + b); // both kept
   });
   it('dedupes identical pieces and trims surrounding whitespace', () => {
     expect(mergeResourceContents([' ## A ', '## A'])).toBe('## A');

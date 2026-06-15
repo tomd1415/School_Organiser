@@ -17,13 +17,30 @@ export async function createPupil(displayName: string): Promise<RosterEntry> {
   // decomposed (NFD) paste otherwise stores a form that later redaction/egress checks can't match.
   const name = displayName.normalize('NFC').trim();
   if (!name) throw new Error('display name required');
-  const { rows } = await pool.query<RosterEntry>(
-    `INSERT INTO pupils (display_name, ai_token)
-     VALUES ($1, 'PUPIL_' || (COALESCE((SELECT max(id) FROM pupils), 0) + 1))
-     RETURNING ${ROW}`,
-    [name],
-  );
-  return rows[0]!;
+  // Derive ai_token from the row's OWN serial id (monotonic, never reused) — not max(id)+1, which
+  // (a) collides if two pupils are created concurrently and (b) re-issues a deleted pupil's token to a
+  // new pupil. Insert with a unique placeholder (so a UNIQUE token index can't trip under concurrency),
+  // then set the token from the assigned id — two statements in one transaction.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const ins = await client.query<{ id: number }>(
+      `INSERT INTO pupils (display_name, ai_token) VALUES ($1, gen_random_uuid()::text) RETURNING id`,
+      [name],
+    );
+    const id = ins.rows[0]!.id;
+    const { rows } = await client.query<RosterEntry>(
+      `UPDATE pupils SET ai_token = 'PUPIL_' || id WHERE id = $1 RETURNING ${ROW}`,
+      [id],
+    );
+    await client.query('COMMIT');
+    return rows[0]!;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function listPupils(): Promise<RosterEntry[]> {

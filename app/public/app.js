@@ -91,8 +91,15 @@
   // A server crash on a background autosave returns a swallowed 200 fragment, so the route fires
   // this HX-Trigger event instead (see server.ts error handler).
   document.body.addEventListener('app:save-failed', function () { saveToast(LOST); });
-  // Any subsequent successful request means we're back — clear the banner.
-  document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) clearToast(); });
+  // Any subsequent successful request means we're back — clear the banner. But a background poll
+  // (the 30s Now clock, the 45s Focus poll) succeeding does NOT mean the failed SAVE went through —
+  // skip those, or the "Not saved" warning is wiped while the work is still unsaved.
+  document.body.addEventListener('htmx:afterRequest', function (e) {
+    if (!e.detail || !e.detail.successful) return;
+    var t = e.target;
+    if (t && t.closest && t.closest('[data-bg-poll]')) return;
+    clearToast();
+  });
 
   // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a
   // page; `?` shows the cheat-sheet; Esc closes things. The principle is "nothing requires the mouse".
