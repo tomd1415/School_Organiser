@@ -181,21 +181,24 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('focus-poll'); // self-poll element drives the auto-refresh
   });
 
-  it('Now clock poll reloads only when the lesson changes (auto-refresh)', async () => {
+  it('Now clock poll: same sig → quiet strip; changed lesson → a refresh prompt, NOT a hard reload', async () => {
     // initial poll (no sig) returns the strip with its current signature baked into the poll URL
     const first = await app.inject({ method: 'GET', url: '/now/clock', headers: { cookie: session } });
     expect(first.statusCode).toBe(200);
     expect(first.body).toContain('now-strip');
     const sig = /\/now\/clock\?sig=([^"&]+)/.exec(first.body)?.[1] ?? '';
     expect(sig).not.toBe('');
-    // same signature → just the strip, no full-page reload
+    // same signature → the still-polling strip, no reload, no prompt
     const same = await app.inject({ method: 'GET', url: `/now/clock?sig=${sig}`, headers: { cookie: session } });
     expect(same.statusCode).toBe(200);
     expect(same.headers['hx-refresh']).toBeUndefined();
-    expect(same.body).toContain('now-strip');
-    // a stale signature (the lesson changed) → tell HTMX to reload the whole page
+    expect(same.body).toContain('hx-trigger="every 30s"'); // still polling
+    // a stale signature (the lesson changed) → a persistent manual-refresh prompt, and the poll stops,
+    // so a half-typed note is never wiped by a hard reload (#27).
     const stale = await app.inject({ method: 'GET', url: '/now/clock?sig=stale-value', headers: { cookie: session } });
-    expect(stale.headers['hx-refresh']).toBe('true');
+    expect(stale.headers['hx-refresh']).toBeUndefined(); // no hard reload
+    expect(stale.body).toContain('now-changed'); // the refresh prompt
+    expect(stale.body).not.toContain('hx-trigger="every 30s"'); // polling stopped
   });
 
   it('Focus self-poll skips the swap when nothing changed, re-renders when it does (auto-refresh)', async () => {

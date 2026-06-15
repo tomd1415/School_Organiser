@@ -70,7 +70,7 @@ function nowSignature(state: NowState, current: NowLesson | null, next: NowLesso
   ].join('|');
 }
 
-function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string, terms: TermDate[]): string {
+function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string, terms: TermDate[], changed = false): string {
   const { dateLabel, clock } = nowLabels(now, tz);
   const sig = nowSignature(state, current, next);
   const tp = termProgress(state.isoDate, terms);
@@ -94,8 +94,13 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
     nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${esc(lessonName(next))} <a href="${href}">open</a>`;
   }
 
-  return `<div id="now-strip" class="now-strip" data-bg-poll hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML">
-    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}
+  // When the lesson/day has changed, stop the poll and show a persistent manual-refresh prompt instead
+  // of hard-reloading — a reload would wipe a half-typed (not-yet-autosaved) note. The teacher refreshes
+  // when ready; the strip itself already shows the new NOW.
+  const poll = changed ? '' : ` data-bg-poll hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"`;
+  const notice = changed ? ` &nbsp;·&nbsp; <a class="now-changed" href="/">↻ the lesson has changed — refresh</a>` : '';
+  return `<div id="now-strip" class="now-strip"${poll}>
+    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}${notice}
   </div>`;
 }
 
@@ -417,9 +422,10 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const { ctx, state, current, next } = await resolveNowLessons(now);
       const prevSig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
       const sig = nowSignature(state, current, next);
-      // The lesson/day changed since this strip was rendered → reload so every card is fresh.
+      // The lesson/day changed since this strip was rendered → show a persistent "refresh" prompt
+      // (and stop polling) rather than hard-reloading, which would wipe a half-typed note.
       if (prevSig !== null && prevSig !== sig) {
-        return reply.header('HX-Refresh', 'true').send('');
+        return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, true));
       }
       return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms));
     } catch (err) {

@@ -142,18 +142,18 @@ function adaptView(gc: number, lp: number, eff: EffectiveLesson, oob = false): s
   return `<div class="adapt-view" id="adapt-${gc}-${lp}-view"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
 
-function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string): string {
+function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string, toolsOpen: boolean = getExperienceMode() === 'power'): string {
   // Rail & Stage declutter: the status (whether this class has a revised version) + the read-only view
   // stay visible, but the EDITOR, AI tools and change log fold into one "Adapt & AI tools" disclosure —
   // closed by default for the everyday teacher (so a fresh lesson never looks unfinished), pre-opened
-  // only when advanced tools are on. Nothing is removed; the mid-lesson view is just calmer.
-  const power = getExperienceMode() === 'power';
+  // only when advanced tools are on. After an AI action that re-renders this block, the caller passes
+  // toolsOpen=true so the disclosure doesn't snap shut and hide its own result + follow-up controls.
   return `<div class="adapt" id="adapt-${gc}-${lp}">
       ${adaptMeta(gc, lp, eff.adapted)}
       ${eff.adaptationNote ? `<p class="adapt-note">${esc(eff.adaptationNote)}</p>` : ''}
       ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
       ${adaptView(gc, lp, eff)}
-      <details class="advanced ld-adapt-tools"${power ? ' open' : ''}>
+      <details class="advanced ld-adapt-tools"${toolsOpen ? ' open' : ''}>
         <summary>🛠 Adapt &amp; AI tools</summary>
         <details class="adapt-edit">
           <summary>✏ ${eff.adapted ? "edit this group's version" : 'adapt it for this group'}</summary>
@@ -626,7 +626,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       adaptationNote: null,
       adaptationId: null,
     };
-    return reply.type('text/html').send(renderAdaptation(p.data.gc, p.data.lp, eff));
+    return reply.type('text/html').send(renderAdaptation(p.data.gc, p.data.lp, eff, undefined, true));
   });
 
   // This group's change log for a lesson (lazy-loaded when the log is opened).
@@ -821,7 +821,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         : outcome.status === 'skip'
           ? "Nothing to adapt from yet — add this class's teaching context, ability or access needs (the “this class's teaching context” panel), or teach a lesson, then try again."
           : (outcome.message ?? 'AI unavailable — nothing changed.');
-    return reply.type('text/html').send(renderAdaptation(gc, lp, eff, msg));
+    return reply.type('text/html').send(renderAdaptation(gc, lp, eff, msg, true));
   });
 
   // Adapt EVERY lesson of this class's scheme (idea: enable adapt for schemes). Confirmed by the

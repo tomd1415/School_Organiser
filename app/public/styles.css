@@ -97,7 +97,7 @@ body {
 .a11y-panel { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.3rem 0.5rem 0.5rem; }
 .a11y-row { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
 .a11y-row > span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; flex-basis: 100%; }
-.a11y-row button { font: inherit; font-size: var(--fs-meta); min-height: 2rem; padding: 0.25rem 0.55rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); cursor: pointer; }
+.a11y-row button { font: inherit; font-size: var(--fs-meta); min-height: var(--tap); min-width: var(--tap); padding: 0.25rem 0.7rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); cursor: pointer; }
 .a11y-row button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 
 /* The stage — the working pane. */
@@ -160,21 +160,10 @@ button {
 button.link { background: none; color: var(--accent); padding: 0; }
 .inline { display: inline; }
 
-/* top-bar nav */
+/* Minimal top bar — used only by the deny-by-default TA / pupil surfaces (not the Rail & Stage teacher
+   chrome). The old horizontal teacher nav (.nav / .nav-more) was removed in the Rail & Stage redesign. */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; background: var(--card); border-bottom: 1px solid var(--line); }
 .bar-left { display: flex; align-items: center; gap: 1.25rem; }
-.nav { display: flex; gap: 1rem; align-items: center; }
-.nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.95rem; }
-.nav a:hover { color: var(--ink); }
-/* idea 6 — current page gets a clear marker; works for links in the bar and inside the menu. */
-.nav a.active { color: var(--ink); }
-.nav > a.active { box-shadow: inset 0 -2px 0 var(--accent); }
-/* idea 6 — the "Setup & admin" dropdown holding the non-daily links. */
-.nav-more { position: relative; }
-.nav-more > summary { cursor: pointer; color: var(--muted); font-weight: 600; font-size: 0.95rem; list-style: none; -webkit-user-select: none; user-select: none; white-space: nowrap; }
-.nav-more > summary::-webkit-details-marker { display: none; }
-.nav-more > summary:hover, .nav-more > summary.active-within { color: var(--ink); }
-.nav-more-panel { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 60; display: flex; flex-direction: column; gap: 0.55rem; min-width: 11rem; padding: 0.7rem 0.9rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12); }
-.nav-more-panel a { white-space: nowrap; }
 /* idea 6 — the Settings picker for which links are pinned to the bar. */
 .nav-config { flex-wrap: wrap; align-items: center; gap: 0.4rem 1rem; }
 .nav-config-item { font-weight: 500; white-space: nowrap; }
@@ -280,6 +269,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .now-strip .now-mins { color: var(--accent); font-weight: 700; }
 .now-strip .now-week { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
 .now-strip a { color: var(--accent); font-weight: 600; }
+.now-changed { font-weight: 700; color: var(--warn); }
 .now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
 /* Rail & Stage — the current group name is the single dominant element, readable across the room. */
 .now-card h1 { margin: 0.1rem 0 0.5rem; font-size: var(--fs-hero); font-weight: 700; line-height: 1.05; }
@@ -296,7 +286,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .nm-text { min-width: 0; }
 a.nm-text { color: var(--accent); text-decoration: none; }
 .nm-sg { background: #fdecea; border-radius: 6px; padding-left: 0.4rem; padding-right: 0.4rem; }
-.nm-done { flex: none; font-size: 1.05rem; min-width: 1.4rem; min-height: 1.4rem; }
+.nm-done { flex: none; font-size: 1.05rem; min-width: var(--tap); min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; }
 .nm-clear { margin: 0.5rem 0 0; }
 .nm-foot { margin: 0; font-size: var(--fs-meta); }
 .nm-foot a { color: var(--accent); text-decoration: none; }
@@ -331,9 +321,6 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .event-title { width: 100%; border: 0; border-bottom: 1px solid transparent; font: inherit; font-weight: 600; outline: none; background: transparent; }
 .event-title:focus { border-bottom-color: var(--line); }
 .event-lead { width: 4.5rem; }
-.coming-list { list-style: none; padding: 0; margin: 0.5rem 0; }
-.coming-list li { padding: 0.25rem 0; display: flex; gap: 0.5rem; }
-.coming-when { margin-left: auto; color: var(--muted); font-size: 0.85rem; }
 
 /* time / work windows + work log */
 .windows { list-style: none; padding: 0; margin: 0.5rem 0 1rem; }
@@ -363,7 +350,6 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .captured textarea { width: 100%; border: 0; resize: vertical; font: inherit; outline: none; background: transparent; }
 .cap-when { font-size: 0.78rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.25rem; }
 .task-controls .link.on, .task-actions .link.on { color: var(--accent); font-weight: 700; }
-.bell-list li.sg { color: var(--error); }
 
 /* schemes of work */
 .scheme-meta { color: var(--muted); font-size: 0.9rem; margin: 0.5rem 0 1rem; }
@@ -526,11 +512,6 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .next-resume { font-size: 0.8rem; margin-top: 0.15rem; }
 .next-when2 { font-size: 0.75rem; }
 /* now: before the next bell */
-.now-bell { margin-top: 1rem; }
-.bell-list { list-style: none; padding: 0; margin: 0.5rem 0 0.75rem; }
-.bell-task { padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--line); }
-.bell-task button.link { font-size: 1rem; }
-.bell-tag { font-size: 0.75rem; margin-left: auto; }
 
 /* email paste box */
 .paste-box { margin: 0.5rem 0; }
@@ -589,11 +570,8 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .all-schemes-list li.current { font-weight: 700; }
 
 /* ── responsive: tablets & phones on the LAN ─────────────────────────────────────────────── */
-.nav { flex-wrap: wrap; row-gap: 0.25rem; }
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 @media (max-width: 900px) {
-  .nav { gap: 0.6rem; }
-  .nav a { font-size: 0.85rem; }
   .card, .now-card { padding: 0.9rem 1rem; }
   .lay-form, .convert-assign, .kit-filter { flex-wrap: wrap; align-items: start; }
 }
@@ -782,11 +760,12 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .trk { margin: 0.55rem 0; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 0.6rem 0.85rem; background: var(--card); }
 .trk-list { list-style: none; margin: 0.3rem 0 0; padding: 0; counter-reset: trk; }
 .trk-step button { display: flex; width: 100%; text-align: left; gap: 0.6rem; align-items: baseline; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: inherit; padding: 0.45rem 0.6rem; margin: 0.25rem 0; cursor: pointer; font-size: 0.92rem; }
-.trk-step button:hover { border-color: var(--accent); background: #eef3fc; }
+.trk-step button:hover { border-color: var(--accent); background: var(--accent-soft); }
 .trk-marker { min-width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--line); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
 .trk-step.trk-done button { opacity: 0.55; }
-.trk-step.trk-done .trk-marker { background: #d5e8d5; color: #2f7d32; }
-.trk-step.trk-now button { border-color: var(--accent); background: #eef3fc; box-shadow: 0 0 0 2px #c8daf7; }
+.trk-step.trk-done .trk-marker { background: var(--accent-soft); color: var(--good); }
+/* token-based so the "we are here" affordance intensifies in the high-contrast theme too */
+.trk-step.trk-now button { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
 .trk-step.trk-now .trk-marker { background: var(--accent); color: #fff; }
 .trk-step.trk-now .trk-label { font-weight: 700; }
 @media print { .trk button { border: none; background: none; } }
@@ -1057,7 +1036,6 @@ html[data-textscale="3"] { font-size: 142%; }
 }
 
 /* ── Track E front door — global search, quick-capture, keyboard cheat-sheet ───────────────────── */
-.bar-tools { display: flex; align-items: center; gap: 0.6rem; }
 .search-box { position: relative; }
 .topbar-search { font: inherit; padding: 0.35rem 0.6rem; border: 1px solid var(--line); border-radius: 8px; min-width: 13rem; background: #fff; }
 .search-results { position: absolute; top: 100%; right: 0; left: 0; z-index: 60; }
@@ -1087,7 +1065,6 @@ html[data-textscale="3"] { font-size: 142%; }
 
 /* 10.22 — live grid badge + marks-waiting card */
 .pw-live-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: #2e7d32; border: 1px solid #b6e0b6; border-radius: 999px; padding: 0 0.4rem; vertical-align: middle; }
-.now-marks .bell-list a { font-weight: 600; }
 
 /* 10.25 — activity/starter countdown timer */
 .act-timer { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: 8px; margin: 0.3rem 0 0.6rem; }

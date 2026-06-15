@@ -2,7 +2,8 @@
 // keyboard-fast bits the spec asks for.
 (function () {
   function isTyping(el) {
-    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    // SELECT included so the two-stroke `g` jump doesn't hijack keyboard navigation of a focused dropdown.
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
   }
 
   // idea 12 — `n` (and the 📝 Note button) open the smart-capture modal anywhere: type a note and
@@ -138,8 +139,10 @@
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); focusSearch(); return; }
     if (e.key === '?') { e.preventDefault(); toggleCheat(); return; }
     if (e.key === 'Escape') { closeCheat(); closeSearch(); return; }
-    if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) { pendingG = true; clearTimeout(gTimer); gTimer = setTimeout(function () { pendingG = false; }, 1200); return; }
+    // Resolve a pending `g` FIRST, so `g g` (→ Safeguarding) works — otherwise the second g just
+    // re-armed the prefix and the jump never fired.
     if (pendingG) { pendingG = false; clearTimeout(gTimer); var dest = NAV[e.key]; if (dest) { e.preventDefault(); location.href = dest; } return; }
+    if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) { pendingG = true; clearTimeout(gTimer); gTimer = setTimeout(function () { pendingG = false; }, 1200); return; }
   });
   // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
@@ -206,7 +209,9 @@
   (function () {
     var path = location.pathname;
     var best = null;
-    var links = document.querySelectorAll('.rail a[href]');
+    // Include the rail footer (the ⚙ Settings gear) so power pages hidden from the everyday rail still
+    // light up their footer entry.
+    var links = document.querySelectorAll('.rail a[href], .rail-foot a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href');
       var match = href === '/' ? path === '/' : path === href || path.indexOf(href + '/') === 0;
