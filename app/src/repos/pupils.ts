@@ -44,8 +44,32 @@ export async function createPupil(displayName: string): Promise<RosterEntry> {
 }
 
 export async function listPupils(): Promise<RosterEntry[]> {
-  const { rows } = await pool.query<RosterEntry>(`SELECT ${ROW} FROM pupils ORDER BY display_name`);
+  const { rows } = await pool.query<RosterEntry>(`SELECT ${ROW} FROM pupils WHERE NOT is_test ORDER BY display_name`);
   return rows;
+}
+
+// The fictitious test pupil (Phase: pupil-testing). Find-or-create — one per instance. Bypasses the
+// usual "no credential before DPIA sign-off" rule because it stores NO real child's data; it exists
+// only so the teacher can drive the real pupil surface. Token derived from the id like any pupil.
+export async function ensureTestPupil(): Promise<RosterEntry> {
+  const found = await pool.query<RosterEntry>(`SELECT ${ROW} FROM pupils WHERE is_test ORDER BY id LIMIT 1`);
+  if (found.rows[0]) return found.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const ins = await client.query<{ id: number }>(
+      `INSERT INTO pupils (display_name, ai_token, active, is_test) VALUES ('Test Pupil', gen_random_uuid()::text, true, true) RETURNING id`,
+    );
+    const id = ins.rows[0]!.id;
+    const { rows } = await client.query<RosterEntry>(`UPDATE pupils SET ai_token = 'PUPIL_' || id WHERE id = $1 RETURNING ${ROW}`, [id]);
+    await client.query('COMMIT');
+    return rows[0]!;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // The roster the redactor matches against — EVERY pupil, not just active ones, longest name
@@ -54,7 +78,7 @@ export async function listPupils(): Promise<RosterEntry[]> {
 // could type a leaver's name into an answer, and the egress assert must still catch it.
 export async function listRoster(): Promise<RosterEntry[]> {
   const { rows } = await pool.query<RosterEntry>(
-    `SELECT ${ROW} FROM pupils ORDER BY length(display_name) DESC, id`,
+    `SELECT ${ROW} FROM pupils WHERE NOT is_test ORDER BY length(display_name) DESC, id`,
   );
   return rows;
 }

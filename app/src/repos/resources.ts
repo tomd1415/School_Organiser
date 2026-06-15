@@ -243,6 +243,23 @@ export async function getImportedPaths(): Promise<string[]> {
   return rows.map((r) => r.rel).filter((r): r is string => !!r);
 }
 
+/** Uploaded/imported SOURCE files linked to a unit, with their original import path — the fallback
+ *  for image carry-over when a plan has no per-plan source link (units converted before per-plan
+ *  linking existed). The path's "Lesson N" folder is what lets us match a deck to its lesson. */
+export async function listSourceFilesForUnit(unitId: number): Promise<Array<{ resourceId: number; title: string; path: string }>> {
+  const { rows } = await pool.query<{ resourceId: number; title: string; path: string | null }>(
+    `SELECT DISTINCT ON (r.id) r.id AS "resourceId", r.title,
+            substring(v.change_note from 'imported from (.*)') AS path
+     FROM resource_links rl
+     JOIN resources r ON r.id = rl.resource_id
+     JOIN resource_versions v ON v.resource_id = r.id
+     WHERE rl.unit_id = $1 AND r.source IN ('uploaded', 'imported') AND v.change_note LIKE 'imported from %'
+     ORDER BY r.id`,
+    [unitId],
+  );
+  return rows.map((r) => ({ resourceId: Number(r.resourceId), title: r.title, path: r.path ?? '' }));
+}
+
 /** Distinct resources whose imported path sits under a folder — the unit's source files. */
 export async function listResourceIdsForFolder(folder: string): Promise<number[]> {
   const { rows } = await pool.query<{ id: number }>(

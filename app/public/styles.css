@@ -836,6 +836,24 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 @keyframes ws-saved-fade { 0%,60% { opacity: 1; } 100% { opacity: 0; } }
 .ws-checklist { list-style: none; padding: 0; }
 .ws-checklist .md-task { font-size: 1.05rem; padding: 0.3rem 0; }
+/* Teacher "preview as pupil" — level tabs + an inert (disabled) rendering of the pupil sheet. */
+.ws-preview { margin: 0.5rem 0; }
+.ws-preview > summary { cursor: pointer; color: var(--accent); font-size: 0.95rem; }
+.ws-preview-tabs { display: flex; gap: 0.4rem; margin: 0.6rem 0; flex-wrap: wrap; }
+.ws-tab { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #f0f3f8; border-radius: 999px; padding: 0.3rem 0.8rem; }
+.ws-tab:hover { background: #e2e8f2; }
+.ws-preview-meta { font-size: 0.9rem; color: var(--muted, #5a6678); margin: 0.3rem 0 0.5rem; }
+.ws-doc-preview { border: 1px dashed #cdd6e3; border-radius: 10px; padding: 0.8rem 1rem; background: #fcfdff; }
+.ws-doc-preview .ws-input { background: #fff; cursor: not-allowed; }
+.md-img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.4rem 0; }
+/* Auto-filled identity cell (name/date online) — read-only, clearly "done for you". */
+.ws-auto { background: #eef6ee; color: #2e5e2e; border: 1px dashed #aaccaa; font-style: italic; }
+/* "Test as pupil" launch (teacher, on the lesson page) + the test-pupil banner on /me. */
+.test-pupil-launch { display: inline-flex; align-items: center; gap: 0.4rem; margin: 0.4rem 0; font-size: 0.9rem; color: var(--muted, #5a6678); }
+.test-banner { background: #fff6da; border: 1px solid #e6cf73; border-radius: 8px; padding: 0.4rem 0.7rem; gap: 0.8rem; flex-wrap: wrap; }
+.test-level { font-size: 0.9rem; }
+.test-level .link { margin: 0 0.15rem; }
+.test-level .link.on { font-weight: 700; text-decoration: underline; }
 .ws-check input { width: 1.3rem; height: 1.3rem; vertical-align: middle; }
 .ws-review .ws-answer { background: #f3faf3; border: 1px solid #d5e8d5; border-radius: 6px; padding: 0.4rem 0.5rem; white-space: pre-wrap; }
 .ws-review .ws-answer.ws-empty { background: #fafafa; border-style: dashed; color: var(--muted); }

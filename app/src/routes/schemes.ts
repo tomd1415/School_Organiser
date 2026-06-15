@@ -52,7 +52,8 @@ import {
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
-import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems } from '../llm/prompts/lessonResources';
+import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems } from '../llm/prompts/lessonResources';
+import { ensureSourceImagesForPlan } from '../services/sourceImages';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
 import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
@@ -121,6 +122,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
           ...concepts,
           ...teachingContextItems(ctx.teachingContext),
           ...equipmentItem(equipment),
+          ...lessonImageItems(images),
           ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
         ],
         instruction: LESSON_RESOURCES_INSTRUCTION,
@@ -132,6 +134,9 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
   const concepts = await conceptItemsFor(ctx.courseId);
   const modelChoice = await modelForFeature('lesson_resources', 'plan');
   const equipment = await listActiveEquipment();
+  // Carry over the source slides' images so the model can embed them where the lesson refers to a
+  // visual (best-effort; empty when the plan has no linked Office source). Never blocks generation.
+  const images = await ensureSourceImagesForPlan(planId).catch(() => []);
   let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
   let tidy = tidyResourceSet(result.data.resources);
@@ -411,6 +416,32 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     // Source provenance: link the downloaded files to the new unit (capped — a unit can hold many).
     const sourceIds = (await listResourceIdsForFolder(b.data.folder)).slice(0, 80);
     for (const rid of sourceIds) await linkResourceToUnit(rid, unitId);
+
+    // Per-lesson provenance: link EACH source lesson's files to ITS plan too, so image carry-over
+    // can find "this lesson's deck". Pair by order when source-lesson and plan counts line up; else
+    // by best lesson-title word overlap (the convert AI may merge/reorder lessons). Best-effort.
+    const srcPlans = await listPlansForUnit(unitId);
+    const titleWords = (s: string) => new Set(s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ').filter((w) => w.length > 2));
+    const planForLesson = (i: number, srcTitle: string): number | null => {
+      if (srcPlans.length === lessons.length) return srcPlans[i]?.id ?? null;
+      const want = titleWords(srcTitle);
+      let bestId: number | null = null;
+      let best = 0;
+      for (const p of srcPlans) {
+        const score = [...titleWords(p.title)].filter((w) => want.has(w)).length;
+        if (score > best) {
+          best = score;
+          bestId = p.id;
+        }
+      }
+      return best > 0 ? bestId : null;
+    };
+    for (let i = 0; i < lessons.length; i++) {
+      const targetPlan = planForLesson(i, lessons[i]!.title);
+      if (targetPlan == null) continue;
+      const lessonIds = (await listResourceIdsForFolder(`${b.data.folder}/${lessons[i]!.dir}`)).slice(0, 20);
+      for (const rid of lessonIds) await linkResourceToPlan(rid, targetPlan);
+    }
 
     // 5.7: assign in the same action — lay into the chosen slot's weeks, then review on the map.
     // A short or empty lay-down never rolls back the conversion; the map shows what happened.

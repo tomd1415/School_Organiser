@@ -2,7 +2,7 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@6'; // @6: ALL slides in ONE entry (fix one-slide-per-entry deck loss). @5: strict "## 🟢/🟡/🔴" level sections.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@7'; // @7: embed source images / captioned image placeholders. @6: ALL slides in ONE entry (fix one-slide-per-entry deck loss). @5: strict "## 🟢/🟡/🔴" level sections.
 
 export const LESSON_RESOURCES_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
@@ -53,5 +53,26 @@ export function lessonResourceItems(ctx: {
   ];
 }
 
+/** The images carried over from this lesson's source slides/unit, offered to the model to embed
+ * where the lesson refers to that visual. Empty list ⇒ no item (text-only generation, unchanged). */
+export function lessonImageItems(images: Array<{ url: string; label: string }>): RedactableItem[] {
+  if (!images.length) return [];
+  const list = images.map((im, i) => `${i + 1}. ${im.label} → ${im.url}`).join('\n');
+  return [
+    {
+      text:
+        'IMAGES AVAILABLE FROM THIS LESSON’S SOURCE SLIDES/UNIT. Where the lesson genuinely refers to ' +
+        'one of these visuals (a diagram, screenshot or worked example), embed it with Markdown image ' +
+        'syntax using EXACTLY the URL given, e.g. `![short description](URL)`, on its own line right ' +
+        'after the instruction that needs it. Use ONLY these URLs — NEVER invent an image URL or ' +
+        'filename, NEVER embed the same image twice, and OMIT any image that does not clearly belong. ' +
+        'These are reference visuals, not answer spaces.\n' +
+        list,
+    },
+  ];
+}
+
 export const LESSON_RESOURCES_INSTRUCTION =
-  'Generate the resource set now: exactly four documents — one "slides", one "worksheet", one "support", one "answers".';
+  'Generate the resource set now: exactly four documents — one "slides", one "worksheet", one "support", one "answers". ' +
+  'Where a visual would clearly help a step but no provided source image fits, add a captioned placeholder on ITS OWN line — `> 🖼️ [show: <what the picture should show>]` — so the teacher can drop an image in; NEVER invent an image URL or filename. ' +
+  'The pupil’s name and the date are filled in automatically online, so the name/date header never needs the pupil to type anything.';

@@ -320,3 +320,87 @@ describe('worksheetForm — robustness', () => {
     expect(t1.length).toBe(2);
   });
 });
+
+// Real worksheets prompt answers with far more than the literal "type … here". These shapes used to
+// render read-only (no answer boxes) — the reported "missing answer spaces" bug.
+describe('worksheetForm — broadened answer detection (missing-answer-space bug)', () => {
+  it('an answer column whose header has no "here" still produces inputs (the "index" table)', () => {
+    const src = `# S\n\n| Index number | Type the item at that position |\n|---|---|\n| index 0 | |\n| index 1 | |\n`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text.map((f) => f.key)).toEqual(['t1.r1.c2', 't1.r2.c2']);
+    expect(r.html).toContain('<textarea');
+  });
+
+  it('a header-only "Paste here" table renders the header as the fillable row (r0)', () => {
+    const src = `# S\n\n| Screenshot — pin program | Paste here |\n|---|---|\n`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text).toHaveLength(1);
+    expect(text[0]!.key).toBe('t1.r0.c2');
+    expect(r.html).toContain('<textarea');
+  });
+
+  it('a question that merely starts with a verb is NOT mistaken for an empty answer box', () => {
+    const src = `# S\n\n| Question | Type your answer here |\n|---|---|\n| Write a sentence about loops. | |\n`;
+    const r = renderWorksheet(src, { mode: 'review' });
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text).toHaveLength(1); // only the answer cell, not the question
+    expect(text[0]!.key).toBe('t1.r1.c2');
+    expect(r.html).toContain('Write a sentence about loops.'); // question kept as text
+  });
+
+  it('a reference table whose header starts with a verb but whose body is filled stays read-only', () => {
+    const src = `# Ref\n\n| Type of loop | Example |\n|---|---|\n| for | counts a fixed number of times |\n| while | repeats until a condition |\n`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    expect(r.fields).toHaveLength(0); // no phantom answer fields
+    expect(r.html).not.toContain('<textarea');
+    expect(r.html).toContain('counts a fixed number of times'); // content preserved
+  });
+});
+
+describe('worksheetForm — name/date auto-fill (online the pupil never types them)', () => {
+  const SRC = `# S\n\n| Name | Type your name here |\n|------|---------------------|\n| Date | Type the date here |\n\n## 🟢 Support\n| Q | Type your answer here |\n|---|---|\n| Easy? | |\n`;
+
+  it('auto-fills name/date read-only and emits no fields for them', () => {
+    const r = renderWorksheet(SRC, { mode: 'form', level: 'support', autofill: { name: 'Sam Lee', date: 'Mon 15 Jun' } });
+    expect(r.html).toContain('Sam Lee');
+    expect(r.html).toContain('Mon 15 Jun');
+    expect(r.html).toContain('ws-auto');
+    const text = r.fields.filter((f) => f.kind === 'text');
+    expect(text).toHaveLength(1); // only the support answer — name/date aren't "to do"
+    expect(text[0]!.label).toContain('Easy?');
+  });
+
+  it('without autofill, name/date stay fillable (the print / offline path is unchanged)', () => {
+    const r = renderWorksheet(SRC, { mode: 'form', level: 'support' });
+    expect(r.fields.filter((f) => f.kind === 'text')).toHaveLength(3); // name + date + answer
+  });
+
+  it('a question that merely mentions "name" is NOT auto-filled', () => {
+    const q = `# S\n\n| Question | Type your answer here |\n|---|---|\n| What is the name of the CPU part? | |\n`;
+    const r = renderWorksheet(q, { mode: 'form', autofill: { name: 'Sam', date: 'today' } });
+    expect(r.fields.filter((f) => f.kind === 'text')).toHaveLength(1); // the answer box stays
+    expect(r.html).toContain('<textarea'); // a real input, not an auto-fill
+  });
+});
+
+describe('worksheetForm — preview mode (teacher "see what pupils get")', () => {
+  const LEVELLED = `# S\n\n## 🟢 Support\n| Q | Type your answer here |\n|---|---|\n| Easy? | |\n\n## 🟡 Core\n| Q | Type your answer here |\n|---|---|\n| Medium? | |\n`;
+
+  it('shows the answer boxes but inert — disabled, with no autosave wiring', () => {
+    const r = renderWorksheet(LEVELLED, { mode: 'preview', level: 'core' });
+    expect(r.html).toContain('<textarea');
+    expect(r.html).toContain('disabled');
+    expect(r.html).not.toContain('hx-post'); // never saves
+  });
+
+  it('slices to the chosen level, exactly like the pupil form', () => {
+    const core = renderWorksheet(LEVELLED, { mode: 'preview', level: 'core' });
+    expect(core.html).toContain('Medium?');
+    expect(core.html).not.toContain('Easy?');
+    const support = renderWorksheet(LEVELLED, { mode: 'preview', level: 'support' });
+    expect(support.html).toContain('Easy?');
+    expect(support.html).not.toContain('Medium?');
+  });
+});

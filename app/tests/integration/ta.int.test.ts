@@ -65,11 +65,14 @@ describe('TA access (integration)', () => {
 
   it('feedback lands, shows for the teacher, and joins the AI history', async () => {
     const slot = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose='teaching' ORDER BY id LIMIT 1`);
-    const { findOrCreateOccurrence, getOccurrenceCourses } = await import('../../src/repos/occurrence');
+    const { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } = await import('../../src/repos/occurrence');
     // TODAY's lesson: a shared-account TA may only feedback on a lesson happening today (the security
-    // scope), and recentGroupHistory includes it (date <= CURRENT_DATE).
+    // scope), and recentGroupHistory includes it (date <= CURRENT_DATE). The dev DB is the teacher's
+    // REAL data — today's occurrence may already exist (with real notes). Only delete it in cleanup if
+    // WE created it, never a pre-existing real one (which would cascade away real teaching records).
     const today = new Date().toISOString().slice(0, 10);
-    const occId = await findOrCreateOccurrence(slot.rows[0]!.id, today);
+    const preExisting = await findOccurrence(slot.rows[0]!.id, today);
+    const occId = preExisting ?? (await findOrCreateOccurrence(slot.rows[0]!.id, today));
     const oc = (await getOccurrenceCourses(occId))[0]!;
     const page = await app.inject({ method: 'GET', url: '/ta', headers: { cookie: taSession } });
     // outside lesson time the card has no hx-headers; the logout form always carries the token
@@ -99,8 +102,9 @@ describe('TA access (integration)', () => {
       const items = historyItems([entry!]);
       expect(items.some((i) => i.text.includes('TA feedback') && i.text.includes('Card sort worked'))).toBe(true);
     } finally {
-      await pool.query(`DELETE FROM ta_feedback WHERE occurrence_course_id = $1`, [oc.occurrenceCourseId]);
-      await pool.query(`DELETE FROM lesson_occurrences WHERE id = $1`, [occId]);
+      // Delete only the feedback THIS test wrote (not any real TA feedback on a real occurrence).
+      await pool.query(`DELETE FROM ta_feedback WHERE occurrence_course_id = $1 AND pupils_text LIKE 'Settled well%'`, [oc.occurrenceCourseId]);
+      if (!preExisting) await pool.query(`DELETE FROM lesson_occurrences WHERE id = $1`, [occId]); // only if WE created it
     }
   });
 

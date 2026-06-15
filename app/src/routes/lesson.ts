@@ -69,6 +69,8 @@ import { equipmentItem } from '../llm/prompts/equipment';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
+import { renderWorksheet, type Level } from '../lib/worksheetForm';
+import { getLessonWorksheet } from '../services/worksheet';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
@@ -214,6 +216,26 @@ function renderTaFeedback(rows: TaFeedbackRow[]): string {
   return `<div class="oc-block ta-fb-teacher"><span class="oc-label">TA feedback</span><ul class="ta-fb-list">${items}</ul></div>`;
 }
 
+const LEVEL_LABEL: Record<Level, string> = { support: '🟢 Support', core: '🟡 Core', challenge: '🔴 Challenge' };
+
+/** The teacher's "preview as pupil" fragment: the worksheet sliced to one level, rendered inert
+ * (preview mode). Surfaces the answer-space count so a level with zero boxes is obvious at a glance. */
+async function renderWorksheetPreview(gc: number, lp: number, level: Level): Promise<string> {
+  const ws = await getLessonWorksheet(gc, lp);
+  if (!ws) {
+    return '<p class="muted ws-preview-meta">No worksheet is attached to this lesson yet — generate or upload one, then preview.</p>';
+  }
+  const rendered = renderWorksheet(ws.markdown, { mode: 'preview', level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } });
+  const boxes = rendered.fields.length;
+  const boxNote = `${boxes} answer space${boxes === 1 ? '' : 's'}`;
+  const levelNote = rendered.hasLevels
+    ? `for <strong>${LEVEL_LABEL[level]}</strong>`
+    : '· <span class="muted">this sheet isn’t split by level — every pupil sees the same</span>';
+  const copyNote = ws.adapted ? '✏ this class’s copy' : 'master copy';
+  return `<div class="ws-preview-meta"><span class="adapt-badge${ws.adapted ? ' on' : ''}">${copyNote}</span> · ${boxNote} ${levelNote}</div>
+    <div class="ws-doc ws-doc-preview" aria-label="Pupil preview">${rendered.html}</div>`;
+}
+
 function renderSection(
   s: CourseSection,
   plans: Array<{ id: number; title: string }>,
@@ -254,6 +276,26 @@ function renderSection(
               : `<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
         }
       </div>
+      ${
+        s.lessonPlanId != null
+          ? `<details class="ws-preview" id="ws-prev-d-${oc}">
+        <summary>👁 Preview as pupil — see each ability level</summary>
+        <div class="ws-preview-tabs" role="tablist">
+          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=support" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
+          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
+          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=challenge" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🔴 Challenge</button>
+        </div>
+        <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
+      </details>
+      <form class="test-pupil-launch" hx-post="/test-pupil/open" hx-swap="none" title="Open this lesson as a test pupil — the real worksheet, autosave and Done, at any level (no time limit)">
+        <input type="hidden" name="lesson" value="${slot.lessonId}">
+        <input type="hidden" name="date" value="${esc(slot.date)}">
+        🧪 Test as pupil
+        <select name="level" aria-label="level"><option value="support">🟢 Support</option><option value="core" selected>🟡 Core</option><option value="challenge">🔴 Challenge</option></select>
+        <button type="submit" class="link">open →</button>
+      </form>`
+          : ''
+      }
       ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${last}
       <label class="stop-label">Stopping point
@@ -698,6 +740,17 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const p = z.object({ gc: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
     return reply.type('text/html').send(await renderGroupContextFragment(p.data.gc));
+  });
+
+  // Teacher preview: render the worksheet EXACTLY as a pupil at the chosen level would see it —
+  // empty answer boxes and all — but inert (no autosave). Lets the teacher spot missing answer
+  // spaces / images per level before the class meets it. Resolves the same class copy the pupil gets.
+  app.get('/lesson/worksheet-preview', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({ gc: z.coerce.number().int().positive(), lp: z.coerce.number().int().positive(), level: z.enum(['support', 'core', 'challenge']) })
+      .safeParse(req.query);
+    if (!q.success) return reply.code(400).type('text/html').send('<p class="muted">Bad preview request.</p>');
+    return reply.type('text/html').send(await renderWorksheetPreview(q.data.gc, q.data.lp, q.data.level));
   });
 
   // Class-intake (idea: set up a class from a free-text description). Opus → the per-class fields;

@@ -9,7 +9,9 @@ import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
 import { getLessonWorksheet, getLessonWorksheetMeta } from '../services/worksheet';
-import { renderWorksheet, savedTick } from '../lib/worksheetForm';
+import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
+import { requireAuth } from '../auth/guard';
+import { ensureTestPupil } from '../repos/pupils';
 import {
   getAnswers,
   getPupilLevel,
@@ -44,6 +46,26 @@ function requirePupil(req: FastifyRequest, reply: FastifyReply): number | null {
     return null;
   }
   return Number(req.session.get('pupilId') ?? 0) || null;
+}
+
+// Who the pupil surface is acting for: a real logged-in pupil, OR a teacher driving the fictitious
+// TEST pupil (an overlay — the teacher's own session/role is untouched, so "exit" returns them to
+// the app). The test pupil bypasses the DPIA access gate and the time gate (see /me).
+interface ActingPupil {
+  id: number;
+  isTest: boolean;
+}
+function actingPupil(req: FastifyRequest): ActingPupil | null {
+  if (req.session.get('role') === 'pupil') {
+    const id = Number(req.session.get('pupilId') ?? 0);
+    return id ? { id, isTest: false } : null;
+  }
+  // A teacher with an active test-pupil session.
+  if (req.session.get('authed') && req.session.get('role') !== 'ta') {
+    const id = Number(req.session.get('testPupilId') ?? 0);
+    return id ? { id, isTest: true } : null;
+  }
+  return null;
 }
 
 async function groupLessonAt(groupId: number, weekday: number, slotOrder: number): Promise<number | null> {
@@ -121,43 +143,68 @@ function doneBlock(oc: number, done: boolean): string {
 
 export function registerMeRoutes(app: FastifyInstance): void {
   app.get('/me', async (req, reply) => {
-    const pupilId = requirePupil(req, reply);
-    if (pupilId == null) return;
-    if (!(await pupilAccessEnabled())) {
+    const acting = actingPupil(req);
+    if (!acting) {
+      reply.redirect(req.session.get('role') === 'pupil' ? '/pupil' : '/');
+      return;
+    }
+    const pupilId = acting.id;
+    const isTest = acting.isTest;
+    // Real pupils need the DPIA access gate ON; the fictitious test pupil bypasses it (no real
+    // child's data) so the teacher can test the pupil surface before/without sign-off.
+    if (!isTest && !(await pupilAccessEnabled())) {
       req.session.delete();
       return reply.redirect('/pupil');
     }
     const csrf = reply.generateCsrf();
     const groupId = Number(req.session.get('pupilGroupId') ?? 0);
-    const name = (await getPupilName(pupilId)) ?? 'you';
+    const name = isTest ? 'Test Pupil' : (await getPupilName(pupilId)) ?? 'you';
+    const testLevel = ((req.session.get('testLevel') as Level) || 'core') as Level;
+    const todayLabel = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date());
     let body: string;
     try {
       const ctx = await getClockContext();
       const state = resolveNow(new Date(), ctx);
       let lesson: { lessonId: number; date: string } | null = null;
-      // A lesson slot, or a form/tutor period (which can also carry a bound worksheet).
-      const currentTeachable = state.current && (state.current.slotType === 'lesson' || state.current.slotType.startsWith('form'));
-      if (state.isSchoolDay && currentTeachable) {
-        const id = await groupLessonAt(groupId, state.weekday, state.current!.slotOrder);
-        if (id) lesson = { lessonId: id, date: state.isoDate };
-      }
-      if (!lesson && state.nextTeaching && state.nextTeaching.date === state.isoDate) {
-        const id = await groupLessonAt(groupId, state.nextTeaching.weekday, state.nextTeaching.slotOrder);
-        if (id) lesson = { lessonId: id, date: state.nextTeaching.date };
+      if (isTest) {
+        // Test pupil: the teacher picked the exact lesson + date — ANY lesson, ANY time, no clock gate.
+        const lid = Number(req.session.get('testLessonId') ?? 0);
+        const d = String(req.session.get('testDate') ?? '');
+        if (lid && /^\d{4}-\d{2}-\d{2}$/.test(d)) lesson = { lessonId: lid, date: d };
+      } else {
+        // A lesson slot, or a form/tutor period (which can also carry a bound worksheet).
+        const currentTeachable = state.current && (state.current.slotType === 'lesson' || state.current.slotType.startsWith('form'));
+        if (state.isSchoolDay && currentTeachable) {
+          const id = await groupLessonAt(groupId, state.weekday, state.current!.slotOrder);
+          if (id) lesson = { lessonId: id, date: state.isoDate };
+        }
+        if (!lesson && state.nextTeaching && state.nextTeaching.date === state.isoDate) {
+          const id = await groupLessonAt(groupId, state.nextTeaching.weekday, state.nextTeaching.slotOrder);
+          if (id) lesson = { lessonId: id, date: state.nextTeaching.date };
+        }
       }
 
       // "Stay signed in on this computer" — only when auto-marking is on and the class allows it,
-      // and not already remembered on this device.
-      const canRemember = !req.cookies?.[DEVICE_COOKIE] && (await marksEnabled()) && groupId > 0 && (await devicesEnabledForGroup(groupId));
+      // and not already remembered on this device. Never for the test pupil.
+      const canRemember = !isTest && !req.cookies?.[DEVICE_COOKIE] && (await marksEnabled()) && groupId > 0 && (await devicesEnabledForGroup(groupId));
       const remember = canRemember
         ? `<button class="pupil-remember" hx-post="/me/remember" hx-target="this" hx-swap="outerHTML">Stay signed in on this computer</button>`
         : '';
-      const head = `<header class="pupil-top"><span class="pupil-hi">Hi ${esc(name)}</span>
+      const levelBtns = (['support', 'core', 'challenge'] as Level[])
+        .map((lv) => `<button type="button" class="link${lv === testLevel ? ' on' : ''}" hx-post="/test-pupil/level" hx-vals='{"level":"${lv}"}' hx-swap="none">${lv}</button>`)
+        .join(' ');
+      const head = isTest
+        ? `<header class="pupil-top test-banner"><span class="pupil-hi">🧪 Test pupil <span class="muted">— not a real pupil</span></span>
+            <span class="test-level">Level: ${levelBtns}</span>
+            <form hx-post="/test-pupil/exit" hx-swap="none" class="inline"><button class="link">✕ exit test</button></form></header>`
+        : `<header class="pupil-top"><span class="pupil-hi">Hi ${esc(name)}</span>
         ${remember}
         <form method="post" action="/logout" class="inline"><input type="hidden" name="_csrf" value="${esc(csrf)}"><button class="pupil-logout">Log out</button></form></header>`;
 
       if (!lesson) {
-        body = `${head}<section class="pupil-card"><h1>No lesson right now</h1>
+        body = isTest
+          ? `${head}<section class="pupil-card"><h1>No lesson chosen</h1><p class="pupil-note">Open a lesson on any date, then tap “🧪 Test as pupil”.</p></section>`
+          : `${head}<section class="pupil-card"><h1>No lesson right now</h1>
           <p class="pupil-note">${state.isSchoolDay ? 'Check back when your lesson starts.' : 'No school today.'}</p></section>`;
       } else {
         // Read-first: only create+materialise the occurrence if it doesn't exist yet (avoids a
@@ -173,12 +220,13 @@ export function registerMeRoutes(app: FastifyInstance): void {
               if (ws) {
                 // independent per-section reads — run them together, not one after another
                 const [level, values, done, fb] = await Promise.all([
-                  getPupilLevel(pupilId, Number(s.groupCourseId)),
+                  isTest ? Promise.resolve(testLevel) : getPupilLevel(pupilId, Number(s.groupCourseId)),
                   getAnswers(pupilId, oc),
                   isDone(pupilId, oc),
                   getPupilFeedback(pupilId, oc),
                 ]);
-                const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}` });
+                // Online the name/date are auto-filled (the pupil never types them) — pass who + today.
+                const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel } });
                 const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
                 // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
                 inner = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p><div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
@@ -198,12 +246,14 @@ export function registerMeRoutes(app: FastifyInstance): void {
   });
 
   app.post('/me/answer', { preHandler: app.csrfProtection }, async (req, reply) => {
-    const pupilId = Number(req.session.get('pupilId') ?? 0);
-    if (req.session.get('role') !== 'pupil' || !pupilId) return reply.code(401).send('');
+    const acting = actingPupil(req);
+    if (!acting) return reply.code(401).send('');
+    const pupilId = acting.id;
     const q = z.object({ oc: z.coerce.number().int().positive(), key: z.string().min(1).max(60) }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    // The pupil may only write to a lesson their group is enrolled in (defence in depth).
-    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    // The pupil may only write to a lesson their group is enrolled in (defence in depth). The test
+    // pupil isn't enrolled anywhere — it's allowed any lesson (teacher-only, fictitious).
+    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const b = z.object({ value: z.string().max(8000).optional() }).safeParse(req.body);
     const value = (b.success && b.data.value) || '';
     // Resolve the worksheet server-side for provenance — never trust a client-supplied resource id.
@@ -221,12 +271,13 @@ export function registerMeRoutes(app: FastifyInstance): void {
   });
 
   app.post('/me/done', { preHandler: app.csrfProtection }, async (req, reply) => {
-    const pupilId = Number(req.session.get('pupilId') ?? 0);
-    if (req.session.get('role') !== 'pupil' || !pupilId) return reply.code(401).send('');
+    const acting = actingPupil(req);
+    if (!acting) return reply.code(401).send('');
+    const pupilId = acting.id;
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     const b = z.object({ done: z.enum(['true', 'false']) }).safeParse(req.body);
     if (!q.success || !b.success) return reply.code(400).send('');
-    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const done = b.data.done === 'true';
     await setDone(pupilId, q.data.oc, done);
     // "Mark as pupils finish" (Q34): tapping Done triggers marking (objective now; open debounced).
@@ -248,11 +299,12 @@ export function registerMeRoutes(app: FastifyInstance): void {
   });
 
   app.post('/me/feedback', { preHandler: app.csrfProtection }, async (req, reply) => {
-    const pupilId = Number(req.session.get('pupilId') ?? 0);
-    if (req.session.get('role') !== 'pupil' || !pupilId) return reply.code(401).send('');
+    const acting = actingPupil(req);
+    if (!acting) return reply.code(401).send('');
+    const pupilId = acting.id;
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    if (!(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
     const body = (req.body ?? {}) as Record<string, unknown>;
     const toList = (v: unknown): string => {
       const arr = Array.isArray(v) ? v : v != null ? [v] : [];
@@ -263,6 +315,35 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const comment = typeof body.comment === 'string' ? body.comment.slice(0, 500) : '';
     await upsertPupilFeedback({ pupilId, occurrenceCourseId: q.data.oc, rating, liked: toList(body.liked), disliked: toList(body.disliked), comment });
     return reply.type('text/html').send(`<span class="note-status saved" id="fb-${q.data.oc}-status" hx-swap-oob="true">saved ✓</span>`);
+  });
+
+  // ── Test pupil (teacher-only) — open the REAL pupil surface for any lesson, any time, at any level.
+  // An overlay on the teacher's session (testPupilId): role stays 'teacher', so "exit" just clears it.
+  app.post('/test-pupil/open', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z
+      .object({ lesson: z.coerce.number().int().positive(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), level: z.enum(['support', 'core', 'challenge']).default('core') })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).type('text/html').send('Bad test-pupil request.');
+    const tp = await ensureTestPupil();
+    req.session.set('testPupilId', tp.id);
+    req.session.set('testLessonId', b.data.lesson);
+    req.session.set('testDate', b.data.date);
+    req.session.set('testLevel', b.data.level);
+    reply.header('HX-Redirect', '/me');
+    return reply.send('');
+  });
+
+  app.post('/test-pupil/level', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z.object({ level: z.enum(['support', 'core', 'challenge']) }).safeParse(req.body);
+    if (b.success) req.session.set('testLevel', b.data.level);
+    reply.header('HX-Redirect', '/me');
+    return reply.send('');
+  });
+
+  app.post('/test-pupil/exit', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    req.session.set('testPupilId', 0); // back to a plain teacher session (role untouched throughout)
+    reply.header('HX-Redirect', '/');
+    return reply.send('');
   });
 }
 

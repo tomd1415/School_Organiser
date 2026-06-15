@@ -48,4 +48,15 @@ describe('renderMarkdown (resource preview)', () => {
     expect(html).toContain('line one<br>line two');
     expect(html).toContain('<a href="https://bbc.co.uk/page"');
   });
+
+  it('renders app-hosted (root-relative) and data:image images, not just http(s)', () => {
+    // App-hosted worksheet images (e.g. /resources/:id/view) previously fell through and vanished.
+    expect(renderMarkdown('![diagram](/resources/12/view)')).toContain('<img class="md-img" src="/resources/12/view"');
+    expect(renderMarkdown('![chip](data:image/png;base64,iVBORw0KGgo=)')).toContain('<img class="md-img" src="data:image/png;base64,iVBORw0KGgo=');
+  });
+
+  it('refuses unsafe image URLs (protocol-relative, javascript:) — left as text, never an <img src>', () => {
+    expect(renderMarkdown('![x](//evil.example/x.png)')).not.toContain('<img');
+    expect(renderMarkdown('![x](javascript:alert(1))')).not.toContain('<img');
+  });
 });

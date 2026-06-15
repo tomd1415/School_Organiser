@@ -26,10 +26,16 @@ export interface WorksheetRender {
 }
 
 export interface WorksheetOptions {
-  mode: 'form' | 'review';
+  // 'form' = the live pupil sheet (autosaving inputs); 'review' = read-only with saved values;
+  // 'preview' = the teacher sees EXACTLY what a pupil at this level gets — the empty answer boxes,
+  // images and all — but inert (disabled, no autosave).
+  mode: 'form' | 'review' | 'preview';
   level?: Level; // slice to this level (+ shared); omit ⇒ whole document
   values?: Map<string, string>;
   action?: string; // POST URL for autosave (the occurrence/resource/version context); form mode only
+  // Online the pupil's name and the date are known — auto-fill those header cells read-only instead
+  // of asking the pupil to type them. Applies in form/preview only.
+  autofill?: { name?: string; date?: string };
 }
 
 function saveUrl(action: string | undefined, key: string): string {
@@ -41,7 +47,19 @@ const HEADING = /^(#{1,6})\s+(.*)$/;
 const TABLE_ROW = /^\s*\|(.+)\|\s*$/;
 const TABLE_SEP = /^\s*\|?[\s:|-]+\|?\s*$/;
 const TASK = /^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/;
+// NARROW — the original "type … here" form. Kept ONLY to decide the header-as-data flip (below),
+// so a column-label header like "My answer" doesn't get mistaken for the name/date layout.
 const PLACEHOLDER = /type\b[^|]*\bhere/i;
+// BROAD — a header cell that NAMES an answer column. Real generated worksheets prompt with far more
+// than "type … here": "Type the item at that position", "Paste here", "Write your answer", "My
+// answer …". Driving answer-column detection off this (not the narrow form) is what stops whole
+// answer tables silently degrading to read-only prose with no input boxes.
+const PROMPT = /^\s*(?:type|write|paste|draw|sketch|enter|fill)\b|\b(?:your|my)\s+answers?\b|\banswer\s*(?:here|below)\b/i;
+// A body cell that is ITSELF a fill-in placeholder ("Type here", "Paste here", "Type your answer
+// here"). Deliberately stricter than PROMPT — it must end in a placeholder noun — so a question that
+// merely starts with a verb ("Write a sentence about loops") is NOT mistaken for an empty answer box
+// and overwritten with an input.
+const PLACEHOLDER_CELL = /^\s*(?:type|write|paste|draw|sketch|enter)\b.{0,20}\b(?:here|answer|answers|name|date|below|response|box)\b[\s.)]*$|^\s*(?:your|my)\s+answers?\b/i;
 
 // GFM-aware cell split: a `|` only separates cells when it is NOT escaped (`\|`) and NOT inside an
 // inline-code span (`...`). Without this, a cell like "What does `a|b` mean?" splits into phantom
@@ -210,6 +228,10 @@ function textControl(key: string, label: string, placeholder: string, opts: Work
       ? `<div class="ws-answer">${esc(value)}</div>`
       : `<div class="ws-answer ws-empty">—</div>`;
   }
+  if (opts.mode === 'preview') {
+    // The pupil's box, shown empty and disabled — the teacher sees the answer space, can't type in it.
+    return `<textarea class="ws-input" rows="2" placeholder="${esc(placeholder || 'Type your answer here')}" disabled aria-label="${esc(label || 'answer')}"></textarea>`;
+  }
   // A per-field "saved ✓" reassurance (updated by an OOB swap from /me/answer) — anxious pupils
   // need to see their typing was kept.
   return `<textarea class="ws-input" name="value" rows="2" placeholder="${esc(placeholder || 'Type your answer here')}"
@@ -224,7 +246,8 @@ export function savedTick(key: string): string {
 
 function checkControl(key: string, label: string, opts: WorksheetOptions): string {
   const checked = (opts.values?.get(key) ?? '') === 'x';
-  if (opts.mode === 'review') {
+  if (opts.mode !== 'form') {
+    // review (saved state) or preview (always empty) — a disabled, non-saving checkbox.
     return `<li class="md-task"><input type="checkbox" disabled${checked ? ' checked' : ''}> ${esc(label)}</li>`;
   }
   return `<li class="md-task ws-check"><label><input type="checkbox" name="value" value="x"${checked ? ' checked' : ''}
@@ -243,8 +266,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const rows = block.lines.map(cells);
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
-  const answerCol = header.map((c) => PLACEHOLDER.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER.test(c)));
+  const answerCol = header.map((c) => PROMPT.test(c));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {
@@ -252,11 +275,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
     return renderMarkdown(block.lines.join('\n'));
   }
 
-  // Layout A (treat the header as a data row too) only when the placeholder is in the header AND
-  // the answer column has no empty body cells to fill — i.e. it's a label/value sheet, not Q&A.
+  // Layout A (treat the header as a data row too) when the NARROW placeholder ("type … here") is in
+  // the header AND the answer column has no empty body cells to fill — i.e. it's a label/value sheet,
+  // not Q&A. Also when there are no body rows at all (e.g. "| Screenshot | Paste here |") — then the
+  // header IS the only fillable row, so render it as data or there'd be nowhere to type.
   const headerHasPlaceholder = header.some((c) => PLACEHOLDER.test(c));
   const answerColHasEmptyBody = answerCol.some((isA, c) => isA && bodyRows.some((r) => (r[c] ?? '').trim() === ''));
-  const headerIsData = headerHasPlaceholder && !answerColHasEmptyBody;
+  const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasEmptyBody;
 
   const theadCells = headerIsData ? null : header;
   // Iterate the FULL column count (header or widest row) so a ragged row missing its trailing
@@ -268,16 +293,40 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // numbered among body rows (r1, r2, …) regardless of the flip, and a header rendered as a data
   // row (name/date layout) gets the fixed key r0. Only the header input appears/disappears on a
   // flip; body-row keys never move.
+  const localFields: WorksheetField[] = [];
+  let autoFilledCells = 0; // auto-filled name/date cells render output but emit no field — count them
   const renderRow = (row: string[], rowNo: number): string => {
     const tds = Array.from({ length: colCount }, (_, c) => {
       const cell = row[c] ?? '';
       const colNo = c + 1;
-      const isInput = answerCol[c] || PLACEHOLDER.test(cell);
+      const placeholder = PLACEHOLDER_CELL.test(cell);
+      // An input is rendered for an answer-column cell that is EMPTY or a placeholder, or for any
+      // cell that is itself a placeholder. A filled, non-placeholder cell is preserved as text — so
+      // a reference column that merely shares an answer column's table never loses its content.
+      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder)) || placeholder;
       if (!isInput) return `<td>${esc(cell)}</td>`;
       const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
-      const label = row.find((x, ci) => ci !== c && !PLACEHOLDER.test(x)) ?? (theadCells?.[c] ?? '');
-      fields.push({ key, kind: 'text', level: block.level, label });
-      return `<td class="ws-answer-cell">${textControl(key, label, PLACEHOLDER.test(cell) ? cell : '', opts)}</td>`;
+      const label = row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? (theadCells?.[c] ?? '');
+      // The name/date identity header is known online — auto-fill it read-only (no field emitted, so
+      // it isn't counted as something the pupil must do). Tightly matched to the identity header
+      // ("Name"/"Date" label, or a "Type your name/date here" placeholder) so a real question that
+      // merely mentions "name"/"date" is never auto-filled.
+      if (opts.autofill && opts.mode !== 'review') {
+        const lbl = label.trim().toLowerCase();
+        const cellLc = cell.trim().toLowerCase();
+        const auto =
+          lbl === 'name' || /^type\s+(?:your\s+)?name\b/.test(cellLc)
+            ? opts.autofill.name
+            : lbl === 'date' || /^type\s+(?:the\s+)?date\b/.test(cellLc)
+              ? opts.autofill.date
+              : undefined;
+        if (auto != null) {
+          autoFilledCells += 1;
+          return `<td class="ws-answer-cell"><div class="ws-answer ws-auto" title="filled in automatically">${esc(auto)}</div></td>`;
+        }
+      }
+      localFields.push({ key, kind: 'text', level: block.level, label });
+      return `<td class="ws-answer-cell">${textControl(key, label, placeholder ? cell : '', opts)}</td>`;
     });
     return `<tr>${tds.join('')}</tr>`;
   };
@@ -288,6 +337,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   if (headerIsData) out.push(renderRow(header, 0)); // header-as-data is the fixed r0 row
   bodyRows.forEach((row, i) => out.push(renderRow(row, i + 1)));
   out.push('</tbody></table>');
+
+  // A header started with an answer verb but every cell turned out to hold real content (a reference
+  // table, not Q&A) → no inputs AND no auto-filled cells emitted. Fall back to a plain read-only table
+  // so nothing is lost and no phantom field keys leak into the marking inventory. (An all-name/date
+  // table emits no fields but IS rendered — the auto-filled count keeps it off the fallback.)
+  if (localFields.length === 0 && autoFilledCells === 0) return renderMarkdown(block.lines.join('\n'));
+  fields.push(...localFields);
   return out.join('');
 }
 

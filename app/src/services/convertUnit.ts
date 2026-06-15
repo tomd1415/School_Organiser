@@ -48,6 +48,7 @@ function lessonNumber(name: string): number {
 
 export interface SourceLesson {
   title: string; // cleaned lesson folder name
+  dir: string; // the RAW lesson folder name (matches the imported `change_note` path, for image carry-over)
   files: string[]; // file names within the lesson folder (deduped, capped by caller if needed)
 }
 
@@ -67,5 +68,5 @@ export function lessonStructure(relPaths: string[], unitFolder: string): SourceL
   }
   return [...filesByLesson.entries()]
     .sort((a, b) => lessonNumber(a[0]) - lessonNumber(b[0]) || a[0].localeCompare(b[0]))
-    .map(([dir, files]) => ({ title: cleanLessonTitle(dir), files: [...files].sort() }));
+    .map(([dir, files]) => ({ title: cleanLessonTitle(dir), dir, files: [...files].sort() }));
 }

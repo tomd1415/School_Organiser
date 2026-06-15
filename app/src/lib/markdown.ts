@@ -10,7 +10,11 @@ function inline(text: string): string {
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
-  s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img class="md-img" src="$2" alt="$1">');
+  // Images: allow absolute http(s), root-relative app paths (e.g. /resources/12/view — but NOT
+  // protocol-relative //host) and data:image URIs. The scheme/shape is restricted so a javascript:
+  // or other unsafe URL can never reach src; a bare relative path is left as text, not guessed at.
+  // Previously only http(s) images rendered, so app-hosted worksheet images silently disappeared.
+  s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+|\/(?!\/)[^)\s]*|data:image\/[a-z0-9.+-]+;base64,[a-z0-9+/=\s]+)\)/gi, '<img class="md-img" src="$2" alt="$1" loading="lazy">');
   s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
   return s;
 }

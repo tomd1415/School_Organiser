@@ -12,5 +12,10 @@ declare module '@fastify/secure-session' {
     pupilId: number;
     pupilGroupId: number;
     lastSeen: number;
+    // Test-pupil overlay on a teacher session (drive the pupil surface for any lesson/level)
+    testPupilId: number;
+    testLessonId: number;
+    testDate: string;
+    testLevel: 'support' | 'core' | 'challenge';
   }
 }
