@@ -93,12 +93,19 @@ describe('Phase 9 marking pipeline (integration)', () => {
     expect(s.awarded).toBe(3); // 2 (keyword 'sequence' + 'items' → but single point worth 2) + 1 (tick)
     expect(s.total).toBe(3);
     expect(s.suggested).toBe(2); // both unconfirmed
+    // The CSV export uses the CONFIRMED-only sums (#19) — nothing confirmed yet, so they're 0.
+    expect(s.confirmedAwarded).toBe(0);
+    expect(s.confirmedTotal).toBe(0);
   });
 
   it('marks are suggestions until confirmed; results hidden from the pupil until then', async () => {
     expect(await pupilLessonResults(pupil, oc)).toBeNull(); // nothing confirmed yet
     const n = await confirmAllConfident(oc);
     expect(n).toBe(2);
+    // Now confirmed → the CSV's confirmed-only sums reflect the real attainment (#19).
+    const sc = (await markSummaries(oc)).get(pupil)!;
+    expect(sc.confirmedAwarded).toBe(3);
+    expect(sc.confirmedTotal).toBe(3);
     const res = await pupilLessonResults(pupil, oc); // instant mode (default) → visible once confirmed
     expect(res).not.toBeNull();
     expect(res!.awarded).toBe(3);

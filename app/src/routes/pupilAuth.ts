@@ -7,9 +7,27 @@ import { getSetting } from '../repos/settings';
 import { allowAttempt } from '../auth/rateLimit';
 import { listLoginNames, pupilInGroup, resolveGroupByCode, verifyPin, getPupilName } from '../repos/pupilCredentials';
 import { marksEnabled } from '../auth/marksGate';
-import { resumeDevice, pupilPrimaryGroup, devicesEnabledForGroup } from '../repos/pupilDevices';
+import { resumeDevice, pupilPrimaryGroup, pupilGroupInSlot, devicesEnabledForGroup } from '../repos/pupilDevices';
+import { resolveNow } from '../services/clock';
+import { getClockContext } from '../repos/clock';
 
 const DEVICE_COOKIE = 'pupil_device';
+
+// The class a remembered device should resume into: the pupil's group whose lesson is on RIGHT NOW
+// (so a multi-class pupil lands in the actual lesson), else their primary enrolment. Keeps the device
+// itself pupil-bound (school-wide) while fixing the wrong-class landing.
+async function resumeGroupFor(pupilId: number): Promise<number | null> {
+  try {
+    const state = resolveNow(new Date(), await getClockContext());
+    if (state.isSchoolDay && state.current) {
+      const g = await pupilGroupInSlot(pupilId, state.weekday, state.current.slotOrder);
+      if (g) return g;
+    }
+  } catch {
+    /* fall through to primary */
+  }
+  return pupilPrimaryGroup(pupilId);
+}
 
 export async function pupilAccessEnabled(): Promise<boolean> {
   return (await getSetting('pupil_access_enabled').catch(() => null)) === 'true';
@@ -73,7 +91,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     const deviceSecret = req.cookies?.[DEVICE_COOKIE];
     if (deviceSecret && (await marksEnabled())) {
       const pupilId = await resumeDevice(deviceSecret);
-      const grp = pupilId ? await pupilPrimaryGroup(pupilId) : null;
+      const grp = pupilId ? await resumeGroupFor(pupilId) : null;
       // Re-check the class still allows remembered devices — a teacher who turned it off (and the
       // revoke) means this device should fall back to the normal login.
       if (pupilId && grp && (await devicesEnabledForGroup(grp))) {
@@ -108,7 +126,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
       reply.clearCookie(DEVICE_COOKIE, { path: '/' });
       return reply.redirect('/pupil');
     }
-    const groupId = await pupilPrimaryGroup(pupilId);
+    const groupId = await resumeGroupFor(pupilId);
     if (!groupId || !(await devicesEnabledForGroup(groupId))) {
       reply.clearCookie(DEVICE_COOKIE, { path: '/' });
       reply.header('HX-Redirect', '/pupil');

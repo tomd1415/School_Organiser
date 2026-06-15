@@ -88,7 +88,10 @@ function feedbackWidget(oc: number, fb: { rating: number | null; liked: string; 
 // 9.5 — a pupil's released results: a kind comment, then big ✓/✗/◐ per answer with a "try this"
 // line. Ticks-only by default (no scores) — two-stars-and-a-wish, never any class comparison.
 function resultsCard(r: PupilResults): string {
-  const mark = (a: number, t: number): string => (t > 0 && a >= t ? '<span class="rc-ok">✓</span>' : a <= 0 ? '<span class="rc-no">✗</span>' : '<span class="rc-part">◐</span>');
+  // No mark for a zero-weight / non-markable point (t === 0) — a "✗" there reads as "wrong" when there
+  // was nothing to get. ✓ full marks · ✗ scored zero of >0 · ◐ partial.
+  const mark = (a: number, t: number): string =>
+    t <= 0 ? '' : a >= t ? '<span class="rc-ok">✓</span>' : a <= 0 ? '<span class="rc-no">✗</span>' : '<span class="rc-part">◐</span>';
   const items = r.items
     .map((i) => {
       // Always give a kind line — never a bare ✗. Use the teacher/AI feedback if present, else a

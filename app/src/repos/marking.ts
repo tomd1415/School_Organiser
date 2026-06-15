@@ -222,6 +222,8 @@ export interface MarkSummary {
   pupilId: number;
   awarded: number;
   total: number;
+  confirmedAwarded: number; // sums over CONFIRMED marks only — the defensible "attainment" figure
+  confirmedTotal: number;
   marked: number;
   suggested: number; // unconfirmed
   needsReview: number;
@@ -231,6 +233,8 @@ export async function markSummaries(occurrenceCourseId: number): Promise<Map<num
     `SELECT a.pupil_id AS "pupilId",
             COALESCE(sum(m.marks_awarded), 0)::int AS awarded,
             COALESCE(sum(m.marks_total), 0)::int AS total,
+            COALESCE(sum(m.marks_awarded) FILTER (WHERE m.status = 'confirmed'), 0)::int AS "confirmedAwarded",
+            COALESCE(sum(m.marks_total) FILTER (WHERE m.status = 'confirmed'), 0)::int AS "confirmedTotal",
             count(m.*)::int AS marked,
             count(*) FILTER (WHERE m.status = 'suggested')::int AS suggested,
             count(*) FILTER (WHERE m.needs_review)::int AS "needsReview"

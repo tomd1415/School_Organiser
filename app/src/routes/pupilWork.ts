@@ -172,7 +172,7 @@ async function buildGrid(oc: number, info: OcInfo, msg?: string): Promise<BuiltG
       return `<tr id="pw-row-${oc}-${r.pupilId}">
         <td><button type="button" class="link" hx-get="/lesson/oc/${oc}/pupil/${r.pupilId}/work" hx-target="#pw-readback-${oc}" hx-swap="innerHTML">${esc(r.displayName)}</button>${r.unseen > 0 ? ` <span class="pw-new" title="${r.unseen} new">●</span>` : ''}</td>
         <td>${levelChips(oc, r.pupilId, r.level)}</td>
-        <td class="pw-prog">${r.filled}${m ? ` / ${m}` : ''}</td>
+        <td class="pw-prog">${m ? `${Math.min(r.filled, m)} / ${m}` : r.filled}</td>
         <td>${r.done ? '✓' : ''}</td>
         ${marking ? markCell(oc, r.pupilId, summaries.get(r.pupilId), released, showScores) : ''}
         <td>${r.rating ? ['', '🙁', '😐', '🙂', '😀'][r.rating] : ''}</td>
@@ -641,7 +641,8 @@ async function renderAnswerPack(oc: number): Promise<string> {
     <div class="answer-pack">${cards || '<p>No questions.</p>'}</div></body></html>`;
 }
 
-/** Marks CSV for the class: pupil, then awarded/total per field, plus a row total. */
+/** Marks CSV for the class: the awarded/total are CONFIRMED marks only (the defensible attainment
+ *  figure), with a "pending" column so unconfirmed AI suggestions are never read as final. */
 async function marksCsv(oc: number): Promise<string> {
   const rows = await pupilWorkRowsWithMarks(oc);
   // Quote as needed AND neutralise CSV formula-injection (a name starting = + - @ tab CR).
@@ -649,16 +650,21 @@ async function marksCsv(oc: number): Promise<string> {
     const v = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
     return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
   };
-  const lines = ['pupil,awarded,total'];
-  for (const r of rows) lines.push(`${esc2(r.displayName)},${r.awarded},${r.total}`);
+  const lines = ['pupil,awarded,total,pending_confirmation'];
+  for (const r of rows) lines.push(`${esc2(r.displayName)},${r.awarded},${r.total},${r.pending}`);
   return lines.join('\n') + '\n';
 }
 
-async function pupilWorkRowsWithMarks(oc: number): Promise<Array<{ displayName: string; awarded: number; total: number }>> {
+async function pupilWorkRowsWithMarks(oc: number): Promise<Array<{ displayName: string; awarded: number; total: number; pending: number }>> {
   const info = await ocInfo(oc);
   if (!info) return [];
   const grid = await pupilWorkRows(oc, info.groupCourseId);
   const sums = await markSummaries(oc);
-  return grid.map((g) => ({ displayName: g.displayName, awarded: sums.get(g.pupilId)?.awarded ?? 0, total: sums.get(g.pupilId)?.total ?? 0 }));
+  return grid.map((g) => {
+    const s = sums.get(g.pupilId);
+    // Export CONFIRMED marks only; surface how many marks are still unconfirmed so the export is never
+    // mistaken for final attainment when AI suggestions are still awaiting the teacher's review.
+    return { displayName: g.displayName, awarded: s?.confirmedAwarded ?? 0, total: s?.confirmedTotal ?? 0, pending: s?.suggested ?? 0 };
+  });
 }
 

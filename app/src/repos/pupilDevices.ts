@@ -82,6 +82,24 @@ export async function devicesEnabledForGroup(groupId: number): Promise<boolean> 
   return (rows[0]?.n ?? 0) > 0;
 }
 
+/** The pupil's enrolled group that has a lesson in the given (weekday, slot) — so a remembered-device
+ *  resume lands in the lesson actually happening now, not just the lowest-id enrolment (a multi-class
+ *  pupil otherwise resumed into the wrong class). Returns null when none is on right now. */
+export async function pupilGroupInSlot(pupilId: number, weekday: number, slotOrder: number): Promise<number | null> {
+  const { rows } = await pool.query<{ groupId: number }>(
+    `SELECT e.group_id AS "groupId"
+     FROM enrolments e
+     JOIN groups g ON g.id = e.group_id AND g.active AND g.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+     JOIN timetabled_lessons tl ON tl.group_id = e.group_id AND tl.purpose IN ('teaching', 'form')
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+        AND p.weekday = $2 AND p.slot_order = $3
+        AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+     WHERE e.pupil_id = $1 AND e.active ORDER BY e.id LIMIT 1`,
+    [pupilId, weekday, slotOrder],
+  );
+  return rows[0]?.groupId ?? null;
+}
+
 /** A pupil's primary enrolled group (for resuming a session without a class code). */
 export async function pupilPrimaryGroup(pupilId: number): Promise<number | null> {
   const { rows } = await pool.query<{ groupId: number }>(
