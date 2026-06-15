@@ -911,6 +911,30 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 [data-theme="dark"] .pupil-body .ws-cloze { background: #20283a; border-left-color: #caa92e; }
 [data-theme="dark"] .pupil-body .ws-blank { background: #232838; color: var(--ink); border-bottom-color: #5b8def; }
 [data-theme="dark"] .pupil-body .ws-chip { background: #1d2740; border-color: var(--line); color: var(--ink); }
+/* Matching — drag an answer tile into a prompt's box, or tap a tile then a box (keyboard/touch). */
+.ws-match { margin: 0.7rem 0; }
+.ws-match-help { color: var(--muted); font-size: 0.95rem; margin: 0 0 0.5rem; }
+.ws-match-grid { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: flex-start; }
+.ws-match-slots { list-style: none; margin: 0; padding: 0; flex: 1 1 16rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.ws-match-row { display: flex; align-items: center; gap: 0.6rem; }
+.ws-match-prompt { flex: 0 0 9rem; font-weight: 600; }
+.ws-match-slot { flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; border: 2px dashed #cdd6e3; border-radius: 10px; padding: 0.3rem 0.6rem; background: #fffef8; cursor: pointer; }
+.ws-match-slot:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.ws-match-slot.is-drop { border-color: var(--accent); background: #eef4fb; }
+.ws-match-empty { color: var(--muted); font-size: 0.95rem; }
+.ws-match-placed { font-weight: 600; }
+.ws-match-clear { background: none; border: 0; color: #b4451f; font-size: 1rem; cursor: pointer; padding: 0 0.3rem; }
+.ws-match-tray { list-style: none; margin: 0; padding: 0.5rem; flex: 1 1 12rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; background: #f3faf4; border-radius: 10px; }
+.ws-match-tile { border: 2px solid #7bbf7b; background: #eef8ee; border-radius: 999px; padding: 0.4rem 0.9rem; min-height: 44px; display: inline-flex; align-items: center; cursor: grab; font-size: 1.05rem; }
+.ws-match-tile:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.ws-match-tile.is-picked { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-1px); }
+.ws-match-tile.is-used { opacity: 0.5; }
+.ws-match-review .ws-match-slot { border-style: solid; cursor: default; background: #fffdf3; }
+[data-contrast="high"] .ws-match-slot, [data-contrast="high"] .ws-match-tile, [data-contrast="high"] .ws-match-tray { background: #fff; border-color: #000; }
+[data-theme="dark"] .pupil-body .ws-match-slot { background: #232838; border-color: var(--line); }
+[data-theme="dark"] .pupil-body .ws-match-slot.is-drop { background: #1d2740; border-color: #5b8def; }
+[data-theme="dark"] .pupil-body .ws-match-tray { background: #1c2c22; }
+[data-theme="dark"] .pupil-body .ws-match-tile { background: #1c2c22; border-color: #3a6b46; color: var(--ink); }
 /* 💡 paste-help modal + practice box */
 .paste-help { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 1200; padding: 1rem; }
 .paste-help[hidden] { display: none; }

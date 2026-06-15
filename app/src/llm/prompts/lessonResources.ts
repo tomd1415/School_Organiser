@@ -2,7 +2,7 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@10'; // @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@11'; // @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -34,7 +34,10 @@ export const LESSON_RESOURCES_SYSTEM =
   '"[[ ]]" (the pupil types into the gap), e.g. "The CPU does [[ ]] and RAM stores [[ ]]."; you may add ' +
   'a "Word bank: word1 · word2" line of the jumbled answer words to support pupils. List the gap ' +
   'answers IN ORDER in the "answers" document; NEVER write the answer inside the worksheet gap. ' +
-  '• SCREENSHOT tasks where the pupil ' +
+  '• MATCHING (pair each item to its answer) — a two-column table whose LEFT cell is each item and ' +
+  'whose RIGHT cell lists the SAME options for EVERY row, each preceded by "( )" (e.g. every row ' +
+  '"( ) does calculations ( ) stores data ( ) stores files"); the pupil drags one answer onto each ' +
+  'item. Put each correct pairing in the "answers" document. • SCREENSHOT tasks where the pupil ' +
   'shows practical work — a two-column table whose right cell is EXACTLY "📷 Paste a screenshot here". ' +
   '• a short tick-box success checklist (- [ ]) at the END of the level. Do NOT add a name/date header ' +
   '— the pupil\'s name and the date are filled in automatically online.\n' +

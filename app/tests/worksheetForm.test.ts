@@ -219,6 +219,49 @@ Word bank: data · calculations
   });
 });
 
+describe('worksheetForm — matching (shared-option choice table → drag-and-drop)', () => {
+  const MD = `# Match
+
+| Match the component | Type your answer here |
+|---|---|
+| CPU | ( ) does calculations ( ) stores data ( ) stores files |
+| RAM | ( ) does calculations ( ) stores data ( ) stores files |
+| SSD | ( ) does calculations ( ) stores data ( ) stores files |
+`;
+
+  it('renders a matching widget but keeps the same t.r.c choice keys as radios would', () => {
+    const r = renderWorksheet(MD, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).toContain('class="ws-match"');
+    expect(r.html).toContain('ws-match-slot');
+    expect(r.html).toContain('ws-match-tile');
+    expect(r.html).toContain('data-save-url="/me/answer?oc=5&amp;key=t1.r1.c2"');
+    const fields = renderWorksheet(MD, { mode: 'review' }).fields.filter((f) => f.kind === 'choice');
+    expect(fields.map((f) => f.key)).toEqual(['t1.r1.c2', 't1.r2.c2', 't1.r3.c2']);
+    expect(fields[0]!.options).toEqual(['does calculations', 'stores data', 'stores files']);
+  });
+
+  it('answer tiles are sorted so their position never reveals the pairing', () => {
+    const md = `| Match | Type your answer here |\n|---|---|\n| A | ( ) zebra ( ) apple ( ) mango |\n| B | ( ) zebra ( ) apple ( ) mango |\n`;
+    const html = renderWorksheet(md, { mode: 'form' }).html;
+    expect(html.indexOf('>apple<')).toBeLessThan(html.indexOf('>mango<'));
+    expect(html.indexOf('>mango<')).toBeLessThan(html.indexOf('>zebra<'));
+  });
+
+  it('choice rows with DIFFERENT options are not matching (stay per-row radios)', () => {
+    const md = `| Q | Type your answer here |\n|---|---|\n| One | ( ) a ( ) b |\n| Two | ( ) c ( ) d |\n`;
+    const html = renderWorksheet(md, { mode: 'form' }).html;
+    expect(html).not.toContain('ws-match');
+    expect(html).toContain('type="radio"');
+  });
+
+  it('review shows the placed answers and no draggable tray', () => {
+    const review = renderWorksheet(MD, { mode: 'review', values: new Map([['t1.r1.c2', 'does calculations']]) });
+    expect(review.html).toContain('ws-match-review');
+    expect(review.html).toContain('does calculations');
+    expect(review.html).not.toContain('ws-match-tile');
+  });
+});
+
 // Locks the structure real generated worksheets use: level "## " sections, "###" subtasks,
 // fenced code containing `#` Python comments and the word "Challenge", and answer tables inside
 // each level — the exact shapes that previously broke level detection.

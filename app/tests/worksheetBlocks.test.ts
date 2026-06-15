@@ -85,6 +85,12 @@ Type your answers in the boxes.
     expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
     expect((fieldSig(md).match(/:blank/g) ?? []).length).toBe(2);
   });
+
+  it('a matching table (shared-option choice rows) round-trips with stable choice keys', () => {
+    const md = `| Match | Type your answer here |\n|---|---|\n| CPU | ( ) calc ( ) store |\n| RAM | ( ) calc ( ) store |\n`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect((fieldSig(md).match(/:choice/g) ?? []).length).toBe(2);
+  });
 });
 
 describe('worksheetBlocks — parse classifies blocks', () => {

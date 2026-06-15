@@ -376,6 +376,62 @@ function choiceControl(key: string, label: string, options: string[], opts: Work
   return `<form class="ws-choice-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none">${group}<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></form>`;
 }
 
+/** A MATCHING table is a 2-column table whose every answer cell is a choice over the SAME option set:
+ * the left column is the prompt to match, the right is the (repeated) pool of answers. Returns the row
+ * prompts + the shared options, or null if it isn't that shape. Each row stays a normal t.r.c choice
+ * field — matching is only a different WIDGET, so the keys and marking are unchanged from radios. */
+function detectMatching(bodyRows: string[][]): { prompts: string[]; options: string[] } | null {
+  if (bodyRows.length < 2) return null;
+  const first = bodyRows[0]![1] ?? '';
+  if (!isChoiceCell(first)) return null;
+  const options = choiceOptions(first);
+  if (options.length < 2) return null;
+  const sig = options.join('');
+  const prompts: string[] = [];
+  for (const r of bodyRows) {
+    const prompt = (r[0] ?? '').trim();
+    const cell = r[1] ?? '';
+    if (prompt === '' || !isChoiceCell(cell) || choiceOptions(cell).join('') !== sig) return null;
+    prompts.push(prompt);
+  }
+  return { prompts, options };
+}
+
+/** Render a matching table as a drag-and-drop (and tap/keyboard) widget: a column of prompt → drop-slot
+ * rows beside a tray of answer tiles (sorted, so position never reveals the pairing). pupil.js wires
+ * the interaction; each slot autosaves the placed answer to its choice field via /me/answer. */
+function renderMatching(tableIdx: number, rows: WorksheetField[], options: string[], opts: WorksheetOptions): string {
+  const sorted = [...options].sort((a, b) => a.localeCompare(b));
+  const slots = rows
+    .map((f) => {
+      const value = (opts.values?.get(f.key) ?? '').trim();
+      const pid = `ws-mp-${tableIdx}-${esc(f.key)}`;
+      const prompt = `<span class="ws-match-prompt" id="${pid}">${esc(f.label)}</span>`;
+      if (opts.mode === 'review') {
+        const placed = value !== '' ? `<span class="ws-match-placed">${esc(value)}</span>` : `<span class="ws-match-empty">—</span>`;
+        return `<li class="ws-match-row">${prompt}<span class="ws-match-slot">${placed}</span></li>`;
+      }
+      const inert = opts.mode === 'preview';
+      const inside =
+        value !== ''
+          ? `<span class="ws-match-placed">${esc(value)}</span>${inert ? '' : '<button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>'}`
+          : `<span class="ws-match-empty">drop an answer here</span>`;
+      const attrs = inert
+        ? 'aria-disabled="true"'
+        : `tabindex="0" role="button" data-key="${esc(f.key)}" data-save-url="${esc(saveUrl(opts.action, f.key))}"`;
+      return `<li class="ws-match-row">${prompt}<div class="ws-match-slot" ${attrs} aria-labelledby="${pid}">${inside}</div></li>`;
+    })
+    .join('');
+  if (opts.mode === 'review') return `<div class="ws-match ws-match-review"><ol class="ws-match-slots">${slots}</ol></div>`;
+  const inert = opts.mode === 'preview';
+  const tiles = sorted
+    .map((o) => `<li class="ws-match-tile" ${inert ? 'aria-disabled="true"' : 'tabindex="0" role="button" draggable="true"'} data-label="${esc(o)}">${esc(o)}</li>`)
+    .join('');
+  const help = inert ? '' : '<p class="ws-match-help">Drag each answer into its box — or tap an answer, then tap a box.</p>';
+  const live = inert ? '' : '<span class="ws-sr-only" aria-live="polite" data-match-live></span>';
+  return `<div class="ws-match" data-match="${tableIdx}">${help}<div class="ws-match-grid"><ol class="ws-match-slots">${slots}</ol><ul class="ws-match-tray" aria-label="Answers to place">${tiles}</ul></div>${live}</div>`;
+}
+
 /** A fill-in-the-blank input, embedded inline in instruction prose. Autosaves like a typed answer. */
 function blankInput(key: string, opts: WorksheetOptions): string {
   const value = opts.values?.get(key) ?? '';
@@ -428,6 +484,18 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
     }),
   );
   const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasFillBody;
+
+  // MATCHING widget: a clean 2-column table whose every answer cell is a choice over the SAME options
+  // (left = prompt, right = the repeated answer pool). Each row keeps its normal t{n}.r{1..}.c2 choice
+  // key — only the WIDGET differs from per-row radios, so marking is identical.
+  if (!headerIsData && header.length === 2) {
+    const m = detectMatching(bodyRows);
+    if (m) {
+      const matchFields: WorksheetField[] = m.prompts.map((prompt, i) => ({ key: `t${tableIdx}.r${i + 1}.c2`, kind: 'choice', level: block.level, label: prompt, options: m.options }));
+      fields.push(...matchFields);
+      return renderMatching(tableIdx, matchFields, m.options, opts);
+    }
+  }
 
   const theadCells = headerIsData ? null : header;
   // Iterate the FULL column count (header or widest row) so a ragged row missing its trailing

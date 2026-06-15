@@ -112,7 +112,20 @@
       ac.addEventListener('click', function () { b.rows.push({ q: '', kind: 'choice', options: ['', ''] }); render(); markDirty(); });
       var as = el('button', 'btn-soft', '+ screenshot task'); as.type = 'button';
       as.addEventListener('click', function () { b.rows.push({ q: '', kind: 'screenshot' }); render(); markDirty(); });
-      var bar = el('div', 'ws-ed-rowbar'); bar.appendChild(aq); bar.appendChild(ac); bar.appendChild(as); body.appendChild(bar);
+      var bar = el('div', 'ws-ed-rowbar'); bar.appendChild(aq); bar.appendChild(ac); bar.appendChild(as);
+      // When ≥2 rows are multiple-choice, offer to give them ALL the same options — that turns the
+      // table into a drag-and-drop matching question (the pupil pairs each item to one shared answer).
+      if ((b.rows || []).filter(function (r) { return r.kind === 'choice'; }).length >= 2) {
+        var sync = el('button', 'btn-soft', '⇅ same options (matching)'); sync.type = 'button';
+        sync.title = "Copy the first choice row's options to every choice row — makes a matching question";
+        sync.addEventListener('click', function () {
+          var base = ((b.rows.filter(function (r) { return r.kind === 'choice'; })[0] || {}).options || []).slice();
+          b.rows.forEach(function (r) { if (r.kind === 'choice') r.options = base.slice(); });
+          render(); markDirty();
+        });
+        bar.appendChild(sync);
+      }
+      body.appendChild(bar);
     }
     return body;
   }
@@ -248,6 +261,11 @@
     ['+ Multiple choice', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['', '', ''] }] }); }],
     ['+ True / False', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['True', 'False'] }] }); }],
     ['+ Fill the blanks', function () { addBlock({ type: 'text', text: 'The [[ ]] does calculations.' }); }],
+    ['+ Matching', function () { addBlock({ type: 'qtable', rows: [
+      { q: 'Item 1', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
+      { q: 'Item 2', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
+      { q: 'Item 3', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
+    ] }); }],
     ['+ Screenshot task', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'screenshot' }] }); }],
     ['+ Checklist', function () { addBlock({ type: 'checklist', items: [''] }); }],
     ['+ Heading', function () { addBlock({ type: 'heading', depth: 2, text: '' }); }],

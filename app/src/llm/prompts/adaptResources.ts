@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@8'; // @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@9'; // @9: matching (a choice table sharing one option set). @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
 
 export const ADAPT_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents for ONE ' +
@@ -21,7 +21,8 @@ export const ADAPT_RESOURCES_SYSTEM =
   'two-column table (question | empty "Type your answer here" cell); MULTIPLE-CHOICE / TRUE-FALSE as a ' +
   'table whose right cell lists 2–4 options each preceded by "( )" ("( ) RAM ( ) CPU ( ) SSD"); ' +
   'FILL-IN-THE-BLANKS as a sentence with each gap written "[[ ]]" (optionally a "Word bank: …" line); ' +
-  'SCREENSHOT tasks as a table whose ' +
+  'MATCHING as a two-column table where every row\'s right cell lists the SAME "( )" options (the pupil ' +
+  'pairs each left item to one); SCREENSHOT tasks as a table whose ' +
   'right cell is EXACTLY "📷 Paste a screenshot here"; a "- [ ]" success checklist per level. NEVER blank ' +
   'lines/underscores as answer spaces; say "type" not "write"; no name/date header (auto-filled online).\n' +
   '(3) "ta_notes" — SEPARATE TA/teacher guidance (how to support each level, misconceptions, expected ' +

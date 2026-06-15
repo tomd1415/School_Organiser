@@ -110,13 +110,15 @@
       var checks = card.querySelectorAll('.ws-check input[type=checkbox]');
       var choices = card.querySelectorAll('.ws-choice-form');
       var blanks = card.querySelectorAll('.ws-blank');
-      var total = texts.length + checks.length + choices.length + blanks.length;
+      var slots = card.querySelectorAll('.ws-match-slot[data-key]');
+      var total = texts.length + checks.length + choices.length + blanks.length + slots.length;
       if (total === 0) { chip.textContent = ''; return; }
       var done = 0;
       texts.forEach(function (t) { if ((t.value || '').trim()) done++; });
       checks.forEach(function (c) { if (c.checked) done++; });
       choices.forEach(function (f) { if (f.querySelector('input[type=radio]:checked')) done++; });
       blanks.forEach(function (b) { if ((b.value || '').trim()) done++; });
+      slots.forEach(function (s) { if (s.querySelector('.ws-match-placed')) done++; });
       chip.textContent = done >= total ? 'All done — great work! (' + done + ' of ' + total + ') ✓' : "You've done " + done + ' of ' + total + ' — keep going!';
       chip.classList.toggle('ws-progress-done', done >= total);
     });
@@ -282,5 +284,63 @@
       e.preventDefault();
       uploadShot(zone, file);
     });
+  }
+
+  // ── Matching: drag a tile into a box, OR tap/keyboard "pick an answer, then a box" (the accessible
+  // baseline that also serves touch). Each box autosaves its placed answer to its choice field.
+  if (main) {
+    var picked = null; // the "picked up" tile (tap/keyboard mode)
+    function widgetOf(elt) { return elt && elt.closest ? elt.closest('.ws-match') : null; }
+    function announce(w, msg) { var lr = w && w.querySelector('[data-match-live]'); if (lr) lr.textContent = msg; }
+    function setPicked(tile) {
+      if (picked) { picked.classList.remove('is-picked'); picked.setAttribute('aria-pressed', 'false'); }
+      picked = tile || null;
+      if (picked) { picked.classList.add('is-picked'); picked.setAttribute('aria-pressed', 'true'); announce(widgetOf(picked), 'Picked up ' + picked.getAttribute('data-label') + '. Now tap a box.'); }
+    }
+    function refreshTray(w) {
+      var used = {};
+      w.querySelectorAll('.ws-match-slot .ws-match-placed').forEach(function (p) { used[p.textContent] = true; });
+      w.querySelectorAll('.ws-match-tile').forEach(function (t) { t.classList.toggle('is-used', !!used[t.getAttribute('data-label')]); });
+    }
+    function saveSlot(slot, value) {
+      var url = slot.getAttribute('data-save-url'); if (!url) return;
+      fetch(url, { method: 'POST', headers: { 'x-csrf-token': csrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'value=' + encodeURIComponent(value), credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw r.status; dirty = false; })
+        .catch(function () { document.body.dispatchEvent(new Event('app:save-failed')); });
+    }
+    function place(slot, label) {
+      slot.innerHTML = '<span class="ws-match-placed"></span><button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>';
+      slot.querySelector('.ws-match-placed').textContent = label; // textContent → never HTML
+      saveSlot(slot, label);
+      var w = widgetOf(slot); refreshTray(w); announce(w, label + ' placed.'); updateProgress();
+    }
+    function clearSlot(slot) {
+      slot.innerHTML = '<span class="ws-match-empty">drop an answer here</span>';
+      saveSlot(slot, '');
+      var w = widgetOf(slot); refreshTray(w); announce(w, 'Box cleared.'); updateProgress();
+    }
+    main.addEventListener('click', function (e) {
+      var clr = e.target.closest('.ws-match-clear');
+      if (clr) { e.preventDefault(); clearSlot(clr.closest('.ws-match-slot')); setPicked(null); return; }
+      var tile = e.target.closest('.ws-match-tile');
+      if (tile && !tile.hasAttribute('aria-disabled')) { setPicked(picked === tile ? null : tile); return; }
+      var slot = e.target.closest('.ws-match-slot');
+      if (slot && slot.hasAttribute('data-key') && picked) { place(slot, picked.getAttribute('data-label')); setPicked(null); }
+    });
+    main.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      var t = e.target;
+      if (t.classList && (t.classList.contains('ws-match-tile') || t.classList.contains('ws-match-slot') || t.classList.contains('ws-match-clear'))) { e.preventDefault(); t.click(); }
+    });
+    main.addEventListener('dragstart', function (e) { var t = e.target.closest && e.target.closest('.ws-match-tile'); if (t) { e.dataTransfer.setData('text/plain', t.getAttribute('data-label')); e.dataTransfer.effectAllowed = 'copy'; } });
+    main.addEventListener('dragover', function (e) { var s = e.target.closest && e.target.closest('.ws-match-slot'); if (s && s.hasAttribute('data-key')) { e.preventDefault(); s.classList.add('is-drop'); } });
+    main.addEventListener('dragleave', function (e) { var s = e.target.closest && e.target.closest('.ws-match-slot'); if (s) s.classList.remove('is-drop'); });
+    main.addEventListener('drop', function (e) {
+      var s = e.target.closest && e.target.closest('.ws-match-slot'); if (!s || !s.hasAttribute('data-key')) return;
+      e.preventDefault(); s.classList.remove('is-drop');
+      var label = e.dataTransfer.getData('text/plain'); if (label) { place(s, label); setPicked(null); }
+    });
+    document.querySelectorAll('.ws-match').forEach(refreshTray);
+    document.body.addEventListener('htmx:afterSwap', function () { document.querySelectorAll('.ws-match').forEach(refreshTray); });
   }
 })();
