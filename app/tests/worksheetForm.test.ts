@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { renderWorksheet } from '../src/lib/worksheetForm';
+import { renderWorksheet, findImagePlaceholders } from '../src/lib/worksheetForm';
+
+describe('worksheetForm — image-gap placeholders (pre-lesson to-do)', () => {
+  it('extracts every `[show: …]` description', () => {
+    const md = `# Lesson\n\n> 🖼️ [show: a binary to denary diagram]\n\nText.\n\n> 🖼️ [show: screenshot of the for loop]\n`;
+    expect(findImagePlaceholders(md)).toEqual(['a binary to denary diagram', 'screenshot of the for loop']);
+  });
+  it('returns nothing when there are no placeholders', () => {
+    expect(findImagePlaceholders('# Lesson\n\nAll good, no images needed.')).toEqual([]);
+  });
+});
 
 // A representative generated worksheet: a name/date header table, shared instructions, three
 // differentiation sections each with an answer table, and a shared success checklist.

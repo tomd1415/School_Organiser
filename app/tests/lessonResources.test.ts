@@ -42,10 +42,10 @@ describe('tidyResourceSet — the reported "only the first slide" bug', () => {
     const { docs, missing } = tidyResourceSet([
       { kind: 'slides', title: 'S', content: '## A\n\n## B' },
       { kind: 'worksheet', title: 'W', content: 'ws' },
-      { kind: 'support', title: 'Sup', content: 'sup' },
+      { kind: 'ta_notes', title: 'TA', content: 'ta' },
       { kind: 'answers', title: 'Ans', content: 'ans' },
     ]);
-    expect(docs.map((d) => d.kind)).toEqual(['slides', 'worksheet', 'support', 'answers']);
+    expect(docs.map((d) => d.kind)).toEqual(['slides', 'worksheet', 'ta_notes', 'answers']);
     expect(slideCount(docs[0]!.content)).toBe(2);
     expect(missing).toEqual([]);
   });
@@ -70,7 +70,7 @@ describe('tidyResourceSet — the reported "only the first slide" bug', () => {
     const r = [
       { kind: 'reference doc', title: 'Doc', content: 'extra' }, // normalises to 'document'
       { kind: 'slides', title: 'S', content: '## A' },
-      { kind: 'support', title: 'Sup', content: 'sup' },
+      { kind: 'ta_notes', title: 'TA', content: 'ta' },
       { kind: 'answers', title: 'Ans', content: 'ans' },
       { kind: 'worksheet', title: 'W', content: 'ws' },
     ];
@@ -78,14 +78,21 @@ describe('tidyResourceSet — the reported "only the first slide" bug', () => {
     const kinds = docs.map((d) => d.kind);
     expect(kinds).toContain('worksheet'); // core kept...
     expect(kinds).toContain('slides');
+    expect(kinds).toContain('ta_notes');
     expect(kinds).not.toContain('document'); // ...the extra is what's dropped
     expect(missing).toEqual([]); // and missing is computed from the kept docs, so it can't lie
   });
 
   it('normaliseResourceKind maps the strays the model produces', () => {
-    expect(normaliseResourceKind('Support worksheet')).toBe('support');
     expect(normaliseResourceKind('answer key')).toBe('answers');
     expect(normaliseResourceKind('teaching slides')).toBe('slides');
+    // The separate TA document, however the model labels it — checked before "answers" (TA notes
+    // contain the answers), and never confused with an "answers" doc.
+    expect(normaliseResourceKind('ta_notes')).toBe('ta_notes');
+    expect(normaliseResourceKind('TA notes')).toBe('ta_notes');
+    expect(normaliseResourceKind('Teaching Assistant guidance')).toBe('ta_notes');
+    expect(normaliseResourceKind('answers')).toBe('answers'); // not mistaken for ta_notes
+    expect(normaliseResourceKind('Support worksheet')).toBe('support'); // legacy kind still recognised
   });
 });
 

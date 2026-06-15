@@ -101,8 +101,8 @@ async function treeHtml(schemeId: number): Promise<string> {
 // Generate/update ONE lesson's resource set (slides outline, worksheet, support, answers) and put
 // each file where it belongs: the resource store, linked to the plan, so it surfaces on the lesson
 // screen and the plan editor. Re-running creates new VERSIONS of the same documents, not copies.
-const RES_KIND_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'support worksheet', answers: 'answers' };
-const RES_KIND_STORE: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'worksheet', answers: 'document' };
+const RES_KIND_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'TA notes', answers: 'answers', support: 'support worksheet' };
+const RES_KIND_STORE: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'ta_notes', answers: 'document', support: 'worksheet' };
 
 async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; message: string }> {
   const [ctx, row] = await Promise.all([getPlanContext(planId), getPlanRow(planId)]);

@@ -69,10 +69,10 @@ import { equipmentItem } from '../llm/prompts/equipment';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
-import { renderWorksheet, type Level } from '../lib/worksheetForm';
+import { renderWorksheet, findImagePlaceholders, type Level } from '../lib/worksheetForm';
 import { getLessonWorksheet } from '../services/worksheet';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
-import { listOccurrencePrep, type PrepItem } from '../repos/prep';
+import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
 import { listRooms, listStaff } from '../repos/setup';
@@ -297,6 +297,7 @@ function renderSection(
       </form>`
           : ''
       }
+      ${s.lessonPlanId != null ? `<div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${last}
       <label class="stop-label">Stopping point
@@ -417,7 +418,7 @@ function renderDetail(
 // Per-class adapted resources: re-make the lesson's documents for ONE class, from the master
 // documents + the class's adapted lesson. Stored in the resource store, linked to the ADAPTATION
 // (reset-to-master unlinks them; the files stay). Re-running version-bumps, never duplicates.
-const ADAPT_RES_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', support: 'support worksheet', answers: 'answers' };
+const ADAPT_RES_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'TA notes', answers: 'answers', support: 'support worksheet' };
 
 async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: boolean; message: string }> {
   const [adaptation, master, info] = await Promise.all([getAdaptation(gc, lp), getLessonPlan(lp), getGroupCourseInfo(gc)]);
@@ -497,7 +498,8 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
       await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class (regenerated)');
       updated++;
     } else {
-      const id = await createResource(filename, kind === 'slides' ? 'slides' : kind === 'answers' || kind === 'document' ? 'document' : 'worksheet', 'text/markdown', 'ai_generated');
+      const storeKind = kind === 'slides' ? 'slides' : kind === 'ta_notes' ? 'ta_notes' : kind === 'answers' || kind === 'document' ? 'document' : 'worksheet';
+      const id = await createResource(filename, storeKind, 'text/markdown', 'ai_generated');
       const rel = relPathFor(id, 1, filename);
       await storeBuffer(rel, buf);
       await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class');
@@ -752,6 +754,27 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       .safeParse(req.query);
     if (!q.success) return reply.code(400).type('text/html').send('<p class="muted">Bad preview request.</p>');
     return reply.type('text/html').send(await renderWorksheetPreview(q.data.gc, q.data.lp, q.data.level));
+  });
+
+  // Image gaps the generator left (`> 🖼️ [show: …]`) become a pre-lesson to-do: surfaced on the
+  // lesson page AND added to the occurrence's "Before the bell" prep list (idempotent by text). The
+  // teacher drops the images in via the worksheet editor, which removes the markers.
+  app.get('/lesson/oc/:oc/image-todo', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.params);
+    const q = z.object({ gc: z.coerce.number().int().positive(), lp: z.coerce.number().int().positive() }).safeParse(req.query);
+    if (!p.success || !q.success) return reply.code(400).send('');
+    const ws = await getLessonWorksheet(q.data.gc, q.data.lp);
+    const gaps = ws ? findImagePlaceholders(ws.markdown) : [];
+    if (!ws || gaps.length === 0) return reply.type('text/html').send('');
+    const existing = new Set((await listOccurrencePrep(p.data.oc)).map((i) => i.text));
+    for (const g of gaps) {
+      const text = `🖼️ Add image: ${g}`.slice(0, 200);
+      if (!existing.has(text)) await addOccurrencePrep(p.data.oc, text).catch(() => {});
+    }
+    const items = gaps.map((g) => `<li>${esc(g)}</li>`).join('');
+    return reply.type('text/html').send(
+      `<div class="img-todo"><p class="img-todo-head">🖼️ <strong>${gaps.length} image${gaps.length === 1 ? '' : 's'} to add</strong> before the lesson — <a class="link" href="/resources/${ws.resourceId}/edit" target="_blank" rel="noopener">edit the worksheet</a> to drop them in (also on your “before the bell” list):</p><ul class="img-todo-list">${items}</ul></div>`,
+    );
   });
 
   // Class-intake (idea: set up a class from a free-text description). Opus → the per-class fields;

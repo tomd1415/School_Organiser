@@ -7,7 +7,7 @@ export const lessonResourcesSchema = z.object({
     .array(
       z.object({
         kind: z.string().describe(
-          'exactly one of: "slides" (teaching slides), "worksheet" (main pupil task), "support" (scaffolded version), "answers" (teacher answer notes)',
+          'exactly one of: "slides" (level-differentiated teaching slides), "worksheet" (the PUPIL task sheet — no TA notes or answers in it), "ta_notes" (separate teaching-assistant/teacher guidance + answers, never shown to pupils), "answers" (concise teacher answer notes)',
         ),
         title: z.string().describe('short human title, e.g. "Slides — Website building blocks"'),
         content: z.string().describe(
@@ -27,9 +27,12 @@ export type LessonResources = z.infer<typeof lessonResourcesSchema>;
 
 /** Models occasionally stray from the four kinds ("support worksheet", "answer key"…) — a strict
  * enum then fails the WHOLE response, so we accept any string and normalise here instead. */
-export function normaliseResourceKind(kind: string): 'slides' | 'worksheet' | 'support' | 'answers' | 'document' {
+export function normaliseResourceKind(kind: string): 'slides' | 'worksheet' | 'support' | 'answers' | 'ta_notes' | 'document' {
   const k = kind.toLowerCase().trim();
   if (k.includes('slide')) return 'slides';
+  // TA/teacher guidance — check before "answers" (TA notes contain the answers). \bta\b matches
+  // "ta notes"/"ta guidance"; the underscore form is matched explicitly (\b doesn't split ta_notes).
+  if (/\bta\b/.test(k) || k.includes('ta_notes') || k.includes('teaching assistant')) return 'ta_notes';
   if (k.includes('support') || k.includes('scaffold')) return 'support';
   if (k.includes('answer') || k.includes('mark')) return 'answers';
   if (k.includes('worksheet') || k.includes('task')) return 'worksheet';
@@ -37,7 +40,7 @@ export function normaliseResourceKind(kind: string): 'slides' | 'worksheet' | 's
 }
 
 export interface TidyResource {
-  kind: 'slides' | 'worksheet' | 'support' | 'answers' | 'document';
+  kind: 'slides' | 'worksheet' | 'support' | 'answers' | 'ta_notes' | 'document';
   title: string;
   content: string;
 }
@@ -79,7 +82,7 @@ export function tidyResourceSet(resources: Array<{ kind: string; title: string; 
   // Keep the four core kinds ahead of any stray 'document' before the cap, so an extra entry is what
   // gets dropped — never slides/worksheet. Then compute `missing` from the kept docs (not the raw map),
   // so we can never report a set complete while the slice has silently dropped a core document.
-  const CORE = ['slides', 'worksheet', 'support', 'answers'];
+  const CORE = ['slides', 'worksheet', 'ta_notes', 'answers'];
   const rank = (k: string): number => (CORE.indexOf(k) === -1 ? CORE.length : CORE.indexOf(k));
   const docs: TidyResource[] = [...contentsByKind.entries()]
     .sort((a, b) => rank(a[0]) - rank(b[0]))

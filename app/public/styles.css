@@ -846,6 +846,10 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .ws-tab { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #f0f3f8; border-radius: 999px; padding: 0.3rem 0.8rem; }
 .ws-tab:hover { background: #e2e8f2; }
 .ws-preview-meta { font-size: 0.9rem; color: var(--muted, #5a6678); margin: 0.3rem 0 0.5rem; }
+/* Image-gap to-do on the lesson page (a `> 🖼️ [show: …]` the teacher should fill before teaching). */
+.img-todo { background: #fff7e8; border: 1px solid #e6cf73; border-radius: 8px; padding: 0.5rem 0.8rem; margin: 0.5rem 0; }
+.img-todo-head { margin: 0 0 0.3rem; font-size: 0.92rem; }
+.img-todo-list { margin: 0.2rem 0 0; padding-left: 1.3rem; font-size: 0.9rem; color: var(--muted); }
 .ws-doc-preview { border: 1px dashed #cdd6e3; border-radius: 10px; padding: 0.8rem 1rem; background: #fcfdff; }
 .ws-doc-preview .ws-input { background: #fff; cursor: not-allowed; }
 /* Block types — clear visual differentiation: instructions to follow vs answers to give vs

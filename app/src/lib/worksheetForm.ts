@@ -64,6 +64,17 @@ const PLACEHOLDER_CELL = /^\s*(?:type|write|paste|draw|sketch|enter)\b.{0,20}\b(
 // Paste-specific so a question that merely mentions "a screenshot" stays a normal text answer.
 const SCREENSHOT = /📷|🖼|\bpaste\b[^|]*\b(?:screenshot|image|picture|photo|work)\b|\b(?:screenshot|image|photo)\b[^|]*\bhere\b/i;
 
+/** Image-gap placeholders the generator leaves where a visual is needed but none was sourced
+ * (`> 🖼️ [show: a binary-to-denary diagram]`). Returns the descriptions — the teacher's "add an
+ * image before the lesson" to-do list; dropping an image in the editor removes the marker. */
+export function findImagePlaceholders(src: string): string[] {
+  const out: string[] = [];
+  const re = /\[show:\s*([^\]]+)\]/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src ?? '')) !== null) out.push(m[1]!.trim());
+  return out;
+}
+
 /** A stored pupil screenshot is recorded as `img:<relpath>`; turn it into a same-origin serve URL. */
 function imgServeUrl(value: string): string | null {
   return value.startsWith('img:') ? `/pupil-image?p=${encodeURIComponent(value.slice(4))}` : null;
