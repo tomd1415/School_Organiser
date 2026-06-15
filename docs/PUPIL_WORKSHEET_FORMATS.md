@@ -32,3 +32,20 @@ split) landed 2026-06-12.
    collection is the bigger pain than layout.
 
 Tracked on the after-Phase-6 list (PHASE_6_PLAN §12).
+
+## Update — Option A built, then deepened (2026-06-15)
+
+The recommendation held: with pupil logins in place (Phase 8), **Option A is built** — in-app HTML
+worksheets where answers become per-pupil data (autosave, completion tracking, auto-marking). **Worksheets
+v2** (CHANGELOG "Pupil worksheets v2") then deepened it well past the table above:
+
+- A **two-pane pupil workspace** — level-sliced slides beside a **full-width** sheet (UX_FLOWS flow 17).
+- Typed blocks pupils can tell apart at a glance — **instruction / question / screenshot / note** — and
+  a **screenshot paste/drop zone** so practical work returns as an **image answer** (`value='img:…'`,
+  stored access-scoped; DATA_MODEL §O), not just text.
+- One **block editor** for the teacher, a **per-level preview / export**, a separate **TA-notes** doc,
+  and a **🧪 test pupil** for previewing — all over the **one Markdown source** the marking keys derive
+  from, so none of it disturbs auto-marking.
+
+Options B–E (fillable PDF, DOCX content controls, Forms/Teams, ODT) remain unbuilt — the per-level Word
+export covers the "hand it back on paper / Teams" case without them.

@@ -850,6 +850,10 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .img-todo { background: #fff7e8; border: 1px solid #e6cf73; border-radius: 8px; padding: 0.5rem 0.8rem; margin: 0.5rem 0; }
 .img-todo-head { margin: 0 0 0.3rem; font-size: 0.92rem; }
 .img-todo-list { margin: 0.2rem 0 0; padding-left: 1.3rem; font-size: 0.9rem; color: var(--muted); }
+/* Per-level sheet switcher on the worksheet view (print/Word a single level). */
+.ws-levelbar { margin: 0.3rem 0 0.9rem; font-size: 0.9rem; }
+.ws-levelbar .link { margin: 0 0.2rem; }
+.ws-levelbar .link.on { font-weight: 700; text-decoration: underline; }
 .ws-doc-preview { border: 1px dashed #cdd6e3; border-radius: 10px; padding: 0.8rem 1rem; background: #fcfdff; }
 .ws-doc-preview .ws-input { background: #fff; cursor: not-allowed; }
 /* Block types — clear visual differentiation: instructions to follow vs answers to give vs
@@ -873,6 +877,18 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 [data-contrast="high"] .ws-answer-cell, [data-contrast="high"] .ws-shot-cell { background: #fff; }
 [data-contrast="high"] .ws-paste { background: #fff; border-color: #000; }
 [data-contrast="high"] .ws-paste-prompt { color: #000; }
+.ws-paste-help { display: inline-block; margin-top: 0.4rem; font: inherit; font-size: 0.85rem; background: none; border: none; color: #2e6b2e; text-decoration: underline; cursor: pointer; }
+/* 💡 paste-help modal + practice box */
+.paste-help { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 1200; padding: 1rem; }
+.paste-help[hidden] { display: none; }
+.paste-help-card { background: var(--card); color: var(--ink); border-radius: 16px; padding: 1.4rem 1.6rem; max-width: 36rem; width: 100%; max-height: 90vh; overflow: auto; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+.paste-help-card h2 { margin-top: 0; }
+.paste-help-x { position: absolute; top: 0.7rem; right: 0.8rem; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
+.paste-help-steps { line-height: 1.6; padding-left: 1.2rem; }
+.paste-help-steps kbd { background: #eef0f6; border: 1px solid var(--line); border-radius: 4px; padding: 0 0.35rem; font-size: 0.85em; }
+.paste-help-practice { margin: 1rem 0; padding: 0.9rem; border: 2px dashed var(--accent); border-radius: 10px; background: var(--accent-soft); }
+.paste-practice { margin-top: 0.5rem; min-height: 4rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0.8rem; text-align: center; cursor: pointer; color: var(--muted); }
+.paste-practice:focus { outline: none; border-color: var(--accent); }
 
 /* ── Pupil soft theme ──────────────────────────────────────────────────────────────────────────
    A calmer, friendlier surface for pupils (assimilated from the Worksheet-Converter design): soft

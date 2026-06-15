@@ -17,6 +17,8 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | TA lesson feedback | **Sensitive** (may describe pupils) | PostgreSQL; flows to adapt-lesson AI after redaction; **safeguarding-flagged feedback withheld entirely** |
 | Pupil PINs (Phase 8) | Secret (low-entropy) | `pupil_credentials`: scrypt **hash** (verification) **plus the PIN value** so the teacher can print/read it onto login cards. A 4–6 digit classroom PIN isn't a real secret here — LAN-only, rate-limited, lockout after 5 fails, shared machines, classmates known to each other; never sent to AI; shown only on teacher-authenticated surfaces |
 | Pupil answers + lesson feedback (Phase 8) | **Sensitive** (pupil-authored) | PostgreSQL; reach AI only **aggregated per question + anonymised**, through the wrapper; never linked to a name on egress |
+| Pupil-pasted screenshots (worksheets v2) | **Sensitive** (pupil-authored work) | Resource volume `pupil-work/<oc>/<pupil>/…`; `pupil_answers.value='img:…'` points at it. Served **access-scoped** (`/pupil-image`: pupil sees only their own, teacher any, **TA none**), raster-only + `nosniff` + `inline`. **Never sent to AI** — image fields are excluded from marking *and* from the class-work summary (only text answers become questions); erased with the pupil's other answers |
+| Fictitious test pupil (worksheets v2) | **Not personal data** | `pupils.is_test=true`; excluded from the roster, redaction targets and marking reports — lets the teacher preview the pupil experience for any lesson without a real child's data |
 | Pupil differentiation level (Phase 8) | **Sensitive** (attainment) | `pupil_levels`; server-side only, never sent to AI |
 | Pupil marks + comments (Phase 9) | **Sensitive** (attainment) | `pupil_marks` / `pupil_lesson_comments`; gated by `pupil_marks_enabled` (DPIA addendum). AI open-marking sends **anonymous slot-lettered per-question batches** (no pupil id/name); pupils see only **confirmed**, visibility-gated marks |
 | Remembered-device credential (Phase 9) | Secret | `pupil_devices`: the cookie holds a random secret; only its **sha256** is stored. Pupil-bound, ~term expiry, revoked on PIN-reset/disable/teacher-revoke. Off unless the class enables it |
@@ -52,6 +54,15 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
   a **Settings master switch that stays off until the teacher confirms DPIA/DPO sign-off** — until
   then no pupil credential can be created. Pupils only ever see their own work; answer writes are
   checked against the pupil's enrolment, not just the session.
+- **Pupil worksheet surface (worksheets v2, 2026-06-15):** the `/me` page is a two-pane workspace
+  (level-sliced slides beside a full-width sheet) and the pupil role's allow-list now also reaches
+  three **narrow** image endpoints — still **no `/resources/*`**: `POST /me/answer-image` (paste a
+  screenshot answer; CSRF; raster-only, no SVG, 12 MB cap), `GET /pupil-image` (their **own**
+  screenshots only — the `<pupil_id>` path segment must match the session), and `GET /lesson-image/:id`
+  (a worksheet's teaching illustrations, `kind='image'` only, served to any authed session because
+  pupils must see the sheet's pictures). The **test pupil** overlay lets the teacher walk this surface
+  for any lesson/level without a real child's data or PIN, and is the only actor that bypasses the
+  clock/DPIA access gates.
 
 ## The pupil-name rule (the one that must never break)
 
@@ -115,6 +126,8 @@ redaction *and* withholding rules apply regardless of provider.
 | Another LAN device reaching the app | Auth required; optional IP allow-list on Caddy. |
 | Limited-role user reaching another lesson's data | TA role scoped to resources/lessons in the current slot; named-TA views filtered to their own lessons. |
 | Malicious uploaded SVG running script in the app origin | SVGs served as downloads (`attachment` + `nosniff`), never inline. |
+| Pupil uploads a hostile file as a "screenshot" answer | Raster-only allow-list (png/jpg/webp/gif — **no SVG**), 12 MB cap, served `inline` + `nosniff`; path-scoped serve so a pupil reaches only their own. |
+| One pupil reading another pupil's screenshot | `/pupil-image` checks the `<pupil_id>` path segment against the session; TAs denied; traversal-guarded (`pupil-work/` prefix, no `..`). |
 | Secret leak via git | `.env` git-ignored; secrets never in code or docs. |
 | Accidental data loss | No-soft-delete + nightly backups + tested restore. |
 

@@ -240,6 +240,19 @@ function segment(src: string): { blocks: Block[]; levelDepth: number } {
   return { blocks, levelDepth };
 }
 
+/** The Markdown for ONE level's pupil sheet (shared content + that level's section, level heading
+ * dropped — the slice is unlabelled, exactly what the pupil gets). For per-level print / Word export. */
+export function sliceWorksheetMarkdown(src: string, level: Level): string {
+  const { blocks } = segment(src);
+  const out: string[] = [];
+  for (const b of blocks) {
+    if (b.level !== 'shared' && b.level !== level) continue;
+    if (b.isLevelHeading) continue;
+    out.push(b.lines.join('\n'));
+  }
+  return out.join('\n\n').trim() + '\n';
+}
+
 function textControl(key: string, label: string, placeholder: string, opts: WorksheetOptions): string {
   const value = opts.values?.get(key) ?? '';
   if (opts.mode === 'review') {
@@ -292,6 +305,7 @@ function imageControl(key: string, label: string, opts: WorksheetOptions): strin
   const shot = src ? `<img class="ws-shot" src="${src}" alt="${esc(label || 'your screenshot')}" loading="lazy">` : '';
   return `<div class="ws-paste${src ? ' has-shot' : ''}" data-paste-key="${esc(key)}" data-paste-url="${esc(postUrl)}" tabindex="0" role="button" aria-label="${esc(prompt)}">
     <span class="ws-paste-prompt">📷 ${esc(prompt)} <span class="muted">(Ctrl/⌘+V, or drop a file)</span></span>
+    <button type="button" class="ws-paste-help" data-paste-help>❓ how to paste?</button>
     <div class="ws-paste-shot">${shot}</div>
     <span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>
   </div>`;

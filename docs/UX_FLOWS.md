@@ -134,6 +134,16 @@ what the TA sent from flow 14, safeguarding-flagged items marked. Objectives and
 everywhere render as formatted read-views (step cards with timing pills, ✓-listed objectives)
 rather than walls of text.
 
+**Worksheets v2** (2026-06-15) reshaped the Worksheet resource here. The teacher opens a **block
+editor** — instruction / question / screenshot-paste / note / image cards they retype, recolour,
+reorder and drop images into — which serialises back to the **one Markdown source** the marking keys
+derive from, so editing never breaks auto-marking. A **per-level preview** and **🧪 Test as pupil**
+(flow 17) show exactly what each ability level sees, and a per-level **print / Word export** produces
+one clean sheet per level. Generation now also writes a separate **TA notes** document (how to support
+each level + the answers), shown here and in the TA view but **never** to a pupil; any picture the AI
+couldn't source becomes a **Before-the-bell** "🖼️ add image" task that clears when an image is dropped
+into the editor.
+
 ## 4. Quick-note capture (the fast path)
 
 Triggered by the `n` shortcut or any `[+ quick note]` button — a small overlay, pre-bound to
@@ -448,6 +458,36 @@ read (a failure stays unseen for the next poll), *and* a per-message key (Messag
 hash when absent) is recorded in `processed_emails` so a message that was imported but failed to get
 marked read is recognised and skipped — not re-imported — on the next poll. Every import keeps the
 raw email as provenance (`email_intake`), exactly like the paste box.
+
+## 17. The pupil view — the worksheet workspace (`/me`)
+
+```text
+┌─ My work · Networks 4 ──────────────── 🟢 · A− A A+ · 🌙 dark · Log out ┐
+│ ┌─ On the board ─────────────┐ ┌─ My sheet ───────────────────────────┐ │
+│ │ Slide 2 of 6      ◀   ▶    │ │ Name: (auto)      Date: 9 Sep (auto)  │ │
+│ │ ┌────────────────────────┐ │ │ ── ✏ Do this ──────────────────────   │ │
+│ │ │ What is a network?     │ │ │  1. Open the network diagram.         │ │
+│ │ │ • computers joined up  │ │ │ ── ❓ Question ─────────────────────   │ │
+│ │ │ [ diagram ]            │ │ │  Name one type of network.            │ │
+│ │ └────────────────────────┘ │ │  [ your answer …                   ]  │ │
+│ │ (slides simplified to 🟢)  │ │ ── 📷 Show me ──────────────────────   │ │
+│ └────────────────────────────┘ │  [ paste / drop / choose a screenshot ] 💡 │
+│                                 │  ☑ I saved my file    [ Done ✓ ]      │ │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+The pupil-facing surface (Phase 8, off until the DPIA gate is on — not on the teacher's rail). After
+**class code → tap your name → PIN**, the pupil lands on a **two-pane workspace**: the lesson's slides
+on the left, **sliced to their ability level** so they follow the board with a simpler deck, and their
+**full-width sheet** on the right. The theme is soft and friendly; the accessibility bar keeps
+contrast/text-size and adds a **🌙 dark toggle** (pre-painted on load so there's no flash). Name and
+date **auto-fill** — nothing to type. The sheet's blocks are **colour-differentiated**: a calm "✏ do
+this" instruction panel, a "❓ question" with a typed-answer box, a green "📷 show me" **screenshot
+paste/drop/upload zone**, and "key idea" notes. A **💡 paste-help** button opens a short, SEND-friendly
+how-to (with a practice box) for taking and pasting a screenshot. Every answer and screenshot
+**autosaves** per field; a **Done ✓** marks the sheet complete. A pupil only ever sees **their own**
+work; the teacher previews the whole thing for any lesson/level through the **🧪 test pupil** (flow 3)
+without a real child's data.
 
 ## Navigation summary — the rail
 

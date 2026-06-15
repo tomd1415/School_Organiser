@@ -1,4 +1,5 @@
 import { pool } from '../db/pool';
+import { removeStored } from '../lib/resourceStore';
 
 export interface RosterEntry {
   id: number;
@@ -119,12 +120,24 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
     if (!who) { await client.query('ROLLBACK'); return null; }
     const counts: Record<string, number> = {};
 
+    // Pupil-pasted screenshots live on the resource volume; the DB only holds an `img:` pointer
+    // (DATA_MODEL §O). Capture them now, while the rows exist, to delete the files after COMMIT — a
+    // raw screenshot can carry direct identifiers the app can't redact, so it survives NEITHER an
+    // erasure NOR an anonymisation (text answers/marks stay as nameless attainment; images don't).
+    const imgPaths = (await client.query<{ value: string }>(
+      `SELECT value FROM pupil_answers WHERE pupil_id = $1 AND value LIKE 'img:%'`, [id],
+    )).rows.map((r) => r.value.slice(4)).filter((p) => p.startsWith('pupil-work/') && !p.includes('..'));
+    counts.screenshots = imgPaths.length;
+
     if (mode === 'anonymise') {
       // Identity + login + individual narrative go; cohort/attainment data stays, now nameless.
       counts.credentials = await rowsAffected(client, `DELETE FROM pupil_credentials WHERE pupil_id = $1`, [id]);
       counts.devices = await rowsAffected(client, `DELETE FROM pupil_devices WHERE pupil_id = $1`, [id]);
       counts.profile = await rowsAffected(client, `DELETE FROM pupil_profiles WHERE pupil_id = $1`, [id]);
       counts.comments = await rowsAffected(client, `DELETE FROM pupil_lesson_comments WHERE pupil_id = $1`, [id]);
+      // Text answers/marks stay as nameless attainment, but raw screenshots are re-identifying — drop
+      // their pointers (the files themselves are removed after COMMIT, below) so nothing dangles.
+      if (imgPaths.length) await client.query(`UPDATE pupil_answers SET value = '' WHERE pupil_id = $1 AND value LIKE 'img:%'`, [id]);
       // Name → the stable token, archived. The token stays so the redaction roster + aggregates hold.
       await client.query(`UPDATE pupils SET display_name = ai_token, active = false WHERE id = $1`, [id]);
     } else {
@@ -143,6 +156,11 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
 
     await client.query(`INSERT INTO pupil_disposals (ai_token, action, detail) VALUES ($1, $2, $3::jsonb)`, [who.aiToken, mode, JSON.stringify(counts)]);
     await client.query('COMMIT');
+    // Files can't join the DB transaction, so delete them after a successful COMMIT. Best-effort: the
+    // disposal is already audited; a failed unlink shouldn't undo it, but we surface any orphan.
+    for (const rel of imgPaths) {
+      try { await removeStored(rel); } catch (err) { console.warn(`disposePupil: could not remove ${rel}:`, err); }
+    }
     return { aiToken: who.aiToken, mode, counts };
   } catch (err) {
     await client.query('ROLLBACK');

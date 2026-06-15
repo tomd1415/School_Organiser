@@ -185,6 +185,43 @@
   document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) { dirty = false; clearToast(); } });
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
+  // ── 💡 Paste-help modal + practice box (how to screenshot & paste — SEND-friendly) ─────────────
+  var pasteHelp = document.getElementById('paste-help');
+  function openPasteHelp() {
+    if (!pasteHelp) return;
+    pasteHelp.hidden = false;
+    var f = pasteHelp.querySelector('.paste-help-x');
+    if (f) f.focus();
+  }
+  function closePasteHelp() {
+    if (!pasteHelp) return;
+    pasteHelp.hidden = true;
+    var prac = pasteHelp.querySelector('.paste-practice');
+    if (prac) prac.textContent = 'Click here, then press Ctrl/⌘ + V to try it.'; // reset
+  }
+  if (pasteHelp) {
+    pasteHelp.addEventListener('click', function (e) {
+      if (e.target === pasteHelp || e.target.closest('.paste-help-x') || e.target.closest('.paste-help-done')) closePasteHelp();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pasteHelp.hidden) closePasteHelp(); });
+    var prac = pasteHelp.querySelector('.paste-practice');
+    if (prac) prac.addEventListener('paste', function (e) {
+      var items = (e.clipboardData && e.clipboardData.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image/') === 0) {
+          e.preventDefault();
+          var rd = new FileReader();
+          rd.onload = function (ev) { prac.textContent = ''; var im = document.createElement('img'); im.src = ev.target.result; im.alt = 'your practice screenshot'; im.style.maxHeight = '120px'; prac.appendChild(im); var ok = document.createElement('div'); ok.textContent = '✓ It worked! You can paste like this on your worksheet.'; ok.style.color = '#2e7d32'; prac.appendChild(ok); };
+          rd.readAsDataURL(items[i].getAsFile());
+          return;
+        }
+      }
+      e.preventDefault();
+      var txt = e.clipboardData ? e.clipboardData.getData('text') : '';
+      prac.textContent = txt ? '✓ Pasted text: ' + txt.slice(0, 80) : 'That had no image — take a screenshot first, then paste.';
+    });
+  }
+
   // ── Screenshot paste: paste / drop / pick an image into a `.ws-paste` zone → upload as the answer.
   function csrfToken() {
     try { return (JSON.parse((main && main.getAttribute('hx-headers')) || '{}'))['x-csrf-token'] || ''; } catch (e) { return ''; }
@@ -215,6 +252,7 @@
   }
   if (main) {
     main.addEventListener('click', function (e) {
+      if (e.target.closest('[data-paste-help]')) { openPasteHelp(); return; } // the "❓ how?" link
       var zone = e.target.closest('.ws-paste');
       if (!zone || zone.classList.contains('ws-paste-preview') || e.target.closest('.ws-shot')) return;
       pickFile(zone); // also a fallback for anyone who can't paste/drag

@@ -47,6 +47,32 @@ const A11Y_BAR = `<div class="a11y-bar" role="toolbar" aria-label="Reading help"
   <span class="a11y-speak-hint">Tap any words to hear them.</span>
 </div>`;
 
+// 💡 SEND-friendly help for the screenshot-paste tasks: how to screenshot + paste on each device,
+// plus a practice box to try it safely. Always in the pupil layout; opened from a "❓ how?" link on
+// any paste zone (pupil.js). Pure client-side — the practice box uploads nothing.
+const PASTE_HELP = `<div id="paste-help" class="paste-help" role="dialog" aria-modal="true" aria-label="How to add a screenshot" hidden>
+  <div class="paste-help-card">
+    <button type="button" class="paste-help-x" aria-label="Close">✕</button>
+    <h2>📸 How to add a screenshot of your work</h2>
+    <ol class="paste-help-steps">
+      <li><strong>Take a screenshot</strong> of your work:
+        <ul>
+          <li>On a <strong>Chromebook</strong>: hold <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Show windows</kbd>, then drag a box around your work.</li>
+          <li>On <strong>Windows</strong>: hold <kbd>⊞ Windows</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>, then drag a box around your work.</li>
+          <li>On a <strong>Mac</strong>: hold <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>4</kbd>, then drag a box around your work.</li>
+        </ul>
+      </li>
+      <li><strong>Click the green box</strong> on your worksheet.</li>
+      <li>Hold <kbd>Ctrl</kbd>+<kbd>V</kbd> (or <kbd>⌘</kbd>+<kbd>V</kbd> on a Mac) to <strong>paste</strong> it in. You can also drag a picture file in, or click the box to choose one.</li>
+    </ol>
+    <div class="paste-help-practice">
+      <p><strong>🧪 Practice here first</strong> — take a screenshot, click this box, then paste:</p>
+      <div class="paste-practice" tabindex="0" role="button">Click here, then press Ctrl/⌘ + V to try it.</div>
+    </div>
+    <button type="button" class="pupil-go paste-help-done">Got it!</button>
+  </div>
+</div>`;
+
 export function pupilLayout(body: string, csrf: string): string {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,6 +87,7 @@ export function pupilLayout(body: string, csrf: string): string {
 <body class="pupil-body">
   ${A11Y_BAR}
   <main class="pupil-main" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>${body}</main>
+  ${PASTE_HELP}
   <script src="/static/htmx.min.js"></script>
   <script src="/static/pupil.js"></script>
 </body></html>`;

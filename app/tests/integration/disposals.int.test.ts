@@ -1,5 +1,8 @@
+import { existsSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
+import { absPath, storeBuffer } from '../../src/lib/resourceStore';
 import { createPupil, disposePupil, exportPupilRecord, listDisposals, listRoster } from '../../src/repos/pupils';
 
 // Phase 10.2 — pupil erasure / anonymisation + SAR export against the dev DB. The critical property:
@@ -9,6 +12,25 @@ let groupId = 0;
 let eraseId = 0, anonId = 0;
 let eraseToken = '', anonToken = '';
 let noteEraseId = 0, taskEraseId = 0, eventEraseId = 0;
+let ocId = 0;                       // an existing occurrence_course to hang a screenshot answer on
+let eraseShot = '', anonShot = '';  // the relative paths of each pupil's seeded screenshot file
+
+const SHOT_KEY = 't9.r9.c9';
+const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]); // PNG sig + filler
+
+// Worksheets v2: a pasted screenshot is a file on the resource volume + an `img:` pointer row. Seed
+// both so the disposal tests can prove the FILE is removed (erasure can't orphan pupil work on disk).
+async function seedScreenshot(pupilId: number): Promise<string> {
+  if (!ocId) return '';
+  const rel = `pupil-work/${ocId}/${pupilId}/erasetest.png`;
+  await storeBuffer(rel, PNG);
+  await pool.query(
+    `INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value)
+     VALUES ($1, $2, NULL, NULL, $3, $4)`,
+    [pupilId, ocId, SHOT_KEY, `img:${rel}`],
+  );
+  return rel;
+}
 
 async function seedPupilData(pupilId: number): Promise<{ noteId: number; taskId: number; eventId: number }> {
   await pool.query(`INSERT INTO enrolments (pupil_id, group_id, active) VALUES ($1, $2, true)`, [pupilId, groupId]);
@@ -47,16 +69,20 @@ beforeAll(async () => {
   await purge();
   const yearId = Number((await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE is_current`)).rows[0]!.id);
   groupId = Number((await pool.query<{ id: number }>(`INSERT INTO groups (name, academic_year_id, active) VALUES ('ZZDGRP', $1, true) RETURNING id`, [yearId])).rows[0]!.id);
+  ocId = Number((await pool.query<{ id: number }>(`SELECT id FROM occurrence_courses ORDER BY id LIMIT 1`)).rows[0]?.id ?? 0);
   const a = await createPupil('ZZD Erase'); eraseId = a.id; eraseToken = a.aiToken;
   const b = await createPupil('ZZD Anon'); anonId = b.id; anonToken = b.aiToken;
   const seeded = await seedPupilData(eraseId);
   noteEraseId = seeded.noteId; taskEraseId = seeded.taskId; eventEraseId = seeded.eventId;
+  eraseShot = await seedScreenshot(eraseId);
   await seedPupilData(anonId);
+  anonShot = await seedScreenshot(anonId);
 });
 
 afterAll(async () => {
   await purge();
   await pool.query(`DELETE FROM pupil_disposals WHERE ai_token = ANY($1)`, [[eraseToken, anonToken]]);
+  for (const s of [eraseShot, anonShot]) if (s) await rm(absPath(s), { force: true }).catch(() => {}); // fallback if a test bailed
   await pool.end();
 });
 
@@ -89,6 +115,11 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     // The name is gone from the redaction roster, and a disposal audit row records it.
     expect((await listRoster()).some((p) => p.id === eraseId)).toBe(false);
     expect((await listDisposals()).some((d) => d.aiToken === eraseToken && d.action === 'erase')).toBe(true);
+    // Worksheets v2: the pasted screenshot FILE is gone from disk (not just its DB row), and counted.
+    if (eraseShot) {
+      expect(r!.counts.screenshots).toBe(1);
+      expect(existsSync(absPath(eraseShot))).toBe(false);
+    }
   });
 
   it('anonymise scrubs identity + login but KEEPS cohort data, and audits', async () => {
@@ -104,5 +135,13 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     expect((await pool.query(`SELECT 1 FROM enrolments WHERE pupil_id = $1`, [anonId])).rowCount).toBe(1);
     expect((await listRoster()).some((p) => p.id === anonId)).toBe(true);
     expect((await listDisposals()).some((d) => d.aiToken === anonToken && d.action === 'anonymise')).toBe(true);
+    // Worksheets v2: a raw screenshot is re-identifying, so anonymise removes the FILE and blanks the
+    // pointer, while the (now-nameless) text-attainment row itself is kept.
+    if (anonShot) {
+      expect(r!.counts.screenshots).toBe(1);
+      expect(existsSync(absPath(anonShot))).toBe(false);
+      const ans = await pool.query<{ value: string }>(`SELECT value FROM pupil_answers WHERE pupil_id = $1 AND field_key = $2`, [anonId, SHOT_KEY]);
+      expect(ans.rows[0]!.value).toBe('');
+    }
   });
 });

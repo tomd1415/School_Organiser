@@ -63,6 +63,22 @@
   category of personal data reaches the sub-processor; the §5 controls are unchanged and, where noted,
   strengthened (the redaction matcher is now whitespace-robust — 2026-06-15 review).
 
+- **Built 2026-06-15 (Worksheets v2 — pupil-pasted screenshots):** the pupil worksheet became a
+  two-pane workspace and pupils can now **paste screenshots** of their practical work as answers. This
+  adds **one new on-disk modality of pupil-authored personal data** — image files under
+  `pupil-work/<oc>/<pupil>/…` on the LAN resource volume, with `pupil_answers.value='img:…'` as the only
+  DB pointer (DATA_MODEL §O). It stays **inside the existing Phase 8 pupil-access gate** (no new switch
+  or category): served **access-scoped** (a pupil sees only their own; teacher all; **TAs none**),
+  **raster-only + `nosniff`**, and **removed by the pupil-erasure path** — `disposePupil` deletes the
+  files from disk, not just the rows, and an `anonymise` (leaver kept for cohort stats) drops the raw
+  screenshots too, because an image can carry direct identifiers the app cannot redact, while text
+  attainment is kept nameless (§7). The **AI boundary is unchanged**: image fields are excluded from
+  marking *and* from the anonymised class-work summary, so **no screenshot — and no path pointer —
+  ever reaches the sub-processor**. A separate **TA-notes** document (`kind='ta_notes'`) holds support
+  guidance + answers and is structurally unreachable by pupils; a **fictitious test pupil** (`is_test`,
+  no personal data, excluded from the roster/redaction/marking) lets the teacher preview the pupil
+  surface without a real child. No new sub-processor exposure; the §5 controls are unchanged.
+
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and
 [DATA_MODEL.md](DATA_MODEL.md), which are load-bearing for this assessment.
@@ -118,6 +134,7 @@ the teacher would keep anyway (planning notes), which should keep this proportio
 | R4 | Backup media lost / mis-handled | Low | Medium |
 | R5 | Incidental sensitive content accumulates in free-text notes | Medium | Medium |
 | R6 | Cohort teaching-context inadvertently identifies a pupil | Low | Medium |
+| R7 | A pupil-pasted screenshot exposes a peer's work, persists after erasure, or carries an unredactable identifier | Low (access-scoped serve; erasure deletes the files; never sent to AI) | Medium |
 
 ## 5. Measures to reduce risk (the AI control)
 
@@ -155,7 +172,10 @@ See [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for the full controls.
 Pupil rows and the teacher's notes are deleted on a **deliberate, audited** action (e.g. end of the
 pupil's time in the class/school), not silently. The disposal itself is recorded in `pupil_disposals`
 (Phase 10.2) — that an erasure/anonymisation happened and what it removed, **without re-storing the
-identity removed** (only the non-identifying `ai_token` is kept). `ai_calls` audit rows are retained as
+identity removed** (only the non-identifying `ai_token` is kept). Pupil-pasted **screenshots** are
+deleted from the resource volume too, not just their DB pointers — `disposePupil` removes the files on
+erase, and an `anonymise` strips them as well, since a raw image can carry an identifier the app cannot
+redact (the count appears in the disposal audit). `ai_calls` audit rows are retained as
 the redaction-control evidence; they contain no names. **[CONFIRM retention periods with DPO.]** All
 data is exportable for a subject-access request (DATA_MODEL §"Data portability").
 

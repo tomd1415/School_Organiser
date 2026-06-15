@@ -905,6 +905,84 @@ records a per-message dedup key (the email's `Message-ID`, or a content hash whe
 [lib/mime.ts](../app/src/lib/mime.ts) / [services/emailPoll.ts](../app/src/services/emailPoll.ts)) so
 a re-seen message is skipped. Reference/log data only.
 
+## O. Worksheets v2 — pupil-first sheets, screenshot answers & a TA split (migrations `0038`–`0039`)
+
+Worksheets v2 (see [CHANGELOG](../CHANGELOG.md) "Pupil worksheets v2") reshaped the pupil-facing
+worksheet into a two-pane workspace (simplified slides beside a full-width sheet), let pupils **paste
+screenshots** of their practical work, split the **TA notes** into their own document, and added a
+block editor. Only two schema changes were needed — the marking field-key model (§K/§L) is
+**unchanged**, the load-bearing guarantee: one source Markdown document still yields the
+`t{table}.r{row}.c{col}` / `task.{n}` keys that flow into `pupil_answers` and `mark_scheme_points`.
+
+### `pupils.is_test` (`0038`) — the fictitious test pupil
+
+```text
+ALTER TABLE pupils ADD COLUMN is_test BOOLEAN NOT NULL DEFAULT false;
+```
+
+One **fictitious** pupil (`ensureTestPupil` — display name "Test Pupil", a random `ai_token`) lets the
+teacher exercise the whole pupil experience — any lesson, any level, any time — without a real child's
+data. It is **not a person**: `listRoster`/`listPupils` filter `WHERE NOT is_test`, so it never appears
+in the roster, the **redaction targets**, or marking reports, and it holds no personal data. The teacher
+opens it from the lesson page ("🧪 Test as pupil"): the teacher session gains
+`testPupilId`/`testLessonId`/`testDate`/`testLevel`, and `actingPupil(req)` returns either a real
+logged-in pupil **or** the teacher-as-test-pupil. The test pupil alone bypasses the DPIA access gate and
+the clock/enrolment gates (`acting.isTest` short-circuits `pupilCanAccessOc`); a real pupil's checks are
+untouched.
+
+### `resources.kind` += `ta_notes` (`0039`) — the TA document, never shown to a pupil
+
+```text
+-- resources_kind_check now: document | slides | worksheet | quiz | image | link | note | ta_notes
+```
+
+Generation now produces a **separate** `ta_notes` document per lesson (how to support each level,
+misconceptions, what good looks like, the answers). It is its own resource so it can **never** reach a
+pupil: the pupil surface only ever resolves `kind='worksheet'`/`'slides'` (`getLessonWorksheet`
+unchanged), while the lesson page and the TA view (flow 14) surface `ta_notes`. The old standalone
+`support` doc is folded into the worksheet's 🟢 Support level. `lesson_resources@8` / `adapt_resources@6`
+author the set: per-level **slides**, a pupil-only **worksheet** (typed blocks, no TA/answer content),
+the separate **ta_notes**, and **answers** (the mark-scheme source).
+
+### Screenshot answers — a new `image` field kind (no schema change)
+
+A worksheet answer cell whose placeholder matches `/📷|paste.*(screenshot|image|picture)/i` renders as an
+**image paste/drop zone** instead of a textarea. It is a new field *kind* (`'image'`) over the
+**existing** table field-key machinery — it carries a normal `t{table}.r{row}.c{col}` key, so marking
+keys stay stable — not a new key scheme. Pupils paste/drop/upload a raster image; the bytes live on the
+resource volume and the answer row records a pointer:
+
+```text
+pupil_answers.value = 'img:pupil-work/<occurrence_course_id>/<pupil_id>/<safeKey>.<ext>'
+```
+
+- **Upload** `POST /me/answer-image?oc=&key=` (CSRF; `actingPupil`, incl. the test pupil; a real pupil is
+  checked with `pupilCanAccessOc`). Raster only — **png/jpg/webp/gif, no SVG** — capped at 12 MB; the key
+  is sanitised (`[^a-z0-9._-]→_`) before it becomes a path. Stored via `storeBuffer`, the answer saved
+  through the normal `saveAnswer` path.
+- **Serve** `GET /pupil-image?p=<relpath>` — path-scoped: must start `pupil-work/`, no `..`; a **pupil
+  sees only their own** (the `<pupil_id>` path segment must equal the session pupil), a **teacher (incl.
+  the test overlay) any**, a **TA none**. `inline` + `nosniff`, raster MIME only.
+- **Marking** ignores image fields — `deriveScheme` filters `kind !== 'image'`, so they get no
+  mark-scheme point; the teacher reviews screenshots on the lesson's pupil-work panel. Review/marking
+  render an `img:` value as an `<img>`.
+
+Pupil-pasted screenshots are **real pupil work / personal data** — see
+[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) (new classification row) and [DPIA.md](DPIA.md):
+access-scoped, raster-only + `nosniff`, on the LAN resource volume, and removed by the pupil-erasure path
+with the rest of `pupil_answers`.
+
+### Worksheet illustrations — `/lesson-image/:id`
+
+Teaching visuals embedded **inside** a worksheet/slides/ta_notes document are uploaded as `kind='image'`
+resources and served by `GET /lesson-image/:id` to **any** authenticated session — pupils and TAs
+included (via the lockdown allow-lists) — because a pupil viewing the sheet must see its pictures.
+`kind='image'` only (it can't be aimed at a worksheet/answers/ta_notes doc), `nosniff`, and an **SVG is
+forced to download** (`Content-Disposition: attachment`) to defang stored-XSS — non-sensitive teaching
+content, distinct from the access-scoped `/pupil-image` above. Where a needed picture can't be sourced,
+generation emits a `> 🖼️ [show: …]` placeholder, which surfaces as a **Before-the-bell** task
+(`addOccurrencePrep`) and clears when an image is dropped into the block editor.
+
 ## Key modelling decisions (for discussion)
 
 1. **Plan vs. occurrence are separate.** `lesson_plans` are reusable; `lesson_occurrences`

@@ -7,6 +7,51 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-15 — Pupil worksheets v2: a pupil-first two-pane workspace, a block editor, and a TA split
+
+A ground-up rework of the pupil worksheet experience (the most-used and most safeguarding-sensitive
+surface), plus a teacher-facing block editor. Built in phases, each tested; design cues for the pupil
+page were assimilated from a sibling prototype (`~/projects/Worksheet converter`) — its two-pane
+slides-beside-worksheet layout, soft styling, and paste-help — re-implemented in this app's
+server-rendered/HTMX stack (no React) with all existing accessibility kept.
+
+- **A teacher "test pupil" + per-level preview.** A fictitious `is_test` pupil (migration `0038`) the
+  teacher drives via **🧪 Test as pupil** on any lesson — the real `/me` surface for any lesson, any
+  time, at any level, bypassing the clock + DPIA gates for that account only, without replacing the
+  teacher session. Plus a **👁 Preview as pupil** per-level panel and the worksheet **markdown editor**
+  on the resource page.
+- **Two-pane pupil page** ([routes/me.ts](../app/src/routes/me.ts)): the pupil's **ability-matched
+  slide deck** on the left (follow the board, Prev/Next, sticky) beside the **worksheet** on the right;
+  full-width; stacks on narrow windows. Slides slice per level ([lib/slideDeck.ts](../app/src/lib/slideDeck.ts)).
+- **Screenshot paste** ([lib/worksheetForm.ts](../app/src/lib/worksheetForm.ts) `image` field): an
+  answer cell marked `📷 Paste a screenshot here` becomes a paste/drop/upload zone; the image is stored
+  access-scoped and shown back. A **💡 paste-help + practice sandbox** teaches the per-OS screenshot
+  steps. Block types (instruction / question / screenshot / note) are colour-differentiated.
+- **Soft theme + 🌙 dark/light toggle** on the pupil surface (calmer cards, friendly accent), defaulting
+  to light, with every accessibility option (text size, read-aloud, dyslexia font, high-contrast, calm)
+  preserved — high-contrast still wins.
+- **Generation redesign** (`lesson_resources@8`, `adapt_resources@6`): per-level **slides**
+  (`# 🟢/🟡/🔴` dividers), a **pupil-only worksheet** (typed instruction/question/screenshot blocks, no
+  answers/TA content), a **separate `ta_notes` document** (migration `0039`; how to support each level
+  with the answers, never shown to pupils), and `answers`. Image gaps → `> 🖼️ [show: …]` placeholders that
+  surface as **"before the bell" tasks** on the lesson page.
+- **Block (WYSIWYG-style) editor** ([public/worksheetEditor.js](../app/public/worksheetEditor.js)):
+  each block an editable card — reorder, change type, edit questions row-by-row (typed / 📷 screenshot),
+  **drag/paste images in**, level-focus tabs, live pupil preview. Saves via the server, which serialises
+  blocks → Markdown ([lib/worksheetBlocks.ts](../app/src/lib/worksheetBlocks.ts)); a round-trip test
+  proves **auto-marking field keys are preserved**. A "raw markdown" escape hatch remains.
+- **Per-level export/print**: a worksheet view + Word export of a single level (`?level=…`).
+- **Image serving fix:** worksheet illustration images now serve via a pupil/TA-safe, kind-gated
+  `/lesson-image/:id` (they were on `/resources/:id/view`, which pupils/TAs can't reach — they'd have
+  been broken in the pupil view). Pupil-pasted screenshots serve via the path-scoped `/pupil-image`.
+- New migrations: `0038` (`pupils.is_test`), `0039` (`ta_notes` resource kind). Pupil-pasted images are
+  a new category of pupil personal data — see [docs/DPIA.md](docs/DPIA.md) / [docs/SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md).
+- **Erasure now removes the screenshot files, not just the rows.** `disposePupil` deleted a pupil's
+  `pupil_answers` but left their pasted screenshots orphaned on the resource volume — a raw image is the
+  one pupil artefact the app can't redact. It now deletes the files on **erase** and strips them on
+  **anonymise** (blanking the `img:` pointer while keeping nameless text attainment), with the count in
+  the disposal audit; covered by the disposals integration test. Docs: DATA_MODEL §O, DPIA §7, R7.
+
 ### 2026-06-15 — Project-wide deep review & remediation (43 findings)
 
 After the redesign landed, the whole project got the most thorough review it has had — an

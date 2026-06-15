@@ -2,7 +2,7 @@
 // resolve them against RESOURCE_STORE_PATH so the same rows work on the host
 // (import/backups) and in the container (the app).
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { RESOURCE_STORE_PATH } from '../config/resources';
 
@@ -26,4 +26,11 @@ export async function storeBuffer(relPath: string, buf: Buffer): Promise<void> {
 
 export async function readStored(relPath: string): Promise<Buffer> {
   return readFile(absPath(relPath));
+}
+
+// Best-effort delete of one stored file — used by pupil erasure to remove pasted screenshots
+// (DATA_MODEL §O, DPIA §7). Guards against escaping the store; a missing file is a no-op.
+export async function removeStored(relPath: string): Promise<void> {
+  if (relPath.includes('..')) return;
+  await rm(absPath(relPath), { force: true });
 }

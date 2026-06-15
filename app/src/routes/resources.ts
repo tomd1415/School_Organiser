@@ -18,7 +18,7 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
-import { renderWorksheet, type Level } from '../lib/worksheetForm';
+import { renderWorksheet, sliceWorksheetMarkdown, type Level } from '../lib/worksheetForm';
 import { parseBlocks, serialiseBlocks, blocksSchema } from '../lib/worksheetBlocks';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
@@ -378,8 +378,12 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
       return reply.code(404).send('The stored file is missing from the resource store.');
     }
-    const docx = markdownToDocx(text);
-    const base = r.title.replace(/\.md$/i, '');
+    // ?level=support|core|challenge → just that level's pupil sheet (shared + the level, unlabelled).
+    const lvl = (req.query as { level?: unknown })?.level;
+    const level = lvl === 'support' || lvl === 'core' || lvl === 'challenge' ? lvl : null;
+    const md = level && (r.kind === 'worksheet' || /worksheet/i.test(r.title)) ? sliceWorksheetMarkdown(text, level) : text;
+    const docx = markdownToDocx(md);
+    const base = r.title.replace(/\.md$/i, '') + (level ? ` (${level})` : '');
     return reply
       .header('Content-Disposition', `attachment; filename="${encodeURIComponent(base)}.docx"`)
       .type('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -491,19 +495,38 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       // Generated documents (Markdown) render as a formatted, printable page in the browser.
       if (pk === 'markdown' || pk === 'text') {
         const text = (await readStored(v.storagePath)).toString('utf8');
-        const inner = pk === 'markdown' ? renderMarkdown(text) : `<pre class="md-pre">${esc(text)}</pre>`;
+        const isWorksheet = r.kind === 'worksheet' || /worksheet/i.test(r.title);
+        const lvlQ = (req.query as { level?: unknown })?.level;
+        const level = lvlQ === 'support' || lvlQ === 'core' || lvlQ === 'challenge' ? (lvlQ as Level) : undefined;
+        // A worksheet renders as the pupil sheet (a level shows just that level — a printable per-level
+        // sheet); other Markdown renders as the formatted document.
+        let inner: string;
+        let levelBar = '';
+        if (isWorksheet) {
+          const rendered = renderWorksheet(text, { mode: 'preview', level });
+          inner = `<div class="ws-doc ws-doc-preview">${rendered.html}</div>`;
+          if (rendered.hasLevels) {
+            const chip = (l: Level | '', label: string): string =>
+              `<a class="link${(level ?? '') === l ? ' on' : ''}" href="/resources/${id.data.id}/view${l ? `?level=${l}` : ''}">${label}</a>`;
+            levelBar = `<div class="ws-levelbar muted">Sheet for: ${chip('', 'All')} ${chip('support', '🟢 Support')} ${chip('core', '🟡 Core')} ${chip('challenge', '🔴 Challenge')}</div>`;
+          }
+        } else {
+          inner = pk === 'markdown' ? renderMarkdown(text) : `<pre class="md-pre">${esc(text)}</pre>`;
+        }
+        const docxHref = `/resources/${id.data.id}/download.docx${level ? `?level=${level}` : ''}`;
         const body = `
           <article class="card md-doc${r.kind === 'slides' ? ' md-slides' : ''}">
             <div class="md-head">
-              <span class="muted">${esc(r.title)} · v${r.versionNo ?? 1}</span>
+              <span class="muted">${esc(r.title)} · v${r.versionNo ?? 1}${level ? ` · ${esc(level)} sheet` : ''}</span>
               <span class="md-head-actions">
                 ${pk === 'markdown' ? `<a class="link" href="/resources/${id.data.id}/edit"><strong>✏ edit</strong></a>` : ''}
                 ${r.kind === 'slides' ? `<a class="link" href="/resources/${id.data.id}/present"><strong>▶ present</strong></a>` : ''}
-                ${pk === 'markdown' ? `<a class="link" href="/resources/${id.data.id}/download.docx">⬇ Word (.docx)</a>` : ''}
+                ${pk === 'markdown' ? `<a class="link" href="${docxHref}">⬇ Word (.docx)</a>` : ''}
                 <button type="button" class="link" onclick="window.print()">🖨 print</button>
                 <a class="link" href="/resources/${id.data.id}/download">download</a>
               </span>
             </div>
+            ${levelBar}
             ${inner}
           </article>`;
         return reply.type('text/html').send(layout({ title: r.title, body, authed: true, csrfToken: reply.generateCsrf() }));

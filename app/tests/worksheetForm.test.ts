@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { renderWorksheet, findImagePlaceholders } from '../src/lib/worksheetForm';
+import { renderWorksheet, findImagePlaceholders, sliceWorksheetMarkdown } from '../src/lib/worksheetForm';
+
+describe('worksheetForm — sliceWorksheetMarkdown (per-level export/print)', () => {
+  const SHEET = `# W\n\nshared intro\n\n## 🟢 Support\n| Q | Type your answer here |\n|---|---|\n| Easy? | |\n\n## 🟡 Core\n| Q | Type your answer here |\n|---|---|\n| Medium? | |\n`;
+  it('keeps shared + the chosen level, drops the level heading and other levels', () => {
+    const core = sliceWorksheetMarkdown(SHEET, 'core');
+    expect(core).toContain('shared intro');
+    expect(core).toContain('Medium?');
+    expect(core).not.toContain('Easy?');
+    expect(core).not.toContain('🟡'); // the level label is dropped (unlabelled, like the pupil view)
+  });
+  it('the sliced markdown renders to just that level\'s fields', () => {
+    const supportFields = renderWorksheet(sliceWorksheetMarkdown(SHEET, 'support'), { mode: 'review' }).fields;
+    expect(supportFields.some((f) => f.label.includes('Easy?'))).toBe(true);
+    expect(supportFields.some((f) => f.label.includes('Medium?'))).toBe(false);
+  });
+});
 
 describe('worksheetForm — image-gap placeholders (pre-lesson to-do)', () => {
   it('extracts every `[show: …]` description', () => {
