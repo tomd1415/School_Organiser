@@ -4,6 +4,20 @@ import { pool } from '../db/pool';
 import { materialiseOccurrencePrep } from './prep';
 import type { LastStop, NoteView, OccurrenceCourseRow, OccurrenceHeader } from '../services/occurrence';
 
+// Security (additional review): a TA may only file feedback on an occurrence-course for a lesson they
+// may see — their own (named) or one happening today. Mirrors taMayAccessResource's lesson scope.
+export async function taMayAccessOccurrenceCourse(occurrenceCourseId: number, taStaffId: number): Promise<boolean> {
+  const { rows } = await pool.query(
+    `SELECT 1 FROM occurrence_courses oc
+     JOIN lesson_occurrences lo ON lo.id = oc.occurrence_id
+     JOIN timetabled_lessons tl ON tl.id = lo.timetabled_lesson_id
+     WHERE oc.id = $1 AND (($2 > 0 AND tl.staff_id = $2) OR lo.date = CURRENT_DATE)
+     LIMIT 1`,
+    [occurrenceCourseId, taStaffId],
+  );
+  return rows.length > 0;
+}
+
 /** How many class-lessons the teacher has actually taught (recorded a stopping point or progress for)
  *  — the signal behind the earned "unlock advanced tools" nudge. */
 export async function countTaughtLessons(): Promise<number> {

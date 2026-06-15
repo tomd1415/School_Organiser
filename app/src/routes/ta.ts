@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { esc } from '../lib/html';
 import { classifyDay, resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
-import { findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
+import { findOrCreateOccurrence, getOccurrenceCourses, taMayAccessOccurrenceCourse } from '../repos/occurrence';
 import { getEffectiveLesson } from '../repos/adaptations';
 import { listResourcesForPlan, listResourcesForAdaptation, type LinkedResource } from '../repos/resources';
 import { addTaFeedback, listTaFeedback } from '../repos/taFeedback';
@@ -41,6 +41,7 @@ interface SlotLesson {
   end: string;
   isSelf: boolean;
   staffName: string;
+  staffId: number;
 }
 
 /** Every lesson running in a given (weekday, slot) — the teacher's own and TA-led ones. */
@@ -48,7 +49,7 @@ async function lessonsAt(weekday: number, slotOrder: number): Promise<SlotLesson
   const { rows } = await pool.query<SlotLesson>(
     `SELECT tl.id AS "lessonId", g.name AS "groupName", r.name AS "roomName",
             p.label, to_char(p.start_time,'HH24:MI') AS start, to_char(p.end_time,'HH24:MI') AS "end",
-            s.is_self AS "isSelf", s.name AS "staffName"
+            s.is_self AS "isSelf", s.name AS "staffName", s.id AS "staffId"
      FROM timetabled_lessons tl
      JOIN period_definitions p ON p.id = tl.period_definition_id
      JOIN staff s ON s.id = tl.staff_id
@@ -219,7 +220,10 @@ export function registerTaRoutes(app: FastifyInstance): void {
         body = `<section class="card">${tabs}<h1>No lesson ${which === 'now' ? 'right now' : 'coming up today'}</h1>
           <p class="muted">${state.isSchoolDay ? 'Check back at lesson time.' : 'No school today.'}</p></section>`;
       } else {
-        const lessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
+        // A NAMED TA (their own staff row) sees only their own lesson in the slot — not every lesson
+        // running that period. Shared-account TAs (taStaffId 0) and the teacher peeking still see all.
+        const slotLessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
+        const lessons = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
         const blocks: string[] = [];
         for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf));
         body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
@@ -245,6 +249,14 @@ export function registerTaRoutes(app: FastifyInstance): void {
       .safeParse(req.body);
     if (!b.success || (b.data.pupils.trim() === '' && b.data.lesson.trim() === '')) {
       return reply.code(400).type('text/html').send('<p class="error">Write something in at least one box.</p>');
+    }
+    // Scope: a TA may only file feedback on an occurrence-course for a lesson they may see (their own,
+    // or one happening today) — not any oc id they can guess. Teachers peeking are unrestricted.
+    if (req.session.get('role') === 'ta') {
+      const taStaffId = Number(req.session.get('taStaffId') ?? 0);
+      if (!(await taMayAccessOccurrenceCourse(b.data.oc, taStaffId))) {
+        return reply.code(403).type('text/html').send('<p class="error">That lesson isn\'t one of yours.</p>');
+      }
     }
     await addTaFeedback({
       occurrenceCourseId: b.data.oc,

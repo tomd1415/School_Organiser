@@ -66,8 +66,10 @@ describe('TA access (integration)', () => {
   it('feedback lands, shows for the teacher, and joins the AI history', async () => {
     const slot = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose='teaching' ORDER BY id LIMIT 1`);
     const { findOrCreateOccurrence, getOccurrenceCourses } = await import('../../src/repos/occurrence');
-    // a PAST date so recentGroupHistory picks it up
-    const occId = await findOrCreateOccurrence(slot.rows[0]!.id, '2001-01-15');
+    // TODAY's lesson: a shared-account TA may only feedback on a lesson happening today (the security
+    // scope), and recentGroupHistory includes it (date <= CURRENT_DATE).
+    const today = new Date().toISOString().slice(0, 10);
+    const occId = await findOrCreateOccurrence(slot.rows[0]!.id, today);
     const oc = (await getOccurrenceCourses(occId))[0]!;
     const page = await app.inject({ method: 'GET', url: '/ta', headers: { cookie: taSession } });
     // outside lesson time the card has no hx-headers; the logout form always carries the token
@@ -89,7 +91,7 @@ describe('TA access (integration)', () => {
       // AI history includes it with the safeguarding flag honoured
       const { recentGroupHistory } = await import('../../src/repos/adaptations');
       const hist = await recentGroupHistory(Number(oc.groupCourseId), 50);
-      const entry = hist.find((h) => h.date === '2001-01-15');
+      const entry = hist.find((h) => h.date === today);
       expect(entry).toBeDefined();
       expect(entry!.taFeedback.some((f) => f.pupils.includes('Settled well'))).toBe(true);
       // and the prompt items carry it
@@ -98,7 +100,20 @@ describe('TA access (integration)', () => {
       expect(items.some((i) => i.text.includes('TA feedback') && i.text.includes('Card sort worked'))).toBe(true);
     } finally {
       await pool.query(`DELETE FROM ta_feedback WHERE occurrence_course_id = $1`, [oc.occurrenceCourseId]);
-      await pool.query(`DELETE FROM lesson_occurrences WHERE date = '2001-01-15'`);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE id = $1`, [occId]);
+    }
+  });
+
+  it('a TA cannot fetch a resource that is not part of one of their lessons (IDOR scope)', async () => {
+    const { createResource } = await import('../../src/repos/resources');
+    const rid = await createResource('ZZTA orphan resource', 'document', 'text/markdown', 'ai_generated');
+    try {
+      for (const path of ['view', 'download', 'present', 'download.docx']) {
+        const res = await app.inject({ method: 'GET', url: `/resources/${rid}/${path}`, headers: { cookie: taSession } });
+        expect(res.statusCode).toBe(403); // not linked to any of the TA's / today's lessons
+      }
+    } finally {
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [rid]);
     }
   });
 

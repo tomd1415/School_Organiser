@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
@@ -12,6 +12,7 @@ import {
   listKinds,
   listUsageForResource,
   searchResources,
+  taMayAccessResource,
 } from '../repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
@@ -29,6 +30,20 @@ import { equipmentItem } from '../llm/prompts/equipment';
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 const PAGE_SIZE = 50;
+
+// Security: a limited TA may only fetch resources for lessons they may see (their own or today's).
+// Teachers are unrestricted. Returns true when the request was DENIED (a response has been sent).
+async function taResourceDenied(
+  req: { session: { get(k: string): unknown } },
+  reply: FastifyReply,
+  resourceId: number,
+): Promise<boolean> {
+  if (req.session.get('role') !== 'ta') return false;
+  const taStaffId = Number(req.session.get('taStaffId') ?? 0);
+  if (await taMayAccessResource(resourceId, taStaffId)) return false;
+  reply.code(403).type('text/html').send('Not available — this resource is not part of one of your lessons.');
+  return true;
+}
 
 function parseQuery(raw: unknown): { q: string; kind: string; page: number } {
   const s = (raw ?? {}) as Record<string, string | undefined>;
@@ -146,6 +161,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   app.get('/resources/:id/download.docx', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
+    if (await taResourceDenied(req, reply, id.data.id)) return;
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
     if (previewKind(r.mimeType, r.title) !== 'markdown') return reply.code(400).send('Only generated (Markdown) documents export to Word.');
@@ -169,6 +185,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   app.get('/resources/:id/present', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
+    if (await taResourceDenied(req, reply, id.data.id)) return;
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
     let text: string;
@@ -241,6 +258,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   app.get('/resources/:id/download', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
+    if (await taResourceDenied(req, reply, id.data.id)) return;
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
     let buf: Buffer;
@@ -259,6 +277,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   app.get('/resources/:id/view', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
+    if (await taResourceDenied(req, reply, id.data.id)) return;
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v) return reply.code(404).send('Not found');
     const pk = previewKind(r.mimeType, r.title);
@@ -284,8 +303,13 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       }
       if (pk === 'pdf' || pk === 'image') {
         const buf = await readStored(v.storagePath);
+        // An inline SVG can carry <script> that runs in our origin (stored-XSS). Force SVG to DOWNLOAD
+        // (a downloaded file is never rendered as a same-origin document); nosniff stops other types
+        // being content-sniffed into something executable.
+        const isSvg = /svg/i.test(r.mimeType ?? '') || /\.svg$/i.test(r.title);
         return reply
-          .header('Content-Disposition', `inline; filename="${encodeURIComponent(r.title)}"`)
+          .header('Content-Disposition', `${isSvg ? 'attachment' : 'inline'}; filename="${encodeURIComponent(r.title)}"`)
+          .header('X-Content-Type-Options', 'nosniff')
           .type(r.mimeType ?? 'application/octet-stream')
           .send(buf);
       }

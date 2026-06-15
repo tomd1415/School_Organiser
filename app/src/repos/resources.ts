@@ -264,6 +264,28 @@ export async function linkResourceToAdaptation(resourceId: number, adaptationId:
   );
 }
 
+// Security (additional review): a limited TA must only open resources for lessons they may see —
+// otherwise they could enumerate resource ids and read any class's materials. A resource is allowed if
+// it is linked (to a plan, or that plan's adaptation for the right class) to an occurrence_course whose
+// lesson is EITHER the named TA's own (tl.staff_id) OR happening today (covers shared-account TAs and
+// the now/next view). Teachers are never restricted by this.
+export async function taMayAccessResource(resourceId: number, taStaffId: number): Promise<boolean> {
+  const { rows } = await pool.query(
+    `SELECT 1
+     FROM resource_links rl
+     JOIN occurrence_courses oc
+       ON oc.lesson_plan_id = rl.lesson_plan_id
+       OR EXISTS (SELECT 1 FROM lesson_adaptations a
+                  WHERE a.id = rl.adaptation_id AND a.lesson_plan_id = oc.lesson_plan_id AND a.group_course_id = oc.group_course_id)
+     JOIN lesson_occurrences lo ON lo.id = oc.occurrence_id
+     JOIN timetabled_lessons tl ON tl.id = lo.timetabled_lesson_id
+     WHERE rl.resource_id = $1 AND (($2 > 0 AND tl.staff_id = $2) OR lo.date = CURRENT_DATE)
+     LIMIT 1`,
+    [resourceId, taStaffId],
+  );
+  return rows.length > 0;
+}
+
 /** The adapted documents for one class's version of a lesson. */
 export async function listResourcesForAdaptation(adaptationId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
