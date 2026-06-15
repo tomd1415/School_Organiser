@@ -12,6 +12,7 @@ import { getLessonWorksheet, getLessonWorksheetMeta } from '../services/workshee
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
+import { readStored, storeBuffer } from '../lib/resourceStore';
 import {
   getAnswers,
   getPupilLevel,
@@ -315,6 +316,52 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const comment = typeof body.comment === 'string' ? body.comment.slice(0, 500) : '';
     await upsertPupilFeedback({ pupilId, occurrenceCourseId: q.data.oc, rating, liked: toList(body.liked), disliked: toList(body.disliked), comment });
     return reply.type('text/html').send(`<span class="note-status saved" id="fb-${q.data.oc}-status" hx-swap-oob="true">saved ✓</span>`);
+  });
+
+  // ── Pupil screenshot paste: store a pasted/dropped image of the pupil's work as their answer.
+  const IMG_EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
+  app.post('/me/answer-image', { preHandler: app.csrfProtection }, async (req, reply) => {
+    const acting = actingPupil(req);
+    if (!acting) return reply.code(401).send('');
+    const q = z.object({ oc: z.coerce.number().int().positive(), key: z.string().min(1).max(60) }).safeParse(req.query);
+    if (!q.success) return reply.code(400).send('');
+    if (!acting.isTest && !(await pupilCanAccessOc(acting.id, q.data.oc))) return reply.code(403).send('');
+    const data = await req.file();
+    if (!data) return reply.code(400).type('text/html').send('<span class="ws-saved show">no image</span>');
+    const ext = IMG_EXT[data.mimetype];
+    if (!ext) return reply.code(400).type('text/html').send('<span class="ws-saved show">that file type isn’t allowed</span>'); // raster only; no SVG
+    const buf = await data.toBuffer();
+    if (buf.length > 12 * 1024 * 1024) return reply.code(413).type('text/html').send('<span class="ws-saved show">that image is too big</span>');
+    const safeKey = q.data.key.replace(/[^a-z0-9._-]/gi, '_');
+    const rel = `pupil-work/${q.data.oc}/${acting.id}/${safeKey}.${ext}`;
+    await storeBuffer(rel, buf);
+    const ws = await worksheetForOccurrenceCourse(q.data.oc);
+    await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` });
+    const url = `/pupil-image?p=${encodeURIComponent(rel)}&t=${Date.now()}`; // cache-bust so a replacement shows
+    return reply.type('text/html').send(`<img class="ws-shot" src="${url}" alt="your screenshot">`);
+  });
+
+  // Serve a pupil-pasted image. A pupil sees only their own; a teacher (incl. the test overlay) any;
+  // TAs are denied. Raster only + nosniff (paths are validated — no traversal, must be under pupil-work).
+  app.get('/pupil-image', async (req, reply) => {
+    const q = z.object({ p: z.string().min(1).max(300) }).safeParse(req.query);
+    if (!q.success) return reply.code(400).send('');
+    const p = q.data.p;
+    if (!p.startsWith('pupil-work/') || p.includes('..')) return reply.code(400).send('');
+    const role = req.session.get('role');
+    if (role === 'pupil') {
+      if (Number(p.split('/')[2] ?? 0) !== Number(req.session.get('pupilId') ?? 0)) return reply.code(403).send('');
+    } else if (role === 'ta' || !req.session.get('authed')) {
+      return reply.code(403).send('');
+    } // teacher (and the test overlay) → allowed
+    const ext = (p.split('.').pop() ?? '').toLowerCase();
+    const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : ext === 'gif' ? 'image/gif' : 'image/jpeg';
+    try {
+      const buf = await readStored(p);
+      return reply.header('X-Content-Type-Options', 'nosniff').header('Content-Disposition', 'inline').type(mime).send(buf);
+    } catch {
+      return reply.code(404).send('');
+    }
   });
 
   // ── Test pupil (teacher-only) — open the REAL pupil surface for any lesson, any time, at any level.

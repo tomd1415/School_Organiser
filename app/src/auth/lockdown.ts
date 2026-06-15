@@ -15,7 +15,7 @@ export const ROLE_ALLOWED: Record<LimitedRole, RegExp[]> = {
     /^\/healthz/,
     /^\/resources\/\d+\/(view|download|present|download\.docx)$/,
   ],
-  pupil: [/^\/me($|\/|\?)/, /^\/pupil($|\/|\?)/, /^\/logout/, /^\/static\//, /^\/healthz/],
+  pupil: [/^\/me($|\/|\?)/, /^\/pupil($|\/|\?)/, /^\/pupil-image($|\?)/, /^\/logout/, /^\/static\//, /^\/healthz/],
 };
 
 export const ROLE_HOME: Record<LimitedRole, string> = { ta: '/ta', pupil: '/me' };

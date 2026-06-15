@@ -385,6 +385,58 @@ describe('worksheetForm — name/date auto-fill (online the pupil never types th
   });
 });
 
+describe('worksheetForm — screenshot paste (image fields)', () => {
+  it('a 📷 "paste a screenshot" answer cell becomes an image paste zone, keyed like any answer', () => {
+    const src = `# S\n\n| Show your program working | 📷 Paste a screenshot here |\n|---|---|\n`;
+    const r = renderWorksheet(src, { mode: 'form', action: '/me/answer?oc=5' });
+    const img = r.fields.filter((f) => f.kind === 'image');
+    expect(img).toHaveLength(1);
+    expect(img[0]!.key).toBe('t1.r0.c2'); // header-as-data row, normal key scheme — marking unaffected
+    expect(r.html).toContain('class="ws-paste');
+    expect(r.html).toContain('/me/answer-image?oc=5&amp;key=');
+  });
+
+  it('a screenshot cell in a Q&A body row is an image field at the normal key', () => {
+    const src = `# S\n\n| Task | Your work |\n|---|---|\n| Save your file and screenshot it | 📷 Paste a screenshot here |\n`;
+    const r = renderWorksheet(src, { mode: 'form', action: '/me/answer?oc=5' });
+    const img = r.fields.filter((f) => f.kind === 'image');
+    expect(img.map((f) => f.key)).toEqual(['t1.r1.c2']);
+  });
+
+  it('a question that merely mentions a screenshot stays a typed answer (not an image field)', () => {
+    const src = `# S\n\n| Question | Type your answer here |\n|---|---|\n| Describe the screenshot you saw | |\n`;
+    const r = renderWorksheet(src, { mode: 'form' });
+    expect(r.fields.filter((f) => f.kind === 'image')).toHaveLength(0);
+    expect(r.fields.filter((f) => f.kind === 'text')).toHaveLength(1);
+  });
+
+  it('a saved screenshot renders as an image (served via /pupil-image) in review', () => {
+    const src = `# S\n\n| Show it | 📷 Paste a screenshot here |\n|---|---|\n`;
+    const key = renderWorksheet(src, { mode: 'review' }).fields.find((f) => f.kind === 'image')!.key;
+    const r = renderWorksheet(src, { mode: 'review', values: new Map([[key, `img:pupil-work/5/9/${key}.png`]]) });
+    expect(r.html).toContain('<img class="ws-shot"');
+    expect(r.html).toContain('/pupil-image?p=');
+  });
+
+  it('image (screenshot) fields are still sliced by level like any field', () => {
+    const src = `# S\n\n## 🟢 Support\n| Show it | 📷 Paste a screenshot here |\n|---|---|\n\n## 🟡 Core\n| Q | Type your answer here |\n|---|---|\n| Why? | |\n`;
+    expect(renderWorksheet(src, { mode: 'form', level: 'support' }).fields.filter((f) => f.kind === 'image')).toHaveLength(1);
+    expect(renderWorksheet(src, { mode: 'form', level: 'core' }).fields.filter((f) => f.kind === 'image')).toHaveLength(0);
+  });
+});
+
+describe('worksheetForm — block styling', () => {
+  it('instruction prose gets a styled "do this" panel', () => {
+    const r = renderWorksheet(`## Instructions\nOpen Thonny and run your starter file.\n`, { mode: 'form' });
+    expect(r.html).toContain('ws-instruction');
+  });
+  it('a standalone callout (blockquote) styles itself, not wrapped as an instruction panel', () => {
+    const r = renderWorksheet(`> Remember to save your work as you go.\n`, { mode: 'form' });
+    expect(r.html).toContain('<blockquote>');
+    expect(r.html).not.toContain('ws-instruction');
+  });
+});
+
 describe('worksheetForm — preview mode (teacher "see what pupils get")', () => {
   const LEVELLED = `# S\n\n## 🟢 Support\n| Q | Type your answer here |\n|---|---|\n| Easy? | |\n\n## 🟡 Core\n| Q | Type your answer here |\n|---|---|\n| Medium? | |\n`;
 

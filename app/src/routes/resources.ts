@@ -18,6 +18,7 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
+import { renderWorksheet } from '../lib/worksheetForm';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
 import { modelForFeature } from '../repos/settings';
@@ -43,6 +44,58 @@ async function taResourceDenied(
   if (await taMayAccessResource(resourceId, taStaffId)) return false;
   reply.code(403).type('text/html').send('Not available — this resource is not part of one of your lessons.');
   return true;
+}
+
+// ── In-browser editing of generated Markdown resources (slides + worksheets) ───────────────────
+// The teacher edits the raw Markdown on the left; the right pane shows it rendered EXACTLY as it
+// appears in use — a worksheet as the per-level pupil form, a deck as slide cards, anything else as
+// the formatted document — updating live as they type. Saving writes a new version (reversible).
+
+/** Render slides the way they present — one card per `## ` heading (a preview of the deck). */
+function renderSlidesPreview(text: string): string {
+  const parts = text.replace(/\r\n/g, '\n').split(/\n(?=## )/);
+  const cards = parts
+    .map((p) => renderMarkdown(p))
+    .filter((h) => h.trim() !== '')
+    .map((h) => `<section class="edit-slide">${h}</section>`)
+    .join('');
+  return `<div class="edit-slides">${cards || '<p class="muted">Start a slide with a <code>## heading</code>.</p>'}</div>`;
+}
+
+/** The "as it appears" preview for a resource's content, by kind. */
+function previewForKind(kind: string, title: string, text: string): string {
+  if (kind === 'worksheet' || /worksheet/i.test(title)) {
+    // Whole document (every level), inert — so the teacher sees all of what they're editing.
+    return `<div class="ws-doc ws-doc-preview">${renderWorksheet(text, { mode: 'preview' }).html}</div>`;
+  }
+  if (kind === 'slides') return renderSlidesPreview(text);
+  return `<div class="md-doc">${renderMarkdown(text)}</div>`;
+}
+
+/** The split editor: raw Markdown + a live "as it appears" preview, with a save-new-version action.
+ *  hx-headers carries the CSRF token so both the live-preview POST and the save POST are authorised. */
+function renderEditor(id: number, r: { title: string; kind: string; versionNo: number | null }, text: string, csrf: string): string {
+  return `<article class="card md-edit" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>
+    <div class="md-head">
+      <span class="muted">✏ Editing: ${esc(r.title)} · v${r.versionNo ?? 1}</span>
+      <span class="md-head-actions">
+        ${r.kind === 'slides' ? `<a class="link" href="/resources/${id}/present" target="_blank" rel="noopener">▶ present</a>` : ''}
+        <a class="link" href="/resources/${id}/view">↩ back to view</a>
+      </span>
+    </div>
+    <form hx-post="/resources/${id}/edit" hx-target="#edit-status" hx-swap="innerHTML">
+      <div class="md-edit-grid">
+        <textarea name="content" class="md-edit-area" rows="28" spellcheck="true" aria-label="Markdown source"
+          hx-post="/resources/${id}/edit/preview" hx-trigger="input changed delay:400ms" hx-target="#md-prev" hx-swap="innerHTML">${esc(text)}</textarea>
+        <div id="md-prev" class="md-edit-preview">${previewForKind(r.kind, r.title, text)}</div>
+      </div>
+      <div class="md-edit-actions">
+        <button type="submit" class="btn">💾 Save new version</button>
+        <span id="edit-status" class="note-status" aria-live="polite"></span>
+        <span class="muted edit-hint">Edits are saved as a new version — the old one is kept.</span>
+      </div>
+    </form>
+  </article>`;
 }
 
 function parseQuery(raw: unknown): { q: string; kind: string; page: number } {
@@ -152,6 +205,52 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'new version');
     const updated = await getResource(id.data.id);
     return reply.type('text/html').send(updated ? renderResourceItem(updated) : '');
+  });
+
+  // The in-browser editor for a generated Markdown resource (slides / worksheet / document).
+  // Teacher-only: the global lockdown hook bounces TA/pupil roles from non-allowlisted paths.
+  app.get('/resources/:id/edit', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v) return reply.code(404).send('Not found');
+    if (previewKind(r.mimeType, r.title) !== 'markdown') return reply.redirect(`/resources/${id.data.id}/view`); // only Markdown is editable here
+    let text: string;
+    try {
+      text = (await readStored(v.storagePath)).toString('utf8');
+    } catch (err) {
+      app.log.error({ err, path: v.storagePath }, 'resource file missing from store');
+      return reply.code(404).send('The stored file is missing from the resource store.');
+    }
+    const csrf = reply.generateCsrf();
+    return reply.type('text/html').send(layout({ title: `Edit · ${r.title}`, body: renderEditor(id.data.id, r, text, csrf), authed: true, csrfToken: csrf }));
+  });
+
+  // Live "as it appears" preview while typing — renders only, never saves.
+  app.post('/resources/:id/edit/preview', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await getResource(id.data.id);
+    if (!r) return reply.code(404).send('');
+    const b = z.object({ content: z.string().max(200_000).optional() }).safeParse(req.body);
+    return reply.type('text/html').send(previewForKind(r.kind, r.title, (b.success && b.data.content) || ''));
+  });
+
+  // Save the edited Markdown as a NEW version (reversible — the old version is kept).
+  app.post('/resources/:id/edit', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await getResource(id.data.id);
+    if (!r) return reply.code(404).send('');
+    if (previewKind(r.mimeType, r.title) !== 'markdown') return reply.code(400).type('text/html').send('<span class="note-status">Only Markdown documents can be edited here.</span>');
+    const b = z.object({ content: z.string().min(1).max(200_000) }).safeParse(req.body);
+    if (!b.success) return reply.type('text/html').send('<span class="note-status">Could not save — the document is empty or too long.</span>');
+    const nextNo = (r.versionNo ?? 0) + 1;
+    const buf = Buffer.from(b.data.content, 'utf8');
+    const rel = relPathFor(id.data.id, nextNo, r.title);
+    await storeBuffer(rel, buf);
+    await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser');
+    return reply.type('text/html').send(`<span class="note-status saved">saved ✓ — now v${nextNo}</span>`);
   });
 
 
@@ -291,6 +390,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
             <div class="md-head">
               <span class="muted">${esc(r.title)} · v${r.versionNo ?? 1}</span>
               <span class="md-head-actions">
+                ${pk === 'markdown' ? `<a class="link" href="/resources/${id.data.id}/edit"><strong>✏ edit</strong></a>` : ''}
                 ${r.kind === 'slides' ? `<a class="link" href="/resources/${id.data.id}/present"><strong>▶ present</strong></a>` : ''}
                 ${pk === 'markdown' ? `<a class="link" href="/resources/${id.data.id}/download.docx">⬇ Word (.docx)</a>` : ''}
                 <button type="button" class="link" onclick="window.print()">🖨 print</button>

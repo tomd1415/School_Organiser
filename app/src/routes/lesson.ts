@@ -232,7 +232,8 @@ async function renderWorksheetPreview(gc: number, lp: number, level: Level): Pro
     ? `for <strong>${LEVEL_LABEL[level]}</strong>`
     : '· <span class="muted">this sheet isn’t split by level — every pupil sees the same</span>';
   const copyNote = ws.adapted ? '✏ this class’s copy' : 'master copy';
-  return `<div class="ws-preview-meta"><span class="adapt-badge${ws.adapted ? ' on' : ''}">${copyNote}</span> · ${boxNote} ${levelNote}</div>
+  return `<div class="ws-preview-meta"><span class="adapt-badge${ws.adapted ? ' on' : ''}">${copyNote}</span> · ${boxNote} ${levelNote}
+      · <a class="link" href="/resources/${ws.resourceId}/edit" target="_blank" rel="noopener">✏ edit this worksheet</a></div>
     <div class="ws-doc ws-doc-preview" aria-label="Pupil preview">${rendered.html}</div>`;
 }
 

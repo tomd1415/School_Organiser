@@ -155,4 +155,61 @@
   document.body.addEventListener('input', function (e) { if (e.target && e.target.classList && e.target.classList.contains('ws-input')) dirty = true; });
   document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) { dirty = false; clearToast(); } });
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // ── Screenshot paste: paste / drop / pick an image into a `.ws-paste` zone → upload as the answer.
+  function csrfToken() {
+    try { return (JSON.parse((main && main.getAttribute('hx-headers')) || '{}'))['x-csrf-token'] || ''; } catch (e) { return ''; }
+  }
+  function uploadShot(zone, file) {
+    if (!file || !/^image\//.test(file.type) || zone.classList.contains('ws-paste-preview')) return;
+    var saved = zone.querySelector('.ws-saved');
+    if (saved) { saved.textContent = 'uploading…'; saved.classList.add('show'); }
+    var fd = new FormData();
+    fd.append('file', file, file.name || 'screenshot.png');
+    fetch(zone.getAttribute('data-paste-url'), { method: 'POST', headers: { 'x-csrf-token': csrfToken() }, body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+      .then(function (html) {
+        var shot = zone.querySelector('.ws-paste-shot');
+        if (shot) shot.innerHTML = html;
+        zone.classList.add('has-shot');
+        if (saved) saved.textContent = 'saved ✓';
+        dirty = false;
+      })
+      .catch(function () { if (saved) saved.textContent = 'could not save — try again'; document.body.dispatchEvent(new Event('app:save-failed')); });
+  }
+  function pickFile(zone) {
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/png,image/jpeg,image/webp,image/gif';
+    inp.addEventListener('change', function () { if (inp.files && inp.files[0]) uploadShot(zone, inp.files[0]); });
+    inp.click();
+  }
+  if (main) {
+    main.addEventListener('click', function (e) {
+      var zone = e.target.closest('.ws-paste');
+      if (!zone || zone.classList.contains('ws-paste-preview') || e.target.closest('.ws-shot')) return;
+      pickFile(zone); // also a fallback for anyone who can't paste/drag
+    });
+    main.addEventListener('dragover', function (e) { var z = e.target.closest('.ws-paste'); if (z && !z.classList.contains('ws-paste-preview')) { e.preventDefault(); z.classList.add('is-drop'); } });
+    main.addEventListener('dragleave', function (e) { var z = e.target.closest('.ws-paste'); if (z) z.classList.remove('is-drop'); });
+    main.addEventListener('drop', function (e) {
+      var z = e.target.closest('.ws-paste');
+      if (!z) return;
+      e.preventDefault();
+      z.classList.remove('is-drop');
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) uploadShot(z, f);
+    });
+    document.addEventListener('paste', function (e) {
+      var items = (e.clipboardData && e.clipboardData.items) || [];
+      var file = null;
+      for (var i = 0; i < items.length; i++) { if (items[i].type && items[i].type.indexOf('image/') === 0) { file = items[i].getAsFile(); break; } }
+      if (!file) return;
+      var zone = (document.activeElement && document.activeElement.closest && document.activeElement.closest('.ws-paste')) || null;
+      if (!zone) { var zones = document.querySelectorAll('.ws-paste:not(.ws-paste-preview)'); if (zones.length === 1) zone = zones[0]; }
+      if (!zone) return;
+      e.preventDefault();
+      uploadShot(zone, file);
+    });
+  }
 })();

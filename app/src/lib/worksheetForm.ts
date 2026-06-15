@@ -14,7 +14,7 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check';
+  kind: 'text' | 'check' | 'image';
   level: BlockLevel;
   label: string;
 }
@@ -60,6 +60,14 @@ const PROMPT = /^\s*(?:type|write|paste|draw|sketch|enter|fill)\b|\b(?:your|my)\
 // merely starts with a verb ("Write a sentence about loops") is NOT mistaken for an empty answer box
 // and overwritten with an input.
 const PLACEHOLDER_CELL = /^\s*(?:type|write|paste|draw|sketch|enter)\b.{0,20}\b(?:here|answer|answers|name|date|below|response|box)\b[\s.)]*$|^\s*(?:your|my)\s+answers?\b/i;
+// A SCREENSHOT-paste answer cell: the pupil pastes/drops an image of their work rather than typing.
+// Paste-specific so a question that merely mentions "a screenshot" stays a normal text answer.
+const SCREENSHOT = /📷|🖼|\bpaste\b[^|]*\b(?:screenshot|image|picture|photo|work)\b|\b(?:screenshot|image|photo)\b[^|]*\bhere\b/i;
+
+/** A stored pupil screenshot is recorded as `img:<relpath>`; turn it into a same-origin serve URL. */
+function imgServeUrl(value: string): string | null {
+  return value.startsWith('img:') ? `/pupil-image?p=${encodeURIComponent(value.slice(4))}` : null;
+}
 
 // GFM-aware cell split: a `|` only separates cells when it is NOT escaped (`\|`) and NOT inside an
 // inline-code span (`...`). Without this, a cell like "What does `a|b` mean?" splits into phantom
@@ -254,6 +262,30 @@ function checkControl(key: string, label: string, opts: WorksheetOptions): strin
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none"> ${esc(label)}</label></li>`;
 }
 
+/** A screenshot-paste answer: the pupil pastes/drops an image; it's stored and shown back. Never
+ * auto-marked (the teacher reviews it). pupil.js wires the paste/drop on `.ws-paste`. */
+function imageControl(key: string, label: string, opts: WorksheetOptions): string {
+  const value = opts.values?.get(key) ?? '';
+  const src = imgServeUrl(value);
+  const prompt = label.trim() || 'Paste or drop a screenshot of your work';
+  if (opts.mode === 'review') {
+    return src
+      ? `<div class="ws-answer ws-shot-wrap"><img class="ws-shot" src="${src}" alt="${esc(label || 'screenshot')}" loading="lazy"></div>`
+      : `<div class="ws-answer ws-empty">— (no screenshot yet)</div>`;
+  }
+  if (opts.mode === 'preview') {
+    return `<div class="ws-paste ws-paste-preview" aria-hidden="true"><span class="ws-paste-prompt">📷 ${esc(prompt)}</span></div>`;
+  }
+  // form: a focusable paste/drop zone; pupil.js posts the image to data-paste-url and swaps the shot in.
+  const postUrl = saveUrl((opts.action ?? '/me/answer').replace('/me/answer', '/me/answer-image'), key);
+  const shot = src ? `<img class="ws-shot" src="${src}" alt="${esc(label || 'your screenshot')}" loading="lazy">` : '';
+  return `<div class="ws-paste${src ? ' has-shot' : ''}" data-paste-key="${esc(key)}" data-paste-url="${esc(postUrl)}" tabindex="0" role="button" aria-label="${esc(prompt)}">
+    <span class="ws-paste-prompt">📷 ${esc(prompt)} <span class="muted">(Ctrl/⌘+V, or drop a file)</span></span>
+    <div class="ws-paste-shot">${shot}</div>
+    <span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>
+  </div>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -266,8 +298,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const rows = block.lines.map(cells);
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
-  const answerCol = header.map((c) => PROMPT.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c)));
+  const answerCol = header.map((c) => PROMPT.test(c) || SCREENSHOT.test(c));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {
@@ -303,7 +335,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // An input is rendered for an answer-column cell that is EMPTY or a placeholder, or for any
       // cell that is itself a placeholder. A filled, non-placeholder cell is preserved as text — so
       // a reference column that merely shares an answer column's table never loses its content.
-      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder)) || placeholder;
+      const shot = SCREENSHOT.test(cell);
+      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot)) || placeholder || shot;
       if (!isInput) return `<td>${esc(cell)}</td>`;
       const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
       const label = row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? (theadCells?.[c] ?? '');
@@ -325,8 +358,12 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
           return `<td class="ws-answer-cell"><div class="ws-answer ws-auto" title="filled in automatically">${esc(auto)}</div></td>`;
         }
       }
-      localFields.push({ key, kind: 'text', level: block.level, label });
-      return `<td class="ws-answer-cell">${textControl(key, label, placeholder ? cell : '', opts)}</td>`;
+      // A screenshot-paste cell becomes an image field (pupil pastes a picture of their work);
+      // everything else is a typed answer. Same key scheme either way → marking is unaffected.
+      const isShot = shot || SCREENSHOT.test(theadCells?.[c] ?? '') || SCREENSHOT.test(label);
+      localFields.push({ key, kind: isShot ? 'image' : 'text', level: block.level, label });
+      const control = isShot ? imageControl(key, label, opts) : textControl(key, label, placeholder ? cell : '', opts);
+      return `<td class="ws-answer-cell${isShot ? ' ws-shot-cell' : ''}">${control}</td>`;
     });
     return `<tr>${tds.join('')}</tr>`;
   };
@@ -394,7 +431,12 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
     } else if (shown) {
       // In a sliced (pupil) view the level's own heading is hidden — the slice is unlabelled.
       if (block.isLevelHeading && include !== null) continue;
-      out.push(renderMarkdown(block.lines.join('\n')));
+      const md = renderMarkdown(block.lines.join('\n'));
+      // Wrap instruction prose in a calm "do this" panel so it reads clearly apart from the answer
+      // boxes. A pure title/heading and a standalone callout (blockquote) style themselves.
+      const headingOnly = block.lines.every((l) => l.trim() === '' || /^#{1,6}\s/.test(l));
+      const quoteOnly = block.lines.every((l) => l.trim() === '' || /^>\s?/.test(l));
+      out.push(headingOnly || quoteOnly ? md : `<div class="ws-block ws-instruction">${md}</div>`);
     }
   }
 
