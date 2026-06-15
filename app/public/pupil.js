@@ -14,9 +14,10 @@
         (k === 'speak' && root.getAttribute('data-speak') === 'on') ||
         (k === 'font' && root.getAttribute('data-font') === 'dyslexic') ||
         (k === 'contrast' && root.getAttribute('data-contrast') === 'high') ||
-        (k === 'motion' && root.getAttribute('data-motion') === 'reduce');
+        (k === 'motion' && root.getAttribute('data-motion') === 'reduce') ||
+        (k === 'theme' && root.getAttribute('data-theme') === 'dark');
       b.classList.toggle('on', !!on);
-      if (k === 'speak' || k === 'font' || k === 'contrast' || k === 'motion') b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (k === 'speak' || k === 'font' || k === 'contrast' || k === 'motion' || k === 'theme') b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
   function setAttr(attr, key, val) {
@@ -43,9 +44,37 @@
       case 'font': toggleAttr('data-font', 'a11y.font', 'dyslexic'); break;
       case 'contrast': toggleAttr('data-contrast', 'a11y.contrast', 'high'); break;
       case 'motion': toggleAttr('data-motion', 'a11y.motion', 'reduce'); break;
+      case 'theme': toggleAttr('data-theme', 'a11y.theme', 'dark'); break;
     }
   });
   syncButtons();
+
+  // ── Slide deck (left pane of the two-pane workspace): one slide at a time, Prev/Next per deck ───
+  function deckGo(deck, dir) {
+    var slides = deck.querySelectorAll('.pslide');
+    if (!slides.length) return;
+    var idx = 0;
+    slides.forEach(function (s, i) { if (s.classList.contains('on')) idx = i; });
+    var next = Math.max(0, Math.min(slides.length - 1, idx + dir));
+    slides.forEach(function (s, i) { s.classList.toggle('on', i === next); });
+    var n = deck.querySelector('.pslide-n'); if (n) n.textContent = String(next + 1);
+    var prev = deck.querySelector('.pslide-prev'); if (prev) prev.disabled = next === 0;
+    var nx = deck.querySelector('.pslide-next'); if (nx) nx.disabled = next === slides.length - 1;
+  }
+  if (main) {
+    main.addEventListener('click', function (e) {
+      var prev = e.target.closest('.pslide-prev');
+      var nx = e.target.closest('.pslide-next');
+      if (!prev && !nx) return;
+      var deck = e.target.closest('.pupil-slides');
+      if (deck) deckGo(deck, prev ? -1 : 1);
+    });
+    document.querySelectorAll('.pupil-slides').forEach(function (deck) {
+      var p = deck.querySelector('.pslide-prev'); if (p) p.disabled = true;
+      var slides = deck.querySelectorAll('.pslide'), nx = deck.querySelector('.pslide-next');
+      if (nx && slides.length <= 1) nx.disabled = true;
+    });
+  }
 
   // ── 10.11 read-aloud (Web Speech API; click any words to hear them when it's on) ───────────────
   function speak(text) {

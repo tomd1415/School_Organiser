@@ -42,6 +42,7 @@ const A11Y_BAR = `<div class="a11y-bar" role="toolbar" aria-label="Reading help"
   <button type="button" class="a11y-btn" data-a11y="speak" title="Read aloud — then tap any words to hear them" aria-pressed="false">🔊 Read aloud</button>
   <button type="button" class="a11y-btn" data-a11y="font" title="Easy-read font" aria-pressed="false">Aa easy-read</button>
   <button type="button" class="a11y-btn" data-a11y="contrast" title="High contrast" aria-pressed="false">◐ Contrast</button>
+  <button type="button" class="a11y-btn" data-a11y="theme" title="Dark / light mode" aria-pressed="false">🌙 Dark</button>
   <button type="button" class="a11y-btn" data-a11y="motion" title="Calm — less movement" aria-pressed="false">🌊 Calm</button>
   <span class="a11y-speak-hint">Tap any words to hear them.</span>
 </div>`;
@@ -53,7 +54,7 @@ export function pupilLayout(body: string, csrf: string): string {
 <script>
 // Apply saved reading-help preferences BEFORE first paint (no flash). Tiny + inline by necessity.
 (function () { try { var d = document.documentElement, s = localStorage;
-  ['textscale','font','contrast','motion','speak'].forEach(function (k) { var v = s.getItem('a11y.' + k); if (v) d.setAttribute('data-' + k, v); });
+  ['textscale','font','contrast','motion','speak','theme'].forEach(function (k) { var v = s.getItem('a11y.' + k); if (v) d.setAttribute('data-' + k, v); });
 } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="/static/styles.css"></head>

@@ -8,8 +8,10 @@ import { pool } from '../db/pool';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
-import { getLessonWorksheet, getLessonWorksheetMeta } from '../services/worksheet';
+import { getLessonWorksheet, getLessonWorksheetMeta, getLessonSlidesMarkdown } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
+import { renderMarkdown } from '../lib/markdown';
+import { sliceSlidesForLevel } from '../lib/slideDeck';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
 import { readStored, storeBuffer } from '../lib/resourceStore';
@@ -131,6 +133,23 @@ function resultsCard(r: PupilResults): string {
   </section>`;
 }
 
+// The pupil's slide deck (left pane) — their ability's slides, one shown at a time, Prev/Next driven
+// by pupil.js. The pupil follows the lesson on the board with a simplified deck matching their level.
+function renderSlideDeck(md: string, deckId: string, level: Level): string {
+  const slides = sliceSlidesForLevel(md, level);
+  if (slides.length === 0) return '';
+  const html = slides.map((s, i) => `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">${renderMarkdown(s)}</div>`).join('');
+  return `<section class="pupil-slides" data-deck="${esc(deckId)}" aria-label="Lesson slides">
+    <div class="pslide-head"><span class="pslide-title">📊 Slides</span><span class="pslide-count">Slide <b class="pslide-n">1</b> / ${slides.length}</span></div>
+    <div class="pslide-stage">${html}</div>
+    <div class="pslide-nav">
+      <button type="button" class="btn-soft pslide-prev" aria-label="Previous slide">◀ Back</button>
+      <span class="muted pslide-hint">Follow along on the board</span>
+      <button type="button" class="btn-soft pslide-next" aria-label="Next slide">Next ▶</button>
+    </div>
+  </section>`;
+}
+
 function doneBlock(oc: number, done: boolean): string {
   return `<div class="pupil-done" id="done-${oc}">
     ${
@@ -217,7 +236,11 @@ export function registerMeRoutes(app: FastifyInstance): void {
             const oc = Number(s.occurrenceCourseId);
             let inner = '';
             if (s.lessonPlanId != null) {
-              const ws = await getLessonWorksheet(Number(s.groupCourseId), Number(s.lessonPlanId));
+              // Worksheet + slides for this section, resolved together (class copy preferred).
+              const [ws, slidesMd] = await Promise.all([
+                getLessonWorksheet(Number(s.groupCourseId), Number(s.lessonPlanId)),
+                getLessonSlidesMarkdown(Number(s.groupCourseId), Number(s.lessonPlanId)),
+              ]);
               if (ws) {
                 // independent per-section reads — run them together, not one after another
                 const [level, values, done, fb] = await Promise.all([
@@ -230,7 +253,13 @@ export function registerMeRoutes(app: FastifyInstance): void {
                 const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel } });
                 const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
                 // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
-                inner = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p><div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p><div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
+                // follow the board while you work. No slides bound → the worksheet uses the full width.
+                const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
+                inner = deck
+                  ? `<div class="pupil-twopane"><div class="pupil-pane pupil-pane-slides">${deck}</div><div class="pupil-pane pupil-pane-work">${work}</div></div>`
+                  : work;
               }
             }
             if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';

@@ -869,6 +869,93 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 [data-contrast="high"] .ws-answer-cell, [data-contrast="high"] .ws-shot-cell { background: #fff; }
 [data-contrast="high"] .ws-paste { background: #fff; border-color: #000; }
 [data-contrast="high"] .ws-paste-prompt { color: #000; }
+
+/* ── Pupil soft theme ──────────────────────────────────────────────────────────────────────────
+   A calmer, friendlier surface for pupils (assimilated from the Worksheet-Converter design): soft
+   rounded cards, gentle shadows, a friendly violet accent, and an optional dark mode (🌙 in the
+   reading-help bar). LIGHT is the default (best on shared screens / projectors). All accessibility
+   options still work — high-contrast (below) overrides either theme. */
+.pupil-body {
+  --bg: #f4f3fb;            /* soft lavender-white */
+  --card: #ffffff;
+  --ink: #232634;
+  --muted: #6b7186;
+  --accent: #5b54d6;        /* friendly indigo — AA on white */
+  --accent-soft: #efedfd;
+  --line: #e7e4f4;
+  --radius: 16px;
+  background:
+    radial-gradient(at 0% 0%, hsl(250 70% 90% / 0.5) 0, transparent 45%),
+    radial-gradient(at 100% 100%, hsl(190 70% 90% / 0.45) 0, transparent 45%),
+    var(--bg);
+  min-height: 100vh;
+  color: var(--ink);
+}
+.pupil-body .pupil-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 24px rgba(40, 40, 90, 0.07);
+}
+.pupil-body .pupil-top {
+  background: hsl(250 60% 99% / 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.pupil-body .pupil-card h1, .pupil-body .pupil-card h2, .pupil-body .pupil-card h3 { color: var(--ink); }
+
+/* Two-pane workspace: slides (left) beside the worksheet (right); stacks on a narrow window. */
+.pupil-twopane { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 1.25rem; align-items: start; }
+.pupil-pane-slides { position: sticky; top: 0.75rem; }          /* slides stay put while the worksheet scrolls */
+.pupil-pane-work { min-width: 0; }
+@media (max-width: 960px) {
+  .pupil-twopane { grid-template-columns: 1fr; }
+  .pupil-pane-slides { position: static; }
+}
+
+/* The pupil slide deck — one slide at a time, follow along on the board. */
+.pupil-slides { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 6px 24px rgba(40, 40, 90, 0.07); overflow: hidden; display: flex; flex-direction: column; }
+.pslide-head { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1rem; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+.pslide-title { font-weight: 700; color: var(--accent); }
+.pslide-count { color: var(--muted); }
+.pslide-stage { padding: 1.5rem 1.6rem; min-height: 16rem; overflow-y: auto; }
+.pslide { display: none; }
+.pslide.on { display: block; animation: fadeInSlide 0.25s ease; }
+@keyframes fadeInSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.pslide h2 { font-size: 1.6rem; margin: 0 0 0.8rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--accent-soft); }
+.pslide li, .pslide p { font-size: 1.15rem; line-height: 1.6; margin: 0.4rem 0; }
+.pslide .md-img { max-width: 100%; border-radius: 10px; }
+.pslide-nav { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; padding: 0.7rem 1rem; border-top: 1px solid var(--line); }
+.pslide-hint { font-size: 0.85rem; }
+.btn-soft { font: inherit; font-weight: 600; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 0.45rem 1rem; transition: background 0.15s, border-color 0.15s; }
+.btn-soft:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+.btn-soft:disabled { opacity: 0.4; cursor: default; }
+
+/* Dark mode (🌙) — the example's calm dark glass look, scoped to the pupil surface. */
+[data-theme="dark"] .pupil-body {
+  --bg: #12141f;
+  --card: #1b1e2c;
+  --ink: #eef0f7;
+  --muted: #9aa3bd;
+  --accent: #8f82ff;
+  --accent-soft: #262a40;
+  --line: #2b3046;
+  background:
+    radial-gradient(at 0% 0%, hsl(250 60% 30% / 0.25) 0, transparent 45%),
+    radial-gradient(at 100% 100%, hsl(190 60% 30% / 0.2) 0, transparent 45%),
+    var(--bg);
+}
+[data-theme="dark"] .pupil-body .pupil-card,
+[data-theme="dark"] .pupil-body .pupil-slides { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+[data-theme="dark"] .pupil-body .pupil-top { background: hsl(224 25% 12% / 0.85); }
+[data-theme="dark"] .pupil-body .ws-input { background: #232838; color: var(--ink); border-color: var(--line); }
+[data-theme="dark"] .pupil-body .ws-instruction { background: #1d2740; border-left-color: #5b8def; }
+[data-theme="dark"] .pupil-body .ws-doc blockquote { background: #2a2510; border-left-color: #e0b53d; }
+[data-theme="dark"] .pupil-body .ws-answer-cell { background: #20283a; }
+[data-theme="dark"] .pupil-body .ws-shot-cell, [data-theme="dark"] .pupil-body .ws-paste { background: #1c2c22; border-color: #3a6b46; }
+[data-theme="dark"] .pupil-body .ws-table th { background: #232838; }
+[data-theme="dark"] .pupil-body .ws-paste-prompt { color: #8fd6a0; }
 .md-img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.4rem 0; }
 /* Auto-filled identity cell (name/date online) — read-only, clearly "done for you". */
 .ws-auto { background: #eef6ee; color: #2e5e2e; border: 1px dashed #aaccaa; font-style: italic; }
