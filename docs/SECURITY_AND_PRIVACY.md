@@ -63,6 +63,11 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
   pupils must see the sheet's pictures). The **test pupil** overlay lets the teacher walk this surface
   for any lesson/level without a real child's data or PIN, and is the only actor that bypasses the
   clock/DPIA access gates.
+- **Richer question types (2026-06-15)** — multiple-choice, true/false, matching and fill-in-the-blanks
+  — add **no new data category**: a pupil's answer is still text in `pupil_answers.value` (the chosen
+  option, the placed label or the typed word), marked by the existing pipeline. They mark
+  **deterministically** (`choice`/`exact`/`keyword`) and never reach the AI, and the **correct** answers
+  live only in the teacher-authored `answers` document (Internal), not in the pupil worksheet.
 
 ## The pupil-name rule (the one that must never break)
 

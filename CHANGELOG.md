@@ -7,6 +7,44 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
+
+Closed/objective question types so a pupil can answer them on screen and they **auto-mark** — closing
+the "generate → answer → mark" loop for objective work. Built in four reviewed phases, each ending with
+the suite green. The headline: it's **migration-free**. The marking engine already supported the needed
+mark kinds (`choice`/`exact`/`keyword`, marked deterministically by
+[deterministicMarker.ts](../app/src/lib/deterministicMarker.ts)), and every type reuses the existing
+`t.r.c` field-key model — so the work lives entirely in the render / block / editor / prompt layers.
+The worksheet stays **answer-free**: the correct answers live only in the `answers` doc and the AI
+derives the scheme as it does for free-text.
+
+- **Multiple-choice & true/false** (`choice` field kind) — an answer cell of `( ) RAM ( ) CPU` (or
+  `( ) True ( ) False`) renders an accessible **radio group** (labelled `<fieldset>`, 44px targets,
+  themed for soft / dark / high-contrast). Picking an option autosaves the chosen text; marked via the existing `choice`
+  kind. The block editor gained per-question kind selection + **"+ Multiple choice"** / **"+ True/False"**
+  presets.
+- **Fill-in-the-blanks** (`blank` field kind) — a `[[ ]]` marker in instruction prose becomes an inline
+  gap input, with an optional `Word bank:` line rendered as chips. New `blank.{n}` key namespace (a
+  global counter, like `task.{n}`, proven stable full-vs-sliced). Editor "make blank" button + a
+  preset. Marked `exact`/`keyword`.
+- **Matching** — a question table whose answer cells share one option set renders as **drag-and-drop
+  tiles**, with a mandatory **keyboard/tap fallback** (pick a tile → choose a box; `role=button`,
+  `aria-pressed`, a live-region narration) that also serves touch. Purely a render upgrade of the choice
+  machinery — same keys, same marking, **no new field kind, block type, or key namespace**.
+- **Generation** teaches all four shapes (`lesson_resources@11` / `adapt_resources@9`); the scheme
+  deriver advertises each field's options / gap so the AI sets `expected` from the answers doc
+  (`mark_scheme@3`). The teacher can still adjust any point inline.
+- **Marking review unchanged:** the scheme editor, answer pack and per-pupil review are generic over the
+  field key, so the new kinds appear with their descriptive labels and the correct accepted answers — no
+  code change needed there.
+- **Privacy:** no new data category — answers stay text in `pupil_answers.value`; objective answers mark
+  deterministically and never reach the AI (the class-work summary is text-only). Docs:
+  [DATA_MODEL.md](docs/DATA_MODEL.md) §O, [SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md),
+  [UX_FLOWS.md](docs/UX_FLOWS.md) flows 3 & 17, [PUPIL_WORKSHEET_FORMATS.md](docs/PUPIL_WORKSHEET_FORMATS.md).
+- A latent bug fixed along the way: an all-choice / all-screenshot Q&A table (no *empty* answer cells)
+  used to misfire the "header is a data row" heuristic and invent a phantom field — the "has a slot to
+  fill" test now counts choice/screenshot cells, not just empty ones.
+
 ### 2026-06-15 — Pupil worksheets v2: a pupil-first two-pane workspace, a block editor, and a TA split
 
 A ground-up rework of the pupil worksheet experience (the most-used and most safeguarding-sensitive

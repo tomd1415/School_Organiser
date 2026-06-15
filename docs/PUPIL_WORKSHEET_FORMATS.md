@@ -46,6 +46,11 @@ v2** (CHANGELOG "Pupil worksheets v2") then deepened it well past the table abov
 - One **block editor** for the teacher, a **per-level preview / export**, a separate **TA-notes** doc,
   and a **🧪 test pupil** for previewing — all over the **one Markdown source** the marking keys derive
   from, so none of it disturbs auto-marking.
+- **Closed question types** (2026-06-15, migration-free — DATA_MODEL §O): **multiple-choice** &
+  **true/false** (`( ) option` cells → radio groups), **fill-in-the-blanks** (`[[ ]]` gaps in prose +
+  a word bank), and **matching** (a shared-option choice table → accessible drag-and-drop tiles, with a
+  keyboard/tap fallback). These **auto-mark** via the existing objective marker; the worksheet stays
+  answer-free (the correct answers live in the `answers` doc).
 
 Options B–E (fillable PDF, DOCX content controls, Forms/Teams, ODT) remain unbuilt — the per-level Word
 export covers the "hand it back on paper / Teams" case without them.

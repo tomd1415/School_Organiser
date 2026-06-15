@@ -137,7 +137,9 @@ rather than walls of text.
 **Worksheets v2** (2026-06-15) reshaped the Worksheet resource here. The teacher opens a **block
 editor** — instruction / question / screenshot-paste / note / image cards they retype, recolour,
 reorder and drop images into — which serialises back to the **one Markdown source** the marking keys
-derive from, so editing never breaks auto-marking. A **per-level preview** and **🧪 Test as pupil**
+derive from, so editing never breaks auto-marking. The add-block menu also offers closed question types
+— **multiple-choice**, **true/false**, **fill-in-the-blanks** and **matching** (one shared option set
+across rows) — all of which **auto-mark** with no migration. A **per-level preview** and **🧪 Test as pupil**
 (flow 17) show exactly what each ability level sees, and a per-level **print / Word export** produces
 one clean sheet per level. Generation now also writes a separate **TA notes** document (how to support
 each level + the answers), shown here and in the TA view but **never** to a pupil; any picture the AI
@@ -483,7 +485,10 @@ on the left, **sliced to their ability level** so they follow the board with a s
 contrast/text-size and adds a **🌙 dark toggle** (pre-painted on load so there's no flash). Name and
 date **auto-fill** — nothing to type. The sheet's blocks are **colour-differentiated**: a calm "✏ do
 this" instruction panel, a "❓ question" with a typed-answer box, a green "📷 show me" **screenshot
-paste/drop/upload zone**, and "key idea" notes. A **💡 paste-help** button opens a short, SEND-friendly
+paste/drop/upload zone**, and "key idea" notes. Questions can also be **multiple-choice / true-false**
+(big radio buttons), **fill-in-the-blanks** (gaps typed inline, with a word bank), or **matching** —
+drag an answer tile onto each item, or tap a tile then a box (a keyboard/touch path, ARIA-announced).
+A **💡 paste-help** button opens a short, SEND-friendly
 how-to (with a practice box) for taking and pasting a screenshot. Every answer and screenshot
 **autosaves** per field; a **Done ✓** marks the sheet complete. A pupil only ever sees **their own**
 work; the teacher previews the whole thing for any lesson/level through the **🧪 test pupil** (flow 3)

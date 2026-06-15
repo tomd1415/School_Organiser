@@ -983,6 +983,34 @@ content, distinct from the access-scoped `/pupil-image` above. Where a needed pi
 generation emits a `> 🖼️ [show: …]` placeholder, which surfaces as a **Before-the-bell** task
 (`addOccurrencePrep`) and clears when an image is dropped into the block editor.
 
+### Richer question types — multiple-choice, true/false, matching, fill-in-the-blanks (no migration)
+
+Worksheets v2.5 added four objective question types. They are **migration-free** and reuse the existing
+auto-marking: `mark_scheme_points.kind` already had `choice`/`exact`/`keyword` and
+[lib/deterministicMarker.ts](../app/src/lib/deterministicMarker.ts) already marks them instantly. The
+worksheet stays **answer-free** — the correct answer lives only in the `answers` doc and `deriveScheme`
+builds the scheme with the AI (as for free-text). `WorksheetField.kind` gained two values; pupil answers
+are stored in `pupil_answers.value` exactly as before (no schema change).
+
+| Type | Authored in the worksheet as | Field kind | Field key | Marked as |
+| --- | --- | --- | --- | --- |
+| Multiple-choice / true-false | a question-table answer cell of radio options `( ) RAM ( ) CPU` / `( ) True ( ) False` | `choice` | existing `t.r.c` | `choice` |
+| Matching | a question table where **every** answer cell carries the **same** `( )` options (rendered as drag-and-drop tiles) | `choice` | existing `t.r.c` | `choice` per row |
+| Fill-in-the-blanks | inline `[[ ]]` gaps in a `text` block (+ optional `Word bank:` line) | `blank` | **`blank.{n}`** (new namespace, a global counter like `task.{n}`) | `exact`/`keyword` |
+
+- **No new block type.** MC/TF/matching are `qtable` rows (`kind: 'choice'` carrying `options[]`); cloze
+  is inline markers inside an ordinary `text` block, so the block round-trip
+  ([lib/worksheetBlocks.ts](../app/src/lib/worksheetBlocks.ts)) is unchanged for blanks. **Matching is a
+  render-time upgrade** of a shared-option choice table — same `t.r.c` keys, same `choice` marking, only
+  the widget differs (`detectMatching`/`renderMatching` in [lib/worksheetForm.ts](../app/src/lib/worksheetForm.ts)).
+- **Key stability holds:** the round-trip oracle ([tests/worksheetBlocks.test.ts](../app/tests/worksheetBlocks.test.ts))
+  covers `choice` and `blank`, and `blank.{n}` is counted across the **whole** document (stable full vs
+  level-sliced, like `task.{n}`). Converting an answered text cell to a `choice` keeps the same key.
+- **Marking derivation:** `deriveScheme` advertises each field's kind to the AI — `[choice: a | b | c]`
+  (with the option set) and `[fill-in-the-blank]` (the gap shown as `[BLANK]`) — so it sets `expected`
+  from the `answers` doc (`mark_scheme@3`). The teacher can still adjust any point inline. Choice/blank
+  answers are excluded from the AI class-work summary (text-only), so they add **no AI egress path**.
+
 ## Key modelling decisions (for discussion)
 
 1. **Plan vs. occurrence are separate.** `lesson_plans` are reusable; `lesson_occurrences`
