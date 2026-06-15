@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import {
+  activateSchemeVersion,
   addPlan,
   addUnit,
   cloneSchemeNewVersion,
@@ -213,7 +214,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             </p>
             <div id="course-${courseId}-summary"></div>
             ${renderTeachingContext(courseId, teachingCtx)}
-            ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
+            ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks}${scheme.active ? '' : ` · <button type="button" class="link" hx-post="/schemes/${scheme.id}/activate" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make this version live</button>`} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
             ${tree}
             <h2 class="sch-divider">Add or import content</h2>
             ${renderConvertPanel(courseId, courseSlots, today)}
@@ -785,6 +786,19 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const newId = await cloneSchemeNewVersion(id.data.id);
     if (newId && head) {
       reply.header('HX-Redirect', `/schemes?course=${head.courseId}&scheme=${newId}`);
+      return reply.send('');
+    }
+    return reply.type('text/html').send('');
+  });
+
+  // Make a draft version the live one for its course (the rollover dead-end fix).
+  app.post('/schemes/:id/activate', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const head = await getScheme(id.data.id);
+    const ok = await activateSchemeVersion(id.data.id);
+    if (ok && head) {
+      reply.header('HX-Redirect', `/schemes?course=${head.courseId}&scheme=${id.data.id}`);
       return reply.send('');
     }
     return reply.type('text/html').send('');

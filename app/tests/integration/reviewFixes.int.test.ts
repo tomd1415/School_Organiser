@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { deletePlan, deleteUnit } from '../../src/repos/schemes';
+import { activateSchemeVersion, deletePlan, deleteUnit, getActiveScheme } from '../../src/repos/schemes';
 import { createPupil } from '../../src/repos/pupils';
 
 // Regression tests for the 2026-06-14 review fixes (#6 delete-FK, #9 pupil ai_token). Uses throwaway
@@ -62,6 +62,26 @@ describe('#6 — deleting a lesson plan/unit that has been taught no longer 500s
     expect((await pool.query(`SELECT 1 FROM lesson_plans WHERE id = $1`, [planId])).rowCount).toBe(0);
     expect((await pool.query(`SELECT 1 FROM units WHERE id = $1`, [u2])).rowCount).toBe(0);
     expect((await pool.query<{ lesson_plan_id: number | null }>(`SELECT lesson_plan_id FROM occurrence_courses WHERE id = $1`, [ocId])).rows[0]!.lesson_plan_id).toBeNull();
+  });
+});
+
+describe('#2 — a draft scheme version can be made live (the rollover dead-end fix)', () => {
+  it('activateSchemeVersion makes the target live and demotes the others to drafts', async () => {
+    // A throwaway course (activate deactivates ALL active schemes for the course — never use a real one).
+    const c = await pool.query<{ id: number }>(`INSERT INTO courses (name) VALUES ('ZZFIX course ' || gen_random_uuid()) RETURNING id`);
+    const courseId = Number(c.rows[0]!.id);
+    const v1 = Number((await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'v1', 1, true) RETURNING id`, [courseId])).rows[0]!.id);
+    const v2 = Number((await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'v2', 2, false) RETURNING id`, [courseId])).rows[0]!.id);
+    try {
+      expect((await getActiveScheme(courseId))?.id).toBe(v1); // v1 live initially; v2 a draft
+      expect(await activateSchemeVersion(v2)).toBe(true);
+      expect((await getActiveScheme(courseId))?.id).toBe(v2); // v2 now drives coverage/lessons/adapt
+      const actives = await pool.query<{ id: number }>(`SELECT id FROM schemes_of_work WHERE course_id = $1 AND active`, [courseId]);
+      expect(actives.rows.map((r) => Number(r.id))).toEqual([v2]); // exactly one active
+    } finally {
+      await pool.query(`DELETE FROM schemes_of_work WHERE course_id = $1`, [courseId]);
+      await pool.query(`DELETE FROM courses WHERE id = $1`, [courseId]);
+    }
   });
 });
 

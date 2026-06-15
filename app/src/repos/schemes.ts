@@ -530,6 +530,32 @@ export async function movePlan(id: number, dir: 'up' | 'down'): Promise<void> {
 }
 
 /** Clone a scheme to a new, inactive version (redraft while the old one keeps teaching). */
+// Make a scheme version the live one for its course (the others become drafts). Without this, a cloned
+// "new version (draft)" could never go live, so coverage/lessons/AI-adapt kept using the old version
+// forever — the September rollover was a dead end. Transactional so the course is never left with two
+// (or zero) active schemes mid-flip. Returns false if the scheme id is unknown.
+export async function activateSchemeVersion(id: number): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const r = await client.query<{ course_id: number }>(`SELECT course_id FROM schemes_of_work WHERE id = $1`, [id]);
+    const courseId = r.rows[0]?.course_id;
+    if (courseId === undefined) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+    await client.query(`UPDATE schemes_of_work SET active = false WHERE course_id = $1 AND active AND id <> $2`, [courseId, id]);
+    await client.query(`UPDATE schemes_of_work SET active = true WHERE id = $1`, [id]);
+    await client.query('COMMIT');
+    return true;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export async function cloneSchemeNewVersion(schemeId: number): Promise<number | null> {
   const head = await getScheme(schemeId);
   if (!head) return null;
