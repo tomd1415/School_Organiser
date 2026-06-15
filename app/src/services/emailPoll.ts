@@ -4,7 +4,8 @@
 // only messages successfully imported get marked, failures stay unseen for the next poll.
 import { pollMailbox, type ImapConfig } from '../lib/imapClient';
 import { parseMime, type ParsedMime } from '../lib/mime';
-import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage } from '../repos/tasks';
+import { createHash } from 'node:crypto';
+import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage, emailAlreadyProcessed, markEmailProcessed } from '../repos/tasks';
 import { createEventFromIntake } from '../repos/events';
 import { fileCaptured } from '../repos/captured';
 import { createNote, updateNoteBody } from '../repos/notes';
@@ -129,6 +130,10 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
     const r = await pollMailbox(cfg, async (mail) => {
       const m = parseMime(mail.raw);
       const raw = mail.raw.toString('utf8').slice(0, 100_000);
+      // #21 idempotency: if this exact message was already imported (a prior poll wrote it but failed to
+      // set \Seen, so it came back UNSEEN), skip it — don't create a duplicate task/event.
+      const dedupKey = m.messageId ?? createHash('sha256').update(mail.raw).digest('hex');
+      if (await emailAlreadyProcessed(dedupKey)) return;
       // 10.5: screen for safeguarding BEFORE any AI egress. A trip is filed locally, flagged, and
       // NEVER sent to the AI (it's withheld everywhere downstream by the safeguarding flag).
       if (screenEmailForSafeguarding(m.subject, m.text)) {
@@ -139,6 +144,7 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
           safeguarding: true,
         });
         await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+        await markEmailProcessed(dedupKey);
         counts.awareness++;
         return;
       }
@@ -152,6 +158,7 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
         await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw);
         counts.task++;
       }
+      await markEmailProcessed(dedupKey); // imported OK — a re-seen copy won't be re-imported
     });
     const routed = (Object.entries(counts) as Array<[EmailRoute, number]>)
       .filter(([, n]) => n > 0)

@@ -84,6 +84,19 @@ function sdk(apiKey: string): Anthropic {
   return client;
 }
 
+// Recursively re-expand roster tokens to display names in every string field of a parsed result —
+// metachar-safe (no JSON round-trip), so a name like O"Brien or a backslash can't discard the result.
+function expandDeep(value: unknown, roster: RosterEntry[]): unknown {
+  if (typeof value === 'string') return expandTokens(value, roster);
+  if (Array.isArray(value)) return value.map((v) => expandDeep(v, roster));
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) out[k] = expandDeep(v, roster);
+    return out;
+  }
+  return value;
+}
+
 function estimateCostPence(model: string, inTok: number, outTok: number): number {
   const p = PRICE_PENCE_PER_MTOK[model] ?? { input: 240, output: 1200 };
   return Number(((inTok * p.input + outTok * p.output) / 1_000_000).toFixed(2));
@@ -224,8 +237,10 @@ export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>):
       error: parsed ? null : 'no parsed output',
     });
     if (!parsed) return { status: 'error', data: null, message: 'The AI returned no usable result.' };
-    // Re-expand tokens to names for display only (string fields, via a JSON round-trip).
-    const display = JSON.parse(expandTokens(JSON.stringify(parsed), p.roster)) as T;
+    // Re-expand tokens to names for display only. Walk the parsed object and expand each STRING value —
+    // NOT via a JSON round-trip: a display name containing a JSON metachar (a quote, backslash) would
+    // make the re-serialised JSON unparseable and throw away a successful, already-billed response.
+    const display = expandDeep(parsed, p.roster) as T;
     return { status: 'ok', data: display };
   } catch (err) {
     const msg = err instanceof Anthropic.APIError ? `${err.status ?? ''} ${err.message}`.trim() : (err as Error).message;

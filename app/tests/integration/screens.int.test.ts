@@ -869,6 +869,10 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       expect(srcStill.rows[0]!.active).toBe(true);
       // idempotent: same name again → skipped
       expect(await rolloverGroup(srcId, yearId, newName)).toBeNull();
+      // …and a re-run with a DIFFERENT name must NOT create a second successor for this source (#39)
+      expect(await rolloverGroup(srcId, yearId, `${newName}-AGAIN`)).toBeNull();
+      const succs = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM groups WHERE academic_year_id = $1 AND predecessor_group_id = $2`, [yearId, srcId]);
+      expect(succs.rows[0]!.n).toBe(1);
       // the wizard page renders the moved class as done
       const page = await app.inject({ method: 'GET', url: `/setup/rollover?from=${(await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE is_current`)).rows[0]!.id}&to=${yearId}`, headers: { cookie: session } });
       expect(page.body).toContain('moved up');

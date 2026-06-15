@@ -83,7 +83,7 @@ import { listSpecPoints, getCourseExamDate, specPointsSolelyCoveredByPlan } from
 import { listCourseDocsWithContent } from '../repos/courseDocs';
 import { courseDocItems } from '../llm/prompts/courseDocs';
 import { reviewLessonMaster, reviewUnitMaster } from '../services/reviewLesson';
-import { getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
+import { claimOpenReview, getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
 import { renderReview } from '../lib/schemeView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -509,13 +509,14 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
   app.post('/schemes/review/:id/apply', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
-    const review = await getReview(id.data.id);
-    if (!review || review.status !== 'open') return reply.type('text/html').send('<span class="muted">That review is no longer open.</span>');
+    // Atomically claim the open review (flip to 'applied') so two quick clicks can't double-apply and a
+    // stale suggestion can't land after the review was closed.
+    const review = await claimOpenReview(id.data.id);
+    if (!review) return reply.type('text/html').send('<span class="muted">That review is no longer open.</span>');
     const obj = (review.suggestedObjectives ?? '').trim();
     const out = (review.suggestedOutline ?? '').trim();
     if (obj) await updatePlanField(review.lessonPlanId, 'objectives', obj);
     if (out) await updatePlanField(review.lessonPlanId, 'outline', out);
-    await setReviewStatus(id.data.id, 'applied');
     const updated = await getPlanRow(review.lessonPlanId);
     if (!updated) return reply.code(404).send('');
     return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: 'review applied to the master ✓' }));

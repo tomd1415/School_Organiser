@@ -127,8 +127,15 @@ export async function buildApp(): Promise<FastifyInstance> {
     }
   };
 
+  // Background polls (the 30s Now clock, 45s Focus, the live pupil-work grid) must NOT count as user
+  // activity — otherwise an unattended laptop never idles out (the DPIA R3 control was defeated). The
+  // idle timeout is still ENFORCED on these requests; only the lastSeen bump is skipped.
+  const isBackgroundPoll = (url: string): boolean =>
+    url.startsWith('/now/clock') || url.startsWith('/focus/inner') || /\/pupil-work(\?|$)/.test(url);
+
   app.addHook('onRequest', async (req, reply) => {
     const role = req.session?.get?.('role');
+    const poll = isBackgroundPoll(req.url);
     // Teacher idle-logout (10.3): the privileged session must also time out on an unattended
     // classroom laptop — the control the threat model/DPIA R3 already claim. Pupils idle out below;
     // this covers the teacher role (the most-privileged session). Configurable; 0 disables.
@@ -140,7 +147,7 @@ export async function buildApp(): Promise<FastifyInstance> {
           req.session.delete();
           return bounce(req, reply, '/login?timeout=1');
         }
-        req.session.set('lastSeen', Date.now());
+        if (!poll) req.session.set('lastSeen', Date.now());
       }
     }
     if (!isLimitedRole(role)) return;
@@ -156,7 +163,7 @@ export async function buildApp(): Promise<FastifyInstance> {
         req.session.delete();
         return bounce(req, reply, '/pupil?timeout=1');
       }
-      req.session.set('lastSeen', Date.now());
+      if (!poll) req.session.set('lastSeen', Date.now());
     }
     if (!roleAllows(role, req.url)) return reply.redirect(ROLE_HOME[role]);
   });

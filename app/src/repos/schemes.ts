@@ -560,40 +560,50 @@ export async function cloneSchemeNewVersion(schemeId: number): Promise<number | 
   const head = await getScheme(schemeId);
   if (!head) return null;
   const nextVersion = head.version + 1;
-  const created = await pool.query<{ id: number }>(
-    `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, false) RETURNING id`,
-    [head.courseId, head.title, nextVersion],
-  );
-  const newSchemeId = created.rows[0]?.id;
-  if (newSchemeId === undefined) return null;
-
-  const units = await listUnits(schemeId);
-  for (const u of units) {
-    const nu = await pool.query<{ id: number }>(
-      `INSERT INTO units (scheme_id, title, display_order) VALUES ($1, $2, $3) RETURNING id`,
-      [newSchemeId, u.title, u.displayOrder],
+  // One transaction: a crash mid-clone must not leave a half-copied draft (missing units/lessons or
+  // dropped coverage mappings) for the teacher to discover at the September rollover.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const created = await client.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, false) RETURNING id`,
+      [head.courseId, head.title, nextVersion],
     );
-    const newUnitId = nu.rows[0]?.id;
-    if (newUnitId === undefined) continue;
-    // Copy each plan individually so we know the old→new id, then carry its spec-point coverage
-    // mappings forward (idea 10). A bulk INSERT…SELECT would lose the id link and reset coverage to
-    // zero on every version bump.
-    const oldPlans = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`, [u.id]);
-    for (const op of oldPlans.rows) {
-      const np = await pool.query<{ id: number }>(
-        `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min)
-         SELECT $1, course_id, title, display_order, objectives, outline, duration_min FROM lesson_plans WHERE id = $2
-         RETURNING id`,
-        [newUnitId, op.id],
+    const newSchemeId = created.rows[0]!.id;
+    const units = await client.query<{ id: number; title: string; display_order: number }>(
+      `SELECT id, title, display_order FROM units WHERE scheme_id = $1 ORDER BY display_order, id`,
+      [schemeId],
+    );
+    for (const u of units.rows) {
+      const nu = await client.query<{ id: number }>(
+        `INSERT INTO units (scheme_id, title, display_order) VALUES ($1, $2, $3) RETURNING id`,
+        [newSchemeId, u.title, u.display_order],
       );
-      const newPlanId = np.rows[0]?.id;
-      if (newPlanId === undefined) continue;
-      await pool.query(
-        `INSERT INTO lesson_plan_spec_points (lesson_plan_id, spec_point_id, source)
-         SELECT $1, spec_point_id, source FROM lesson_plan_spec_points WHERE lesson_plan_id = $2`,
-        [newPlanId, op.id],
-      );
+      const newUnitId = nu.rows[0]!.id;
+      // Copy each plan individually so we know the old→new id, then carry its spec-point coverage
+      // mappings forward (idea 10). A bulk INSERT…SELECT would lose the id link and reset coverage to
+      // zero on every version bump.
+      const oldPlans = await client.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`, [u.id]);
+      for (const op of oldPlans.rows) {
+        const np = await client.query<{ id: number }>(
+          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min)
+           SELECT $1, course_id, title, display_order, objectives, outline, duration_min FROM lesson_plans WHERE id = $2
+           RETURNING id`,
+          [newUnitId, op.id],
+        );
+        await client.query(
+          `INSERT INTO lesson_plan_spec_points (lesson_plan_id, spec_point_id, source)
+           SELECT $1, spec_point_id, source FROM lesson_plan_spec_points WHERE lesson_plan_id = $2`,
+          [np.rows[0]!.id, op.id],
+        );
+      }
     }
+    await client.query('COMMIT');
+    return newSchemeId;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
   }
-  return newSchemeId;
 }

@@ -125,6 +125,8 @@ export function registerWelcomeRoutes(app: FastifyInstance): void {
     await setSetting('school_name', b.data.school);
     await setSetting('auth_password_hash', hashPassword(b.data.password));
     req.session.set('authed', true);
+    req.session.set('role', 'teacher'); // so the onboarding session is a real teacher session (idle-logout, role gating)
+    req.session.set('lastSeen', Date.now());
     return reply.redirect('/welcome');
   });
 

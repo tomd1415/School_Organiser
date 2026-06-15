@@ -8,6 +8,7 @@ export interface ParsedMime {
   from: string | null;
   date: string | null;
   text: string;
+  messageId: string | null; // for de-duplicating re-seen messages on intake (#21)
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────
@@ -128,5 +129,6 @@ export function parseMime(raw: Buffer): ParsedMime {
   const text = (plain ?? (html ? stripHtml(html) : top.body.toString('utf8'))).replace(/\r\n/g, '\n').trim();
   const subject = top.headers.get('subject') ? decodeWords(top.headers.get('subject')!) : null;
   const from = top.headers.get('from') ? decodeWords(top.headers.get('from')!) : null;
-  return { subject, from, date: top.headers.get('date') ?? null, text };
+  const messageId = (top.headers.get('message-id') ?? '').replace(/[<>]/g, '').trim() || null;
+  return { subject, from, date: top.headers.get('date') ?? null, text, messageId };
 }

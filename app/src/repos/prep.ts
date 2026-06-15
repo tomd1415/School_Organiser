@@ -69,14 +69,28 @@ async function readDay(date: string, part: 'start' | 'end'): Promise<PrepItem[]>
 export async function getDayChecklist(date: string, part: 'start' | 'end'): Promise<PrepItem[]> {
   const existing = await readDay(date, part);
   if (existing.length > 0) return existing;
-  let order = 0;
-  for (const text of DAY_CHECKLIST_DEFAULTS[part]) {
-    await pool.query(`INSERT INTO day_checklist (date, part, text, display_order) VALUES ($1::date, $2, $3, $4)`, [
-      date,
-      part,
-      text,
-      order++,
-    ]);
+  // Two simultaneous first-loads for the same (date, part) could both see "empty" and both insert the
+  // defaults (duplicate checklist). A transaction-scoped advisory lock serialises materialisation: the
+  // loser waits, re-reads (now populated), and skips — without constraining teacher-added items.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`day_checklist:${date}:${part}`]);
+    const again = (
+      await client.query<PrepItem>(`SELECT id, text, done FROM day_checklist WHERE date = $1::date AND part = $2 ORDER BY display_order, id`, [date, part])
+    ).rows;
+    if (again.length === 0) {
+      let order = 0;
+      for (const text of DAY_CHECKLIST_DEFAULTS[part]) {
+        await client.query(`INSERT INTO day_checklist (date, part, text, display_order) VALUES ($1::date, $2, $3, $4)`, [date, part, text, order++]);
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
   }
   return readDay(date, part);
 }

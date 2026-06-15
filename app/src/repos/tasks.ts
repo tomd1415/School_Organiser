@@ -61,6 +61,16 @@ export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: str
   return taskId;
 }
 
+/** Email-intake idempotency (#21): has this message already been imported? (keyed by Message-ID, or a
+ *  content hash when absent) — so a re-seen message after a failed \Seen-set isn't imported twice. */
+export async function emailAlreadyProcessed(dedupKey: string): Promise<boolean> {
+  const { rows } = await pool.query<{ n: number }>(`SELECT 1 AS n FROM processed_emails WHERE dedup_key = $1`, [dedupKey]);
+  return rows.length > 0;
+}
+export async function markEmailProcessed(dedupKey: string): Promise<void> {
+  await pool.query(`INSERT INTO processed_emails (dedup_key) VALUES ($1) ON CONFLICT DO NOTHING`, [dedupKey]);
+}
+
 /** Record an email in the intake log without a task (triage filed it elsewhere). */
 export async function recordEmailIntake(parsed: { from: string | null; subject: string | null }, rawBody: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(

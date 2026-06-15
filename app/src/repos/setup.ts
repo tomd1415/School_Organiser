@@ -389,6 +389,17 @@ export async function rolloverGroup(sourceGroupId: number, targetYearId: number,
       await client.query('ROLLBACK');
       return null; // name already taken in the target year — surfaced by the wizard
     }
+    // Idempotent on re-run (the wizard is re-enterable): if this source already has a successor in the
+    // target year, do NOT create a second one — even when the teacher re-runs with a different name
+    // (the rollover dup hole, #39). The name-taken check above already covers the same-name re-run.
+    const succ = await client.query<{ id: number }>(
+      `SELECT id FROM groups WHERE academic_year_id = $1 AND predecessor_group_id = $2`,
+      [targetYearId, sourceGroupId],
+    );
+    if (succ.rows[0]) {
+      await client.query('ROLLBACK');
+      return null; // already rolled over to this year — don't duplicate the successor
+    }
     const yearGroup = src.rows[0].yearGroup ? bumpName(src.rows[0].yearGroup) : null;
     const g = await client.query<{ id: number }>(
       `INSERT INTO groups (name, year_group, academic_year_id, predecessor_group_id)

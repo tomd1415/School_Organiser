@@ -97,6 +97,17 @@ export async function setReviewStatus(id: number, status: ReviewState): Promise<
   await pool.query(`UPDATE lesson_reviews SET status = $2 WHERE id = $1`, [id, status]);
 }
 
+/** Atomically flip an OPEN review to 'applied' and return it — or null if it wasn't open (already
+ *  applied/dismissed, or gone). Makes apply a single-winner operation: two quick clicks can't both
+ *  apply, and a stale suggestion can't be applied after the review was closed. */
+export async function claimOpenReview(id: number): Promise<ReviewRow | null> {
+  const { rows } = await pool.query<ReviewRow>(
+    `UPDATE lesson_reviews SET status = 'applied' WHERE id = $1 AND status = 'open' RETURNING ${COLS}`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
 /** Plan ids (within a set) that currently have an open master review — for badging the tree. */
 export async function openReviewPlanIds(planIds: number[]): Promise<Set<number>> {
   if (planIds.length === 0) return new Set();

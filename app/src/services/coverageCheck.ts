@@ -50,10 +50,23 @@ export async function suggestCoverage(schemeId: number): Promise<SuggestResult> 
 
   const byCode = new Map(uncovered.map((u) => [u.code.trim().toLowerCase(), u]));
   const byRef = new Map(lessons.map((l, i) => [`l${i + 1}`, l]));
+  // The model sometimes echoes a code WITH its title ("1.1.1 — Binary" or "1.1.1 Binary") instead of
+  // the bare code — match the exact code first, else the leading code token, else any code that's a
+  // prefix, so a formatted echo no longer silently drops the whole suggestion.
+  const resolvePoint = (raw: string): (typeof uncovered)[number] | undefined => {
+    const p = (raw ?? '').trim().toLowerCase();
+    if (!p) return undefined;
+    const exact = byCode.get(p);
+    if (exact) return exact;
+    const lead = p.split(/[\s—–:-]+/)[0];
+    if (lead && byCode.get(lead)) return byCode.get(lead);
+    for (const [code, u] of byCode) if (p.startsWith(code)) return u;
+    return undefined;
+  };
   const seen = new Set<number>();
   const suggestions: CoverageSuggestion[] = [];
   for (const s of r.data.suggestions) {
-    const pt = byCode.get((s.point ?? '').trim().toLowerCase());
+    const pt = resolvePoint(s.point ?? '');
     if (!pt || seen.has(pt.id)) continue; // ignore unknown/duplicate points
     seen.add(pt.id);
     const lessRef = (s.lesson ?? '').trim().toLowerCase();

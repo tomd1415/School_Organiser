@@ -104,15 +104,21 @@ export async function generateDueInstances(today: string): Promise<number> {
       const due = nextDueDate(def.pattern, after, recurCtx);
       if (!due) break;
       if (daysFromToday(due.date, today) > def.leadDays) break; // not yet within lead time
-      await pool.query(
+      // Idempotent insert: skip if an instance for this definition + due date already exists. Without
+      // this, a crash AFTER the insert but BEFORE the last_generated bump would re-create the task on
+      // the next sweep (the cursor hadn't advanced). Count only when a row was actually inserted.
+      const ins = await pool.query(
         `INSERT INTO tasks (title, detail, urgency, estimate_min, cognitive_load, group_id, course_id, source, recurring_task_id, due_at, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'recurring', $8,
-                 ($9::date + make_interval(mins => $10)) AT TIME ZONE 'Europe/London', 'inbox')`,
+         SELECT $1, $2, $3, $4, $5, $6, $7, 'recurring', $8,
+                ($9::date + make_interval(mins => $10)) AT TIME ZONE 'Europe/London', 'inbox'
+         WHERE NOT EXISTS (
+           SELECT 1 FROM tasks WHERE recurring_task_id = $8 AND source = 'recurring'
+             AND (due_at AT TIME ZONE 'Europe/London')::date = $9::date)`,
         [def.title, def.detail, def.urgency, def.estimateMin, def.cognitiveLoad, def.groupId, def.courseId, def.id, due.date, due.startMin],
       );
       await pool.query(`UPDATE recurring_tasks SET last_generated = $2::date WHERE id = $1`, [def.id, due.date]);
       after = due.date;
-      created++;
+      if (ins.rowCount) created++;
     }
   }
   return created;

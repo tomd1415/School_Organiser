@@ -135,6 +135,14 @@ export function registerMapRoutes(app: FastifyInstance): void {
     const yearEnd = await getCurrentYearEnd();
     const dates = upcomingSlotDates(chosen.weekday, from, seq.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
     await layLessonsIntoSlot(lessonId, groupCourseId, seq, dates);
+    // If the shift pushes the tail past the end of the year, those lessons can't be re-placed and their
+    // bindings are dropped — tell the teacher instead of losing them silently (#22).
+    const overflow = seq.length - dates.length;
+    if (overflow > 0) {
+      return reply
+        .type('text/html')
+        .send(`<p class="error">Shifted what fits — but the last ${overflow} lesson${overflow === 1 ? '' : 's'} fall past the end of the school year and weren't re-placed; re-lay ${overflow === 1 ? 'it' : 'them'} next year. <a href="/map?slot=${esc(b.data.slot)}">view the map →</a></p>`);
+    }
     reply.header('HX-Redirect', `/map?slot=${b.data.slot}`);
     return reply.send('');
   });

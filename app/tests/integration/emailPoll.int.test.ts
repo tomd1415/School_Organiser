@@ -7,8 +7,10 @@ import { pollEmailOnce } from '../../src/services/emailPoll';
 // End-to-end email intake v2 against a scripted in-process IMAP server: one unseen multipart
 // email → poll → a draft task appears (source='email'), the message is marked \Seen, and a
 // second poll imports nothing.
+const EMAIL_MSGID = 'zzfix-emailpoll@test';
 const EMAIL = [
   'From: Office <office@school.org>',
+  `Message-ID: <${EMAIL_MSGID}>`,
   'Subject: =?utf-8?B?VHJpcCBmb3JtcyDinIU=?=', // "Trip forms ✅"
   'Content-Type: multipart/alternative; boundary="XYZ"',
   '',
@@ -82,6 +84,8 @@ describe('email intake v2 (integration — fake IMAP server)', () => {
 
   it('polls, imports a task, marks seen; second poll is a no-op', async () => {
     const { server, port } = await fakeImap();
+    // #21 idempotency persists the message's dedup key; clear this fixture's key so the poll re-imports.
+    await pool.query(`DELETE FROM processed_emails WHERE dedup_key = $1`, [EMAIL_MSGID]);
     try {
       await setSetting('email_imap_host', '127.0.0.1');
       await setSetting('email_imap_port', String(port));
@@ -111,6 +115,7 @@ describe('email intake v2 (integration — fake IMAP server)', () => {
       await pool.query(`UPDATE email_intake SET created_task_id = NULL WHERE subject = 'Trip forms ✅'`);
       await pool.query(`DELETE FROM tasks WHERE title = 'Trip forms ✅'`);
       await pool.query(`DELETE FROM email_intake WHERE subject = 'Trip forms ✅'`);
+      await pool.query(`DELETE FROM processed_emails WHERE dedup_key = $1`, [EMAIL_MSGID]);
     } finally {
       server.close();
     }
@@ -127,7 +132,7 @@ describe('email intake v2 (integration — fake IMAP server)', () => {
 import { routeTriagedEmail } from '../../src/services/emailPoll';
 
 describe('email triage routing (no AI — fake triage objects)', () => {
-  const m = { subject: 'FW: original', from: 'office@school.org', date: null, text: 'body' };
+  const m = { subject: 'FW: original', from: 'office@school.org', date: null, text: 'body', messageId: null };
   const base = { title: 'X', summary: 'Y', urgency: null, eventKind: null, dateIso: null, category: null, groupName: null, safeguarding: false, reason: 'test' };
 
   it('task route: urgency + group land on the task', async () => {

@@ -11,6 +11,13 @@ describe('parseMime (email intake v2)', () => {
     expect(m.text).toContain('Please cover 9TDU period 3.');
   });
 
+  it('extracts the Message-ID (stripped of <>) for intake de-duplication (#21)', () => {
+    const m = parseMime(Buffer.from(CRLF('Message-ID: <abc.123@school.org>\nSubject: Hi\n\nbody')));
+    expect(m.messageId).toBe('abc.123@school.org');
+    const none = parseMime(Buffer.from(CRLF('Subject: No id\n\nbody')));
+    expect(none.messageId).toBeNull();
+  });
+
   it('RFC2047 encoded subject (base64 + quoted-printable)', () => {
     expect(decodeWords('=?utf-8?B?Q2xhc3MgdHJpcCDinIU=?=')).toBe('Class trip ✅');
     expect(decodeWords('=?iso-8859-1?Q?caf=E9_meeting?=')).toBe('café meeting');

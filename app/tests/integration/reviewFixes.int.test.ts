@@ -85,6 +85,41 @@ describe('#2 — a draft scheme version can be made live (the rollover dead-end 
   });
 });
 
+describe('#26 — apply-review is a single-winner atomic claim (no double-apply)', () => {
+  it('claimOpenReview returns the row once, then null (two clicks cannot both apply)', async () => {
+    const { createReview, claimOpenReview } = await import('../../src/repos/reviews');
+    // a throwaway plan in the ZZFIX scheme's unit
+    const p = await pool.query<{ id: number }>(`INSERT INTO lesson_plans (unit_id, course_id, title, display_order) SELECT $1, course_id, 'ZZFIX review plan', 9 FROM units uu JOIN schemes_of_work s ON s.id=uu.scheme_id WHERE uu.id=$1 RETURNING id`, [unitId]);
+    const planId = Number(p.rows[0]!.id);
+    const rid = await createReview({ lessonPlanId: planId, groupCourseId: null, verdict: 'tweak', findings: [], suggestedObjectives: 'X', suggestedOutline: 'Y', rationale: 'r', model: null, promptVersion: null });
+    try {
+      const first = await claimOpenReview(rid!);
+      expect(first?.id).toBe(rid);
+      expect(first?.status).toBe('applied');
+      const second = await claimOpenReview(rid!);
+      expect(second).toBeNull(); // already claimed — the second click is a no-op
+    } finally {
+      await pool.query(`DELETE FROM lesson_reviews WHERE id = $1`, [rid]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [planId]);
+    }
+  });
+});
+
+describe('#21 — email intake is idempotent (a re-seen message is not re-imported)', () => {
+  it('markEmailProcessed / emailAlreadyProcessed round-trip (dedup store)', async () => {
+    const { emailAlreadyProcessed, markEmailProcessed } = await import('../../src/repos/tasks');
+    const key = 'ZZFIX-msg-' + Math.random().toString(36).slice(2);
+    try {
+      expect(await emailAlreadyProcessed(key)).toBe(false); // first sight
+      await markEmailProcessed(key);
+      expect(await emailAlreadyProcessed(key)).toBe(true); // re-seen → would be skipped
+      await markEmailProcessed(key); // ON CONFLICT DO NOTHING — no throw on a repeat
+    } finally {
+      await pool.query(`DELETE FROM processed_emails WHERE dedup_key = $1`, [key]);
+    }
+  });
+});
+
 describe('#9 — pupil ai_token is derived from the row id (no collision, no reuse)', () => {
   it('assigns PUPIL_<id> tokens that are unique and match the row id', async () => {
     const a = await createPupil('ZZFIX Anna Lee');
