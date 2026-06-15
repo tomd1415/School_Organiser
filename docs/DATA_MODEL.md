@@ -712,6 +712,199 @@ marks**, gated by the per-class `results_mode` (instant on confirm, or held unti
 is set). `pupil_profiles`/`pupil_devices` are **pupil-keyed** with no teacher/class binding — the
 multi-teacher forward-compat choice (PHASE_9_PLAN §13).
 
+## M. Phase 10 — trustworthy in daily use (migrations `0023`–`0027`)
+
+Phase 10 (see [PHASE_10_PLAN.md](PHASE_10_PLAN.md)) made the privacy/safeguarding promises real and
+stopped the app silently losing work. As before, the migration files are the source of truth.
+
+### `mark_schemes.resource_id` → `ON DELETE SET NULL` (`0023`)
+
+```text
+ALTER TABLE mark_schemes ALTER COLUMN resource_id DROP NOT NULL;
+-- FK re-created ON DELETE SET NULL (was CASCADE)
+```
+
+Closes the footgun `0020` fixed for `pupil_answers`: deleting a worksheet resource would have
+silently deleted its mark scheme and left marks dangling. There is no hard-delete path for resources
+today, so this is latent — but made safe and consistent.
+
+### `pupil_disposals` (P10.2, `0024`) — the erasure / leaver audit
+
+```text
+pupil_disposals(id, ai_token TEXT,                  -- the KEPT, non-identifying token ("PUPIL_7")
+                action CHECK (anonymise | erase),
+                detail JSONB DEFAULT '{}',          -- per-table counts removed/detached
+                created_at)                          -- indexed created_at DESC
+```
+
+Pupil erasure / leaver anonymisation is "a deliberate, audited retention action" (SECURITY,
+DPIA §7). This records **that** it happened and what it removed **without re-storing the identity
+that was just removed** — the stable `ai_token` is kept (not identifying on its own), so the audit
+reads "PUPIL_7 erased on `<date>`, removed N answers".
+
+### `safeguarding_review` + `pupil_marks.disclosure` (P10.4, `0025`) — the disclosure register
+
+```text
+ALTER TABLE pupil_marks ADD COLUMN disclosure BOOLEAN NOT NULL DEFAULT false;  -- set when the
+                                          -- content guard withholds an answer from the AI
+
+safeguarding_review(source_type CHECK (answer | captured | ta_feedback),
+                    source_id BIGINT,               -- the flagged row in its own table
+                    status CHECK (recorded | actioned | referred) DEFAULT 'recorded',
+                    action_note TEXT DEFAULT '', updated_at,
+                    PRIMARY KEY (source_type, source_id))
+```
+
+A guard-matched pupil answer used to wear the same generic "⚠ needs your eyes" badge as a benign
+low-confidence mark, so a real disclosure could be lost in the noise. The distinct `disclosure` flag
+tags it; `safeguarding_review` gives the teacher **one place** to review every flagged item
+(disclosure answers + safeguarding-flagged captured items + TA feedback) and **record what was done**.
+A flagged item with no row here is implicitly *new* (unreviewed); the row is created lazily on the
+first action. It is a **record-of-handling, never a referral system, and never sent to any AI**.
+
+### `marking_queue` (P10.9, `0026`) — the durable open-marking queue
+
+```text
+marking_queue(occurrence_course_id PK FK→occurrence_courses ON DELETE CASCADE,
+              due_at TIMESTAMPTZ,                    -- indexed
+              created_at)
+```
+
+The "mark as pupils finish" open-answer AI pass was a debounced in-process `setTimeout`, so a
+reboot/crash/redeploy during a live lesson silently dropped every pending mark (the NFR requires
+"survives a server reboot"). The pending job is now persisted here: a boot sweep + periodic tick run
+any that are due, one row per occurrence-course; a fresh "Done" tap pushes `due_at` forward so
+finishers still batch. `markOpen` is idempotent (only marks unmarked answers), so running a job twice
+is harmless — and the [services/markingQueue.ts](../app/src/services/markingQueue.ts) re-arms a job
+on an `unavailable`/failed pass rather than dropping it (review fix #7).
+
+### `pupil_unit_signal` (P10.24, `0027`) — a per-unit progress traffic-light
+
+```text
+pupil_unit_signal(pupil_id FK ON DELETE CASCADE, unit_id FK ON DELETE CASCADE,
+                  signal CHECK (behind | on_track | exceeding), updated_at,
+                  PRIMARY KEY (pupil_id, unit_id))
+```
+
+A one-tap per-unit traffic-light per pupil (SPECIFICATION §5.7 C). Teacher-only signal; **never
+AI-bound**.
+
+## N. Phase 11 — the teacher's idea backlog (migrations `0028`–`0037`)
+
+Phase 11 (see [MORE_IDEAS.md](MORE_IDEAS.md)) is largely built. Every new AI input here is
+cohort/curriculum-level and rides the wrapper's `context[]` (so it inherits redaction → withholding →
+egress-assert → audit); **none names or describes an individual pupil**.
+
+### `teaching_concepts` (idea 1.1, `0028`) — a library of cohort-level teaching ideas
+
+```text
+teaching_concepts(id, course_id FK→courses ON DELETE CASCADE,  -- NULL = all courses
+                  title, body, tags,
+                  active BOOL DEFAULT true,          -- archive, never delete (kit convention)
+                  created_at, updated_at)            -- partial index (course_id) WHERE active
+```
+
+Concepts/ideas the AI should weave into lessons where they fit — course-scoped, with `course_id`
+NULL meaning "applies to every course".
+
+### `group_courses.guided_access` (idea 7, `0029`) — the per-class access questionnaire
+
+```text
+ALTER TABLE group_courses ADD COLUMN guided_access JSONB;
+```
+
+A small, optional per-class questionnaire (VI → min font, short attention, reading age, EAL,
+dyslexia-friendly, low typing). The raw answers live here; a deterministic builder derives
+**cohort-level constraint lines** that ride `context[]` into the class-scoped generators
+(`adapt_lesson` / `adapt_resources`). Sits on `group_courses` with the per-class teaching context, so
+the September rollover carries it forward like the other per-class fields.
+
+### `course_spec_points` + `lesson_plan_spec_points` (idea 10 slice 1, `0030`) — the coverage backbone
+
+```text
+course_spec_points(id, course_id FK ON DELETE CASCADE,
+                   code, title, exam_weight INT NULL,
+                   active BOOL DEFAULT true, display_order,
+                   created_at, UNIQUE (course_id, code))      -- re-import upserts by code
+
+lesson_plan_spec_points(lesson_plan_id FK ON DELETE CASCADE,
+                        spec_point_id FK ON DELETE CASCADE,
+                        source CHECK (teacher | ai) DEFAULT 'teacher',
+                        PRIMARY KEY (lesson_plan_id, spec_point_id))   -- index on spec_point_id
+```
+
+The source-of-truth list of what a course **must cover** (pasted from the spec), with a mapping from
+each lesson to the points it covers — so "what isn't yet covered" becomes a deterministic query
+rather than an implicit guess. Reference/curriculum data only; no pupil identity ever attached.
+**`cloneSchemeNewVersion` copies the mappings on a version bump**, or coverage would silently reset to
+zero at every September rollover.
+
+### `courses.exam_date` (idea 10 slice 2, `0031`) · `group_courses.scheme_auto_adapted` (`0032`) · `group_courses.covered_summary` (`0033`)
+
+```text
+ALTER TABLE courses       ADD COLUMN exam_date DATE;                              -- 0031
+ALTER TABLE group_courses ADD COLUMN scheme_auto_adapted BOOLEAN NOT NULL DEFAULT false;  -- 0032
+ALTER TABLE group_courses ADD COLUMN covered_summary TEXT;                        -- 0033
+```
+
+`exam_date` lets AI scheme authoring reserve revision time before it (and the coverage page show how
+long is left); nullable, non-exam courses leave it blank. `scheme_auto_adapted` is a one-shot flag —
+the background whole-scheme adapt fires automatically the first time a class has **both** a scheme and
+some teaching context, and never re-fires on its own (the teacher re-runs it by hand). `covered_summary`
+is a short "what this class has covered so far" prose summary, generated by the class-intake tool at
+setup and fed to planning so the AI builds on prior learning. Both `group_courses` fields are
+cohort-level prose only.
+
+### `course_documents` (idea 9, `0034`) — official course documents
+
+```text
+course_documents(id, course_id FK ON DELETE CASCADE,
+                 role CHECK (spec | examiners_report | past_paper | reference),
+                 title, content TEXT DEFAULT '', char_count INT DEFAULT 0,
+                 created_at)                          -- indexed by course_id
+```
+
+The extracted text of an uploaded spec / examiners' report / past paper, referenced when the AI
+authors schemes/lessons for the course. Teacher-previewed/editable (extraction can be rough); only a
+**capped slice** is ever sent to the model. Reference/curriculum data only — never pupil data.
+
+### `lesson_reviews` (Wave 5, idea 8 lean cut, `0035` + `0036`) — the advisory AI reviewer's store
+
+```text
+lesson_reviews(id, lesson_plan_id FK ON DELETE CASCADE,
+               group_course_id FK ON DELETE CASCADE,  -- NULL = master scope (v1 always NULL)
+               verdict CHECK (keep | tweak | rework),
+               findings JSONB DEFAULT '[]',           -- [{issue, fix}], worst first, max 3
+               suggested_objectives, suggested_outline, rationale,
+               model, prompt_version,
+               status CHECK (open | applied | dismissed) DEFAULT 'open',
+               created_at)
+
+-- 0036: at most ONE open master review per lesson, enforced in the DB (race-proof)
+CREATE UNIQUE INDEX lesson_reviews_one_open_idx ON lesson_reviews (lesson_plan_id)
+  WHERE status = 'open' AND group_course_id IS NULL;
+```
+
+A review critiques a **not-yet-taught master lesson** against the spec / official documents and
+proposes an improved version the teacher **Applies** (writes to the master via `updatePlanField`) or
+**Dismisses** — the master is **never** mutated automatically. Only `open` rows are surfaced/badged.
+The partial unique index makes the service's check-then-insert race-proof (`createReview` uses
+`ON CONFLICT DO NOTHING`, so the loser of a race is a harmless skip); it replaced the plain index from
+`0035`. `group_course_id` is reserved for a future per-class scope; v1 always writes NULL. See
+[CHANGELOG](../CHANGELOG.md) "Wave 5".
+
+### `processed_emails` (reliability, `0037`) — idempotent email intake
+
+```text
+processed_emails(dedup_key TEXT PRIMARY KEY, processed_at)
+```
+
+The poller writes the task/event **before** it sets the IMAP `\Seen` flag; if that flag-set fails (a
+dropped connection) the message stays unseen and the next poll would re-import it as a duplicate. This
+records a per-message dedup key (the email's `Message-ID`, or a content hash when absent — see
+[lib/mime.ts](../app/src/lib/mime.ts) / [services/emailPoll.ts](../app/src/services/emailPoll.ts)) so
+a re-seen message is skipped. Reference/log data only.
+
 ## Key modelling decisions (for discussion)
 
 1. **Plan vs. occurrence are separate.** `lesson_plans` are reusable; `lesson_occurrences`

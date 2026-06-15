@@ -252,7 +252,7 @@ course_doc_text               -- idea 9 (mig 0031): extracted plaintext sidecar 
   UNIQUE (version_id)            -- one extraction per version; survives version bumps
   -- reference content only, never safeguarding-flagged; chunks still ride context[] redacted
 
-lesson_reviews                 -- ideas 8 + 4 (mig 0032): ONE table, idea 8's FK schema
+lesson_reviews                 -- ideas 8 + 4 (mig 0035 + 0036): ONE table, idea 8's FK schema
   id              BIGSERIAL PK
   lesson_plan_id  BIGINT NOT NULL REFERENCES lesson_plans(id) ON DELETE CASCADE
   group_course_id BIGINT REFERENCES group_courses(id) ON DELETE CASCADE  -- NULL = master scope

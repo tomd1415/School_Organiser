@@ -1,6 +1,16 @@
 # Additional Review Findings - 2026-06-15
 
-These findings were identified after comparing against `docs/REVIEW_FINDINGS_2026-06-14.md`. No code changes were made as part of the review.
+> **Status: RESOLVED (2026-06-15).** All four findings were fixed with regression tests (suite green):
+> the **TA resource IDOR** is closed by `taMayAccessResource` (view / download / present /
+> `download.docx` now require the resource to be linked to a lesson in the TA's current slot);
+> **uploaded SVGs** are forced to `Content-Disposition: attachment` + `nosniff`; the **named-TA
+> now/next view** is scoped to that TA's own lessons; and the **day-checklist** materialisation takes a
+> `pg_advisory_xact_lock` + re-checks so concurrent first-loads can't double-insert. See
+> [CHANGELOG.md](../CHANGELOG.md) → "2026-06-15 — Project-wide deep review & remediation".
+
+These findings were identified after comparing against `docs/REVIEW_FINDINGS_2026-06-14.md`. No code
+changes were made *at review time*; the remediation (with regression tests) followed — see the status
+note above.
 
 ## Findings
 

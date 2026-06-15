@@ -25,8 +25,18 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 > confirm; released results show on the pupil's screen (ticks-only by default); marks feed the adapt
 > loop, a printable answer pack, CSV export and per-pupil "what works for me" profiles; pupils can
 > "stay signed in on this computer". Both sit behind **DPIA-gated master switches that are off until
-> DPO/SLT sign-off is confirmed**. Beyond: the parked **multi-teacher** v2
-> ([docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md)).
+> DPO/SLT sign-off is confirmed**. **Phase 10 — trustworthy in daily use**
+> ([docs/PHASE_10_PLAN.md](docs/PHASE_10_PLAN.md)) is built: encrypted nightly backups with a
+> restore-drill, pupil erasure/anonymisation with a disposal audit, a teacher **idle-logout**, the
+> in-app **AI-call audit viewer**, a **safeguarding disclosure register**, a reboot-durable marking
+> queue, SEND accessibility options and global search. **Phase 11 — the teacher's idea backlog**
+> ([docs/MORE_IDEAS.md](docs/MORE_IDEAS.md)) is largely built: a standing teaching-concepts library,
+> an optional per-class guided-access questionnaire, a **spec-point coverage backbone** with uploaded
+> official course documents, per-feature model choice, and an opt-in **advisory AI lesson reviewer**
+> (off by default). The whole app now wears a **Rail & Stage** UI — a persistent grouped left rail
+> beside one content stage, an everyday/power experience toggle, a command palette and an
+> accessibility toolbar (see [docs/UX_FLOWS.md](docs/UX_FLOWS.md)). Beyond: the parked
+> **multi-teacher** v2 ([docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md)).
 
 ## The one-sentence pitch
 
@@ -62,8 +72,8 @@ Read in this order:
 | [docs/PHASE_6_PLAN.md](docs/PHASE_6_PLAN.md) | Build plan for Phase 6: in-app setup editors, the September rollover (new timetable every year; class-group knowledge follows the group), the onboarding wizard, and per-teacher instances. |
 | [docs/PHASE_8_PLAN.md](docs/PHASE_8_PLAN.md) | Build plan for Phase 8: pupil logins and in-app work — interactive worksheets, answers as data, teacher review, per-TA accounts. |
 | [docs/PHASE_9_PLAN.md](docs/PHASE_9_PLAN.md) | Build plan for Phase 9: auto-marking (deterministic + AI-suggested, teacher-released), results back to pupils, marks feeding the loop, "what works for me" profiles, stay-signed-in devices. |
-| [docs/PHASE_10_PLAN.md](docs/PHASE_10_PLAN.md) | **Planned (not started).** Phase 10 — trustworthy in daily use: make the privacy/safeguarding promises real (encrypted backups, pupil erasure/SAR, teacher idle-logout, disclosure register, AI audit viewer), stop silently losing work (resilient autosave, durable marking queue), SEND accessibility (read-aloud, display options, progress), close the feedback loop (retrieval starters, standing digest), and daily-driver polish (global search, capture-anywhere, MIS import). Single-teacher only. |
-| [docs/MORE_IDEAS.md](docs/MORE_IDEAS.md) | **Planned (not started), plan-first.** Phase 11 — the teacher's idea backlog, sequenced: standing style/feature prefs, a teaching-concepts library and guided cohort-access prompts (all on the existing `context[]` seam), a spec-point coverage backbone + uploaded official course docs, per-feature model choice + an opt-in Opus reviewer, and a calmer nav (daily-vs-setup split, one typed nav model, swappable themes). Single-teacher only. |
+| [docs/PHASE_10_PLAN.md](docs/PHASE_10_PLAN.md) | **Built.** Phase 10 — trustworthy in daily use: make the privacy/safeguarding promises real (encrypted backups, pupil erasure/SAR, teacher idle-logout, disclosure register, AI audit viewer), stop silently losing work (resilient autosave, durable marking queue), SEND accessibility (read-aloud, display options, progress), close the feedback loop (retrieval starters, standing digest), and daily-driver polish (global search, capture-anywhere, MIS import). Single-teacher only. |
+| [docs/MORE_IDEAS.md](docs/MORE_IDEAS.md) | **Largely built.** Phase 11 — the teacher's idea backlog, sequenced: standing style/feature prefs, a teaching-concepts library and guided cohort-access prompts (all on the existing `context[]` seam), a spec-point coverage backbone + uploaded official course docs, per-feature model choice + an opt-in Opus reviewer, and a calmer nav (daily-vs-setup split, one typed nav model, swappable themes). Single-teacher only. |
 | [docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md) | **Unnumbered / parked** future v2: one shared school server, multiple teacher accounts, one account per pupil, opt-in cross-subject planning signal. Not started — gated on the single-teacher tool being proven and a fresh whole-school DPIA. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
 

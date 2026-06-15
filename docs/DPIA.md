@@ -51,6 +51,18 @@
   is out of scope here (deferred to the multi-teacher whole-school DPIA). Marks retention: proposed
   academic year + one term, then aggregate — DPO to confirm.
 
+- **Built 2026-06-15 (Phase 10, trustworthy in daily use):** the privacy/safeguarding promises are now
+  **enforced in code**, not just stated. **Encrypted nightly backups** with a monthly restore-drill
+  (R4); a teacher **idle-logout** on shared machines, now correctly ignoring background polls so an
+  unattended laptop actually times out (R3); the **`ai_calls` audit is reviewable in-app** as DPO
+  evidence; a **safeguarding disclosure register** (`safeguarding_review`) gives the teacher one place
+  to review every flagged item — disclosure answers, safeguarding-flagged captured items and TA
+  feedback — and **record what was done** (a record-of-handling, never a referral system, **never sent
+  to any AI**); and pupil **erasure / anonymisation** writes a **disposal audit** (`pupil_disposals`)
+  recording the action and per-table counts while keeping only the non-identifying token. No new
+  category of personal data reaches the sub-processor; the §5 controls are unchanged and, where noted,
+  strengthened (the redaction matcher is now whitespace-robust — 2026-06-15 review).
+
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and
 [DATA_MODEL.md](DATA_MODEL.md), which are load-bearing for this assessment.
@@ -141,9 +153,11 @@ See [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for the full controls.
 ## 7. Retention and disposal
 
 Pupil rows and the teacher's notes are deleted on a **deliberate, audited** action (e.g. end of the
-pupil's time in the class/school), not silently. `ai_calls` audit rows are retained as the
-redaction-control evidence; they contain no names. **[CONFIRM retention periods with DPO.]** All data
-is exportable for a subject-access request (DATA_MODEL §"Data portability").
+pupil's time in the class/school), not silently. The disposal itself is recorded in `pupil_disposals`
+(Phase 10.2) — that an erasure/anonymisation happened and what it removed, **without re-storing the
+identity removed** (only the non-identifying `ai_token` is kept). `ai_calls` audit rows are retained as
+the redaction-control evidence; they contain no names. **[CONFIRM retention periods with DPO.]** All
+data is exportable for a subject-access request (DATA_MODEL §"Data portability").
 
 ## 8. Outcome and sign-off
 

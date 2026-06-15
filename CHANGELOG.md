@@ -7,6 +7,73 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-15 — Project-wide deep review & remediation (43 findings)
+
+After the redesign landed, the whole project got the most thorough review it has had — an
+eight-lens adversarial sweep (correctness, concurrency/races, security/privacy, data integrity,
+error handling, the AI boundary, accessibility, dead code), every finding **independently verified**
+before it was accepted, then fixed in six batches. The standing review notes are
+[docs/REVIEW_FINDINGS_2026-06-14.md](docs/REVIEW_FINDINGS_2026-06-14.md) and
+[docs/REVIEW_FINDINGS_ADDITIONAL_2026-06-15.md](docs/REVIEW_FINDINGS_ADDITIONAL_2026-06-15.md)
+(both now resolved). Highlights:
+
+- **Security / privacy.**
+  - **Redaction is now whitespace-robust** ([services/redact.ts](../app/src/services/redact.ts)): a
+    roster name matches across any run of whitespace (nbsp, tab, double-space, a line break mid-name),
+    closing a gap where an odd space inside a name could slip it past the egress assert. Token
+    **re-expansion is longest-first**, so `PUPIL_1` can no longer corrupt `PUPIL_10` on the way back,
+    and the structured response is expanded **recursively** (no fragile JSON round-trip).
+  - **TA resource scoping (IDOR).** A TA could open any resource by guessing its id; view / download /
+    present / `download.docx` are now gated by `taMayAccessResource` — a TA only reaches resources
+    linked to a lesson running in their current slot ([auth/lockdown.ts](../app/src/auth/lockdown.ts),
+    [routes/resources.ts](../app/src/routes/resources.ts)). The **named-TA now/next view is likewise
+    scoped to that TA's own lessons**, and feedback to occurrences they are assigned to.
+  - **Uploaded SVGs** are forced to `Content-Disposition: attachment` + `nosniff`, so a malicious SVG
+    cannot execute script in the app origin via `/resources/:id/view`.
+- **Concurrency / data integrity.**
+  - Deleting a **taught** lesson plan/unit no longer 500s — the `occurrence_courses.lesson_plan_id`
+    binding is nulled first inside a transaction ([repos/schemes.ts](../app/src/repos/schemes.ts)). A
+    draft scheme version can be **made live** (`activateSchemeVersion`, transactional, exactly one
+    active), fixing the rollover dead-end; `cloneSchemeNewVersion` is transactional.
+  - **Pupil `ai_token` derives from the row id** in a transaction (`PUPIL_<id>`), removing a race that
+    could reuse or collide a token ([repos/pupils.ts](../app/src/repos/pupils.ts)).
+  - **Email intake is idempotent** — a new `processed_emails` dedup store (migration `0037`, keyed on
+    the Message-ID or a content hash) means a message that was imported but failed to get its `\Seen`
+    flag set is not re-imported as a duplicate on the next poll.
+  - **Durable open-marking** re-arms itself on an unavailable/failed AI pass
+    ([services/markingQueue.ts](../app/src/services/markingQueue.ts)); **day-checklist**
+    materialisation takes a `pg_advisory_xact_lock` + re-checks so two first-loads cannot double-insert
+    defaults; **recurring-task** generation is a conditional `INSERT … WHERE NOT EXISTS`.
+- **Correctness.** Resource sets keep **core kinds** before truncating to four (a 4-slide deck no
+  longer collapses to one); the marking CSV reports **confirmed-only** awarded/total with a
+  `pending_confirmation` column; the now-strip shows "↻ the lesson has changed — refresh" instead of a
+  silent reload that could wipe a half-typed note; idle-logout no longer counts background polls as
+  activity, so an unattended laptop actually times out.
+- New migrations: `0035`/`0036` (`lesson_reviews` + the one-open-per-lesson partial unique index —
+  Wave 5), `0037` (`processed_emails`). **336 unit / 246 integration green; typecheck clean.**
+
+### 2026-06-14 — UI/UX redesign: the Rail & Stage navigation
+
+A ground-up navigation redesign so the app is intuitive for a teacher of any level while keeping the
+advanced features one step away for power users. The shape was chosen from two mockups via a
+structured design workflow, then built in six tested slices (the screen flows are in
+[docs/UX_FLOWS.md](docs/UX_FLOWS.md)).
+
+- **Rail & Stage shell** ([lib/html.ts](../app/src/lib/html.ts), [lib/nav.ts](../app/src/lib/nav.ts)):
+  a persistent left **rail** (grouped **Today / Plan / Advanced**) beside a single content **Stage**,
+  replacing the old flat top-bar. The Now screen is still home; the daily essentials sit at the top
+  and setup/admin folds into **Advanced**.
+- **Two experience levels.** An `experience` setting (`everyday` | `power`) hides the advanced rail
+  group until the teacher opts in; a one-time **nudge** offers "show advanced" after enough visits
+  (`shouldShowExperienceNudge`, `EXPERIENCE_NUDGE_AT`). The assumption is that an expert sets the
+  system up first, then the everyday teacher gets an uncluttered rail.
+- **Command palette** (`/search`): a keyboard-driven jump-to-anything with arrow/Enter navigation, so
+  power users never hunt through menus.
+- **Accessibility & legibility.** Self-hosted **Atkinson Hyperlegible** font (woff2 in
+  `public/fonts/`, no npm dependency); an a11y toolbar (text size, contrast, motion) driven by
+  `<html data-*>` attributes with a pre-paint script so there is no flash of the wrong setting; a
+  swappable theme; 44 px minimum tap targets.
+
 ### 2026-06-14 — Phase 11 Wave 5: the advisory AI lesson reviewer (lean idea-8 cut)
 
 A second opinion on an **upcoming, not-yet-taught** lesson — the one thing the planning pipeline

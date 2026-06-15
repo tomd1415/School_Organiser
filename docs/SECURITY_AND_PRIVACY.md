@@ -21,6 +21,8 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
 | Pupil marks + comments (Phase 9) | **Sensitive** (attainment) | `pupil_marks` / `pupil_lesson_comments`; gated by `pupil_marks_enabled` (DPIA addendum). AI open-marking sends **anonymous slot-lettered per-question batches** (no pupil id/name); pupils see only **confirmed**, visibility-gated marks |
 | Remembered-device credential (Phase 9) | Secret | `pupil_devices`: the cookie holds a random secret; only its **sha256** is stored. Pupil-bound, ~term expiry, revoked on PIN-reset/disable/teacher-revoke. Off unless the class enables it |
 | "What works for me" profile (Phase 9) | **Sensitive** (profiling) | `pupil_profiles`; AI digest built from the pupil's own feedback+marks (no name to AI); pupil-keyed (cross-subject sharing is deferred to the multi-teacher DPIA) |
+| Safeguarding disclosure register (Phase 10) | **Sensitive** (record of handling) | `safeguarding_review`; teacher-only, **never sent to AI** — a record-of-handling, not a referral system |
+| Pupil disposal audit (Phase 10) | Internal — no identity | `pupil_disposals`; records that an erasure/anonymisation happened + per-table counts, keeping only the non-identifying token |
 | AI prompts & responses | Internal (audited) | `ai_calls`, **redacted** request only |
 | Auth secrets (`SESSION_SECRET`) | Secret | `.env`, never committed |
 | AI provider API key | Secret | `ANTHROPIC_API_KEY` in `.env` where set (wins); otherwise the teacher's own key stored in the `settings` table (instance-local DB, LAN-only) — like the mailbox password. Test mode never reads the stored key, so tests can't make real calls |
@@ -38,7 +40,11 @@ user. Mirrors the approach in `exam_questions/SECURITY_AND_PRIVACY.md` and `DPIA
   password (set in Settings) into a deny-by-default role — only the read-only current/next-lesson
   view, its linked resources, the feedback form (and, if their account links a staff row, "my
   upcoming lessons") are reachable; everything else bounces. TA feedback can be
-  safeguarding-flagged, which withholds it from all AI calls.
+  safeguarding-flagged, which withholds it from all AI calls. A TA can only open resources **linked
+  to a lesson running in their current slot** (`taMayAccessResource`), and a named TA's now/next view
+  is scoped to **their own** lessons — closing an enumerate-by-id gap (2026-06-15 review). Uploaded
+  **SVGs are served as downloads** (`Content-Disposition: attachment` + `nosniff`), never inline, so
+  a malicious SVG cannot run script in the app origin.
 - **Pupil access (built 2026-06-13, off by default):** a deny-by-default `pupil` role reaching
   only `/me` and its autosave endpoints — **no `/resources/*`** (worksheet content is rendered
   server-side). Login is **class code → tap your name → PIN**, rate-limited per IP with a durable
@@ -55,11 +61,15 @@ Implemented structurally, not by discipline:
 
 1. Each pupil has a stable `ai_token` (e.g. `PUPIL_7`) in the database.
 2. The **single LLM client wrapper** is the only code that calls a provider. Before sending,
-   it substitutes every known pupil name in the payload with that pupil's token.
+   it substitutes every known pupil name in the payload with that pupil's token. Matching is
+   **Unicode-aware and whitespace-robust** — a name is matched across any run of spaces, tabs,
+   non-breaking spaces or a line break that falls mid-name, so an odd space cannot smuggle a name
+   through (2026-06-15 review).
 3. The `ai_calls` audit table stores **only the redacted request**, so the record itself
    proves no name left the building.
 4. Responses that reference a token are re-expanded to the name **for display only**, in the
-   app, after the call returns.
+   app, after the call returns — **longest-token-first** and walking the structured response
+   recursively, so `PUPIL_1` never corrupts `PUPIL_10`.
 5. Tests assert that a payload containing a roster name is rejected/redacted before egress.
 
 This matches the project-wide rule in the root `CLAUDE.md` ("Pupil names are never sent to AI
@@ -84,9 +94,10 @@ redaction *and* withholding rules apply regardless of provider.
   `exam_questions` retention approach.
 - **Subject access / portability:** all data is exportable (DATA_MODEL §"Data portability"),
   so an SAR can be satisfied.
-- **DPIA:** maintain a short `docs/DPIA.md` before storing real pupil data, covering what's
-  held, why, the AI-redaction control, retention, and backup handling. (To be written in P2,
-  when pupils are introduced — see ROADMAP.)
+- **DPIA:** [docs/DPIA.md](DPIA.md) is a **working draft** covering what's held, why, the
+  AI-redaction control, retention/disposal and backup handling. It awaits DPO + SLT (safeguarding)
+  sign-off; the pupil-login and auto-marking surfaces stay **code-disabled** until that sign-off is
+  confirmed in Settings (`pupil_dpia_ack` / `pupil_marks_dpia_ack`).
 
 ## Backups
 
@@ -102,6 +113,8 @@ redaction *and* withholding rules apply regardless of provider.
 | Pupil name leaking to a third-party AI | Structural redaction in the one LLM wrapper + audit. |
 | Backup tape/disk lost | Encrypted backups. |
 | Another LAN device reaching the app | Auth required; optional IP allow-list on Caddy. |
+| Limited-role user reaching another lesson's data | TA role scoped to resources/lessons in the current slot; named-TA views filtered to their own lessons. |
+| Malicious uploaded SVG running script in the app origin | SVGs served as downloads (`attachment` + `nosniff`), never inline. |
 | Secret leak via git | `.env` git-ignored; secrets never in code or docs. |
 | Accidental data loss | No-soft-delete + nightly backups + tested restore. |
 

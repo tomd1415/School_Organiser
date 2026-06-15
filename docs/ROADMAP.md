@@ -4,11 +4,14 @@ Phased delivery. Each phase is independently useful and shippable to the school 
 tool earns its keep early and we learn before building more. Priorities reference the user
 stories in [SPECIFICATION.md](SPECIFICATION.md).
 
-> **Status (2026-06-11):** Phases **0–3 ✅ complete** (pupils 2.11 deferred to the pupil-facing
-> project), **Phase 4 ✅** except parts of 4.6 and the optional 4.8, **Phase 5 — curriculum
-> delivery built through 5.8** plus parts of 5.9 ([PHASE_5_PLAN.md](PHASE_5_PLAN.md)), and
-> **Phase 6 — setup, September & new instances planned** ([PHASE_6_PLAN.md](PHASE_6_PLAN.md)).
-> The original "polish" phase is now **Phase 7**.
+> **Status (2026-06-15):** Phases **0–6 and 8–10 built** and in daily use (Phase 4's optional 4.6/4.8
+> extras aside); **Phase 7** (polish) is an ongoing pick-by-pain list, much of it absorbed into Phase
+> 10. **Phase 11** — the teacher's idea backlog — is **largely built** (Waves 0–5; see
+> [MORE_IDEAS.md](MORE_IDEAS.md)). The app now wears the **Rail & Stage** UI
+> ([UX_FLOWS.md](UX_FLOWS.md)) and has had a project-wide review + remediation
+> ([CHANGELOG.md](../CHANGELOG.md)). Pupil logins (Phase 8) and auto-marking (Phase 9) ship **off by
+> default** behind DPIA gates. Beyond: the deferred idea-4 reviewer tail and the parked multi-teacher
+> v2 — both gated on real-use proof.
 
 ## Sequencing principle
 
@@ -125,7 +128,11 @@ log; the record feeds back into next week's lesson and the master.
 **Done when:** a whole unit can be filled and assigned for a class in one request, and each
 class's delivery record visibly improves the next lesson. *(Reached for the headline flow.)*
 
-## Phase 6 — Setup, September & new instances *(planned 2026-06-11 — see [PHASE_6_PLAN.md](PHASE_6_PLAN.md))*
+## Phase 6 — Setup, September & new instances *(BUILT — see [PHASE_6_PLAN.md](PHASE_6_PLAN.md))*
+
+*Status: ✅ built (migrations 0013–0017) — in-app setup editors incl. the timetable grid editor, the
+September rollover wizard with the class predecessor chain, the new-instance onboarding wizard, and
+calendar exceptions.*
 
 **Goal:** the app becomes self-sufficient across time and teachers — no more seed scripts.
 
@@ -211,9 +218,12 @@ login). Absorbs the old 8.8 stretch list; design mines the sibling `exam_questio
 marking architecture. Gated on a **DPIA addendum** (attainment storage, anonymous answer text
 to the AI, the device credential).
 
-## Phase 10 — Trustworthy in daily use *(PLANNED 2026-06-13 — see [PHASE_10_PLAN.md](PHASE_10_PLAN.md))*
+## Phase 10 — Trustworthy in daily use *(BUILT — see [PHASE_10_PLAN.md](PHASE_10_PLAN.md))*
 
-*Status 2026-06-13: planned, plan-first; not started. Single-teacher only — no multi-teacher work.*
+*Status 2026-06-15: ✅ built (migrations 0024–0027). Encrypted nightly backups + a monthly
+restore-drill, pupil erasure/anonymisation with a disposal audit, a teacher idle-logout, the in-app
+AI-call audit viewer, a safeguarding disclosure register, a reboot-durable open-marking queue, SEND
+accessibility options and global search. Single-teacher only — no multi-teacher work.*
 
 **Goal:** Phases 8–9 put real children's PII and pupil-authored answers into the system; Phase 10
 pays the bill that created. **Make the privacy/safeguarding promises real** — the DPIA currently
@@ -229,6 +239,17 @@ marking data enables — retrieval-practice starters (the 9.9 stretch) and the *
 feedback digest (only the per-lesson half shipped). Then **daily-driver polish** — global search,
 capture-from-anywhere, keyboard shortcuts, print packs — and **September setup** — MIS CSV import.
 A menu sequenced by pain, not an all-or-nothing gate; Track A ships first.
+
+## Phase 11 — The teacher's idea backlog *(LARGELY BUILT — see [MORE_IDEAS.md](MORE_IDEAS.md))*
+
+*Status 2026-06-15: Waves 0–5 built and tested (migrations 0028–0036).* Standing style/feature prefs,
+a **teaching-concepts** library and **guided cohort-access** prompts (all on the `context[]` seam), a
+**spec-point coverage** backbone + uploaded **official course documents**, **per-feature model
+choice**, and an opt-in **advisory AI lesson reviewer** (off by default) — plus the **Rail & Stage**
+navigation redesign (see [UX_FLOWS.md](UX_FLOWS.md)). The richer **idea-4 reviewer tail** (random
+spot-check + scheme-level review + finding re-injection) is **deferred** until adoption data shows the
+idea-8 findings actually get applied (`lesson_reviews.status`), since its Opus spend is the project's
+named #1 cost risk.
 
 ## Future (unnumbered) — Multi-teacher school server *(parked — see [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md))*
 
@@ -262,3 +283,5 @@ These are relative sizes, not promises (one developer, evenings):
 | 7 Polish + extras | ongoing | Long-tail quality of life |
 | 8 Pupil logins + in-app work | L | Answers become data; less marking; the loop closes |
 | 9 Auto-marking + results loop | L | Marks without transcribing; results back to pupils; question-precise planning |
+| 10 Trustworthy in daily use | L | Privacy/safeguarding promises enforced; durable work; SEND a11y |
+| 11 Idea backlog (Waves 0–5) | L | Coverage, course docs, per-feature models, the AI reviewer, Rail & Stage |

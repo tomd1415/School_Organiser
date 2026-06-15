@@ -70,10 +70,11 @@ before Phase 0 if you change your mind. The rest of this document assumes TypeSc
                                           └──────────────────────────┘
 ```
 
-No queue/Redis initially. If background work appears (email polling, embedding batches,
-nightly note summaries) add a single worker process or a cron-driven script — not a broker.
-Phase 2.12's **recurring-task generator** is the first such job: an idempotent run on app boot + a
-daily in-process timer, also exposed as `npm run generate-recurring` for system cron.
+No queue/Redis — background work runs as **idempotent in-process jobs** (a boot sweep + a periodic
+timer), not a broker. The built jobs: the Phase 2.12 **recurring-task generator** (also
+`npm run generate-recurring` for system cron); the Phase 10.9 **durable open-marking queue**
+(`marking_queue` — a pending mark survives a reboot and is re-armed if the AI is unavailable); and the
+**email-intake poller** (IMAP, deduplicated via `processed_emails`). Each is safe to run twice.
 
 ## Components
 
@@ -83,6 +84,22 @@ daily in-process timer, also exposed as `npm run generate-recurring` for system 
   log "actual" on a work block). No client-side router.
 - All POSTs CSRF-protected; session cookie HttpOnly/Secure/SameSite=Strict.
 - Per-route Zod schemas; validation failures render a templated message.
+
+### UI shell — Rail & Stage
+
+The whole app renders into a **Rail & Stage** shell ([lib/html.ts](../app/src/lib/html.ts),
+[lib/nav.ts](../app/src/lib/nav.ts)): a persistent left **rail** (grouped Today / Plan / Advanced)
+beside one content **Stage**, replacing the old flat top-bar. Built so a teacher of any level finds it
+easy, with the advanced surfaces one step away rather than in the way:
+
+- **Two experience levels.** An `experience` setting (`everyday` | `power`) hides the Advanced rail
+  group until the teacher opts in (a one-time nudge offers it after enough visits). The assumption is
+  that an expert sets the system up first, then the everyday teacher gets an uncluttered rail.
+- **Command palette** (`/search`) — a keyboard jump-to-anything with arrow/Enter navigation.
+- **Accessibility & legibility.** Self-hosted **Atkinson Hyperlegible** font (no npm dependency); an
+  a11y toolbar (text size, contrast, motion) applied via `<html data-*>` with a pre-paint script (no
+  flash of the wrong setting); a swappable theme; 44 px minimum tap targets. The screen-by-screen
+  flows are in [UX_FLOWS.md](UX_FLOWS.md).
 
 ### Application services (where all logic lives)
 
@@ -112,7 +129,9 @@ daily in-process timer, also exposed as `npm run generate-recurring` for system 
 ### LLM client (one wrapper)
 
 - Single entry point for every AI call. Responsibilities: **redact pupil names → tokens**
-  (from `pupils.ai_token`), select provider/model from `settings`, call with structured-output
+  (from `pupils.ai_token`), select provider/model from `settings` (now **per-feature** — each AI
+  feature picks design/planning/cheap or its own model override), enforce the **monthly spend cap**
+  (with a pre-call estimate that refuses a call which *would* cross it), call with a structured-output
   schema, and write an `ai_calls` audit row containing only the **redacted** request.
 - **Provider = Anthropic (Claude), by default.** Suggested models: planning/authoring →
   Sonnet (`claude-sonnet-4-6`); heavy curriculum design → Opus (`claude-opus-4-8`); cheap

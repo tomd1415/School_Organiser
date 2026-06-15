@@ -7,10 +7,17 @@ everything else.**
 ## Interaction principles
 
 - **The Now screen is home.** Opening the app always lands here.
+- **Rail & Stage.** A persistent left **rail** sits beside one content **Stage**. The rail groups
+  destinations as **Today** (a configurable pin set — by default Now, Focus, Timetable, Tasks,
+  Captured), a permanently-pinned **⚑ Safeguarding**, **Plan** (the rest of the everyday pages), and
+  **Advanced** (expert/setup pages, revealed only when the `power` experience level is on). An
+  `everyday` → `power` toggle (with a one-time *earned* nudge after enough lessons) plus a **command
+  palette** (`/search`) keep day-to-day use uncluttered while leaving everything one keystroke away.
 - **Autosave everywhere.** Notes and "actual" logs save on blur / every few seconds via HTMX;
   no explicit Save button needed for capture.
 - **Keyboard-fast.** A global shortcut (e.g. `n`) opens a note box from anywhere; `Enter` adds
-  a follow-up line; `Esc` closes. Nothing requires the mouse.
+  a follow-up line; `Esc` closes. `g`+letter jumps to any rail destination and `/search` opens the
+  command palette. Nothing requires the mouse.
 - **Never block on structure.** A note saves with just text. Stopping point, follow-ups,
   pupils, tags are all optional and can be added after the bell.
 - **Colour by course** so the timetable and Now screen are scannable at a glance.
@@ -223,7 +230,7 @@ that you accept/edit into a new scheme version.
 ## 9. General notes / knowledge base
 
 A simple notes list with search and optional links to a course/group/pupil/task — the same
-`notes` table, `kind='general'`. Reached from the top nav; integrated because any general
+`notes` table, `kind='general'`. Reached from the rail (Plan group); integrated because any general
 note can be filtered by what it links to and surfaced next to that lesson/group.
 
 ## 10. Focus mode — one thing now (& end-of-day)
@@ -436,20 +443,29 @@ the **single best home** of the four routes above. The key **facts** (when · de
 who · money · bring · contact) come back as tiny values and render as **colour-coded chips**
 inside the task's "✉ what it says" disclosure, with dates and amounts highlighted in the
 remaining prose and the provenance line muted; plain prose (manual tasks, pre-triage emails)
-renders unchanged. The **Seen flag is the dedup**: only successfully imported messages are
-marked read — a failure stays unseen for the next poll — and every import keeps the raw email
-as provenance (`email_intake`), exactly like the paste box.
+renders unchanged. Dedup is **belt-and-braces**: only successfully imported messages are marked
+read (a failure stays unseen for the next poll), *and* a per-message key (Message-ID, or a content
+hash when absent) is recorded in `processed_emails` so a message that was imported but failed to get
+marked read is recognised and skipped — not re-imported — on the next poll. Every import keeps the
+raw email as provenance (`email_intake`), exactly like the paste box.
 
-## Navigation summary
+## Navigation summary — the rail
+
+The persistent left **rail** groups destinations; the **Stage** to its right shows one screen at a
+time. **Today** is a teacher-configurable pin set; **⚑ Safeguarding** is always pinned and never
+gated; **Plan** holds the rest of the everyday pages; **Advanced** appears only at the `power`
+experience level. `g`+letter jumps to a destination and `/search` opens the command palette.
 
 ```text
-Now ──┬── Timetable ──── Lesson detail ──── Plan / Resources
-      ├── Focus ──────── One thing now / end-of-day wind-down
-      ├── Tasks ──────── Triage / Work blocks / Events & deadlines
-      ├── Notes ──────── Search / General notes
-      ├── Captured ───── "Things I've been told" inbox (AI-filed)
-      ├── Oversee ────── TA lesson prep
-      ├── Map ────────── Curriculum map — which lesson lands which week
-      ├── Kit ────────── Classroom equipment inventory
-      └── Planning/AI ── Draft / Summarise / Redesign
+TODAY      Now · Focus · Timetable · Tasks · Captured        (default pins — configurable)
+⚑          Safeguarding                                       (always visible, never AI-bound)
+PLAN       Schemes · Map · Coverage · Notes · Oversee · Events · Resources
+ADVANCED   Pupils · Concepts · Kit · Recurring · Time · Setup · Settings   (power level only)
+─────────────────────────────────────────────────────────────────────────────────────────────
+Each rail link opens its screen on the Stage, e.g.:
+  Now       → current & next lesson · before-the-bell · heads-up · end-of-day        (flow 1)
+  Timetable → week grid → Lesson detail → Plan / Resources / adaptation             (flows 2–3)
+  Schemes   → schemes of work · lesson plans · the advisory AI reviewer 🔎 · AI authoring (flow 8)
+  Coverage  → spec-point coverage backbone (what the course must still cover)
+  Map       → curriculum map — which lesson lands which week                         (flow 12)
 ```
