@@ -21,6 +21,16 @@ describe('markSchemeItems — field hints for the scheme deriver', () => {
     expect(fieldsItem.text).toContain('FIELD task.1 [checkbox]: I checked my work');
   });
 
+  it('tags a fill-in-the-blank field so the AI marks it exact/keyword', () => {
+    const items = markSchemeItems({
+      worksheetTitle: 'Cloze',
+      worksheetMarkdown: 'w',
+      answersMarkdown: '1. calculations',
+      fields: [{ key: 'blank.1', label: 'The CPU does [BLANK]', kindHint: 'blank' }],
+    });
+    expect(items.find((i) => i.text.startsWith('FIELDS'))!.text).toContain('FIELD blank.1 [fill-in-the-blank]: The CPU does [BLANK]');
+  });
+
   it('includes the teacher answers as a separate context item when present', () => {
     const items = markSchemeItems({ worksheetTitle: 'Q', worksheetMarkdown: 'w', answersMarkdown: 'A: 42', fields: [] });
     expect(items.some((i) => i.text.includes('TEACHER ANSWERS') && i.text.includes('42'))).toBe(true);

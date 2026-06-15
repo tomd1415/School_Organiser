@@ -2,7 +2,7 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@9'; // @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@10'; // @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -30,7 +30,11 @@ export const LESSON_RESOURCES_SYSTEM =
   'two-column table; the question on the left, and on the right the options each preceded by "( )", ' +
   'e.g. "( ) RAM ( ) CPU ( ) SSD" or "( ) True ( ) False" (the pupil picks ONE). Give 2–4 options; ' +
   'list them ONLY in the worksheet and put WHICH ONE IS CORRECT in the "answers" document — never mark ' +
-  'the answer in the worksheet. • SCREENSHOT tasks where the pupil ' +
+  'the answer in the worksheet. • FILL-IN-THE-BLANKS — a sentence with each missing word written as ' +
+  '"[[ ]]" (the pupil types into the gap), e.g. "The CPU does [[ ]] and RAM stores [[ ]]."; you may add ' +
+  'a "Word bank: word1 · word2" line of the jumbled answer words to support pupils. List the gap ' +
+  'answers IN ORDER in the "answers" document; NEVER write the answer inside the worksheet gap. ' +
+  '• SCREENSHOT tasks where the pupil ' +
   'shows practical work — a two-column table whose right cell is EXACTLY "📷 Paste a screenshot here". ' +
   '• a short tick-box success checklist (- [ ]) at the END of the level. Do NOT add a name/date header ' +
   '— the pupil\'s name and the date are filled in automatically online.\n' +
@@ -38,7 +42,8 @@ export const LESSON_RESOURCES_SYSTEM =
   'how to support pupils at each level, likely misconceptions, what a good response looks like, and the ' +
   'expected answers. All answer guidance and adult prompts live HERE, not in the worksheet.\n' +
   '(4) "answers" — concise teacher answer notes / the mark-scheme source for the worksheet questions; ' +
-  'for every multiple-choice / true-false question, state the correct option exactly as written.\n' +
+  'for every multiple-choice / true-false question state the correct option exactly as written, and ' +
+  'for every fill-in-the-blanks sentence list the gap answers in order.\n' +
   'Where a visual would clearly help a step but you have no source image for it, add a captioned ' +
   'placeholder on ITS OWN line — `> 🖼️ [show: <what the picture should show>]` — so the teacher can ' +
   'drop an image in; NEVER invent an image URL. Match the lesson outline step by step; plan within the ' +
@@ -85,7 +90,7 @@ export function lessonImageItems(images: Array<{ url: string; label: string }>):
 export const LESSON_RESOURCES_INSTRUCTION =
   'Generate the resource set now: exactly four documents — one "slides" (level-differentiated with ' +
   '`# 🟢/🟡/🔴` dividers, all slides in the one entry), one "worksheet" (pupil-only, three "## 🟢/🟡/🔴" ' +
-  'level sections, typed answer tables, "( ) a ( ) b" multiple-choice cells and "📷 Paste a screenshot ' +
-  'here" tasks, NO answers/TA notes), ' +
+  'level sections, typed answer tables, "( ) a ( ) b" multiple-choice cells, "[[ ]]" fill-in-the-blank ' +
+  'gaps and "📷 Paste a screenshot here" tasks, NO answers/TA notes), ' +
   'one "ta_notes" (separate TA/teacher guidance + answers), one "answers". Where a visual is needed but ' +
   'no source image fits, use a `> 🖼️ [show: …]` placeholder. No name/date header — those auto-fill online.';

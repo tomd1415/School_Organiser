@@ -14,7 +14,7 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image' | 'choice';
+  kind: 'text' | 'check' | 'image' | 'choice' | 'blank';
   level: BlockLevel;
   label: string;
   options?: string[]; // choice fields only — the selectable options, in source order
@@ -74,6 +74,30 @@ function isChoiceCell(s: string): boolean {
 /** Split a choice cell into its options (the text after each "( )" marker), in source order. */
 function choiceOptions(s: string): string[] {
   return s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
+}
+
+// A FILL-IN-THE-BLANK marker inside instruction prose ("The CPU does [[ ]]."): each "[[ ]]" becomes an
+// inline input keyed blank.{n} — a global counter across the document, like task.{n}, so keys are
+// stable in full vs sliced renders. The answer lives in the answers doc (the worksheet stays blank).
+function countBlanks(s: string): number {
+  return (s.match(/\[\[\s*\]\]/g) ?? []).length;
+}
+/** For each blank in order, the sentence with THIS gap marked [BLANK] and the others as ____ — context
+ * the AI scheme-deriver uses to set each blank.{n}'s expected word. */
+function blankLabels(text: string): string[] {
+  const n = countBlanks(text);
+  const out: string[] = [];
+  for (let i = 0; i < n; i++) {
+    let k = -1;
+    out.push(
+      text
+        .replace(/\[\[\s*\]\]/g, () => (++k === i ? '[BLANK]' : '____'))
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 200),
+    );
+  }
+  return out;
 }
 
 /** Image-gap placeholders the generator leaves where a visual is needed but none was sourced
@@ -352,6 +376,19 @@ function choiceControl(key: string, label: string, options: string[], opts: Work
   return `<form class="ws-choice-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none">${group}<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></form>`;
 }
 
+/** A fill-in-the-blank input, embedded inline in instruction prose. Autosaves like a typed answer. */
+function blankInput(key: string, opts: WorksheetOptions): string {
+  const value = opts.values?.get(key) ?? '';
+  if (opts.mode === 'review') {
+    return value.trim() !== '' ? `<span class="ws-blank-filled">${esc(value)}</span>` : `<span class="ws-blank-filled ws-empty">____</span>`;
+  }
+  if (opts.mode === 'preview') {
+    return `<input class="ws-blank" type="text" disabled aria-label="fill in the gap">`;
+  }
+  return `<input class="ws-blank" type="text" name="value" autocomplete="off" value="${esc(value)}" aria-label="fill in the gap"
+    hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -495,6 +532,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
   const out: string[] = [];
   let tableIdx = 0;
   let taskIdx = 0;
+  let blankIdx = 0;
 
   for (const block of blocks) {
     const shown = include === null || include.has(block.level);
@@ -514,15 +552,45 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         fields.push(...collected);
         out.push(html);
       }
-    } else if (shown) {
+    } else {
+      // An md block (heading / instruction prose / note). Count any [[ ]] fill-in blanks FIRST so their
+      // global blank.{n} keys stay stable whether or not this block is in the shown slice (like tasks).
+      const blockText = block.lines.join('\n');
+      const startBlank = blankIdx;
+      blankIdx += countBlanks(blockText);
+      if (!shown) continue;
       // In a sliced (pupil) view the level's own heading is hidden — the slice is unlabelled.
       if (block.isLevelHeading && include !== null) continue;
-      const md = renderMarkdown(block.lines.join('\n'));
-      // Wrap instruction prose in a calm "do this" panel so it reads clearly apart from the answer
-      // boxes. A pure title/heading and a standalone callout (blockquote) style themselves.
+
+      // Pull out an optional "Word bank: a · b · c" line and render it as chips (SEND scaffold).
+      let body = blockText;
+      let wordbank = '';
+      const wb = body.match(/^[ \t]*word ?bank[ \t]*[:：][ \t]*(.+)$/im);
+      if (wb) {
+        const words = wb[1]!.split(/[·,;|]+/).map((w) => w.trim()).filter(Boolean);
+        if (words.length) wordbank = `<div class="ws-wordbank"><span class="ws-wordbank-label">Word bank</span>${words.map((w) => `<span class="ws-chip">${esc(w)}</span>`).join('')}</div>`;
+        body = body.replace(wb[0]!, '').trim();
+      }
+
+      let md = renderMarkdown(body);
+      const nBlanks = countBlanks(body);
+      if (nBlanks > 0) {
+        const labels = blankLabels(body);
+        let bi = 0;
+        md = md.replace(/\[\[\s*\]\]/g, () => {
+          const key = `blank.${startBlank + bi + 1}`;
+          fields.push({ key, kind: 'blank', level: block.level, label: labels[bi] ?? '' });
+          bi += 1;
+          return blankInput(key, opts);
+        });
+      }
+
+      // Wrap instruction prose in a calm "do this" panel; a fill-in-the-blank block gets the warmer
+      // "answer" tint instead so it reads as something to complete. Headings/callouts style themselves.
       const headingOnly = block.lines.every((l) => l.trim() === '' || /^#{1,6}\s/.test(l));
       const quoteOnly = block.lines.every((l) => l.trim() === '' || /^>\s?/.test(l));
-      out.push(headingOnly || quoteOnly ? md : `<div class="ws-block ws-instruction">${md}</div>`);
+      const cls = nBlanks > 0 ? 'ws-block ws-cloze' : 'ws-block ws-instruction';
+      out.push(headingOnly || quoteOnly ? md + wordbank : `<div class="${cls}">${md}${wordbank}</div>`);
     }
   }
 

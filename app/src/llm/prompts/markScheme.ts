@@ -3,7 +3,7 @@
 // teacher's own content, but a pupil name could appear in an example, so the boundary still holds.
 import type { RedactableItem } from '../../services/redact';
 
-export const MARK_SCHEME_VERSION = 'mark_scheme@2';
+export const MARK_SCHEME_VERSION = 'mark_scheme@3';
 
 export const MARK_SCHEME_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher writing a MARK SCHEME for a worksheet ' +
@@ -15,7 +15,10 @@ export const MARK_SCHEME_SYSTEM =
   'alternatives), "tick" (a success-checklist item), or "open" (extended/explain answers needing ' +
   'human-style judgement — give marking guidance in expected). A field tagged "[choice: a | b | c]" ' +
   'lists its exact options: use kind "choice" and set "expected" to the ONE correct option copied ' +
-  'verbatim from that list (use the teacher answers to decide which). Prefer objective kinds where ' +
+  'verbatim from that list (use the teacher answers to decide which). A field tagged ' +
+  '"[fill-in-the-blank]" is one missing word/phrase in a sentence (the gap shown as [BLANK]): mark it ' +
+  '"exact" (or "keyword" when a few wordings are fine), expected = the missing word from the teacher ' +
+  'answers. Prefer objective kinds where ' +
   'you safely can (they mark instantly and free); use "open" only when the answer genuinely needs ' +
   'judgement. Keep "expected" concise. Use ONLY the field keys given. Plain UK English; never ' +
   'reference an individual pupil.';
@@ -24,11 +27,18 @@ export function markSchemeItems(args: {
   worksheetTitle: string;
   worksheetMarkdown: string;
   answersMarkdown: string | null;
-  fields: Array<{ key: string; label: string; kindHint: 'text' | 'check' | 'choice'; options?: string[] }>;
+  fields: Array<{ key: string; label: string; kindHint: 'text' | 'check' | 'choice' | 'blank'; options?: string[] }>;
 }): RedactableItem[] {
   const fieldList = args.fields
     .map((f) => {
-      const tag = f.kindHint === 'check' ? 'checkbox' : f.kindHint === 'choice' ? `choice: ${(f.options ?? []).join(' | ')}` : 'written';
+      const tag =
+        f.kindHint === 'check'
+          ? 'checkbox'
+          : f.kindHint === 'choice'
+            ? `choice: ${(f.options ?? []).join(' | ')}`
+            : f.kindHint === 'blank'
+              ? 'fill-in-the-blank'
+              : 'written';
       return `FIELD ${f.key} [${tag}]: ${f.label || '(no label)'}`;
     })
     .join('\n');

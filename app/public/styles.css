@@ -897,6 +897,20 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 [data-theme="dark"] .pupil-body .ws-choice-opt > label { background: #232838; color: var(--ink); border-color: var(--line); }
 [data-theme="dark"] .pupil-body .ws-choice-opt:has(input:checked) > label { background: #1d2740; border-color: #5b8def; }
 [data-theme="dark"] .pupil-body .ws-choice-review .ws-choice-opt.chosen { color: #8fd99a; }
+/* Fill-in-the-blanks — an inline gap input in instruction prose, with an optional word bank. */
+.ws-cloze { background: #fffdf3; border-left: 4px solid #caa92e; border-radius: 8px; padding: 0.4rem 0.9rem; margin: 0.7rem 0; }
+.ws-blank { display: inline-block; width: 8rem; min-width: 5rem; max-width: 100%; font: inherit; font-size: 1.05rem; border: 0; border-bottom: 2px solid var(--accent); border-radius: 4px 4px 0 0; background: #fffef0; padding: 0.1rem 0.35rem; margin: 0 0.15rem; vertical-align: baseline; }
+.ws-blank:focus { outline: 2px solid var(--accent); outline-offset: 1px; background: #fff; }
+.ws-blank-filled { font-weight: 700; border-bottom: 2px solid #cbd5e1; padding: 0 0.25rem; }
+.ws-wordbank { margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.ws-wordbank-label { font-weight: 600; color: var(--muted); font-size: 0.9rem; margin-right: 0.2rem; }
+.ws-chip { display: inline-block; background: #eef4fb; border: 1px solid #cdd6e3; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.95rem; }
+[data-contrast="high"] .ws-cloze { background: #fff; }
+[data-contrast="high"] .ws-blank { background: #fff; border-bottom-color: #000; }
+[data-contrast="high"] .ws-chip { background: #fff; border-color: #000; }
+[data-theme="dark"] .pupil-body .ws-cloze { background: #20283a; border-left-color: #caa92e; }
+[data-theme="dark"] .pupil-body .ws-blank { background: #232838; color: var(--ink); border-bottom-color: #5b8def; }
+[data-theme="dark"] .pupil-body .ws-chip { background: #1d2740; border-color: var(--line); color: var(--ink); }
 /* 💡 paste-help modal + practice box */
 .paste-help { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 1200; padding: 1rem; }
 .paste-help[hidden] { display: none; }

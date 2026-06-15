@@ -72,7 +72,22 @@
       body.appendChild(row);
     } else if (b.type === 'text' || b.type === 'note' || b.type === 'raw' || b.type === 'rawtable') {
       var key = b.type === 'text' || b.type === 'note' ? 'text' : 'md';
-      body.appendChild(textareaFor(function () { return b[key]; }, function (v) { b[key] = v; }));
+      var ta = textareaFor(function () { return b[key]; }, function (v) { b[key] = v; });
+      body.appendChild(ta);
+      if (b.type === 'text') {
+        // "make blank": turn the selected word into a fill-in gap [[ ]] (the answer goes in the answers doc).
+        var tb = el('div', 'ws-ed-rowbar');
+        var mk = el('button', 'btn-soft', '␣ make blank'); mk.type = 'button';
+        mk.title = 'Turn the selected word into a fill-in gap [[ ]] — put the answer in the answers doc';
+        mk.addEventListener('click', function () {
+          var s = ta.selectionStart || 0, e = ta.selectionEnd || 0, val = ta.value;
+          ta.value = val.slice(0, s) + '[[ ]]' + val.slice(e);
+          b.text = ta.value; markDirty(); autosize(ta);
+          ta.focus(); var pos = s + 5; ta.setSelectionRange(pos, pos);
+        });
+        tb.appendChild(mk);
+        body.appendChild(tb);
+      }
     } else if (b.type === 'placeholder') {
       body.appendChild(el('p', 'ws-ed-ph', '🖼️ ' + (b.desc || 'image to add')));
       body.appendChild(dropZone(i, 'Add this image (drop / paste / click)'));
@@ -232,6 +247,7 @@
     ['+ Question', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'text' }] }); }],
     ['+ Multiple choice', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['', '', ''] }] }); }],
     ['+ True / False', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['True', 'False'] }] }); }],
+    ['+ Fill the blanks', function () { addBlock({ type: 'text', text: 'The [[ ]] does calculations.' }); }],
     ['+ Screenshot task', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'screenshot' }] }); }],
     ['+ Checklist', function () { addBlock({ type: 'checklist', items: [''] }); }],
     ['+ Heading', function () { addBlock({ type: 'heading', depth: 2, text: '' }); }],

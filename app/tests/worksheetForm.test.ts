@@ -177,6 +177,48 @@ describe('worksheetForm — choice fields (multiple-choice / true-false)', () =>
   });
 });
 
+describe('worksheetForm — fill-in-the-blank fields', () => {
+  const MD = `Fill the gaps.
+
+The CPU does [[ ]] and RAM stores [[ ]].
+
+Word bank: data · calculations
+`;
+
+  it('each [[ ]] becomes a blank field keyed blank.{n}, with a gap-marked label', () => {
+    const blanks = renderWorksheet(MD, { mode: 'review' }).fields.filter((f) => f.kind === 'blank');
+    expect(blanks.map((b) => b.key)).toEqual(['blank.1', 'blank.2']);
+    expect(blanks[0]!.label).toContain('[BLANK]'); // this gap marked
+    expect(blanks[0]!.label).toContain('____'); // the other gap blanked
+  });
+
+  it('form mode renders inline gap inputs + the word bank as chips; the marker never shows', () => {
+    const r = renderWorksheet(MD, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).toContain('class="ws-blank"');
+    expect(r.html).toContain('hx-post="/me/answer?oc=5&amp;key=blank.1"');
+    expect(r.html).toContain('ws-wordbank');
+    expect(r.html).toContain('ws-chip');
+    expect(r.html).toContain('ws-cloze'); // the warm fill-in panel
+    expect(r.html).not.toContain('[[ ]]'); // the marker is consumed into inputs
+  });
+
+  it('review shows the typed words; preview is inert', () => {
+    const review = renderWorksheet(MD, { mode: 'review', values: new Map([['blank.1', 'calculations']]) });
+    expect(review.html).toContain('calculations');
+    expect(review.html).not.toContain('class="ws-blank"'); // read-only
+    expect(renderWorksheet(MD, { mode: 'preview' }).html).toContain('disabled');
+  });
+
+  it('blank keys are global and stable across level slices', () => {
+    const levelled = `## 🟢 Support\n\nThe [[ ]] runs programs.\n\n## 🟡 Core\n\nA loop [[ ]] code.\n`;
+    const full = renderWorksheet(levelled, { mode: 'review' }).fields.filter((f) => f.kind === 'blank');
+    expect(full.map((f) => f.key)).toEqual(['blank.1', 'blank.2']);
+    const core = renderWorksheet(levelled, { mode: 'review', level: 'core' }).fields.filter((f) => f.kind === 'blank');
+    expect(core).toHaveLength(1);
+    expect(core[0]!.key).toBe('blank.2'); // Support's blank.1 is counted but not shown
+  });
+});
+
 // Locks the structure real generated worksheets use: level "## " sections, "###" subtasks,
 // fenced code containing `#` Python comments and the word "Challenge", and answer tables inside
 // each level — the exact shapes that previously broke level detection.

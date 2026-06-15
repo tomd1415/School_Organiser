@@ -79,6 +79,12 @@ Type your answers in the boxes.
     expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
     expect((fieldSig(md).match(/:choice/g) ?? []).length).toBe(2);
   });
+
+  it('fill-in-the-blank [[ ]] gaps survive a round-trip as blank fields', () => {
+    const md = `Fill the gaps.\n\nThe CPU does [[ ]] and RAM stores [[ ]].\n\nWord bank: data · calculations\n`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect((fieldSig(md).match(/:blank/g) ?? []).length).toBe(2);
+  });
 });
 
 describe('worksheetBlocks — parse classifies blocks', () => {
@@ -138,6 +144,12 @@ Do this first.
   it('captures a choice table even when the header is not the canonical "type here"', () => {
     const b = parseBlocks(`| Question | Answer |\n|---|---|\n| Pick one | ( ) a ( ) b |\n`);
     expect(b.some((x) => x.type === 'qtable')).toBe(true);
+  });
+
+  it('a text block with [[ ]] gaps stays a verbatim text block', () => {
+    const b = parseBlocks(`The CPU does [[ ]] and RAM stores [[ ]].\n`);
+    expect(b[0]!.type).toBe('text');
+    expect((b[0] as Extract<Block, { type: 'text' }>).text).toContain('[[ ]]');
   });
 
   it('an edited block list serialises to the canonical answer-table shape', () => {

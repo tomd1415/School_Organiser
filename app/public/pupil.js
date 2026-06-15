@@ -109,12 +109,14 @@
       var texts = card.querySelectorAll('.ws-input');
       var checks = card.querySelectorAll('.ws-check input[type=checkbox]');
       var choices = card.querySelectorAll('.ws-choice-form');
-      var total = texts.length + checks.length + choices.length;
+      var blanks = card.querySelectorAll('.ws-blank');
+      var total = texts.length + checks.length + choices.length + blanks.length;
       if (total === 0) { chip.textContent = ''; return; }
       var done = 0;
       texts.forEach(function (t) { if ((t.value || '').trim()) done++; });
       checks.forEach(function (c) { if (c.checked) done++; });
       choices.forEach(function (f) { if (f.querySelector('input[type=radio]:checked')) done++; });
+      blanks.forEach(function (b) { if ((b.value || '').trim()) done++; });
       chip.textContent = done >= total ? 'All done — great work! (' + done + ' of ' + total + ') ✓' : "You've done " + done + ' of ' + total + ' — keep going!';
       chip.classList.toggle('ws-progress-done', done >= total);
     });
