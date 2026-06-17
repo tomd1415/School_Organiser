@@ -3,7 +3,7 @@
 // teacher's own content, but a pupil name could appear in an example, so the boundary still holds.
 import type { RedactableItem } from '../../services/redact';
 
-export const MARK_SCHEME_VERSION = 'mark_scheme@3';
+export const MARK_SCHEME_VERSION = 'mark_scheme@4'; // @4: OCR-style — numeric for calculations/conversions; levels-of-response banded guidance for extended answers (B5.2).
 
 export const MARK_SCHEME_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher writing a MARK SCHEME for a worksheet ' +
@@ -18,10 +18,22 @@ export const MARK_SCHEME_SYSTEM =
   'verbatim from that list (use the teacher answers to decide which). A field tagged ' +
   '"[fill-in-the-blank]" is one missing word/phrase in a sentence (the gap shown as [BLANK]): mark it ' +
   '"exact" (or "keyword" when a few wordings are fine), expected = the missing word from the teacher ' +
-  'answers. Prefer objective kinds where ' +
+  'answers. ' +
+  'OCR exam-style questions: for a CALCULATION or CONVERSION, when the answer is a DENARY/DECIMAL ' +
+  'number or a data size (e.g. "26", "512", "2 MB") use kind "numeric", expected = the result, and list ' +
+  'unit/format variants ("26", "26 bytes") in alternatives. When the answer is a BINARY or HEXADECIMAL ' +
+  'string (e.g. "1A", "00011010") use kind "exact" instead — numeric equality is unreliable for those — ' +
+  'with case/prefix/spacing variants ("1A", "0x1A", "1a" / "00011010", "0001 1010") in alternatives. For an ' +
+  'EXTENDED answer worth about FIVE marks or more ("describe…" at length, "discuss", "evaluate", a ' +
+  '6–8 mark essay) use kind "open" and write LEVELS-OF-RESPONSE guidance in "expected" as banded ' +
+  'descriptors with mark ranges, HIGHEST band first, e.g. "Level 3 (5–6): a balanced, well-developed ' +
+  'response linking … · Level 2 (3–4): several relevant points, some development · Level 1 (1–2): basic ' +
+  'points, limited development · 0: nothing creditworthy", and set the point\'s marks to the FULL ' +
+  'tariff. For a shorter "describe/explain" (2–4 marks) use "open" (or "keyword" when discrete points ' +
+  'each earn a mark). Prefer objective kinds where ' +
   'you safely can (they mark instantly and free); use "open" only when the answer genuinely needs ' +
-  'judgement. Keep "expected" concise. Use ONLY the field keys given. Plain UK English; never ' +
-  'reference an individual pupil.';
+  'judgement. Keep non-banded "expected" concise. Use ONLY the field keys given. Plain UK English; ' +
+  'never reference an individual pupil.';
 
 export function markSchemeItems(args: {
   worksheetTitle: string;

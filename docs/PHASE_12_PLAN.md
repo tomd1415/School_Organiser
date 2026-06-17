@@ -4,9 +4,13 @@
 > Slides/Worksheet toggle); ✅ B1–B4 (the lesson's prepared materials now feed worksheet generation +
 > per-class adaptation + unit conversion, with a default-on consent toggle that lists which files are
 > used); ✅ B5.1 (OCR GCSE exam-style question weighting by proximity to exams — KS3 unchanged, exam
-> questions appear more as a cohort nears its GCSEs, using shapes that already auto-/AI-mark).
-> **Remaining:** A4–A7, B5.2 (bespoke render widgets — trace/truth tables — + levels-of-response
-> banded marking + numeric-scheme derivation), C, D, E. Suite green throughout (419 unit / 259 integration).
+> questions appear more as a cohort nears its GCSEs, using shapes that already auto-/AI-mark);
+> ✅ B5.2a/b (the mark-scheme deriver now produces OCR-style **numeric** calculations, **hex/binary as
+> exact** with format variants, and **levels-of-response banded** guidance for extended answers;
+> `mark_scheme@3→@4`; and the open marker applies levels-of-response banding, `mark_answers@1→@2`).
+> **Remaining:** A4–A7, **B5.2c** (bespoke render widgets for trace tables + truth/logic tables — they
+> render today as typed-answer tables, functional but not purpose-built), C, D, E. Suite green
+> throughout (423 unit / 259 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets
