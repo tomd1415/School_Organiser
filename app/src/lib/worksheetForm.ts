@@ -289,27 +289,58 @@ export function sliceWorksheetMarkdown(src: string, level: Level): string {
   return out.join('\n\n').trim() + '\n';
 }
 
-function textControl(key: string, label: string, placeholder: string, opts: WorksheetOptions): string {
+// `compact` ⇒ a single-line input instead of a 2-row textarea — used for the cells of a trace table /
+// truth table / wide grid (B5.2c), where many small answers read far better as a tidy row of boxes.
+// Keys, autosave wiring and the "saved ✓" span are identical, so marking is unaffected.
+function textControl(key: string, label: string, placeholder: string, opts: WorksheetOptions, compact = false): string {
   const value = opts.values?.get(key) ?? '';
   if (opts.mode === 'review') {
     return value.trim() !== ''
       ? `<div class="ws-answer">${esc(value)}</div>`
       : `<div class="ws-answer ws-empty">—</div>`;
   }
+  const cls = compact ? 'ws-input ws-input-cell' : 'ws-input';
+  const ph = esc(placeholder || (compact ? 'Type here' : 'Type your answer here'));
+  const al = esc(label || 'answer');
   if (opts.mode === 'preview') {
     // The pupil's box, shown empty and disabled — the teacher sees the answer space, can't type in it.
-    return `<textarea class="ws-input" rows="2" placeholder="${esc(placeholder || 'Type your answer here')}" disabled aria-label="${esc(label || 'answer')}"></textarea>`;
+    return compact
+      ? `<input class="${cls}" type="text" placeholder="${ph}" disabled aria-label="${al}">`
+      : `<textarea class="${cls}" rows="2" placeholder="${ph}" disabled aria-label="${al}"></textarea>`;
   }
   // A per-field "saved ✓" reassurance (updated by an OOB swap from /me/answer) — anxious pupils
   // need to see their typing was kept.
-  return `<textarea class="ws-input" name="value" rows="2" placeholder="${esc(placeholder || 'Type your answer here')}"
-    hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"
-    aria-label="${esc(label || 'answer')}">${esc(value)}</textarea><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+  const saved = `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+  const field = compact
+    ? `<input class="${cls}" type="text" name="value" autocomplete="off" value="${esc(value)}" placeholder="${ph}"
+        hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none" aria-label="${al}">`
+    : `<textarea class="${cls}" name="value" rows="2" placeholder="${ph}"
+        hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"
+        aria-label="${al}">${esc(value)}</textarea>`;
+  return `${field}${saved}`;
 }
 
 /** The OOB "saved ✓" span /me/answer returns so the field that just saved confirms instantly. */
 export function savedTick(key: string): string {
   return `<span class="ws-saved show" id="ws-sv-${esc(key)}" aria-live="polite" hx-swap-oob="true">saved ✓</span>`;
+}
+
+/** A4: strip light Markdown so a read-aloud button speaks clean words, not symbols. */
+function speakText(raw: string): string {
+  return (raw ?? '')
+    .replace(/\[\[\s*\]\]/g, ' blank ') // a fill-in gap reads as "blank"
+    .replace(/[#>*_`|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** A4: an inline 🔊 that reads THIS question/instruction aloud in one tap — no global mode to switch
+ * on first (pupil.js handles `.ws-speak` whether or not tap-anywhere read-aloud is enabled). Form
+ * mode only (pupils); empty text ⇒ no button. */
+function speakBtn(raw: string): string {
+  const t = speakText(raw);
+  if (!t) return '';
+  return `<button type="button" class="ws-speak" aria-label="Read this aloud" title="Read aloud" data-speak-text="${esc(t)}">🔊</button>`;
 }
 
 function checkControl(key: string, label: string, opts: WorksheetOptions): string {
@@ -504,6 +535,10 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // Iterate the FULL column count (header or widest row) so a ragged row missing its trailing
   // answer cell still gets an input in the answer column, not an unanswerable blank.
   const colCount = Math.max(header.length, ...bodyRows.map((r) => r.length), 0);
+  // B5.2c: a 3+-column answer table is a GRID — a trace table (line | vars… | output) or a truth /
+  // logic table (A | B | A AND B). Its typed cells render as compact single-line boxes (not 2-row
+  // textareas) so the grid reads cleanly; Q&A / name-date / matching (≤2 cols) keep the roomy box.
+  const isGrid = colCount >= 3;
 
   // Keys must be STABLE across the header-vs-data classification flip (a re-version that flips it
   // must NOT renumber body rows and mis-attach saved answers/marks). So body rows are ALWAYS
@@ -512,7 +547,15 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // flip; body-row keys never move.
   const localFields: WorksheetField[] = [];
   let autoFilledCells = 0; // auto-filled name/date cells render output but emit no field — count them
+  // A cell is an input when it's an answer-column blank/placeholder, or itself a placeholder/screenshot/choice.
+  const cellIsInput = (c: number, cell: string): boolean => {
+    const ph = PLACEHOLDER_CELL.test(cell);
+    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell);
+  };
   const renderRow = (row: string[], rowNo: number): string => {
+    // A4: a row that has an input is a question — give its prompt cell a 🔊 read-aloud button.
+    const rowHasInput = Array.from({ length: colCount }, (_, c) => cellIsInput(c, row[c] ?? '')).some(Boolean);
+    let promptSpoken = false;
     const tds = Array.from({ length: colCount }, (_, c) => {
       const cell = row[c] ?? '';
       const colNo = c + 1;
@@ -523,9 +566,19 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       const shot = SCREENSHOT.test(cell);
       const cho = isChoiceCell(cell);
       const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho)) || placeholder || shot || cho;
-      if (!isInput) return `<td>${esc(cell)}</td>`;
+      if (!isInput) {
+        // The question prompt for this row (its first non-empty text cell) gets the read-aloud button.
+        if (opts.mode === 'form' && rowHasInput && !promptSpoken && cell.trim() !== '') {
+          promptSpoken = true;
+          return `<td class="ws-q-cell">${speakBtn(cell)}<span class="ws-q-text">${esc(cell)}</span></td>`;
+        }
+        return `<td>${esc(cell)}</td>`;
+      }
       const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
-      const label = row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? (theadCells?.[c] ?? '');
+      // In a grid (trace/truth table) the column HEADER is the clearest label for a cell input;
+      // otherwise prefer a sibling cell value (the question text), falling back to the header.
+      const headerLabel = (theadCells?.[c] ?? '').trim();
+      const label = isGrid && headerLabel ? headerLabel : (row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? headerLabel);
       // The name/date identity header is known online — auto-fill it read-only (no field emitted, so
       // it isn't counted as something the pupil must do). Tightly matched to the identity header
       // ("Name"/"Date" label, or a "Type your name/date here" placeholder) so a real question that
@@ -556,13 +609,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
         }
       }
       localFields.push({ key, kind: isShot ? 'image' : 'text', level: block.level, label });
-      const control = isShot ? imageControl(key, label, opts) : textControl(key, label, placeholder ? cell : '', opts);
+      const control = isShot ? imageControl(key, label, opts) : textControl(key, label, placeholder ? cell : '', opts, isGrid);
       return `<td class="ws-answer-cell${isShot ? ' ws-shot-cell' : ''}">${control}</td>`;
     });
     return `<tr>${tds.join('')}</tr>`;
   };
 
-  const out: string[] = ['<table class="ws-table">'];
+  const out: string[] = [`<table class="ws-table${isGrid ? ' ws-grid' : ''}">`];
   if (theadCells) out.push(`<thead><tr>${theadCells.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`);
   out.push('<tbody>');
   if (headerIsData) out.push(renderRow(header, 0)); // header-as-data is the fixed r0 row
@@ -661,7 +714,9 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
       const headingOnly = block.lines.every((l) => l.trim() === '' || /^#{1,6}\s/.test(l));
       const quoteOnly = block.lines.every((l) => l.trim() === '' || /^>\s?/.test(l));
       const cls = nBlanks > 0 ? 'ws-block ws-cloze' : 'ws-block ws-instruction';
-      out.push(headingOnly || quoteOnly ? md + wordbank : `<div class="${cls}">${md}${wordbank}</div>`);
+      // A4: a 🔊 reads the whole instruction / cloze block aloud (form mode only; not bare headings).
+      const spk = opts.mode === 'form' ? speakBtn(block.lines.join(' ')) : '';
+      out.push(headingOnly || quoteOnly ? md + wordbank : `<div class="${cls}">${spk}${md}${wordbank}</div>`);
     }
   }
 

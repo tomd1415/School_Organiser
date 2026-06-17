@@ -97,6 +97,15 @@
     } catch (e) {}
   }
   if (main) {
+    // A4: an inline 🔊 reads THIS question/instruction in one tap — no need to switch the global
+    // tap-anywhere mode on first. Always available; works even when data-speak is off.
+    main.addEventListener('click', function (e) {
+      var btn = e.target.closest('.ws-speak');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      speak(btn.getAttribute('data-speak-text') || '');
+    });
     main.addEventListener('click', function (e) {
       if (root.getAttribute('data-speak') !== 'on') return;
       // Let controls work normally — only read non-interactive text.

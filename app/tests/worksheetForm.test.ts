@@ -225,6 +225,61 @@ Word bank: data · calculations
   });
 });
 
+describe('worksheetForm — per-question read-aloud buttons (A4)', () => {
+  const SRC = `# Task
+
+Read the instructions carefully.
+
+| Question | Type your answer here |
+|---|---|
+| What is RAM? | |
+`;
+
+  it('form mode gives instructions and the question prompt a 🔊 read-aloud button', () => {
+    const r = renderWorksheet(SRC, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).toContain('class="ws-speak"');
+    expect(r.html).toContain('Read the instructions carefully.'); // the instruction block is spoken
+    expect(r.html).toContain('data-speak-text="What is RAM?"'); // the question prompt cell, in one tap
+    expect(r.html).toContain('ws-q-cell');
+  });
+
+  it('review/preview mode has no read-aloud buttons (teacher surfaces)', () => {
+    expect(renderWorksheet(SRC, { mode: 'review' }).html).not.toContain('ws-speak');
+    expect(renderWorksheet(SRC, { mode: 'preview' }).html).not.toContain('ws-speak');
+  });
+});
+
+describe('worksheetForm — trace / truth tables render as a compact grid (B5.2c)', () => {
+  const TRUTH = `# Logic
+
+| A | B | A AND B |
+|---|---|---|
+| 0 | 0 | Type your answer here |
+| 1 | 1 | Type your answer here |
+`;
+
+  it('a 3+-column answer table is a grid: compact cell inputs, given columns stay plain text', () => {
+    const r = renderWorksheet(TRUTH, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).toContain('ws-grid'); // tagged as a grid
+    expect(r.html).toContain('ws-input-cell'); // compact single-line inputs, not 2-row textareas
+    expect(r.html).not.toMatch(/<textarea[^>]*ws-input-cell/); // the fill cells are <input>, not <textarea>
+    // the given 0/1 columns are plain cells, only the output column is an input
+    expect(r.html).toContain('<td>0</td>');
+    // keys are the normal t.r.c scheme so marking is unchanged
+    const keys = r.fields.map((f) => f.key);
+    expect(keys).toContain('t1.r1.c3');
+    expect(keys).toContain('t1.r2.c3');
+  });
+
+  it('a 2-column Q&A table keeps the roomy textarea (not the compact grid)', () => {
+    const qa = `# Q\n\n| Question | Type your answer here |\n|---|---|\n| What is RAM? | |\n`;
+    const r = renderWorksheet(qa, { mode: 'form', action: '/me/answer?oc=5' });
+    expect(r.html).not.toContain('ws-grid');
+    expect(r.html).not.toContain('ws-input-cell');
+    expect(r.html).toContain('<textarea');
+  });
+});
+
 describe('worksheetForm — matching (shared-option choice table → drag-and-drop)', () => {
   const MD = `# Match
 

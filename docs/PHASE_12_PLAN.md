@@ -7,10 +7,12 @@
 > questions appear more as a cohort nears its GCSEs, using shapes that already auto-/AI-mark);
 > ✅ B5.2a/b (the mark-scheme deriver now produces OCR-style **numeric** calculations, **hex/binary as
 > exact** with format variants, and **levels-of-response banded** guidance for extended answers;
-> `mark_scheme@3→@4`; and the open marker applies levels-of-response banding, `mark_answers@1→@2`).
-> **Remaining:** A4–A7, **B5.2c** (bespoke render widgets for trace tables + truth/logic tables — they
-> render today as typed-answer tables, functional but not purpose-built), C, D, E. Suite green
-> throughout (423 unit / 259 integration).
+> `mark_scheme@3→@4`; and the open marker applies levels-of-response banding, `mark_answers@1→@2`);
+> ✅ B5.2c (trace tables + truth/logic tables now render as a **compact grid** of single-line cell
+> inputs — keys/marking unchanged). **Workstream B is complete.**
+> ✅ A4 (an inline 🔊 read-aloud button on every instruction and question prompt — one tap, no need to
+> switch the global tap-anywhere mode on first).
+> **Remaining:** A5–A7, C, D, E. Suite green throughout (427 unit / 259 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets
