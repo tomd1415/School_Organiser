@@ -500,6 +500,11 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .map-future a { text-decoration: none; }
 .map-master { font-size: 0.72rem; color: var(--muted); text-decoration: none; }
 .map-master:hover { color: var(--accent); }
+/* C1 kit-per-lesson: a small kit note on map rows + a collapsible weeks summary. */
+.map-kit { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+.map-kit-summary { margin: 0.4rem 0 0.6rem; font-size: 0.85rem; }
+.map-kit-summary ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+.oc-kit { font-size: 0.9rem; }
 .map-shift { font-size: 0.78rem; }
 .ld-slot-links { margin: 0.3rem 0; font-size: 0.82rem; display: flex; gap: 1rem; align-items: center; }
 

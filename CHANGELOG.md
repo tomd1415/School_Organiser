@@ -60,9 +60,14 @@ slice (**427 unit / 259 integration; typecheck clean**). Built so far:
     marker (`mark_answers@1→@2`) applies the banding (best-fit band → mark within it, level named in the
     feedback). Trace tables and truth/logic tables now render as a **compact grid** of single-line cell
     inputs — keys/marking unchanged.
-- **Remaining Phase 12:** A5–A7 (first-run micro-tour + calmer loading; presentation pass; usability-tuned
-  generation prompt), then curriculum stretch (kit-per-lesson, cross-group compare), the Phase-4 tail
-  (estimate calibration, current-interest profile, optional pgvector) and the gated Opus reviewer tail.
+- **Curriculum stretch (Workstream C).**
+  - **C1 — kit-per-lesson** (migration `0040`, the first of Phase 12). A free-text **"🔧 kit needed"**
+    on each master lesson plan ([0040_lesson_kit.sql](../app/migrations/0040_lesson_kit.sql)) —
+    editable on the Schemes page, shown read-only on the lesson screen, and on the **curriculum map**
+    per week with a collapsible **"kit needed across the next weeks"** checklist so equipment can be
+    gathered ahead. Kept master-level (kit doesn't differ per class); per-group adaptations inherit it.
+- **Remaining Phase 12:** C2 (cross-group compare), C3 niceties, the Phase-4 tail (estimate calibration,
+  current-interest profile, optional pgvector) and the gated Opus reviewer tail.
 
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 

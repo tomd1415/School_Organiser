@@ -31,6 +31,7 @@ export interface OccurrenceCourseRow {
   planTitle: string | null;
   planObjectives: string | null;
   planOutline: string | null;
+  planKitNeeded: string | null; // C1: kit the (master) lesson needs, shown read-only on the lesson screen
 }
 
 export interface LastStop {
@@ -60,6 +61,7 @@ export interface CourseSection {
   planTitle: string | null;
   planObjectives: string | null;
   planOutline: string | null;
+  planKitNeeded: string | null;
 }
 
 export interface LessonDetail {
@@ -88,6 +90,7 @@ export function buildLessonDetail(
     planTitle: c.planTitle,
     planObjectives: c.planObjectives,
     planOutline: c.planOutline,
+    planKitNeeded: c.planKitNeeded,
   }));
 
   return { header, sections };

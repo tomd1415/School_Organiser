@@ -86,7 +86,8 @@ export async function getOccurrenceCourses(occurrenceId: number): Promise<Occurr
     `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId", gc.course_id AS "courseId",
             c.name AS "courseName", c.colour,
             oc.stopping_point AS "stoppingPoint", oc.progress_step AS "progressStep", oc.lesson_plan_id AS "lessonPlanId",
-            lp.title AS "planTitle", lp.objectives AS "planObjectives", lp.outline AS "planOutline"
+            lp.title AS "planTitle", lp.objectives AS "planObjectives", lp.outline AS "planOutline",
+            lp.kit_needed AS "planKitNeeded"
      FROM occurrence_courses oc
      JOIN group_courses gc ON gc.id = oc.group_course_id
      JOIN courses c        ON c.id  = gc.course_id

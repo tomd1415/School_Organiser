@@ -59,10 +59,11 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
     </div>
     <details class="plan-detail" id="plan-${p.id}-detail"${opts.open ? ' open' : ''}>
       <summary>objectives · outline · ${p.durationMin ? esc(String(p.durationMin)) + ' min' : 'duration'}</summary>
-      ${p.objectives || p.outline
+      ${p.objectives || p.outline || p.kitNeeded
         ? `<div class="plan-view">
             ${p.objectives ? `<div class="oc-block oc-objectives"><span class="oc-label">Objectives</span>${formatObjectives(p.objectives)}</div>` : ''}
             ${p.outline ? `<div class="oc-block oc-outline"><span class="oc-label">Outline</span>${formatOutline(p.outline)}</div>` : ''}
+            ${p.kitNeeded ? `<div class="oc-block oc-kit"><span class="oc-label">🔧 Kit needed</span> ${esc(p.kitNeeded)}</div>` : ''}
           </div>`
         : ''}
       <div class="plan-ai">
@@ -79,6 +80,7 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
         <label>Objectives<textarea name="objectives" rows="2" ${save('input changed delay:800ms, blur')}>${esc(p.objectives ?? '')}</textarea></label>
         <label>Outline<textarea name="outline" rows="3" ${save('input changed delay:800ms, blur')}>${esc(p.outline ?? '')}</textarea></label>
         <label>Duration (min) <input type="number" name="duration_min" min="0" value="${p.durationMin ?? ''}" ${save('input changed delay:600ms, blur')}></label>
+        <label>🔧 Kit needed <input type="text" name="kit_needed" value="${esc(p.kitNeeded ?? '')}" placeholder="e.g. 16× micro:bit, batteries, USB leads" ${save('input changed delay:600ms, blur')}></label>
       </details>
       <div class="plan-res-head">Resources</div>
       <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="toggle from:#plan-${p.id}-detail once" hx-target="this" hx-swap="innerHTML">

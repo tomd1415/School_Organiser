@@ -84,6 +84,7 @@ export interface ScheduleEntry {
   planTitle: string | null;
   stoppingPoint: string | null;
   adapted: boolean;
+  kitNeeded: string | null; // C1: the (master) lesson's kit note, for the map row + weeks summary
 }
 
 /** Dated occurrences of one slot for one group_course, with the bound plan + adapted flag. */
@@ -91,7 +92,7 @@ export async function slotSchedule(lessonId: number, groupCourseId: number, from
   const { rows } = await pool.query<ScheduleEntry>(
     `SELECT to_char(o.date, 'YYYY-MM-DD') AS date,
             oc.lesson_plan_id AS "lessonPlanId", lp.title AS "planTitle",
-            oc.stopping_point AS "stoppingPoint",
+            oc.stopping_point AS "stoppingPoint", lp.kit_needed AS "kitNeeded",
             EXISTS (SELECT 1 FROM lesson_adaptations a
                     WHERE a.group_course_id = oc.group_course_id AND a.lesson_plan_id = oc.lesson_plan_id) AS adapted
      FROM occurrence_courses oc

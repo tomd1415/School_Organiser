@@ -117,13 +117,14 @@ function errorPage(reply: { generateCsrf: () => string }, code: number, message:
   return { code, html: layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }) };
 }
 
-function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false, adapted = false): string {
+function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false, adapted = false, kitNeeded: string | null = null): string {
   // When the class has its own adaptation, this shows the EFFECTIVE (revised) plan, badged — so it's
   // clear the lesson, the tracker and resource generation all use this class's version, not the master.
   const badge = adapted ? '<span class="adapt-badge on" title="This class has its own revised version — shown here and used when generating this class\'s resources">✏ this class’s revised plan</span> ' : '';
   const detail =
     `${objectives ? `<div class="oc-block"><span class="oc-label">Objectives</span>${formatObjectives(objectives)}</div>` : ''}` +
-    `${outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(outline)}</div>` : ''}`;
+    `${outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(outline)}</div>` : ''}` +
+    `${kitNeeded ? `<div class="oc-block oc-kit"><span class="oc-label">🔧 Kit needed</span> ${esc(kitNeeded)}</div>` : ''}`;
   const inner = title ? badge + (detail || '<span class="muted">(plan has no detail yet)</span>') : '<span class="muted">No plan bound.</span>';
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
@@ -282,7 +283,7 @@ function renderSection(
         <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
-      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, eff?.adapted ? eff.outline : s.planOutline, false, eff?.adapted ?? false)}
+      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, eff?.adapted ? eff.outline : s.planOutline, false, eff?.adapted ?? false, s.planKitNeeded)}
       ${renderTracker(oc, outlineSteps((eff?.adapted ? eff.outline : null) ?? s.planOutline), s.progressStep)}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
       <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}

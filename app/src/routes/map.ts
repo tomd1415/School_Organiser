@@ -31,9 +31,10 @@ function renderRow(
   shift?: { slotKey: string; today: string },
 ): string {
   const open = `/lesson?lesson=${lessonId}&date=${esc(date)}`;
+  const kit = e?.planTitle && e.kitNeeded ? `<div class="map-kit" title="kit this lesson needs">🔧 ${esc(e.kitNeeded)}</div>` : '';
   const title = e?.planTitle
     ? `<a href="${open}">${esc(e.planTitle)}</a>${e.adapted ? ' <span class="map-adapted">✏ adapted</span>' : ''}` +
-      ` <a class="map-master" href="/schemes?course=${courseId}" title="edit the master lesson on the Schemes page">master ↗</a>`
+      ` <a class="map-master" href="/schemes?course=${courseId}" title="edit the master lesson on the Schemes page">master ↗</a>${kit}`
     : `<a href="${open}" class="muted">— nothing planned</a>`;
   // 5.9: carry-over — a recent lesson that didn't finish repeats next week; the rest shift back.
   const canShift = shift && e?.planTitle && kind !== 'future' && date >= addDays(shift.today, -14);
@@ -86,6 +87,16 @@ export function registerMapRoutes(app: FastifyInstance): void {
           .map((s) => `<option value="${slotKey(s)}"${slotKey(s) === slotKey(chosen) ? ' selected' : ''}>${esc(slotLabel(s))}</option>`)
           .join('');
         const rows = [...pastRows, ...todayRow, ...futureRows].join('');
+
+        // C1: a kit checklist for the weeks ahead — every bound lesson from today on that names kit, so
+        // the teacher can gather equipment in advance (only materialised/bound weeks carry a plan + kit).
+        const upcomingKit = entries
+          .filter((e) => e.date >= today && e.lessonPlanId != null && (e.kitNeeded ?? '').trim() !== '')
+          .map((e) => ({ date: e.date, kit: (e.kitNeeded ?? '').trim() }));
+        const kitSummary = upcomingKit.length
+          ? `<details class="map-kit-summary"><summary>🔧 Kit needed across the next weeks (${upcomingKit.length})</summary>
+              <ul>${upcomingKit.map((k) => `<li><span class="map-date">${esc(k.date)}</span> — ${esc(k.kit)}</li>`).join('')}</ul></details>`
+          : '';
         body = `
           <section class="card map" hx-headers='{"x-csrf-token":"${csrf}"}'>
             <h1>Curriculum map</h1>
@@ -97,6 +108,7 @@ export function registerMapRoutes(app: FastifyInstance): void {
             </form>
             <p class="muted">Last ${PAST_WEEKS} weeks taught, then the next ${FUTURE_WEEKS} school weeks (holidays skipped). ✏ = adapted for this group.
               <a href="/schemes?course=${chosen.courseId}">fill this slot from a downloaded unit →</a></p>
+            ${kitSummary}
             <div class="table-scroll"><table class="map-table">
               <thead><tr><th>Week</th><th>Lesson</th><th></th></tr></thead>
               <tbody>${rows || '<tr><td colspan="3" class="muted">nothing recorded or planned in this window</td></tr>'}</tbody>

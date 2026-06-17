@@ -9,6 +9,7 @@ export interface PlanRow {
   outline: string | null;
   durationMin: number | null;
   displayOrder: number;
+  kitNeeded: string | null; // C1: free-text equipment the lesson needs (master-level)
 }
 
 export interface UnitRow {

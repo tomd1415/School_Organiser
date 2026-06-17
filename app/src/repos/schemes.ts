@@ -215,7 +215,7 @@ export async function listUnits(schemeId: number): Promise<UnitRow[]> {
 export async function listPlansForScheme(schemeId: number): Promise<PlanRow[]> {
   const { rows } = await pool.query<PlanRow>(
     `SELECT lp.id, lp.unit_id AS "unitId", lp.title, lp.objectives, lp.outline,
-            lp.duration_min AS "durationMin", lp.display_order AS "displayOrder"
+            lp.duration_min AS "durationMin", lp.display_order AS "displayOrder", lp.kit_needed AS "kitNeeded"
      FROM lesson_plans lp JOIN units u ON u.id = lp.unit_id
      WHERE u.scheme_id = $1`,
     [schemeId],
@@ -373,7 +373,7 @@ export async function addPlan(unitId: number, title: string): Promise<number> {
 }
 
 const UNIT_COLS: Record<string, string> = { title: 'title' };
-const PLAN_COLS: Record<string, string> = { title: 'title', objectives: 'objectives', outline: 'outline', duration_min: 'duration_min' };
+const PLAN_COLS: Record<string, string> = { title: 'title', objectives: 'objectives', outline: 'outline', duration_min: 'duration_min', kit_needed: 'kit_needed' };
 
 export async function updateUnitField(id: number, field: string, value: string | null): Promise<boolean> {
   const col = UNIT_COLS[field];
@@ -469,7 +469,7 @@ export async function getLessonPlan(
 export async function getPlanRow(id: number): Promise<PlanRow | null> {
   const { rows } = await pool.query<PlanRow>(
     `SELECT id, unit_id AS "unitId", title, objectives, outline,
-            duration_min AS "durationMin", display_order AS "displayOrder"
+            duration_min AS "durationMin", display_order AS "displayOrder", kit_needed AS "kitNeeded"
      FROM lesson_plans WHERE id = $1`,
     [id],
   );

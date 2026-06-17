@@ -16,7 +16,10 @@
 > question reading stronger than its box, tidier instruction lists); ✅ A7 (both generation prompts now
 > demand reading-age language, fewest steps, never a wall of text — `lesson_resources@13→@14`,
 > `adapt_resources@11→@12`). **Workstream A is complete.**
-> **Remaining:** C, D, E. Suite green throughout (428 unit / 259 integration).
+> ✅ C1 (kit-per-lesson — migration `0040`: a free-text "🔧 kit needed" on each master lesson, editable
+> on Schemes, shown read-only on the lesson screen, and on the map per week with a collapsible
+> "kit needed across the next weeks" checklist).
+> **Remaining:** C2–C3, D, E. Suite green throughout (428 unit / 259 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets

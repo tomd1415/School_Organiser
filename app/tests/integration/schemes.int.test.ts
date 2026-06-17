@@ -7,6 +7,7 @@ import {
   deleteScheme,
   getCourseTeachingContext,
   getScheme,
+  getPlanRow,
   listAllSchemes,
   moveSchemeToCourse,
   setCourseTeachingContext,
@@ -54,10 +55,13 @@ describe('schemes (integration — needs the dev DB up)', () => {
     const p1 = await addPlan(u, 'Lesson 1');
     await addPlan(u, 'Lesson 2');
     await updatePlanField(p1, 'objectives', 'understand variables');
+    await updatePlanField(p1, 'kit_needed', '16× micro:bit, batteries'); // C1
     expect((await listUnits(schemeId)).length).toBe(1);
     const plans = await listPlansForScheme(schemeId);
     expect(plans.length).toBe(2);
     expect(plans.find((p) => p.id === p1)?.objectives).toBe('understand variables');
+    expect(plans.find((p) => p.id === p1)?.kitNeeded).toBe('16× micro:bit, batteries'); // C1 round-trips
+    expect((await getPlanRow(p1))?.kitNeeded).toBe('16× micro:bit, batteries');
   });
 
   it('reorders plans with move', async () => {
