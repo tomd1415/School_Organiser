@@ -18,8 +18,11 @@
 > `adapt_resources@11→@12`). **Workstream A is complete.**
 > ✅ C1 (kit-per-lesson — migration `0040`: a free-text "🔧 kit needed" on each master lesson, editable
 > on Schemes, shown read-only on the lesson screen, and on the map per week with a collapsible
-> "kit needed across the next weeks" checklist).
-> **Remaining:** C2–C3, D, E. Suite green throughout (428 unit / 259 integration).
+> "kit needed across the next weeks" checklist); ✅ C2 (cross-group compare — a lazy "⚖ Compare classes'
+> versions" section on each Schemes lesson shows the master beside every class's adaptation, marks
+> inherited fields, and "⬆ promote this class's version to master" reuses the 5.5b apply path;
+> migration-free).
+> **Remaining:** C3 (optional niceties), D, E. Suite green throughout (430 unit / 259 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets

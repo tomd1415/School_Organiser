@@ -6,6 +6,7 @@ import type { CourseSlot, LaidLesson } from '../repos/delivery';
 import { weekdayName } from '../services/delivery';
 import type { UnitCandidate } from '../services/convertUnit';
 import type { ReviewRow } from '../repos/reviews';
+import type { PlanAdaptation } from '../repos/adaptations';
 
 // Wave 5 — the advisory AI review card shown under a lesson on the Schemes page. It only ever
 // suggests: the teacher Applies the rewrite to the master (reusing updatePlanField) or Dismisses it.
@@ -38,6 +39,42 @@ export function renderReview(r: ReviewRow): string {
       <button type="button" class="link" hx-post="/schemes/review/${r.id}/dismiss" hx-target="#review-${r.id}" hx-swap="outerHTML">✕ dismiss</button>
     </div>
   </div>`;
+}
+
+// C2 cross-group compare: the master lesson beside each class's adaptation, with a one-click
+// "promote this class's version to master" that reuses the 5.5b apply-improvement route. Read-only
+// otherwise; editing each version stays on that class's lesson screen.
+export function renderClassCompare(plan: PlanRow, adaptations: PlanAdaptation[]): string {
+  if (adaptations.length === 0) {
+    return `<p class="muted">No class has its own version of this lesson yet — adapt it from a class's lesson screen, then compare the classes here.</p>`;
+  }
+  const masterCol = `<div class="cc-col cc-master">
+      <h4>Master <span class="muted">every class starts here</span></h4>
+      ${plan.objectives ? `<div class="oc-block"><span class="oc-label">Objectives</span>${formatObjectives(plan.objectives)}</div>` : '<p class="muted">no objectives yet</p>'}
+      ${plan.outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(plan.outline)}</div>` : '<p class="muted">no outline yet</p>'}
+    </div>`;
+  const groupCols = adaptations
+    .map((a) => {
+      const effObj = a.objectives ?? plan.objectives ?? '';
+      const effOut = a.outline ?? plan.outline ?? '';
+      const id = `cc-${plan.id}-${a.groupCourseId}`;
+      const name = a.groupName ?? 'class';
+      return `<div class="cc-col cc-group" id="${id}">
+        <h4>${esc(name)} <span class="map-adapted">✏ adapted</span> <span class="muted">${esc(a.updatedAt)}</span></h4>
+        ${a.adaptationNote ? `<p class="adapt-note">${esc(a.adaptationNote)}</p>` : ''}
+        <div class="oc-block"><span class="oc-label">Objectives${a.objectives ? '' : ' (inherits master)'}</span>${effObj ? formatObjectives(effObj) : '<span class="muted">—</span>'}</div>
+        <div class="oc-block"><span class="oc-label">Outline${a.outline ? '' : ' (inherits master)'}</span>${effOut ? formatOutline(effOut) : '<span class="muted">—</span>'}</div>
+        <form hx-post="/lesson/plan/${plan.id}/apply-improvement" hx-target="#${id}-status" hx-swap="innerHTML"
+              hx-confirm="Promote ${esc(name)}'s version to the master? Every class then starts from it (this class keeps its own adaptation here).">
+          <textarea name="objectives" hidden>${esc(effObj)}</textarea>
+          <textarea name="outline" hidden>${esc(effOut)}</textarea>
+          <button type="submit" class="link">⬆ Promote this class's version to master</button>
+        </form>
+        <span id="${id}-status"></span>
+      </div>`;
+    })
+    .join('');
+  return `<div class="class-compare">${masterCol}${groupCols}</div>`;
 }
 
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
@@ -86,6 +123,10 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
       <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="toggle from:#plan-${p.id}-detail once" hx-target="this" hx-swap="innerHTML">
         <span class="muted">resources load when opened…</span>
       </div>
+      <details class="plan-compare" id="plan-${p.id}-compare">
+        <summary>⚖ Compare classes' versions</summary>
+        <div hx-get="/schemes/plan/${p.id}/compare" hx-trigger="toggle from:#plan-${p.id}-compare once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading…</span></div>
+      </details>
     </details>
   </li>`;
 }

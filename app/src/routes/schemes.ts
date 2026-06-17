@@ -87,7 +87,8 @@ import { listCourseDocsWithContent } from '../repos/courseDocs';
 import { courseDocItems } from '../llm/prompts/courseDocs';
 import { reviewLessonMaster, reviewUnitMaster } from '../services/reviewLesson';
 import { claimOpenReview, getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
-import { renderReview } from '../lib/schemeView';
+import { renderReview, renderClassCompare } from '../lib/schemeView';
+import { listAdaptationsForPlan } from '../repos/adaptations';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -809,6 +810,15 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
     return reply.type('text/html').send(renderPlanResourcesBlock(id.data.id, await listResourcesForPlan(id.data.id)));
+  });
+
+  // C2: cross-group compare — the master lesson beside every class's adaptation (lazy-loaded).
+  app.get('/schemes/plan/:id/compare', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const plan = await getPlanRow(id.data.id);
+    if (!plan) return reply.code(404).send('');
+    return reply.type('text/html').send(renderClassCompare(plan, await listAdaptationsForPlan(id.data.id)));
   });
 
   app.get('/schemes/plan/:id/resources/search', { preHandler: requireAuth }, async (req, reply) => {

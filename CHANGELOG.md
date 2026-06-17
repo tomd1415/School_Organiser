@@ -66,8 +66,14 @@ slice (**427 unit / 259 integration; typecheck clean**). Built so far:
     editable on the Schemes page, shown read-only on the lesson screen, and on the **curriculum map**
     per week with a collapsible **"kit needed across the next weeks"** checklist so equipment can be
     gathered ahead. Kept master-level (kit doesn't differ per class); per-group adaptations inherit it.
-- **Remaining Phase 12:** C2 (cross-group compare), C3 niceties, the Phase-4 tail (estimate calibration,
-  current-interest profile, optional pgvector) and the gated Opus reviewer tail.
+  - **C2 — cross-group compare** (migration-free). A lazy **"⚖ Compare classes' versions"** section on
+    each Schemes lesson shows the **master beside every class's adaptation** side by side, marks fields a
+    class inherits from the master, and offers **"⬆ promote this class's version to master"** — which
+    reuses the 5.5b `apply-improvement` route and sends the *effective* content (a class's overrides plus
+    the master where it inherits), so the master never loses a section. Read-only otherwise; editing each
+    version stays on that class's lesson screen. New `listAdaptationsForPlan` repo query.
+- **Remaining Phase 12:** C3 niceties (convert de-dup, kit CSV import, map drag-to-shift), the Phase-4
+  tail (estimate calibration, current-interest profile, optional pgvector) and the gated Opus reviewer tail.
 
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 

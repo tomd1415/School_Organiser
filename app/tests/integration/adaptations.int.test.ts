@@ -4,6 +4,7 @@ import {
   getAdaptation,
   getEffectiveLesson,
   listAdaptationHistory,
+  listAdaptationsForPlan,
   resetAdaptation,
   upsertAdaptation,
 } from '../../src/repos/adaptations';
@@ -82,6 +83,9 @@ describe('lesson adaptations (5.1 — integration, needs the dev DB up)', () => 
     expect(hist.length).toBe(1);
     expect(hist[0]!.changeSummary).toBe('teacher edit');
     expect(hist[0]!.author).toBe('teacher');
+    // C2: the cross-group compare lists this class's adaptation of the master lesson
+    const all = await listAdaptationsForPlan(lessonPlanId);
+    expect(all.some((x) => x.groupCourseId === groupCourseId && x.objectives === 'GROUP objectives')).toBe(true);
   });
 
   it('inherits the master per-field when an override field is null', async () => {

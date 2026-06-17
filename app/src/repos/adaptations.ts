@@ -109,6 +109,31 @@ export async function resetAdaptation(groupCourseId: number, lessonPlanId: numbe
   await pool.query(`DELETE FROM lesson_adaptations WHERE group_course_id = $1 AND lesson_plan_id = $2`, [groupCourseId, lessonPlanId]);
 }
 
+// C2 cross-group compare: every class's adaptation of ONE master lesson, side by side.
+export interface PlanAdaptation {
+  groupCourseId: number;
+  groupName: string | null;
+  objectives: string | null; // NULL ⇒ this class inherits the master here
+  outline: string | null; // NULL ⇒ inherits the master here
+  adaptationNote: string | null;
+  updatedAt: string;
+}
+
+export async function listAdaptationsForPlan(lessonPlanId: number): Promise<PlanAdaptation[]> {
+  const { rows } = await pool.query<PlanAdaptation>(
+    `SELECT a.group_course_id AS "groupCourseId", g.name AS "groupName",
+            a.objectives, a.outline, a.adaptation_note AS "adaptationNote",
+            to_char(a.updated_at, 'YYYY-MM-DD') AS "updatedAt"
+     FROM lesson_adaptations a
+     JOIN group_courses gc ON gc.id = a.group_course_id
+     LEFT JOIN groups g ON g.id = gc.group_id
+     WHERE a.lesson_plan_id = $1
+     ORDER BY g.name, a.group_course_id`,
+    [lessonPlanId],
+  );
+  return rows;
+}
+
 // ── 5.5: the feedback loop — what recently happened in this group's lessons ────────────────────
 
 export interface GroupCourseInfo {
