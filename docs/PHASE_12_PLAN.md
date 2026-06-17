@@ -66,6 +66,27 @@ One extraction engine, three call sites.
 - **B4 — Teacher preview & consent.** Before spend, show which files were read + a char count + a "use
   my materials" toggle (default on), honouring the `docText` "always previewed" rule. Inherits
   redaction/withholding/audit via `context[]`. **M.**
+- **B5 — OCR GCSE Computer Science exam question types, weighted by proximity to GCSE.** Every question
+  shape used in the **OCR GCSE CS (J277) exam papers** must be generatable and auto-/AI-markable —
+  extending the four closed types already built (MC / true-false / matching / fill-in-the-blanks) with:
+  - **short-answer recall** ("state", "identify", "give") — 1–2 mark `keyword`/`exact` marking;
+  - **describe / explain** (2–4 mark open answers, AI-marked against point-based schemes);
+  - **extended / "discuss"** (6–8 mark, **levels-of-response** mark scheme — AI-marked, banded);
+  - **calculations / conversions** (binary ↔ denary ↔ hex, data-size, ranges) — `numeric` marking;
+  - **trace tables** (complete-the-table given an algorithm) — table of `exact` cells;
+  - **pseudocode / code completion** (OCR Exam Reference Language) — open answer, AI-marked on logic;
+  - **truth tables & Boolean / logic-gate** questions — `exact`/`choice` cells.
+
+  These reuse the existing `t.r.c` key model and marking kinds (`exact`/`keyword`/`numeric`/`choice`)
+  plus the open-answer AI marker where a deterministic kind can't apply, so most are render/prompt work,
+  not new marking infrastructure. **Weighting:** the generator should pick these exam-style shapes
+  **more frequently the closer a cohort is to its GCSE exams** (Years 11–12) and lean on friendlier
+  closed/scaffolded shapes for younger KS3 groups — driven off a per-course/per-group "proximity to
+  GCSE" signal (year group / exam date) injected via `context[]`, with the level-slicing (🟢🟡🔴) still
+  honouring usability (Workstream A) so an exam-style question is never a wall of text for a pupil who
+  needs scaffolding. **Size: L** (one new prompt contract + a few render widgets — trace/truth tables,
+  banded-mark open answers — landed incrementally; each shape ships with marking tests). Builds on
+  B1–B4 (real materials make the generated exam questions match the taught content).
 
 **Privacy:** lesson materials are teaching content, not pupil data, but still pass the one boundary —
 a stray name is tokenised, a safeguarding-flagged doc withheld. **Tests:** capping / skip-AI /

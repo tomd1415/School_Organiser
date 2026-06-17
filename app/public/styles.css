@@ -987,9 +987,16 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .pupil-twopane { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 1.25rem; align-items: start; }
 .pupil-pane-slides { position: sticky; top: 0.75rem; }          /* slides stay put while the worksheet scrolls */
 .pupil-pane-work { min-width: 0; }
+.pane-toggle { display: none; }                                  /* wide screen: both panes show, no toggle */
 @media (max-width: 960px) {
   .pupil-twopane { grid-template-columns: 1fr; }
   .pupil-pane-slides { position: static; }
+  /* narrow screen: one pane at a time, switched by a sticky segmented toggle (zero scrolling) */
+  .pane-toggle { display: flex; gap: 0.4rem; position: sticky; top: 0.25rem; z-index: 5; padding: 0.35rem; margin-bottom: 0.6rem; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 4px 16px rgba(40, 40, 90, 0.08); }
+  .pane-tab { flex: 1; min-height: var(--tap); border: 1px solid transparent; border-radius: calc(var(--radius) - 4px); background: transparent; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer; }
+  .pane-tab.is-on { background: var(--accent); color: #fff; }
+  .pupil-twopane[data-pane="work"] .pupil-pane-slides { display: none; }
+  .pupil-twopane[data-pane="slides"] .pupil-pane-work { display: none; }
 }
 
 /* The pupil slide deck — one slide at a time, follow along on the board. */

@@ -74,6 +74,16 @@
       var slides = deck.querySelectorAll('.pslide'), nx = deck.querySelector('.pslide-next');
       if (nx && slides.length <= 1) nx.disabled = true;
     });
+    // ── A3 narrow-screen pane toggle: tap "Slides" / "My worksheet" to switch the visible pane (the
+    // two-pane CSS only acts on data-pane below 960px; on a wide screen both panes show regardless).
+    main.addEventListener('click', function (e) {
+      var tab = e.target.closest('.pane-tab'); if (!tab) return;
+      var pane = e.target.closest('.pupil-twopane'); if (!pane) return;
+      pane.setAttribute('data-pane', tab.getAttribute('data-pane-btn'));
+      pane.querySelectorAll('.pane-tab').forEach(function (t) {
+        var on = t === tab; t.classList.toggle('is-on', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    });
   }
 
   // ── 10.11 read-aloud (Web Speech API; click any words to hear them when it's on) ───────────────
@@ -188,7 +198,26 @@
   });
   var dirty = false;
   document.body.addEventListener('input', function (e) { if (e.target && e.target.classList && e.target.classList.contains('ws-input')) dirty = true; });
-  document.body.addEventListener('htmx:afterRequest', function (e) { if (e.detail && e.detail.successful) { dirty = false; clearToast(); } });
+
+  // ── A2: a live "saving… → saved ✓" so the autosave never feels like a dead pause. The triggering
+  // field owns a `.ws-saved` span; we flip it to "saving…" the moment the request starts, and the
+  // server's OOB swap replaces it with "saved ✓" on success (an error message stays put on failure).
+  function savedSpanFor(elt) {
+    if (!elt || !elt.closest) return null;
+    if (elt.classList && elt.classList.contains('ws-choice-form')) return elt.querySelector('.ws-saved');
+    if (elt.matches && elt.matches('.ws-check input')) { var li = elt.closest('li'); return li ? li.querySelector('.ws-saved') : null; }
+    var sib = elt.nextElementSibling;
+    return sib && sib.classList && sib.classList.contains('ws-saved') ? sib : null;
+  }
+  document.body.addEventListener('htmx:beforeRequest', function (e) {
+    var span = savedSpanFor(e.target);
+    if (span) { span.textContent = 'saving…'; span.classList.add('show'); }
+  });
+  document.body.addEventListener('htmx:afterRequest', function (e) {
+    if (e.detail && e.detail.successful) { dirty = false; clearToast(); return; }
+    var span = savedSpanFor(e.target);
+    if (span) { span.textContent = 'could not save — try again'; span.classList.add('show'); }
+  });
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
   // ── 💡 Paste-help modal + practice box (how to screenshot & paste — SEND-friendly) ─────────────
@@ -308,6 +337,7 @@
     function saveSlot(slot, value) {
       var url = slot.getAttribute('data-save-url'); if (!url) return;
       var tick = (widgetOf(slot) || {}).querySelector ? widgetOf(slot).querySelector('.ws-match-saved') : null;
+      flashSaved(tick, 'saving…');
       fetch(url, { method: 'POST', headers: { 'x-csrf-token': csrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'value=' + encodeURIComponent(value), credentials: 'same-origin' })
         .then(function (r) { if (!r.ok) throw r.status; dirty = false; flashSaved(tick, 'saved ✓'); })
         .catch(function () { flashSaved(tick, 'could not save — try again'); document.body.dispatchEvent(new Event('app:save-failed')); });

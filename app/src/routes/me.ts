@@ -257,8 +257,18 @@ export function registerMeRoutes(app: FastifyInstance): void {
                 // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
                 // follow the board while you work. No slides bound → the worksheet uses the full width.
                 const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
+                // On a phone/narrow screen the panes stack, so a sticky Slides/Worksheet toggle keeps
+                // the pupil's own work one tap away (default = Worksheet; the board shows the slides too).
+                // pupil.js flips data-pane; on a wide screen the toggle is hidden and both panes show.
                 inner = deck
-                  ? `<div class="pupil-twopane"><div class="pupil-pane pupil-pane-slides">${deck}</div><div class="pupil-pane pupil-pane-work">${work}</div></div>`
+                  ? `<div class="pupil-twopane" data-pane="work">
+                       <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
+                         <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
+                         <button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 My worksheet</button>
+                       </div>
+                       <div class="pupil-pane pupil-pane-slides">${deck}</div>
+                       <div class="pupil-pane pupil-pane-work">${work}</div>
+                     </div>`
                   : work;
               }
             }
