@@ -86,7 +86,9 @@ import { AUTHOR_SCHEME_SYSTEM, AUTHOR_SCHEME_VERSION, authorSchemeInstruction, s
 import { listSpecPoints, getCourseExamDate, specPointsSolelyCoveredByPlan } from '../repos/specPoints';
 import { listCourseDocsWithContent } from '../repos/courseDocs';
 import { courseDocItems } from '../llm/prompts/courseDocs';
-import { reviewLessonMaster, reviewUnitMaster } from '../services/reviewLesson';
+import { reviewLessonMaster, reviewUnitMaster, spotCheckCurriculum, reviewSchemeSequence } from '../services/reviewLesson';
+import { pastReviewItems } from '../llm/prompts/lessonReview';
+import { recentAppliedFindings } from '../repos/reviews';
 import { claimOpenReview, getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
 import { renderReview, renderClassCompare, renderConvertDup } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
@@ -238,6 +240,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
             <div id="course-${courseId}-summary"></div>
             ${renderTeachingContext(courseId, teachingCtx)}
             ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks}${scheme.active ? '' : ` · <button type="button" class="link" hx-post="/schemes/${scheme.id}/activate" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make this version live</button>`} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
+            <p class="sch-spot"><button type="button" class="link" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
+              hx-post="/schemes/spot-check" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
+            <div id="spot-check-slot"></div>
             ${tree}
             <h2 class="sch-divider">Add or import content</h2>
             ${renderConvertPanel(courseId, courseSlots, today)}
@@ -578,6 +583,37 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
   });
 
+  // E1: spot-check a random lesson from across the curriculum (gated + cost-capped like one review).
+  app.post('/schemes/spot-check', guard, async (_req, reply) => {
+    const r = await spotCheckCurriculum();
+    const msg =
+      r.status === 'ok'
+        ? `🎲 Spot-checked “${esc(r.lessonTitle ?? 'a lesson')}” — verdict: <strong>${esc(r.verdict ?? '')}</strong>. <a href="/schemes">open it on Schemes</a> to apply or dismiss the review.`
+        : r.status === 'disabled'
+          ? 'The AI reviewer is off — turn it on in <a href="/settings">Settings → AI</a> first.'
+          : esc(r.message ?? 'Nothing to spot-check.');
+    return reply.type('text/html').send(`<p class="adapt-note" id="spot-check-result">${msg}</p>`);
+  });
+
+  // E2: scheme-level (sequence) review of a whole unit — advisory, not stored.
+  app.post('/schemes/unit/:id/review-sequence', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const r = await reviewSchemeSequence(id.data.id);
+    if (r.status !== 'ok') {
+      const note = r.status === 'disabled' ? 'The AI reviewer is off — turn it on in <a href="/settings">Settings → AI</a> first.' : esc(r.message ?? 'Could not review the sequence.');
+      return reply.type('text/html').send(`<p class="adapt-note">${note}</p>`);
+    }
+    const findings = (r.findings ?? []).length
+      ? `<ul class="seq-review-findings">${(r.findings ?? []).map((f) => `<li><strong>${esc(f.issue)}</strong> — ${esc(f.fix)}</li>`).join('')}</ul>`
+      : '<p class="muted">No sequence-level issues — the unit reads as a sound progression. ✓</p>';
+    return reply.type('text/html').send(`<div class="seq-review">
+        <p class="adapt-note">Sequence review — verdict: <strong>${esc(r.verdict ?? '')}</strong>. ${esc(r.rationale ?? '')}</p>
+        ${findings}
+        <p class="muted">Advisory — this looks at the unit as a whole; use 🔎 Review on a lesson to change one.</p>
+      </div>`);
+  });
+
   // Apply a review's suggested rewrite to the MASTER lesson (teacher decision; affects every class).
   app.post('/schemes/review/:id/apply', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
@@ -802,7 +838,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         model: await modelForFeature('draft_lesson', 'plan'),
         promptVersion: DRAFT_LESSON_VERSION,
         system: DRAFT_LESSON_SYSTEM,
-        context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...courseDocItems(await listCourseDocsWithContent(ctx.courseId), 3000), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), { text: draftLessonInstruction(ctx) }],
+        context: [...(await standingPrefItems()), ...(await conceptItemsFor(ctx.courseId)), ...courseDocItems(await listCourseDocsWithContent(ctx.courseId), 3000), ...teachingContextItems(ctx.teachingContext), ...equipmentItem(await listActiveEquipment()), ...pastReviewItems(await recentAppliedFindings(ctx.courseId)), { text: draftLessonInstruction(ctx) }],
         instruction: 'Draft the lesson now.',
         maxTokens: 4000,
       },

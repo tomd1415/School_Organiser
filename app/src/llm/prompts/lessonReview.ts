@@ -45,6 +45,21 @@ export function reviewLessonItems(
   return items;
 }
 
+// E3 — feed the findings the teacher has already APPLIED back into the cheap planners (draft-lesson),
+// so they stop repeating issues a review already flagged. Empty ⇒ no item (behaviour unchanged).
+export function pastReviewItems(findings: Array<{ issue: string; fix: string }>): RedactableItem[] {
+  if (!findings.length) return [];
+  const list = findings.map((f) => `• ${f.issue} → ${f.fix}`).join('\n');
+  return [
+    {
+      text:
+        'LESSONS LEARNED FROM PAST REVIEWS of this course (the teacher already applied these fixes) — ' +
+        'do NOT repeat these issues; bake their fixes in by default:\n' +
+        list,
+    },
+  ];
+}
+
 export const LESSON_REVIEW_INSTRUCTION =
   'Review this lesson. Give a verdict (keep / tweak / rework), at most three findings (worst first), ' +
   'a short rationale, and the improved master objectives and outline in full.';

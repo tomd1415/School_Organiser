@@ -167,6 +167,9 @@ function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>): string 
     <button type="button" class="link" title="an AI second opinion on every upcoming lesson in this unit — it suggests; you apply or dismiss each (only when the reviewer is on in Settings → AI)"
       hx-post="/schemes/unit/${u.id}/review-ai" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="this"
       hx-confirm="Review EVERY lesson in this unit with AI? One call per lesson (lessons that already have an open review are skipped). It only suggests — nothing changes until you apply a review.">🔎 review all lessons</button>
+    <button type="button" class="link" title="one AI call — a sequence-level read of the whole unit (order, progression, coverage gaps). Advisory; only when the reviewer is on in Settings → AI"
+      hx-post="/schemes/unit/${u.id}/review-sequence" hx-target="#unit-${u.id}-seq" hx-swap="innerHTML" hx-disabled-elt="this">🔎 review the sequence</button>
+    <div id="unit-${u.id}-seq"></div>
     <details class="unit-lay" id="unit-${u.id}-lay">
       <summary>📅 Lay into a group's calendar</summary>
       <div class="unit-lay-body" hx-get="/schemes/unit/${u.id}/lay-form" hx-trigger="toggle from:#unit-${u.id}-lay once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading slots…</span></div>

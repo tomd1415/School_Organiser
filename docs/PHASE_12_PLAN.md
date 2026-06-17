@@ -31,7 +31,14 @@
 > median actual÷estimate → a padding multiplier + a degrade-safe cheap-AI insight, on the Tasks page);
 > D2 **time-decaying current-interest profile** (migration `0042`: an `interest_at` stamp + a 14-day
 > half-life decay surfacing fresh interests on Now and fading old ones).
-> **Remaining:** E (the gated Opus reviewer tail). Suite green throughout (442 unit / 263 integration).
+> ✅ **Workstream E complete** — the deferred idea-4 reviewer tail, gated (off-by-default
+> `ai_review_enabled`) and cost-capped: **E1** a 🎲 spot-check of one random lesson from across the
+> curriculum; **E2** a scheme-level **sequence review** of a whole unit (coherence/progression/gaps,
+> advisory, `review_scheme@1`); **E3** **finding re-injection** — applied review findings feed back
+> into the cheap draft-lesson planner so it stops repeating flagged issues.
+>
+> **Phase 12 is complete (A–E).** Suite green throughout (446 unit / 267 integration). Migrations
+> `0040`–`0042`. AI prompt bumps still warrant one throwaway live smoke against a real key.
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets

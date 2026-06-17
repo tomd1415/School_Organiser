@@ -251,23 +251,28 @@ spot-check + scheme-level review + finding re-injection) is **deferred** until a
 idea-8 findings actually get applied (`lesson_reviews.status`), since its Opus spend is the project's
 named #1 cost risk.
 
-## Phase 12 — Zero-friction pupils + content-rich, exam-ready worksheets *(IN PROGRESS — see [PHASE_12_PLAN.md](PHASE_12_PLAN.md))*
+## Phase 12 — Zero-friction pupils + content-rich, exam-ready worksheets *(BUILT — see [PHASE_12_PLAN.md](PHASE_12_PLAN.md))*
 
-*Status 2026-06-17: building.* Completes the post-Phase-11 "What's next" backlog with **pupil
-presentation/usability as the overriding priority**, plus two teacher requirements: worksheets must
-**build on all of a lesson's prepared materials**, and **OCR GCSE (J277) exam question types** appear
-**more frequently the closer a cohort is to its exams**. **Migration-free**; the AI boundary is unchanged.
+*Status 2026-06-17: ✅ built (migrations 0040–0042; 446 unit / 267 integration green).* Completed the
+post-Phase-11 "What's next" backlog with **pupil presentation/usability as the overriding priority**,
+plus two teacher requirements: worksheets **build on all of a lesson's prepared materials**, and **OCR
+GCSE (J277) exam question types** appear **more frequently the closer a cohort is to its exams**. The AI
+boundary is unchanged throughout.
 
-- **Pupil usability (A):** ✅ consistent + live save confirmation on every field type, a narrow-screen
-  Slides/Worksheet toggle, per-question 🔊 read-aloud; remaining: first-run micro-tour + calmer loading,
-  a presentation pass, and a usability-tuned generation prompt.
-- **Content-rich worksheets (B, complete):** the `docText` extractor now feeds generation, so the
-  worksheet and slides build on the lesson's own uploaded materials (with a default-on consent toggle),
-  unit conversion is content-based, OCR exam-style questions are weighted by proximity to GCSE, and the
-  marker handles numeric/hex/levels-of-response with trace/truth tables as a compact grid.
-- **Remaining:** the Phase-5.9 curriculum stretch (kit-per-lesson, cross-group compare), the Phase-4 tail
-  (estimate calibration, current-interest profile, optional pgvector search) and the deferred,
-  cost-gated Phase-11 Opus reviewer tail.
+- **A — Pupil usability:** consistent + live save confirmation on every field type, a narrow-screen
+  Slides/Worksheet toggle, per-question 🔊 read-aloud, a first-run micro-tour, a presentation pass, and a
+  usability-tuned generation prompt.
+- **B — Content-rich worksheets:** the `docText` extractor now feeds generation, so the worksheet and
+  slides build on the lesson's own uploaded materials (default-on consent toggle); unit conversion is
+  content-based; OCR exam-style questions are weighted by proximity to GCSE; and the marker handles
+  numeric/hex/levels-of-response with trace/truth tables as a compact grid.
+- **C — Curriculum stretch:** kit-per-lesson, cross-group compare, and niceties (convert de-dup, kit CSV
+  import, map drag-to-shift).
+- **D — Phase-4 tail:** estimate calibration, a time-decaying current-interest profile, and **ranked
+  full-text search** (Postgres tsvector — chosen over vector/embeddings, which would need a new
+  sub-processor + DPIA change).
+- **E — The deferred AI-reviewer tail:** gated & cost-capped curriculum spot-check, scheme-level sequence
+  review, and applied-finding re-injection into the cheap planners.
 
 ## Future (unnumbered) — Multi-teacher school server *(parked — see [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md))*
 

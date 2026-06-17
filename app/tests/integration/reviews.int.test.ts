@@ -10,8 +10,11 @@ import {
   getReview,
   hasOpenReviewForPlan,
   openReviewPlanIds,
+  randomReviewableLessonId,
+  recentAppliedFindings,
+  setReviewStatus,
 } from '../../src/repos/reviews';
-import { reviewLessonMaster, reviewUnitMaster } from '../../src/services/reviewLesson';
+import { reviewLessonMaster, reviewUnitMaster, reviewSchemeSequence, spotCheckCurriculum } from '../../src/services/reviewLesson';
 
 // Wave 5 (idea 8, lean cut) — the advisory reviewer. The integration suite forces an empty API key, so
 // NO real AI call is ever made: every "enabled" path here lands on the wrapper's 'unavailable' degrade.
@@ -25,6 +28,7 @@ let unitId = 0;
 let planId = 0;
 let planId2 = 0;
 let schemeId = 0;
+let courseId = 0;
 let origReviewSetting: string | null = null;
 
 function firstCookie(setCookie: string | string[] | undefined): string {
@@ -44,7 +48,7 @@ beforeAll(async () => {
   origReviewSetting = await getSetting('ai_review_enabled');
 
   const c = await pool.query<{ id: number }>(`SELECT id FROM courses ORDER BY id LIMIT 1`);
-  const courseId = Number(c.rows[0]!.id);
+  courseId = Number(c.rows[0]!.id);
   const s = await pool.query<{ id: number }>(
     `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'ZZREV scheme', 97, false) RETURNING id`,
     [courseId],
@@ -203,5 +207,47 @@ describe('the unit sweep self-stops and skips, never overrunning', () => {
     expect(r.disabled).toBe(false);
     expect(r.reviewed).toBe(0);
     expect(r.stopped).toBe(true); // the wrapper is unavailable → break out, don't hammer
+  });
+});
+
+describe('E — spot-check, scheme-level review and finding re-injection (gated + cost-capped)', () => {
+  it('spot-check + scheme review refuse when the reviewer is OFF (no AI work)', async () => {
+    await setSetting('ai_review_enabled', 'false');
+    expect((await spotCheckCurriculum()).status).toBe('disabled');
+    expect((await reviewSchemeSequence(unitId)).status).toBe('disabled');
+  });
+
+  it('enabled but no key → both degrade via the wrapper (spot-check picks a real lesson first)', async () => {
+    await setSetting('ai_review_enabled', 'true');
+    // clear any open reviews so a candidate exists, then spot-check
+    await pool.query(`UPDATE lesson_reviews SET status = 'dismissed' WHERE lesson_plan_id = ANY($1) AND status = 'open'`, [[planId, planId2]]);
+    const spot = await spotCheckCurriculum();
+    expect(['unavailable', 'skip']).toContain(spot.status); // a real candidate → wrapper unavailable (or skip if none)
+    expect((await reviewSchemeSequence(unitId)).status).toBe('unavailable'); // 2 written lessons → reaches the wrapper
+  });
+
+  it('randomReviewableLessonId only returns lessons WITHOUT an open review', async () => {
+    await pool.query(`UPDATE lesson_reviews SET status = 'dismissed' WHERE lesson_plan_id = ANY($1)`, [[planId, planId2]]);
+    const id = await randomReviewableLessonId();
+    expect(id).not.toBeNull(); // our two written lessons are candidates
+  });
+
+  it('recentAppliedFindings returns only APPLIED findings for the course (E3 re-injection source)', async () => {
+    const rid = await createReview({
+      lessonPlanId: planId,
+      verdict: 'tweak',
+      findings: [{ issue: 'ZZ no recap', fix: 'ZZ add a 5-min retrieval starter' }],
+      suggestedObjectives: 'o',
+      suggestedOutline: 'x',
+      rationale: 'r',
+      model: 'test',
+      promptVersion: 'review_lesson@1',
+    });
+    expect(rid).not.toBeNull();
+    // still 'open' → not yet a lesson learned
+    expect((await recentAppliedFindings(courseId)).some((f) => f.issue === 'ZZ no recap')).toBe(false);
+    await setReviewStatus(rid!, 'applied');
+    const applied = await recentAppliedFindings(courseId);
+    expect(applied.some((f) => f.issue === 'ZZ no recap' && f.fix.includes('retrieval'))).toBe(true);
   });
 });

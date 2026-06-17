@@ -68,6 +68,36 @@ export async function createReview(r: NewReview): Promise<number | null> {
   return rows[0]?.id ?? null;
 }
 
+// E1: a random not-yet-reviewed master lesson with content, from the active scheme — the spot-check
+// sampler picks one so the teacher catches issues across the whole curriculum without reviewing all.
+export async function randomReviewableLessonId(): Promise<number | null> {
+  const { rows } = await pool.query<{ id: number }>(
+    `SELECT lp.id FROM lesson_plans lp
+       JOIN units u ON u.id = lp.unit_id
+       JOIN schemes_of_work s ON s.id = u.scheme_id
+      WHERE s.active AND lp.active
+        AND (coalesce(lp.objectives, '') <> '' OR coalesce(lp.outline, '') <> '')
+        AND NOT EXISTS (SELECT 1 FROM lesson_reviews r WHERE r.lesson_plan_id = lp.id AND r.group_course_id IS NULL AND r.status = 'open')
+      ORDER BY random() LIMIT 1`,
+  );
+  return rows[0]?.id ?? null;
+}
+
+// E3: the findings the teacher has already APPLIED for a course — fed back into the cheap planners so
+// they avoid repeating issues a review already flagged. Newest first, capped.
+export async function recentAppliedFindings(courseId: number, limit = 8): Promise<ReviewFinding[]> {
+  const { rows } = await pool.query<{ findings: ReviewFinding[] }>(
+    `SELECT r.findings FROM lesson_reviews r
+       JOIN lesson_plans lp ON lp.id = r.lesson_plan_id
+      WHERE lp.course_id = $1 AND r.status = 'applied' AND jsonb_array_length(r.findings) > 0
+      ORDER BY r.created_at DESC LIMIT 20`,
+    [courseId],
+  );
+  const out: ReviewFinding[] = [];
+  for (const row of rows) for (const f of row.findings ?? []) if (out.length < limit && f?.issue) out.push({ issue: f.issue, fix: f.fix });
+  return out;
+}
+
 /** The cost guard: a lesson with an OPEN master review is skipped by the sweep (no double-spend). */
 export async function hasOpenReviewForPlan(planId: number): Promise<boolean> {
   const { rows } = await pool.query<{ n: number }>(

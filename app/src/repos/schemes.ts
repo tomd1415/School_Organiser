@@ -339,6 +339,28 @@ export async function materialiseUnit(
 }
 
 /** A unit's lessons in teaching order — used to lay a unit into the calendar (5.4). */
+// E2: a unit's course + ordered lessons (with objectives) for the scheme-level sequence review.
+export interface UnitReviewContext {
+  unitTitle: string;
+  courseId: number;
+  courseName: string;
+  lessons: Array<{ id: number; title: string; objectives: string | null }>;
+}
+export async function getUnitForReview(unitId: number): Promise<UnitReviewContext | null> {
+  const head = await pool.query<{ unitTitle: string; courseId: number; courseName: string }>(
+    `SELECT u.title AS "unitTitle", c.id AS "courseId", c.name AS "courseName"
+       FROM units u JOIN schemes_of_work s ON s.id = u.scheme_id JOIN courses c ON c.id = s.course_id
+      WHERE u.id = $1`,
+    [unitId],
+  );
+  if (!head.rows[0]) return null;
+  const lessons = await pool.query<{ id: number; title: string; objectives: string | null }>(
+    `SELECT id, title, objectives FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`,
+    [unitId],
+  );
+  return { ...head.rows[0], lessons: lessons.rows };
+}
+
 export async function listPlansForUnit(unitId: number): Promise<Array<{ id: number; title: string }>> {
   const { rows } = await pool.query<{ id: number; title: string }>(
     `SELECT id, title FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`,

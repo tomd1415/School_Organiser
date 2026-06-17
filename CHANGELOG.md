@@ -100,7 +100,23 @@ slice (**427 unit / 259 integration; typecheck clean**). Built so far:
     ([services/currentInterests.ts](../app/src/services/currentInterests.ts)): a **⭐ Current interests**
     card on Now foregrounds the freshest, mutes the fading, and drops fully-stale ones — so the profile
     follows what you care about *right now*. **Workstream D is complete.**
-- **Remaining Phase 12:** the gated Opus reviewer tail (Workstream E).
+- **The deferred AI-reviewer tail (Workstream E, complete) — gated & cost-capped.** The Phase-11 idea-4
+  tail, built behind the **off-by-default `ai_review_enabled`** with the existing per-call cap guard, so
+  the project's #1 cost risk stays bounded (manual-trigger; the cheaper Planning model by default).
+  - **E1 — spot-check.** A **🎲 Spot-check a random lesson** button on Schemes reviews ONE random
+    not-yet-reviewed lesson from across the whole curriculum (`randomReviewableLessonId` +
+    `spotCheckCurriculum`), so issues get caught without reviewing everything.
+  - **E2 — scheme-level review.** A **🔎 review the sequence** button per unit gives a sequence-level
+    second opinion on the whole unit — order, progression, coverage gaps — advisory and **not stored**
+    (it never rewrites a lesson; the per-lesson reviewer does that). New `review_scheme@1` prompt/schema
+    plus a `reviewSchemeSequence` service.
+  - **E3 — finding re-injection.** Review findings the teacher has **applied** now feed back into the
+    cheap draft-lesson planner (`recentAppliedFindings` → `pastReviewItems` in the draft context), so it
+    stops repeating issues a review already flagged. **Workstream E is complete — Phase 12 is done (A–E).**
+- **Phase 12 in total:** migrations `0040`–`0042`; every slice tested (446 unit / 267 integration green;
+  typecheck clean); the AI boundary and the no-pupil-name-to-AI / withhold-safeguarding invariants held
+  throughout. The AI prompt-version bumps across the phase warrant one throwaway live smoke against a real
+  key. Single-teacher only — multi-teacher remains parked.
 
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 

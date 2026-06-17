@@ -13,9 +13,12 @@ import { aiReviewEnabled, modelForFeature } from '../repos/settings';
 import { getPlanContext, getPlanRow, listPlansForUnit } from '../repos/schemes';
 import { getPlanSpecPointIds, listSpecPoints } from '../repos/specPoints';
 import { listCourseDocsWithContent } from '../repos/courseDocs';
-import { createReview, hasOpenReviewForPlan } from '../repos/reviews';
+import { createReview, hasOpenReviewForPlan, randomReviewableLessonId } from '../repos/reviews';
+import { reviewSchemeSchema } from '../llm/schemas/reviewScheme';
+import { REVIEW_SCHEME_INSTRUCTION, REVIEW_SCHEME_SYSTEM, REVIEW_SCHEME_VERSION, reviewSchemeItems } from '../llm/prompts/reviewScheme';
+import { getUnitForReview } from '../repos/schemes';
 import { PRICE_PENCE_PER_MTOK } from '../config/llm';
-import type { ReviewVerdict } from '../repos/reviews';
+import type { ReviewFinding, ReviewVerdict } from '../repos/reviews';
 
 export type ReviewStatus = 'ok' | 'skip' | 'blocked' | 'unavailable' | 'error' | 'notfound' | 'disabled';
 export interface ReviewOutcome {
@@ -101,6 +104,70 @@ export async function reviewLessonMaster(lp: number): Promise<ReviewOutcome> {
   // null = a concurrent request already created the open review (partial unique index) — treat as skip.
   if (reviewId === null) return { status: 'skip', message: 'This lesson already has an open review.' };
   return { status: 'ok', verdict: d.verdict, reviewId };
+}
+
+// E1 — spot-check: review ONE random not-yet-reviewed lesson from across the whole curriculum, so the
+// teacher catches issues without reviewing everything. Gated + cost-capped exactly like a single review.
+export interface SpotCheckResult extends ReviewOutcome {
+  lessonPlanId?: number;
+  lessonTitle?: string;
+}
+export async function spotCheckCurriculum(): Promise<SpotCheckResult> {
+  if (!(await aiReviewEnabled())) return { status: 'disabled', message: 'The AI reviewer is off — enable it in Settings → AI.' };
+  const id = await randomReviewableLessonId();
+  if (id == null) return { status: 'skip', message: 'No lesson to spot-check — every written lesson already has an open review, or none have objectives/outline yet.' };
+  const row = await getPlanRow(id);
+  const o = await reviewLessonMaster(id);
+  return { ...o, lessonPlanId: id, lessonTitle: row?.title };
+}
+
+// E2 — scheme-level review: a sequence-level second opinion on a whole unit (coherence, progression,
+// coverage gaps). Advisory and NOT stored (it never rewrites a lesson) — gated + cost-capped like a
+// single lesson review. Returns the findings for the route to render inline.
+export interface SchemeReviewResult {
+  status: ReviewStatus;
+  verdict?: 'coherent' | 'tweak' | 'gaps';
+  findings?: ReviewFinding[];
+  rationale?: string;
+  message?: string;
+}
+export async function reviewSchemeSequence(unitId: number): Promise<SchemeReviewResult> {
+  if (!(await aiReviewEnabled())) return { status: 'disabled', message: 'The AI reviewer is off — enable it in Settings → AI.' };
+  const unit = await getUnitForReview(unitId);
+  if (!unit) return { status: 'notfound', message: 'Unit not found.' };
+  const written = unit.lessons.filter((l) => (l.objectives ?? '').trim() !== '');
+  if (written.length < 2) return { status: 'skip', message: 'Add objectives to at least two lessons first — there is no sequence to review yet.' };
+
+  // Spec points across the whole unit (union of each lesson's mapped points).
+  const idSets = await Promise.all(unit.lessons.map((l) => getPlanSpecPointIds(l.id)));
+  const wantIds = new Set<number>(idSets.flat());
+  const allPoints = await listSpecPoints(unit.courseId);
+  const labels = allPoints.filter((p) => wantIds.has(p.id)).map((p) => (p.code === p.title ? p.title : `${p.code} ${p.title}`));
+  const docs = await listCourseDocsWithContent(unit.courseId);
+
+  const model = await modelForFeature('review_scheme', 'plan');
+  const result = await callLLMStructured(
+    {
+      feature: 'review_scheme',
+      model,
+      promptVersion: REVIEW_SCHEME_VERSION,
+      system: REVIEW_SCHEME_SYSTEM,
+      estimatedCostPence: estimateReviewCostPence(model),
+      context: [
+        ...(await standingPrefItems()),
+        ...(await conceptItemsFor(unit.courseId)),
+        ...courseDocItems(docs.slice(0, REVIEW_MAX_DOCS).map((d) => ({ role: d.role, title: d.title, content: d.content })), REVIEW_DOC_CAP),
+        ...reviewSchemeItems(unit.courseName, unit.unitTitle, unit.lessons, labels),
+      ],
+      instruction: REVIEW_SCHEME_INSTRUCTION,
+      maxTokens: REVIEW_MAX_OUTPUT_TOK,
+    },
+    reviewSchemeSchema,
+  );
+  if (result.status === 'blocked') return { status: 'blocked', message: result.message };
+  if (result.status === 'unavailable') return { status: 'unavailable', message: result.message };
+  if (result.status !== 'ok' || !result.data) return { status: 'error', message: result.message };
+  return { status: 'ok', verdict: result.data.verdict, findings: result.data.findings.slice(0, 5), rationale: result.data.rationale };
 }
 
 export interface UnitReviewResult {
