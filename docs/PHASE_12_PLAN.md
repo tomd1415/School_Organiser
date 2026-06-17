@@ -25,7 +25,13 @@
 > and offers "convert again", **kit CSV import** on `/kit` (idempotent, matched by name), and map
 > **drag-to-shift** to move a lesson between weeks, swapping with an occupied target). **Workstream C
 > is complete.**
-> **Remaining:** D, E. Suite green throughout (431 unit / 263 integration).
+> ✅ **Workstream D complete** — D3 **ranked full-text search** (migration `0041`: Postgres tsvector +
+> GIN, stemmed/prefix/relevance-ranked, with an ILIKE fallback; **not** vector embeddings — that would
+> need a new sub-processor + DPIA, so it's deferred); D1 **estimate calibration** (deterministic
+> median actual÷estimate → a padding multiplier + a degrade-safe cheap-AI insight, on the Tasks page);
+> D2 **time-decaying current-interest profile** (migration `0042`: an `interest_at` stamp + a 14-day
+> half-life decay surfacing fresh interests on Now and fading old ones).
+> **Remaining:** E (the gated Opus reviewer tail). Suite green throughout (442 unit / 263 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets

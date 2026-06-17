@@ -81,8 +81,26 @@ slice (**427 unit / 259 integration; typecheck clean**). Built so far:
     lesson onto another week to move it — the two swap, or it fills an empty week — never rewriting past
     weeks (`moveBinding` repo + `POST /map/move`; drag wiring in [public/app.js](../app/public/app.js)).
     **Workstream C is complete.**
-- **Remaining Phase 12:** the Phase-4 tail (estimate calibration, current-interest profile, optional
-  pgvector) and the gated Opus reviewer tail.
+- **The Phase-4 tail (Workstream D, complete).**
+  - **D3 — ranked full-text search** (migration `0041`). The global search box moves from substring
+    (ILIKE) to Postgres **full-text** ([repos/search.ts](../app/src/repos/search.ts)): stemming
+    (teach/teaching/taught all match), relevance ranking (`ts_rank`), multi-word AND and as-you-type
+    prefix matching, with an ILIKE fallback so a symbol query ("micro:bit") never loses recall. Pure
+    local SQL — nothing leaves the building, so the no-name-to-AI invariant is untouched. **Deliberately
+    not vector/embedding search**: Anthropic (the only configured provider) has no embeddings API, so
+    true semantic search would mean a new embeddings sub-processor and a DPIA §6 change — deferred until
+    that's a decision worth making.
+  - **D1 — estimate calibration** ([services/estimateCalibration.ts](../app/src/services/estimateCalibration.ts)).
+    A 📊 panel on the Tasks page compares your time *estimates* with the *actual* time your timers
+    recorded: a deterministic median-ratio headline ("tasks took ~1.5× your estimate — pad by ×1.5",
+    broken down by cognitive load) plus a short **cheap-AI** insight (degrades cleanly when AI is off).
+    No pupil data; the maths is pure and unit-tested.
+  - **D2 — time-decaying current-interest profile** (migration `0042`). An `interest_at` stamp (set when
+    you mark a task / captured item as a current interest) drives a **14-day half-life decay**
+    ([services/currentInterests.ts](../app/src/services/currentInterests.ts)): a **⭐ Current interests**
+    card on Now foregrounds the freshest, mutes the fading, and drops fully-stale ones — so the profile
+    follows what you care about *right now*. **Workstream D is complete.**
+- **Remaining Phase 12:** the gated Opus reviewer tail (Workstream E).
 
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 

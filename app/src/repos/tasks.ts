@@ -148,7 +148,32 @@ export async function listInterestTasks(): Promise<TaskRow[]> {
 }
 
 export async function toggleTaskInterest(id: number): Promise<void> {
-  await pool.query(`UPDATE tasks SET interest = NOT interest, updated_at = now() WHERE id = $1`, [id]);
+  // D2: stamp interest_at when turning interest ON (so the Now profile can decay it), clear when OFF.
+  // The CASE reads the OLD row value, so `NOT interest` is the NEW value after the flip.
+  await pool.query(
+    `UPDATE tasks SET interest = NOT interest,
+            interest_at = CASE WHEN NOT interest THEN now() ELSE NULL END,
+            updated_at = now() WHERE id = $1`,
+    [id],
+  );
+}
+
+// D1: tasks that have BOTH an estimate and recorded actual time — the raw material for calibration.
+export interface EstimateSampleRow {
+  title: string;
+  estimateMin: number;
+  actualSeconds: number;
+  cognitiveLoad: string | null;
+}
+export async function estimateSamples(limit = 40): Promise<EstimateSampleRow[]> {
+  const { rows } = await pool.query<EstimateSampleRow>(
+    `SELECT title, estimate_min AS "estimateMin", actual_seconds AS "actualSeconds", cognitive_load AS "cognitiveLoad"
+     FROM tasks
+     WHERE estimate_min IS NOT NULL AND estimate_min > 0 AND actual_seconds IS NOT NULL AND actual_seconds > 0
+     ORDER BY updated_at DESC LIMIT $1`,
+    [limit],
+  );
+  return rows;
 }
 
 /** Map of group → the (weekday, slot, start) of each teaching lesson — for due_rule. */

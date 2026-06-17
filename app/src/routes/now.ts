@@ -27,6 +27,7 @@ import { marksBacklog, type MarksBacklogRow } from '../repos/marking';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
+import { currentInterests, type InterestItem } from '../services/currentInterests';
 import { listExceptionsBetween } from '../repos/exceptions';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import type { LessonRow, PeriodRow } from '../services/timetable';
@@ -286,6 +287,20 @@ async function resolveNowLessons(now: Date) {
   return { ctx, state, current, next };
 }
 
+// D2: the time-decaying current-interest profile, foregrounded on Now. Fresh marks are bold; ones
+// that are fading (older than ~a fortnight) are muted, and fully-stale ones have dropped off already.
+function renderCurrentInterests(items: InterestItem[]): string {
+  if (items.length === 0) return '';
+  const row = (i: InterestItem): string => {
+    const href = i.kind === 'task' ? '/tasks?view=interest' : '/captured';
+    return `<li class="${i.fresh ? 'ci-fresh' : 'ci-fading'}"><a href="${href}">${esc(i.label)}</a></li>`;
+  };
+  return `<div class="now-card ci-card">
+    <p class="kicker">⭐ Current interests</p>
+    <ul class="ci-list">${items.map(row).join('')}</ul>
+  </div>`;
+}
+
 export function registerNowRoutes(app: FastifyInstance): void {
   app.get('/', { preHandler: requireAuth }, async (_req, reply) => {
     const now = new Date();
@@ -346,6 +361,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
       const marksWaiting = (await marksEnabled()) ? await marksBacklog() : [];
+      const interests = await currentInterests(now.getTime()); // D2: time-decaying current-interest profile
 
       // The "next session" card for the right column.
       let nextCard: string;
@@ -402,6 +418,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           <div class="now-col now-col-next">
             ${nextCard}
             ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
+            ${renderCurrentInterests(interests)}
             ${renderDayCard(dayPart, dayItems, state.isoDate)}
           </div>
         </div>

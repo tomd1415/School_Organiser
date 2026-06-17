@@ -682,6 +682,12 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toContain('unicorn');
       expect(res.body).toContain('Captured');
+      // D3: full-text STEMMING — searching "study" finds a note that says "studies" (a plain substring
+      // search could not), proving the FTS upgrade is live, not just the ILIKE fallback.
+      const cap2 = await app.inject({ method: 'POST', url: '/capture-quick', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('ZZSEARCH revision studies of binary') });
+      expect(cap2.body).toContain('captured ✓');
+      const stem = await app.inject({ method: 'GET', url: '/search?q=study', headers: { cookie } });
+      expect(stem.body).toContain('studies'); // matched by stem, not substring
       const tooShort = await app.inject({ method: 'GET', url: '/search?q=u', headers: { cookie } });
       expect(tooShort.body).toBe(''); // <2 chars → no query
       // Command palette: the dropdown also offers "go to" destinations — including pages hidden from

@@ -69,7 +69,9 @@ const FLAGS = new Set(['safeguarding', 'interest', 'archived']);
 
 export async function toggleCapturedFlag(id: number, flag: string): Promise<CapturedItem | null> {
   if (!FLAGS.has(flag)) return null;
-  await pool.query(`UPDATE notes SET ${flag} = NOT ${flag}, updated_at = now() WHERE id = $1 AND kind = 'captured'`, [id]);
+  // D2: when toggling the "interest" flag, also stamp/clear interest_at for the time-decaying profile.
+  const stamp = flag === 'interest' ? `, interest_at = CASE WHEN NOT interest THEN now() ELSE NULL END` : '';
+  await pool.query(`UPDATE notes SET ${flag} = NOT ${flag}${stamp}, updated_at = now() WHERE id = $1 AND kind = 'captured'`, [id]);
   return getCaptured(id);
 }
 

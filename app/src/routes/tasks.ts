@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
-import { layout } from '../lib/html';
+import { esc, layout } from '../lib/html';
+import { calibrationHeadline, calibrationInsight, gatherCalibration } from '../services/estimateCalibration';
 import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
 import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
@@ -42,10 +43,32 @@ export function registerTaskRoutes(app: FastifyInstance): void {
         ${banner}
         <div class="ld-notes-head"><h1>Tasks</h1><span>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') + ' ' : ''}<a class="link" href="/recurring">Recurring →</a></span></div>
         <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')} ${tab('interest', '⭐ Interest')}</nav>
+        <details class="task-calibrate" id="task-calibrate">
+          <summary>📊 Calibrate my time estimates</summary>
+          <div hx-get="/tasks/calibrate" hx-trigger="toggle from:#task-calibrate once" hx-target="this" hx-swap="innerHTML"><span class="muted">analysing your timed tasks…</span></div>
+        </details>
         ${view === 'inbox' ? `<details class="paste-box"><summary>Paste an email</summary><form hx-post="/tasks/paste" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="this.reset()"><textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea><div><button type="submit" class="btn-secondary">Make task</button></div></form></details>` : ''}
         ${listHtml}
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
+  });
+
+  // D1: calibrate the teacher's time estimates from their timed history (deterministic headline +
+  // an optional cheap AI insight; degrades cleanly when AI is off). Lazy-loaded from the panel above.
+  app.get('/tasks/calibrate', { preHandler: requireAuth }, async (_req, reply) => {
+    const { calibration, samples } = await gatherCalibration();
+    if (!calibration) {
+      return reply.type('text/html').send('<p class="muted">Not enough data yet — start a timer on a task that has an estimate, finish a few, then check back.</p>');
+    }
+    const insight = await calibrationInsight(calibration, samples).catch(() => '');
+    const byLoad = calibration.byLoad.length
+      ? `<ul class="cal-byload">${calibration.byLoad.map((g) => `<li>${esc(g.load)} load: ${g.medianRatio.toFixed(1)}× <span class="muted">(${g.count})</span></li>`).join('')}</ul>`
+      : '';
+    return reply.type('text/html').send(`<div class="task-cal-result">
+        <p class="cal-headline">${esc(calibrationHeadline(calibration))}</p>
+        ${byLoad}
+        ${insight ? `<p class="cal-insight">💡 ${esc(insight)}</p>` : ''}
+      </div>`);
   });
 
   // Create a (blank) task in the inbox; returns the editable item to append.
