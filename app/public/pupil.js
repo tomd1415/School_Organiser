@@ -149,6 +149,48 @@
     updateProgress();
   }
 
+  // ── A5 first-run micro-tour: a calm one-time "how this page works" on the worksheet surface, shown
+  // once per device (localStorage), built with textContent only (never innerHTML). Dismiss with the
+  // button, a backdrop tap, or Escape. Skips the login page (no worksheet there).
+  function maybeTour() {
+    if (!main || (!main.querySelector('.ws-doc') && !main.querySelector('.pupil-twopane'))) return;
+    try { if (localStorage.getItem('pupil.toured') === '1') return; } catch (e) { return; }
+    var ov = document.createElement('div');
+    ov.className = 'pupil-tour';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'How this page works');
+    var card = document.createElement('div');
+    card.className = 'pupil-tour-card';
+    var h = document.createElement('h2');
+    h.textContent = '👋 Welcome!';
+    card.appendChild(h);
+    var ul = document.createElement('ul');
+    ul.className = 'pupil-tour-steps';
+    [['📊', 'The slides are on the left — follow along with the board.'],
+     ['✍️', 'Type your answers on the right. It saves on its own — you’ll see “saved ✓”.'],
+     ['🔊', 'Tap a speaker button to hear a question read out to you.'],
+     ['✅', 'Tap “I’m done” when you’ve finished.']].forEach(function (s) {
+      var li = document.createElement('li');
+      var em = document.createElement('span'); em.className = 'pupil-tour-emoji'; em.textContent = s[0];
+      var tx = document.createElement('span'); tx.textContent = s[1];
+      li.appendChild(em); li.appendChild(tx); ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'pupil-go'; btn.textContent = 'Got it!';
+    function close() { try { localStorage.setItem('pupil.toured', '1'); } catch (e) {} ov.remove(); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    btn.addEventListener('click', close);
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    document.addEventListener('keydown', onKey);
+    card.appendChild(btn);
+    ov.appendChild(card);
+    document.body.appendChild(ov);
+    btn.focus();
+  }
+  maybeTour();
+
   // ── 10.14 picture PIN: tapping an emoji key types its digit into the PIN box (login surface) ────
   document.addEventListener('click', function (e) {
     var key = e.target.closest('[data-digit], [data-pin-back]');

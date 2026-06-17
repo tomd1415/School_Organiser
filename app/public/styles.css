@@ -829,6 +829,13 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 /* Worksheet as a form */
 .ws-doc { line-height: 1.6; }
 .ws-doc h1, .ws-doc h2, .ws-doc h3 { margin: 0.8rem 0 0.4rem; }
+/* A6 presentation pass: calmer one-idea-per-block rhythm + the question reading stronger than its box. */
+.ws-doc h2 { padding-bottom: 0.2rem; border-bottom: 2px solid var(--line); } /* clear section breaks */
+.ws-table:not(.ws-grid) td:first-child { font-weight: 600; }                 /* the question stands out */
+.ws-q-text { font-weight: 600; }
+.ws-instruction ol, .ws-instruction ul { margin: 0.3rem 0; padding-left: 1.4rem; }
+.ws-instruction li { margin: 0.3rem 0; line-height: 1.55; }
+.ws-table th { font-size: 0.95rem; }
 .ws-table { width: 100%; border-collapse: collapse; margin: 0.6rem 0; }
 .ws-table th, .ws-table td { border: 1px solid var(--line); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
 .ws-table th { background: #f0f3f8; }
@@ -851,6 +858,17 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .ws-instruction .ws-speak, .ws-cloze .ws-speak { float: right; margin: 0 0 0.3rem 0.4rem; }
 .ws-q-cell { white-space: normal; }
 .ws-q-text { vertical-align: middle; }
+/* A5: first-run micro-tour overlay (calm, dismissible, shown once per device) + gentle content fade. */
+.pupil-tour { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(20, 24, 40, 0.45); }
+.pupil-tour-card { background: var(--card); color: var(--ink); border-radius: var(--radius); box-shadow: 0 16px 48px rgba(20, 24, 40, 0.3); max-width: 30rem; width: 100%; padding: 1.25rem 1.4rem; }
+.pupil-tour-card h2 { margin: 0 0 0.6rem; }
+.pupil-tour-steps { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.7rem; }
+.pupil-tour-steps li { display: flex; gap: 0.6rem; align-items: flex-start; line-height: 1.35; }
+.pupil-tour-emoji { font-size: 1.4rem; line-height: 1; flex: 0 0 auto; }
+.pupil-work-card { animation: pupil-fade-in 0.35s ease both; }
+@keyframes pupil-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pupil-work-card { animation: none; } }
+[data-motion="calm"] .pupil-work-card { animation: none; }
 .ws-checklist { list-style: none; padding: 0; }
 .ws-checklist .md-task { font-size: 1.05rem; padding: 0.3rem 0; }
 /* Teacher "preview as pupil" — level tabs + an inert (disabled) rendering of the pupil sheet. */

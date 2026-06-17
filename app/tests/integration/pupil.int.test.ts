@@ -123,6 +123,7 @@ describe('pupil login + surface (integration)', () => {
     expect(js.body).toContain('savedSpanFor'); // A2 maps a field to its "saved ✓" span
     expect(js.body).toContain('data-pane-btn'); // A3 narrow-screen Slides/Worksheet toggle wired
     expect(js.body).toContain('ws-speak'); // A4 per-question read-aloud buttons wired
+    expect(js.body).toContain('pupil.toured'); // A5 first-run micro-tour wired (shown once per device)
   });
 
   it('the PIN step offers a picture (emoji) keypad — same numeric PIN (10.14)', async () => {

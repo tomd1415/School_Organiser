@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@11'; // @11: OCR GCSE exam-style weighting by proximity to exams (B5) via context[]. @10: also build on the lesson's prepared materials (extracted text of uploaded slides/worksheets) via context[]. @9: matching (a choice table sharing one option set). @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@12'; // @12: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @11: OCR GCSE exam-style weighting by proximity to exams (B5) via context[]. @10: also build on the lesson's prepared materials (extracted text of uploaded slides/worksheets) via context[]. @9: matching (a choice table sharing one option set). @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
 
 export const ADAPT_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents for ONE ' +
@@ -30,7 +30,10 @@ export const ADAPT_RESOURCES_SYSTEM =
   'multiple-choice / true-false question state the correct option exactly as written, and list each ' +
   'fill-in-the-blanks sentence\'s gap answers in order.\n' +
   'If a master document is missing, create it from the adapted outline. Where a visual is needed but ' +
-  'absent, use a `> 🖼️ [show: …]` placeholder. Plain UK English; never reference an individual pupil.';
+  'absent, use a `> 🖼️ [show: …]` placeholder. USABILITY IS PARAMOUNT — the sheet must be easy and calm ' +
+  'for the pupil: write for their reading age, short sentences, everyday words, consistent question ' +
+  'stems, the fewest steps that still teach it, never a wall of text; give 🟢 Support shorter chunks ' +
+  'and more scaffolding. Plain UK English; never reference an individual pupil.';
 
 /** The class's effective lesson + each master document (capped) as separate context items. */
 export function adaptResourceItems(

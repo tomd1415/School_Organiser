@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildMaterialText, isTextBearing, readUseMaterials } from '../src/services/lessonMaterials';
-import { lessonMaterialItems } from '../src/llm/prompts/lessonResources';
+import { lessonMaterialItems, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION } from '../src/llm/prompts/lessonResources';
+import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION } from '../src/llm/prompts/adaptResources';
 
 describe('lessonMaterials — buildMaterialText (capping is pure + testable)', () => {
   it('joins each file under its title and reports what was included', () => {
@@ -60,6 +61,17 @@ describe('lessonMaterials — isTextBearing', () => {
   it('accepts office / pdf / plain extensions, rejects images and unknowns', () => {
     for (const f of ['a.pdf', 'b.docx', 'c.pptx', 'd.odt', 'e.txt', 'f.md', 'g.csv']) expect(isTextBearing(f)).toBe(true);
     for (const f of ['x.png', 'y.jpg', 'z.zip', 'noext']) expect(isTextBearing(f)).toBe(false);
+  });
+});
+
+describe('generation prompts — usability is paramount (A7)', () => {
+  it('both resource-generation prompts carry the reading-age / no-wall-of-text directive', () => {
+    expect(LESSON_RESOURCES_VERSION).toBe('lesson_resources@14');
+    expect(ADAPT_RESOURCES_VERSION).toBe('adapt_resources@12');
+    expect(LESSON_RESOURCES_SYSTEM).toContain('USABILITY IS PARAMOUNT');
+    expect(LESSON_RESOURCES_SYSTEM).toMatch(/reading age/);
+    expect(LESSON_RESOURCES_SYSTEM).toMatch(/never a wall ([\s\S]*?)of text/);
+    expect(ADAPT_RESOURCES_SYSTEM).toContain('USABILITY IS PARAMOUNT');
   });
 });
 

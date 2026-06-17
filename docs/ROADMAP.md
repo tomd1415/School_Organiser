@@ -251,6 +251,24 @@ spot-check + scheme-level review + finding re-injection) is **deferred** until a
 idea-8 findings actually get applied (`lesson_reviews.status`), since its Opus spend is the project's
 named #1 cost risk.
 
+## Phase 12 — Zero-friction pupils + content-rich, exam-ready worksheets *(IN PROGRESS — see [PHASE_12_PLAN.md](PHASE_12_PLAN.md))*
+
+*Status 2026-06-17: building.* Completes the post-Phase-11 "What's next" backlog with **pupil
+presentation/usability as the overriding priority**, plus two teacher requirements: worksheets must
+**build on all of a lesson's prepared materials**, and **OCR GCSE (J277) exam question types** appear
+**more frequently the closer a cohort is to its exams**. **Migration-free**; the AI boundary is unchanged.
+
+- **Pupil usability (A):** ✅ consistent + live save confirmation on every field type, a narrow-screen
+  Slides/Worksheet toggle, per-question 🔊 read-aloud; remaining: first-run micro-tour + calmer loading,
+  a presentation pass, and a usability-tuned generation prompt.
+- **Content-rich worksheets (B, complete):** the `docText` extractor now feeds generation, so the
+  worksheet and slides build on the lesson's own uploaded materials (with a default-on consent toggle),
+  unit conversion is content-based, OCR exam-style questions are weighted by proximity to GCSE, and the
+  marker handles numeric/hex/levels-of-response with trace/truth tables as a compact grid.
+- **Remaining:** the Phase-5.9 curriculum stretch (kit-per-lesson, cross-group compare), the Phase-4 tail
+  (estimate calibration, current-interest profile, optional pgvector search) and the deferred,
+  cost-gated Phase-11 Opus reviewer tail.
+
 ## Future (unnumbered) — Multi-teacher school server *(parked — see [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md))*
 
 **Deliberately unnumbered and not scheduled.** A v2 architecture: one shared school server, many

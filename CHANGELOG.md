@@ -7,6 +7,63 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-17 — Phase 12 (in progress): zero-friction pupils + content-rich, exam-ready worksheets
+
+Planned in [docs/PHASE_12_PLAN.md](docs/PHASE_12_PLAN.md) — completes the "What's next" backlog and adds
+a teacher requirement: **worksheets must build on all of a lesson's prepared materials**, with
+**presentation/usability for pupils the overriding priority**, and **OCR GCSE (J277) exam question
+types weighted more heavily the closer a cohort is to its exams**. **Migration-free throughout**; every
+AI input still rides the one wrapper (redact → withhold → egress-assert → audit). Suite green at each
+slice (**427 unit / 259 integration; typecheck clean**). Built so far:
+
+- **Pupil usability (Workstream A).**
+  - **A1 — consistent save confirmation on every field type.** Checkboxes and matching tiles used to
+    save silently; both now flash the same "saved ✓" ([worksheetForm.ts](../app/src/lib/worksheetForm.ts),
+    [pupil.js](../app/public/pupil.js)).
+  - **A2 — live "saving… → saved ✓".** The autosave shows "saving…" the instant a request starts and
+    "saved ✓" (or "could not save — try again") on completion, across text/blank/choice/checkbox/matching
+    — the 600 ms debounce no longer feels like a dead pause.
+  - **A3 — narrow-screen Slides/Worksheet toggle.** On ≤960 px the two panes no longer stack with the
+    whole deck above the work; a sticky segmented toggle defaults to **My worksheet** (the board already
+    shows the slides), so a pupil's own work is zero-scroll. Desktop two-pane unchanged.
+  - **A4 — per-question read-aloud.** An inline **🔊** on every instruction and question prompt reads
+    *that* text in one tap — no need to switch the global tap-anywhere read-aloud mode on first.
+  - **A5 — first-run micro-tour.** A calm, one-time "how this page works" card (slides left, type right,
+    it saves itself, tap 🔊, tap "I'm done"), shown once per device, dismissible by button/backdrop/Esc;
+    plus a gentle content fade that honours reduced-motion / the Calm toggle.
+  - **A6 — presentation pass.** Clearer section breaks, the question reading stronger than its answer
+    box, and tidier instruction lists — verified to hold at every accessibility setting.
+  - **A7 — usability-tuned generation.** Both resource generators now demand reading-age language,
+    everyday words, consistent question stems, the fewest steps, and **never a wall of text**
+    (`lesson_resources@13→@14`, `adapt_resources@11→@12`). **Workstream A is complete.**
+- **Content-rich worksheets (Workstream B).** The existing [docText.ts](../app/src/lib/docText.ts)
+  extractor (PDF / docx / pptx / odt via the Gotenberg sidecar) is now wired into generation — it had
+  only ever fed the course-document library.
+  - **B1–B2 — build on the lesson's own materials.** New [lessonMaterials.ts](../app/src/services/lessonMaterials.ts)
+    reads the text of a lesson's linked source files (capped per-file/total, AI-generated docs + images
+    skipped, best-effort) and feeds it as one `context[]` item, so the worksheet/slides reuse the real
+    examples, vocabulary and tasks the teacher prepared. Wired into master generation
+    (`lesson_resources@11→@13`) and per-class adaptation (`adapt_resources@9→@11`); empty ⇒ no item
+    (unchanged when nothing is uploaded).
+  - **B3 — content-based unit conversion** (`convert_unit@2→@3`): conversion now reworks the **actual
+    text** of the source files, not just their filenames.
+  - **B4 — teacher preview & consent.** The lesson page's generate buttons carry a default-on
+    "📎 build on my uploaded materials (N: …)" checkbox (off ⇒ no extraction/spend), and the result
+    reports which files were used.
+  - **B5.1 — OCR exam-style weighting by proximity to GCSE.** New [examProfile.ts](../app/src/services/examProfile.ts)
+    classifies a class from existing signals (`courses.key_stage`/`qualification`/`exam_date`,
+    `groups.year_group`): **KS3 ⇒ no change**; nearer the exams ⇒ more OCR J277 exam-style questions,
+    using shapes that already auto-/AI-mark.
+  - **B5.2 — OCR exam marking + widgets.** The mark-scheme deriver (`mark_scheme@3→@4`) now produces
+    **numeric** calculations, **hex/binary as `exact`** with format variants (numeric equality is
+    unreliable for hex), and **levels-of-response banded** guidance for extended answers; the open
+    marker (`mark_answers@1→@2`) applies the banding (best-fit band → mark within it, level named in the
+    feedback). Trace tables and truth/logic tables now render as a **compact grid** of single-line cell
+    inputs — keys/marking unchanged.
+- **Remaining Phase 12:** A5–A7 (first-run micro-tour + calmer loading; presentation pass; usability-tuned
+  generation prompt), then curriculum stretch (kit-per-lesson, cross-group compare), the Phase-4 tail
+  (estimate calibration, current-interest profile, optional pgvector) and the gated Opus reviewer tail.
+
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 
 Closed/objective question types so a pupil can answer them on screen and they **auto-mark** — closing

@@ -3,7 +3,7 @@
 import type { RedactableItem } from '../../services/redact';
 import type { ExamProfile } from '../../services/examProfile';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@13'; // @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@14'; // @14: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -51,7 +51,11 @@ export const LESSON_RESOURCES_SYSTEM =
   'Where a visual would clearly help a step but you have no source image for it, add a captioned ' +
   'placeholder on ITS OWN line — `> 🖼️ [show: <what the picture should show>]` — so the teacher can ' +
   'drop an image in; NEVER invent an image URL. Match the lesson outline step by step; plan within the ' +
-  'equipment listed; plain UK English; never reference or describe an individual pupil.';
+  'equipment listed. USABILITY IS PARAMOUNT — pupils must find the sheet easy and calm to use: write ' +
+  'for the pupil\'s reading age, short sentences, everyday words, gloss any technical term in plain ' +
+  'words the first time, consistent question stems, the fewest steps that still teach it, never a wall ' +
+  'of text; give 🟢 Support shorter chunks and more scaffolding. Plain UK English; never reference or ' +
+  'describe an individual pupil.';
 
 export function lessonResourceItems(ctx: {
   courseName: string;

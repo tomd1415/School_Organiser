@@ -11,8 +11,12 @@
 > ✅ B5.2c (trace tables + truth/logic tables now render as a **compact grid** of single-line cell
 > inputs — keys/marking unchanged). **Workstream B is complete.**
 > ✅ A4 (an inline 🔊 read-aloud button on every instruction and question prompt — one tap, no need to
-> switch the global tap-anywhere mode on first).
-> **Remaining:** A5–A7, C, D, E. Suite green throughout (427 unit / 259 integration).
+> switch the global tap-anywhere mode on first); ✅ A5 (a calm one-time first-run micro-tour + a gentle
+> content fade honouring reduced-motion); ✅ A6 (a presentation pass — clear section breaks, the
+> question reading stronger than its box, tidier instruction lists); ✅ A7 (both generation prompts now
+> demand reading-age language, fewest steps, never a wall of text — `lesson_resources@13→@14`,
+> `adapt_resources@11→@12`). **Workstream A is complete.**
+> **Remaining:** C, D, E. Suite green throughout (428 unit / 259 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets
