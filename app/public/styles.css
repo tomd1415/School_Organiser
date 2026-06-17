@@ -837,6 +837,7 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .ws-saved { display: inline-block; font-size: 0.85rem; color: #2e7d32; min-height: 1.1em; opacity: 0; transition: opacity 0.2s; }
 .ws-saved.show { opacity: 1; animation: ws-saved-fade 2.4s forwards; }
 @keyframes ws-saved-fade { 0%,60% { opacity: 1; } 100% { opacity: 0; } }
+.ws-match-saved { margin-top: 0.4rem; font-weight: 600; }
 .ws-checklist { list-style: none; padding: 0; }
 .ws-checklist .md-task { font-size: 1.05rem; padding: 0.3rem 0; }
 /* Teacher "preview as pupil" — level tabs + an inert (disabled) rendering of the pupil sheet. */

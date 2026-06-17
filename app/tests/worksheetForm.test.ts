@@ -116,6 +116,12 @@ describe('worksheetForm — form vs review mode', () => {
     expect(core.html).not.toContain('disabled'); // checkboxes are live in form mode
   });
 
+  it('checkboxes carry a "saved ✓" target so the tick is not silent (A1)', () => {
+    const core = renderWorksheet(SHEET, { mode: 'form', level: 'support', action: '/me/answer?oc=5' });
+    // the OOB savedTick from /me/answer targets #ws-sv-<key>; the checkbox li must contain it
+    expect(core.html).toContain('</label><span class="ws-saved"');
+  });
+
   it('review mode shows saved values read-only', () => {
     const values = new Map<string, string>();
     const probe = renderWorksheet(SHEET, { mode: 'review', level: 'core' });
@@ -235,6 +241,7 @@ describe('worksheetForm — matching (shared-option choice table → drag-and-dr
     expect(r.html).toContain('ws-match-slot');
     expect(r.html).toContain('ws-match-tile');
     expect(r.html).toContain('data-save-url="/me/answer?oc=5&amp;key=t1.r1.c2"');
+    expect(r.html).toContain('ws-match-saved'); // visible "saved ✓" flash target (A1)
     const fields = renderWorksheet(MD, { mode: 'review' }).fields.filter((f) => f.kind === 'choice');
     expect(fields.map((f) => f.key)).toEqual(['t1.r1.c2', 't1.r2.c2', 't1.r3.c2']);
     expect(fields[0]!.options).toEqual(['does calculations', 'stores data', 'stores files']);

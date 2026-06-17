@@ -319,7 +319,7 @@ function checkControl(key: string, label: string, opts: WorksheetOptions): strin
     return `<li class="md-task"><input type="checkbox" disabled${checked ? ' checked' : ''}> ${esc(label)}</li>`;
   }
   return `<li class="md-task ws-check"><label><input type="checkbox" name="value" value="x"${checked ? ' checked' : ''}
-    hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none"> ${esc(label)}</label></li>`;
+    hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none"> ${esc(label)}</label><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></li>`;
 }
 
 /** A screenshot-paste answer: the pupil pastes/drops an image; it's stored and shown back. Never
@@ -429,7 +429,10 @@ function renderMatching(tableIdx: number, rows: WorksheetField[], options: strin
     .join('');
   const help = inert ? '' : '<p class="ws-match-help">Drag each answer into its box — or tap an answer, then tap a box.</p>';
   const live = inert ? '' : '<span class="ws-sr-only" aria-live="polite" data-match-live></span>';
-  return `<div class="ws-match" data-match="${tableIdx}">${help}<div class="ws-match-grid"><ol class="ws-match-slots">${slots}</ol><ul class="ws-match-tray" aria-label="Answers to place">${tiles}</ul></div>${live}</div>`;
+  // A visible "saved ✓" flash for sighted pupils (pupil.js flashes it on each placement). Screen-reader
+  // users get the parallel `data-match-live` announcement, so this stays aria-hidden to avoid a double read.
+  const saved = inert ? '' : '<span class="ws-saved ws-match-saved" aria-hidden="true"></span>';
+  return `<div class="ws-match" data-match="${tableIdx}">${help}<div class="ws-match-grid"><ol class="ws-match-slots">${slots}</ol><ul class="ws-match-tray" aria-label="Answers to place">${tiles}</ul></div>${live}${saved}</div>`;
 }
 
 /** A fill-in-the-blank input, embedded inline in instruction prose. Autosaves like a typed answer. */

@@ -302,11 +302,15 @@
       w.querySelectorAll('.ws-match-slot .ws-match-placed').forEach(function (p) { used[p.textContent] = true; });
       w.querySelectorAll('.ws-match-tile').forEach(function (t) { t.classList.toggle('is-used', !!used[t.getAttribute('data-label')]); });
     }
+    // Re-flash a "saved ✓" tick in place (restart the fade animation each save, unlike the HTMX OOB
+    // ticks which are swapped fresh every time).
+    function flashSaved(el, msg) { if (!el) return; el.textContent = msg; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
     function saveSlot(slot, value) {
       var url = slot.getAttribute('data-save-url'); if (!url) return;
+      var tick = (widgetOf(slot) || {}).querySelector ? widgetOf(slot).querySelector('.ws-match-saved') : null;
       fetch(url, { method: 'POST', headers: { 'x-csrf-token': csrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'value=' + encodeURIComponent(value), credentials: 'same-origin' })
-        .then(function (r) { if (!r.ok) throw r.status; dirty = false; })
-        .catch(function () { document.body.dispatchEvent(new Event('app:save-failed')); });
+        .then(function (r) { if (!r.ok) throw r.status; dirty = false; flashSaved(tick, 'saved ✓'); })
+        .catch(function () { flashSaved(tick, 'could not save — try again'); document.body.dispatchEvent(new Event('app:save-failed')); });
     }
     function place(slot, label) {
       slot.innerHTML = '<span class="ws-match-placed"></span><button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>';
