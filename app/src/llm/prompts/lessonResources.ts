@@ -1,8 +1,9 @@
 // Versioned prompt for generating one lesson's resource set (slides outline, worksheet, support
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
+import type { ExamProfile } from '../../services/examProfile';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@12'; // @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@13'; // @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -87,6 +88,45 @@ export function lessonMaterialItems(materialText: string): RedactableItem[] {
         'may be partial (long files are truncated) and may contain layout noise — use them as the source ' +
         'of truth for CONTENT, not formatting.\n' +
         materialText,
+    },
+  ];
+}
+
+/** Phase 12 B5 — how much OCR GCSE (J277) exam-style practice to weight in, by how close the class
+ * is to its exams. KS3 / foundational (weighting 'none') ⇒ NO item, so those sheets are unchanged;
+ * exam questions appear MORE the nearer a cohort is to its GCSEs. Every shape named here is built
+ * from the worksheet mechanisms that ALREADY auto-/AI-mark (typed answers, "( )" choices, "[[ ]]"
+ * gaps, tables), so no new marking is needed — the correct answers still live only in the answers doc. */
+export function examStyleItems(profile: ExamProfile): RedactableItem[] {
+  if (profile.weighting === 'none') return [];
+  const emphasis =
+    profile.weighting === 'high'
+      ? 'GCSE exam preparation is a PRIORITY for this class: make a good proportion of the 🟡 Core and ' +
+        '🔴 Challenge questions OCR J277 exam-style (still scaffold 🟢 Support and never a wall of text).'
+      : 'This class is approaching GCSE: include SOME OCR J277 exam-style questions among the practice, ' +
+        'alongside the scaffolded activities, building exam familiarity gently.';
+  return [
+    {
+      text:
+        `EXAM PRACTICE WEIGHTING — this is ${profile.label}. ${emphasis}\n` +
+        'Write the exam-style questions in genuine OCR GCSE Computer Science (J277) style, using ONLY ' +
+        'the worksheet shapes that mark automatically (so put EVERY correct answer / mark point in the ' +
+        '"answers" document, never in the worksheet):\n' +
+        '• Use OCR command words and show the mark tariff in square brackets, e.g. "State… [1]", ' +
+        '"Describe… [2]", "Explain… [3]", "Discuss/Evaluate… [6]".\n' +
+        '• SHORT RECALL ("state/identify/give/define") → a typed-answer question cell; keep it to one ' +
+        'or two marks.\n' +
+        '• DESCRIBE / EXPLAIN (2–4 marks) → a typed-answer question cell with room to develop points.\n' +
+        '• EXTENDED / DISCUSS (6–8 marks) → ONE typed-answer question cell asking for a structured ' +
+        'response (state the banded expectations in the answers doc).\n' +
+        '• CALCULATIONS & CONVERSIONS (binary ↔ denary ↔ hex, data-size/units, ranges) → a typed-answer ' +
+        'cell; give the exact numeric answer and working in the answers doc.\n' +
+        '• TRACE TABLES and TRUTH / LOGIC tables → a Markdown table whose cells the pupil fills are ' +
+        'EXACTLY "Type your answer here"; put each correct cell value in the answers doc.\n' +
+        '• PSEUDOCODE / CODE COMPLETION (OCR Exam Reference Language) → a typed-answer cell; model ' +
+        'answer in the answers doc.\n' +
+        '• Definitions, multiple-choice and true/false → the existing "( )" / "[[ ]]" closed shapes.\n' +
+        'Match the question difficulty to each level; one question idea per row; plain UK English.',
     },
   ];
 }

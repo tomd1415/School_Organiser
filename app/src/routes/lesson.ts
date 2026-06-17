@@ -31,8 +31,9 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
-import { lessonMaterialItems } from '../llm/prompts/lessonResources';
+import { lessonMaterialItems, examStyleItems } from '../llm/prompts/lessonResources';
 import { lessonMaterialsForPlan, materialCandidatesForPlan, readUseMaterials } from '../services/lessonMaterials';
+import { examProfileForCourse } from '../services/examProfile';
 import {
   getAdaptation,
   getEffectiveLesson,
@@ -470,6 +471,10 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
   const materials = useMaterials
     ? await lessonMaterialsForPlan(lp).catch(() => ({ text: '', files: [], truncated: false }))
     : { text: '', files: [], truncated: false };
+  // B5: weight OCR GCSE exam-style questions by this class's proximity to exams (course + year group).
+  const examProfile = await examProfileForCourse(info.courseId, new Date(), gc).catch(
+    () => ({ stage: 'foundational', weighting: 'none', monthsToExam: null, label: '' }) as const,
+  );
   const callOnce = () =>
     callLLMStructured(
       {
@@ -485,6 +490,7 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
           ...abilityItem(ability),
           ...equipmentItem(equipment),
           ...lessonMaterialItems(materials.text),
+          ...examStyleItems(examProfile),
           ...adaptResourceItems(
             { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
             masterDocs,

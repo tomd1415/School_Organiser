@@ -485,6 +485,23 @@ export interface PlanContext {
   teachingContext: string | null;
 }
 
+export interface CourseExamMeta {
+  keyStage: string | null; // "KS3" | "KS4" | "KS5"
+  qualification: string | null; // "GCSE" | …
+  examDate: string | null; // 'YYYY-MM-DD'
+}
+
+/** The exam-relevant facts about a course — drives how much OCR exam-style practice to weight in
+ *  generated worksheets (Phase 12 B5). No new columns: these have existed since 0002 / 0031. */
+export async function getCourseExamMeta(courseId: number): Promise<CourseExamMeta | null> {
+  const { rows } = await pool.query<CourseExamMeta>(
+    `SELECT key_stage AS "keyStage", qualification, to_char(exam_date, 'YYYY-MM-DD') AS "examDate"
+     FROM courses WHERE id = $1`,
+    [courseId],
+  );
+  return rows[0] ?? null;
+}
+
 // Context for the AI draft-lesson feature: where this plan sits in the scheme + its siblings,
 // plus the course's teaching-context (cohort/pedagogy guidance auto-applied to AI output).
 export async function getPlanContext(id: number): Promise<PlanContext | null> {

@@ -129,6 +129,15 @@ export async function getGroupCourseInfo(groupCourseId: number): Promise<GroupCo
   return rows[0] ?? null;
 }
 
+/** A class's year group ("Y8", "Y11", "Post-16") — sharpens the GCSE-proximity signal (B5). */
+export async function getGroupYearGroup(groupCourseId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ yg: string | null }>(
+    `SELECT g.year_group AS yg FROM group_courses gc JOIN groups g ON g.id = gc.group_id WHERE gc.id = $1`,
+    [groupCourseId],
+  );
+  return rows[0]?.yg ?? null;
+}
+
 // 5.9: optional per-class teaching-context (adds to the course-level default, never replaces it).
 export async function getGroupTeachingContext(groupCourseId: number): Promise<string | null> {
   const { rows } = await pool.query<{ teachingContext: string | null }>(

@@ -1,6 +1,14 @@
 # Phase 12 — Content-rich worksheets, zero-friction pupils, and the deferred tail
 
-> **Status (2026-06-17): planned.** Completes the "What's next" backlog after the pupil-UI
+> **Status (2026-06-17): in progress.** ✅ A1–A3 (save confirmation, live saving state, narrow-screen
+> Slides/Worksheet toggle); ✅ B1–B4 (the lesson's prepared materials now feed worksheet generation +
+> per-class adaptation + unit conversion, with a default-on consent toggle that lists which files are
+> used); ✅ B5.1 (OCR GCSE exam-style question weighting by proximity to exams — KS3 unchanged, exam
+> questions appear more as a cohort nears its GCSEs, using shapes that already auto-/AI-mark).
+> **Remaining:** A4–A7, B5.2 (bespoke render widgets — trace/truth tables — + levels-of-response
+> banded marking + numeric-scheme derivation), C, D, E. Suite green throughout (419 unit / 259 integration).
+>
+> Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets
 > must use all of a lesson's prepared materials to contribute to the sheet**, and **presentation /
 > usability for pupils is the overriding priority — remove as much friction as possible.**

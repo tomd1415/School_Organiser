@@ -3,7 +3,7 @@
 // context[] (redaction, withholding, audit) like everything else.
 import type { RedactableItem } from '../../services/redact';
 
-export const ADAPT_RESOURCES_VERSION = 'adapt_resources@10'; // @10: also build on the lesson's prepared materials (extracted text of uploaded slides/worksheets) via context[]. @9: matching (a choice table sharing one option set). @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
+export const ADAPT_RESOURCES_VERSION = 'adapt_resources@11'; // @11: OCR GCSE exam-style weighting by proximity to exams (B5) via context[]. @10: also build on the lesson's prepared materials (extracted text of uploaded slides/worksheets) via context[]. @9: matching (a choice table sharing one option set). @8: fill-in-the-blank "[[ ]]" gaps. @7: multiple-choice / true-false "( ) option" cells. @6: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + separate ta_notes. @5: all slides in one entry.
 
 export const ADAPT_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher re-making ONE lesson\'s documents for ONE ' +

@@ -52,7 +52,8 @@ import {
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
-import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems } from '../llm/prompts/lessonResources';
+import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems, examStyleItems } from '../llm/prompts/lessonResources';
+import { examProfileForCourse } from '../services/examProfile';
 import { ensureSourceImagesForPlan } from '../services/sourceImages';
 import { lessonMaterialsForPlan, lessonMaterialsForResourceIds, readUseMaterials } from '../services/lessonMaterials';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
@@ -125,6 +126,7 @@ async function generateResourcesForPlan(planId: number, useMaterials = true): Pr
           ...equipmentItem(equipment),
           ...lessonImageItems(images),
           ...lessonMaterialItems(materials.text),
+          ...examStyleItems(examProfile),
           ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
         ],
         instruction: LESSON_RESOURCES_INSTRUCTION,
@@ -146,6 +148,10 @@ async function generateResourcesForPlan(planId: number, useMaterials = true): Pr
   const materials = useMaterials
     ? await lessonMaterialsForPlan(planId).catch(() => ({ text: '', files: [], truncated: false }))
     : { text: '', files: [], truncated: false };
+  // B5: weight OCR GCSE exam-style questions by how close this course is to its exams (KS3 ⇒ none).
+  const examProfile = await examProfileForCourse(ctx.courseId, new Date()).catch(
+    () => ({ stage: 'foundational', weighting: 'none', monthsToExam: null, label: '' }) as const,
+  );
   let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
   let tidy = tidyResourceSet(result.data.resources);
