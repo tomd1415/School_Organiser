@@ -8,7 +8,7 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { getClockContext } from '../repos/clock';
 import { localParts, addDays } from '../lib/time';
-import { getCurrentYearEnd, layLessonsIntoSlot, listAllSlots, slotSchedule, type ScheduleEntry, type SlotOption } from '../repos/delivery';
+import { getCurrentYearEnd, layLessonsIntoSlot, listAllSlots, moveBinding, slotSchedule, type ScheduleEntry, type SlotOption } from '../repos/delivery';
 import { upcomingSlotDates, weekdayName } from '../services/delivery';
 
 const PAST_WEEKS = 6;
@@ -29,6 +29,7 @@ function renderRow(
   lessonId: number,
   courseId: number,
   shift?: { slotKey: string; today: string },
+  dragSlot?: string,
 ): string {
   const open = `/lesson?lesson=${lessonId}&date=${esc(date)}`;
   const kit = e?.planTitle && e.kitNeeded ? `<div class="map-kit" title="kit this lesson needs">🔧 ${esc(e.kitNeeded)}</div>` : '';
@@ -50,7 +51,11 @@ function renderRow(
       : kind === 'today'
         ? `<strong class="map-today">today</strong>${shiftBtn}`
         : '';
-  return `<tr class="map-${kind}"><td class="map-date">${esc(date)}</td><td>${title}</td><td>${status}</td></tr>`;
+  // C3: future weeks are drag-to-shift targets; a future week WITH a lesson can be picked up and
+  // dropped on another week (they swap, or move into an empty week). History (past/today) is fixed.
+  const drag = kind === 'future' && dragSlot ? ` data-date="${esc(date)}"${e?.planTitle ? ' draggable="true"' : ''}` : '';
+  const handle = kind === 'future' && dragSlot && e?.planTitle ? '<span class="map-grip" title="drag to another week" aria-hidden="true">⠿</span> ' : '';
+  return `<tr class="map-${kind}"${drag}><td class="map-date">${esc(date)}</td><td>${handle}${title}</td><td>${status}</td></tr>`;
 }
 
 export function registerMapRoutes(app: FastifyInstance): void {
@@ -81,7 +86,7 @@ export function registerMapRoutes(app: FastifyInstance): void {
           .filter((e) => e.date < today)
           .map((e) => renderRow(e.date, e, 'past', chosen.lessonId, chosen.courseId, shift));
         const todayRow = byDate.has(today) ? [renderRow(today, byDate.get(today), 'today', chosen.lessonId, chosen.courseId, shift)] : [];
-        const futureRows = futureDates.map((d) => renderRow(d, byDate.get(d), 'future', chosen.lessonId, chosen.courseId));
+        const futureRows = futureDates.map((d) => renderRow(d, byDate.get(d), 'future', chosen.lessonId, chosen.courseId, undefined, slotKey(chosen)));
 
         const opts = slots
           .map((s) => `<option value="${slotKey(s)}"${slotKey(s) === slotKey(chosen) ? ' selected' : ''}>${esc(slotLabel(s))}</option>`)
@@ -109,7 +114,8 @@ export function registerMapRoutes(app: FastifyInstance): void {
             <p class="muted">Last ${PAST_WEEKS} weeks taught, then the next ${FUTURE_WEEKS} school weeks (holidays skipped). ✏ = adapted for this group.
               <a href="/schemes?course=${chosen.courseId}">fill this slot from a downloaded unit →</a></p>
             ${kitSummary}
-            <div class="table-scroll"><table class="map-table">
+            <p class="muted map-drag-hint">Tip: drag a future lesson (⠿) onto another week to move it — they swap, or it fills an empty week.</p>
+            <div class="table-scroll"><table class="map-table" data-map-slot="${slotKey(chosen)}" data-map-csrf="${csrf}">
               <thead><tr><th>Week</th><th>Lesson</th><th></th></tr></thead>
               <tbody>${rows || '<tr><td colspan="3" class="muted">nothing recorded or planned in this window</td></tr>'}</tbody>
             </table></div>
@@ -155,6 +161,27 @@ export function registerMapRoutes(app: FastifyInstance): void {
         .type('text/html')
         .send(`<p class="error">Shifted what fits — but the last ${overflow} lesson${overflow === 1 ? '' : 's'} fall past the end of the school year and weren't re-placed; re-lay ${overflow === 1 ? 'it' : 'them'} next year. <a href="/map?slot=${esc(b.data.slot)}">view the map →</a></p>`);
     }
+    reply.header('HX-Redirect', `/map?slot=${b.data.slot}`);
+    return reply.send('');
+  });
+
+  // C3 drag-to-shift: move ONE lesson's binding from one future week to another (swap if occupied).
+  app.post('/map/move', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z
+      .object({
+        slot: z.string().regex(/^\d+:\d+$/),
+        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    const [lessonId, groupCourseId] = b.data.slot.split(':').map(Number) as [number, number];
+    const slots = await listAllSlots();
+    if (!slots.some((s) => Number(s.lessonId) === lessonId && Number(s.groupCourseId) === groupCourseId)) return reply.code(404).send('');
+    const ctx = await getClockContext();
+    const today = localParts(new Date(), ctx.tz).isoDate;
+    if (b.data.from < today || b.data.to < today) return reply.code(400).send('history is fixed'); // never rewrite past weeks
+    await moveBinding(lessonId, groupCourseId, b.data.from, b.data.to);
     reply.header('HX-Redirect', `/map?slot=${b.data.slot}`);
     return reply.send('');
   });

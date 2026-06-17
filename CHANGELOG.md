@@ -72,8 +72,17 @@ slice (**427 unit / 259 integration; typecheck clean**). Built so far:
     reuses the 5.5b `apply-improvement` route and sends the *effective* content (a class's overrides plus
     the master where it inherits), so the master never loses a section. Read-only otherwise; editing each
     version stays on that class's lesson screen. New `listAdaptationsForPlan` repo query.
-- **Remaining Phase 12:** C3 niceties (convert de-dup, kit CSV import, map drag-to-shift), the Phase-4
-  tail (estimate calibration, current-interest profile, optional pgvector) and the gated Opus reviewer tail.
+  - **C3 — the niceties** (migration-free). **Convert de-dup**: converting a folder that was already
+    converted now shows a "you already converted this — convert again?" warning (naming the unit it made)
+    before any AI spend, with a confirmed "convert again as a new unit" / cancel (`unitsFromFolder` repo
+    query + a `confirm` flag on the convert route). **Kit CSV import** on `/kit`: paste a spreadsheet
+    stock-take (tolerant column names; matched by name so re-importing updates, never duplicates —
+    [services/kitImport.ts](../app/src/services/kitImport.ts)). **Map drag-to-shift**: drag a future
+    lesson onto another week to move it — the two swap, or it fills an empty week — never rewriting past
+    weeks (`moveBinding` repo + `POST /map/move`; drag wiring in [public/app.js](../app/public/app.js)).
+    **Workstream C is complete.**
+- **Remaining Phase 12:** the Phase-4 tail (estimate calibration, current-interest profile, optional
+  pgvector) and the gated Opus reviewer tail.
 
 ### 2026-06-15 — Richer worksheet question types: multiple-choice, true/false, matching, fill-in-the-blanks
 

@@ -77,6 +77,26 @@ export function renderClassCompare(plan: PlanRow, adaptations: PlanAdaptation[])
   return `<div class="class-compare">${masterCol}${groupCols}</div>`;
 }
 
+// C3: shown when the chosen folder was already converted — warn, then let the teacher convert again
+// (confirm=1) as a new unit, or cancel back to the normal panel. Swaps into #convert-panel.
+export function renderConvertDup(courseId: number, folder: string, assignSlot: string, assignStart: string, existing: string[]): string {
+  return `<details class="convert-panel" id="convert-panel" open>
+    <summary>📥 Convert a downloaded unit for my classes</summary>
+    <div class="convert-dup">
+      <p class="warn">⚠ You already converted <strong>${esc(folder)}</strong> — it created: ${existing.map((t) => esc(t)).join(', ')}.</p>
+      <p class="muted">Converting again makes a <strong>new</strong> unit (the existing one is kept — delete it with ✕ on the scheme if you don't want it).</p>
+      <form hx-post="/schemes/course/${courseId}/convert" hx-target="#convert-panel" hx-swap="outerHTML" hx-disabled-elt="find button">
+        <input type="hidden" name="folder" value="${esc(folder)}">
+        <input type="hidden" name="assign_slot" value="${esc(assignSlot)}">
+        <input type="hidden" name="assign_start" value="${esc(assignStart)}">
+        <input type="hidden" name="confirm" value="1">
+        <button type="submit" class="btn-secondary">✨ Convert again as a new unit</button>
+        <button type="button" class="link" hx-get="/schemes/course/${courseId}/convert-panel" hx-target="#convert-panel" hx-swap="outerHTML">Cancel</button>
+      </form>
+    </div>
+  </details>`;
+}
+
 function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string {
   return `<span class="row-actions">
     <button type="button" class="link" title="Move ${kind} up" aria-label="Move ${kind} up" hx-post="/schemes/${kind}/${id}/move/up" hx-target="#scheme-tree" hx-swap="outerHTML">▲</button>

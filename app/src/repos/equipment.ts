@@ -36,6 +36,15 @@ export async function createEquipment(name: string, category = 'other'): Promise
   return rows[0]!.id;
 }
 
+/** Case-insensitive name match — lets the CSV import update an existing item instead of duplicating. */
+export async function findEquipmentByName(name: string): Promise<number | null> {
+  const { rows } = await pool.query<{ id: number }>(
+    `SELECT id FROM equipment WHERE lower(name) = lower($1) ORDER BY id LIMIT 1`,
+    [name.trim()],
+  );
+  return rows[0]?.id ?? null;
+}
+
 const FIELDS: Record<string, string> = {
   name: 'name',
   category: 'category',

@@ -16,6 +16,7 @@ import {
 } from '../repos/equipment';
 import { getClockContext } from '../repos/clock';
 import { localParts, addDays } from '../lib/time';
+import { importKit } from '../services/kitImport';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const CATEGORIES = ['physical-computing', 'robotics', 'computers', 'peripherals', 'av', 'consumables', 'other'];
@@ -59,7 +60,7 @@ function groupByCategory(rows: EquipmentRow[]): Map<string, EquipmentRow[]> {
   return m;
 }
 
-function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchived: boolean, csrf: string): string {
+function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchived: boolean, csrf: string, importStatus = ''): string {
   const needle = q.trim().toLowerCase();
   const filtered = needle
     ? rows.filter((r) => [r.name, r.category, r.location, r.notes, r.tags].some((f) => f && f.toLowerCase().includes(needle)))
@@ -91,6 +92,15 @@ function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchi
         <select name="category">${catOpts}</select>
         <button type="submit" class="btn-secondary">＋ add</button>
       </form>
+      <details class="kit-import"${importStatus ? ' open' : ''}>
+        <summary>📥 Import kit from a CSV (spreadsheet stock-take)</summary>
+        <form hx-post="/kit/import" hx-target="closest section" hx-swap="outerHTML">
+          <p class="muted">Paste a CSV with a <strong>name</strong> column (optionally category, total, working, location, notes, tags). Existing items are matched by name and updated — re-importing never duplicates.</p>
+          <textarea name="csv" rows="5" placeholder="name,category,total,working,location&#10;micro:bit v2,physical-computing,16,14,cupboard B"></textarea>
+          <button type="submit" class="btn-secondary">Import</button>
+        </form>
+        ${importStatus}
+      </details>
     </section>`;
 }
 
@@ -121,6 +131,17 @@ export function registerKitRoutes(app: FastifyInstance): void {
     const ctx = await getClockContext();
     const today = localParts(new Date(), ctx.tz).isoDate;
     return reply.type('text/html').send(renderKitPage(await listEquipment(false), today, '', false, reply.generateCsrf()));
+  });
+
+  // C3: bulk-import the kit list from a pasted CSV (idempotent — matches existing items by name).
+  app.post('/kit/import', guard, async (req, reply) => {
+    const b = z.object({ csv: z.string().min(1).max(200000) }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('');
+    const result = await importKit(b.data.csv);
+    const ctx = await getClockContext();
+    const today = localParts(new Date(), ctx.tz).isoDate;
+    const status = `<p class="${result.ok ? 'kit-import-ok' : 'error'}">${esc(result.message)}</p>`;
+    return reply.type('text/html').send(renderKitPage(await listEquipment(false), today, '', false, reply.generateCsrf(), status));
   });
 
   app.post('/kit/:id', guard, async (req, reply) => {

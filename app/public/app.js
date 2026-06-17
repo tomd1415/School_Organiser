@@ -275,4 +275,45 @@
       else if (t.hasAttribute('data-timer-full')) openFull();
     });
   })();
+
+  // C3 curriculum-map drag-to-shift: pick up a future lesson row and drop it on another week to move
+  // it (the two swap, or it fills an empty week). History rows aren't draggable; the server re-checks.
+  (function () {
+    var table = document.querySelector('.map-table[data-map-slot]');
+    if (!table) return;
+    var slot = table.getAttribute('data-map-slot');
+    var csrf = table.getAttribute('data-map-csrf');
+    var fromDate = null;
+    function clearOver() { table.querySelectorAll('.map-drop-over').forEach(function (r) { r.classList.remove('map-drop-over'); }); }
+    table.addEventListener('dragstart', function (e) {
+      var tr = e.target.closest('tr[draggable="true"]');
+      if (!tr) return;
+      fromDate = tr.getAttribute('data-date');
+      if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', fromDate); } catch (x) {} }
+      tr.classList.add('map-dragging');
+    });
+    table.addEventListener('dragend', function (e) {
+      var tr = e.target.closest('tr'); if (tr) tr.classList.remove('map-dragging');
+      clearOver(); fromDate = null;
+    });
+    table.addEventListener('dragover', function (e) {
+      var tr = e.target.closest('tr[data-date]'); if (!tr || !fromDate) return;
+      e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      clearOver(); if (tr.getAttribute('data-date') !== fromDate) tr.classList.add('map-drop-over');
+    });
+    table.addEventListener('drop', function (e) {
+      var tr = e.target.closest('tr[data-date]'); if (!tr || !fromDate) return;
+      e.preventDefault();
+      var toDate = tr.getAttribute('data-date');
+      if (!toDate || toDate === fromDate) { clearOver(); return; }
+      fetch('/map/move', {
+        method: 'POST',
+        headers: { 'x-csrf-token': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'slot=' + encodeURIComponent(slot) + '&from=' + encodeURIComponent(fromDate) + '&to=' + encodeURIComponent(toDate),
+        credentials: 'same-origin',
+      })
+        .then(function (r) { if (r.ok) location.href = '/map?slot=' + encodeURIComponent(slot); })
+        .catch(function () {});
+    });
+  })();
 })();

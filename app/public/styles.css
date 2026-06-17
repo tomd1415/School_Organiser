@@ -510,6 +510,16 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .cc-col .oc-block { margin: 0.4rem 0; }
 .plan-compare { margin-top: 0.5rem; }
 .map-kit { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+/* C3 niceties: kit CSV import, convert-again warning, map drag-to-shift. */
+.kit-import { margin-top: 0.6rem; }
+.kit-import textarea { width: 100%; font-family: var(--mono, monospace); font-size: 0.85rem; }
+.kit-import-ok { color: #2e7d32; font-weight: 600; }
+.convert-dup .warn { color: #b4451f; font-weight: 600; }
+.map-drag-hint { font-size: 0.8rem; }
+.map-grip { cursor: grab; color: var(--muted); -webkit-user-select: none; user-select: none; }
+tr[draggable="true"] { cursor: grab; }
+tr.map-dragging { opacity: 0.5; }
+tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 2px 0 var(--accent); }
 .map-kit-summary { margin: 0.4rem 0 0.6rem; font-size: 0.85rem; }
 .map-kit-summary ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
 .oc-kit { font-size: 0.9rem; }

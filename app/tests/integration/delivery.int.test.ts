@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse } from '../../src/repos/delivery';
+import { getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
 import { addDays, weekdayOf } from '../../src/lib/time';
 
 // 5.4: laying a unit's lessons into a group's weekly slot. Uses a real slot (read-only) and a
@@ -111,5 +111,21 @@ describe('calendar lay-down (5.4 — integration, needs the dev DB up)', () => {
       [groupCourseId, dates],
     );
     expect(bound.rows.map((r) => Number(r.lesson_plan_id))).toEqual([...planIds].reverse());
+  });
+
+  it('drag-to-shift moves a lesson, swapping with an occupied target week (C3)', async () => {
+    // state from the previous test: dates [0,1,2] hold [p3, p2, p1]. Move week 0 onto week 2 → swap.
+    const moved = await moveBinding(slotLessonId, groupCourseId, dates[0]!, dates[2]!);
+    expect(moved).toBe(true);
+    const bound = await pool.query<{ lesson_plan_id: string }>(
+      `SELECT oc.lesson_plan_id FROM occurrence_courses oc JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+       WHERE oc.group_course_id = $1 AND o.date = ANY($2) ORDER BY o.date`,
+      [groupCourseId, dates],
+    );
+    // [p3,p2,p1] with weeks 0 and 2 swapped ⇒ [p1,p2,p3] (the original order)
+    expect(bound.rows.map((r) => Number(r.lesson_plan_id))).toEqual(planIds);
+    // nothing bound at the source date ⇒ refuses (returns false)
+    await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE group_course_id = $1 AND occurrence_id = (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $2 AND date = $3)`, [groupCourseId, slotLessonId, dates[1]]);
+    expect(await moveBinding(slotLessonId, groupCourseId, dates[1]!, dates[0]!)).toBe(false);
   });
 });

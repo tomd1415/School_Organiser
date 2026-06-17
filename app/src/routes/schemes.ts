@@ -44,6 +44,7 @@ import {
   linkResourceToPlan,
   linkResourceToUnit,
   listResourceIdsForFolder,
+  unitsFromFolder,
   listResourcesForPlan,
   listVersions,
   searchResources,
@@ -87,7 +88,7 @@ import { listCourseDocsWithContent } from '../repos/courseDocs';
 import { courseDocItems } from '../llm/prompts/courseDocs';
 import { reviewLessonMaster, reviewUnitMaster } from '../services/reviewLesson';
 import { claimOpenReview, getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
-import { renderReview, renderClassCompare } from '../lib/schemeView';
+import { renderReview, renderClassCompare, renderConvertDup } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -350,6 +351,15 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
   });
 
   // 5.3: find convertible downloaded units (folders with lesson-named subfolders) by substring.
+  // C3: re-render the convert panel (the "Cancel" on the already-converted warning returns here).
+  app.get('/schemes/course/:id/convert-panel', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [slots, ctx] = await Promise.all([listSlotsForCourse(id.data.id), getClockContext()]);
+    const today = localParts(new Date(), ctx.tz).isoDate;
+    return reply.type('text/html').send(renderConvertPanel(id.data.id, slots, today));
+  });
+
   app.get('/schemes/course/:id/convert-search', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     const qq = z.object({ q: z.string().max(200).optional() }).safeParse(req.query);
@@ -370,6 +380,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         q: z.string().optional(),
         assign_slot: z.string().regex(/^\d+:\d+$/).optional().or(z.literal('')),
         assign_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+        confirm: z.string().optional(), // C3: set after the "already converted?" warning
       })
       .safeParse(req.body);
     if (!id.success) return reply.code(400).send('');
@@ -397,6 +408,13 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     // Only a genuine candidate folder is convertible (also guards the LIKE in the source-link query).
     if (!unitCandidates(paths).some((c) => c.folder === b.data.folder)) {
       return reply.type('text/html').send(panel('That folder is not a convertible unit — pick one from the search results.'));
+    }
+    // C3 de-dup: this folder was already converted → warn (and let them convert again) before spending.
+    if (!b.data.confirm) {
+      const already = await unitsFromFolder(b.data.folder);
+      if (already.length) {
+        return reply.type('text/html').send(renderConvertDup(courseId, b.data.folder, assignSlot ?? '', startDate, already));
+      }
     }
     const lessons = lessonStructure(paths, b.data.folder);
 

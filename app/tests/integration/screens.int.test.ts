@@ -317,7 +317,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       method: 'POST',
       url: `/schemes/course/${courseId}/convert`,
       headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
-      payload: `folder=${encodeURIComponent(folder)}`,
+      payload: `folder=${encodeURIComponent(folder)}&confirm=1`, // confirm=1 bypasses the C3 "already converted?" gate — this asserts the AI-degrade path
     });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('convert-panel'); // the panel again, with the degrade message
@@ -359,7 +359,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
         method: 'POST',
         url: `/schemes/course/${courseId}/convert`,
         headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
-        payload: `folder=${encodeURIComponent(folder)}&assign_slot=${lessonId}%3A${groupCourseId}&assign_start=2099-06-01`,
+        payload: `folder=${encodeURIComponent(folder)}&assign_slot=${lessonId}%3A${groupCourseId}&assign_start=2099-06-01&confirm=1`, // bypass the C3 de-dup gate to assert the AI-degrade path
       });
       expect(deg.body).toContain('class="error"'); // AI degrade (no key)
       const afterUnits = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM units`);

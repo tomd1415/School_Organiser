@@ -2,7 +2,7 @@
 // exists (timetabled_lesson_courses → group_courses); this binds a unit's lessons to the upcoming
 // dated occurrences of one slot, for one group_course.
 import { pool } from '../db/pool';
-import { findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
+import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
 
 export interface CourseSlot {
   lessonId: number; // timetabled_lessons id
@@ -109,6 +109,25 @@ export interface LaidLesson {
   date: string;
   lessonPlanId: number;
   title: string;
+}
+
+/** C3 map drag-to-shift: move ONE lesson's binding between weeks of a slot+group. If the target week
+ *  already holds a lesson the two SWAP; an empty target just receives it (source cleared). Returns
+ *  false when there's nothing bound at `fromDate`. Callers must keep both dates today-or-future. */
+export async function moveBinding(timetabledLessonId: number, groupCourseId: number, fromDate: string, toDate: string): Promise<boolean> {
+  if (fromDate === toDate) return false;
+  const fromOccId = await findOccurrence(timetabledLessonId, fromDate);
+  if (fromOccId == null) return false;
+  const fromOc = (await getOccurrenceCourses(fromOccId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
+  if (!fromOc || fromOc.lessonPlanId == null) return false;
+  const movingPlan = fromOc.lessonPlanId;
+  const toOccId = await findOrCreateOccurrence(timetabledLessonId, toDate);
+  const toOc = (await getOccurrenceCourses(toOccId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
+  if (!toOc) return false;
+  const displaced = toOc.lessonPlanId; // null when the target week was empty
+  await setOccurrenceCoursePlan(toOc.occurrenceCourseId, movingPlan);
+  await setOccurrenceCoursePlan(fromOc.occurrenceCourseId, displaced); // swap, or clear when empty
+  return true;
 }
 
 /**

@@ -273,6 +273,21 @@ export async function listSourceFilesForUnit(unitId: number): Promise<Array<{ re
   return rows.map((r) => ({ resourceId: Number(r.resourceId), title: r.title, path: r.path ?? '' }));
 }
 
+/** C3 convert de-dup: unit titles already created from this source folder (its files are linked to
+ *  them as sources). Empty ⇒ never converted. Lets the convert flow warn before a duplicate run. */
+export async function unitsFromFolder(folder: string): Promise<string[]> {
+  const { rows } = await pool.query<{ title: string }>(
+    `SELECT DISTINCT u.title
+     FROM resource_links rl
+     JOIN units u ON u.id = rl.unit_id
+     JOIN resource_versions rv ON rv.resource_id = rl.resource_id
+     WHERE rl.unit_id IS NOT NULL AND rv.change_note LIKE 'imported from ' || $1 || '/%'
+     ORDER BY u.title`,
+    [folder],
+  );
+  return rows.map((r) => r.title);
+}
+
 /** Distinct resources whose imported path sits under a folder — the unit's source files. */
 export async function listResourceIdsForFolder(folder: string): Promise<number[]> {
   const { rows } = await pool.query<{ id: number }>(

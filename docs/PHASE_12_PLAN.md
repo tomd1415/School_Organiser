@@ -21,8 +21,11 @@
 > "kit needed across the next weeks" checklist); ✅ C2 (cross-group compare — a lazy "⚖ Compare classes'
 > versions" section on each Schemes lesson shows the master beside every class's adaptation, marks
 > inherited fields, and "⬆ promote this class's version to master" reuses the 5.5b apply path;
-> migration-free).
-> **Remaining:** C3 (optional niceties), D, E. Suite green throughout (430 unit / 259 integration).
+> migration-free); ✅ C3 (the niceties — convert **de-dup** warns when a folder was already converted
+> and offers "convert again", **kit CSV import** on `/kit` (idempotent, matched by name), and map
+> **drag-to-shift** to move a lesson between weeks, swapping with an occupied target). **Workstream C
+> is complete.**
+> **Remaining:** D, E. Suite green throughout (431 unit / 263 integration).
 >
 > Completes the "What's next" backlog after the pupil-UI
 > worksheet overhaul (CHANGELOG 2026-06-15). Adds one new requirement from the teacher: **worksheets
