@@ -54,7 +54,7 @@ import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems } from '../llm/prompts/lessonResources';
 import { ensureSourceImagesForPlan } from '../services/sourceImages';
-import { lessonMaterialsForPlan, lessonMaterialsForResourceIds } from '../services/lessonMaterials';
+import { lessonMaterialsForPlan, lessonMaterialsForResourceIds, readUseMaterials } from '../services/lessonMaterials';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
 import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
@@ -105,7 +105,7 @@ async function treeHtml(schemeId: number): Promise<string> {
 const RES_KIND_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'TA notes', answers: 'answers', support: 'support worksheet' };
 const RES_KIND_STORE: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'ta_notes', answers: 'document', support: 'worksheet' };
 
-async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; message: string }> {
+async function generateResourcesForPlan(planId: number, useMaterials = true): Promise<{ ok: boolean; message: string }> {
   const [ctx, row] = await Promise.all([getPlanContext(planId), getPlanRow(planId)]);
   if (!ctx || !row) return { ok: false, message: 'Lesson not found.' };
   if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
@@ -142,8 +142,10 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
   const images = await ensureSourceImagesForPlan(planId).catch(() => []);
   // Phase 12 B2: build the worksheet ON the lesson's own prepared materials (extracted text). Runs
   // after the image step so any unit-level sources it linked are visible here. Best-effort; empty ⇒
-  // no item, so a lesson with no uploaded materials generates exactly as before.
-  const materials = await lessonMaterialsForPlan(planId).catch(() => ({ text: '', files: [], truncated: false }));
+  // no item, so a lesson with no uploaded materials generates exactly as before. B4: opt-out skips it.
+  const materials = useMaterials
+    ? await lessonMaterialsForPlan(planId).catch(() => ({ text: '', files: [], truncated: false }))
+    : { text: '', files: [], truncated: false };
   let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
   let tidy = tidyResourceSet(result.data.resources);
@@ -182,7 +184,8 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
       created++;
     }
   }
-  return { ok: true, message: `resources ready ✓ — ${created} new, ${updated} updated (linked below)` };
+  const builtOn = materials.files.length ? ` · built on ${materials.files.length} of your file(s)${materials.truncated ? ' (partial)' : ''}` : '';
+  return { ok: true, message: `resources ready ✓ — ${created} new, ${updated} updated${builtOn} (linked below)` };
 }
 
 export function registerSchemeRoutes(app: FastifyInstance): void {
@@ -481,7 +484,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
     const q = z.object({ from: z.enum(['lesson']).optional() }).safeParse(req.query);
-    const res = await generateResourcesForPlan(id.data.id);
+    const res = await generateResourcesForPlan(id.data.id, readUseMaterials(req.body));
     if (q.success && q.data.from === 'lesson') {
       if (res.ok) {
         reply.header('HX-Refresh', 'true');

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMaterialText, isTextBearing } from '../src/services/lessonMaterials';
+import { buildMaterialText, isTextBearing, readUseMaterials } from '../src/services/lessonMaterials';
 import { lessonMaterialItems } from '../src/llm/prompts/lessonResources';
 
 describe('lessonMaterials — buildMaterialText (capping is pure + testable)', () => {
@@ -60,6 +60,25 @@ describe('lessonMaterials — isTextBearing', () => {
   it('accepts office / pdf / plain extensions, rejects images and unknowns', () => {
     for (const f of ['a.pdf', 'b.docx', 'c.pptx', 'd.odt', 'e.txt', 'f.md', 'g.csv']) expect(isTextBearing(f)).toBe(true);
     for (const f of ['x.png', 'y.jpg', 'z.zip', 'noext']) expect(isTextBearing(f)).toBe(false);
+  });
+});
+
+describe('lessonMaterials — readUseMaterials consent (B4)', () => {
+  it('no field at all ⇒ ON (existing surfaces / buttons without the control are unchanged)', () => {
+    expect(readUseMaterials(undefined)).toBe(true);
+    expect(readUseMaterials({})).toBe(true);
+    expect(readUseMaterials(null)).toBe(true);
+  });
+
+  it('checked box ⇒ ON (paired hidden "0" + checkbox "1" arrive together)', () => {
+    expect(readUseMaterials({ use_materials: ['0', '1'] })).toBe(true);
+    expect(readUseMaterials({ use_materials: ['1', '0'] })).toBe(true);
+    expect(readUseMaterials({ use_materials: '1' })).toBe(true);
+  });
+
+  it('unchecked box ⇒ OFF (only the hidden "0" is posted)', () => {
+    expect(readUseMaterials({ use_materials: '0' })).toBe(false);
+    expect(readUseMaterials({ use_materials: ['0'] })).toBe(false);
   });
 });
 

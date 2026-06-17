@@ -10,6 +10,7 @@ import {
   getCurrentVersion,
   getResource,
   listResourcesForPlan,
+  listSourceDocsForPlan,
   type LinkedResource,
 } from '../repos/resources';
 import { readStored } from '../lib/resourceStore';
@@ -33,6 +34,18 @@ const TEXT_EXT = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'odt', 'odp', 'rt
 /** Does this filename look like something docText can extract words from? (cheap pre-filter) */
 export function isTextBearing(title: string): boolean {
   return TEXT_EXT.has((title.split('.').pop() ?? '').toLowerCase());
+}
+
+/**
+ * B4 consent: read the generate form's `use_materials` field. The control posts a paired hidden
+ * "0" plus a checked "1", so a CHECKED box yields '1' (on) and an UNCHECKED box yields only '0'
+ * (off). A request with NO field at all (a generate button without the control) defaults to ON, so
+ * every existing surface keeps building on materials unless the teacher explicitly opts out.
+ */
+export function readUseMaterials(body: unknown): boolean {
+  const raw = (body as Record<string, unknown> | null | undefined)?.use_materials;
+  if (raw === undefined) return true;
+  return ([] as unknown[]).concat(raw).map(String).includes('1');
 }
 
 /**
@@ -63,6 +76,12 @@ export function buildMaterialText(
     total += slice.length;
   }
   return { text: parts.join('\n\n'), files: included, truncated };
+}
+
+/** The titles of the teacher's source docs that WOULD feed this plan's generation — cheap (no text
+ *  extraction), for the pre-spend "build on my materials" preview/consent (B4). */
+export async function materialCandidatesForPlan(planId: number): Promise<string[]> {
+  return (await listSourceDocsForPlan(planId)).filter((r) => isTextBearing(r.title)).map((r) => r.title);
 }
 
 /** Read + extract the text of every text-bearing source linked to a plan, then cap it. Best-effort. */

@@ -195,6 +195,19 @@ export async function listResourcesForPlan(planId: number): Promise<LinkedResour
   return rows;
 }
 
+/** The teacher's own SOURCE documents linked to a plan (uploaded/imported, not AI-generated, not
+ *  images) — the candidates for "build the worksheet on my materials" (B4 preview, cheap: no extract). */
+export async function listSourceDocsForPlan(planId: number): Promise<LinkedResource[]> {
+  const { rows } = await pool.query<LinkedResource>(
+    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+     JOIN resources r ON r.id = rl.resource_id
+     WHERE rl.lesson_plan_id = $1 AND r.active AND r.source IN ('uploaded', 'imported') AND r.kind <> 'image'
+     ORDER BY r.title`,
+    [planId],
+  );
+  return rows;
+}
+
 export interface ResourceUsage {
   kind: 'plan' | 'unit' | 'group';
   title: string;

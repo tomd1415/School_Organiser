@@ -32,7 +32,7 @@ import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
 import { lessonMaterialItems } from '../llm/prompts/lessonResources';
-import { lessonMaterialsForPlan } from '../services/lessonMaterials';
+import { lessonMaterialsForPlan, materialCandidatesForPlan, readUseMaterials } from '../services/lessonMaterials';
 import {
   getAdaptation,
   getEffectiveLesson,
@@ -239,6 +239,20 @@ async function renderWorksheetPreview(gc: number, lp: number, level: Level): Pro
     <div class="ws-doc ws-doc-preview" aria-label="Pupil preview">${rendered.html}</div>`;
 }
 
+// B4: a default-on "build on my uploaded materials" checkbox + a preview of which files. Empty list
+// ⇒ nothing rendered (no materials to consent to). A paired hidden 'use_materials=0' means an
+// UNCHECKED box still posts an explicit "off" (an unchecked checkbox alone sends nothing); the route
+// treats the presence of '1' as on, so a generate button with no control at all defaults to on.
+function materialsConsent(titles: string[]): string {
+  if (!titles.length) return '';
+  const shown = titles.slice(0, 4).map(esc).join(', ');
+  const more = titles.length > 4 ? `, +${titles.length - 4} more` : '';
+  return `<label class="materials-consent" title="${esc(titles.join(', '))}">
+      <input type="checkbox" name="use_materials" value="1" checked> 📎 build on my uploaded materials
+      <span class="muted">(${titles.length}: ${shown}${more})</span>
+    </label><input type="hidden" name="use_materials" value="0">`;
+}
+
 function renderSection(
   s: CourseSection,
   plans: Array<{ id: number; title: string }>,
@@ -247,6 +261,7 @@ function renderSection(
   taFb: TaFeedbackRow[],
   eff: EffectiveLesson | undefined,
   slot: { lessonId: number; date: string },
+  materialTitles: string[],
 ): string {
   const colour = s.colour ?? '#94a3b8';
   const oc = s.occurrenceCourseId;
@@ -275,8 +290,8 @@ function renderSection(
           s.lessonPlanId == null
             ? ''
             : eff?.adapted
-              ? `<button type="button" class="link" title="Generate slides/worksheet/support/answers from THIS CLASS'S revised plan, linked to this class (AI)" hx-post="/lesson/adapt/${s.groupCourseId}/${s.lessonPlanId}/resources-ai" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate for this class (AI)</button><span id="res-gen-${oc}"></span>`
-              : `<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
+              ? `${materialsConsent(materialTitles)}<button type="button" class="link" title="Generate slides/worksheet/support/answers from THIS CLASS'S revised plan, linked to this class (AI)" hx-post="/lesson/adapt/${s.groupCourseId}/${s.lessonPlanId}/resources-ai" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate for this class (AI)</button><span id="res-gen-${oc}"></span>`
+              : `${materialsConsent(materialTitles)}<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
         }
       </div>
       ${
@@ -360,6 +375,7 @@ function renderDetail(
   prep: PrepItem[],
   plansByCourse: Map<number, Array<{ id: number; title: string }>>,
   resByPlan: Map<number, LinkedResource[]>,
+  matByPlan: Map<number, string[]>,
   effByKey: Map<string, EffectiveLesson>,
   adaptedResByKey: Map<string, LinkedResource[]>,
   taFbByOc: Map<number, TaFeedbackRow[]>,
@@ -386,6 +402,7 @@ function renderDetail(
               taFbByOc.get(s.occurrenceCourseId) ?? [],
               s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
               { lessonId: h.lessonId, date: h.date },
+              (s.lessonPlanId != null && matByPlan.get(s.lessonPlanId)) || [],
             ),
           )
           .join('')
@@ -422,7 +439,7 @@ function renderDetail(
 // (reset-to-master unlinks them; the files stay). Re-running version-bumps, never duplicates.
 const ADAPT_RES_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'TA notes', answers: 'answers', support: 'support worksheet' };
 
-async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: boolean; message: string }> {
+async function generateAdaptedResources(gc: number, lp: number, useMaterials = true): Promise<{ ok: boolean; message: string }> {
   const [adaptation, master, info] = await Promise.all([getAdaptation(gc, lp), getLessonPlan(lp), getGroupCourseInfo(gc)]);
   if (!master || !info) return { ok: false, message: 'Lesson not found.' };
   if (!adaptation) return { ok: false, message: "Adapt the lesson for this class first — class copies are made from the class's version." };
@@ -449,7 +466,10 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
   const equipment = await listActiveEquipment();
   // Phase 12 B2: anchor the class adaptation to the lesson's own prepared materials too (the master
   // .md sheets above are already fed in; this adds the original uploaded source content). Best-effort.
-  const materials = await lessonMaterialsForPlan(lp).catch(() => ({ text: '', files: [], truncated: false }));
+  // B4: the teacher can opt out per generation; off ⇒ no extraction, no item (unchanged behaviour).
+  const materials = useMaterials
+    ? await lessonMaterialsForPlan(lp).catch(() => ({ text: '', files: [], truncated: false }))
+    : { text: '', files: [], truncated: false };
   const callOnce = () =>
     callLLMStructured(
       {
@@ -513,7 +533,8 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
       created++;
     }
   }
-  return { ok: true, message: `class copies ready ✓ — ${created} new, ${updated} updated` };
+  const builtOn = materials.files.length ? ` · built on ${materials.files.length} of your file(s)${materials.truncated ? ' (partial)' : ''}` : '';
+  return { ok: true, message: `class copies ready ✓ — ${created} new, ${updated} updated${builtOn}` };
 }
 
 export function registerLessonRoutes(app: FastifyInstance): void {
@@ -565,6 +586,12 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const resByPlan = new Map<number, LinkedResource[]>();
       planIds.forEach((pid, i) => resByPlan.set(pid, resLists[i] ?? []));
 
+      // B4: the teacher's own source docs that resource generation would build on — names only (cheap,
+      // no text extraction), for the pre-spend "build on my materials" preview + consent toggle.
+      const matLists = await Promise.all(planIds.map((pid) => materialCandidatesForPlan(pid)));
+      const matByPlan = new Map<number, string[]>();
+      planIds.forEach((pid, i) => matByPlan.set(pid, matLists[i] ?? []));
+
       // 5.2: each group's effective lesson (its adaptation where present, else the master).
       const effByKey = new Map<string, EffectiveLesson>();
       const adaptedResByKey = new Map<string, LinkedResource[]>();
@@ -592,7 +619,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const title = header.groupName ?? purposeLabel(header.purpose);
       return reply
         .type('text/html')
-        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, effByKey, adaptedResByKey, taFbByOc, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
+        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, matByPlan, effByKey, adaptedResByKey, taFbByOc, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
@@ -927,7 +954,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
   app.post('/lesson/adapt/:gc/:lp/resources-ai', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
     const p = AdaptParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
-    const res = await generateAdaptedResources(p.data.gc, p.data.lp);
+    const res = await generateAdaptedResources(p.data.gc, p.data.lp, readUseMaterials(req.body));
     if (res.ok) {
       reply.header('HX-Refresh', 'true');
       return reply.send('');

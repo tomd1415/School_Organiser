@@ -440,6 +440,8 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 /* lesson screen: bound plan's resources (read-only) */
 .ld-res { margin: 0.4rem 0; font-size: 0.85rem; }
 .ld-res-label { font-weight: 700; }
+.materials-consent { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.5rem; padding: 0.15rem 0.4rem; border-radius: 6px; background: rgba(40, 120, 80, 0.08); cursor: pointer; }
+.materials-consent input { accent-color: var(--accent); }
 /* plan editor: attach/detach resources */
 .plan-res-head { font-weight: 700; margin-top: 0.5rem; font-size: 0.85rem; }
 .plan-res { margin: 0.3rem 0; }
