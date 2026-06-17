@@ -1508,8 +1508,8 @@ adapt per group → fold improvements back into the master.**
 
 ### 2026-06-09 — 4.4: author a scheme of work with AI (verified live)
 
-- **"✨ Author scheme with AI"** in the Schemes empty state → a brief becomes a full scheme (units
-  + lesson titles), **materialised atomically** as a real, editable scheme you then prune and flesh
+- **"✨ Author scheme with AI"** in the Schemes empty state → a brief becomes a full scheme (units +
+  lesson titles), **materialised atomically** as a real, editable scheme you then prune and flesh
   out lesson-by-lesson with the 4.3 drafter. Opus (design model); **nested** structured output.
 - **Verified live:** a 4-unit / 23-lesson KS3 scheme authored for **1.06p** and materialised correctly.
 - New: `llm/schemas/authorScheme.ts`, `llm/prompts/authorScheme.ts`, `repos/schemes.materialiseScheme`
@@ -1590,8 +1590,8 @@ adapt per group → fold improvements back into the master.**
   the teacher's own work**, the rest TC curriculum. Writes manifests to `data/reconcile-report/`.
 - **`import-resources --filter <manifest>`** — import only the files listed in a manifest (e.g.
   `own.tsv`); also now skips `.part`/`.crdownload` partial downloads and Mac `__MACOSX`/`._` junk.
-- **First full import:** own work (265 files, big backup zips excluded) + KS3 + all 16 GCSE units
-  + KS4 non-GCSE → **2,433 resources, 3.6 GB** in the store (dedup skipped 534 byte-identical).
+- **First full import:** own work (265 files, big backup zips excluded) + KS3 + all 16 GCSE units +
+  KS4 non-GCSE → **2,433 resources, 3.6 GB** in the store (dedup skipped 534 byte-identical).
 - Docs: [docs/RESOURCE_INGEST.md](docs/RESOURCE_INGEST.md) — KS4 download checklist + workflow.
 - `.gitignore`: `data/reconcile-report/` (regenerable, pupil-data-adjacent).
 
@@ -1614,8 +1614,8 @@ adapt per group → fold improvements back into the master.**
 ### 2026-06-09 — Phase 3 plan authored; docs audited
 
 - **Authored [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md)** — the Phase 3 build plan (schemes of
-  work → lesson plans → the **hosted, versioned resource store** + Office/PDF preview + bulk-import
-  + the "lessons I oversee" view + file-store backups), 8 increments (3.1–3.8). For sign-off.
+  work → lesson plans → the **hosted, versioned resource store** + Office/PDF preview + bulk-import +
+  the "lessons I oversee" view + file-store backups), 8 increments (3.1–3.8). For sign-off.
 - **Docs brought up to date:** added `recurring_tasks` + `tasks.recurring_task_id` to DATA_MODEL,
   noted the recurring-task generator in ARCHITECTURE, and **marked 2.11 (pupils / DPIA) deferred**
   in the ROADMAP — picked up with the pupil-facing resources project.

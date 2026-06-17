@@ -353,8 +353,8 @@ suite (real dev DB on 5434, AI forced off). Per-idea:
 
 - **Anything multi-teacher** — per-teacher RBAC, cross-subject profiles, per-staff UI preferences:
   stays in [PHASE_MULTI_TEACHER_PLAN.md](PHASE_MULTI_TEACHER_PLAN.md). Idea 11's "different teachers,
-  different UIs" is satisfied for *this* single-teacher-per-instance app by per-browser `localStorage`
-  + a per-instance `settings` default; a per-staff preference column waits for the multi-teacher work.
+  different UIs" is satisfied for *this* single-teacher-per-instance app by per-browser `localStorage` +
+  a per-instance `settings` default; a per-staff preference column waits for the multi-teacher work.
 - **pgvector semantic retrieval over course docs** (idea 9 tail) — keyword/truncation retrieval ships
   first; revisit embeddings only if lexical retrieval surfaces irrelevant spec sections. The
   `course_doc_text` table is shaped to add a GIN/tsvector index later.

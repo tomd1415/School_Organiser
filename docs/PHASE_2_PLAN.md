@@ -115,8 +115,8 @@ Pure logic in services (unit-tested, no DB); SQL in repos. The two **pure hearts
   from the day.
 - **`WorkBlockService`** — plan a block in a window; the **diverted** path (preserve
   `planned_task_id`, record `actual_*`); the planned-vs-actual day/week log.
-- **`EventService`** — events/deadlines/exams + parental-contact log; **lead-time** → "due soon"
-  + optional **prep-task generation** (`tasks.event_id`); `affects_availability` removes a window.
+- **`EventService`** — events/deadlines/exams + parental-contact log; **lead-time** → "due soon" +
+  optional **prep-task generation** (`tasks.event_id`); `affects_availability` removes a window.
 - **`TimerService`** (§7) — start/stop/pause/resume with the **one-running** invariant;
   accumulate `tasks.actual_seconds`; the estimate-vs-actual report.
 - **`FocusService`** (pure, §6) — rank candidate tasks for *now* and return the **single** best,

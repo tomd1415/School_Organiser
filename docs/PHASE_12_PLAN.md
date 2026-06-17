@@ -84,8 +84,9 @@ One extraction engine, three call sites.
 - **B4 — Teacher preview & consent.** Before spend, show which files were read + a char count + a "use
   my materials" toggle (default on), honouring the `docText` "always previewed" rule. Inherits
   redaction/withholding/audit via `context[]`. **M.**
-- **B5 — OCR GCSE Computer Science exam question types, weighted by proximity to GCSE.** Every question
-  shape used in the **OCR GCSE CS (J277) exam papers** must be generatable and auto-/AI-markable —
+- **B5 — OCR GCSE Computer Science exam question types, weighted by proximity to GCSE.** The app must be
+  able to generate, and to mark (automatically or via the AI marker), every question shape used in the
+  **OCR GCSE CS (J277) exam papers** —
   extending the four closed types already built (MC / true-false / matching / fill-in-the-blanks) with:
   - **short-answer recall** ("state", "identify", "give") — 1–2 mark `keyword`/`exact` marking;
   - **describe / explain** (2–4 mark open answers, AI-marked against point-based schemes);
