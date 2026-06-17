@@ -31,6 +31,8 @@ import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceSt
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, tidyResourceSet } from '../llm/schemas/lessonResources';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
+import { lessonMaterialItems } from '../llm/prompts/lessonResources';
+import { lessonMaterialsForPlan } from '../services/lessonMaterials';
 import {
   getAdaptation,
   getEffectiveLesson,
@@ -445,6 +447,9 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
   const groupCtx = await getGroupTeachingContext(gc);
   const ability = await getGroupAbility(gc);
   const equipment = await listActiveEquipment();
+  // Phase 12 B2: anchor the class adaptation to the lesson's own prepared materials too (the master
+  // .md sheets above are already fed in; this adds the original uploaded source content). Best-effort.
+  const materials = await lessonMaterialsForPlan(lp).catch(() => ({ text: '', files: [], truncated: false }));
   const callOnce = () =>
     callLLMStructured(
       {
@@ -459,6 +464,7 @@ async function generateAdaptedResources(gc: number, lp: number): Promise<{ ok: b
           ...groupContextItems(courseCtx, groupCtx),
           ...abilityItem(ability),
           ...equipmentItem(equipment),
+          ...lessonMaterialItems(materials.text),
           ...adaptResourceItems(
             { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
             masterDocs,

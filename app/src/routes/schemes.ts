@@ -52,8 +52,9 @@ import {
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
-import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems } from '../llm/prompts/lessonResources';
+import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems } from '../llm/prompts/lessonResources';
 import { ensureSourceImagesForPlan } from '../services/sourceImages';
+import { lessonMaterialsForPlan, lessonMaterialsForResourceIds } from '../services/lessonMaterials';
 import { lessonStructure, unitCandidates } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
 import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
@@ -123,6 +124,7 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
           ...teachingContextItems(ctx.teachingContext),
           ...equipmentItem(equipment),
           ...lessonImageItems(images),
+          ...lessonMaterialItems(materials.text),
           ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
         ],
         instruction: LESSON_RESOURCES_INSTRUCTION,
@@ -136,7 +138,12 @@ async function generateResourcesForPlan(planId: number): Promise<{ ok: boolean; 
   const equipment = await listActiveEquipment();
   // Carry over the source slides' images so the model can embed them where the lesson refers to a
   // visual (best-effort; empty when the plan has no linked Office source). Never blocks generation.
+  // (This also backfills unit-level source links onto the plan, so the material read below sees them.)
   const images = await ensureSourceImagesForPlan(planId).catch(() => []);
+  // Phase 12 B2: build the worksheet ON the lesson's own prepared materials (extracted text). Runs
+  // after the image step so any unit-level sources it linked are visible here. Best-effort; empty ⇒
+  // no item, so a lesson with no uploaded materials generates exactly as before.
+  const materials = await lessonMaterialsForPlan(planId).catch(() => ({ text: '', files: [], truncated: false }));
   let result = await callOnce();
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
   let tidy = tidyResourceSet(result.data.resources);
@@ -383,6 +390,12 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     }
     const lessons = lessonStructure(paths, b.data.folder);
 
+    // B3 content-based conversion: read the actual text of the source files (capped, best-effort) so
+    // the conversion reworks the real content, not just the lesson titles. Empty ⇒ no item (the
+    // title/structure-only behaviour stands when nothing extractable).
+    const srcIds = (await listResourceIdsForFolder(b.data.folder)).slice(0, 8);
+    const materials = await lessonMaterialsForResourceIds(srcIds).catch(() => ({ text: '', files: [], truncated: false }));
+
     const result = await callLLMStructured(
       {
         feature: 'convert_unit',
@@ -394,6 +407,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           ...teachingContextItems(await getCourseTeachingContext(courseId)),
           ...curriculumHistoryItems(await getCourseCurriculumHistory(courseId)),
           ...equipmentItem(await listActiveEquipment()),
+          ...lessonMaterialItems(materials.text),
           { text: convertUnitInstruction(course.name, b.data.folder, lessons) },
         ],
         instruction: 'Convert the unit now.',

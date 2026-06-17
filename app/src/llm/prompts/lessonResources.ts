@@ -2,7 +2,7 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@11'; // @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@12'; // @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -67,6 +67,26 @@ export function lessonResourceItems(ctx: {
         `Objectives:\n${ctx.objectives ?? '(none written)'}`,
         `Outline:\n${ctx.outline ?? '(none written)'}`,
       ].join('\n'),
+    },
+  ];
+}
+
+/** Phase 12 B2 — the extracted TEXT of the teacher's already-prepared materials for this lesson
+ * (uploaded slides/worksheets/handouts). Tells the model to build ON the real content so the sheet
+ * matches what's on the board. Empty ⇒ no item (behaviour unchanged when there are no materials). */
+export function lessonMaterialItems(materialText: string): RedactableItem[] {
+  if (!materialText.trim()) return [];
+  return [
+    {
+      text:
+        'LESSON MATERIALS ALREADY PREPARED FOR THIS LESSON — extracted text from the teacher’s own ' +
+        'uploaded slides / worksheets / handouts for THIS lesson. BUILD THE RESOURCES ON THESE: reuse ' +
+        'their key examples, vocabulary, definitions, worked steps and tasks, and follow the order the ' +
+        'content is taught in, so the worksheet and slides match what pupils see on the board. Do not ' +
+        'contradict this material; extend or simplify it per level where a level needs it. The extracts ' +
+        'may be partial (long files are truncated) and may contain layout noise — use them as the source ' +
+        'of truth for CONTENT, not formatting.\n' +
+        materialText,
     },
   ];
 }
