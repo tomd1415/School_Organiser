@@ -135,7 +135,7 @@ function resultsCard(r: PupilResults): string {
 
 // The pupil's slide deck (left pane) — their ability's slides, one shown at a time, Prev/Next driven
 // by pupil.js. The pupil follows the lesson on the board with a simplified deck matching their level.
-function renderSlideDeck(md: string, deckId: string, level: Level): string {
+export function renderSlideDeck(md: string, deckId: string, level: Level): string {
   const slides = sliceSlidesForLevel(md, level);
   if (slides.length === 0) return '';
   const html = slides.map((s, i) => `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">${renderMarkdown(s)}</div>`).join('');

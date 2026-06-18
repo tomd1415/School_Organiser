@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { classSchedule, classSlots, getSlotWeekday, layLessonsAcrossClass, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
+import { applyPlacements, classPlacements, classSchedule, classSlots, getSlotWeekday, layLessonsAcrossClass, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
+import { cascadeInsert, pullForward } from '../../src/services/delivery';
 import { addDays, weekdayOf } from '../../src/lib/time';
 
 // 5.4: laying a unit's lessons into a group's weekly slot. Uses a real slot (read-only) and a
@@ -153,5 +154,41 @@ describe('calendar lay-down (5.4 — integration, needs the dev DB up)', () => {
     const sched = await classSchedule(groupCourseId, dates[0]!, dates[2]!);
     expect(sched.map((e) => e.lessonPlanId)).toEqual(planIds);
     expect(sched.every((e) => e.timetabledLessonId === slotLessonId)).toBe(true);
+  });
+
+  it('cascadeInsert "all move along one" then pullForward, round-tripped through the DB (13.5)', async () => {
+    const weekday = (await getSlotWeekday(slotLessonId))!;
+    const four = nextDatesOnWeekday(weekday, '2099-06-01', 4); // three filled positions + a trailing gap
+    const stream = four.map((d) => ({ date: d, timetabledLessonId: slotLessonId }));
+    const p4 = Number(
+      (await pool.query<{ id: number }>(`INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, 'LAY-L4', 4) RETURNING id`, [unitId, courseId])).rows[0]!.id,
+    );
+    try {
+      // seed: p1,p2,p3 at the first three weeks, the fourth empty
+      await applyPlacements(
+        groupCourseId,
+        planIds.map((id, i) => ({ date: four[i]!, timetabledLessonId: slotLessonId, lessonPlanId: id })),
+      );
+      const before = await classPlacements(groupCourseId, stream);
+      expect(before.map((p) => p.lessonPlanId)).toEqual([planIds[0], planIds[1], planIds[2], null]);
+
+      // drop p4 at the front → everything shifts along one into the trailing gap
+      await applyPlacements(groupCourseId, cascadeInsert(before, 0, p4));
+      const after = await classPlacements(groupCourseId, stream);
+      expect(after.map((p) => p.lessonPlanId)).toEqual([p4, planIds[0], planIds[1], planIds[2]]);
+
+      // pull the front back out → the gap closes again (inverse)
+      await applyPlacements(groupCourseId, pullForward(after, 0));
+      const closed = await classPlacements(groupCourseId, stream);
+      expect(closed.map((p) => p.lessonPlanId)).toEqual([planIds[0], planIds[1], planIds[2], null]);
+    } finally {
+      await pool.query(
+        `UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE group_course_id = $1
+         AND occurrence_id IN (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $2 AND date = ANY($3))`,
+        [groupCourseId, slotLessonId, four],
+      );
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = ANY($1)`, [four]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [p4]);
+    }
   });
 });

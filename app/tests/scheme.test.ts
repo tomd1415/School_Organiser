@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildSchemeTree, type PlanRow, type UnitRow } from '../src/services/scheme';
+import { renderPlan } from '../src/lib/schemeView';
 
 const units: UnitRow[] = [
   { id: 2, title: 'B', displayOrder: 1 },
@@ -30,5 +31,17 @@ describe('buildSchemeTree', () => {
 
   it('drops plans with no unit', () => {
     expect(tree.flatMap((u) => u.plans).some((p) => p.title === 'orphan')).toBe(false);
+  });
+});
+
+describe('renderPlan — Schemes card reuses the pupil preview (13.2)', () => {
+  const p: PlanRow = { id: 42, unitId: 1, title: 'Binary', objectives: 'O', outline: 'L', durationMin: 50, displayOrder: 0, kitNeeded: null };
+  const html = renderPlan(p, { open: true });
+
+  it('offers "open as pupil" in a NEW TAB, in master mode (no class id)', () => {
+    expect(html).toContain('/lesson/pupil-view?master=1&amp;lp=42');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener"');
+    expect(html).not.toContain('gc='); // master lesson has no class context
   });
 });

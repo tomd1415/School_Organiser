@@ -74,7 +74,10 @@ import { getFollowupsForOccurrence } from '../repos/notes';
 import { buildLessonDetail, type CourseSection, type LessonDetail } from '../services/occurrence';
 import { renderLinkedResources } from '../lib/resourceView';
 import { renderWorksheet, findImagePlaceholders, type Level } from '../lib/worksheetForm';
-import { getLessonWorksheet } from '../services/worksheet';
+import { getLessonWorksheet, getLessonSlidesMarkdown } from '../services/worksheet';
+import { renderSlideDeck } from './me';
+import { pupilLayout } from './pupilAuth';
+import { saveLessonDocMarkdown } from '../services/lessonDocEdit';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
@@ -368,8 +371,9 @@ function renderSection(
       ${renderResourcesBlock(oc, s, eff?.adapted ?? false, resources, adaptedRes, materialTitles)}
       ${
         s.lessonPlanId != null
-          ? `<details class="ws-preview" id="ws-prev-d-${oc}">
-        <summary>👁 Preview as pupil — see each ability level</summary>
+          ? `<p class="pv-open"><a class="link" href="/lesson/pupil-view?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Open this lesson exactly as the pupil sees it, in a new tab — with an edit toggle to tweak the slides/worksheet for this class or the master">👁 Open as pupil (new tab) ↗</a></p>
+      <details class="ws-preview" id="ws-prev-d-${oc}">
+        <summary>quick peek — each ability level inline</summary>
         <div class="ws-preview-tabs" role="tablist">
           <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=support" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
           <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
@@ -747,6 +751,84 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       : null;
     const master = q.data.mode === 'master' && sec.lessonPlanId != null ? await getPlanRow(sec.lessonPlanId) : null;
     return reply.type('text/html').send(renderLessonEdit(oc, sec, eff, master, q.data.mode));
+  });
+
+  // 13.4 (point 5): preview a lesson EXACTLY as the pupil sees it (two-pane slides + worksheet), in a
+  // standalone page meant to be opened in a NEW TAB. The off/local/master toggle turns it into a
+  // markdown editor for the slides/worksheet, saving to the class's adapted copy (local) or the master.
+  app.get('/lesson/pupil-view', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({
+        // class mode passes gc (off/local/master); master mode omits gc (off/master only — the
+        // Schemes page previews the master lesson, where "this class" has no meaning).
+        gc: z.coerce.number().int().positive().optional(),
+        lp: z.coerce.number().int().positive(),
+        level: z.enum(['support', 'core', 'challenge']).default('core'),
+        edit: z.enum(['off', 'local', 'master']).default('off'),
+      })
+      .safeParse(req.query);
+    if (!q.success) return reply.code(400).type('text/html').send('<p>Bad request.</p>');
+    const { gc, lp, level } = q.data;
+    const isMaster = gc == null;
+    // local has no meaning without a class — clamp it to master so a stale link can't 500.
+    const edit: EditMode = isMaster && q.data.edit === 'local' ? 'master' : q.data.edit;
+    const gcKey = gc ?? 0; // gc=0 makes the resolvers fall through to the master resources
+    const csrf = reply.generateCsrf();
+    const [ws, slidesMd, info, master] = await Promise.all([
+      getLessonWorksheet(gcKey, lp),
+      getLessonSlidesMarkdown(gcKey, lp),
+      isMaster ? Promise.resolve(null) : getGroupCourseInfo(gc),
+      getPlanRow(lp),
+    ]);
+    const className = isMaster ? 'master lesson · every class' : (info?.groupName ?? 'class');
+    const scopeQ = isMaster ? `master=1` : `gc=${gc}`;
+    const href = (l: string, e: string): string => `/lesson/pupil-view?${scopeQ}&amp;lp=${lp}&amp;level=${l}&amp;edit=${e}`;
+    const lvlTab = (l: Level, label: string): string => `<a class="ws-tab${l === level ? ' is-on' : ''}" href="${href(l, edit)}">${label}</a>`;
+    const editTab = (e: 'off' | 'local' | 'master', label: string): string => `<a class="edit-tab${e === edit ? ' is-on' : ''}" href="${href(level, e)}">${label}</a>`;
+    const editTabs = isMaster
+      ? `${editTab('off', '👁 View')}${editTab('master', '✏ Master')}`
+      : `${editTab('off', '👁 View')}${editTab('local', '✏ This class')}${editTab('master', '✏ Master')}`;
+    const header = `<div class="pv-bar">
+        <div><strong>${esc(master?.title ?? 'Lesson')}</strong> <span class="muted">${esc(className)} · preview as pupil</span></div>
+        <div class="pv-levels">${lvlTab('support', '🟢')}${lvlTab('core', '🟡')}${lvlTab('challenge', '🔴')}</div>
+        <div class="edit-toggle">${editTabs}</div>
+      </div>`;
+    let bodyContent: string;
+    if (edit === 'off') {
+      const deck = slidesMd ? renderSlideDeck(slidesMd, `pv-${gcKey}-${lp}`, level) : '';
+      const wsHtml = ws ? renderWorksheet(ws.markdown, { mode: 'preview', level }).html : '<p class="pupil-note">No worksheet for this lesson yet — generate one, or switch to ✏ edit.</p>';
+      bodyContent = deck
+        ? `<div class="pupil-twopane" data-pane="work">
+            <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet"><button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button><button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 Worksheet</button></div>
+            <div class="pupil-pane pupil-pane-slides">${deck}</div>
+            <div class="pupil-pane pupil-pane-work">${wsHtml}</div>
+          </div>`
+        : `<div class="pupil-pane pupil-pane-work">${wsHtml}</div>`;
+    } else {
+      const banner =
+        edit === 'local'
+          ? `<p class="edit-banner edit-local">✏ Editing <strong>${esc(className)}’s</strong> copy — saved for this class only; the master and other classes are unchanged.</p>`
+          : `<p class="edit-banner edit-master">✏ Editing the <strong>master</strong> — saved for <strong>every</strong> class using this lesson.</p>`;
+      const editor = (kind: 'slides' | 'worksheet', label: string, md: string): string =>
+        `<details class="pv-edit" open><summary>${label} — markdown</summary>
+          <textarea class="pv-md" name="markdown" rows="18" spellcheck="false"
+            hx-post="/lesson/pupil-view/save?${scopeQ}&amp;lp=${lp}&amp;kind=${kind}&amp;scope=${edit}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(md)}</textarea>
+          <span class="ws-saved" id="pv-${kind}-status" aria-live="polite"></span></details>`;
+      bodyContent = banner + editor('slides', '📊 Slides', slidesMd ?? '') + editor('worksheet', '📝 Worksheet', ws?.markdown ?? '');
+    }
+    const page = `<section class="pupil-card pv-card" hx-headers='{"x-csrf-token":"${csrf}"}'>${header}${bodyContent}</section>`;
+    return reply.type('text/html').send(pupilLayout(page, csrf));
+  });
+
+  app.post('/lesson/pupil-view/save', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const q = z
+      .object({ gc: z.coerce.number().int().positive().optional(), lp: z.coerce.number().int().positive(), kind: z.enum(['slides', 'worksheet']), scope: z.enum(['local', 'master']) })
+      .safeParse(req.query);
+    const b = z.object({ markdown: z.string().max(200000) }).safeParse(req.body);
+    // local writes a class's adapted copy and needs a real gc; master ignores gc entirely.
+    if (!q.success || !b.success || (q.data.scope === 'local' && q.data.gc == null)) return reply.code(400).send('');
+    await saveLessonDocMarkdown(q.data.gc ?? 0, q.data.lp, q.data.kind, q.data.scope, b.data.markdown);
+    return reply.type('text/html').send(`<span class="ws-saved show" id="pv-${q.data.kind}-status" aria-live="polite" hx-swap-oob="true">saved ✓</span>`);
   });
 
 

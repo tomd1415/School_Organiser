@@ -10,7 +10,7 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 ### 2026-06-18 — Phase 13 (in progress): multi-lesson weeks, one lesson view, inline editing
 
 Six interdependent teacher requests (planned in [docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)). Landed
-so far (suite green: **458 unit / 271 integration; typecheck clean**):
+so far (suite green: **468 unit / 276 integration; typecheck clean**):
 
 - **Multi-lesson-per-week delivery (point 1).** GCSE/Post-16 classes correctly have **3 weekly slots**,
   but curriculum delivery planned one-lesson-per-week into a single slot. New per-class spine
@@ -29,14 +29,36 @@ so far (suite green: **458 unit / 271 integration; typecheck clean**):
   reload; and the Schemes page's resource slot, which only loaded on first open, now **eager-loads when
   the plan is open**, so generated resources show immediately. Resources/tracker extracted into reusable
   `renderResourcesBlock` / `renderOutlineTracker`.
+- **One lesson view, reused on the Schemes page (point 2, second half).** The Schemes master-plan card
+  now carries the **same 👁 Open as pupil (new tab)** preview as the timetable lesson card, in a
+  **master mode** (View · Master only — "this class" is hidden where there's no class). The pupil-view
+  renderer is shared verbatim between the two pages, so a lesson reads and behaves the same whichever
+  page you reach it from.
 - **Tri-state inline edit toggle (point 3).** Each lesson card carries **👁 View · ✏ This class · ✏
   Master**. View is read-only (default). *This class* turns the objectives/outline into inline editors
   that save as the **class's adaptation** (master untouched). *Master* edits the objectives/outline/
   duration/kit of the **master** lesson (every class). Server-rendered, so an edit shows the moment you
   return to View; the tappable tracker appears only in View.
-- **Remaining Phase 13:** reuse the lesson card on the Schemes page (point 2's consistency half), the
-  pupil preview in a new tab with the same edit toggle (point 5), and the drag-drop class planner with
-  **insert & cascade** ("all move along one") and related placement helpers (point 6).
+- **Pupil preview in a new tab, with off/local/master edit (point 5).** Each lesson card gains **👁 Open
+  as pupil (new tab) ↗**, opening [`/lesson/pupil-view`](../app/src/routes/lesson.ts) in the **pupil
+  shell** — the **exact** two-pane slides/worksheet a pupil sees, at any ability level. The same
+  **View · This class · Master** toggle flips each pane to a **markdown editor** that autosaves: *This
+  class* writes a **class-only adapted copy** of the slides/worksheet (created on first edit, master and
+  other classes untouched — persistent for the class), *Master* versions the **master** resource for
+  every class. Resource plumbing only ([services/lessonDocEdit.ts](../app/src/services/lessonDocEdit.ts),
+  reusing the existing versioned store) — **no AI**.
+- **Drag-drop class planner (point 6).** A new **[/planner](../app/src/routes/planner.ts)** page: pick a
+  class → a **week × slot** timeline (multi-slot classes get a column per weekly period), holiday-aware
+  (non-teaching weeks shown hatched), with a tray of the scheme's **not-yet-placed** lessons. **Drag a
+  lesson onto a slot** to place it — dropping onto a filled slot does **insert & cascade** ("all move
+  along one": the occupant and everything after it shift one slot along the stream into the next gap).
+  **Drag a placed lesson** to move it; **✕** removes it and pulls the rest forward. Every drop posts to
+  `/planner/place`, which rearranges the bindings via the unit-tested `cascadeInsert` / `pullForward`
+  primitives (plus `classPlacements` / `applyPlacements` repos) and re-renders; history (today and
+  earlier) is never touched. Integration-tested end-to-end through the route.
+- **Remaining Phase 13:** planner polish (point 6) — drag a **whole unit** in one gesture, **lock** a
+  lesson to its date (the cascade maths is already lock-aware), **undo** the last placement, and an
+  **end-of-unit** cue.
 
 ### 2026-06-17 — Phase 12 (in progress): zero-friction pupils + content-rich, exam-ready worksheets
 

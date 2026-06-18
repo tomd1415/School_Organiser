@@ -3,6 +3,7 @@
 // dated occurrences of one slot, for one group_course.
 import { pool } from '../db/pool';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
+import type { Placement } from '../services/delivery'; // pure type only — the cascade maths lives in the service
 
 export interface CourseSlot {
   lessonId: number; // timetabled_lessons id
@@ -178,6 +179,37 @@ export async function layLessonsAcrossClass(
     laid.push({ date, lessonPlanId: lesson.id, title: lesson.title });
   }
   return laid;
+}
+
+/** Phase 13.5: read the CURRENT plan bound at each position of a class's upcoming slot stream (null
+ *  where nothing is bound yet) — the input the cascade maths rearranges. The `stream` comes from the
+ *  pure `upcomingClassSlots`. One range query; positions keep the stream's order. */
+export async function classPlacements(
+  groupCourseId: number,
+  stream: Array<{ date: string; timetabledLessonId: number }>,
+): Promise<Placement[]> {
+  if (!stream.length) return [];
+  const bound = await classSchedule(groupCourseId, stream[0]!.date, stream[stream.length - 1]!.date);
+  const byKey = new Map(bound.map((b) => [`${b.date}#${b.timetabledLessonId}`, b.lessonPlanId]));
+  return stream.map((s) => ({
+    date: s.date,
+    timetabledLessonId: s.timetabledLessonId,
+    lessonPlanId: byKey.get(`${s.date}#${s.timetabledLessonId}`) ?? null,
+  }));
+}
+
+/** Phase 13.5: persist the placements the cascade maths returned — bind (or clear, when null) each
+ *  position's occurrence for this class. Creates occurrences on demand. Returns how many were written. */
+export async function applyPlacements(groupCourseId: number, changes: Placement[]): Promise<number> {
+  let n = 0;
+  for (const c of changes) {
+    const occId = await findOrCreateOccurrence(c.timetabledLessonId, c.date);
+    const oc = (await getOccurrenceCourses(occId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
+    if (!oc) continue; // that slot no longer teaches this class
+    await setOccurrenceCoursePlan(oc.occurrenceCourseId, c.lessonPlanId);
+    n++;
+  }
+  return n;
 }
 
 /** C3 map drag-to-shift: move ONE lesson's binding between weeks of a slot+group. If the target week

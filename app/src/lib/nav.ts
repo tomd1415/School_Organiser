@@ -43,6 +43,7 @@ export const NAV_MODEL: readonly NavItem[] = [
   { href: '/concepts', label: 'Concepts', group: 'setup', tier: 'power' },
   { href: '/coverage', label: 'Coverage', group: 'setup', tier: 'everyday' },
   { href: '/map', label: 'Map', key: 'm', group: 'setup', tier: 'everyday' },
+  { href: '/planner', label: 'Planner', group: 'setup', tier: 'everyday' },
   { href: '/kit', label: 'Kit', group: 'setup', tier: 'power' },
   { href: '/resources', label: 'Resources', key: 'r', group: 'setup', tier: 'everyday' },
   { href: '/setup', label: 'Setup', group: 'setup', tier: 'power' },

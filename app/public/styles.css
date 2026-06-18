@@ -800,6 +800,43 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .plan-view { margin: 0.4rem 0 0.6rem; }
 
 /* the in-lesson tracker */
+/* 13.5 planner — week × slot timeline with a draggable lesson tray. */
+.pl-pick { margin: 0.4rem 0 0.8rem; }
+.pl-layout { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+.pl-grid-wrap { flex: 1 1 60%; overflow-x: auto; }
+.pl-tray { flex: 1 1 220px; min-width: 200px; border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; background: var(--card); }
+.pl-tray h2 { font-size: 1rem; margin: 0.2rem 0 0.6rem; }
+.pl-tray-unit { margin-bottom: 0.7rem; }
+.pl-tray-unit h3 { font-size: 0.85rem; margin: 0.2rem 0; color: var(--muted, #64748b); }
+.pl-tray-lessons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.pl-tray-lesson { border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.5rem; background: var(--bg); cursor: grab; font-size: 0.85rem; }
+.pl-tray-lesson:active { cursor: grabbing; }
+.pl-tray-done { font-style: italic; }
+.pl-grid { border-collapse: collapse; width: 100%; }
+.pl-grid th, .pl-grid td { border: 1px solid var(--line); padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+.pl-grid th { font-size: 0.8rem; font-weight: 600; }
+.pl-wk { white-space: nowrap; font-size: 0.8rem; color: var(--muted, #64748b); }
+.pl-cell { min-width: 8rem; }
+.pl-cell.is-placed { background: color-mix(in srgb, var(--accent) 12%, transparent); cursor: grab; }
+.pl-cell.is-empty .pl-empty { color: var(--muted, #94a3b8); font-size: 0.8rem; }
+.pl-cell.pl-none { background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 8px); color: var(--muted, #94a3b8); text-align: center; }
+.pl-cell.pl-over { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.pl-lesson { font-size: 0.85rem; }
+.pl-adapted, .pl-kit { font-size: 0.75rem; }
+.pl-acts { float: right; }
+.pl-mini { border: none; background: none; cursor: pointer; color: var(--muted, #94a3b8); padding: 0 0.2rem; }
+.pl-mini:hover { color: var(--danger, #dc2626); }
+.pl-thisweek { outline: 2px solid var(--accent); }
+.pl-now { font-size: 0.7rem; background: var(--accent); border-radius: 6px; padding: 0 0.3rem; }
+/* 13.4 pupil-preview (new tab): exact pupil view + markdown edit. */
+.pv-open { margin: 0.4rem 0; }
+.pv-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; padding: 0.5rem 0.7rem; margin-bottom: 0.6rem; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+.pv-levels { display: inline-flex; gap: 0.2rem; }
+.pv-levels .ws-tab { padding: 0.2rem 0.5rem; border-radius: 6px; text-decoration: none; }
+.pv-levels .ws-tab.is-on { background: var(--accent); }
+.pv-card .edit-tab { text-decoration: none; }
+.pv-edit { margin: 0.6rem 0; }
+.pv-md { width: 100%; font-family: var(--mono, monospace); font-size: 0.85rem; }
 /* 13.3 tri-state edit toggle on the lesson card. */
 .lesson-edit { margin: 0.3rem 0; }
 .edit-toggle { display: inline-flex; gap: 0.2rem; margin-bottom: 0.4rem; padding: 0.15rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }

@@ -1168,6 +1168,46 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Pupil preview (new tab): exact view off, markdown editors local/master with right save scope (13.4)', async () => {
+    const gc = await pool.query<{ id: number }>(`SELECT id FROM group_courses ORDER BY id LIMIT 1`);
+    const lp = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE active ORDER BY id LIMIT 1`);
+    const gcId = gc.rows[0]!.id;
+    const lpId = lp.rows[0]!.id;
+    const get = (edit: string) =>
+      app.inject({ method: 'GET', url: `/lesson/pupil-view?gc=${gcId}&lp=${lpId}&level=core&edit=${edit}`, headers: { cookie: session } });
+
+    const off = await get('off');
+    expect(off.statusCode).toBe(200);
+    expect(off.body).toContain('pv-bar'); // the preview header
+    expect(off.body).toContain('preview as pupil');
+    expect(off.body).toContain('✏ This class'); // the off/local/master toggle
+    expect(off.body).not.toContain('pv-md'); // read-only: no markdown editor
+
+    const local = await get('local');
+    expect(local.body).toContain('pv-md'); // markdown editor
+    expect(local.body).toContain(`scope=local`); // autosaves to THIS class's copy
+    expect(local.body).toContain('this class'); // banner wording
+
+    const master = await get('master');
+    expect(master.body).toContain(`scope=master`); // autosaves to the MASTER
+    expect(master.body).toContain('every'); // "every class" banner
+  });
+
+  it('Pupil preview master mode (Schemes page): View/Master only, no "this class", saves to master (13.2)', async () => {
+    const lp = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE active ORDER BY id LIMIT 1`);
+    const lpId = lp.rows[0]!.id;
+    const off = await app.inject({ method: 'GET', url: `/lesson/pupil-view?master=1&lp=${lpId}&level=core&edit=off`, headers: { cookie: session } });
+    expect(off.statusCode).toBe(200);
+    expect(off.body).toContain('master lesson · every class'); // master-mode header
+    expect(off.body).not.toContain('✏ This class'); // local edit is meaningless on the master
+    expect(off.body).toContain('master=1'); // toggle links stay in master mode
+
+    const ed = await app.inject({ method: 'GET', url: `/lesson/pupil-view?master=1&lp=${lpId}&level=core&edit=master`, headers: { cookie: session } });
+    expect(ed.body).toContain('pv-md'); // markdown editor
+    expect(ed.body).toContain('save?master=1'); // autosaves in master mode (no class id)
+    expect(ed.body).toContain('scope=master'); // → the master resource
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
