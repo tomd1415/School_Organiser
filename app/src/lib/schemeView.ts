@@ -251,7 +251,9 @@ export function renderConvertResults(candidates: UnitCandidate[]): string {
     .slice(0, 12)
     .map(
       (c, i) =>
-        `<label class="convert-opt"><input type="radio" name="folder" value="${esc(c.folder)}"${i === 0 ? ' checked' : ''}> ${esc(c.folder)} <span class="muted">(${c.lessonCount} lessons)</span></label>`,
+        `<label class="convert-opt"><input type="radio" name="folder" value="${esc(c.folder)}"${i === 0 ? ' checked' : ''}>` +
+        `<span class="convert-title">${esc(c.title)}</span> <span class="muted">${c.lessonCount} lesson${c.lessonCount === 1 ? '' : 's'}</span>` +
+        `<span class="muted convert-folder">${esc(c.folder)}</span></label>`,
     )
     .join('');
 }

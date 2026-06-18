@@ -111,6 +111,75 @@ export interface LaidLesson {
   title: string;
 }
 
+// ── Phase 13.1: per-class delivery across ALL the class's weekly slots ────────────────────────────
+
+export interface GroupCourseSlot {
+  timetabledLessonId: number;
+  weekday: number;
+  slotOrder: number;
+  periodLabel: string;
+}
+
+/** Every weekly teaching slot a class (group_course) is taught in — GCSE/Post-16 have several. */
+export async function classSlots(groupCourseId: number): Promise<GroupCourseSlot[]> {
+  const { rows } = await pool.query<GroupCourseSlot>(
+    `SELECT tl.id AS "timetabledLessonId", p.weekday, p.slot_order AS "slotOrder", p.label AS "periodLabel"
+     FROM timetabled_lesson_courses tlc
+     JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
+     JOIN period_definitions p  ON p.id  = tl.period_definition_id
+     WHERE tlc.group_course_id = $1 AND tl.purpose = 'teaching'
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+     ORDER BY p.weekday, p.slot_order`,
+    [groupCourseId],
+  );
+  return rows;
+}
+
+export interface ClassScheduleEntry extends ScheduleEntry {
+  timetabledLessonId: number; // which of the class's slots this occurrence is in
+}
+
+/** All bound occurrences for a class across ALL its weekly slots, date-ordered (map/planner source). */
+export async function classSchedule(groupCourseId: number, fromDate: string, toDate: string): Promise<ClassScheduleEntry[]> {
+  const { rows } = await pool.query<ClassScheduleEntry>(
+    `SELECT to_char(o.date, 'YYYY-MM-DD') AS date, o.timetabled_lesson_id AS "timetabledLessonId",
+            oc.lesson_plan_id AS "lessonPlanId", lp.title AS "planTitle",
+            oc.stopping_point AS "stoppingPoint", lp.kit_needed AS "kitNeeded",
+            EXISTS (SELECT 1 FROM lesson_adaptations a
+                    WHERE a.group_course_id = oc.group_course_id AND a.lesson_plan_id = oc.lesson_plan_id) AS adapted
+     FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     JOIN timetabled_lesson_courses tlc
+       ON tlc.timetabled_lesson_id = o.timetabled_lesson_id AND tlc.group_course_id = oc.group_course_id
+     LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
+     WHERE oc.group_course_id = $1 AND o.date BETWEEN $2 AND $3
+     ORDER BY o.date, o.timetabled_lesson_id`,
+    [groupCourseId, fromDate, toDate],
+  );
+  return rows;
+}
+
+/** Lay a unit's lessons SEQUENTIALLY across a class's merged slot stream (3 slots/week ⇒ 3 lessons a
+ *  week). `stream[i]` (date + which slot) receives lesson `i`. Stops when either runs out. */
+export async function layLessonsAcrossClass(
+  groupCourseId: number,
+  lessons: Array<{ id: number; title: string }>,
+  stream: Array<{ date: string; timetabledLessonId: number }>,
+): Promise<LaidLesson[]> {
+  const laid: LaidLesson[] = [];
+  const n = Math.min(lessons.length, stream.length);
+  for (let i = 0; i < n; i++) {
+    const { date, timetabledLessonId } = stream[i]!;
+    const lesson = lessons[i]!;
+    const occId = await findOrCreateOccurrence(timetabledLessonId, date);
+    const oc = (await getOccurrenceCourses(occId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
+    if (!oc) continue; // that slot no longer teaches this class — skip
+    await setOccurrenceCoursePlan(oc.occurrenceCourseId, lesson.id);
+    laid.push({ date, lessonPlanId: lesson.id, title: lesson.title });
+  }
+  return laid;
+}
+
 /** C3 map drag-to-shift: move ONE lesson's binding between weeks of a slot+group. If the target week
  *  already holds a lesson the two SWAP; an empty target just receives it (source cleared). Returns
  *  false when there's nothing bound at `fromDate`. Callers must keep both dates today-or-future. */

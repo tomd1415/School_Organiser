@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
+import { classSchedule, classSlots, getSlotWeekday, layLessonsAcrossClass, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
 import { addDays, weekdayOf } from '../../src/lib/time';
 
 // 5.4: laying a unit's lessons into a group's weekly slot. Uses a real slot (read-only) and a
@@ -127,5 +127,31 @@ describe('calendar lay-down (5.4 — integration, needs the dev DB up)', () => {
     // nothing bound at the source date ⇒ refuses (returns false)
     await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE group_course_id = $1 AND occurrence_id = (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $2 AND date = $3)`, [groupCourseId, slotLessonId, dates[1]]);
     expect(await moveBinding(slotLessonId, groupCourseId, dates[1]!, dates[0]!)).toBe(false);
+  });
+
+  it('classSlots returns ALL of a class\'s weekly slots — multi-slot for GCSE (13.1)', async () => {
+    // the class with the most weekly teaching slots (a GCSE/Post-16 class has 3)
+    const top = await pool.query<{ gc: string; n: string }>(
+      `SELECT tlc.group_course_id AS gc, count(*) AS n
+       FROM timetabled_lesson_courses tlc JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
+       WHERE tl.purpose = 'teaching'
+       GROUP BY tlc.group_course_id ORDER BY n DESC, gc LIMIT 1`,
+    );
+    const gc = Number(top.rows[0]!.gc);
+    const n = Number(top.rows[0]!.n);
+    const slots = await classSlots(gc);
+    expect(slots.length).toBe(n);
+    expect(new Set(slots.map((s) => s.timetabledLessonId)).size).toBe(n); // distinct weekly periods
+    expect(n).toBeGreaterThanOrEqual(2); // confirms multi-lesson-per-week classes exist in the data
+  });
+
+  it('layLessonsAcrossClass binds the stream and classSchedule reads it back, date-ordered (13.1)', async () => {
+    const lessons = planIds.map((id, i) => ({ id, title: `LAY-L${i + 1}` }));
+    const stream = dates.map((d) => ({ date: d, timetabledLessonId: slotLessonId }));
+    const laid = await layLessonsAcrossClass(groupCourseId, lessons, stream);
+    expect(laid.map((l) => l.date)).toEqual(dates);
+    const sched = await classSchedule(groupCourseId, dates[0]!, dates[2]!);
+    expect(sched.map((e) => e.lessonPlanId)).toEqual(planIds);
+    expect(sched.every((e) => e.timetabledLessonId === slotLessonId)).toBe(true);
   });
 });

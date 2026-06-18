@@ -375,7 +375,9 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .convert-assign { display: flex; gap: 0.8rem; align-items: end; margin: 0.5rem 0; flex-wrap: wrap; }
 .convert-assign label { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.78rem; font-weight: 700; }
 .convert-assign select, .convert-assign input { font: inherit; font-weight: 400; padding: 0.3rem 0.4rem; border: 1px solid var(--line); border-radius: 4px; }
-.convert-opt { font-size: 0.85rem; display: flex; gap: 0.4rem; align-items: baseline; }
+.convert-opt { font-size: 0.85rem; display: flex; gap: 0.4rem; align-items: baseline; flex-wrap: wrap; }
+.convert-title { font-weight: 600; }
+.convert-folder { flex-basis: 100%; margin-left: 1.4rem; font-size: 0.78rem; } /* the source path, secondary */
 /* 5.4: lay a unit into the calendar */
 .unit-lay { margin-top: 0.5rem; font-size: 0.85rem; }
 .unit-lay summary { cursor: pointer; color: var(--accent); }

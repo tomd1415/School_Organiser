@@ -65,8 +65,8 @@ import { equipmentItem } from '../llm/prompts/equipment';
 import { convertUnitSchema } from '../llm/schemas/convertUnit';
 import { CONVERT_UNIT_SYSTEM, CONVERT_UNIT_VERSION, convertUnitInstruction } from '../llm/prompts/convertUnit';
 import { buildSchemeTree } from '../services/scheme';
-import { getCurrentYearEnd, getSlotWeekday, layLessonsIntoSlot, listSlotsForCourse } from '../repos/delivery';
-import { upcomingSlotDates } from '../services/delivery';
+import { classSlots, getCurrentYearEnd, layLessonsAcrossClass, listSlotsForCourse } from '../repos/delivery';
+import { upcomingClassSlots } from '../services/delivery';
 import { getClockContext } from '../repos/clock';
 import { localParts } from '../lib/time';
 import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderSchemeControls, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
@@ -495,12 +495,14 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     // 5.7: assign in the same action — lay into the chosen slot's weeks, then review on the map.
     // A short or empty lay-down never rolls back the conversion; the map shows what happened.
     if (assignTarget) {
-      const weekday = await getSlotWeekday(assignTarget.lessonId);
-      if (weekday != null) {
+      // 13.1: lay across ALL the class's weekly slots in date order (3 slots/week ⇒ 3 lessons a week),
+      // not one-per-week into the single picked slot.
+      const slots = await classSlots(assignTarget.groupCourseId);
+      if (slots.length) {
         const unitPlans = await listPlansForUnit(unitId);
         const yearEnd = await getCurrentYearEnd();
-        const dates = upcomingSlotDates(weekday, startDate, unitPlans.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
-        await layLessonsIntoSlot(assignTarget.lessonId, assignTarget.groupCourseId, unitPlans, dates);
+        const stream = upcomingClassSlots(slots, startDate, unitPlans.length, ctx.terms).filter((s) => !yearEnd || s.date <= yearEnd);
+        await layLessonsAcrossClass(assignTarget.groupCourseId, unitPlans, stream);
       }
       reply.header('HX-Redirect', `/map?slot=${assignTarget.lessonId}:${assignTarget.groupCourseId}`);
       return reply.send('');
@@ -753,11 +755,13 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     if (!slots.some((s) => Number(s.lessonId) === lessonId && Number(s.groupCourseId) === groupCourseId)) {
       return reply.type('text/html').send('<p class="muted">That slot doesn\'t teach this course.</p>');
     }
-    const [lessons, weekday, ctx] = await Promise.all([listPlansForUnit(id.data.id), getSlotWeekday(lessonId), getClockContext()]);
-    if (weekday == null) return reply.type('text/html').send('<p class="muted">Slot not found.</p>');
+    // 13.1: sequence the unit across ALL the class's weekly slots in date order (multi-lesson weeks),
+    // regardless of which of the class's slots was picked.
+    const [lessons, classWeeklySlots, ctx] = await Promise.all([listPlansForUnit(id.data.id), classSlots(groupCourseId), getClockContext()]);
+    if (classWeeklySlots.length === 0) return reply.type('text/html').send('<p class="muted">This class has no teaching slots.</p>');
     const yearEnd = await getCurrentYearEnd();
-    const dates = upcomingSlotDates(weekday, body.data.start, lessons.length, ctx.terms).filter((d) => !yearEnd || d <= yearEnd);
-    const laid = await layLessonsIntoSlot(lessonId, groupCourseId, lessons, dates);
+    const stream = upcomingClassSlots(classWeeklySlots, body.data.start, lessons.length, ctx.terms).filter((s) => !yearEnd || s.date <= yearEnd);
+    const laid = await layLessonsAcrossClass(groupCourseId, lessons, stream);
     return reply.type('text/html').send(renderLayResult(laid, lessons.length));
   });
 

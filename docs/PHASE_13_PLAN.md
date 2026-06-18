@@ -1,0 +1,86 @@
+# Phase 13 — Multi-lesson weeks, one consistent lesson view, inline editing & a drag-drop planner
+
+> **Status (2026-06-18): planned.** Six teacher requests, several interdependent. Decisions captured
+> from the teacher (the questions asked before this plan):
+>
+> 1. **Multi-lesson-per-week classes** (GCSE/Post-16 = 3 slots/week) → **sequence a unit's lessons
+>    across ALL the class's weekly slots in date order** (not one-per-week-per-slot). Delivery becomes
+>    per-**class** (group_course), not per-single-slot.
+> 2. **Consistency** → **reuse the timetable lesson view everywhere** (the Schemes page shows the same
+>    lesson card), and fix the lazy-load so plan/resources/preview appear **without a refresh**.
+> 3. **Inline edit** → a **tri-state toggle: off (default, read-only) · local-only (this class's
+>    adaptation) · master (the master lesson)**.
+> 4. **Combine** the "tap where you are" tracker **into the outline**; disable the tapping when the
+>    edit toggle is on (local or master).
+> 5. **Preview as pupil** → opens in a **new tab**, renders **exactly** as the pupil sees it, with the
+>    same **off/local/master** edit toggle for the slides/worksheet, **persistent for the class**.
+> 6. **Planner** → a **new full planner page**: pick a class, see a timeline (weeks · days · half-terms)
+>    with the class's slots and a tray of units/lessons, and **drag lessons into slots**.
+
+**Standing constraints** (unchanged): no pupil name to any AI service; per-class content is cohort-level
+prose; server-rendered HTML + vendored HTMX; `routes → services (pure) → repos`; tests never call the
+real AI. Migrations only where a new column/table is genuinely needed.
+
+---
+
+## Build order (each a reviewable, tested slice)
+
+### 13.1 — Foundation: per-class multi-slot delivery *(enables 13.4/13.5; migration-free)*
+
+Today delivery binds a lesson to one `(timetabled_lesson × group_course)` slot and lays a unit
+one-lesson-per-week into a single slot. Make it **class-centric across all the class's weekly slots**.
+
+- **`classSlots(groupCourseId)`** (repo) — the group_course's weekly teaching slots (timetabled_lesson
+  id + weekday + slot_order + period label).
+- **`upcomingClassSlots(slots, fromDate, count, terms)`** (pure service) — merge all the class's weekly
+  slots into ONE date-ordered stream of `{ date, timetabledLessonId }`, holiday-aware. This is the
+  spine: lesson *i* of a unit goes to stream position *i* (so 3 slots/week ⇒ 3 lessons/week).
+- **`layLessonsAcrossClass(groupCourseId, lessons, stream)`** (repo) — bind each lesson to
+  `occurrence(stream[i].timetabledLessonId, date)` for this group_course (reuses findOrCreate +
+  setOccurrenceCoursePlan).
+- **`classSchedule(groupCourseId, from, to)`** (repo) — all bound occurrences across ALL the class's
+  slots, date-ordered (the map/planner data source; generalises `slotSchedule`).
+- Re-point **convert lay-down (5.7)** and the **map** at the class stream; keep a single-slot path only
+  where it still makes sense. Pure date-merge logic is fully unit-tested.
+
+### 13.2 — One lesson card + lazy-load fix + combined outline/tracker *(points 2, 4)*
+
+- Extract the **lesson card** (objectives · outline-with-progress · adaptation · resources · generate ·
+  preview) into **one renderer** used by BOTH the timetable lesson page and the Schemes page, so they
+  look and behave identically.
+- **Lazy-load fix:** the `hx-trigger="toggle … once"` resource slot doesn't refresh after generation and
+  needs a page reload to show. Load eagerly / re-trigger after generate / drop the stale `once`.
+- **Combine** `renderTracker` ("tap where you are") **into the outline**: one component showing the
+  outline steps with the stopping-point tappable inline; tapping is **disabled when editing**.
+
+### 13.3 — Tri-state inline edit toggle (off · local · master) *(point 3)*
+
+- A 3-position control on the lesson card. **Off** = read-only (default). **Local** = inline-edit fields
+  → writes this class's **adaptation** (`upsertAdaptation`; master untouched). **Master** = inline-edit
+  → writes the **master** (`updatePlanField`).
+- Editable inline: title (master only), objectives, outline, duration, kit. A clear banner shows which
+  layer is being edited; the tracker tapping is suppressed while on.
+
+### 13.4 — Pupil preview in a new tab, with off/local/master edit *(point 5)*
+
+- A teacher route that renders the **exact pupil view** (reuse `/me`'s renderer) for a chosen
+  class+lesson, opened in a **new tab**, at a chosen level.
+- The same **off/local/master** toggle lets the teacher inline-edit the **slides/worksheet** (reusing
+  the block/markdown editor); **local** saves the class's adapted resource, **master** the master
+  resource. Persists for the class.
+
+### 13.5 — New planner page (drag-drop class timeline) *(point 6)*
+
+- **`/planner`** — pick a class → a timeline: **weeks** down, the class's **slots** across (multi/week),
+  **half-term** dividers; a **tray** of the course's units/lessons not yet placed; **drag a lesson into
+  a slot** (or drag to reorder), persisting via the 13.1 binding. Holiday-aware, "today and future only"
+  (history fixed). Built to be genuinely easy to use; consumes the 13.1 class stream.
+
+---
+
+## Sequencing & risk
+
+13.1 first (everything sits on it). 13.2 next (the shared card is where 13.3's edit toggle and 13.4's
+preview button live). 13.3, 13.4, then the big 13.5 planner last. Each slice ends with the suite green
+(`npm test` + `npm run test:integration` + `npm run typecheck`); AI-touching paths get a throwaway live
+smoke as usual. No new pupil-data categories; the per-class edits use the existing adaptation tables.

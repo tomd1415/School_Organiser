@@ -1,0 +1,54 @@
+import { describe, it, expect } from 'vitest';
+import { upcomingClassSlots, type ClassSlot } from '../src/services/delivery';
+import type { TermDate } from '../src/services/clock';
+
+// One open term covering the test window, no holidays — so only weekends are skipped.
+const terms: TermDate[] = [{ startDate: '2026-01-01', endDate: '2026-12-31', kind: 'term' }];
+
+describe('upcomingClassSlots (13.1 — multi-lesson-per-week delivery)', () => {
+  it('a 3-slots-a-week class gets 3 lessons a week, in date + period order', () => {
+    // GCSE-style: Mon (p1), Wed (p1), Fri (p1). Mon 15 Jun 2026 is a Monday.
+    const slots: ClassSlot[] = [
+      { timetabledLessonId: 10, weekday: 1, slotOrder: 1 }, // Mon
+      { timetabledLessonId: 20, weekday: 3, slotOrder: 1 }, // Wed
+      { timetabledLessonId: 30, weekday: 5, slotOrder: 1 }, // Fri
+    ];
+    const stream = upcomingClassSlots(slots, '2026-06-15', 7, terms);
+    expect(stream.map((s) => s.date)).toEqual([
+      '2026-06-15', '2026-06-17', '2026-06-19', // week 1: Mon, Wed, Fri
+      '2026-06-22', '2026-06-24', '2026-06-26', // week 2: Mon, Wed, Fri
+      '2026-06-29', // week 3: Mon
+    ]);
+    // each date carries which weekly slot it is
+    expect(stream.slice(0, 3).map((s) => s.timetabledLessonId)).toEqual([10, 20, 30]);
+  });
+
+  it('two slots on the SAME day come out in period (slot_order) order', () => {
+    const slots: ClassSlot[] = [
+      { timetabledLessonId: 200, weekday: 1, slotOrder: 4 }, // Mon, later period
+      { timetabledLessonId: 100, weekday: 1, slotOrder: 1 }, // Mon, earlier period
+    ];
+    const stream = upcomingClassSlots(slots, '2026-06-15', 4, terms);
+    expect(stream).toEqual([
+      { date: '2026-06-15', timetabledLessonId: 100 },
+      { date: '2026-06-15', timetabledLessonId: 200 },
+      { date: '2026-06-22', timetabledLessonId: 100 },
+      { date: '2026-06-22', timetabledLessonId: 200 },
+    ]);
+  });
+
+  it('a single-slot class still lays one lesson per week (unchanged for KS3)', () => {
+    const stream = upcomingClassSlots([{ timetabledLessonId: 5, weekday: 2, slotOrder: 1 }], '2026-06-15', 3, terms);
+    expect(stream.map((s) => s.date)).toEqual(['2026-06-16', '2026-06-23', '2026-06-30']); // Tuesdays
+  });
+
+  it('skips a half-term/holiday week (the sequence slides past it)', () => {
+    const withHalfTerm: TermDate[] = [
+      { startDate: '2026-01-01', endDate: '2026-12-31', kind: 'term' },
+      { startDate: '2026-06-22', endDate: '2026-06-26', kind: 'half_term' }, // week 2 off
+    ];
+    const slots: ClassSlot[] = [{ timetabledLessonId: 1, weekday: 1, slotOrder: 1 }]; // Mondays
+    const stream = upcomingClassSlots(slots, '2026-06-15', 3, withHalfTerm);
+    expect(stream.map((s) => s.date)).toEqual(['2026-06-15', '2026-06-29', '2026-07-06']); // 22 Jun skipped
+  });
+});

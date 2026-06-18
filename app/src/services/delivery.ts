@@ -26,3 +26,38 @@ export function upcomingSlotDates(weekday: number, fromDate: string, count: numb
   }
   return out;
 }
+
+// Phase 13.1 — multi-lesson-per-week delivery. A class (group_course) may teach on several weekly
+// slots (GCSE = 3/week). One ClassSlot per weekly slot.
+export interface ClassSlot {
+  timetabledLessonId: number;
+  weekday: number;
+  slotOrder: number;
+}
+export interface ClassDate {
+  date: string; // YYYY-MM-DD
+  timetabledLessonId: number; // which of the class's weekly slots this date belongs to
+}
+
+/**
+ * Merge ALL of a class's weekly slots into ONE date-ordered stream of teaching occurrences, holiday-
+ * aware — so a unit's lessons lay SEQUENTIALLY across the week (3 slots ⇒ 3 lessons a week), not
+ * one-per-week-per-slot. Same-day slots come out in period (slot_order) order. Pure date logic.
+ */
+export function upcomingClassSlots(slots: ClassSlot[], fromDate: string, count: number, terms: TermDate[]): ClassDate[] {
+  const ordered = [...slots].sort((a, b) => a.weekday - b.weekday || a.slotOrder - b.slotOrder);
+  const out: ClassDate[] = [];
+  let date = fromDate;
+  for (let guard = 0; out.length < count && guard < 366 * 3; guard++) {
+    const wd = weekdayOf(date);
+    if (classifyDay(date, wd, terms).isSchoolDay) {
+      for (const s of ordered) {
+        if (s.weekday !== wd) continue;
+        out.push({ date, timetabledLessonId: s.timetabledLessonId });
+        if (out.length >= count) break;
+      }
+    }
+    date = addDays(date, 1);
+  }
+  return out;
+}

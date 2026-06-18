@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanLessonTitle, lessonStructure, searchUnits, unitCandidates } from '../src/services/convertUnit';
+import { cleanLessonTitle, deriveUnitTitle, lessonStructure, searchUnits, unitCandidates } from '../src/services/convertUnit';
 
 // Realistic imported paths: KS3 units wrap each lesson in a "…_v1.zip" folder; GCSE units use
 // "L2 - title" folders; loose files at any level are not lessons.
@@ -21,8 +21,8 @@ describe('unitCandidates (5.3 — find convertible downloaded units)', () => {
   it('finds folders with ≥2 lesson-named subfolders, at any depth', () => {
     const c = unitCandidates(paths);
     expect(c).toEqual([
-      { folder: 'GCSE Lessons/Data Representation', lessonCount: 3 },
-      { folder: 'KS3/year_7/Unit 1', lessonCount: 2 },
+      { folder: 'GCSE Lessons/Data Representation', lessonCount: 3, title: 'Data Representation' },
+      { folder: 'KS3/year_7/Unit 1', lessonCount: 2, title: 'Unit 1' },
     ]);
   });
 
@@ -93,5 +93,30 @@ describe('searchUnits — content-aware convert search (regression: hidden compl
   it('matches a term that appears only in a file name, not the folder path', () => {
     const hits = searchUnits(['Term 1/Unit A/L1/cybersecurity-quiz.pdf', 'Term 1/Unit A/L2/intro.pptx'], 'cybersecurity');
     expect(hits.map((h) => h.folder)).toEqual(['Term 1/Unit A']);
+  });
+});
+
+describe('deriveUnitTitle — friendly title from the unit guide, else the folder name', () => {
+  it('parses an NCCE "Unit guide" file into "<Title> — <KeyStage>"', () => {
+    expect(deriveUnitTitle(impactsPaths, 'unit_11')).toBe('Impacts of technology — KS4');
+  });
+
+  it('falls back to a descriptive folder name when there is no guide file', () => {
+    expect(deriveUnitTitle(impactsPaths, 'GCSE Lessons/Impacts of technology')).toBe('Impacts of technology');
+  });
+
+  it('keeps an opaque folder name as-is when nothing better is available', () => {
+    expect(deriveUnitTitle(['unit_9/L1/slides.pptx', 'unit_9/L2/slides.pptx'], 'unit_9')).toBe('unit_9');
+  });
+
+  it('parses a "Learning graph" file (en-dash separated) too', () => {
+    const p = ['T/L1/x.docx', 'T/L2/y.docx', 'T/Learning graph – Networks – KS4.pdf'];
+    expect(deriveUnitTitle(p, 'T')).toBe('Networks — KS4');
+  });
+
+  it('unitCandidates now carry the friendly title (the opaque unit is readable)', () => {
+    const byFolder = new Map(unitCandidates(impactsPaths).map((c) => [c.folder, c.title]));
+    expect(byFolder.get('unit_11')).toBe('Impacts of technology — KS4');
+    expect(byFolder.get('GCSE Lessons/Impacts of technology')).toBe('Impacts of technology');
   });
 });
