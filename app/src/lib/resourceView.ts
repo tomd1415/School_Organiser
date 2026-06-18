@@ -11,6 +11,34 @@ const KIND_ICON: Record<string, string> = {
   note: '🗒',
 };
 
+// Linked resources are grouped into three buckets so a lesson's resource list reads cleanly:
+// images, the teacher's own ORIGINAL uploads/imports, and what the AI GENERATED. Empty buckets hide.
+type ResGroupKey = 'images' | 'original' | 'generated';
+const RES_GROUP_META: ReadonlyArray<{ key: ResGroupKey; label: string; icon: string }> = [
+  { key: 'images', label: 'Images', icon: '🖼' },
+  { key: 'original', label: 'Original resources', icon: '📎' },
+  { key: 'generated', label: 'Generated resources', icon: '✨' },
+];
+
+function resGroupOf(r: LinkedResource): ResGroupKey {
+  if (r.kind === 'image') return 'images';
+  if (r.source === 'ai_generated') return 'generated';
+  return 'original'; // uploaded / imported / anything else the teacher brought in
+}
+
+/** Render linked resources split into the three labelled groups, each item via `item`. */
+function renderResourceGroups(rows: LinkedResource[], item: (r: LinkedResource) => string): string {
+  const by: Record<ResGroupKey, LinkedResource[]> = { images: [], original: [], generated: [] };
+  for (const r of rows) by[resGroupOf(r)].push(r);
+  return RES_GROUP_META.filter((g) => by[g.key].length > 0)
+    .map(
+      (g) =>
+        `<div class="res-group res-group-${g.key}"><span class="res-group-label">${g.icon} ${g.label}</span>` +
+        `<ul class="res-linked">${by[g.key].map(item).join('')}</ul></div>`,
+    )
+    .join('');
+}
+
 function fmtSize(bytes: number | null): string {
   if (bytes == null) return '';
   if (bytes < 1024) return `${bytes} B`;
@@ -108,15 +136,14 @@ export function renderGenerateForm(): string {
 // a live search to attach more. Swapped wholesale on attach/detach (hx-swap="outerHTML").
 export function renderPlanResourcesBlock(planId: number, linked: LinkedResource[]): string {
   const items = linked.length
-    ? `<ul class="res-linked">${linked
-        .map(
-          (r) =>
-            `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
+    ? renderResourceGroups(
+        linked,
+        (r) =>
+          `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
               <a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
               <a class="link" href="/resources/${r.resourceId}/download">↓</a>
               <button type="button" class="link danger" title="unlink" hx-post="/schemes/plan/${planId}/resources/${r.resourceId}/detach" hx-target="#plan-${planId}-res" hx-swap="outerHTML">✕</button></li>`,
-        )
-        .join('')}</ul>`
+      )
     : '<span class="muted">no resources linked</span>';
   return `<div class="plan-res" id="plan-${planId}-res">
     ${items}
@@ -142,10 +169,9 @@ export function renderAttachResults(planId: number, rows: ResourceRow[]): string
 
 export function renderLinkedResources(rows: LinkedResource[]): string {
   if (rows.length === 0) return '<span class="muted">no resources linked</span>';
-  return `<ul class="res-linked">${rows
-    .map(
-      (r) =>
-        `<li><a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a> <a class="link" href="/resources/${r.resourceId}/download">↓</a></li>`,
-    )
-    .join('')}</ul>`;
+  return renderResourceGroups(
+    rows,
+    (r) =>
+      `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span> <a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a> <a class="link" href="/resources/${r.resourceId}/download">↓</a></li>`,
+  );
 }

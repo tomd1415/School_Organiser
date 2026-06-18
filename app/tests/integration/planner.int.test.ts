@@ -77,6 +77,14 @@ describe('planner (13.5 — integration, needs the dev DB up)', () => {
     const plan = Number(
       (await pool.query<{ id: number }>(`INSERT INTO lesson_plans (course_id, title, display_order) VALUES ($1, 'PLANNER-TEST', 999) RETURNING id`, [courseId])).rows[0]!.id,
     );
+    // a throwaway one-lesson unit, for the drag-a-whole-unit drop
+    const schemeId = Number(
+      (await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'PLANNER-TEST scheme', 96, false) RETURNING id`, [courseId])).rows[0]!.id,
+    );
+    const unitId = Number((await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'PT unit', 1) RETURNING id`, [schemeId])).rows[0]!.id);
+    const unitPlan = Number(
+      (await pool.query<{ id: number }>(`INSERT INTO lesson_plans (unit_id, course_id, title, display_order) VALUES ($1, $2, 'PT-U1', 1) RETURNING id`, [unitId, courseId])).rows[0]!.id,
+    );
     // a CSRF token + matching cookie from an authed page
     const seed = await app.inject({ method: 'GET', url: '/planner', headers: { cookie: session } });
     const csrf = /x-csrf-token":"([^"]+)"/.exec(seed.body)?.[1] ?? '';
@@ -102,6 +110,17 @@ describe('planner (13.5 — integration, needs the dev DB up)', () => {
       expect(ins.headers['hx-redirect']).toBe(`/planner?gc=${gc}`);
       expect(await bound()).toBe(1); // the lesson is now bound at that slot
 
+      // undo the insert → the slot is empty again
+      const undo = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=undo` });
+      expect(undo.statusCode).toBe(200);
+      expect(await bound()).toBe(0);
+      // a second undo has nothing to restore
+      const undo2 = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=undo` });
+      expect(undo2.statusCode).toBe(400);
+      // re-place it so the pull step below has something to remove
+      await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=insert&date=${empty.date}&tll=${empty.timetabledLessonId}&plan=${plan}` });
+      expect(await bound()).toBe(1);
+
       const pull = await app.inject({
         method: 'POST',
         url: '/planner/place',
@@ -114,15 +133,48 @@ describe('planner (13.5 — integration, needs the dev DB up)', () => {
       // validation: a past date is refused
       const past = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=insert&date=2000-01-03&tll=${empty.timetabledLessonId}&plan=${plan}` });
       expect(past.statusCode).toBe(400);
+
+      // drag a WHOLE unit onto the empty slot → its (single) lesson lands there
+      const unitDrop = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=unit&unit=${unitId}&date=${empty.date}&tll=${empty.timetabledLessonId}` });
+      expect(unitDrop.statusCode).toBe(200);
+      const unitBound = (
+        await pool.query<{ n: number }>(
+          `SELECT count(*)::int n FROM occurrence_courses oc JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+           WHERE oc.group_course_id = $1 AND o.timetabled_lesson_id = $2 AND o.date = $3 AND oc.lesson_plan_id = $4`,
+          [gc, empty.timetabledLessonId, empty.date, unitPlan],
+        )
+      ).rows[0]!.n;
+      expect(unitBound).toBe(1);
+      // a unit op with no unit id is rejected
+      const noUnit = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=unit&date=${empty.date}&tll=${empty.timetabledLessonId}` });
+      expect(noUnit.statusCode).toBe(400);
+
+      // the unit's lesson is now bound at the empty slot — pin it, then prove a pinned slot refuses writes
+      const lock = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=lock&date=${empty.date}&tll=${empty.timetabledLessonId}` });
+      expect(lock.statusCode).toBe(200);
+      const lockedFlag = (
+        await pool.query<{ planner_locked: boolean }>(
+          `SELECT oc.planner_locked FROM occurrence_courses oc JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+           WHERE oc.group_course_id = $1 AND o.timetabled_lesson_id = $2 AND o.date = $3`,
+          [gc, empty.timetabledLessonId, empty.date],
+        )
+      ).rows[0]!.planner_locked;
+      expect(lockedFlag).toBe(true);
+      const ontoPinned = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=insert&date=${empty.date}&tll=${empty.timetabledLessonId}&plan=${plan}` });
+      expect(ontoPinned.statusCode).toBe(400); // can't drop onto a pinned slot
+      const unlock = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=unlock&date=${empty.date}&tll=${empty.timetabledLessonId}` });
+      expect(unlock.statusCode).toBe(200);
     } finally {
       // null the binding (pull already did, but be defensive) and drop the throwaway plan; the empty
       // far-future occurrence is harmless and reused across runs, so it's left in place.
       await pool.query(
-        `UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE group_course_id = $1
+        `UPDATE occurrence_courses SET lesson_plan_id = NULL, planner_locked = false WHERE group_course_id = $1
          AND occurrence_id IN (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $2 AND date = $3)`,
         [gc, empty.timetabledLessonId, empty.date],
       );
-      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [plan]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = ANY($1)`, [[plan, unitPlan]]);
+      await pool.query(`DELETE FROM units WHERE id = $1`, [unitId]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
     }
   });
 });

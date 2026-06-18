@@ -27,6 +27,7 @@ export interface LinkedResource {
   resourceId: number;
   title: string;
   kind: string;
+  source: string; // 'uploaded' | 'imported' | 'ai_generated' | … — used to group the linked list
 }
 
 const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source,
@@ -188,7 +189,7 @@ export async function unlinkResourceFromPlan(resourceId: number, planId: number)
 
 export async function listResourcesForPlan(planId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
-    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+    `SELECT r.id AS "resourceId", r.title, r.kind, r.source FROM resource_links rl
      JOIN resources r ON r.id = rl.resource_id WHERE rl.lesson_plan_id = $1 AND r.active ORDER BY r.title`,
     [planId],
   );
@@ -199,7 +200,7 @@ export async function listResourcesForPlan(planId: number): Promise<LinkedResour
  *  images) — the candidates for "build the worksheet on my materials" (B4 preview, cheap: no extract). */
 export async function listSourceDocsForPlan(planId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
-    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+    `SELECT r.id AS "resourceId", r.title, r.kind, r.source FROM resource_links rl
      JOIN resources r ON r.id = rl.resource_id
      WHERE rl.lesson_plan_id = $1 AND r.active AND r.source IN ('uploaded', 'imported') AND r.kind <> 'image'
      ORDER BY r.title`,
@@ -334,7 +335,7 @@ export async function taMayAccessResource(resourceId: number, taStaffId: number)
 /** The adapted documents for one class's version of a lesson. */
 export async function listResourcesForAdaptation(adaptationId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
-    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+    `SELECT r.id AS "resourceId", r.title, r.kind, r.source FROM resource_links rl
      JOIN resources r ON r.id = rl.resource_id WHERE rl.adaptation_id = $1 AND r.active ORDER BY r.title`,
     [adaptationId],
   );
@@ -353,7 +354,7 @@ export async function linkResourceToUnit(resourceId: number, unitId: number): Pr
 
 export async function listResourcesForCourse(courseId: number): Promise<LinkedResource[]> {
   const { rows } = await pool.query<LinkedResource>(
-    `SELECT r.id AS "resourceId", r.title, r.kind FROM resource_links rl
+    `SELECT r.id AS "resourceId", r.title, r.kind, r.source FROM resource_links rl
      JOIN resources r ON r.id = rl.resource_id WHERE rl.course_id = $1 AND r.active ORDER BY r.title`,
     [courseId],
   );

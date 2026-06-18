@@ -402,6 +402,10 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .res-meta { font-size: 0.78rem; margin-left: auto; }
 .res-linked { list-style: none; padding: 0; margin: 0.3rem 0; }
 .res-linked li { font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; }
+/* 13.6 — group a lesson's linked resources: images · original · generated. */
+.res-group { margin: 0.25rem 0 0.5rem; }
+.res-group-label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted, #64748b); margin-bottom: 0.1rem; }
+.res-group .res-linked { margin: 0.1rem 0 0; }
 .oc-plan { font-size: 0.85rem; margin: 0.3rem 0; }
 .oc-plan strong { font-weight: 700; }
 /* 5.2: per-group adaptation of a master lesson */
@@ -808,6 +812,8 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .pl-tray h2 { font-size: 1rem; margin: 0.2rem 0 0.6rem; }
 .pl-tray-unit { margin-bottom: 0.7rem; }
 .pl-tray-unit h3 { font-size: 0.85rem; margin: 0.2rem 0; color: var(--muted, #64748b); }
+.pl-tray-unit-h { cursor: grab; }
+.pl-tray-unit-h:active { cursor: grabbing; }
 .pl-tray-lessons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .pl-tray-lesson { border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.5rem; background: var(--bg); cursor: grab; font-size: 0.85rem; }
 .pl-tray-lesson:active { cursor: grabbing; }
@@ -826,6 +832,10 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .pl-acts { float: right; }
 .pl-mini { border: none; background: none; cursor: pointer; color: var(--muted, #94a3b8); padding: 0 0.2rem; }
 .pl-mini:hover { color: var(--danger, #dc2626); }
+.pl-cell.is-locked { background: color-mix(in srgb, #f59e0b 16%, transparent); cursor: default; }
+.pl-cell.is-unit-end { border-bottom: 2px solid var(--accent); }
+.pl-unit-end { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); margin-top: 0.15rem; }
+.pl-lock { font-size: 0.75rem; }
 .pl-thisweek { outline: 2px solid var(--accent); }
 .pl-now { font-size: 0.7rem; background: var(--accent); border-radius: 6px; padding: 0 0.3rem; }
 /* 13.4 pupil-preview (new tab): exact pupil view + markdown edit. */

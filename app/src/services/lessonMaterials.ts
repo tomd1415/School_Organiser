@@ -96,7 +96,7 @@ export async function lessonMaterialsForResourceIds(ids: number[], totalCap = TO
   const linked: LinkedResource[] = [];
   for (const id of ids) {
     const res = await getResource(id);
-    if (res) linked.push({ resourceId: id, title: res.title, kind: res.kind });
+    if (res) linked.push({ resourceId: id, title: res.title, kind: res.kind, source: res.source });
   }
   return gather(linked, totalCap);
 }

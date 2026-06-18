@@ -1,6 +1,6 @@
 # Phase 13 — Multi-lesson weeks, one consistent lesson view, inline editing & a drag-drop planner
 
-> **Status (2026-06-18): in progress.** ✅ **13.1** (per-class multi-slot delivery — point 1 fixed at
+> **Status (2026-06-18): complete.** ✅ **13.1** (per-class multi-slot delivery — point 1 fixed at
 > the data/lay-down layer); ✅ **point 4** (outline + "tap where you are" combined into one component;
 > tapping disabled while editing); ✅ the **no-refresh** half of point 2 (binding a plan now OOB-refreshes
 > the plan details + tracker + resources; the Schemes resource slot eager-loads when open); ✅ **13.3**
@@ -8,8 +8,9 @@
 > (pupil preview opens in a new tab as the exact pupil view, with the same off/local/master toggle flipping
 > each pane to an autosaving markdown editor — local writes a class-only adapted copy, master versions the
 > master resource); ✅ the **card-reuse** half of point 2 (the Schemes master-plan card now carries the
-> same 👁 *Open as pupil (new tab)* preview, in master mode). Suite green throughout (459 unit / 273
-> integration). **Remaining:** **13.5** (drag-drop planner with insert & cascade).
+> same 👁 *Open as pupil (new tab)* preview, in master mode); ✅ **13.5** (the [/planner](../app/src/routes/planner.ts)
+> drag-drop class timeline — insert & cascade "all move along one", move, pull-forward, drag-a-whole-unit,
+> pin/lock, and one-step undo). **All six points complete.** Suite green throughout (473 unit / 276 integration).
 >
 > Six teacher requests, several interdependent. Decisions captured from the teacher (the questions
 > asked before this plan):
@@ -84,16 +85,15 @@ one-lesson-per-week into a single slot. Make it **class-centric across all the c
   the block/markdown editor); **local** saves the class's adapted resource, **master** the master
   resource. Persists for the class.
 
-### 13.5 — New planner page (drag-drop class timeline) *(point 6)* ◐ *(page + insert/move/pull ✅; polish next)*
+### 13.5 — New planner page (drag-drop class timeline) *(point 6)* ✅
 
-> **Page + core drops done.** [/planner](../app/src/routes/planner.ts) renders the week × slot timeline
-> and tray, handling **insert & cascade**, **move**, and **pull-forward (✕)** drops via the unit-tested
-> `cascadeInsert` / `pullForward` (pure, lock-aware) in
-> [services/delivery.ts](../app/src/services/delivery.ts) and the `classPlacements` / `applyPlacements`
-> repos in [repos/delivery.ts](../app/src/repos/delivery.ts), round-tripped through the route in an
-> integration test. **Still to do (polish):** drag a *whole unit* in one gesture; **lock** a lesson to
-> its date (maths already lock-aware — needs a per-occurrence flag + UI); **undo** the last placement;
-> an **end-of-unit** cue. (Holiday-aware timeline ✅ and empty-slot cue ✅ are done.)
+> **Done.** [/planner](../app/src/routes/planner.ts) renders the week × slot timeline and tray, handling
+> **insert & cascade**, **move**, **pull-forward (✕)**, **drag a whole unit**, **pin/lock (🔓/🔒)**, and
+> one-step **undo (↶)** drops via the unit-tested `cascadeInsert` / `pullForward` (pure, lock-aware) in
+> [services/delivery.ts](../app/src/services/delivery.ts) and the `classPlacements` / `applyPlacements` /
+> `setPlannerLock` repos in [repos/delivery.ts](../app/src/repos/delivery.ts) (migration 0043 adds the
+> `planner_locked` flag), all round-tripped through the route in integration tests. Holiday-aware
+> timeline, empty-slot cue, and an **end-of-unit** marker round it out.
 
 - **`/planner`** — pick a class → a timeline: **weeks** down, the class's **slots** across (multi/week),
   **half-term** dividers; a **tray** of the course's units/lessons not yet placed; **drag a lesson into

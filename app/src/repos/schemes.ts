@@ -369,6 +369,17 @@ export async function listPlansForUnit(unitId: number): Promise<Array<{ id: numb
   return rows;
 }
 
+/** Map each given lesson-plan id → its unit id (skips plans with no unit). For the planner's
+ *  end-of-unit cue: spotting where one unit's run of placed lessons ends and the next begins. */
+export async function unitIdByPlan(planIds: number[]): Promise<Map<number, number>> {
+  if (!planIds.length) return new Map();
+  const { rows } = await pool.query<{ id: number; unitId: number | null }>(
+    `SELECT id, unit_id AS "unitId" FROM lesson_plans WHERE id = ANY($1)`,
+    [planIds],
+  );
+  return new Map(rows.filter((r) => r.unitId != null).map((r) => [r.id, r.unitId as number]));
+}
+
 export async function addUnit(schemeId: number, title: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
     `INSERT INTO units (scheme_id, title, display_order)

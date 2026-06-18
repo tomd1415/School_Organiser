@@ -7,10 +7,10 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
-### 2026-06-18 — Phase 13 (in progress): multi-lesson weeks, one lesson view, inline editing
+### 2026-06-18 — Phase 13 (complete): multi-lesson weeks, one lesson view, inline editing, drag-drop planner
 
-Six interdependent teacher requests (planned in [docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)). Landed
-so far (suite green: **468 unit / 276 integration; typecheck clean**):
+Six interdependent teacher requests (planned in [docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)), **all six
+now landed** (suite green: **473 unit / 276 integration; typecheck clean**):
 
 - **Multi-lesson-per-week delivery (point 1).** GCSE/Post-16 classes correctly have **3 weekly slots**,
   but curriculum delivery planned one-lesson-per-week into a single slot. New per-class spine
@@ -56,9 +56,18 @@ so far (suite green: **468 unit / 276 integration; typecheck clean**):
   `/planner/place`, which rearranges the bindings via the unit-tested `cascadeInsert` / `pullForward`
   primitives (plus `classPlacements` / `applyPlacements` repos) and re-renders; history (today and
   earlier) is never touched. Integration-tested end-to-end through the route.
-- **Remaining Phase 13:** planner polish (point 6) — drag a **whole unit** in one gesture, **lock** a
-  lesson to its date (the cascade maths is already lock-aware), **undo** the last placement, and an
-  **end-of-unit** cue.
+- **Planner — whole-unit drop · pin · undo · end-of-unit cue (point 6 polish).** Drag a **unit header
+  (⠿)** onto a slot to lay *all* its lessons sequentially from there in one gesture (reuses 13.1
+  `layLessonsAcrossClass`). **🔓 Pin** a placed lesson to its date (new `planner_locked` flag, migration
+  0043) so the cascades flow **around** it — a pinned slot won't accept a drop, move or clear, and a
+  pinned lesson can't be dragged; the lock-aware `cascadeInsert` / `pullForward` already step over it.
+  **↶ Undo** reverses the last drop in one step (an in-memory pre-drop snapshot, restored as a minimal
+  diff). The timeline marks where each unit's run **ends**, so "what's next" is obvious. All
+  integration-tested through the route.
+- **Grouped resource lists (teacher request).** A lesson's linked resources were a messy flat list; they
+  now group into **Images · Original resources · Generated resources** (by kind + source) on both the
+  lesson card and the Schemes plan card — empty groups hide. `LinkedResource` now carries `source`;
+  shared `renderResourceGroups` in [resourceView.ts](../app/src/lib/resourceView.ts).
 
 ### 2026-06-17 — Phase 12 (in progress): zero-friction pupils + content-rich, exam-ready worksheets
 

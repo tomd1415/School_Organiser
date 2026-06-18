@@ -138,6 +138,7 @@ export async function classSlots(groupCourseId: number): Promise<GroupCourseSlot
 
 export interface ClassScheduleEntry extends ScheduleEntry {
   timetabledLessonId: number; // which of the class's slots this occurrence is in
+  locked: boolean; // 13.5: pinned to its date — cascades flow around it
 }
 
 /** All bound occurrences for a class across ALL its weekly slots, date-ordered (map/planner source). */
@@ -145,7 +146,7 @@ export async function classSchedule(groupCourseId: number, fromDate: string, toD
   const { rows } = await pool.query<ClassScheduleEntry>(
     `SELECT to_char(o.date, 'YYYY-MM-DD') AS date, o.timetabled_lesson_id AS "timetabledLessonId",
             oc.lesson_plan_id AS "lessonPlanId", lp.title AS "planTitle",
-            oc.stopping_point AS "stoppingPoint", lp.kit_needed AS "kitNeeded",
+            oc.stopping_point AS "stoppingPoint", lp.kit_needed AS "kitNeeded", oc.planner_locked AS locked,
             EXISTS (SELECT 1 FROM lesson_adaptations a
                     WHERE a.group_course_id = oc.group_course_id AND a.lesson_plan_id = oc.lesson_plan_id) AS adapted
      FROM occurrence_courses oc
@@ -190,12 +191,29 @@ export async function classPlacements(
 ): Promise<Placement[]> {
   if (!stream.length) return [];
   const bound = await classSchedule(groupCourseId, stream[0]!.date, stream[stream.length - 1]!.date);
-  const byKey = new Map(bound.map((b) => [`${b.date}#${b.timetabledLessonId}`, b.lessonPlanId]));
-  return stream.map((s) => ({
-    date: s.date,
-    timetabledLessonId: s.timetabledLessonId,
-    lessonPlanId: byKey.get(`${s.date}#${s.timetabledLessonId}`) ?? null,
-  }));
+  const byKey = new Map(bound.map((b) => [`${b.date}#${b.timetabledLessonId}`, b]));
+  return stream.map((s) => {
+    const e = byKey.get(`${s.date}#${s.timetabledLessonId}`);
+    return {
+      date: s.date,
+      timetabledLessonId: s.timetabledLessonId,
+      lessonPlanId: e?.lessonPlanId ?? null,
+      locked: e?.locked ?? false,
+    };
+  });
+}
+
+/** Phase 13.5: pin/unpin a class's binding at one dated slot (so cascades flow around it). The
+ *  occurrence must already exist (you can only lock something that's planned). Returns false if there
+ *  is no occurrence_course for that class+slot+date. */
+export async function setPlannerLock(groupCourseId: number, timetabledLessonId: number, date: string, locked: boolean): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    `UPDATE occurrence_courses oc SET planner_locked = $4
+     FROM lesson_occurrences o
+     WHERE o.id = oc.occurrence_id AND oc.group_course_id = $1 AND o.timetabled_lesson_id = $2 AND o.date = $3`,
+    [groupCourseId, timetabledLessonId, date, locked],
+  );
+  return (rowCount ?? 0) > 0;
 }
 
 /** Phase 13.5: persist the placements the cascade maths returned — bind (or clear, when null) each
