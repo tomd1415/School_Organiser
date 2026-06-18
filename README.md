@@ -56,6 +56,7 @@ Read in this order:
 
 | Document | What it covers |
 | --- | --- |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | **Deploy on Proxmox** — step-by-step (LXC one-command or Debian VM), TLS, backups/restore, upgrades. |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | Vision, glossary, every feature as a user story, non-functional requirements. **Start here.** |
 | [docs/TEACHING_PATTERN.md](docs/TEACHING_PATTERN.md) | The real groups, courses, splits and TA lessons — seeds the data model. |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Entities, relationships, draft PostgreSQL schema. |

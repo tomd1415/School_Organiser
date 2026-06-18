@@ -4,7 +4,7 @@
 #
 # `tls internal` issues a self-signed certificate from Caddy's own CA, so HTTPS works on a LAN that
 # has no public DNS and no internet-facing ACME. Accept it once in the browser, or install Caddy's
-# root CA on the teacher's devices (see deploy/README.md). If SITE_ADDRESS is a REAL, internet-
+# root CA on the teacher's devices (see DEPLOYMENT.md). If SITE_ADDRESS is a REAL, internet-
 # resolvable hostname and the box can reach Let's Encrypt, delete the `tls internal` line for a
 # publicly-trusted cert instead.
 {$SITE_ADDRESS} {

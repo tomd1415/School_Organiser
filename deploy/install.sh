@@ -86,7 +86,7 @@ cat <<EOF
 
    Open       https://$SITE/         → the onboarding wizard sets your password on first run.
               (Self-signed TLS by default — accept the certificate once, or install Caddy's root CA
-               on your devices: deploy/README.md.)
+               on your devices: DEPLOYMENT.md.)
 
    Manage     cd $APP_DIR
               docker compose --profile proxy ps | logs -f | restart | down
