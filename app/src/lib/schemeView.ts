@@ -140,7 +140,7 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
         <label>🔧 Kit needed <input type="text" name="kit_needed" value="${esc(p.kitNeeded ?? '')}" placeholder="e.g. 16× micro:bit, batteries, USB leads" ${save('input changed delay:600ms, blur')}></label>
       </details>
       <div class="plan-res-head">Resources</div>
-      <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="toggle from:#plan-${p.id}-detail once" hx-target="this" hx-swap="innerHTML">
+      <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="${opts.open ? 'load' : `toggle from:#plan-${p.id}-detail once`}" hx-target="this" hx-swap="innerHTML">
         <span class="muted">resources load when opened…</span>
       </div>
       <details class="plan-compare" id="plan-${p.id}-compare">

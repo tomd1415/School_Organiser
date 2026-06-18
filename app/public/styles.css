@@ -804,6 +804,9 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .trk-list { list-style: none; margin: 0.3rem 0 0; padding: 0; counter-reset: trk; }
 .trk-step button { display: flex; width: 100%; text-align: left; gap: 0.6rem; align-items: baseline; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: inherit; padding: 0.45rem 0.6rem; margin: 0.25rem 0; cursor: pointer; font-size: 0.92rem; }
 .trk-step button:hover { border-color: var(--accent); background: var(--accent-soft); }
+/* 13.2: when the edit toggle is on the steps render static (not tappable) — same look, no button. */
+.trk-step.trk-static { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.45rem 0.6rem; margin: 0.25rem 0; font-size: 0.92rem; }
+.trk-step.trk-static.trk-now .trk-label { font-weight: 700; }
 .trk-marker { min-width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--line); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
 .trk-step.trk-done button { opacity: 0.55; }
 .trk-step.trk-done .trk-marker { background: var(--accent-soft); color: var(--good); }

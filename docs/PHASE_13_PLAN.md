@@ -76,6 +76,30 @@ one-lesson-per-week into a single slot. Make it **class-centric across all the c
   a slot** (or drag to reorder), persisting via the 13.1 binding. Holiday-aware, "today and future only"
   (history fixed). Built to be genuinely easy to use; consumes the 13.1 class stream.
 
+**Placement operations** (how a drop resolves + the helpers that make planning fast):
+
+- **Insert & cascade ("all move along one")** *(teacher-requested)* — dropping a lesson onto an occupied
+  future slot can **push** the occupant and everything after it forward one position along the class's
+  merged slot stream (holiday-aware; never rewriting past weeks). A **`cascadeInsert(groupCourseId,
+  date, planId)`** delivery primitive: rebuild the bound tail from the target onward, shifted by one.
+  The drop offers the choice — **insert/push · swap · replace** — with insert/push as the default for an
+  occupied target.
+- **Drag a whole unit** onto a starting slot → lays all its lessons sequentially from there across the
+  class's slots (reuses 13.1 `layLessonsAcrossClass`), so a unit can be placed in one gesture.
+- **Pull-forward / close a gap** — remove or cancel a lesson and optionally **pull the rest forward** to
+  fill the gap (the inverse of insert & cascade), so a cancelled lesson doesn't leave a hole.
+- **Lock a lesson to its date** — pin an assessment/fixed event so cascades flow **around** it rather
+  than shifting it (a small per-occurrence "locked" flag).
+- **Undo the last placement** — a one-step undo for a drag/insert/cascade, since a cascade touches many
+  bindings and a misdrop should be cheap to reverse.
+- **Holiday/exception-aware timeline** — show INSET / half-term / cover / cancelled days inline and
+  un-droppable, so you never plan into a non-teaching day; a clear **"today" line** with past = locked.
+- **Empty-slot & end-of-unit cues** — highlight future slots with nothing planned and mark where a unit
+  ends, so gaps and "what's next" are obvious at a glance.
+
+These build on the 13.1 stream; `cascadeInsert` / pull-forward generalise the existing `moveBinding`
+(swap) and the 5.9 carry-over ("↻ continue next week"), which is the same shift-the-tail family.
+
 ---
 
 ## Sequencing & risk

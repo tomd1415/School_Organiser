@@ -1108,6 +1108,34 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Binding a plan re-renders its details + resources in place — OOB, no page refresh (13.2)', async () => {
+    const occ = await import('../../src/repos/occurrence');
+    const lr = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`);
+    const lp = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE active ORDER BY id LIMIT 1`);
+    const occId = await occ.findOrCreateOccurrence(lr.rows[0]!.id, '2099-03-12');
+    const oc = (await occ.getOccurrenceCourses(occId))[0]!;
+    const page = await app.inject({ method: 'GET', url: '/schemes', headers: { cookie: session } });
+    const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
+    const cookie = firstCookie(page.headers['set-cookie']) || session;
+    try {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/occurrence-course/${oc.occurrenceCourseId}/plan`,
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: `lesson_plan_id=${lp.rows[0]!.id}`,
+      });
+      expect(res.statusCode).toBe(200);
+      // the plan area, the combined outline-tracker AND the resources block all swap in place via OOB
+      expect(res.body).toContain(`id="oc-${oc.occurrenceCourseId}-plan"`);
+      expect(res.body).toContain(`id="trk-${oc.occurrenceCourseId}"`);
+      expect(res.body).toContain(`id="oc-${oc.occurrenceCourseId}-res"`);
+      expect(res.body).toContain('hx-swap-oob="true"'); // updated in place — no full reload needed
+    } finally {
+      await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE id = $1`, [oc.occurrenceCourseId]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = '2099-03-12'`);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

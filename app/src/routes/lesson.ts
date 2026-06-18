@@ -117,16 +117,38 @@ function errorPage(reply: { generateCsrf: () => string }, code: number, message:
   return { code, html: layout({ title: 'Lesson', body, authed: true, csrfToken: reply.generateCsrf() }) };
 }
 
-function renderPlanContent(ocId: number, title: string | null, objectives: string | null, outline: string | null, oob = false, adapted = false, kitNeeded: string | null = null): string {
-  // When the class has its own adaptation, this shows the EFFECTIVE (revised) plan, badged — so it's
-  // clear the lesson, the tracker and resource generation all use this class's version, not the master.
+// Objectives + kit. The OUTLINE moved into the combined outline-tracker (renderOutlineTracker), so it
+// isn't repeated here. When the class has its own adaptation this shows the EFFECTIVE plan, badged.
+function renderPlanContent(ocId: number, title: string | null, objectives: string | null, oob = false, adapted = false, kitNeeded: string | null = null): string {
   const badge = adapted ? '<span class="adapt-badge on" title="This class has its own revised version — shown here and used when generating this class\'s resources">✏ this class’s revised plan</span> ' : '';
   const detail =
     `${objectives ? `<div class="oc-block"><span class="oc-label">Objectives</span>${formatObjectives(objectives)}</div>` : ''}` +
-    `${outline ? `<div class="oc-block"><span class="oc-label">Outline</span>${formatOutline(outline)}</div>` : ''}` +
     `${kitNeeded ? `<div class="oc-block oc-kit"><span class="oc-label">🔧 Kit needed</span> ${esc(kitNeeded)}</div>` : ''}`;
   const inner = title ? badge + (detail || '<span class="muted">(plan has no detail yet)</span>') : '<span class="muted">No plan bound.</span>';
   return `<div id="oc-${ocId}-plan" class="oc-plan"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
+}
+
+// 13.2 — the Resources block (linked + adapted + generate), extracted so the plan-rebind route can
+// re-render it in place (id `oc-<oc>-res`) without a full page refresh. `oob` swaps it by id.
+function renderResourcesBlock(
+  oc: number,
+  s: { lessonPlanId: number | null; groupCourseId: number },
+  adapted: boolean,
+  resources: LinkedResource[],
+  adaptedRes: LinkedResource[],
+  materialTitles: string[],
+  oob = false,
+): string {
+  const gen =
+    s.lessonPlanId == null
+      ? ''
+      : adapted
+        ? `${materialsConsent(materialTitles)}<button type="button" class="link" title="Generate slides/worksheet/support/answers from THIS CLASS'S revised plan, linked to this class (AI)" hx-post="/lesson/adapt/${s.groupCourseId}/${s.lessonPlanId}/resources-ai" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate for this class (AI)</button><span id="res-gen-${oc}"></span>`
+        : `${materialsConsent(materialTitles)}<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`;
+  return `<div class="ld-res" id="oc-${oc}-res"${oob ? ' hx-swap-oob="true"' : ''}><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}
+        ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
+        ${gen}
+      </div>`;
 }
 
 // 5.2: the per-group adaptation block. The master stays in renderPlanContent above; here the teacher
@@ -185,27 +207,29 @@ function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: st
 }
 
 
-// The in-lesson marker: the effective outline's steps as a clickable list — tap a step to mark
-// "we are here". The click also writes the textual stopping point, so "last time → resume" and
-// the AI feedback loop keep working off the same record.
-function renderTracker(oc: number, steps: string[], progress: number | null): string {
-  if (!steps.length) return '';
+// 13.2 (point 4) — the OUTLINE and the "tap where you are" tracker are ONE component: the outline's
+// steps are the clickable progress list (tap a step to mark "we are here", which also writes the
+// textual stopping point so "last time → resume" and the AI feedback loop keep working). When the
+// edit toggle is on (13.3) the steps render static (not tappable). A free-text outline that doesn't
+// parse into steps falls back to formatted text. `oob` lets a route swap it in place by id.
+function renderOutlineTracker(oc: number, outline: string | null, progress: number | null, editing = false, oob = false): string {
+  const wrap = (inner: string, cls: string): string => `<div class="${cls}" id="trk-${oc}"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
+  if (!outline || !outline.trim()) return wrap('', 'trk');
+  const steps = outlineSteps(outline);
+  if (!steps.length) return wrap(`<span class="oc-label">Outline</span>${formatOutline(outline)}`, 'oc-block oc-outline');
   const rows = steps
     .map((label, i) => {
       const state = progress == null ? '' : i < progress ? ' trk-done' : i === progress ? ' trk-now' : '';
+      const marker = `<span class="trk-marker">${progress != null && i === progress ? '▶' : progress != null && i < progress ? '✓' : i + 1}</span>`;
+      const lbl = `<span class="trk-label">${esc(label)}</span>`;
+      if (editing) return `<li class="trk-step trk-static${state}">${marker}${lbl}</li>`;
       return `<li class="trk-step${state}">
         <button type="button" hx-post="/occurrence-course/${oc}/progress" hx-vals='${JSON.stringify({ step: i, label: `step ${i + 1} — ${label.slice(0, 150)}` }).replace(/'/g, '&#39;')}'
-          hx-target="#trk-${oc}" hx-swap="outerHTML" title="mark: we are here">
-          <span class="trk-marker">${progress != null && i === progress ? '▶' : progress != null && i < progress ? '✓' : i + 1}</span>
-          <span class="trk-label">${esc(label)}</span>
-        </button>
+          hx-target="#trk-${oc}" hx-swap="outerHTML" title="mark: we are here">${marker}${lbl}</button>
       </li>`;
     })
     .join('');
-  return `<div class="trk" id="trk-${oc}">
-    <span class="oc-label">Lesson tracker — tap where you are</span>
-    <ol class="trk-list">${rows}</ol>
-  </div>`;
+  return wrap(`<span class="oc-label">Outline${editing ? '' : ' — tap where you are'}</span><ol class="trk-list">${rows}</ol>`, 'trk oc-block');
 }
 
 function renderTaFeedback(rows: TaFeedbackRow[]): string {
@@ -283,19 +307,10 @@ function renderSection(
         <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
-      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, eff?.adapted ? eff.outline : s.planOutline, false, eff?.adapted ?? false, s.planKitNeeded)}
-      ${renderTracker(oc, outlineSteps((eff?.adapted ? eff.outline : null) ?? s.planOutline), s.progressStep)}
+      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, false, eff?.adapted ?? false, s.planKitNeeded)}
+      ${renderOutlineTracker(oc, (eff?.adapted ? eff.outline : null) ?? s.planOutline, s.progressStep)}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
-      <div class="ld-res"><span class="ld-res-label">Resources</span> ${renderLinkedResources(resources)}
-        ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
-        ${
-          s.lessonPlanId == null
-            ? ''
-            : eff?.adapted
-              ? `${materialsConsent(materialTitles)}<button type="button" class="link" title="Generate slides/worksheet/support/answers from THIS CLASS'S revised plan, linked to this class (AI)" hx-post="/lesson/adapt/${s.groupCourseId}/${s.lessonPlanId}/resources-ai" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate for this class (AI)</button><span id="res-gen-${oc}"></span>`
-              : `${materialsConsent(materialTitles)}<button type="button" class="link" title="slides + worksheet + support + answers from the master plan (AI); re-running updates them" hx-post="/schemes/plan/${s.lessonPlanId}/resources-ai?from=lesson" hx-include="closest .ld-res" hx-swap="innerHTML" hx-target="#res-gen-${oc}" hx-disabled-elt="this">📄 generate resources (AI)</button><span id="res-gen-${oc}"></span>`
-        }
-      </div>
+      ${renderResourcesBlock(oc, s, eff?.adapted ?? false, resources, adaptedRes, materialTitles)}
       ${
         s.lessonPlanId != null
           ? `<details class="ws-preview" id="ws-prev-d-${oc}">
@@ -641,11 +656,29 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     if (!params.success || !body.success) return reply.code(400).send('');
     const raw = body.data.lesson_plan_id;
     const planId = raw && raw !== '' && Number.isFinite(Number(raw)) ? Number(raw) : null;
-    await setOccurrenceCoursePlan(params.data.id, planId);
-    const plan = planId ? await getLessonPlan(planId) : null;
-    return reply
-      .type('text/html')
-      .send(renderPlanContent(params.data.id, plan?.title ?? null, plan?.objectives ?? null, plan?.outline ?? null, true) + renderSavedStatus(`oc-${params.data.id}-plan-status`));
+    const oc = params.data.id;
+    await setOccurrenceCoursePlan(oc, planId);
+    // 13.2: re-render the WHOLE plan area (objectives · outline-tracker · resources) in place via OOB,
+    // so binding a plan shows its details + resources immediately — no page refresh needed.
+    const occId = await poolOccurrenceOf(oc);
+    const sec = (await getOccurrenceCourses(occId ?? 0)).find((o) => Number(o.occurrenceCourseId) === oc);
+    if (!sec) return reply.type('text/html').send(renderSavedStatus(`oc-${oc}-plan-status`));
+    const eff = sec.lessonPlanId != null
+      ? await getEffectiveLesson(sec.groupCourseId, sec.lessonPlanId, { objectives: sec.planObjectives ?? null, outline: sec.planOutline ?? null })
+      : null;
+    const [resources, materialTitles] = await Promise.all([
+      sec.lessonPlanId != null ? listResourcesForPlan(sec.lessonPlanId) : Promise.resolve([]),
+      sec.lessonPlanId != null ? materialCandidatesForPlan(sec.lessonPlanId) : Promise.resolve([]),
+    ]);
+    const adaptedRes = eff?.adaptationId != null ? await listResourcesForAdaptation(eff.adaptationId) : [];
+    const objectives = eff?.adapted ? eff.objectives : sec.planObjectives;
+    const outline = eff?.adapted ? eff.outline : sec.planOutline;
+    return reply.type('text/html').send(
+      renderPlanContent(oc, sec.planTitle, objectives, true, eff?.adapted ?? false, sec.planKitNeeded) +
+        renderOutlineTracker(oc, outline, sec.progressStep ?? null, false, true) +
+        renderResourcesBlock(oc, sec, eff?.adapted ?? false, resources, adaptedRes, materialTitles, true) +
+        renderSavedStatus(`oc-${oc}-plan-status`),
+    );
   });
 
 
@@ -662,10 +695,10 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const effOutline = sec?.lessonPlanId != null
       ? (await getEffectiveLesson(sec.groupCourseId, sec.lessonPlanId, { objectives: sec.planObjectives ?? null, outline: sec.planOutline ?? null }))
       : null;
-    const steps = outlineSteps((effOutline?.adapted ? effOutline.outline : null) ?? sec?.planOutline ?? null);
+    const outline = (effOutline?.adapted ? effOutline.outline : null) ?? sec?.planOutline ?? null;
     return reply
       .type('text/html')
-      .send(renderTracker(params.data.id, steps, body.data.step) + renderSavedStatus(`oc-${params.data.id}-status`));
+      .send(renderOutlineTracker(params.data.id, outline, body.data.step) + renderSavedStatus(`oc-${params.data.id}-status`));
   });
 
   async function poolOccurrenceOf(occurrenceCourseId: number): Promise<number | null> {
