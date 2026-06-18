@@ -4,7 +4,8 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { addDays, localParts, weekdayOf } from '../lib/time';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
-import { listExceptionsBetween } from '../repos/exceptions';
+import { listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
+import { describeException, type ExceptionEffect } from '../services/exceptions';
 import { buildWeekGrid, type GridCell, type GridLesson } from '../services/timetable';
 
 const TZ = 'Europe/London';
@@ -42,12 +43,21 @@ function purposeLabel(purpose: string): string {
   }
 }
 
-function renderLesson(l: GridLesson, date: string, flagged = false): string {
+// A small per-slot badge for today's dated exceptions: Free (trip/cancelled/off-timetable), Cover, or → room.
+function exBadge(ex: ExceptionEffect): string {
+  if (ex.mode === 'none') return '';
+  const cls = ex.mode === 'free' ? 'tt-ex-free' : ex.mode === 'cover' ? 'tt-ex-cover' : 'tt-ex-room';
+  const text = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'Cover' : ex.roomName ? `→ ${esc(ex.roomName)}` : 'Room';
+  const title = [ex.label, ex.detail].filter(Boolean).join(' — ');
+  return ` <span class="tt-ex ${cls}" title="${esc(title)}">${text}</span>`;
+}
+
+function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect): string {
   const colour = l.courses[0]?.colour ?? '#94a3b8';
   const flag = l.isSelf ? '' : '⚑ ';
   const heading = l.groupName ? esc(l.groupName) : esc(purposeLabel(l.purpose));
   const courses = l.courses.map((c) => esc(c.name)).join(' · ');
-  const exMark = flagged ? '<span class="tt-ex" title="exception on this date — open the lesson">⚠</span>' : '';
+  const exMark = exBadge(ex);
   const inner = `<span class="tt-group">${flag}${heading}${exMark}</span>${courses ? `<span class="tt-course">${courses}</span>` : ''}`;
   const style = `border-left-color:${esc(colour)}`;
   // Teaching / free / form lessons open the lesson detail; clubs/duties are just shown.
@@ -57,12 +67,12 @@ function renderLesson(l: GridLesson, date: string, flagged = false): string {
   return `<span class="tt-lesson tt-${esc(l.purpose)}" style="${style}">${inner}</span>`;
 }
 
-function renderCell(cell: GridCell, date: string, isToday: boolean, exKeys?: Set<string>): string {
+function renderCell(cell: GridCell, date: string, isToday: boolean, exForLesson: (date: string, lessonId: number) => ExceptionEffect): string {
   const td = isToday ? '<td class="tt-today">' : '<td>';
   if (cell.lessons.length === 0) {
     return `${isToday ? '<td class="tt-empty tt-today">' : '<td class="tt-empty">'}<span class="tt-band">${esc(cell.periodLabel)}</span></td>`;
   }
-  return `${td}${cell.lessons.map((l) => renderLesson(l, date, exKeys?.has(`${date}:${l.lessonId}`) ?? false)).join('')}</td>`;
+  return `${td}${cell.lessons.map((l) => renderLesson(l, date, exForLesson(date, l.lessonId))).join('')}</td>`;
 }
 
 export function registerTimetableRoutes(app: FastifyInstance): void {
@@ -83,8 +93,18 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
         getTimetabledLessons(yearId),
         listExceptionsBetween(weekDates[0]!, weekDates[4]!),
       ]);
-      const exKeys = new Set(exRows.filter((e) => e.timetabledLessonId != null).map((e) => `${e.date}:${e.timetabledLessonId}`));
-      const dayEx = new Set(exRows.filter((e) => e.timetabledLessonId == null).map((e) => e.date));
+      const wholeDayByDate = new Map<string, ExceptionRow>();
+      const byDateLesson = new Map<string, ExceptionRow>();
+      for (const e of exRows) {
+        if (e.timetabledLessonId == null) {
+          if (e.kind === 'off_timetable') wholeDayByDate.set(e.date, e);
+        } else {
+          byDateLesson.set(`${e.date}:${e.timetabledLessonId}`, e);
+        }
+      }
+      const dayEx = new Set(wholeDayByDate.keys());
+      const exForLesson = (d: string, lessonId: number): ExceptionEffect =>
+        describeException(wholeDayByDate.get(d) ?? byDateLesson.get(`${d}:${lessonId}`) ?? null);
       const grid = buildWeekGrid(periods, lessons);
       const head = `<tr><th class="tt-corner"></th>${weekDates
         .map((d, i) => `<th${d === today ? ' class="tt-today"' : ''}>${esc(DAY_NAMES[i] ?? '')}${dayEx.has(d) ? ' <span class="tt-ex" title="off-timetable day">⚠</span>' : ''}<span class="tt-date">${esc(fmtShort(d))}</span></th>`)
@@ -94,7 +114,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
           const cells = row.cells
             .map((cell, i) => {
               const d = weekDates[i] ?? today;
-              return renderCell(cell, d, d === today, exKeys);
+              return renderCell(cell, d, d === today, exForLesson);
             })
             .join('');
           return `<tr class="tt-row tt-kind-${esc(row.kind)}"><th class="tt-time"><span class="tt-rl">${esc(row.label)}</span><span class="tt-clock">${esc(row.start)}</span></th>${cells}</tr>`;
@@ -117,7 +137,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
           </nav>
         </div>
         ${table}
-        <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · colour = course</p>
+        <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · colour = course</p>
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
   });

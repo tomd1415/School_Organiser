@@ -294,13 +294,21 @@ scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz.age
 
 ## 12. Upgrades
 
+One command in the container — the light path (pull, rebuild, restart):
+
 ```bash
-cd /opt/school-organiser
-git pull
-sudo bash deploy/install.sh          # rebuilds + restarts; data, secrets and backups are preserved
+bash /opt/school-organiser/scripts/upgrade.sh
 ```
 
-New database migrations run automatically on the app's next boot.
+Or re-run the full installer, which also re-checks Docker and the backup cron:
+
+```bash
+cd /opt/school-organiser && git pull
+bash deploy/install.sh          # rebuilds + restarts; data, secrets and backups are preserved
+```
+
+New database migrations run automatically on the app's next boot. For a major upgrade, take a Proxmox
+snapshot first ([§13](#13-proxmox-snapshots)).
 
 ---
 
@@ -317,6 +325,7 @@ rollback if anything surprises you, on top of the app-level encrypted backups.
 |---|---|
 | **Docker didn't start in the LXC** | The known Docker-in-LXC issue. `pct stop <CTID>; pct destroy <CTID>` and re-run `proxmox-lxc.sh` with the default (privileged: leave `UNPRIVILEGED` unset/`0`). If it still fails, use the VM (Path B). |
 | **Browser certificate warning** | Expected on a LAN with `tls internal`. Accept once, or install Caddy's root CA ([§7](#7-the-tls-certificate-lan)). |
+| **Managed/locked-down PC won't let you past the cert warning** | School Chrome/Edge policy (`SSLErrorOverrideAllowed=false`) hides "Proceed" and disables the `thisisunsafe` bypass. Best: have IT trust Caddy's root CA ([§7](#7-the-tls-certificate-lan)). No IT? Switch to plain HTTP — set `COOKIE_SECURE=false` in `app/.env`, use the Caddyfile `:80` block, then browse `http://<ip>/` (or the app's direct port `http://<ip>:44360/`). LAN-cleartext trade-off; see [§7](#7-the-tls-certificate-lan). |
 | **Compose v2 missing** | Install `docker-compose-plugin` (the installer needs `docker compose`, not the old `docker-compose`). |
 | **App can't reach the database** | `docker compose --profile proxy logs db` — the app waits for the db healthcheck; check `DB_PASSWORD` in `app/.env` matches. |
 | **Page loads on `:44360` but not `https://`** | The `caddy` service needs the `--profile proxy` flag; bring it up with `docker compose --profile proxy up -d`. |

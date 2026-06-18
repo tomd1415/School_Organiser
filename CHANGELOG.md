@@ -7,6 +7,38 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-18 — Setup, September rollover & cover/free; Proxmox deploy niceties
+
+Teacher-driven follow-ups while getting the app onto a Proxmox box for the new year (tracked in
+[docs/NEXT_STEPS.md](docs/NEXT_STEPS.md)). Suite green: **477 unit / 281 integration; typecheck clean**.
+
+- **Day shape — "Model day" (setup).** Build one weekday's periods, then stamp its times, labels and
+  slot types onto every other weekday in one click; days that already have classes assigned are
+  protected and skipped ([app/src/repos/setup.ts](app/src/repos/setup.ts) `applyModelDay`,
+  [app/src/routes/setup.ts](app/src/routes/setup.ts)). Classes are never copied — you just enter the
+  new names per day.
+- **Move a pupil between classes in one click.** Each pupil chip on the Groups tab gains a "move to…"
+  picker; the move is same-year-only and transactional ([app/src/repos/setup.ts](app/src/repos/setup.ts)
+  `moveEnrolment`).
+- **Roll classes up from the Groups tab.** A button surfaces the existing September rollover transfer,
+  pre-targeted from the previous year into the one you're editing.
+- **Dated free / on-cover, reflected live.** A new `free (class away — trip/exam)` exception kind
+  ([app/migrations/0044_exception_free_kind.sql](app/migrations/0044_exception_free_kind.sql)); a
+  cancelled / free / off-timetable slot now reads **Free** and a cover reads **On cover** on the Now
+  strip + cards and as a per-slot badge on the week timetable
+  ([app/src/services/exceptions.ts](app/src/services/exceptions.ts) pure helpers,
+  [app/src/routes/now.ts](app/src/routes/now.ts), [app/src/routes/timetable.ts](app/src/routes/timetable.ts)).
+  Still display-level — feeding exceptions into the availability engine is the deferred next step
+  ([docs/NEXT_STEPS.md](docs/NEXT_STEPS.md)).
+- **Deployment.** The Proxmox-host bootstrap now `curl`s the single `deploy/proxmox-lxc.sh` (no repo
+  checkout needed on the host) using the real repo URL; a generated
+  [app/scripts/blank-week.sql](app/scripts/blank-week.sql) lays the weekly timing skeleton (no classes)
+  onto a fresh instance; [scripts/upgrade.sh](scripts/upgrade.sh) is a one-command in-container upgrade;
+  and the locked-down managed-PC TLS wall (Chrome `SSLErrorOverrideAllowed=false`) is documented with
+  Caddy-root-CA and plain-HTTP fallbacks ([DEPLOYMENT.md](DEPLOYMENT.md)).
+- **Tests.** New unit cover for the exception-effect helpers; new integration cover for `applyModelDay`,
+  `moveEnrolment`, and the timetable free/cover badge.
+
 ### 2026-06-18 — Phase 13 (complete): multi-lesson weeks, one lesson view, inline editing, drag-drop planner
 
 Six interdependent teacher requests (planned in [docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)), **all six

@@ -3,9 +3,10 @@
 # Run this ON THE PROXMOX HOST (as root). It creates the container, enables the flags Docker needs,
 # clones the repo, and runs deploy/install.sh inside — so the whole thing is one command on the host.
 #
-#   sudo REPO_URL=https://github.com/you/School_Organiser.git SITE_ADDRESS=192.168.1.50 \
-#        bash deploy/proxmox-lxc.sh
-#   # or positionally:  sudo bash deploy/proxmox-lxc.sh <REPO_URL> [SITE_ADDRESS]
+#   REPO_URL=https://github.com/tomd1415/School_Organiser.git SITE_ADDRESS=192.168.1.50 \
+#        bash proxmox-lxc.sh
+#   # or positionally:  bash proxmox-lxc.sh <REPO_URL> [SITE_ADDRESS]
+#   # (you're root on the Proxmox host, so no sudo; from a full checkout use deploy/proxmox-lxc.sh)
 #
 # DOCKER-IN-LXC NOTE: this defaults to a PRIVILEGED container with nesting+keyctl, which is the
 # reliable way to run Docker in an LXC (unprivileged Docker-in-LXC can break on recent kernels —
@@ -21,7 +22,7 @@ command -v pct >/dev/null || { echo "This must run on a Proxmox VE host (the 'pc
 # ── Config (override any via env) ───────────────────────────────────────────
 REPO_URL="${REPO_URL:-${1:-}}"
 SITE_ADDRESS="${SITE_ADDRESS:-${2:-}}"
-[[ -n "$REPO_URL" ]] || { echo "REPO_URL is required (the git URL to clone). Usage: sudo bash deploy/proxmox-lxc.sh <REPO_URL> [SITE_ADDRESS]" >&2; exit 1; }
+[[ -n "$REPO_URL" ]] || { echo "REPO_URL is required (the git URL to clone). Usage: bash proxmox-lxc.sh <REPO_URL> [SITE_ADDRESS]" >&2; exit 1; }
 
 CTID="${CTID:-$(pvesh get /cluster/nextid)}"
 HOSTNAME="${HOSTNAME:-school-organiser}"

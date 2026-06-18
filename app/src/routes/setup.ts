@@ -313,9 +313,17 @@ async function groupsTab(years: YearRow[], yearId: number): Promise<string> {
       </div>`;
     }),
   );
+  // Surface the September rollover transfer from where classes are renamed/repopulated: a one-click
+  // jump into the wizard, pre-targeted from the previous year into this one.
+  const others = years.filter((y) => Number(y.id) !== yearId);
+  const prev = sel ? others.filter((y) => y.startDate < sel.startDate).sort((a, b) => (a.startDate < b.startDate ? 1 : -1))[0] : undefined;
+  const rollUp = others.length
+    ? `<p class="grp-rollup"><a class="btn-secondary" href="/setup/rollover?${prev ? `from=${prev.id}&` : ''}to=${yearId}">${prev ? `Roll ${esc(prev.name)} classes into ${esc(sel?.name ?? 'this year')} →` : 'Roll a previous year into this year →'}</a> <span class="muted">brings classes up with their pupils, courses &amp; context — then rename &amp; move pupils below.</span></p>`
+    : '';
   return `
     <h2>Groups — ${esc(sel?.name ?? '')}</h2>
     <p class="muted">Pupil names stay in this app only (never sent to AI). Manage the roster itself on <a href="/pupils">Pupils</a>.</p>
+    ${rollUp}
     ${rows.join('') || '<p class="muted">no groups in this year yet</p>'}
     <form class="setup-add" hx-post="/setup/group/add?year=${yearId}" hx-target="closest section" hx-swap="outerHTML">
       <input name="name" placeholder="7ARO" required maxlength="50">

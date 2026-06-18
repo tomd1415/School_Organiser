@@ -146,7 +146,8 @@ cd instances/mrs-jones && docker compose up -d --build
   instance. Restores follow the same pattern as the main instance (see above), inside the
   instance's directory.
 - **Updates:** `git pull`, then for each instance `docker compose up -d --build` — migrations run
-  on boot. Update one instance first, check it, then the rest.
+  on boot. Update one instance first, check it, then the rest. (Single-instance LXC/VM: just
+  `scripts/upgrade.sh` — see [DEPLOYMENT.md §12](../DEPLOYMENT.md).)
 - **Removal:** `docker compose down -v` inside the instance directory deletes its database volume;
   hand the teacher a final backup first.
 - The `instances/` directory is git-ignored; each instance's `.env` holds its own secrets.
