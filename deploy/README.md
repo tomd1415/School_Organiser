@@ -104,3 +104,41 @@ sudo bash deploy/install.sh        # rebuilds + restarts; data, secrets and back
 
 Take a Proxmox snapshot of the VM before a major upgrade — it's the fastest possible rollback if
 anything surprises you, on top of the app-level encrypted backups.
+
+---
+
+## Alternative: one command on the Proxmox host (LXC)
+
+If you'd rather not click through the VM wizard, `deploy/proxmox-lxc.sh` runs **on the Proxmox host**
+and does everything — creates a Debian 12 LXC, sets the flags Docker needs, clones the repo, and runs
+the installer inside it:
+
+```bash
+# On the Proxmox host, as root:
+sudo REPO_URL=https://github.com/you/School_Organiser.git SITE_ADDRESS=192.168.1.50 \
+     bash deploy/proxmox-lxc.sh
+# or positionally:  sudo bash deploy/proxmox-lxc.sh <REPO_URL> [SITE_ADDRESS]
+```
+
+When it finishes it prints the URL; open it and the onboarding wizard takes over. Get a root shell
+with `pct enter <CTID>`.
+
+**Tunables (env vars, with defaults):** `CTID` (next free), `HOSTNAME` (school-organiser), `CORES` (2),
+`MEMORY` (4096 MB), `DISK` (20 GB), `STORAGE` (local-lvm), `TEMPLATE_STORAGE` (local), `BRIDGE`
+(vmbr0), `IPCONF` (`dhcp`, or e.g. `192.168.1.50/24,gw=192.168.1.1`), `CT_PASSWORD` (optional root
+password), `UNPRIVILEGED` (0).
+
+### Docker-in-LXC: privileged by default, and why
+
+Running Docker inside an LXC needs `nesting=1,keyctl=1` (the script sets both). It defaults to a
+**privileged** container because *unprivileged* Docker-in-LXC is unreliable on recent kernels (runc's
+per-namespace sysctl write and Docker's AppArmor probe). On a single-admin school host this is an
+acceptable trade-off and the data is no more exposed than in a VM.
+
+- Want the hardened path? `UNPRIVILEGED=1 sudo bash deploy/proxmox-lxc.sh …`. The script verifies
+  Docker actually started and, if it didn't, tells you to fall back to privileged (or the VM).
+- **The most isolated option is still the VM** (the first half of this guide) — prefer it if you're
+  unsure; the LXC route is here for when you want the lighter footprint.
+
+Backups, the AI key, upgrades (`git pull` then re-run the installer) and management are all identical
+to the VM — the LXC just runs the same `deploy/install.sh` inside.
