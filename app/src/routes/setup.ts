@@ -9,6 +9,7 @@ import { esc, layout } from '../lib/html';
 import { renderSavedStatus } from '../lib/notesView';
 import { weekdayName } from '../services/delivery';
 import {
+  applyModelDay,
   copyDayShape,
   createCourse,
   createGroup,
@@ -46,6 +47,7 @@ import {
   listEditorLessons,
   toggleLessonCourse,
   updateLessonField,
+  type ApplyModelDayResult,
   type EditorLesson,
   type YearRow,
 } from '../repos/setup';
@@ -181,7 +183,35 @@ async function dayTab(years: YearRow[], yearId: number): Promise<string> {
         <p class="muted lay-note">Copies every period that doesn't already exist in this year — then edit the times here.</p>
       </form>`
     : '';
-  return `<h2>Day shape — periods &amp; times</h2>${copyFrom}${days.join('')}`;
+  // "Model day": build one day fully, then stamp its shape (times/labels/types — never classes)
+  // onto every other weekday, and tweak per day afterwards.
+  const dayCount = (wd: number) => periods.filter((p) => p.weekday === wd).length;
+  const modelDefault = [1, 2, 3, 4, 5].reduce((best, wd) => (dayCount(wd) > dayCount(best) ? wd : best), 1);
+  const modelDay = periods.length
+    ? `<form class="setup-add" hx-post="/setup/day/apply-model?year=${yearId}" hx-target="closest section" hx-swap="outerHTML"
+          hx-confirm="Replace the period structure on the other weekdays with this day's? Times, labels and slot types are copied — never classes. Any weekday that already has classes assigned is left untouched.">
+        <label>Model day — use
+          <select name="model">${[1, 2, 3, 4, 5].map((wd) => `<option value="${wd}"${wd === modelDefault ? ' selected' : ''}>${weekdayName(wd)}</option>`).join('')}</select>
+          and apply it to the whole week</label>
+        <button type="submit" class="btn-secondary">apply to all days →</button>
+        <p class="muted lay-note">Stamps that day's times, labels and slot types onto every other weekday; classes are never copied, so you just fill those in per day afterwards.</p>
+      </form>`
+    : '';
+  return `<h2>Day shape — periods &amp; times</h2>${modelDay}${copyFrom}${days.join('')}`;
+}
+
+/** Banner shown after a "model day" apply, summarising what changed and what was protected. */
+function applyModelNotice(r: ApplyModelDayResult): string {
+  if (r.modelPeriods === 0)
+    return `<p class="muted lay-note">${weekdayName(r.model)} has no periods yet — add some before applying it to the week.</p>`;
+  const names = (ds: number[]) => ds.map(weekdayName).join(', ');
+  const applied = r.applied.length
+    ? `Applied <strong>${weekdayName(r.model)}</strong>'s day shape to ${names(r.applied)}.`
+    : 'No other days were changed.';
+  const blocked = r.blocked.length
+    ? ` Left ${names(r.blocked)} untouched — ${r.blocked.length === 1 ? 'it already has classes' : 'they already have classes'} assigned (clear those on the Timetable tab to include them).`
+    : '';
+  return `<p class="muted lay-note">${applied}${blocked}</p>`;
 }
 
 async function peopleTab(): Promise<string> {
@@ -362,7 +392,7 @@ async function timetableTab(yearId: number): Promise<string> {
 export function registerSetupRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
 
-  async function renderSetup(tab: Tab, yearId: number, csrf: string): Promise<string> {
+  async function renderSetup(tab: Tab, yearId: number, csrf: string, notice = ''): Promise<string> {
     const years = await listYears();
     const tabs = TABS.map((t) => `<a href="/setup?tab=${t}&year=${yearId}"${t === tab ? ' class="active"' : ''}>${TAB_LABELS[t]}</a>`).join(' ');
     const yearScoped = tab === 'year' || tab === 'day' || tab === 'groups' || tab === 'timetable';
@@ -378,6 +408,7 @@ export function registerSetupRoutes(app: FastifyInstance): void {
         <h1>Setup</h1>
         <nav class="task-tabs">${tabs}</nav>
         ${yearScoped ? yearPicker(years, yearId, tab) : ''}
+        ${notice}
         ${body}
       </section>`;
   }
@@ -405,9 +436,9 @@ export function registerSetupRoutes(app: FastifyInstance): void {
   });
 
   // Re-render the whole section after a structural add (simplest correct swap).
-  const section = async (req: { query: unknown; headers: Record<string, unknown> }, reply: { generateCsrf: () => string }, tab: Tab, yearId?: number) => {
+  const section = async (req: { query: unknown; headers: Record<string, unknown> }, reply: { generateCsrf: () => string }, tab: Tab, yearId?: number, notice = '') => {
     const y = yearId ?? (await getCurrentYearId());
-    return renderSetup(tab, Number(y), reply.generateCsrf());
+    return renderSetup(tab, Number(y), reply.generateCsrf(), notice);
   };
 
   // years
@@ -479,6 +510,21 @@ export function registerSetupRoutes(app: FastifyInstance): void {
     if (!q.success || !b.success) return reply.code(400).send('');
     await copyDayShape(b.data.from, q.data.year);
     return reply.type('text/html').send(await section(req, reply, 'day', q.data.year));
+  });
+
+  app.post('/setup/day/apply-model', guard, async (req, reply) => {
+    const q = z.object({ year: z.coerce.number().int().positive() }).safeParse(req.query);
+    const b = z.object({ model: z.coerce.number().int().min(1).max(5) }).safeParse(req.body);
+    if (!q.success || !b.success) return reply.code(400).send('');
+    let notice: string;
+    try {
+      notice = applyModelNotice(await applyModelDay(q.data.year, b.data.model));
+    } catch (err) {
+      if ((err as { code?: string }).code === '23503')
+        notice = `<p class="muted lay-note">Couldn't replace some days — they have records linked to their periods. Clear those first, then try again.</p>`;
+      else throw err;
+    }
+    return reply.type('text/html').send(await section(req, reply, 'day', q.data.year, notice));
   });
 
   // rooms / staff / courses

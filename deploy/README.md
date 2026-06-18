@@ -5,10 +5,12 @@ The full, step-by-step deployment guide is **[../DEPLOYMENT.md](../DEPLOYMENT.md
 This folder holds the two scripts it uses.
 
 **`proxmox-lxc.sh`** — run on the **Proxmox host** to create a Debian 12 LXC and install everything
-inside it in one command:
+inside it in one command. The host usually has no checkout of this repo (or `git`), so fetch the one
+script first — it clones the full repo into the container itself:
 
 ```bash
-sudo REPO_URL=<git-url> SITE_ADDRESS=192.168.1.50 bash deploy/proxmox-lxc.sh
+curl -fsSLO https://raw.githubusercontent.com/tomd1415/School_Organiser/main/deploy/proxmox-lxc.sh
+REPO_URL=https://github.com/tomd1415/School_Organiser.git SITE_ADDRESS=192.168.1.50 bash proxmox-lxc.sh
 ```
 
 **`install.sh`** — run **inside** a Debian 12 container or VM (idempotent; re-run to upgrade):

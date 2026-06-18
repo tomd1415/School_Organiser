@@ -184,6 +184,74 @@ export async function copyDayShape(fromYearId: number, toYearId: number): Promis
   return rowCount ?? 0;
 }
 
+export interface ApplyModelDayResult {
+  /** the weekday used as the template (1 = Mon … 5 = Fri) */
+  model: number;
+  /** weekdays whose shape was replaced with a copy of the model day's */
+  applied: number[];
+  /** weekdays left untouched because they already have timetabled lessons */
+  blocked: number[];
+  /** how many periods the model day had (0 ⇒ nothing was copied) */
+  modelPeriods: number;
+}
+
+/**
+ * Stamp one weekday's "model" day shape onto the other weekdays of the same year. Each target
+ * weekday's period_definitions are replaced with copies of the model day's (slot order, type,
+ * label, lesson index and times — NOT any class/lesson assignment), so the structure matches but
+ * classes are entered per day afterwards. Target weekdays that already have timetabled lessons are
+ * protected and skipped (deleting their periods would break the FK and drop class assignments).
+ * Transactional and idempotent: re-running with the same model converges.
+ */
+export async function applyModelDay(yearId: number, modelWeekday: number): Promise<ApplyModelDayResult> {
+  const targets = [1, 2, 3, 4, 5].filter((wd) => wd !== modelWeekday);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: cnt } = await client.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM period_definitions WHERE academic_year_id = $1 AND weekday = $2`,
+      [yearId, modelWeekday],
+    );
+    const modelPeriods = cnt[0]!.n;
+    if (modelPeriods === 0) {
+      await client.query('ROLLBACK');
+      return { model: modelWeekday, applied: [], blocked: [], modelPeriods: 0 };
+    }
+    // Days with classes assigned are protected — never silently dropped.
+    const { rows: blockedRows } = await client.query<{ weekday: number }>(
+      `SELECT DISTINCT p.weekday
+         FROM period_definitions p
+         JOIN timetabled_lessons tl ON tl.period_definition_id = p.id
+        WHERE p.academic_year_id = $1 AND p.weekday = ANY($2::int[])`,
+      [yearId, targets],
+    );
+    const blocked = blockedRows.map((r) => r.weekday);
+    const applied = targets.filter((wd) => !blocked.includes(wd));
+    if (applied.length) {
+      await client.query(
+        `DELETE FROM period_definitions WHERE academic_year_id = $1 AND weekday = ANY($2::int[])`,
+        [yearId, applied],
+      );
+      await client.query(
+        `INSERT INTO period_definitions
+           (academic_year_id, weekday, slot_order, slot_type, label, lesson_index, start_time, end_time, teachable)
+         SELECT $1, t.wd, p.slot_order, p.slot_type, p.label, p.lesson_index, p.start_time, p.end_time, p.teachable
+           FROM period_definitions p
+           CROSS JOIN unnest($2::int[]) AS t(wd)
+          WHERE p.academic_year_id = $1 AND p.weekday = $3`,
+        [yearId, applied, modelWeekday],
+      );
+    }
+    await client.query('COMMIT');
+    return { model: modelWeekday, applied, blocked, modelPeriods };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 // ── rooms / staff / courses ──────────────────────────────────────────────────────────────────
 
 export interface NamedRow {

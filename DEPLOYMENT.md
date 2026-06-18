@@ -5,9 +5,12 @@ The whole stack — **PostgreSQL + the app + a Caddy HTTPS reverse proxy** — r
 inside a single Debian 12 container (or VM). Everything stays on the school LAN; no pupil data leaves
 the building.
 
-> **TL;DR (recommended path).** On the Proxmox host, as root:
+> **TL;DR (recommended path).** On the Proxmox host, as root. The host has no checkout of this repo
+> yet (and usually no `git`), so fetch the one bootstrap script — it clones the full repo into the
+> container itself:
 > ```bash
-> sudo REPO_URL=<your-git-url> SITE_ADDRESS=192.168.1.50 bash deploy/proxmox-lxc.sh
+> curl -fsSLO https://raw.githubusercontent.com/tomd1415/School_Organiser/main/deploy/proxmox-lxc.sh
+> REPO_URL=https://github.com/tomd1415/School_Organiser.git SITE_ADDRESS=192.168.1.50 bash proxmox-lxc.sh
 > ```
 > It creates the container, installs everything, and prints a URL. Open it → the onboarding wizard sets
 > your password. The rest of this document explains every step, the alternatives, and how to operate it.
@@ -60,17 +63,26 @@ Both routes run the **same** `deploy/install.sh` and are operated identically af
 
 ## 3. Path A — one command on the Proxmox host (LXC)
 
-Run this **on the Proxmox host, as root**. It creates a Debian 12 LXC, sets the two flags Docker needs
-(`nesting=1,keyctl=1`), clones the repo, and runs the installer inside it:
+Run this **on the Proxmox host, as root**. The host has no checkout of this repo yet (and usually no
+`git`), so first fetch the single bootstrap script. It creates a Debian 12 LXC, sets the two flags
+Docker needs (`nesting=1,keyctl=1`), then clones the **full** repo *inside* the container and runs the
+installer there:
 
 ```bash
+# Fetch the one script onto the host (it self-clones the repo into the container via REPO_URL):
+curl -fsSLO https://raw.githubusercontent.com/tomd1415/School_Organiser/main/deploy/proxmox-lxc.sh
+
 # Minimal — auto-detects the container's IP and serves on it:
-sudo REPO_URL=https://github.com/you/School_Organiser.git bash deploy/proxmox-lxc.sh
+REPO_URL=https://github.com/tomd1415/School_Organiser.git bash proxmox-lxc.sh
 
 # Or pin the address (recommended) and pass it positionally or by env:
-sudo REPO_URL=https://github.com/you/School_Organiser.git SITE_ADDRESS=192.168.1.50 \
-     bash deploy/proxmox-lxc.sh
+REPO_URL=https://github.com/tomd1415/School_Organiser.git SITE_ADDRESS=192.168.1.50 \
+     bash proxmox-lxc.sh
 ```
+
+You're already root on the host, so no `sudo` is needed — a bare Proxmox host often doesn't have it,
+and the script enforces `root` itself. Already have the repo cloned on the host? Skip the `curl` and
+run `bash deploy/proxmox-lxc.sh …` from inside the checkout instead.
 
 When it finishes it prints the URL — open it and the onboarding wizard takes over (→ [§6](#6-first-run-onboarding)).
 Get a root shell in the container any time with `pct enter <CTID>`.
@@ -99,7 +111,7 @@ per-namespace sysctl write and Docker's AppArmor probe). On a single-admin schoo
 acceptable trade-off, and the data is no more exposed than in a VM. The script **verifies Docker actually
 started** and, if it didn't, tells you to fall back to privileged or to the VM (Path B).
 
-- Want the hardened path? `UNPRIVILEGED=1 sudo bash deploy/proxmox-lxc.sh …`.
+- Want the hardened path? `UNPRIVILEGED=1 bash proxmox-lxc.sh …`.
 - **The most isolated option is the VM** — use Path B if you're unsure.
 
 Skip to [§6](#6-first-run-onboarding).
@@ -159,6 +171,29 @@ Open **`https://<SITE_ADDRESS>/`** in a browser. The first time, the onboarding 
 - Walks you through first-time setup (your timetable, classes, etc.).
 
 You'll get a one-time certificate warning on a LAN — see the next section.
+
+### Load your weekly timetable shape (one-time, recommended)
+
+A fresh instance has an **empty day shape** — only migrations run on deploy, not the seed, so no
+period times exist yet. Rather than re-enter every lesson/break/briefing time by hand, load the
+prepared **blank weekly skeleton** ([`app/scripts/blank-week.sql`](app/scripts/blank-week.sql)) — it
+recreates the full Mon–Fri timing grid (lessons, breaks, briefings, form, lunch, before/after school)
+with **no classes**, so all you do is enter the new class names. The timings stay the same every year;
+only the classes change.
+
+1. In the app: **Setup → Academic years →** add the new year (e.g. `2026/27`, with its dates) **→
+   Make current**.
+2. The file ships in the repo, so make sure the box is current (`cd /opt/school-organiser && git pull`),
+   then load it into the database container:
+   ```bash
+   cd /opt/school-organiser/app
+   docker compose exec -T db psql -U organiser -d organiser -v ON_ERROR_STOP=1 < scripts/blank-week.sql
+   ```
+3. Reload the app — the whole week is laid out with the right times and empty slots. Enter your class
+   names in **Setup**.
+
+It targets whichever year is **current** (hence step 1 first), is idempotent (safe to re-run), and
+never creates or alters classes. It was generated from the `period_definitions` of a working instance.
 
 ---
 
