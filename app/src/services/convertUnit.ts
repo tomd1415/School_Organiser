@@ -33,6 +33,23 @@ export function unitCandidates(relPaths: string[]): UnitCandidate[] {
     .sort((a, b) => a.folder.localeCompare(b.folder));
 }
 
+/** Convert-unit search: candidates whose folder name OR any imported file path inside them contains
+ *  the query — so a topic search ("impacts") finds a unit even when its folder is named opaquely
+ *  ("unit_11"). Without the content match, only folders whose NAME contains the term surface, which
+ *  silently hides the complete copy of a unit when its sibling, partially-imported copy happens to be
+ *  the named one. Case-insensitive; empty query ⇒ []. */
+export function searchUnits(relPaths: string[], query: string): UnitCandidate[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  const lowered = relPaths.map((p) => p.toLowerCase());
+  return unitCandidates(relPaths).filter((c) => {
+    const f = c.folder.toLowerCase();
+    if (f.includes(needle)) return true;
+    const prefix = `${f}/`;
+    return lowered.some((p) => p.startsWith(prefix) && p.includes(needle));
+  });
+}
+
 /** Strip packaging noise from a lesson folder name: "_v1.zip", ".zip", version suffixes. */
 export function cleanLessonTitle(dirName: string): string {
   return dirName

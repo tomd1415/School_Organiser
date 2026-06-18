@@ -57,7 +57,7 @@ import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES
 import { examProfileForCourse } from '../services/examProfile';
 import { ensureSourceImagesForPlan } from '../services/sourceImages';
 import { lessonMaterialsForPlan, lessonMaterialsForResourceIds, readUseMaterials } from '../services/lessonMaterials';
-import { lessonStructure, unitCandidates } from '../services/convertUnit';
+import { lessonStructure, unitCandidates, searchUnits } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
 import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
 import { listActiveEquipment } from '../repos/equipment';
@@ -371,7 +371,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     if (!id.success) return reply.code(400).send('');
     const needle = (qq.success ? (qq.data.q ?? '') : '').trim().toLowerCase();
     if (!needle) return reply.type('text/html').send('<span class="muted">type to search the imported folders…</span>');
-    const candidates = unitCandidates(await getImportedPaths()).filter((c) => c.folder.toLowerCase().includes(needle));
+    // Content-aware: match the folder name OR any imported file path within it, so a topic search
+    // ("impacts") finds a complete unit even when its folder is named opaquely ("unit_11").
+    const candidates = searchUnits(await getImportedPaths(), needle);
     return reply.type('text/html').send(renderConvertResults(candidates));
   });
 
