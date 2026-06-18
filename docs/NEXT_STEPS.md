@@ -26,9 +26,8 @@ A living checklist of the follow-ups suggested while building the setup/deploy a
 - [x] **"Roll classes up from a previous year" button on the Groups tab** — surfaces the existing
   rollover transfer from where you rename/move pupils. (2026-06-18)
 - [x] **Free/cover badges on the week timetable grid** — per-slot, reusing `describeException`. (2026-06-18)
-- [ ] **Exceptions → availability engine** *(larger; own sub-plan below)* — make a marked-free slot
-  count as real availability (free-time finder, scheduling) and a cover block you, not just change the
-  display.
+- [x] **Exceptions → availability engine** — per-lesson free/cover now adjust the `/time` work-window
+  planner; whole-day off-timetable stays display-only (see sub-plan below). (2026-06-18)
 
 ## D. Hygiene
 
@@ -36,20 +35,26 @@ A living checklist of the follow-ups suggested while building the setup/deploy a
 
 ---
 
-## Sub-plan — C: exceptions into the availability engine
+## Sub-plan — C8: exceptions into the availability engine
 
-Today dated exceptions are **display-level only** ([../app/src/repos/exceptions.ts](../app/src/repos/exceptions.ts)):
-the Now strip/cards and timetable show free/cover, but the clock/availability maths still follows the
-recurring pattern. To make them *count*:
+Dated exceptions were display-only. The real "free-time finder" is `computeWindows`
+([../app/src/services/availability.ts](../app/src/services/availability.ts)), consumed only by the
+**/time** work-window planner ([../app/src/routes/time.ts](../app/src/routes/time.ts)); its slots come
+from `getDaySlots` ([../app/src/repos/workBlocks.ts](../app/src/repos/workBlocks.ts)) — the recurring
+pattern, by weekday. Plan:
 
-1. **Read path.** Teach `services/clock.ts` / the availability lookup to take the day's exceptions so
-   `resolveNow`/free-time queries treat a `free`/`cancelled`/`off_timetable` slot as free and a `cover`
-   slot as occupied.
-2. **Free-time finder.** Anywhere that hunts for genuine free periods (task "before next bell", focus,
-   protected work time) should add exception-freed slots and drop cover slots.
-3. **Guardrails.** Keep it date-scoped (exceptions are per-date, the pattern stays the source of truth
-   for unexceptional days); cover with no lesson (a free period you're pulled onto) must register as busy.
-4. **Tests.** Unit-cover the merge (pattern + exceptions → effective availability) and an integration
-   pass over the Now screen + free-time finder on a day with each kind.
+1. **Identity.** Add `lessonId` to `AvailSlot` and return it from `getDaySlots` (the self lesson at
+   that slot), so per-date exceptions (keyed by `timetabled_lesson_id`) can match a slot.
+2. **Effect.** New pure `applyExceptions(slots, effectFor)` in the availability service: a
+   `free`/`cancelled` slot → effective `purpose='free'` (becomes a work window); a `cover` slot →
+   `purpose='cover'` (occupied). `isWorkWindow` excludes `'cover'`.
+3. **Scope.** Per-lesson exceptions only — **whole-day `off_timetable` is NOT applied to availability**
+   (you may be off-site on a trip); it stays display-only. The pattern remains the source of truth for
+   unexceptional days.
+4. **Wire.** `/time` fetches the date's exceptions, builds `effectFor` from `byLesson` (ignoring the
+   whole-day entry), applies before `computeWindows`, and shows an "adjusted for today's cover/free" note.
+5. **Tests.** Unit: `applyExceptions` + `computeWindows` (freed lesson appears; covered free period
+   drops). Integration: `/time` gains the note + a window once an exception is added.
 
-Deferred deliberately — it touches the scheduling core, so it deserves its own focused pass.
+Out of scope (deliberately still display-only): the clock's now/next teaching (already reflected on the
+Now strip), and whole-day off-timetable availability.

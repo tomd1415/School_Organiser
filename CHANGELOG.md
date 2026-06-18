@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-18 — Cover/free now feed the availability planner
+
+Follow-up to the cover/free work ([docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) C8): dated exceptions were
+display-only; they now adjust the **/time** work-window planner. Suite green: **480 unit / 282
+integration; typecheck clean**.
+
+- A per-lesson **free / cancelled** slot is folded into the day's free **work windows**, and a **cover**
+  on a free period is removed (you're occupied) — via a new pure
+  [`applyExceptions`](app/src/services/availability.ts) plus a `lessonId` on each availability slot
+  ([app/src/repos/workBlocks.ts](app/src/repos/workBlocks.ts)). `/time` shows an "adjusted for today's
+  cover/free" note ([app/src/routes/time.ts](app/src/routes/time.ts)).
+- Scope held tight: **whole-day off-timetable stays display-only** for availability (you may be
+  off-site), and the clock's now/next teaching still follows the pattern (already reflected on the Now
+  strip). New unit + integration cover.
+
 ### 2026-06-18 — Setup, September rollover & cover/free; Proxmox deploy niceties
 
 Teacher-driven follow-ups while getting the app onto a Proxmox box for the new year (tracked in

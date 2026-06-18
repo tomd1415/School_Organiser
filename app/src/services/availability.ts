@@ -9,6 +9,7 @@ export interface AvailSlot {
   startMin: number;
   endMin: number;
   purpose: string | null; // the self lesson's purpose, or null when no lesson sits here
+  lessonId?: number | null; // the self lesson's id at this slot — lets dated exceptions match a slot
 }
 
 export interface BlockInterval {
@@ -50,6 +51,7 @@ function subtract(s: number, e: number, blocked: Array<[number, number]>): Array
 }
 
 function isWorkWindow(slot: AvailSlot): boolean {
+  if (slot.purpose === 'cover') return false; // pulled onto cover for this date — not free
   if (slot.purpose === 'free') return true; // a protected free period
   return (slot.slotType === 'before_school' || slot.slotType === 'after_school') && slot.label !== 'Coffee';
 }
@@ -75,4 +77,22 @@ export function computeWindows(ctx: AvailCtx): Window[] {
     }
   }
   return windows.sort((a, b) => a.startMin - b.startMin);
+}
+
+export type SlotEffect = 'free' | 'busy' | 'none';
+
+/**
+ * Fold a day's per-lesson exception effects into the pattern slots before window computation:
+ * a free/cancelled slot becomes free work time ('free'), a cover slot becomes occupied ('busy').
+ * Whole-day off-timetable is intentionally NOT applied here (you may be off-site) — it stays
+ * display-only. Slots with no self lesson (lessonId null) are untouched.
+ */
+export function applyExceptions(slots: AvailSlot[], effectFor: (lessonId: number) => SlotEffect): AvailSlot[] {
+  return slots.map((s) => {
+    if (s.lessonId == null) return s;
+    const eff = effectFor(s.lessonId);
+    if (eff === 'free') return { ...s, purpose: 'free' };
+    if (eff === 'busy') return { ...s, purpose: 'cover' };
+    return s;
+  });
 }

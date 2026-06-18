@@ -4,9 +4,11 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { addDays, fromMinutes, localParts, weekdayOf } from '../lib/time';
 import { classifyDay } from '../services/clock';
-import { computeWindows } from '../services/availability';
+import { computeWindows, applyExceptions, type SlotEffect } from '../services/availability';
 import { getClockContext } from '../repos/clock';
 import { listAvailabilityEvents } from '../repos/events';
+import { listExceptionsBetween } from '../repos/exceptions';
+import { indexDayExceptions, describeException } from '../services/exceptions';
 import {
   createWorkBlock,
   deleteWorkBlock,
@@ -40,27 +42,40 @@ export function registerTimeRoutes(app: FastifyInstance): void {
       const weekday = weekdayOf(date);
       const isSchoolDay = classifyDay(date, weekday, ctx.terms).isSchoolDay;
 
-      const [slots, leave, blockingRaw, blocks] = await Promise.all([
+      const [slots, leave, blockingRaw, blocks, exRows] = await Promise.all([
         getDaySlots(weekday),
         getLeaveMinutes(),
         listAvailabilityEvents(date),
         listWorkBlocks(date),
+        listExceptionsBetween(date, date),
       ]);
       // The after-school work window really runs to the leave time, not the seeded slot end.
       const adjusted = slots.map((s) => (s.slotType === 'after_school' ? { ...s, endMin: Math.max(s.endMin, leave) } : s));
+      // Fold today's per-lesson cover/free exceptions into availability (whole-day off-timetable stays display-only).
+      const dx = indexDayExceptions(exRows);
+      const effectFor = (lessonId: number): SlotEffect => {
+        const ex = dx.byLesson.get(lessonId);
+        if (!ex) return 'none';
+        const mode = describeException(ex).mode;
+        return mode === 'free' ? 'free' : mode === 'cover' ? 'busy' : 'none';
+      };
+      const withEx = applyExceptions(adjusted, effectFor);
+      const exAdjusted = withEx.some((s, i) => s.purpose !== adjusted[i]!.purpose);
       const blockingEvents = blockingRaw
         .filter((e) => e.startMin != null && e.endMin != null)
         .map((e) => ({ startMin: e.startMin as number, endMin: e.endMin as number }));
-      const windows = computeWindows({ weekday, isSchoolDay, slots: adjusted, blockingEvents, fortnightActive: true });
+      const windows = computeWindows({ weekday, isSchoolDay, slots: withEx, blockingEvents, fortnightActive: true });
 
-      windowsHtml = windows.length
-        ? `<ul class="windows">${windows
-            .map(
-              (w) =>
-                `<li><span class="win-time">${esc(fromMinutes(w.startMin))}–${esc(fromMinutes(w.endMin))}</span> <span>${esc(w.label)}</span> <span class="win-min muted">${w.minutes} min</span></li>`,
-            )
-            .join('')}</ul>`
-        : `<p class="muted">${isSchoolDay ? 'No free work windows today.' : 'Not a school day.'}</p>`;
+      const exNote = exAdjusted ? `<p class="muted win-ex-note">Adjusted for today's cover/free lessons.</p>` : '';
+      windowsHtml =
+        (windows.length
+          ? `<ul class="windows">${windows
+              .map(
+                (w) =>
+                  `<li><span class="win-time">${esc(fromMinutes(w.startMin))}–${esc(fromMinutes(w.endMin))}</span> <span>${esc(w.label)}</span> <span class="win-min muted">${w.minutes} min</span></li>`,
+              )
+              .join('')}</ul>`
+          : `<p class="muted">${isSchoolDay ? 'No free work windows today.' : 'Not a school day.'}</p>`) + exNote;
       logHtml = renderWorkLog(blocks);
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');

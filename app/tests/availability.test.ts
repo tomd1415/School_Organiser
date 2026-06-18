@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeWindows, type AvailCtx, type AvailSlot } from '../src/services/availability';
+import { computeWindows, applyExceptions, type AvailCtx, type AvailSlot, type SlotEffect } from '../src/services/availability';
 
 const slot = (slotType: string, label: string, startMin: number, endMin: number, purpose: string | null = null): AvailSlot => ({
   slotType,
@@ -57,5 +57,30 @@ describe('computeWindows', () => {
 
   it('returns nothing on a non-school day', () => {
     expect(computeWindows(base({ isSchoolDay: false }))).toEqual([]);
+  });
+});
+
+describe('applyExceptions (dated free/cover feed availability)', () => {
+  const teachId: AvailSlot = { ...teach, lessonId: 11 };
+  const freeId: AvailSlot = { ...free, lessonId: 22 };
+  const effect = (m: Record<number, SlotEffect>) => (id: number): SlotEffect => m[id] ?? 'none';
+
+  it('turns a cancelled/free lesson into a free work window', () => {
+    const slots = applyExceptions([teachId, freeId], effect({ 11: 'free' }));
+    expect(slots[0]!.purpose).toBe('free');
+    const w = computeWindows(base({ slots, commitments: [] }));
+    expect(w.some((x) => x.label === 'Lesson 1')).toBe(true);
+  });
+
+  it('drops a free period that is on cover', () => {
+    const slots = applyExceptions([teachId, freeId], effect({ 22: 'busy' }));
+    expect(slots[1]!.purpose).toBe('cover');
+    const w = computeWindows(base({ slots, commitments: [] }));
+    expect(w.some((x) => x.label === 'Lesson 4')).toBe(false);
+  });
+
+  it('leaves unmatched slots and null-lesson slots untouched', () => {
+    const slots = applyExceptions([teachId, freeId, coffee], effect({}));
+    expect(slots).toEqual([teachId, freeId, coffee]);
   });
 });

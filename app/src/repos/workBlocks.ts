@@ -4,10 +4,10 @@ import { toMinutes } from '../lib/time';
 import type { AvailSlot } from '../services/availability';
 
 export async function getDaySlots(weekday: number): Promise<AvailSlot[]> {
-  const { rows } = await pool.query<{ slotType: string; label: string; start: string; end: string; purpose: string | null }>(
+  const { rows } = await pool.query<{ slotType: string; label: string; start: string; end: string; purpose: string | null; lessonId: number | null }>(
     `SELECT p.slot_type AS "slotType", p.label,
             to_char(p.start_time, 'HH24:MI') AS start, to_char(p.end_time, 'HH24:MI') AS "end",
-            tl.purpose
+            tl.purpose, tl.id AS "lessonId"
      FROM period_definitions p
      LEFT JOIN timetabled_lessons tl
        ON tl.period_definition_id = p.id AND tl.staff_id = (SELECT id FROM staff WHERE is_self)
@@ -22,6 +22,7 @@ export async function getDaySlots(weekday: number): Promise<AvailSlot[]> {
     startMin: toMinutes(r.start),
     endMin: toMinutes(r.end),
     purpose: r.purpose,
+    lessonId: r.lessonId,
   }));
 }
 

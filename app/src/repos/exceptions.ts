@@ -1,5 +1,7 @@
-// Phase 6.7: dated exceptions over the weekly pattern. Display-level for now — the clock and
-// availability still follow the pattern (deeper integration is on the post-phase list).
+// Phase 6.7: dated exceptions over the weekly pattern. The Now strip/cards and the week timetable
+// reflect them, and per-lesson free/cover now feed the availability windows (services/availability.ts
+// `applyExceptions`, used by /time). The clock's now/next teaching still follows the pattern (it's
+// reflected on the strip); whole-day off-timetable stays display-only for availability.
 import { pool } from '../db/pool';
 
 export interface ExceptionRow {
