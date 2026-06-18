@@ -401,6 +401,49 @@ export async function unenrolPupil(enrolmentId: number): Promise<void> {
   await pool.query(`UPDATE enrolments SET active = false WHERE id = $1`, [enrolmentId]);
 }
 
+/**
+ * Move a pupil straight from one class to another within the SAME academic year: deactivates the
+ * source enrolment and (re)activates the pupil's enrolment in the target group. Returns false for an
+ * unknown enrolment, the same group, or a target group in a different year. Transactional.
+ */
+export async function moveEnrolment(enrolmentId: number, targetGroupId: number): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const cur = await client.query<{ pupilId: number; groupId: number; yearId: number }>(
+      `SELECT e.pupil_id AS "pupilId", e.group_id AS "groupId", g.academic_year_id AS "yearId"
+         FROM enrolments e JOIN groups g ON g.id = e.group_id WHERE e.id = $1`,
+      [enrolmentId],
+    );
+    const row = cur.rows[0];
+    if (!row || targetGroupId === row.groupId) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+    const tgt = await client.query<{ id: number }>(
+      `SELECT id FROM groups WHERE id = $1 AND academic_year_id = $2`,
+      [targetGroupId, row.yearId],
+    );
+    if (!tgt.rows[0]) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+    await client.query(`UPDATE enrolments SET active = false WHERE id = $1`, [enrolmentId]);
+    await client.query(
+      `INSERT INTO enrolments (pupil_id, group_id, active) VALUES ($1, $2, true)
+       ON CONFLICT (pupil_id, group_id) DO UPDATE SET active = true`,
+      [row.pupilId, targetGroupId],
+    );
+    await client.query('COMMIT');
+    return true;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 // ── September rollover (6.4) ────────────────────────────────────────────────────────────────
 
 export interface RolloverGroupRow {

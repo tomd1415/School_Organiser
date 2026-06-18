@@ -417,7 +417,7 @@ function renderSection(
     </section>`;
 }
 
-const EX_LABEL: Record<string, string> = { cancelled: 'Cancelled', room_change: 'Room change', cover: 'Cover', off_timetable: 'Off-timetable day' };
+const EX_LABEL: Record<string, string> = { cancelled: 'Cancelled', free: 'Free (class away)', room_change: 'Room change', cover: 'Cover', off_timetable: 'Off-timetable day' };
 
 function renderExceptions(ex: ExceptionRow[], lessonId: number, date: string, rooms: Array<{ id: number; name: string }>, staff: Array<{ id: number; name: string }>): string {
   const banners = ex
@@ -433,6 +433,7 @@ function renderExceptions(ex: ExceptionRow[], lessonId: number, date: string, ro
       <form class="setup-add" hx-post="/lesson/exception" hx-vals='{"lesson":"${lessonId}","date":"${esc(date)}"}' hx-target="closest .ex-add" hx-swap="outerHTML">
         <select name="kind">
           <option value="cancelled">cancelled</option>
+          <option value="free">free (class away — trip/exam)</option>
           <option value="room_change">room change</option>
           <option value="cover">cover</option>
           <option value="off_timetable">off-timetable day (whole day)</option>
@@ -1237,7 +1238,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       .object({
         lesson: z.coerce.number().int().positive(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        kind: z.enum(['cancelled', 'room_change', 'cover', 'off_timetable']),
+        kind: z.enum(['cancelled', 'free', 'room_change', 'cover', 'off_timetable']),
         room: z.string().optional(),
         staff: z.string().optional(),
         note: z.string().max(200).optional(),

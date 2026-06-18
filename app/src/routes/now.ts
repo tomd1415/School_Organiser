@@ -29,6 +29,7 @@ import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
 import { currentInterests, type InterestItem } from '../services/currentInterests';
 import { listExceptionsBetween } from '../repos/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import type { LessonRow, PeriodRow } from '../services/timetable';
 import { toMinutes, weekdayOf } from '../lib/time';
@@ -71,7 +72,7 @@ function nowSignature(state: NowState, current: NowLesson | null, next: NowLesso
   ].join('|');
 }
 
-function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string, terms: TermDate[], changed = false): string {
+function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson | null, now: Date, tz: string, terms: TermDate[], changed = false, curEx: ExceptionEffect = NO_EXCEPTION, nextEx: ExceptionEffect = NO_EXCEPTION): string {
   const { dateLabel, clock } = nowLabels(now, tz);
   const sig = nowSignature(state, current, next);
   const tp = termProgress(state.isoDate, terms);
@@ -82,8 +83,11 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
     nowLine = `<strong>No school today</strong> <span class="muted">(${esc(state.dayKind.replace('_', ' '))})</span>`;
   } else if (state.current) {
     const mins = state.minutesRemaining;
-    const who = current ? ` · ${esc(lessonName(current))}` : '';
     const left = mins != null ? ` · <span class="now-mins">${mins} min left</span>` : '';
+    let who = current ? ` · ${esc(lessonName(current))}` : '';
+    if (curEx.mode === 'free') who = ` · <span class="now-ex-free">Free</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
+    else if (curEx.mode === 'cover') who = ` · <span class="now-ex-cover">On cover</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
+    else if (curEx.mode === 'room' && current) who = ` · ${esc(lessonName(current))} <span class="muted">→ ${esc(curEx.roomName ?? '')}</span>`;
     nowLine = `<strong>NOW</strong> ${esc(state.current.label)}${who}${left}`;
   } else {
     nowLine = `<strong>Outside lesson time</strong>`;
@@ -92,7 +96,11 @@ function renderStrip(state: NowState, current: NowLesson | null, next: NowLesson
   let nextLine = '';
   if (state.nextTeaching && next) {
     const href = `/lesson?lesson=${next.lessonId}&date=${esc(state.nextTeaching.date)}`;
-    nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${esc(lessonName(next))} <a href="${href}">open</a>`;
+    const what =
+      nextEx.mode === 'free' ? `<span class="now-ex-free">Free</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
+      : nextEx.mode === 'cover' ? `<span class="now-ex-cover">On cover</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
+      : esc(lessonName(next));
+    nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${what} <a href="${href}">open</a>`;
   }
 
   // When the lesson/day has changed, stop the poll and show a persistent manual-refresh prompt instead
@@ -112,6 +120,7 @@ function renderCurrentCard(
   notes: NoteItem[],
   occurrenceId: number,
   state: NowState,
+  ex: ExceptionEffect,
 ): string {
   const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
   // The resume point is the single most useful mid-lesson fact — promote it from a muted footnote to a
@@ -131,11 +140,19 @@ function renderCurrentCard(
   const listId = `notes-list-${occurrenceId}`;
   const openHref = `/lesson?lesson=${current.lessonId}&date=${esc(state.isoDate)}`;
 
+  const exBanner = ex.mode !== 'none'
+    ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
+    : '';
+  const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
+  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(current.groupName ?? purposeLabel(current.purpose));
+  const wasLine = isFreeOrCover && current.groupName ? `<p class="muted now-ex-was">${ex.mode === 'free' ? 'was ' : 'instead of '}${esc(current.groupName)}</p>` : '';
   return `<div class="now-card">
     <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
-    <h1>${esc(current.groupName ?? purposeLabel(current.purpose))}</h1>
-    ${meta ? `<p class="ld-meta">${meta}</p>` : ''}
-    ${lastLines}
+    ${exBanner}
+    <h1>${heading}</h1>
+    ${wasLine}
+    ${meta && !isFreeOrCover ? `<p class="ld-meta">${meta}</p>` : ''}
+    ${isFreeOrCover ? '' : lastLines}
     <div class="now-notes">
       <div class="ld-notes-head"><h2>Quick note</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: occurrenceId })}</div>
       ${renderNotesList(listId, notes)}
@@ -158,6 +175,7 @@ function renderNextCard(
   courses: OccurrenceCourseRow[],
   lastStops: LastStop[],
   slot: { date: string; label: string; startMin: number },
+  ex: ExceptionEffect,
 ): string {
   const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
   const courseBlocks = courses
@@ -174,11 +192,17 @@ function renderNextCard(
     : esc(slot.date);
   const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
   const openHref = `/lesson?lesson=${next.lessonId}&date=${esc(slot.date)}`;
+  const exBanner = ex.mode !== 'none'
+    ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
+    : '';
+  const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
+  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(next.groupName ?? purposeLabel(next.purpose));
   return `<div class="now-card now-next">
     <p class="kicker">Next · ${esc(slot.label)}</p>
-    <h2>${esc(next.groupName ?? purposeLabel(next.purpose))}</h2>
+    ${exBanner}
+    <h2>${heading}</h2>
     <p class="ld-meta">${when}${room}</p>
-    ${courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
+    ${isFreeOrCover ? '' : courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
     <p><a href="${openHref}">Open next lesson →</a></p>
   </div>`;
 }
@@ -287,6 +311,21 @@ async function resolveNowLessons(now: Date) {
   return { ctx, state, current, next };
 }
 
+// Today's dated exceptions, resolved to how the current & next slots should read on the strip/cards.
+async function nowExceptions(
+  isoDate: string,
+  current: NowLesson | null,
+  next: NowLesson | null,
+): Promise<{ count: number; curEx: ExceptionEffect; nextEx: ExceptionEffect }> {
+  const rows = await listExceptionsBetween(isoDate, isoDate);
+  const dx = indexDayExceptions(rows);
+  return {
+    count: rows.length,
+    curEx: describeException(exceptionForLesson(dx, current?.lessonId)),
+    nextEx: describeException(exceptionForLesson(dx, next?.lessonId)),
+  };
+}
+
 // D2: the time-decaying current-interest profile, foregrounded on Now. Fresh marks are bold; ones
 // that are fading (older than ~a fortnight) are muted, and fully-stale ones have dropped off already.
 function renderCurrentInterests(items: InterestItem[]): string {
@@ -307,6 +346,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
     try {
       const { ctx, state, current, next } = await resolveNowLessons(now);
+      const { count: exToday, curEx, nextEx } = await nowExceptions(state.isoDate, current, next);
 
       let card: string;
       if (current && (current.purpose === 'teaching' || current.purpose === 'free' || current.purpose === 'form')) {
@@ -324,7 +364,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           fuByNote.set(f.noteId, arr);
         }
         const noteItems: NoteItem[] = noteRows.map((n) => ({ id: n.id, body: n.body, time: n.time, followups: fuByNote.get(n.id) ?? [] }));
-        card = renderCurrentCard(current, courses, lastStops, noteItems, occurrenceId, state);
+        card = renderCurrentCard(current, courses, lastStops, noteItems, occurrenceId, state, curEx);
       } else if (current) {
         card = `<div class="now-card"><p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p><h1>${esc(lessonName(current))}</h1><p class="muted">${esc(purposeLabel(current.purpose))} is on now — not a teaching slot.</p></div>`;
       } else {
@@ -357,7 +397,6 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const showNudge =
         experience === 'everyday' && !nudgeDismissed && shouldShowExperienceNudge(experience, false, await countTaughtLessons());
 
-      const exToday = (await listExceptionsBetween(state.isoDate, state.isoDate)).length;
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
       const marksWaiting = (await marksEnabled()) ? await marksBacklog() : [];
@@ -371,7 +410,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           getOccurrenceCourses(nextOccId),
           getLastStoppingPoints(next.lessonId, state.nextTeaching.date),
         ]);
-        nextCard = renderNextCard(next, state, nextCourses, nextLastStops, state.nextTeaching);
+        nextCard = renderNextCard(next, state, nextCourses, nextLastStops, state.nextTeaching, nextEx);
       } else if (state.nextTeaching && next) {
         nextCard = `<div class="now-card now-next"><p class="kicker">Next · ${esc(state.nextTeaching.label)}</p><h2>${esc(lessonName(next))}</h2><p class="muted">${esc(state.nextTeaching.date)}</p></div>`;
       } else {
@@ -395,7 +434,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
 
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
-        ${renderStrip(state, current, next, now, ctx.tz, ctx.terms)}
+        ${renderStrip(state, current, next, now, ctx.tz, ctx.terms, false, curEx, nextEx)}
         ${
           showNudge
             ? `<div class="exp-nudge" id="exp-nudge">
@@ -437,14 +476,15 @@ export function registerNowRoutes(app: FastifyInstance): void {
     const now = new Date();
     try {
       const { ctx, state, current, next } = await resolveNowLessons(now);
+      const { curEx, nextEx } = await nowExceptions(state.isoDate, current, next);
       const prevSig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
       const sig = nowSignature(state, current, next);
       // The lesson/day changed since this strip was rendered → show a persistent "refresh" prompt
       // (and stop polling) rather than hard-reloading, which would wipe a half-typed note.
       if (prevSig !== null && prevSig !== sig) {
-        return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, true));
+        return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, true, curEx, nextEx));
       }
-      return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms));
+      return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, false, curEx, nextEx));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');

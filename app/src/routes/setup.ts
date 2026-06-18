@@ -31,6 +31,7 @@ import {
   listTerms,
   listYears,
   makeYearCurrent,
+  moveEnrolment,
   setCourseActive,
   setGroupActive,
   setGroupCourse,
@@ -274,9 +275,14 @@ async function groupsTab(years: YearRow[], yearId: number): Promise<string> {
         .filter((p) => p.active && !enrolled.some((e) => Number(e.pupilId) === Number(p.id)))
         .map((p) => `<option value="${p.id}">${esc(p.displayName)}</option>`)
         .join('');
+      const moveOpts = groups
+        .filter((o) => Number(o.id) !== Number(g.id) && o.active)
+        .map((o) => `<option value="${o.id}">${esc(o.name)}</option>`)
+        .join('');
       const chips = enrolled
         .map(
           (e) => `<span class="grp-chip">${esc(e.displayName)}
+            ${moveOpts ? `<select class="grp-move" title="move to another class" hx-post="/setup/enrolment/${e.enrolmentId}/move?year=${yearId}" hx-vals='js:{"to":event.target.value}' hx-trigger="change" hx-target="closest section" hx-swap="outerHTML"><option value="">move to…</option>${moveOpts}</select>` : ''}
             <button type="button" class="link danger" title="remove from group" hx-post="/setup/enrolment/${e.enrolmentId}/remove" hx-target="#grp-${g.id}-detail" hx-swap="outerHTML">✕</button></span>`,
         )
         .join(' ');
@@ -616,6 +622,14 @@ export function registerSetupRoutes(app: FastifyInstance): void {
     const g = await pool_enrolmentGroup(p.data.id);
     await unenrolPupil(p.data.id);
     return reply.type('text/html').send(g ? await groupDetail(g) : '');
+  });
+  app.post('/setup/enrolment/:id/move', guard, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    const q = z.object({ year: z.coerce.number().int().positive() }).safeParse(req.query);
+    const b = z.object({ to: z.coerce.number().int().positive() }).safeParse(req.body);
+    if (!p.success || !q.success || !b.success) return reply.code(400).send('');
+    await moveEnrolment(p.data.id, b.data.to);
+    return reply.type('text/html').send(await section(req, reply, 'groups', q.data.year));
   });
 
 

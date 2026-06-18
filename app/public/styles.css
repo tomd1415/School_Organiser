@@ -680,6 +680,7 @@ tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 
 .setup-add input, .setup-add select { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; }
 .grp { border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; margin: 0.6rem 0; background: var(--card); }
 .grp-chip { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.55rem; font-size: 0.8rem; margin: 0.1rem 0; }
+.grp-move { font-size: 0.72rem; padding: 0 0.1rem; margin-left: 0.25rem; max-width: 9rem; vertical-align: baseline; }
 .grp-courses, .grp-pupils { font-size: 0.85rem; margin: 0.4rem 0; }
 .grp-course { display: inline-block; margin-right: 0.8rem; font-weight: 400; }
 .grp-pupils select { font: inherit; font-size: 0.8rem; padding: 0.2rem; border: 1px solid var(--line); border-radius: 4px; }
@@ -704,6 +705,15 @@ tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 
 .ex-add { margin: 0.4rem 0 0.8rem; font-size: 0.85rem; }
 .ex-add summary { cursor: pointer; color: var(--muted); }
 .ex-note { background: #fff7e6; border: 1px solid #f0d9a8; border-radius: 8px; padding: 0.4rem 0.7rem; font-size: 0.88rem; margin: -0.4rem 0 0.8rem; }
+.ex-banner.ex-free { background: #e9f7ee; border-color: #b6e0c4; }
+.ex-banner.ex-cover { background: #e9f0fb; border-color: #b7cdee; }
+/* Now-screen reflection of today's exceptions (free / on cover / room change) */
+.now-exbanner { background: #fff7e6; border: 1px solid #f0d9a8; border-radius: 8px; padding: 0.4rem 0.65rem; font-size: 0.9rem; margin: 0.2rem 0 0.5rem; }
+.now-exbanner.now-ex-free { background: #e9f7ee; border-color: #b6e0c4; }
+.now-exbanner.now-ex-cover { background: #e9f0fb; border-color: #b7cdee; }
+.now-ex-was { margin: 0.1rem 0 0.3rem; }
+.now-strip .now-ex-free { color: #1f8a4c; font-weight: 700; }
+.now-strip .now-ex-cover { color: #2563c9; font-weight: 700; }
 .tt-ex { color: #b7791f; }
 
 /* structured lesson content */
