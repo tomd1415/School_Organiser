@@ -8,7 +8,8 @@ services:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: organiser
-      POSTGRES_PASSWORD: organiser
+      # Dev default is "organiser"; production sets a random DB_PASSWORD in app/.env (deploy/install.sh).
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-organiser}
       POSTGRES_DB: organiser
     ports:
       - "5434:5432"
@@ -41,7 +42,7 @@ services:
     environment:
       # Overrides for the two values that differ inside the container.
       NODE_ENV: production
-      DATABASE_URL: postgres://organiser:organiser@db:5432/organiser
+      DATABASE_URL: postgres://organiser:${DB_PASSWORD:-organiser}@db:5432/organiser
       RESOURCE_STORE_PATH: /data/resources
       GOTENBERG_URL: http://gotenberg:3000
     depends_on:
@@ -54,5 +55,26 @@ services:
       - ../data/resources:/data/resources
     restart: unless-stopped
 
+  # Production reverse proxy with automatic LAN TLS. Behind a profile so dev never starts it; the
+  # production installer brings it up with `--profile proxy`. It fronts the app on 80/443, so in
+  # production the app's own 44360 stays a direct/debug port (front door is https://$SITE_ADDRESS).
+  caddy:
+    image: caddy:2
+    profiles: ["proxy"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-organiser.school.internal}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
 volumes:
   db-data:
+  caddy-data:
+  caddy-config:

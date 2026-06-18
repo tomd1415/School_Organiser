@@ -1,13 +1,22 @@
-# Production reverse proxy on the school LAN.
-# Replace the hostname with your internal DNS name. Caddy will obtain a cert
-# from your internal CA, or use `tls internal` for a self-signed cert.
-organiser.school.internal {
+# Production reverse proxy for the School Organiser on the school LAN.
+# SITE_ADDRESS is injected from app/.env by the compose `caddy` service (deploy/install.sh sets it),
+# e.g. organiser.school.internal — or a bare IP like 192.168.1.50.
+#
+# `tls internal` issues a self-signed certificate from Caddy's own CA, so HTTPS works on a LAN that
+# has no public DNS and no internet-facing ACME. Accept it once in the browser, or install Caddy's
+# root CA on the teacher's devices (see deploy/README.md). If SITE_ADDRESS is a REAL, internet-
+# resolvable hostname and the box can reach Let's Encrypt, delete the `tls internal` line for a
+# publicly-trusted cert instead.
+{$SITE_ADDRESS} {
 	encode gzip
-	# tls internal
+	tls internal
 	reverse_proxy app:44360
 }
 
-# Plain-HTTP fallback for first-run testing on the LAN (no TLS):
+# ── Plain-HTTP only (no TLS) ────────────────────────────────────────────────
+# To skip certificates entirely on a trusted LAN: comment out the block above, set
+# COOKIE_SECURE=false in app/.env, and use this instead (then browse to http://SITE_ADDRESS/):
 # :80 {
+# 	encode gzip
 # 	reverse_proxy app:44360
 # }
