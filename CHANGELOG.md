@@ -7,6 +7,37 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-18 — Phase 13 (in progress): multi-lesson weeks, one lesson view, inline editing
+
+Six interdependent teacher requests (planned in [docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)). Landed
+so far (suite green: **458 unit / 271 integration; typecheck clean**):
+
+- **Multi-lesson-per-week delivery (point 1).** GCSE/Post-16 classes correctly have **3 weekly slots**,
+  but curriculum delivery planned one-lesson-per-week into a single slot. New per-class spine
+  ([services/delivery.ts](../app/src/services/delivery.ts) `upcomingClassSlots`,
+  [repos/delivery.ts](../app/src/repos/delivery.ts) `classSlots` / `classSchedule` /
+  `layLessonsAcrossClass`) **merges all of a class's weekly slots into one date-ordered stream**, so a
+  unit's lessons lay **sequentially across the week** (3 slots ⇒ 3 lessons a week), holiday-aware.
+  Both lay-down paths (convert-and-assign, and unit "lay into a calendar") now use it. *(The single-slot
+  map view still shows one slot at a time until the planner lands — the data is correct.)*
+- **Outline + tracker combined (point 4).** The lesson outline and the "tap where you are" progress
+  marker are now **one component** ([lesson.ts](../app/src/routes/lesson.ts) `renderOutlineTracker`):
+  the outline's steps *are* the tappable progress list. They render **static (non-tappable) while
+  editing**.
+- **No more "doesn't appear without a refresh" (point 2, first half).** Binding a plan to a lesson now
+  re-renders the plan details, the outline-tracker **and** the resources in place via OOB swaps — no
+  reload; and the Schemes page's resource slot, which only loaded on first open, now **eager-loads when
+  the plan is open**, so generated resources show immediately. Resources/tracker extracted into reusable
+  `renderResourcesBlock` / `renderOutlineTracker`.
+- **Tri-state inline edit toggle (point 3).** Each lesson card carries **👁 View · ✏ This class · ✏
+  Master**. View is read-only (default). *This class* turns the objectives/outline into inline editors
+  that save as the **class's adaptation** (master untouched). *Master* edits the objectives/outline/
+  duration/kit of the **master** lesson (every class). Server-rendered, so an edit shows the moment you
+  return to View; the tappable tracker appears only in View.
+- **Remaining Phase 13:** reuse the lesson card on the Schemes page (point 2's consistency half), the
+  pupil preview in a new tab with the same edit toggle (point 5), and the drag-drop class planner with
+  **insert & cascade** ("all move along one") and related placement helpers (point 6).
+
 ### 2026-06-17 — Phase 12 (in progress): zero-friction pupils + content-rich, exam-ready worksheets
 
 Planned in [docs/PHASE_12_PLAN.md](docs/PHASE_12_PLAN.md) — completes the "What's next" backlog and adds

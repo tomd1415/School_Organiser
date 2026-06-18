@@ -1136,6 +1136,38 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
+  it('Edit toggle: View / This class / Master render the right inline editors + save targets (13.3)', async () => {
+    const occ = await import('../../src/repos/occurrence');
+    const lr = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`);
+    const lp = await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE active ORDER BY id LIMIT 1`);
+    const occId = await occ.findOrCreateOccurrence(lr.rows[0]!.id, '2099-03-19');
+    const oc = (await occ.getOccurrenceCourses(occId))[0]!;
+    const lpId = lp.rows[0]!.id;
+    try {
+      await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [oc.occurrenceCourseId, lpId]);
+      const get = (mode: string) => app.inject({ method: 'GET', url: `/occurrence-course/${oc.occurrenceCourseId}/edit?mode=${mode}&gc=${oc.groupCourseId}&lp=${lpId}`, headers: { cookie: session } });
+
+      const off = await get('off');
+      expect(off.body).toContain('data-edit="off"');
+      expect(off.body).toContain('👁 View');
+      expect(off.body).not.toContain('edit-banner'); // read-only: no editor
+
+      const local = await get('local');
+      expect(local.body).toContain('data-edit="local"');
+      expect(local.body).toContain('this class’s'); // banner
+      expect(local.body).toContain(`/lesson/adapt/${oc.groupCourseId}/${lpId}`); // saves to the ADAPTATION
+
+      const master = await get('master');
+      expect(master.body).toContain('data-edit="master"');
+      expect(master.body).toContain('every'); // "affects every class" banner
+      expect(master.body).toContain(`/schemes/plan/${lpId}`); // saves to the MASTER
+      expect(master.body).toContain('name="kit_needed"'); // master-only fields
+    } finally {
+      await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = NULL WHERE id = $1`, [oc.occurrenceCourseId]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE date = '2099-03-19'`);
+    }
+  });
+
   it('Resources page renders with search bar + paged list', async () => {
     const res = await app.inject({ method: 'GET', url: '/resources', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

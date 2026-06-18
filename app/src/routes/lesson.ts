@@ -11,7 +11,8 @@ import {
   setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../repos/occurrence';
-import { getLessonPlan, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
+import { getLessonPlan, getPlanRow, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
+import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
 import { getExperienceMode } from '../lib/nav';
@@ -149,6 +150,61 @@ function renderResourcesBlock(
         ${adaptedRes.length ? `<span class="ld-res-label adapt-badge on">✏ this class</span> ${renderLinkedResources(adaptedRes)}` : ''}
         ${gen}
       </div>`;
+}
+
+// 13.3 — tri-state edit toggle on the lesson card: 👁 View (default, read-only) · ✏ This class
+// (edits save as the class's ADAPTATION; master untouched) · ✏ Master (edits save to the master, for
+// every class). Server-rendered (each toggle re-fetches fresh data via GET .../edit?mode=…), so an
+// edit is reflected the moment you return to View. The tappable progress tracker shows ONLY in View
+// (point 4: tapping is disabled while editing). When no plan is bound there's nothing to edit.
+type EditMode = 'off' | 'local' | 'master';
+
+function editToggle(oc: number, gc: number, lp: number, mode: EditMode): string {
+  const btn = (m: EditMode, label: string): string =>
+    `<button type="button" class="edit-tab${m === mode ? ' is-on' : ''}" aria-pressed="${m === mode}" hx-get="/occurrence-course/${oc}/edit?mode=${m}&gc=${gc}&lp=${lp}" hx-target="#oc-${oc}-edit" hx-swap="outerHTML">${label}</button>`;
+  return `<div class="edit-toggle" role="group" aria-label="Edit mode">${btn('off', '👁 View')}${btn('local', '✏ This class')}${btn('master', '✏ Master')}</div>`;
+}
+
+interface EditSection {
+  groupCourseId: number;
+  lessonPlanId: number | null;
+  planTitle: string | null;
+  planObjectives: string | null;
+  planOutline: string | null;
+  planKitNeeded: string | null;
+  progressStep?: number | null;
+}
+
+function renderLessonEdit(oc: number, s: EditSection, eff: EffectiveLesson | null, master: PlanRow | null, mode: EditMode, oob = false): string {
+  const lp = s.lessonPlanId;
+  const gc = s.groupCourseId;
+  const toggle = lp != null ? editToggle(oc, gc, lp, mode) : '';
+  let body: string;
+  if (mode === 'local' && lp != null) {
+    // edits save as THIS class's adaptation (autosave → /lesson/adapt). Inherits master where blank.
+    body =
+      `<p class="edit-banner edit-local">✏ Editing <strong>this class’s</strong> version — the master and other classes are unchanged.</p>` +
+      `<form hx-post="/lesson/adapt/${gc}/${lp}" hx-trigger="input changed delay:1000ms from:textarea, blur from:textarea" hx-swap="none">
+        <label class="adapt-l">Objectives — this class<textarea name="objectives" rows="3" placeholder="(inherits the master)">${esc(eff?.objectives ?? '')}</textarea></label>
+        <label class="adapt-l">Outline — this class<textarea name="outline" rows="6" placeholder="(inherits the master)">${esc(eff?.outline ?? '')}</textarea></label>
+        <span class="note-status" id="adapt-${gc}-${lp}-status"></span>
+      </form>`;
+  } else if (mode === 'master' && lp != null) {
+    // edits save to the MASTER (autosave → /schemes/plan/:lp), affecting every class using this lesson.
+    const save = (t: string): string => `hx-post="/schemes/plan/${lp}" hx-swap="none" hx-trigger="${t}"`;
+    body =
+      `<p class="edit-banner edit-master">✏ Editing the <strong>master</strong> — changes apply to <strong>every</strong> class using this lesson.</p>` +
+      `<label>Objectives<textarea name="objectives" rows="3" ${save('input changed delay:1000ms, blur')}>${esc(master?.objectives ?? s.planObjectives ?? '')}</textarea></label>
+      <label>Outline<textarea name="outline" rows="6" ${save('input changed delay:1000ms, blur')}>${esc(master?.outline ?? s.planOutline ?? '')}</textarea></label>
+      <label>Duration (min) <input type="number" name="duration_min" min="0" value="${master?.durationMin ?? ''}" ${save('input changed delay:600ms, blur')}></label>
+      <label>🔧 Kit needed <input type="text" name="kit_needed" value="${esc(master?.kitNeeded ?? s.planKitNeeded ?? '')}" placeholder="e.g. 16× micro:bit" ${save('input changed delay:600ms, blur')}></label>
+      <span class="note-status" id="plan-${lp}-status"></span>`;
+  } else {
+    body =
+      renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, false, eff?.adapted ?? false, s.planKitNeeded) +
+      renderOutlineTracker(oc, (eff?.adapted ? eff.outline : null) ?? s.planOutline, s.progressStep ?? null, false);
+  }
+  return `<div class="lesson-edit" id="oc-${oc}-edit" data-edit="${mode}"${oob ? ' hx-swap-oob="true"' : ''}>${toggle}${body}</div>`;
 }
 
 // 5.2: the per-group adaptation block. The master stays in renderPlanContent above; here the teacher
@@ -307,8 +363,7 @@ function renderSection(
         <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
         <span class="note-status" id="oc-${oc}-plan-status"></span>
       </label>
-      ${renderPlanContent(oc, s.planTitle, eff?.adapted ? eff.objectives : s.planObjectives, false, eff?.adapted ?? false, s.planKitNeeded)}
-      ${renderOutlineTracker(oc, (eff?.adapted ? eff.outline : null) ?? s.planOutline, s.progressStep)}
+      ${renderLessonEdit(oc, s, eff ?? null, null, 'off')}
       ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
       ${renderResourcesBlock(oc, s, eff?.adapted ?? false, resources, adaptedRes, materialTitles)}
       ${
@@ -671,14 +726,27 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       sec.lessonPlanId != null ? materialCandidatesForPlan(sec.lessonPlanId) : Promise.resolve([]),
     ]);
     const adaptedRes = eff?.adaptationId != null ? await listResourcesForAdaptation(eff.adaptationId) : [];
-    const objectives = eff?.adapted ? eff.objectives : sec.planObjectives;
-    const outline = eff?.adapted ? eff.outline : sec.planOutline;
     return reply.type('text/html').send(
-      renderPlanContent(oc, sec.planTitle, objectives, true, eff?.adapted ?? false, sec.planKitNeeded) +
-        renderOutlineTracker(oc, outline, sec.progressStep ?? null, false, true) +
+      renderLessonEdit(oc, sec, eff, null, 'off', true) +
         renderResourcesBlock(oc, sec, eff?.adapted ?? false, resources, adaptedRes, materialTitles, true) +
         renderSavedStatus(`oc-${oc}-plan-status`),
     );
+  });
+
+  // 13.3: re-render the lesson card's editable area in the chosen mode (View / This class / Master).
+  app.get('/occurrence-course/:id/edit', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const q = z.object({ mode: z.enum(['off', 'local', 'master']).default('off') }).safeParse(req.query);
+    if (!p.success || !q.success) return reply.code(400).send('');
+    const oc = p.data.id;
+    const occId = await poolOccurrenceOf(oc);
+    const sec = (await getOccurrenceCourses(occId ?? 0)).find((o) => Number(o.occurrenceCourseId) === oc);
+    if (!sec) return reply.code(404).send('');
+    const eff = sec.lessonPlanId != null
+      ? await getEffectiveLesson(sec.groupCourseId, sec.lessonPlanId, { objectives: sec.planObjectives ?? null, outline: sec.planOutline ?? null })
+      : null;
+    const master = q.data.mode === 'master' && sec.lessonPlanId != null ? await getPlanRow(sec.lessonPlanId) : null;
+    return reply.type('text/html').send(renderLessonEdit(oc, sec, eff, master, q.data.mode));
   });
 
 

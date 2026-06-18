@@ -800,6 +800,16 @@ body.deck-show-notes .deck-note { display: block; font-size: 1.05rem !important;
 .plan-view { margin: 0.4rem 0 0.6rem; }
 
 /* the in-lesson tracker */
+/* 13.3 tri-state edit toggle on the lesson card. */
+.lesson-edit { margin: 0.3rem 0; }
+.edit-toggle { display: inline-flex; gap: 0.2rem; margin-bottom: 0.4rem; padding: 0.15rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.edit-tab { min-height: var(--tap); padding: 0.2rem 0.6rem; border: 1px solid transparent; border-radius: 6px; background: transparent; font: inherit; color: var(--ink); cursor: pointer; }
+.edit-tab.is-on { background: var(--accent); color: #fff; font-weight: 600; }
+.edit-banner { font-size: 0.85rem; border-radius: 8px; padding: 0.3rem 0.6rem; margin: 0.3rem 0; }
+.edit-banner.edit-local { background: #eef7ef; border-left: 4px solid var(--good, #2e7d32); }
+.edit-banner.edit-master { background: #fdf3e7; border-left: 4px solid #c4761f; }
+.lesson-edit label { display: block; margin: 0.35rem 0; }
+.lesson-edit textarea, .lesson-edit input[type="number"], .lesson-edit input[type="text"] { width: 100%; font: inherit; }
 .trk { margin: 0.55rem 0; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 0.6rem 0.85rem; background: var(--card); }
 .trk-list { list-style: none; margin: 0.3rem 0 0; padding: 0; counter-reset: trk; }
 .trk-step button { display: flex; width: 100%; text-align: left; gap: 0.6rem; align-items: baseline; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: inherit; padding: 0.45rem 0.6rem; margin: 0.25rem 0; cursor: pointer; font-size: 0.92rem; }

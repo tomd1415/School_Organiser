@@ -1,7 +1,15 @@
 # Phase 13 — Multi-lesson weeks, one consistent lesson view, inline editing & a drag-drop planner
 
-> **Status (2026-06-18): planned.** Six teacher requests, several interdependent. Decisions captured
-> from the teacher (the questions asked before this plan):
+> **Status (2026-06-18): in progress.** ✅ **13.1** (per-class multi-slot delivery — point 1 fixed at
+> the data/lay-down layer); ✅ **point 4** (outline + "tap where you are" combined into one component;
+> tapping disabled while editing); ✅ the **no-refresh** half of point 2 (binding a plan now OOB-refreshes
+> the plan details + tracker + resources; the Schemes resource slot eager-loads when open); ✅ **13.3**
+> (tri-state edit toggle on the lesson card — 👁 View · ✏ This class (adaptation) · ✏ Master). Suite
+> green throughout (458 unit / 271 integration). **Remaining:** the Schemes-page *card reuse* half of
+> point 2, **13.4** (pupil preview new-tab + edit), **13.5** (drag-drop planner with insert & cascade).
+>
+> Six teacher requests, several interdependent. Decisions captured from the teacher (the questions
+> asked before this plan):
 >
 > 1. **Multi-lesson-per-week classes** (GCSE/Post-16 = 3 slots/week) → **sequence a unit's lessons
 >    across ALL the class's weekly slots in date order** (not one-per-week-per-slot). Delivery becomes
