@@ -4,6 +4,9 @@
 **Scope:** Current working tree, including uncommitted changes  
 **Method:** Static cross-check of routes, services, repositories, migrations, client code, tests, operational scripts, specifications, and the resolved June 2026 review reports. Findings below are limited to deterministic defects and strongly supported risks; style-only observations and already-resolved findings are excluded.
 
+> **Remediation plan:** every finding below is scheduled into waves — with shared test harnesses, a
+> red-then-green method, and per-wave acceptance — in [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md).
+
 ## Executive summary
 
 The audit found **50 current issues**. The most urgent defects are pupil-name redaction bypasses caused by punctuation variants and partial-name references. The main recurring patterns are insufficient binding of authentication steps, pupil/TA routes whose authorization scope is broader than the UI, non-atomic multi-step writes, limits applied after buffering, incomplete personal-data lifecycle handling, and recovery procedures that do not treat the database and file store as one recoverable unit.

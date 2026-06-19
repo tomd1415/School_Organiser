@@ -67,6 +67,8 @@ Read in this order:
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan and MVP definition. |
 | [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) | Living checklist of near-term follow-ups (deploy polish, setup/cover feature follow-ons). |
 | [docs/FUTURE_WAVES.md](docs/FUTURE_WAVES.md) | Strategic idea backlog beyond Phase 11 (Wave 6+): absence/cover, quiet automation, insight from the record, pupil-facing depth. |
+| [BUGREPORT.md](BUGREPORT.md) | The 19 June 2026 project-wide audit — 50 findings (privacy/security, correctness, recovery, transactional invariants) with reproduction + fix sketch per item. |
+| [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md) | The fix-and-finish programme: the BUGREPORT findings organised into Waves 0 + A1–A8 (foundations first), **plus** the consolidated outstanding-features track (Wave 6+/Phase 14/Phase 7 tail). |
 | [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) | Detailed build plan for Phase 1 (the MVP): schema, real-timetable seed, ClockService, screens. |
 | [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md) | Detailed build plan for Phase 2: tasks, time, events, focus mode, captured info, pupils. |
 | [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md) | Detailed build plan for Phase 3: schemes of work, lesson plans, the hosted resource store. |

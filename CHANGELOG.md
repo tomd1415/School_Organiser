@@ -7,6 +7,17 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Remediation & completion plan (planning)
+
+Turned the 19 June audit ([BUGREPORT.md](BUGREPORT.md), 50 findings) into an actionable programme:
+[docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). All 50 bugs are mapped — each exactly once — into a
+foundations wave (7 reusable test harnesses) + eight themed fix waves (A1 trust boundaries/authz · A2
+limits-before-buffering · A3 auth/network/secrets · A4 assessment correctness · A5 recovery/disposal/SAR ·
+A6 transactional invariants · A7 cost/audit/supply-chain · A8 UX reliability), with a red-then-green
+method, per-wave acceptance, and a suggested sequence. Part B consolidates the outstanding feature backlog
+(Wave 6.2/6.3, 8.x, 9.x, Phase 14 planner hardening, Phase 7 long-tail, deferred AI tails, parked items)
+with pointers to their existing plans. Indexed from [README.md](README.md); no code changed.
+
 ### 2026-06-19 — Bulk import: whole folders + per-unit metadata
 
 Four follow-ups to the bulk importer. Suite green: **508 unit / 301 integration; typecheck clean**.
