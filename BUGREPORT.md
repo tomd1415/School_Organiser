@@ -26,31 +26,31 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (26):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
-BUG-007, BUG-012, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration, image/folder/IMAP
-buffering, exception leakage, safety-gate, **marks-vs-edited-answer & incomplete-AI-batch, login-limit
-reset & first-run-identity race**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-024, BUG-026, BUG-030,
-BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc
-cap, **mark provenance, calendar-aware print & DB-enforced scheme/recurring invariants**); BUG-034,
-BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment
-correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045 await an
-operator go-ahead; A6 (transactional invariants) is underway — the four query-only invariants
-(active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are now all
-DB-enforced.**
+**Fixed so far (27):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+BUG-007, BUG-008, BUG-012, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
+image/folder/IMAP buffering, exception leakage, safety-gate, **marks-vs-edited-answer &
+incomplete-AI-batch, login-limit reset, first-run-identity race & atomic resource versioning**);
+BUG-015, BUG-016, BUG-017, BUG-019, BUG-024, BUG-026, BUG-030, BUG-031, BUG-046, BUG-047 (Medium —
+session revocation, pupil-work authz, DB invariants, course-doc cap, **mark provenance, calendar-aware
+print & DB-enforced scheme/recurring invariants**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves
+A1 (authorization), A2 (limits) and A4 (assessment correctness) are complete; A3 (auth) has its two
+non-deployment fixes done — BUG-032/045 await an operator go-ahead; A6 (transactional invariants) is
+underway — the four query-only invariants (active-scheme, recurring-idempotency, migrator-serialisation,
+one-current-year) are now all DB-enforced, plus atomic resource-version appends.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 10 | 8 |
+| High | 18 | 11 | 7 |
 | Medium | 26 | 10 | 16 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **26** | **24** |
+| **Total** | **50** | **27** | **23** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 522 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **69 test files, 323 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **70 test files, 324 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -148,6 +148,7 @@ DB-enforced.**
 
 ### BUG-008 — Concurrent resource version writes can corrupt version/file provenance
 
+- **Status:** ✅ Resolved 2026-06-20 — `addVersion` now allocates the version and updates the current pointer in **one transaction after `SELECT … FOR UPDATE` on the resource row** ([app/src/repos/resources.ts](app/src/repos/resources.ts)), so two concurrent appends serialise — the second reads the committed max and takes the next number instead of losing the `UNIQUE(resource_id, version_no)` race with a 500. The on-disk path (`relPathFor`) gained a random token, so the two writers can no longer target the **same file** (the version number in the path is now just a human-readable prefix; storage paths are opaque after write — reads never reconstruct them). Staged files are removed on a failed write via a `withStagedFile` wrapper applied to every resource write route, so a rolled-back version leaves no orphan. Integration test fires two appends that both pre-compute "v2" and asserts distinct version numbers, distinct files, both contents intact, and the pointer on the newest. **Residual:** a brand-new resource is still created in a separate statement before its first version, so a failure between them can leave a resource row with no version (harmless — no file, hidden from listings); folding create+first-version into one txn is a small follow-up, as is migrating the AI-markdown writers (lesson/schemes/services) to `withStagedFile` (they already inherit the atomic `addVersion`).
 - **Severity / confidence:** High / Credible risk
 - **Affected:** `app/src/routes/resources.ts:392-405, 447-485`; `app/src/repos/resources.ts:55-73`; `app/migrations/0006_phase3.sql:54-68`
 - **Problem and trigger:** Routes read the current version, choose `nextNo`, and write that path before `addVersion` independently recomputes `max(version_no)+1`. The version insert and current-pointer update are also separate autocommit statements. Concurrent saves can choose the same path/version.

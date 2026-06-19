@@ -16,7 +16,7 @@ import {
   searchResources,
   taMayAccessResource,
 } from '../repos/resources';
-import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
+import { checksum, readStored, relPathFor, withStagedFile } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
@@ -365,8 +365,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const dup = await findResourceByChecksum(sum);
     const id = await createResource(filename, kindFromFilename(filename), data.mimetype || mimeFromFilename(filename), 'uploaded');
     const rel = relPathFor(id, 1, filename);
-    await storeBuffer(rel, buf);
-    await addVersion(id, rel, buf.length, sum, 'teacher', 'uploaded');
+    await withStagedFile(rel, buf, () => addVersion(id, rel, buf.length, sum, 'teacher', 'uploaded'));
     const r = await getResource(id);
     const warn = dup ? `<li class="muted">⚠ a copy already existed (resource #${dup}).</li>` : '';
     return reply.type('text/html').send((r ? renderResourceItem(r) : '') + warn);
@@ -397,8 +396,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const buf = Buffer.from(d.content, 'utf8');
     const id = await createResource(filename, 'document', 'text/markdown', 'ai_generated');
     const rel = relPathFor(id, 1, filename);
-    await storeBuffer(rel, buf);
-    await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
+    await withStagedFile(rel, buf, () => addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated'));
     const r = await getResource(id);
     return reply.type('text/html').send(r ? renderResourceItem(r) : '');
   });
@@ -414,8 +412,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     if (!r) return reply.code(404).send('');
     const nextNo = (r.versionNo ?? 0) + 1;
     const rel = relPathFor(id.data.id, nextNo, filename);
-    await storeBuffer(rel, buf);
-    await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'new version');
+    await withStagedFile(rel, buf, () => addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'new version'));
     const updated = await getResource(id.data.id);
     return reply.type('text/html').send(updated ? renderResourceItem(updated) : '');
   });
@@ -468,8 +465,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const nextNo = (r.versionNo ?? 0) + 1;
     const buf = Buffer.from(serialiseBlocks(parsed.data), 'utf8');
     const rel = relPathFor(id.data.id, nextNo, r.title);
-    await storeBuffer(rel, buf);
-    await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser (blocks)');
+    await withStagedFile(rel, buf, () => addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser (blocks)'));
     return reply.type('application/json').send(JSON.stringify({ ok: true, version: nextNo }));
   });
 
@@ -495,8 +491,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const nextNo = (r.versionNo ?? 0) + 1;
     const buf = Buffer.from(b.data.content, 'utf8');
     const rel = relPathFor(id.data.id, nextNo, r.title);
-    await storeBuffer(rel, buf);
-    await addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser');
+    await withStagedFile(rel, buf, () => addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser'));
     return reply.type('text/html').send(`<span class="note-status saved">saved ✓ — now v${nextNo}</span>`);
   });
 
@@ -519,8 +514,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const name = safeFilename(data.filename || `image.${ext}`);
     const imgId = await createResource(name, 'image', data.mimetype, 'uploaded');
     const rel = relPathFor(imgId, 1, name);
-    await storeBuffer(rel, buf);
-    await addVersion(imgId, rel, buf.length, checksum(buf), 'teacher', 'worksheet image');
+    await withStagedFile(rel, buf, () => addVersion(imgId, rel, buf.length, checksum(buf), 'teacher', 'worksheet image'));
     return reply.type('application/json').send(JSON.stringify({ url: `/lesson-image/${imgId}`, alt: name.replace(/\.[a-z0-9]+$/i, '') }));
   });
 

@@ -7,6 +7,22 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 9 (Wave A6 — atomic resource versioning)
+
+Make "append a new version of a resource" safe under concurrency — no corrupted files, no lost writes,
+no orphaned bytes. Suite green: **522 unit / 324 integration; typecheck clean**.
+
+- **🗂 Atomic, race-safe version appends (BUG-008, High).** `addVersion` now takes a `SELECT … FOR UPDATE`
+  on the resource row and writes the version row **and** the current-version pointer in one transaction, so
+  two overlapping saves serialise — the second reads the committed max and takes the next number instead of
+  losing the `UNIQUE(resource_id, version_no)` race with a 500. The on-disk path gained a random token, so
+  concurrent writers can no longer target (and clobber) the same file — the version number in the path is
+  now just a readable prefix. A `withStagedFile` wrapper removes the just-written file if the version write
+  fails, so a rolled-back save leaves no orphan. New integration test fires two appends that both pre-compute
+  "v2" and asserts distinct versions, distinct files, both contents intact, and the pointer on the newest.
+  *(Residual: a brand-new resource is still created a statement before its first version — a gap that can
+  leave a versionless resource row, harmless and hidden; folding those into one txn is a small follow-up.)*
+
 ### 2026-06-20 — Audit remediation, batch 8 (Wave A6 — DB-enforced invariants)
 
 Make two "maintained by convention" invariants impossible to violate, by enforcing them in the database

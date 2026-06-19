@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 26 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
+> **Status (2026-06-20): in progress — 27 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -15,10 +15,12 @@
 > teacher-login IP brake) + **041** (first-run identity is claimed under an advisory lock, so exactly one
 > teacher session can ever be created). **A6 (transactional invariants)** — **024/031** plus **019**
 > (DB-enforced one-active + unique-version per course; every create/author/import/clone/move path respects
-> it) and **026** (DB-enforced one recurring occurrence per definition/date, generator on `ON CONFLICT`);
-> the four query-only invariants are now all DB-enforced. Suites green: 522 unit / 323 integration;
-> typecheck clean. **Next:** remaining **A6** multi-step-write items (008/014/020/021/022/023/025/027/028),
-> then A5 (recovery/disposal) or A7 (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
+> it), **026** (DB-enforced one recurring occurrence per definition/date, generator on `ON CONFLICT`) — so
+> the four query-only invariants are now all DB-enforced — and **008** (resource-version appends are
+> atomic + row-locked, storage paths carry a random token so concurrent writers can't overwrite, staged
+> files cleaned on rollback). Suites green: 522 unit / 324 integration; typecheck clean. **Next:** remaining
+> **A6** multi-step-write items (014/020/021/022/023/025/027/028), then A5 (recovery/disposal) or A7
+> (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

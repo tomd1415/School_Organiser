@@ -52,7 +52,12 @@ export async function setResourceUnit(id: number, unit: string | null, yearGroup
   await pool.query(`UPDATE resources SET unit = $2, year_group = $3 WHERE id = $1`, [id, unit || null, yearGroup || null]);
 }
 
-/** Append a version (version_no = max+1) and make it current. */
+/** Append a version (version_no = max+1) and make it current — atomically. BUG-008: the insert and the
+ *  current-pointer update run in ONE transaction, and the resource row is locked `FOR UPDATE` first so
+ *  two concurrent appends serialise. Without the lock both read the same max(version_no), and one loses
+ *  the UNIQUE(resource_id, version_no) race with a 500 (orphaning its just-staged file); with it the
+ *  second caller reads the committed max and gets the next number. (Storage-path uniqueness — so the two
+ *  files don't collide on disk — is handled by the random token in relPathFor.) */
 export async function addVersion(
   resourceId: number,
   storagePath: string,
@@ -61,16 +66,27 @@ export async function addVersion(
   author: 'teacher' | 'ai',
   changeNote: string | null,
 ): Promise<number> {
-  const { rows } = await pool.query<{ id: number }>(
-    `INSERT INTO resource_versions (resource_id, version_no, storage_path, byte_size, checksum, author, change_note)
-     VALUES ($1, COALESCE((SELECT max(version_no) + 1 FROM resource_versions WHERE resource_id = $1), 1), $2, $3, $4, $5, $6)
-     RETURNING id`,
-    [resourceId, storagePath, byteSize, sum, author, changeNote],
-  );
-  const vid = rows[0]?.id;
-  if (vid === undefined) throw new Error('failed to add version');
-  await pool.query(`UPDATE resources SET current_version_id = $2 WHERE id = $1`, [resourceId, vid]);
-  return vid;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`SELECT id FROM resources WHERE id = $1 FOR UPDATE`, [resourceId]);
+    const { rows } = await client.query<{ id: number }>(
+      `INSERT INTO resource_versions (resource_id, version_no, storage_path, byte_size, checksum, author, change_note)
+       VALUES ($1, COALESCE((SELECT max(version_no) + 1 FROM resource_versions WHERE resource_id = $1), 1), $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [resourceId, storagePath, byteSize, sum, author, changeNote],
+    );
+    const vid = rows[0]?.id;
+    if (vid === undefined) throw new Error('failed to add version');
+    await client.query(`UPDATE resources SET current_version_id = $2 WHERE id = $1`, [resourceId, vid]);
+    await client.query('COMMIT');
+    return vid;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function getResource(id: number): Promise<ResourceRow | null> {
