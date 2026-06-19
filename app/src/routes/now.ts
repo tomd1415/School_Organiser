@@ -32,6 +32,7 @@ import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import { coverageAtRisk } from '../repos/brief';
+import { openReviewCount } from '../repos/reviews';
 import { buildBrief, type BriefItem } from '../services/brief';
 import type { LessonRow, PeriodRow } from '../services/timetable';
 import { addDays, toMinutes, weekdayOf } from '../lib/time';
@@ -464,6 +465,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
         coverage: await coverageAtRisk(),
         nextSchoolDay: nextSchoolDayInfo(state.isoDate, ctx.terms, allLessons, ctx.tz),
         markingClasses: marksWaiting.length,
+        openReviews: await openReviewCount(),
       });
 
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>

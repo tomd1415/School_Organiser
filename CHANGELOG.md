@@ -7,6 +7,25 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Scheduled reviewer sweep (Wave 7.2)
+
+Wave 7's first scheduled-AI job, on the seam 7.1 established. **Off by default**; the existing
+budget-enforced reviewer does the work. Suite green: **488 unit / 287 integration; typecheck clean**.
+
+- **`sweepReviews(maxLessons)`** ([app/src/services/reviewLesson.ts](app/src/services/reviewLesson.ts))
+  — spot-checks up to N not-yet-reviewed master lessons, one AI review each (mirrors `reviewUnitMaster`'s
+  stop-on-blocked loop). Every call is the wrapper's budget-enforced `review_lesson`; it stops the
+  instant one is blocked (monthly cap) or unavailable (AI off).
+- **`scheduleReviewSweep`** ([app/src/server.ts](app/src/server.ts)) — cost-safe by construction: off
+  unless `ai_review_sweep_daily > 0`, **never on boot**, once per calendar day in a 4–7am window,
+  claiming the day *before* spending so a restart can't double-spend; per-run cap (≤10) with the monthly
+  £-cap as the backstop.
+- **Setting** — "Nightly auto-review: N lessons/night (0 = off)" in Settings → AI, registry-validated.
+- **Surfaced in the morning brief** — a "🔎 N lesson reviews to look at" line
+  ([app/src/services/brief.ts](app/src/services/brief.ts)), so overnight findings greet you in the morning.
+- **Safety test** ([app/tests/integration/reviewSweep.int.test.ts](app/tests/integration/reviewSweep.int.test.ts)):
+  reviewer off, or on with no key ⇒ no reviews written, no spend, no throw.
+
 ### 2026-06-19 — Morning brief + the daily-job seam (Wave 7.1)
 
 First slice of [docs/FUTURE_WAVES.md](docs/FUTURE_WAVES.md) Wave 7 (quiet automation). Suite green:

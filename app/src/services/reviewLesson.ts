@@ -196,3 +196,32 @@ export async function reviewUnitMaster(unitId: number): Promise<UnitReviewResult
   }
   return { total: plans.length, reviewed, skipped, stopped, disabled: false };
 }
+
+export interface SweepResult {
+  reviewed: number;
+  stopped: boolean; // hit the monthly cap, or the reviewer went unavailable mid-run
+  disabled: boolean; // the reviewer is off (the default)
+}
+
+/** Wave 7.2 — the scheduled sweep: spot-check up to `maxLessons` not-yet-reviewed master lessons, one
+ * AI review each. Mirrors reviewUnitMaster's stop-on-blocked loop; every call is budget-enforced by the
+ * wrapper, and it stops the moment one is blocked (monthly cap) or unavailable (AI off). The caller
+ * (the scheduled job) is responsible for the off-by-default gate and the once-a-day window. */
+export async function sweepReviews(maxLessons: number): Promise<SweepResult> {
+  if (maxLessons <= 0) return { reviewed: 0, stopped: false, disabled: false };
+  if (!(await aiReviewEnabled())) return { reviewed: 0, stopped: false, disabled: true };
+  let reviewed = 0;
+  let stopped = false;
+  for (let i = 0; i < maxLessons; i++) {
+    const id = await randomReviewableLessonId();
+    if (id == null) break; // nothing left needs reviewing
+    const o = await reviewLessonMaster(id);
+    if (o.status === 'ok') reviewed += 1;
+    else if (o.status === 'blocked' || o.status === 'unavailable' || o.status === 'disabled') {
+      stopped = true; // over the cap / no key / switched off mid-run — stop spending
+      break;
+    }
+    // 'skip' / 'notfound' / 'error' on one lesson → move on to the next
+  }
+  return { reviewed, stopped, disabled: false };
+}

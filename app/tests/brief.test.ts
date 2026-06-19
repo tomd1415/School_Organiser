@@ -55,6 +55,13 @@ describe('buildBrief', () => {
     expect(buildBrief({ today: '2026-06-01', coverage: [], nextSchoolDay: null, markingClasses: 0 })).toEqual([]);
   });
 
+  it('surfaces open lesson reviews from the nightly sweep', () => {
+    const items = buildBrief({ today: '2026-06-01', coverage: [], nextSchoolDay: null, markingClasses: 0, openReviews: 3 });
+    expect(items.some((i) => i.text === '3 lesson reviews to look at' && i.href === '/schemes')).toBe(true);
+    const one = buildBrief({ today: '2026-06-01', coverage: [], nextSchoolDay: null, markingClasses: 0, openReviews: 1 });
+    expect(one.some((i) => i.text === '1 lesson review to look at')).toBe(true);
+  });
+
   it('singularises one lesson / one class', () => {
     const items = buildBrief({
       today: '2026-06-01',

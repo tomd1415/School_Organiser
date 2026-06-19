@@ -1,6 +1,6 @@
 # Future waves — beyond Phase 11 (Wave 6+)
 
-> **Status (2026-06-19): proposals — Wave 7.1 (morning brief) shipped, the rest proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
+> **Status (2026-06-19): proposals — Wave 7.1 (morning brief) + 7.2 (reviewer sweep) shipped, the rest proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
 > the numbered Phase plans (12 worksheets, 13 planner, 14 hardening) run on a parallel track. This is
 > the next idea backlog — strategic feature directions grounded in what the app now holds and two fresh
 > unlocks. Near-term operational follow-ups live in [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -34,7 +34,7 @@ no-op when AI is off.
 | # | What | Why | Effort | Pri |
 |---|---|---|---|---|
 | 7.1 ✅ | **Morning brief** *(v1 built 2026-06-19)* — a scheduled, deterministic digest on Now: coverage at risk before an exam date, next school day's teaching load, marking waiting. *(Deferred: tomorrow's lessons lacking a bound plan, the optional AI summary.)* | Pulls the scattered "needs me" signals into one glance *ahead*; every input already exists (`schemeCoverage`, marking backlog, tasks) | M | 🟠 |
-| 7.2 | **Scheduled reviewer sweep** — the parked nightly review: off-by-default behind `ai_review_enabled`, cost-capped, writing advisory `lesson_reviews` findings on next-to-teach lessons, surfaced as a morning heads-up | Was parked *only* for "no scheduler" — now solved. The manual reviewer already ships; this just schedules it | M | 🟡 |
+| 7.2 ✅ | **Scheduled reviewer sweep** *(built 2026-06-19)* — off-by-default nightly review (own `ai_review_sweep_daily` setting), once/day in a 4–7am window, claim-before-spend, cost-capped, writing advisory `lesson_reviews` findings surfaced in the morning brief | Was parked *only* for "no scheduler" — now solved. The manual reviewer already ships; this just schedules it | M | 🟡 |
 | 7.3 | **Spaced-retrieval scheduler** — auto-build a "do now" from coverage on a spacing curve (recall ~2-week-old + ~6-week-old points) via `retrieval_starter`, ready on the lesson each morning | Retrieval starters exist but are manual/one-off; spacing is where the learning gain is, and coverage supplies the source points | M | 🟡 |
 
 *Reuses:* `scheduleRecurring`'s idempotent daily-job pattern, `lesson_reviews`, `retrieval_starter`, `schemeCoverage`, the monthly £-cap.
@@ -99,3 +99,27 @@ there's no data.
 
 Deferred to fast-follows: "tomorrow's lessons lacking a bound plan" (needs the delivery plan-for-date
 map), the optional AI one-line summary, and a persisted `daily_brief` store (the 7.2 attach-point).
+
+---
+
+## Sub-plan — 7.2 Scheduled reviewer sweep *(built 2026-06-19)*
+
+The existing manual reviewer (`reviewLessonMaster`, `lesson_reviews`) does the work; 7.2 is a thin,
+**off-by-default, budgeted** scheduled loop around it, surfaced in the brief.
+
+1. **Loop** — `sweepReviews(maxLessons)` (`services/reviewLesson.ts`): spot-check up to N not-yet-reviewed
+   master lessons (`randomReviewableLessonId`), one AI review each; mirrors `reviewUnitMaster`'s
+   stop-on-blocked loop. Every call is the wrapper's budget-enforced `review_lesson` (Sonnet default);
+   it stops the instant one is blocked (monthly cap) or unavailable (AI off).
+2. **Cost gates (defence in depth)** — (a) **off by default**: `ai_review_sweep_daily = 0` ⇒ zero AI
+   calls; (b) a per-run count cap (the setting, hard-ceiled at 10); (c) **once per calendar day** in a
+   4–7am window, claiming the day (`ai_review_sweep_last`) *before* spending so a restart can't
+   re-trigger; (d) **never on boot**; (e) skips lessons with an open review; (f) the monthly £-cap is
+   the backstop.
+3. **Schedule** — `scheduleReviewSweep(server.ts)` ticks every 30 min, gated to the daily AM window.
+4. **Surface** — the morning brief gains a "🔎 N lesson reviews to look at" line (`openReviewCount`),
+   closing the loop: the sweep runs overnight, the findings greet you in the brief.
+5. **Setting** — `ai_review_sweep_daily` in Settings → AI (registry-validated, 0–10), beneath the
+   reviewer master switch.
+6. **Tests** — the safety one: reviewer off / AI key empty ⇒ `sweepReviews` is a no-op (no reviews
+   created, no real call, no throw); plus the brief's reviews line.

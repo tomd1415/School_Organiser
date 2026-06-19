@@ -57,7 +57,8 @@ import { coverageAtRisk } from './repos/brief';
 import { buildBrief } from './services/brief';
 import { runDueMarkJobs } from './services/markingQueue';
 import { pollEmailOnce } from './services/emailPoll';
-import { getSetting } from './repos/settings';
+import { getSetting, setSetting } from './repos/settings';
+import { sweepReviews } from './services/reviewLesson';
 import { setNavDailyOverride, setExperienceMode } from './lib/nav';
 import { localParts } from './lib/time';
 
@@ -279,6 +280,28 @@ function scheduleMorningBrief(app: FastifyInstance): void {
   setInterval(() => void run(), 24 * 60 * 60 * 1000);
 }
 
+/** Wave 7.2: the off-by-default nightly reviewer sweep. NEVER on boot (no spend on restart); ticks
+ * every 30 min but only acts once per calendar day in a 4–7am window, claiming the day BEFORE spending
+ * so a restart can't double-spend. Capped per run; the monthly £-cap is the backstop. */
+function scheduleReviewSweep(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const daily = Number(await getSetting('ai_review_sweep_daily').catch(() => null)) || 0;
+      if (daily <= 0) return; // off by default — no AI spend
+      const today = localParts(new Date(), 'Europe/London').isoDate;
+      if ((await getSetting('ai_review_sweep_last').catch(() => null)) === today) return; // already swept today
+      const hour = new Date().getHours();
+      if (hour < 4 || hour >= 8) return; // only the early-morning window
+      await setSetting('ai_review_sweep_last', today); // claim the day BEFORE spending (restart-safe)
+      const r = await sweepReviews(Math.min(daily, 10));
+      if (r.reviewed > 0) app.log.info(`review sweep: reviewed ${r.reviewed} lesson(s)${r.stopped ? ' (stopped at cap)' : ''}`);
+    } catch (err) {
+      app.log.error({ err }, 'review sweep crashed');
+    }
+  };
+  setInterval(() => void run(), 30 * 60 * 1000); // every 30 min, gated to once/day in the AM window
+}
+
 /** Production entrypoint: migrate, then listen. */
 export async function start(): Promise<void> {
   await migrate();
@@ -302,6 +325,7 @@ export async function start(): Promise<void> {
     scheduleEmailPoll(app);
     scheduleMarkingQueue(app);
     scheduleMorningBrief(app);
+    scheduleReviewSweep(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

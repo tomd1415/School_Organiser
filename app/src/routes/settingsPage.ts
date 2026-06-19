@@ -60,7 +60,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const envManaged = !!appConfig.APP_PASSWORD_HASH;
-      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey, stylePrefs, featurePrefs, reviewOn] = await Promise.all([
+      const [school, aiEnabled, cap, mPlan, mDesign, mCheap, emHost, emPort, emUser, emPass, emFolder, emTls, emOn, emMins, emLast, aiKey, stylePrefs, featurePrefs, reviewOn, reviewSweep] = await Promise.all([
         getSetting('school_name'),
         getSetting('ai_enabled'),
         getSetting('ai_month_cap_pence'),
@@ -80,6 +80,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         getSetting('ai_style_prefs'),
         getSetting('ai_feature_prefs'),
         getSetting('ai_review_enabled'),
+        getSetting('ai_review_sweep_daily'),
       ]);
       const [pupilOn, pupilIdle, dpiaAck, taLegacy, taAccounts, staffRows, marksOn, marksAck, teacherIdle] = await Promise.all([
         getSetting('pupil_access_enabled'),
@@ -187,6 +188,10 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             Schemes page; the master lesson is never changed automatically. Runs on the <strong>Planning</strong> model
             by default (Sonnet); push "Review a lesson" to Opus above for a deeper, pricier review. Manual-trigger only,
             and a whole-unit sweep self-stops at the monthly cap.</p>
+          <label>Nightly auto-review
+            <input type="number" min="0" max="10" value="${esc(reviewSweep ?? '0')}" style="width:4rem"
+              hx-post="/settings/ai" hx-vals='js:{"key":"ai_review_sweep_daily","value":event.target.value}' hx-trigger="change" hx-swap="none">
+            lessons/night <span class="muted">(0 = off; needs the reviewer on above; runs once early each morning, capped by the monthly budget)</span></label>
         </div>
         <p class="muted">Standing instructions sent with every lesson/scheme/resource generation
           (cohort-level — <strong>never name a pupil</strong>). Style shapes <em>how</em> things are
@@ -371,6 +376,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     ai_style_prefs: 2000, // idea 3 — standing style prefs (free text)
     ai_feature_prefs: 2000, // idea 3 — standing feature requirements (free text)
     ai_review_enabled: 5, // Wave 5 — the advisory reviewer master switch (off by default)
+    ai_review_sweep_daily: 3, // Wave 7.2 — lessons/night for the scheduled sweep (0 = off, ≤10)
   };
   app.post('/settings/ai', guard, async (req, reply) => {
     const b = z.object({ key: z.string(), value: z.string().max(2000) }).safeParse(req.body);
@@ -381,6 +387,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (cap === null || b.data.value.length > cap) return reply.code(400).send('');
     if (isFeatureModelKey(b.data.key) && b.data.value.trim() !== '' && !KNOWN_MODEL_IDS.has(b.data.value.trim())) return reply.code(400).send('');
     if (b.data.key === 'ai_month_cap_pence' && b.data.value.trim() !== '' && !(Number(b.data.value) > 0)) return reply.code(400).send('');
+    if (b.data.key === 'ai_review_sweep_daily' && b.data.value.trim() !== '' && !(Number.isInteger(Number(b.data.value)) && Number(b.data.value) >= 0 && Number(b.data.value) <= 10)) return reply.code(400).send('');
     await setSetting(b.data.key, b.data.value.trim());
     return reply.send('');
   });

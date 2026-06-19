@@ -30,6 +30,7 @@ export interface BriefInput {
   coverage: CoverageCourseRow[];
   nextSchoolDay: { label: string; teachingCount: number } | null;
   markingClasses: number;
+  openReviews?: number; // Wave 7.2 — advisory lesson reviews waiting (from the nightly sweep)
 }
 
 export function buildBrief(input: BriefInput): BriefItem[] {
@@ -52,6 +53,10 @@ export function buildBrief(input: BriefInput): BriefItem[] {
   }
   if (input.markingClasses > 0) {
     items.push({ level: 'info', icon: '✍️', text: `Marking waiting for ${input.markingClasses} class${input.markingClasses === 1 ? '' : 'es'}`, href: '/' });
+  }
+  if ((input.openReviews ?? 0) > 0) {
+    const n = input.openReviews as number;
+    items.push({ level: 'info', icon: '🔎', text: `${n} lesson review${n === 1 ? '' : 's'} to look at`, href: '/schemes' });
   }
   return items;
 }
