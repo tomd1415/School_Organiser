@@ -41,6 +41,7 @@ export interface GridLesson {
 
 export interface GridCell {
   weekday: number;
+  present: boolean; // false when this weekday has no period in this time band (renders blank)
   slotType: string; // this weekday's slot type (e.g. briefing vs before_school)
   periodLabel: string; // "Briefing" / "Prep" / "Lesson 1" / "Break" …
   lessons: GridLesson[]; // self lesson + any overseen lessons, usually 0–2
@@ -50,6 +51,7 @@ export interface GridRow {
   slotOrder: number;
   start: string;
   end: string;
+  minutes: number; // the band's duration, so the row height can scale to the time it takes
   teachable: boolean;
   kind: string; // representative slot type for the row
   label: string; // left-column label (e.g. "L1", "Break")
@@ -122,14 +124,12 @@ function rowLabel(slotType: string, lessonIndex: number | null): string {
   }
 }
 
-export function buildWeekGrid(periods: PeriodRow[], lessons: LessonRow[]): WeekGrid {
-  const periodAt = new Map<string, PeriodRow>();
-  const slotOrders = new Set<number>();
-  for (const p of periods) {
-    periodAt.set(`${p.weekday}:${p.slotOrder}`, p);
-    slotOrders.add(p.slotOrder);
-  }
+function toMin(hhmm: string): number {
+  const [h, m] = hhmm.split(':');
+  return (Number(h) || 0) * 60 + (Number(m) || 0);
+}
 
+export function buildWeekGrid(periods: PeriodRow[], lessons: LessonRow[]): WeekGrid {
   const lessonsAt = new Map<string, GridLesson[]>();
   for (const l of lessons) {
     const key = `${l.weekday}:${l.slotOrder}`;
@@ -151,30 +151,36 @@ export function buildWeekGrid(periods: PeriodRow[], lessons: LessonRow[]): WeekG
     );
   }
 
+  // Rows are TIME BANDS — the distinct start times across the week, in chronological order. A period
+  // lands in the band matching its start time; a weekday with nothing at that time gets an empty cell.
+  // This keeps days with different shapes (e.g. a briefing only some mornings) aligned by the clock
+  // rather than by slot order, which previously smeared such periods across the whole week.
+  const byDayStart = new Map<string, PeriodRow>(); // `${weekday}:${start}` → period
+  const starts = new Set<string>();
+  for (const p of periods) {
+    byDayStart.set(`${p.weekday}:${p.start}`, p);
+    starts.add(p.start);
+  }
+
   const rows: GridRow[] = [];
-  for (const slotOrder of [...slotOrders].sort((a, b) => a - b)) {
-    // Representative period for the row's time/label (times match across weekdays;
-    // only slot 1's type differs, which the per-cell slotType captures).
-    const rep =
-      periodAt.get(`1:${slotOrder}`) ??
-      WEEKDAYS.map((w) => periodAt.get(`${w}:${slotOrder}`)).find((p): p is PeriodRow => p !== undefined);
+  for (const start of [...starts].sort()) {
+    const present = WEEKDAYS.map((w) => byDayStart.get(`${w}:${start}`));
+    const rep = present.find((p): p is PeriodRow => p !== undefined);
     if (!rep) continue;
 
-    const cells: GridCell[] = WEEKDAYS.map((w) => {
-      const p = periodAt.get(`${w}:${slotOrder}`);
-      return {
-        weekday: w,
-        slotType: p?.slotType ?? rep.slotType,
-        periodLabel: p?.label ?? rep.label,
-        lessons: lessonsAt.get(`${w}:${slotOrder}`) ?? [],
-      };
+    const cells: GridCell[] = WEEKDAYS.map((w, i) => {
+      const p = present[i];
+      return p
+        ? { weekday: w, present: true, slotType: p.slotType, periodLabel: p.label, lessons: lessonsAt.get(`${w}:${p.slotOrder}`) ?? [] }
+        : { weekday: w, present: false, slotType: '', periodLabel: '', lessons: [] };
     });
 
     rows.push({
-      slotOrder,
+      slotOrder: rep.slotOrder,
       start: rep.start,
       end: rep.end,
-      teachable: rep.teachable,
+      minutes: Math.max(1, toMin(rep.end) - toMin(rep.start)),
+      teachable: present.some((p) => p?.teachable === true),
       kind: rep.slotType,
       label: rowLabel(rep.slotType, rep.lessonIndex),
       cells,

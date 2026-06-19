@@ -208,7 +208,8 @@ main:has(.tt) { max-width: 76rem; }
 .tt-time { width: 3.2rem; text-align: right; vertical-align: top; padding: 0.35rem 0.4rem 0; }
 .tt-time .tt-rl { display: block; font-size: 0.8rem; font-weight: 700; }
 .tt-time .tt-clock { font-size: 0.7rem; color: var(--muted); }
-.tt-table td { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0; vertical-align: top; height: 3rem; }
+.tt-table td { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0; vertical-align: top; }
+.tt-table td.tt-blank { background: transparent; border-color: transparent; }
 .tt-today { outline: 2px solid var(--accent); outline-offset: -1px; }
 thead th.tt-today { outline: none; color: var(--accent); }
 .tt-lesson { display: block; padding: 0.35rem 0.45rem; border-left: 4px solid var(--line); border-radius: 6px; text-decoration: none; color: var(--ink); }

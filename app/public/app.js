@@ -41,6 +41,20 @@
     }
   });
 
+  // Setup's structural edits (＋ period, ＋ lesson, model day, …) re-render the whole <section> via
+  // hx-swap=outerHTML, which can jump the scroll to the bottom. Preserve the scroll position across
+  // those swaps so you stay on the period/row you were editing.
+  (function () {
+    var savedY = null;
+    document.body.addEventListener('htmx:beforeSwap', function (e) {
+      var t = e.detail && e.detail.target;
+      if (t && t.matches && t.matches('section.card.setup')) savedY = window.scrollY;
+    });
+    document.body.addEventListener('htmx:afterSettle', function () {
+      if (savedY != null) { window.scrollTo(0, savedY); savedY = null; }
+    });
+  })();
+
   // Visible feedback for slow requests (AI calls can take 20–60s): htmx already adds
   // .htmx-request to the busy element (button spinner via CSS); this adds a page-top activity
   // bar whenever anything has been in flight longer than a moment, so even a swapped-away

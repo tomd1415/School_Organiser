@@ -154,6 +154,7 @@ async function dayTab(years: YearRow[], yearId: number): Promise<string> {
   const days = [1, 2, 3, 4, 5].map((wd) => {
     const rows = periods
       .filter((p) => p.weekday === wd)
+      .sort((a, b) => a.start.localeCompare(b.start) || a.slotOrder - b.slotOrder)
       .map(
         (p) => `<tr id="pd-${p.id}">
         <td><input class="setup-narrow" name="value" value="${esc(p.label)}" ${save(`/setup/period/${p.id}`, 'label')}></td>

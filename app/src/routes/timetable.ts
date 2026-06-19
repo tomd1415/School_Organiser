@@ -68,6 +68,7 @@ function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect): string 
 }
 
 function renderCell(cell: GridCell, date: string, isToday: boolean, exForLesson: (date: string, lessonId: number) => ExceptionEffect): string {
+  if (!cell.present) return `<td class="tt-blank${isToday ? ' tt-today' : ''}"></td>`; // this day has nothing at this time
   const td = isToday ? '<td class="tt-today">' : '<td>';
   if (cell.lessons.length === 0) {
     return `${isToday ? '<td class="tt-empty tt-today">' : '<td class="tt-empty">'}<span class="tt-band">${esc(cell.periodLabel)}</span></td>`;
@@ -117,7 +118,8 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
               return renderCell(cell, d, d === today, exForLesson);
             })
             .join('');
-          return `<tr class="tt-row tt-kind-${esc(row.kind)}"><th class="tt-time"><span class="tt-rl">${esc(row.label)}</span><span class="tt-clock">${esc(row.start)}</span></th>${cells}</tr>`;
+          const h = Math.max(22, row.minutes); // scale row height to the period's duration (≈1px/min)
+          return `<tr class="tt-row tt-kind-${esc(row.kind)}" style="height:${h}px"><th class="tt-time"><span class="tt-rl">${esc(row.label)}</span><span class="tt-clock">${esc(row.start)}</span></th>${cells}</tr>`;
         })
         .join('');
       table = `<div class="table-scroll"><table class="tt-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;

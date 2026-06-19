@@ -55,4 +55,32 @@ describe('TimetableService.buildWeekGrid', () => {
     expect(rowAt(2)?.teachable).toBe(true);
     expect(rowAt(1)?.teachable).toBe(false);
   });
+
+  it('scales each row to its period duration (minutes)', () => {
+    expect(rowAt(1)?.minutes).toBe(20); // 08:30–08:50
+    expect(rowAt(2)?.minutes).toBe(50); // 09:10–10:00
+  });
+});
+
+describe('buildWeekGrid aligns by time when day shapes differ', () => {
+  // Monday has a briefing (08:30) then form (08:50); Tuesday has NO briefing — nothing at 08:30.
+  const ps: PeriodRow[] = [
+    { weekday: 1, slotOrder: 1, slotType: 'briefing', label: 'Briefing', lessonIndex: null, start: '08:30', end: '08:50', teachable: false },
+    { weekday: 1, slotOrder: 2, slotType: 'form_am', label: 'Form', lessonIndex: null, start: '08:50', end: '09:10', teachable: false },
+    { weekday: 2, slotOrder: 1, slotType: 'form_am', label: 'Form', lessonIndex: null, start: '08:50', end: '09:10', teachable: false },
+  ];
+  const g = buildWeekGrid(ps, []);
+
+  it('puts the briefing in its own band, blank on days without one (not smeared across the day)', () => {
+    const band = g.rows.find((r) => r.start === '08:30');
+    expect(band?.cells[0]?.present).toBe(true); // Mon
+    expect(band?.cells[0]?.periodLabel).toBe('Briefing');
+    expect(band?.cells[1]?.present).toBe(false); // Tue — nothing at 08:30
+  });
+
+  it('aligns the 08:50 form across both days', () => {
+    const band = g.rows.find((r) => r.start === '08:50');
+    expect(band?.cells[0]?.periodLabel).toBe('Form');
+    expect(band?.cells[1]?.periodLabel).toBe('Form');
+  });
 });

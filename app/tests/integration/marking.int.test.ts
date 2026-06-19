@@ -210,8 +210,10 @@ describe('Phase 9 marking — safety invariants (integration)', () => {
   });
 
   it('marksBacklog (10.22) lists a recent class with marks waiting to confirm', async () => {
-    // A recent (future-dated, within the window) occurrence on this class with a suggested mark.
-    const occ2 = Number((await pool.query<{ id: number }>(`INSERT INTO lesson_occurrences (timetabled_lesson_id, date) SELECT id, CURRENT_DATE + 3 FROM timetabled_lessons ORDER BY id LIMIT 1 RETURNING id`)).rows[0]!.id);
+    // A future-dated occurrence on this class with a suggested mark. The backlog window has no upper
+    // bound (date >= now()-21d), so a FAR-future slot still appears — and, unlike CURRENT_DATE+3, it
+    // can't collide with a real next-teaching occurrence the Now screen creates by browsing.
+    const occ2 = Number((await pool.query<{ id: number }>(`INSERT INTO lesson_occurrences (timetabled_lesson_id, date) SELECT id, CURRENT_DATE + 400 FROM timetabled_lessons ORDER BY id LIMIT 1 RETURNING id`)).rows[0]!.id);
     const oc2 = Number((await pool.query<{ id: number }>(`INSERT INTO occurrence_courses (occurrence_id, group_course_id, lesson_plan_id) VALUES ($1,$2,$3) RETURNING id`, [occ2, gc, lessonPlanId])).rows[0]!.id);
     const ans = Number((await pool.query<{ id: number }>(`INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value) VALUES ($1,$2,$3,1,'t1.r1.c2','x') RETURNING id`, [pupil, oc2, resourceId])).rows[0]!.id);
     await pool.query(`INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, marker, status) VALUES ($1, 1, 2, 'ai', 'suggested')`, [ans]);
