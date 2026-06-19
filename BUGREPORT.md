@@ -26,26 +26,28 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (22):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
-BUG-007, BUG-012, BUG-038, BUG-042 (High — image-enumeration, image/folder/IMAP buffering, exception
-leakage, safety-gate, **marks-vs-edited-answer & incomplete-AI-batch**); BUG-015, BUG-016, BUG-017,
-BUG-024, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
-invariants, course-doc cap, **mark provenance & calendar-aware print**); BUG-034, BUG-035, BUG-036,
-BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correctness) are complete.**
+**Fixed so far (24):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+BUG-007, BUG-012, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration, image/folder/IMAP
+buffering, exception leakage, safety-gate, **marks-vs-edited-answer & incomplete-AI-batch, login-limit
+reset & first-run-identity race**); BUG-015, BUG-016, BUG-017, BUG-024, BUG-030, BUG-031, BUG-046,
+BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc cap, **mark
+provenance & calendar-aware print**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1
+(authorization), A2 (limits) and A4 (assessment correctness) are complete; A3 (auth) has its two
+non-deployment fixes done — BUG-032/045 await an operator go-ahead.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 8 | 10 |
+| High | 18 | 10 | 8 |
 | Medium | 26 | 8 | 18 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **22** | **28** |
+| **Total** | **50** | **24** | **26** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
-- The completed unit-test baseline passes: **73 test files, 508 tests**.
-- The integration-test baseline passes against the local PostgreSQL service: **60 test files, 301 tests**. The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The unit-test suite passes: **75 test files, 522 tests** (508 at audit time; remediation has added regression coverage).
+- The integration-test suite passes against the local PostgreSQL service: **69 test files, 321 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -235,6 +237,7 @@ BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correc
 
 ### BUG-040 — A successful TA login resets the shared teacher-login IP limiter
 
+- **Status:** ✅ Resolved 2026-06-19 — `clearAttempts(login:${ip})` is now called **only on a successful teacher login**; both the named-TA and shared-TA success paths leave the shared `login:${ip}` counter untouched, so a lower-privilege success can no longer reset the teacher-password brake. Integration test (`loginLimit.int.test`) interleaves 5 wrong guesses → a successful TA login → 4 more wrong → asserts the 11th attempt is `429` (the TA success did *not* reset the counter). **Residual note:** counters remain keyed per-IP, not per-principal — a single IP's teacher and TA failures still share one budget (acceptable for a single-teacher LAN app; the security property — TA success can't unlock teacher guessing — holds). True per-principal counters + client-IP trust (BUG-045) are the larger follow-up.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/auth/routes.ts:49-83`; `app/src/auth/rateLimit.ts:8-27`
 - **Problem and trigger:** Teacher and TA password attempts share the same `login:${req.ip}` counter. The route tests the teacher password first, then TA credentials, and clears the shared counter after any successful TA login. A person who knows their own TA password can repeatedly make teacher-password guesses and reset the limit by signing in as TA.
@@ -245,6 +248,7 @@ BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correc
 
 ### BUG-041 — Concurrent first-run identity submissions can both obtain teacher sessions
 
+- **Status:** ✅ Resolved 2026-06-19 — the claim is now serialised in `claimFirstRunIdentity` ([app/src/repos/settings.ts](app/src/repos/settings.ts)): one transaction takes a `pg_advisory_xact_lock`, re-checks for `auth_password_hash` **under the lock**, and only the single winner writes the hash (`INSERT … ON CONFLICT DO NOTHING`) and is granted a teacher session — a loser is told "already set up" and can never overwrite the winner's password. Integration test (`firstRunIdentity.int.test`) fires two concurrent claims and asserts exactly one wins and the loser's hash is never persisted.
 - **Severity / confidence:** High / Credible risk
 - **Affected:** `app/src/routes/welcome.ts:106-130`; `app/src/repos/settings.ts:17-22`
 - **Problem and trigger:** `/welcome/identity` checks that no teacher hash exists, then independently inserts/updates staff and settings and upserts the new hash. There is no transaction, lock, or create-if-absent condition. Two concurrent requests can both pass the initial check; the later write wins the stored password and school values, but both responses grant a teacher session.

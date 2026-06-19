@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 7 (Wave A3 — auth hardening, code-fixes)
+
+Close the two auth defects that don't change deployment config. Suite green: **522 unit / 321 integration; typecheck clean**.
+
+- **🔐 A TA login no longer unlocks teacher-password guessing (BUG-040, High).** `clearAttempts(login:${ip})`
+  now fires **only on a successful teacher login** — a named- or shared-TA success leaves the shared per-IP
+  brake untouched, so someone who knows a TA password can't reset the limiter and brute-force the teacher
+  password in bounded batches.
+- **🔑 First-run identity can't be raced (BUG-041, High).** The onboarding claim is serialised in
+  `claimFirstRunIdentity`: one transaction takes a `pg_advisory_xact_lock`, re-checks for the password hash
+  **under the lock**, and only the single winner writes it and gets a teacher session — a loser is told
+  "already set up" and can never overwrite the winner's password.
+
+The remaining A3 items — **BUG-032** (Compose binds DB/app to all interfaces) and **BUG-045** (Caddy
+`trustProxy` / client-IP rate-limiting) — change running deployment behaviour and are held for an explicit
+operator go-ahead. **24 / 50 findings fixed.**
+
 ### 2026-06-19 — Audit remediation, batch 6 (Wave A4 — assessment correctness)
 
 Make marks and the daily print trustworthy. Suite green: **522 unit / 318 integration; typecheck clean**.

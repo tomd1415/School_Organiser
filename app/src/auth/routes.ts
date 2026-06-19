@@ -65,7 +65,8 @@ export function registerAuthRoutes(app: FastifyInstance): void {
     // Named TA accounts (8.1) — each TA has their own password, set on the Settings page.
     const ta = await verifyTaLogin(parsed.data.password).catch(() => null);
     if (ta) {
-      clearAttempts(`login:${req.ip}`);
+      // BUG-040: a lower-privilege (TA) success must NOT clear the shared IP attempt counter — otherwise
+      // a TA who knows their own password could reset the brake and brute-force the teacher password.
       req.session.set('authed', true);
       req.session.set('role', 'ta');
       req.session.set('taName', ta.name);
@@ -77,7 +78,7 @@ export function registerAuthRoutes(app: FastifyInstance): void {
     // Legacy shared TA password — still honoured until the teacher clears it in Settings.
     const taHash = await getSetting('ta_password_hash').catch(() => null);
     if (taHash && taHash.trim() !== '' && verifyPassword(parsed.data.password, taHash)) {
-      clearAttempts(`login:${req.ip}`);
+      // BUG-040: as above — a shared-TA success must not reset the teacher-login brake.
       req.session.set('authed', true);
       req.session.set('role', 'ta');
       return reply.redirect('/ta');

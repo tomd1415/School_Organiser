@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { esc, layout } from '../lib/html';
 import { hashPassword } from '../lib/passwords';
 import { configuredHash } from '../auth/routes';
-import { getSetting, setSetting } from '../repos/settings';
+import { claimFirstRunIdentity, getSetting, setSetting } from '../repos/settings';
 import { pool } from '../db/pool';
 
 interface Counts {
@@ -118,12 +118,11 @@ export function registerWelcomeRoutes(app: FastifyInstance): void {
     if (b.data.password !== b.data.password2) {
       return reply.code(400).type('text/html').send(identityForm(reply.generateCsrf(), "The passwords don't match."));
     }
-    await pool.query(
-      `INSERT INTO staff (name, role, is_self) SELECT $1, 'self', true WHERE NOT EXISTS (SELECT 1 FROM staff WHERE is_self)`,
-      [b.data.name],
-    );
-    await setSetting('school_name', b.data.school);
-    await setSetting('auth_password_hash', hashPassword(b.data.password));
+    // BUG-041: serialise the claim. The check above is not enough — two simultaneous submissions can
+    // both pass it before either writes. claimFirstRunIdentity takes a lock, re-checks under it, and
+    // only the single winner gets the hash + a teacher session; a loser is told it's already set up.
+    const won = await claimFirstRunIdentity({ name: b.data.name, school: b.data.school, passwordHash: hashPassword(b.data.password) });
+    if (!won) return reply.code(403).send('already set up');
     req.session.set('authed', true);
     req.session.set('role', 'teacher'); // so the onboarding session is a real teacher session (idle-logout, role gating)
     req.session.set('lastSeen', Date.now());

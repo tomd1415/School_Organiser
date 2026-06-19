@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-19): in progress — 22 of 50 fixed; Waves A1 + A2 + A4 complete.** This is the
+> **Status (2026-06-19): in progress — 24 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -11,9 +11,11 @@
 > pupil-work authz **030**. **A2 (limits)** — **006/046** (route `fileSize` caps), **007** (folder/zip
 > guards), **042** (IMAP caps). **A4 (assessment correctness)** — **004** (drop a mark when its answer is
 > edited), **005** (all-or-nothing AI batches), **015** (mark by exact provenance), **047** (calendar-aware
-> daily print). Plus A8 **034/035/036/050** and A6 **024/031**. Suites green: 522 unit / 318 integration;
-> typecheck clean. **Next:** Wave **A3 (auth/network/secrets)** — BUG-040 / 041 are clean code+test;
-> **BUG-032 / 045 are deployment-config and await the operator's go-ahead** — or A5 (recovery/disposal).
+> daily print). Plus A8 **034/035/036/050**, A6 **024/031**, and A3 code-fixes **040** (a TA login no
+> longer resets the teacher-login IP brake) + **041** (first-run identity is claimed under an advisory
+> lock, so exactly one teacher session can ever be created). Suites green: 522 unit / 321 integration;
+> typecheck clean. **Next:** the remaining **A3 (auth/network/secrets)** items, **BUG-032 / 045**, are
+> deployment-config and await the operator's go-ahead; otherwise A5 (recovery/disposal) or A6 (txn invariants).
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new
