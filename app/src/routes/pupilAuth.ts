@@ -6,6 +6,7 @@ import { esc } from '../lib/html';
 import { getSetting } from '../repos/settings';
 import { allowAttempt } from '../auth/rateLimit';
 import { listLoginNames, pupilInGroup, resolveGroupByCode, verifyPin, getPupilName } from '../repos/pupilCredentials';
+import { getPupilSessionState } from '../repos/pupils';
 import { marksEnabled } from '../auth/marksGate';
 import { resumeDevice, pupilPrimaryGroup, pupilGroupInSlot, devicesEnabledForGroup } from '../repos/pupilDevices';
 import { resolveNow } from '../services/clock';
@@ -164,6 +165,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     req.session.set('role', 'pupil');
     req.session.set('pupilId', pupilId);
     req.session.set('pupilGroupId', groupId);
+    req.session.set('pupilEpoch', (await getPupilSessionState(pupilId))?.epoch ?? 0); // BUG-017 revocation
     req.session.set('lastSeen', Date.now());
     reply.header('HX-Redirect', '/me');
     return reply.type('text/html').send('');
@@ -250,6 +252,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     req.session.set('role', 'pupil');
     req.session.set('pupilId', b.data.pupil);
     req.session.set('pupilGroupId', b.data.group);
+    req.session.set('pupilEpoch', (await getPupilSessionState(b.data.pupil))?.epoch ?? 0); // BUG-017 revocation
     req.session.set('lastSeen', Date.now());
     reply.header('HX-Redirect', '/me');
     return reply.type('text/html').send('');

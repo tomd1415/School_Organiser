@@ -50,7 +50,9 @@ import { registerPupilWorkRoutes } from './routes/pupilWork';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { registerSearchRoutes } from './routes/search';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
+import { signLessonImages } from './lib/lessonImageSig';
 import { pupilCfg } from './auth/pupilAccessCache';
+import { getPupilSessionState } from './repos/pupils';
 import { teacherIdleMins } from './auth/teacherIdleCache';
 import { generateDueInstances } from './repos/recurringTasks';
 import { coverageAtRisk } from './repos/brief';
@@ -163,6 +165,14 @@ export async function buildApp(): Promise<FastifyInstance> {
         req.session.delete();
         return bounce(req, reply, '/pupil');
       }
+      // Per-pupil revocation (BUG-017): archived/erased (no row or inactive) or a bumped epoch (PIN
+      // reset / disable) kills this self-contained session immediately, not just at next login.
+      const pid = Number(req.session.get('pupilId') ?? 0);
+      const st = pid ? await getPupilSessionState(pid) : null;
+      if (!st || !st.active || st.epoch !== Number(req.session.get('pupilEpoch') ?? 0)) {
+        req.session.delete();
+        return bounce(req, reply, '/pupil');
+      }
       const last = Number(req.session.get('lastSeen') ?? 0);
       if (last && Date.now() - last > cfg.idleMins * 60_000) {
         req.session.delete();
@@ -171,6 +181,19 @@ export async function buildApp(): Promise<FastifyInstance> {
       if (!poll) req.session.set('lastSeen', Date.now());
     }
     if (!roleAllows(role, req.url)) return reply.redirect(ROLE_HOME[role]);
+  });
+
+  // BUG-003: sign every /lesson-image URL in the HTML we send a limited role, so their browser can only
+  // request images the server actually rendered for them — the route rejects an unsigned/forged id for
+  // pupils/TAs. Teachers are unrestricted, so their HTML is left untouched.
+  app.addHook('onSend', async (req, reply, payload) => {
+    const role = req.session?.get?.('role');
+    if (!isLimitedRole(role) || typeof payload !== 'string') return payload;
+    const ct = reply.getHeader('content-type');
+    if (typeof ct === 'string' && ct.includes('text/html') && payload.includes('/lesson-image/')) {
+      return signLessonImages(payload);
+    }
+    return payload;
   });
 
   registerHealthRoutes(app);

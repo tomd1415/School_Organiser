@@ -26,16 +26,17 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (9):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-038 (safety-gate variants);
-BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliability & secrets).
+**Fixed so far (11):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-038 (High —
+image-enumeration & safety-gate); BUG-017, BUG-024, BUG-031 (Medium — pupil session revocation & DB
+invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets).
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 1 | 17 |
-| Medium | 26 | 2 | 24 |
+| High | 18 | 2 | 16 |
+| Medium | 26 | 3 | 23 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **9** | **41** |
+| **Total** | **50** | **11** | **39** |
 
 ## Testing and environment limitations
 
@@ -84,6 +85,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-003 — Pupils and TAs can enumerate unrelated image resources
 
+- **Status:** ✅ Resolved 2026-06-19 — `/lesson-image` now requires a server signature for the limited (pupil/TA) roles: an `onSend` hook signs every `/lesson-image` URL in the HTML sent to those roles ([app/src/lib/lessonImageSig.ts](app/src/lib/lessonImageSig.ts), HMAC keyed by `SESSION_KEY`), and the route rejects an unsigned/forged id for them. Teachers are unrestricted. A limited role can now fetch only an image the server actually rendered into one of their pages — enumeration is closed. Unit + TA-route tests cover it.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/auth/lockdown.ts:8-20`; `app/src/routes/resources.ts:489-525`; `app/src/services/resource.ts:6-16`
 - **Problem and trigger:** The limited-role allowlists permit every numeric `/lesson-image/:id`. The route checks only that the requested resource exists and has `kind = 'image'`; it does not verify that the image is linked to a lesson, worksheet, class, or occurrence the requester may see. Normal uploaded PNG/JPEG/GIF/WebP resources are also classified as images.
@@ -277,6 +279,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-017 — Pupil PIN/account changes do not revoke live pupil sessions
 
+- **Status:** ✅ Resolved 2026-06-19 — pupil sessions now carry a `pupilEpoch`; the request hook re-reads `pupils.active` + `session_epoch` ([migration 0048](app/migrations/0048_pupil_session_epoch.sql)) on every pupil request and kills the session on a mismatch or inactive/erased pupil. The epoch is bumped on PIN (re)set, credential disable and archive (disposal sets `active=false`/removes the row), so a reset/disable/archive revokes the live cookie immediately, not just at next login. Integration test proves each action bumps the epoch. *(TA-account revocation, BUG-016, is the symmetric remaining piece.)*
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/server.ts:158-173`; `app/src/routes/pupils.ts:175-182, 295-321`; `app/src/repos/pupilCredentials.ts:107-119`; `app/src/repos/pupilWork.ts:12-20`
 - **Problem and trigger:** Resetting or disabling a PIN and archiving a pupil revoke remembered-device rows, but not the self-contained live session. The request hook validates only the global access switch and idle time; it does not recheck pupil active/credential state. `pupilCanAccessOc` also ignores `pupils.active` and credential state.

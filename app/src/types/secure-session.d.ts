@@ -11,6 +11,7 @@ declare module '@fastify/secure-session' {
     // Pupil sessions (8.2/8.3) + shared-machine idle logout
     pupilId: number;
     pupilGroupId: number;
+    pupilEpoch: number; // session-revocation epoch — must match pupils.session_epoch (BUG-017)
     lastSeen: number;
     // Test-pupil overlay on a teacher session (drive the pupil surface for any lesson/level)
     testPupilId: number;

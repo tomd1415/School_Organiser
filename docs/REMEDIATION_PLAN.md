@@ -1,15 +1,17 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-19): in progress — 9 of 50 fixed.** This is the fix-and-finish programme for the 50
+> **Status (2026-06-19): in progress — 11 of 50 fixed.** This is the fix-and-finish programme for the 50
 > findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026 audit) **plus** the still-outstanding
 > features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md), [PHASE_14_PLAN.md](PHASE_14_PLAN.md),
 > [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md). Each wave is a reviewable,
 > independently-shippable slice.
 >
 > **Landed (2026-06-19):** the A1 trust-boundary canonicalisation cluster — **BUG-001 / 037** (redaction)
-> and **BUG-038** (safety gate); the A8 reliability quick wins — **BUG-034 / 035 / 036 / 050**; and two A6
-> invariants — **BUG-024 / 031**. Suites green: 515 unit / 307 integration; typecheck clean. Per-finding
-> detail in the BUGREPORT progress section.
+> and **BUG-038** (safety gate); A1 authorization — **BUG-003** (image-enumeration capability) and
+> **BUG-017** (pupil session revocation); the A8 reliability quick wins — **BUG-034 / 035 / 036 / 050**;
+> and two A6 invariants — **BUG-024 / 031**. Suites green: 517 unit / 310 integration; typecheck clean.
+> Per-finding detail in the BUGREPORT progress section. **Next in A1 authorization:** BUG-016 (TA session
+> revocation — symmetric to 017), BUG-012 (exception leakage), BUG-030 (pupil-work authz).
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

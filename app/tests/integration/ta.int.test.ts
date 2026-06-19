@@ -63,6 +63,30 @@ describe('TA access (integration)', () => {
     }
   });
 
+  it('a TA can only fetch a /lesson-image with a valid server signature (BUG-003)', async () => {
+    const { createResource, addVersion } = await import('../../src/repos/resources');
+    const { checksum, relPathFor, storeBuffer } = await import('../../src/lib/resourceStore');
+    const { imageSigQuery } = await import('../../src/lib/lessonImageSig');
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+    const id = await createResource('ZZ internal diagram.png', 'image', 'image/png', 'uploaded');
+    const rel = relPathFor(id, 1, 'ZZ internal diagram.png');
+    await storeBuffer(rel, png);
+    await addVersion(id, rel, png.length, checksum(png), 'teacher', 'test image');
+    try {
+      // An unrelated image, enumerated by id WITHOUT a signature → denied for the limited role.
+      const unsigned = await app.inject({ method: 'GET', url: `/lesson-image/${id}`, headers: { cookie: taSession } });
+      expect(unsigned.statusCode).toBe(404);
+      // With the server signature (as it would be rendered into a page) → served.
+      const signed = await app.inject({ method: 'GET', url: `/lesson-image/${id}${imageSigQuery(id)}`, headers: { cookie: taSession } });
+      expect(signed.statusCode).toBe(200);
+      expect(String(signed.headers['content-type'])).toContain('image/png');
+    } finally {
+      await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [id]);
+      await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [id]);
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [id]);
+    }
+  });
+
   it('feedback lands, shows for the teacher, and joins the AI history', async () => {
     const slot = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose='teaching' ORDER BY id LIMIT 1`);
     const { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } = await import('../../src/repos/occurrence');

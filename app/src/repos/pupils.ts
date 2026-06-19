@@ -85,7 +85,23 @@ export async function listRoster(): Promise<RosterEntry[]> {
 }
 
 export async function setPupilActive(id: number, active: boolean): Promise<void> {
-  await pool.query(`UPDATE pupils SET active = $2 WHERE id = $1`, [id, active]);
+  // Archiving (active=false) must also revoke any live session for the pupil (BUG-017).
+  await pool.query(`UPDATE pupils SET active = $2, session_epoch = session_epoch + (CASE WHEN $2 THEN 0 ELSE 1 END) WHERE id = $1`, [id, active]);
+}
+
+/** Live-session validity inputs for the request hook: is the pupil still active, and at what epoch?
+ *  Returns null if the pupil no longer exists (erased) → the hook treats that as revoked. */
+export async function getPupilSessionState(id: number): Promise<{ active: boolean; epoch: number } | null> {
+  const { rows } = await pool.query<{ active: boolean; epoch: number }>(
+    `SELECT active, session_epoch AS epoch FROM pupils WHERE id = $1`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+/** Invalidate every live session for a pupil (a PIN reset / disable bumps it). */
+export async function bumpPupilEpoch(id: number): Promise<void> {
+  await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [id]);
 }
 
 // ── 10.2: erasure / anonymisation — "a deliberate, audited retention action" (DATA_MODEL, DPIA §7).

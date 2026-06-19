@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 2 (authorization: 2 findings)
+
+Second slice of [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md) (A1 authorization). Suite green:
+**517 unit / 310 integration; typecheck clean**.
+
+- **🖼 Scoped lesson images (BUG-003, High).** `/lesson-image` no longer serves arbitrary image ids to
+  pupils/TAs. An `onSend` hook signs every `/lesson-image` URL in the HTML sent to a limited role
+  ([app/src/lib/lessonImageSig.ts](app/src/lib/lessonImageSig.ts), HMAC keyed by `SESSION_KEY`), and the
+  route rejects an unsigned/forged id for those roles — so a pupil/TA can fetch only the images the
+  server actually rendered into one of their pages. Teachers are unrestricted.
+- **🔑 Pupil session revocation (BUG-017, Medium).** Pupil sessions carry a `pupilEpoch`; the request
+  hook re-checks `pupils.active` + `session_epoch` ([migration 0048](app/migrations/0048_pupil_session_epoch.sql))
+  and kills the session on a mismatch or inactive/erased pupil. A PIN reset, credential disable, archive
+  or disposal now revokes the live cookie **immediately**, not just at next login.
+
 ### 2026-06-19 — Audit remediation, batch 1 (9 findings)
 
 First execution slice of [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Suite green:

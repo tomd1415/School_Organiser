@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
+import { isLimitedRole } from '../auth/lockdown';
+import { verifyImageSig } from '../lib/lessonImageSig';
 import { esc, layout } from '../lib/html';
 import {
   addVersion,
@@ -510,6 +512,12 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   app.get('/lesson-image/:id', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
+    // BUG-003: a limited role (pupil/TA) may only fetch an image the server signed into one of their
+    // pages — never an arbitrary id. Teachers are unrestricted.
+    const role = req.session.get('role');
+    if (isLimitedRole(role) && !verifyImageSig(id.data.id, (req.query as { s?: string }).s)) {
+      return reply.code(404).send('Not found');
+    }
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
     if (!r || !v || r.kind !== 'image') return reply.code(404).send('Not found');
     const isSvg = /svg/i.test(r.mimeType ?? '') || /\.svg$/i.test(r.title);

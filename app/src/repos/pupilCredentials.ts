@@ -112,10 +112,14 @@ export async function setPupilPin(pupilId: number, pin: string): Promise<void> {
      ON CONFLICT (pupil_id) DO UPDATE SET pin_hash = EXCLUDED.pin_hash, pin = EXCLUDED.pin, enabled = true, failed_count = 0, updated_at = now()`,
     [pupilId, hashPassword(pin), pin],
   );
+  // A PIN (re)set revokes any live session for the pupil (BUG-017); harmless on the initial set.
+  await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
 }
 
 export async function setPupilCredentialEnabled(pupilId: number, enabled: boolean): Promise<void> {
   await pool.query(`UPDATE pupil_credentials SET enabled = $2, updated_at = now() WHERE pupil_id = $1`, [pupilId, enabled]);
+  // Disabling the credential revokes any live session for the pupil (BUG-017).
+  if (!enabled) await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
 }
 
 export async function unlockPupil(pupilId: number): Promise<void> {
