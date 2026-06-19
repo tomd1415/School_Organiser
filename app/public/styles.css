@@ -220,6 +220,10 @@ a.tt-lesson:hover { background: #eef3fc; }
 .tt-free .tt-group { color: #2f7d32; }
 .tt-empty { background: #fafbfc; }
 .tt-empty .tt-band { display: block; padding: 0.3rem 0.45rem; font-size: 0.72rem; color: var(--muted); }
+/* A non-teaching day (holiday / INSET / half-term / out of term): the whole column is greyed and
+   hatched, with the reason labelled in the header (.tt-daykind), and no lessons are shown. */
+.tt-table td.tt-off { background: repeating-linear-gradient(45deg, #f4f5f7, #f4f5f7 7px, #eceef1 7px, #eceef1 14px); border-color: var(--line); }
+.tt-daykind { display: inline-block; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); background: #eceef1; border-radius: 4px; padding: 0 0.3rem; vertical-align: middle; }
 .tt-row.tt-kind-break td, .tt-row.tt-kind-lunch td, .tt-row.tt-kind-before_school td,
 .tt-row.tt-kind-form_am td, .tt-row.tt-kind-after_school td { height: auto; }
 .tt-legend { margin-top: 1rem; font-size: 0.8rem; color: var(--muted); }

@@ -3,6 +3,7 @@
 // every timetabled lesson is current; a year filter joins via groups when needed.
 import { pool } from '../db/pool';
 import type { LessonRow, PeriodRow } from '../services/timetable';
+import type { TermDate } from '../services/clock';
 
 // Year-scoped (6.1): no year given ⇒ the current year. Editors pass a specific year so next
 // September can be built in advance without touching the live timetable.
@@ -51,6 +52,18 @@ export async function getTimetabledLessons(yearId?: number): Promise<LessonRow[]
     GROUP BY tl.id, p.weekday, p.slot_order, s.is_self, s.name, g.name
     ORDER BY p.weekday, p.slot_order`,
     [yearId ?? null],
+  );
+  return rows;
+}
+
+// Every term-date overlay across all years (term / half_term / holiday / inset). The timetable uses
+// these to grey out non-teaching days; spanning all years means a week viewed in any year classifies
+// correctly (including the Aug→Sep boundary week).
+export async function getTermDatesAll(): Promise<TermDate[]> {
+  const { rows } = await pool.query<TermDate>(
+    `SELECT to_char(start_date, 'YYYY-MM-DD') AS "startDate",
+            to_char(end_date,   'YYYY-MM-DD') AS "endDate", kind, name
+     FROM term_dates`,
   );
   return rows;
 }

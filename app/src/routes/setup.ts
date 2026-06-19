@@ -378,13 +378,15 @@ async function timetableTab(yearId: number): Promise<string> {
       <div class="tt-ed-courses">${courseTicks}</div>
     </div>`;
   };
-  const orders = [...new Set(periods.map((x) => x.slotOrder))].sort((a, b) => a - b);
+  // Rows are TIME BANDS (distinct start times, chronological) — matching the live timetable, so a
+  // period like "make coffee" at 07:30 sits at the top, not wherever its slot_order happened to land.
+  const starts = [...new Set(periods.map((x) => x.start))].sort();
   const head = `<tr><th></th>${[1, 2, 3, 4, 5].map((wd) => `<th>${weekdayName(wd)}</th>`).join('')}</tr>`;
-  const rows = orders
-    .map((ord) => {
+  const rows = starts
+    .map((start) => {
       const cells = [1, 2, 3, 4, 5]
         .map((wd) => {
-          const pd = periods.find((x) => x.weekday === wd && x.slotOrder === ord);
+          const pd = periods.find((x) => x.weekday === wd && x.start === start);
           if (!pd) return '<td class="tt-empty"></td>';
           const ls = (byPeriod.get(Number(pd.id)) ?? []).map(lessonBlock).join('');
           return `<td class="tt-ed-cell"><div class="tt-ed-period">${esc(pd.label)} <span class="muted">${esc(pd.start)}</span></div>
@@ -393,7 +395,7 @@ async function timetableTab(yearId: number): Promise<string> {
           </td>`;
         })
         .join('');
-      return `<tr>${cells}</tr>`.replace('<tr>', `<tr><th class="tt-time">${ord}</th>`);
+      return `<tr><th class="tt-time">${esc(start)}</th>${cells}</tr>`;
     })
     .join('');
   return `

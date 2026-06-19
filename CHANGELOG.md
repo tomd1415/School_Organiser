@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Timetable calendar-awareness + setup editor ordering
+
+Three reported timetable bugs. Suite green: **505 unit / 304 integration; typecheck clean**.
+
+- **The week timetable now respects the calendar.** Holidays, half-terms, INSET/training days, bank
+  holidays (all `term_dates` overlays) and any day outside term are greyed and labelled, with **no
+  lessons shown** on them — previously the full timetable showed straight through the holidays.
+  Driven by the same `classifyDay` the Now screen already uses ([app/src/services/clock.ts](app/src/services/clock.ts)).
+- **Looking ahead/back rolls to the right academic year.** The week's owning year is resolved from the
+  dates shown ([app/src/routes/timetable.ts](app/src/routes/timetable.ts) via [listYears](app/src/repos/setup.ts)),
+  so September shows next year's (draft) structure instead of repeating the current one; a week beyond
+  every set-up year says so rather than silently showing the current timetable. Prev/This/Next nav
+  unchanged. New [getTermDatesAll](app/src/repos/timetable.ts).
+- **Setup → Timetable editor orders rows by time, not slot order.** A period like "make coffee" at
+  07:30 added with a later `slot_order` now sits at the top, matching the live grid (both use
+  chronological time-bands). [app/src/routes/setup.ts](app/src/routes/setup.ts) `timetableTab`.
+
 ### 2026-06-19 — Bulk resource import (zip of a folder)
 
 Upload a whole folder of resources at once instead of one file at a time. Suite green:

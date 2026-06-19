@@ -3,10 +3,12 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { addDays, localParts, weekdayOf } from '../lib/time';
-import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
+import { getPeriodDefinitions, getTimetabledLessons, getTermDatesAll } from '../repos/timetable';
 import { listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
 import { describeException, type ExceptionEffect } from '../services/exceptions';
 import { buildWeekGrid, type GridCell, type GridLesson } from '../services/timetable';
+import { classifyDay, type DayKind } from '../services/clock';
+import { listYears } from '../repos/setup';
 
 const TZ = 'Europe/London';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -40,6 +42,22 @@ function purposeLabel(purpose: string): string {
       return 'Meeting';
     default:
       return purpose;
+  }
+}
+
+// Why a day shows no teaching — used to label and grey the non-school columns (holiday / INSET / …).
+function dayKindLabel(kind: DayKind): string {
+  switch (kind) {
+    case 'holiday':
+      return 'Holiday';
+    case 'half_term':
+      return 'Half-term';
+    case 'inset':
+      return 'INSET';
+    case 'out_of_term':
+      return 'Out of term';
+    default:
+      return '';
   }
 }
 
@@ -87,13 +105,26 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
     const next = addDays(monday, 7);
 
     let table: string;
+    let yearLabel = '';
     try {
-      const yearId = parsed.success ? parsed.data.year : undefined;
-      const [periods, lessons, exRows] = await Promise.all([
-        getPeriodDefinitions(yearId),
-        getTimetabledLessons(yearId),
+      const explicitYear = parsed.success ? parsed.data.year : undefined;
+      const years = await listYears();
+      // Which academic year owns this week? Looking ahead to next September shows next year's (draft)
+      // structure; looking back shows the archived one. An explicit ?year= (setup preview) overrides.
+      const weekYear = explicitYear
+        ? years.find((y) => y.id === explicitYear)
+        : years.find((y) => weekDates[0]! >= y.startDate && weekDates[0]! <= y.endDate)
+          ?? years.find((y) => weekDates[4]! >= y.startDate && weekDates[4]! <= y.endDate);
+      const structureYearId = explicitYear ?? weekYear?.id;
+      const [periods, lessons, exRows, terms] = await Promise.all([
+        getPeriodDefinitions(structureYearId),
+        getTimetabledLessons(structureYearId),
         listExceptionsBetween(weekDates[0]!, weekDates[4]!),
+        getTermDatesAll(),
       ]);
+      // Calendar: a holiday / half-term / INSET / bank holiday (all term_dates overlays) or any day
+      // outside term suppresses that day's lessons — the timetable must never show teaching then.
+      const dayInfo = weekDates.map((d) => classifyDay(d, weekdayOf(d), terms));
       const wholeDayByDate = new Map<string, ExceptionRow>();
       const byDateLesson = new Map<string, ExceptionRow>();
       for (const e of exRows) {
@@ -108,13 +139,20 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
         describeException(wholeDayByDate.get(d) ?? byDateLesson.get(`${d}:${lessonId}`) ?? null);
       const grid = buildWeekGrid(periods, lessons);
       const head = `<tr><th class="tt-corner"></th>${weekDates
-        .map((d, i) => `<th${d === today ? ' class="tt-today"' : ''}>${esc(DAY_NAMES[i] ?? '')}${dayEx.has(d) ? ' <span class="tt-ex" title="off-timetable day">⚠</span>' : ''}<span class="tt-date">${esc(fmtShort(d))}</span></th>`)
+        .map((d, i) => {
+          const off = !dayInfo[i]!.isSchoolDay ? dayKindLabel(dayInfo[i]!.dayKind) : '';
+          const mark = off
+            ? ` <span class="tt-daykind">${esc(off)}</span>`
+            : dayEx.has(d) ? ' <span class="tt-ex" title="off-timetable day">⚠</span>' : '';
+          return `<th${d === today ? ' class="tt-today"' : ''}>${esc(DAY_NAMES[i] ?? '')}${mark}<span class="tt-date">${esc(fmtShort(d))}</span></th>`;
+        })
         .join('')}</tr>`;
       const body = grid.rows
         .map((row) => {
           const cells = row.cells
             .map((cell, i) => {
               const d = weekDates[i] ?? today;
+              if (!dayInfo[i]!.isSchoolDay) return `<td class="tt-off${d === today ? ' tt-today' : ''}"></td>`; // holiday/INSET/etc.
               return renderCell(cell, d, d === today, exForLesson);
             })
             .join('');
@@ -123,6 +161,11 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
         })
         .join('');
       table = `<div class="table-scroll"><table class="tt-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+      yearLabel =
+        explicitYear && weekYear ? ` <span class="muted">— ${esc(weekYear.name)} structure</span>`
+        : weekYear && !weekYear.isCurrent ? ` <span class="muted">— ${esc(weekYear.name)}</span>`
+        : !weekYear ? ' <span class="muted">— no academic year set up for this week</span>'
+        : '';
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       table = `<p class="muted">The timetable is unavailable — the database is not reachable. Try <code>./start.sh</code>.</p>`;
@@ -131,7 +174,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
     const body = `
       <section class="tt">
         <div class="tt-head">
-          <h1>Timetable${parsed.success && parsed.data.year ? ' <span class="muted">— archive/draft year structure</span>' : ''}</h1>
+          <h1>Timetable${yearLabel}</h1>
           <nav class="tt-weeknav">
             <a href="/timetable?date=${esc(prev)}">◀ Prev</a>
             <a href="/timetable">This week</a>
@@ -139,7 +182,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
           </nav>
         </div>
         ${table}
-        <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · colour = course</p>
+        <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
   });

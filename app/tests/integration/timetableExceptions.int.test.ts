@@ -45,10 +45,18 @@ describe('timetable exception badges (integration — needs the dev DB up)', () 
     const lessonId = rows[0]!.id;
     const weekday = rows[0]!.weekday;
 
-    // a far-future date whose weekday matches the lesson's slot (1=Mon … 5=Fri)
-    let d = new Date(Date.UTC(2099, 2, 2));
-    while (((d.getUTCDay() + 6) % 7) + 1 !== weekday) d = new Date(d.getTime() + 86_400_000);
-    const date = d.toISOString().slice(0, 10);
+    // A real teaching day (in term, not a holiday/INSET/weekend) matching the lesson's weekday — the
+    // week timetable now greys non-teaching days, so an exception only shows on an actual school day.
+    const day = await pool.query<{ date: string }>(
+      `SELECT to_char(d, 'YYYY-MM-DD') AS date
+         FROM generate_series(DATE '2026-06-01', DATE '2027-07-21', INTERVAL '1 day') AS d
+        WHERE EXTRACT(ISODOW FROM d) = $1
+          AND EXISTS (SELECT 1 FROM term_dates t WHERE t.kind = 'term' AND d::date BETWEEN t.start_date AND t.end_date)
+          AND NOT EXISTS (SELECT 1 FROM term_dates t WHERE t.kind <> 'term' AND d::date BETWEEN t.start_date AND t.end_date)
+        ORDER BY d LIMIT 1`,
+      [weekday],
+    );
+    const date = day.rows[0]!.date;
 
     const ins = await pool.query<{ id: number }>(
       `INSERT INTO lesson_exceptions (date, timetabled_lesson_id, kind, note) VALUES ($1,$2,'free','Y9 trip') RETURNING id`,
