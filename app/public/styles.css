@@ -257,6 +257,7 @@ a.tt-lesson:hover { background: #eef3fc; }
 .note-status.saved { opacity: 1; animation: ld-fade 1.8s forwards; }
 /* 10.10: a stale-tab clobber warning — persistent + amber, does NOT fade like "saved ✓" */
 .note-status.conflict { color: #b45309; opacity: 1; animation: none; font-weight: 600; }
+.note-status.save-error { color: #b3261e; opacity: 1; animation: none; font-weight: 600; }
 @keyframes ld-fade { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
 .note-time { margin-left: auto; }
 .link.danger { color: var(--error); }

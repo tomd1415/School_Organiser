@@ -21,6 +21,22 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 
 “Confirmed” means the failure follows deterministically from the current code path. “Credible risk” means the code contains a concrete race or partial-failure path whose trigger depends on concurrency, I/O failure, or deployment conditions.
 
+## Remediation progress (live)
+
+Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
+regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
+
+**Fixed so far (9):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-038 (safety-gate variants);
+BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliability & secrets).
+
+| Severity | Total | Resolved | Remaining |
+|---|---:|---:|---:|
+| Critical | 2 | 2 | 0 |
+| High | 18 | 1 | 17 |
+| Medium | 26 | 2 | 24 |
+| Low | 4 | 4 | 0 |
+| **Total** | **50** | **9** | **41** |
+
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
@@ -34,6 +50,7 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 
 ### BUG-001 — Typographic apostrophes bypass pupil-name redaction
 
+- **Status:** ✅ Resolved 2026-06-19 — name matching now folds the apostrophe / hyphen-dash / accent / case families per character, in both `redactNames` and the `containsRosterName` egress assert. Regression tests cover straight/curly apostrophes and hyphen/en-dash in both stored-name directions.
 - **Severity / confidence:** Critical / Confirmed
 - **Affected:** `app/src/services/redact.ts:13-26, 41-49, 64-69`; `app/src/llm/client.ts:152-163`
 - **Problem and trigger:** `nameRegExp` escapes punctuation literally. A roster name stored as `O'Brien` does not match pupil text containing the routine typographic form `O’Brien` (U+2019), and the reverse is also true. Both `redactNames` and `containsRosterName` use the same literal pattern, so neither the replacement nor the final egress assertion catches the variant.
@@ -44,6 +61,7 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 
 ### BUG-037 — Partial pupil-name references bypass redaction
 
+- **Status:** ✅ Resolved 2026-06-19 — redaction now runs a second pass over distinctive given/sur-name parts (accent-folded), with an explicit, reviewable ambiguous-common-word policy and a length floor so ordinary prose isn't over-redacted; a two-pass (full-then-parts) order prevents a shared first name being mis-assigned. The egress assert fails closed on the same parts. **Residual policy note:** an ambiguous common-word name (e.g. a pupil named "Summer" or "Mark") is matched only by its FULL name, not the bare part — tune `AMBIGUOUS_PARTS` in `redact.ts`, or add structured preferred-name fields, if your roster needs more.
 - **Severity / confidence:** Critical / Confirmed
 - **Affected:** `app/src/services/redact.ts:22-26, 41-49, 64-69`; `app/src/repos/pupils.ts:76-84`; `app/src/llm/client.ts:152-163`
 - **Problem and trigger:** The redactor builds one exact regular expression from each complete `display_name`. If the roster contains `Anna Lee`, ordinary prose containing only `Anna` or only `Lee` is neither replaced nor detected by the final assertion. Common accentless or nickname variants have the same failure mode.

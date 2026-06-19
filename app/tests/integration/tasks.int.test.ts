@@ -43,6 +43,17 @@ describe('tasks (integration — needs the dev DB up)', () => {
     expect(await updateTaskField(id, 'drop table students', 'x')).toBe(false);
   });
 
+  it('refuses to clear a required title (NOT NULL) and keeps the existing value (BUG-035)', async () => {
+    const id = await createTask('Keep this title');
+    created.push(id);
+    for (const empty of ['', '   ', null] as const) expect(await updateTaskField(id, 'title', empty)).toBe(false);
+    const kept = await pool.query<{ title: string }>(`SELECT title FROM tasks WHERE id = $1`, [id]);
+    expect(kept.rows[0]!.title).toBe('Keep this title'); // never nulled
+    expect(await updateTaskField(id, 'title', 'A real new title')).toBe(true); // a real title still saves
+    const updated = await pool.query<{ title: string }>(`SELECT title FROM tasks WHERE id = $1`, [id]);
+    expect(updated.rows[0]!.title).toBe('A real new title');
+  });
+
   it('moves through triage → done across the buckets', async () => {
     const id = created[0]!;
     await setTaskStatus(id, 'triaged');

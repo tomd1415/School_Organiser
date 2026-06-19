@@ -54,6 +54,13 @@ export function renderSavedStatus(statusId: string): string {
   return `<span class="note-status saved" id="${esc(statusId)}" hx-swap-oob="true">saved ✓</span>`;
 }
 
+// Autosave validation failure (e.g. a required title cleared): shown in the same status slot, in red,
+// WITHOUT writing — so a NOT NULL column never receives a null and the user gets a useful message
+// instead of a generic save-failed toast (BUG-035).
+export function renderSaveError(statusId: string, message: string): string {
+  return `<span class="note-status save-error" id="${esc(statusId)}" hx-swap-oob="true">${esc(message)}</span>`;
+}
+
 /** 10.10: the OOB rev-token update after a successful guarded save (advances the client's token). */
 export function renderRevUpdate(noteId: number, rev: string): string {
   return `<input type="hidden" name="rev" id="note-${noteId}-rev" value="${esc(rev)}" hx-swap-oob="true">`;

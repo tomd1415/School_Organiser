@@ -291,8 +291,8 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
             hx-post="/settings/email?key=email_imap_port" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
           <label>User <input name="email_imap_user" value="${esc(emUser ?? '')}" placeholder="organiser.intake@gmail.com" autocomplete="off"
             hx-post="/settings/email?key=email_imap_user" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
-          <label>Password <input type="password" name="email_imap_password" value="${esc(emPass ?? '')}" placeholder="app password" autocomplete="new-password"
-            hx-post="/settings/email?key=email_imap_password" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
+          <label>Password <input type="password" name="email_imap_password" value="" placeholder="${emPass ? 'saved — type to replace' : 'app password'}" autocomplete="new-password"
+            hx-post="/settings/email?key=email_imap_password" hx-trigger="input changed delay:700ms, change" hx-swap="none">${emPass ? '<span class="muted"> configured ✓</span>' : ''}</label>
           <label>Folder <input name="email_imap_folder" value="${esc(emFolder ?? '')}" placeholder="INBOX"
             hx-post="/settings/email?key=email_imap_folder" hx-trigger="input changed delay:700ms, change" hx-swap="none"></label>
           <span class="note-status" id="email-status"></span>
@@ -420,7 +420,9 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     const body = (req.body ?? {}) as Record<string, unknown>;
     const raw = body[q.data.key];
     const value = typeof raw === 'string' ? raw.trim().slice(0, 300) : EMAIL_BOOLS.has(q.data.key) ? 'false' : '';
-    await setSetting(q.data.key, value);
+    // The password field renders empty (the stored secret is never echoed to the browser — BUG-050),
+    // so a blank submit means "keep the saved password"; only overwrite when a new value is typed.
+    if (!(q.data.key === 'email_imap_password' && value === '')) await setSetting(q.data.key, value);
     return reply.type('text/html').send('<span class="note-status saved" id="email-status" hx-swap-oob="true">saved ✓</span>');
   });
 

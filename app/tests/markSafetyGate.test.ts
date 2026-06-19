@@ -12,6 +12,21 @@ describe('markSafetyGate — content guard (withhold from AI)', () => {
   it('uses the default pattern list', () => {
     expect(GUARD_PATTERNS.length).toBeGreaterThan(5);
   });
+
+  // BUG-038: trivial whitespace / newline / hyphen-dash / accent variants must not bypass a phrase,
+  // and direct first-person intent ("I want to die") must be covered.
+  it('canonicalises away whitespace, newline and hyphen/dash variants before matching', () => {
+    expect(guardMatch('i think i want to hurt  myself')).toBe('hurt myself'); // double space
+    expect(guardMatch('hurt\nmyself')).toBe('hurt myself'); // newline
+    expect(guardMatch('it is self‑harm really')).toBe('self harm'); // U+2011 non-breaking hyphen
+    expect(guardMatch('self harm')).toBe('self harm'); // non-breaking space
+  });
+  it('covers direct first-person intent phrases', () => {
+    expect(guardMatch('I want to die')).toBe('want to die');
+    expect(guardMatch("I don't want to be here any more")).toBe("don't want to be here");
+    expect(guardMatch('honestly I hate my life')).toBe('hate my life');
+    expect(guardMatch('the program will end my loop')).toBeNull(); // benign — not a flagged phrase
+  });
 });
 
 describe('markSafetyGate — the gate', () => {

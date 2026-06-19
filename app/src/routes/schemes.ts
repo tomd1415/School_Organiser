@@ -71,7 +71,7 @@ import { getClockContext } from '../repos/clock';
 import { localParts } from '../lib/time';
 import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderSchemeControls, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
-import { renderSavedStatus } from '../lib/notesView';
+import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
 import { standingPrefItems } from '../services/standingPrefs';
 import { conceptItemsFor } from '../services/teachingConcepts';
@@ -788,6 +788,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const body = (req.body ?? {}) as Record<string, unknown>;
     for (const [f, raw] of Object.entries(body)) {
       if (f === '_csrf') continue;
+      if (f === 'title' && (typeof raw !== 'string' || raw.trim() === '')) {
+        return reply.type('text/html').send(renderSaveError(`unit-${id.data.id}-status`, 'Title can’t be empty.'));
+      }
       await updateUnitField(id.data.id, f, typeof raw === 'string' ? raw : null);
     }
     return reply.type('text/html').send(renderSavedStatus(`unit-${id.data.id}-status`));
@@ -824,6 +827,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const body = (req.body ?? {}) as Record<string, unknown>;
     for (const [f, raw] of Object.entries(body)) {
       if (f === '_csrf') continue;
+      if (f === 'title' && (typeof raw !== 'string' || raw.trim() === '')) {
+        return reply.type('text/html').send(renderSaveError(`plan-${id.data.id}-status`, 'Title can’t be empty.'));
+      }
       await updatePlanField(id.data.id, f, typeof raw === 'string' ? raw : null);
     }
     return reply.type('text/html').send(renderSavedStatus(`plan-${id.data.id}-status`));

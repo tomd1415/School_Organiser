@@ -63,6 +63,7 @@ const ENUMS: Record<string, readonly string[]> = { urgency: URGENCIES, cognitive
 export async function updateRecurringField(id: number, field: string, value: string | null): Promise<boolean> {
   const column = COLUMN[field];
   if (!column) return false;
+  if (field === 'title' && (value === null || value.trim() === '')) return false; // NOT NULL — keep existing (BUG-035)
   const allowed = ENUMS[field];
   if (allowed && value !== null && !allowed.includes(String(value))) return false;
   if (field === 'pattern' && (value === null || !PATTERN_RE.test(value))) return false;

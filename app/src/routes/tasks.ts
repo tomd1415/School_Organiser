@@ -6,7 +6,7 @@ import { calibrationHeadline, calibrationInsight, gatherCalibration } from '../s
 import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
 import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
-import { renderSavedStatus } from '../lib/notesView';
+import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
 import type { TaskView } from '../services/task';
@@ -107,6 +107,11 @@ export function registerTaskRoutes(app: FastifyInstance): void {
     const body = (req.body ?? {}) as Record<string, unknown>;
     for (const [field, raw] of Object.entries(body)) {
       if (field === '_csrf') continue;
+      // A required (NOT NULL) title cleared to empty: reject with a clear message, write nothing — the
+      // existing title is preserved instead of a generic DB error (BUG-035).
+      if (field === 'title' && (typeof raw !== 'string' || raw.trim() === '')) {
+        return reply.type('text/html').send(renderSaveError(`task-${id.data.id}-status`, 'Title can’t be empty.'));
+      }
       let value: string | number | null = typeof raw === 'string' ? raw : null;
       if (value === '') value = null;
       if ((field === 'estimate_min' || field === 'group_id') && value !== null) {

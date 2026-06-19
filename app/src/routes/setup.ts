@@ -474,7 +474,7 @@ export function registerSetupRoutes(app: FastifyInstance): void {
   app.post('/setup/year/:id/make-current', guard, async (req, reply) => {
     const p = idParam.safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
-    await makeYearCurrent(p.data.id);
+    if (!(await makeYearCurrent(p.data.id))) return reply.code(400).send(''); // unknown year — leave current as-is
     return reply.send('');
   });
 

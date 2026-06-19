@@ -411,6 +411,7 @@ const PLAN_COLS: Record<string, string> = { title: 'title', objectives: 'objecti
 export async function updateUnitField(id: number, field: string, value: string | null): Promise<boolean> {
   const col = UNIT_COLS[field];
   if (!col) return false;
+  if (field === 'title' && (value === null || value.trim() === '')) return false; // NOT NULL — keep existing (BUG-035)
   await pool.query(`UPDATE units SET ${col} = $2 WHERE id = $1`, [id, value === '' ? null : value]);
   return true;
 }
@@ -418,6 +419,7 @@ export async function updateUnitField(id: number, field: string, value: string |
 export async function updatePlanField(id: number, field: string, value: string | null): Promise<boolean> {
   const col = PLAN_COLS[field];
   if (!col) return false;
+  if (field === 'title' && (value === null || value.trim() === '')) return false; // NOT NULL — keep existing (BUG-035)
   let v: string | number | null = value === '' ? null : value;
   if (field === 'duration_min' && v !== null) {
     const n = Number(v);

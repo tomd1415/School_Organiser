@@ -77,8 +77,10 @@
       document.body.classList.remove('hx-busy');
     }
   }
+  // Decrement on ONE terminal event only. htmx fires `htmx:afterRequest` for every finished request —
+  // success, error, timeout AND abort — so listening to `htmx:sendAbort` as well double-counted an
+  // aborted request and could clear the busy bar while another request was still in flight (BUG-034).
   document.body.addEventListener('htmx:afterRequest', requestDone);
-  document.body.addEventListener('htmx:sendAbort', requestDone);
 
   // 10.8 — never lose work silently. Autosaves use hx-swap="none", so a failed save (connection
   // drop, server error, timeout) would otherwise show nothing. Surface a persistent banner; the

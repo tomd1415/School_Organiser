@@ -44,14 +44,22 @@ export async function updateYearField(id: number, field: string, value: string):
   return true;
 }
 
-/** Go live: exactly one current year (partial unique index enforces it — clear first, then set). */
-export async function makeYearCurrent(id: number): Promise<void> {
+/** Go live: exactly one current year. Validates + locks the target FIRST, so a stale/forged/deleted id
+ *  aborts without clearing the current flag — we never commit a state with no current year (BUG-024).
+ *  Returns false if the id does not exist. (At-most-one is enforced by the partial unique index.) */
+export async function makeYearCurrent(id: number): Promise<boolean> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    const found = await client.query('SELECT 1 FROM academic_years WHERE id = $1 FOR UPDATE', [id]);
+    if (found.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return false;
+    }
     await client.query(`UPDATE academic_years SET is_current = false WHERE is_current`);
     await client.query(`UPDATE academic_years SET is_current = true WHERE id = $1`, [id]);
     await client.query('COMMIT');
+    return true;
   } catch (e) {
     await client.query('ROLLBACK');
     throw e;

@@ -62,6 +62,18 @@ describe('timetable calendar + year (integration — needs the dev DB up)', () =
     expect(res.body).not.toContain('8PFA');
   });
 
+  it('preserves an explicit ?year= preview across Prev/Next week navigation (BUG-036)', async () => {
+    const yr = await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE NOT is_current ORDER BY start_date LIMIT 1`);
+    const yid = yr.rows[0]!.id;
+    const res = await app.inject({ method: 'GET', url: `/timetable?year=${yid}&date=2026-09-07`, headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    // Both Prev and Next links carry the previewed year (This week deliberately drops it = exit preview).
+    const navLinks = [...res.body.matchAll(/href="\/timetable\?date=[^"]*"/g)].map((m) => m[0]);
+    expect(navLinks.length).toBeGreaterThanOrEqual(2);
+    expect(navLinks.every((h) => h.includes(`year=${yid}`))).toBe(true);
+    expect(res.body).toContain('exit preview');
+  });
+
   it('the Setup Timetable editor orders rows by time, not by slot_order', async () => {
     // A draft year with an early period given a LATER slot_order than a midday one — the old editor
     // sorted by slot_order and put 07:30 at the bottom; it must now sort by start time.

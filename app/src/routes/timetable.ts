@@ -103,11 +103,14 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
     const weekDates = [0, 1, 2, 3, 4].map((i) => addDays(monday, i));
     const prev = addDays(monday, -7);
     const next = addDays(monday, 7);
+    // An explicit ?year= (setup "preview this year's structure") must survive week navigation, or one
+    // Prev/Next click silently drops back to the date-derived/current year (BUG-036).
+    const explicitYear = parsed.success ? parsed.data.year : undefined;
+    const yearQ = explicitYear ? `&year=${explicitYear}` : '';
 
     let table: string;
     let yearLabel = '';
     try {
-      const explicitYear = parsed.success ? parsed.data.year : undefined;
       const years = await listYears();
       // Which academic year owns this week? Looking ahead to next September shows next year's (draft)
       // structure; looking back shows the archived one. An explicit ?year= (setup preview) overrides.
@@ -176,10 +179,10 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
         <div class="tt-head">
           <h1>Timetable${yearLabel}</h1>
           <nav class="tt-weeknav">
-            <a href="/timetable?date=${esc(prev)}">◀ Prev</a>
+            <a href="/timetable?date=${esc(prev)}${yearQ}">◀ Prev</a>
             <a href="/timetable">This week</a>
-            <a href="/timetable?date=${esc(next)}">Next ▶</a>
-          </nav>
+            <a href="/timetable?date=${esc(next)}${yearQ}">Next ▶</a>
+          </nav>${explicitYear ? ' <a class="tt-exit-preview muted" href="/timetable">exit preview →</a>' : ''}
         </div>
         ${table}
         <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>

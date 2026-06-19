@@ -12,7 +12,7 @@ import {
   updateRecurringField,
 } from '../repos/recurringTasks';
 import { renderNewRecurringButton, renderRecurringItem, renderRecurringList } from '../lib/recurringView';
-import { renderSavedStatus } from '../lib/notesView';
+import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -50,6 +50,9 @@ export function registerRecurringRoutes(app: FastifyInstance): void {
     const body = (req.body ?? {}) as Record<string, unknown>;
     for (const [field, raw] of Object.entries(body)) {
       if (field === '_csrf') continue;
+      if (field === 'title' && (typeof raw !== 'string' || raw.trim() === '')) {
+        return reply.type('text/html').send(renderSaveError(`recur-${id.data.id}-status`, 'Title can’t be empty.'));
+      }
       await updateRecurringField(id.data.id, field, typeof raw === 'string' ? raw : null);
     }
     return reply.type('text/html').send(renderSavedStatus(`recur-${id.data.id}-status`));

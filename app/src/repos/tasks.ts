@@ -115,6 +115,8 @@ const ENUMS: Record<string, readonly string[]> = { urgency: URGENCIES, cognitive
 export async function updateTaskField(id: number, field: string, value: string | number | null): Promise<boolean> {
   const column = COLUMN[field];
   if (!column) return false;
+  // A NOT NULL title must never be nulled/emptied — refuse and keep the existing value (BUG-035).
+  if (field === 'title' && (value === null || String(value).trim() === '')) return false;
   const allowed = ENUMS[field];
   if (allowed && value !== null && !allowed.includes(String(value))) return false;
   await pool.query(`UPDATE tasks SET ${column} = $2, updated_at = now() WHERE id = $1`, [id, value]);

@@ -6,19 +6,45 @@
 //    a hallucinated evidence quote (not actually in the answer), or marks clipped to the total.
 // Both are pure functions, proven by tests.
 
-// Substring patterns (case-insensitive) — deliberately broad; better a false "needs your eyes"
-// than a missed disclosure. Teacher-editable later; constant for now.
+// Substring patterns — deliberately broad; better a false "needs your eyes" than a missed disclosure.
+// Matched after canonicalisation (see `canon`), so a hyphen/dash variant, double space, line break or
+// accent can't bypass them (BUG-038). Hyphens canonicalise to spaces, so write phrases with spaces.
+// Teacher-editable later; constant for now.
 export const GUARD_PATTERNS: string[] = [
-  'kill', 'hurt myself', 'hurt me', 'self harm', 'self-harm', 'suicide', 'abuse', 'hit me',
-  'touched me', 'scared at home', 'not safe', 'starving', "won't eat", 'run away', 'hate myself',
+  // self-harm / suicide — direct and first-person intent
+  'kill', 'kill myself', 'want to die', 'wanna die', 'going to die', 'end my life', 'end it all',
+  'take my life', 'hurt myself', 'hurt me', 'harm myself', 'self harm', 'self injury', 'cut myself',
+  'cutting myself', 'suicide', 'suicidal', 'hate myself', 'hate my life', 'better off dead',
+  'no reason to live', 'no point living', "don't want to be here", 'want to disappear', 'run away',
+  // abuse / neglect / not safe
+  'abuse', 'hit me', 'hits me', 'touched me', 'scared at home', 'not safe', 'starving', "won't eat",
+  // prompt-injection (a worksheet answer is an untrusted channel)
   'ignore previous', 'ignore the above', 'system prompt', 'disregard your instructions',
 ];
 
-/** Does this answer trip a guard pattern? (→ withhold from AI, route to "needs your eyes".) */
+// Canonicalise before matching so trivial variants can't bypass a phrase: strip accents + zero-width
+// chars, fold apostrophe/hyphen/dash families, and collapse ALL whitespace (NBSP, tabs, newlines,
+// double spaces) to a single space. "self‑harm" (non-breaking hyphen), "hurt  myself", "hurt\nmyself"
+// and "self harm" all reduce to the same canonical text the patterns are matched against.
+function canon(s: string): string {
+  return (s ?? '')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '') // combining accents
+    .replace(/[‘’ʼ′]/g, "'") // apostrophe variants
+    .replace(/[​‌‍﻿]/g, '') // zero-width
+    .toLowerCase()
+    .replace(/[‐-―−-]+/g, ' ') // hyphen / dash family → space
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Does this answer trip a guard pattern? (→ withhold from AI, route to "needs your eyes".)
+ *  Returns the original phrase (for the teacher-facing reason), or null. */
 export function guardMatch(answer: string, patterns: string[] = GUARD_PATTERNS): string | null {
-  const a = (answer ?? '').toLowerCase();
+  const a = canon(answer);
   for (const p of patterns) {
-    if (p && a.includes(p.toLowerCase())) return p;
+    const cp = canon(p);
+    if (cp && a.includes(cp)) return p;
   }
   return null;
 }
