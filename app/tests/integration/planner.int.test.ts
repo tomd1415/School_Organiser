@@ -162,6 +162,9 @@ describe('planner (13.5 — integration, needs the dev DB up)', () => {
       expect(lockedFlag).toBe(true);
       const ontoPinned = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=insert&date=${empty.date}&tll=${empty.timetabledLessonId}&plan=${plan}` });
       expect(ontoPinned.statusCode).toBe(400); // can't drop onto a pinned slot
+      // BUG-014: a whole-unit drop is now lock-aware too — it refuses a pinned target rather than clobbering it
+      const unitOntoPinned = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=unit&unit=${unitId}&date=${empty.date}&tll=${empty.timetabledLessonId}` });
+      expect(unitOntoPinned.statusCode).toBe(400);
       const unlock = await app.inject({ method: 'POST', url: '/planner/place', headers, payload: `gc=${gc}&op=unlock&date=${empty.date}&tll=${empty.timetabledLessonId}` });
       expect(unlock.statusCode).toBe(200);
     } finally {

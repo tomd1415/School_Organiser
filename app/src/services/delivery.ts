@@ -132,3 +132,22 @@ export function pullForward(positions: Placement[], targetIndex: number): Placem
   next[write] = null; // the last pulled-from position is now free
   return changed(positions, next);
 }
+
+/**
+ * BUG-014: lay a whole unit's lessons into the stream from `targetIndex`, flowing AROUND locked
+ * positions (a pinned lesson keeps its plan; the next unit lesson takes the next FREE position). One
+ * lesson per writable position; stops when lessons or positions run out. This is the lock-aware
+ * replacement for the old blind overwrite — and, like the single-drop ops, it returns CHANGED positions
+ * to persist through the one atomic apply path, so a unit drop is never half-written or clobbers a pin.
+ */
+export function layUnit(positions: Placement[], targetIndex: number, planIds: number[]): Placement[] {
+  if (targetIndex < 0 || targetIndex >= positions.length) return [];
+  const next = positions.map((p) => p.lessonPlanId);
+  let k = 0;
+  for (let i = targetIndex; i < positions.length && k < planIds.length; i++) {
+    if (positions[i]!.locked) continue; // step over a pinned lesson
+    next[i] = planIds[k]!;
+    k++;
+  }
+  return changed(positions, next);
+}

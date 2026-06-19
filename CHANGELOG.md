@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 10 (Wave A6 — atomic, lock-aware planner placement)
+
+Make planner drops respect pins and never half-apply. Suite green: **528 unit / 324 integration; typecheck clean**.
+
+- **📌 Whole-unit drops flow around pinned lessons (BUG-014, High).** Dragging a unit onto the planner used
+  to overwrite every slot in its path — including a lesson the teacher had explicitly **pinned** (an
+  assessment, say). It now uses a new lock-aware `layUnit` primitive that lays the unit's lessons into the
+  successive **non-locked** positions, stepping over any pin (which keeps its plan), and refuses a pinned
+  target outright — the same rule single drops already followed.
+- **⛓ Planner cascades are all-or-nothing (BUG-021, Medium).** The cascade's binding changes are now applied
+  in **one transaction** serialised per class by an advisory lock, so a connection drop or error mid-shift
+  rolls the whole thing back instead of leaving the schedule half-rewritten; two concurrent edits to one
+  class queue rather than interleave. The one-step undo snapshot is armed **only after** the write commits,
+  so a failed drop can't leave a bogus undo. Every place op (insert/move/swap/pull/unit/lock) shares this path.
+  *(Residual: the swap helper and undo's lock-restore loop aren't wrapped yet — lower-traffic than the
+  binding rewrite, which is the corruption risk the audit flagged.)*
+
 ### 2026-06-20 — Audit remediation, batch 9 (Wave A6 — atomic resource versioning)
 
 Make "append a new version of a resource" safe under concurrency — no corrupted files, no lost writes,

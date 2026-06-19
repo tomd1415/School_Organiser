@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 27 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
+> **Status (2026-06-20): in progress — 29 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -16,10 +16,12 @@
 > teacher session can ever be created). **A6 (transactional invariants)** — **024/031** plus **019**
 > (DB-enforced one-active + unique-version per course; every create/author/import/clone/move path respects
 > it), **026** (DB-enforced one recurring occurrence per definition/date, generator on `ON CONFLICT`) — so
-> the four query-only invariants are now all DB-enforced — and **008** (resource-version appends are
-> atomic + row-locked, storage paths carry a random token so concurrent writers can't overwrite, staged
-> files cleaned on rollback). Suites green: 522 unit / 324 integration; typecheck clean. **Next:** remaining
-> **A6** multi-step-write items (014/020/021/022/023/025/027/028), then A5 (recovery/disposal) or A7
+> the four query-only invariants are now all DB-enforced — **008** (resource-version appends are atomic +
+> row-locked, storage paths carry a random token so concurrent writers can't overwrite, staged files
+> cleaned on rollback), and **014 + 021** (planner: whole-unit drops flow around pinned slots via the new
+> lock-aware `layUnit`, and the cascade's binding rewrite is one all-or-nothing transaction per class with
+> undo armed only after commit). Suites green: 528 unit / 324 integration; typecheck clean. **Next:**
+> remaining **A6** multi-step-write items (020/022/023/025/027/028), then A5 (recovery/disposal) or A7
 > (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cascadeInsert, pullForward, upcomingClassSlots, type ClassSlot, type Placement } from '../src/services/delivery';
+import { cascadeInsert, layUnit, pullForward, upcomingClassSlots, type ClassSlot, type Placement } from '../src/services/delivery';
 import type { TermDate } from '../src/services/clock';
 
 // Build a stream of positions from a compact spec: a plan id, or null for an empty slot, or
@@ -121,5 +121,37 @@ describe('pullForward (13.5 — close the gap)', () => {
   it('a locked lesson anchors everything after it', () => {
     const p = positions([1, 2, [3, 'lock'], 4]);
     expect(applied(p, pullForward(p, 0))).toEqual([2, null, 3, 4]); // pull stops at the pin; 3,4 stay
+  });
+});
+
+describe('layUnit (13.5 / BUG-014 — lock-aware whole-unit lay-down)', () => {
+  it('lays a unit across empty/occupied positions from the target onward', () => {
+    const p = positions([null, null, null, null]);
+    expect(applied(p, layUnit(p, 0, [71, 72, 73]))).toEqual([71, 72, 73, null]);
+  });
+
+  it('overwrites existing (non-pinned) bindings as it lays down', () => {
+    const p = positions([1, 2, 3, 4]);
+    expect(applied(p, layUnit(p, 1, [71, 72]))).toEqual([1, 71, 72, 4]);
+  });
+
+  it('FLOWS AROUND a pinned slot — the pin keeps its plan, the next lesson takes the next free slot', () => {
+    const p = positions([null, [9, 'lock'], null, null]);
+    expect(applied(p, layUnit(p, 0, [71, 72, 73]))).toEqual([71, 9, 72, 73]); // 9 stays pinned
+  });
+
+  it('starts laying at the target index, leaving earlier positions untouched', () => {
+    const p = positions([1, 2, null, null]);
+    expect(applied(p, layUnit(p, 2, [71, 72]))).toEqual([1, 2, 71, 72]);
+  });
+
+  it('stops when it runs out of positions (a long unit lays only what fits)', () => {
+    const p = positions([null, null]);
+    expect(applied(p, layUnit(p, 0, [71, 72, 73, 74]))).toEqual([71, 72]);
+  });
+
+  it('is a no-op for an out-of-range target', () => {
+    const p = positions([1, 2]);
+    expect(layUnit(p, 5, [71])).toEqual([]);
   });
 });

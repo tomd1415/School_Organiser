@@ -15,13 +15,12 @@ import {
   classSchedule,
   classSlots,
   getCurrentYearEnd,
-  layLessonsAcrossClass,
   listAllSlots,
   setPlannerLock,
   type ClassScheduleEntry,
   type GroupCourseSlot,
 } from '../repos/delivery';
-import { cascadeInsert, pullForward, upcomingClassSlots, weekdayName, type Placement } from '../services/delivery';
+import { cascadeInsert, layUnit, pullForward, upcomingClassSlots, weekdayName, type Placement } from '../services/delivery';
 import { getActiveScheme, listPlansForUnit, listUnits, unitIdByPlan } from '../repos/schemes';
 
 const WEEKS = 16; // how many school weeks of timeline to show
@@ -282,7 +281,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
     const yearEnd = await getCurrentYearEnd();
     const cols = await classSlots(gc);
     if (!cols.length) return reply.code(404).send('No slots for this class.');
-    const { positions, stream } = await loadWindow(gc, today, cols, ctx.terms, yearEnd);
+    const { positions } = await loadWindow(gc, today, cols, ctx.terms, yearEnd);
 
     // Undo: restore the bindings + locks captured before the last mutating drop (only the differences).
     if (op === 'undo') {
@@ -308,30 +307,23 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
     const tIdx = indexOf.get(key(date, tll));
     if (tIdx == null) return reply.code(400).send('That slot is outside the plannable window.');
 
-    // Snapshot the window before mutating, so this drop can be undone in one step.
-    lastPlacement.set(gc, new Map(positions.map((p) => [key(p.date, p.timetabledLessonId), { plan: p.lessonPlanId, locked: p.locked ?? false }])));
+    // Capture the window's pre-state so this drop can be undone in one step — but only ARM it AFTER the
+    // write commits (BUG-021), so a failed/rolled-back mutation never leaves a bogus one-step undo.
+    const snapshot = new Map(positions.map((p) => [key(p.date, p.timetabledLessonId), { plan: p.lessonPlanId, locked: p.locked ?? false }]));
+    const armUndo = (): void => void lastPlacement.set(gc, snapshot);
 
     // Pin/unpin the target to its date — cascades will then flow around it.
     if (op === 'lock' || op === 'unlock') {
       const ok = await setPlannerLock(gc, tll, date, op === 'lock');
       if (!ok) return reply.code(400).send('Nothing planned there to pin.');
+      armUndo();
       reply.header('HX-Redirect', `/planner?gc=${gc}`);
       return reply.send('');
     }
 
-    // Drop a WHOLE unit: lay its lessons sequentially across the class's slots from the target onward
-    // (reuses the tested 13.1 lay-down; overwrites those positions). A one-gesture way to place a unit.
-    if (op === 'unit') {
-      if (unit == null) return reply.code(400).send('No unit to place.');
-      const lessons = await listPlansForUnit(unit);
-      if (!lessons.length) return reply.code(400).send('That unit has no lessons.');
-      await layLessonsAcrossClass(gc, lessons, stream.slice(tIdx));
-      reply.header('HX-Redirect', `/planner?gc=${gc}`);
-      return reply.send('');
-    }
-
-    // A pinned target can't be written over; a pinned source can't be moved.
-    if (positions[tIdx]!.locked && (op === 'insert' || op === 'replace' || op === 'clear')) {
+    // A pinned target can't be written over — covers a single drop AND a whole-unit lay-down (BUG-014:
+    // unit placement is now lock-aware too); a pinned source can't be moved.
+    if (positions[tIdx]!.locked && (op === 'insert' || op === 'replace' || op === 'clear' || op === 'unit')) {
       return reply.code(400).send('That slot is pinned — unpin it first (🔒).');
     }
 
@@ -349,6 +341,14 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
       work[tIdx]!.lessonPlanId = plan;
     } else if (op === 'clear') {
       work[tIdx]!.lessonPlanId = null;
+    } else if (op === 'unit') {
+      // Drop a WHOLE unit: lay its lessons across the class's slots from the target onward, flowing
+      // AROUND any pinned slots (BUG-014) and persisting through the same atomic apply path as a single
+      // drop (BUG-021) — instead of the old blind overwrite that clobbered pins and wrote row-by-row.
+      if (unit == null) return reply.code(400).send('No unit to place.');
+      const lessons = await listPlansForUnit(unit);
+      if (!lessons.length) return reply.code(400).send('That unit has no lessons.');
+      fold(layUnit(work, tIdx, lessons.map((l) => l.id)));
     } else if (op === 'pull') {
       fold(pullForward(work, tIdx));
     } else if (op === 'swap') {
@@ -371,6 +371,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
       .map((p, i) => ({ ...p, lessonPlanId: work[i]!.lessonPlanId }))
       .filter((p, i) => p.lessonPlanId !== positions[i]!.lessonPlanId);
     await applyPlacements(gc, changes);
+    armUndo(); // arm one-step undo only now the write has committed (BUG-021)
     reply.header('HX-Redirect', `/planner?gc=${gc}`);
     return reply.send('');
   });

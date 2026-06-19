@@ -26,30 +26,31 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (27):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
-BUG-007, BUG-008, BUG-012, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
+**Fixed so far (29):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+BUG-007, BUG-008, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
 image/folder/IMAP buffering, exception leakage, safety-gate, **marks-vs-edited-answer &
-incomplete-AI-batch, login-limit reset, first-run-identity race & atomic resource versioning**);
-BUG-015, BUG-016, BUG-017, BUG-019, BUG-024, BUG-026, BUG-030, BUG-031, BUG-046, BUG-047 (Medium —
-session revocation, pupil-work authz, DB invariants, course-doc cap, **mark provenance, calendar-aware
-print & DB-enforced scheme/recurring invariants**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves
-A1 (authorization), A2 (limits) and A4 (assessment correctness) are complete; A3 (auth) has its two
-non-deployment fixes done — BUG-032/045 await an operator go-ahead; A6 (transactional invariants) is
-underway — the four query-only invariants (active-scheme, recurring-idempotency, migrator-serialisation,
-one-current-year) are now all DB-enforced, plus atomic resource-version appends.**
+incomplete-AI-batch, login-limit reset, first-run-identity race, atomic resource versioning &
+lock-aware unit placement**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-021, BUG-024, BUG-026, BUG-030,
+BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc
+cap, **mark provenance, calendar-aware print, DB-enforced scheme/recurring invariants & atomic planner
+cascades**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4
+(assessment correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045
+await an operator go-ahead; A6 (transactional invariants) is underway — the four query-only invariants
+(active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are now all
+DB-enforced, plus atomic resource-version appends and atomic, lock-aware planner placement.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 11 | 7 |
-| Medium | 26 | 10 | 16 |
+| High | 18 | 12 | 6 |
+| Medium | 26 | 11 | 15 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **27** | **23** |
+| **Total** | **50** | **29** | **21** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
-- The unit-test suite passes: **75 test files, 522 tests** (508 at audit time; remediation has added regression coverage).
+- The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
 - The integration-test suite passes against the local PostgreSQL service: **70 test files, 324 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
@@ -210,6 +211,7 @@ one-current-year) are now all DB-enforced, plus atomic resource-version appends.
 
 ### BUG-014 — Whole-unit planner drops overwrite pinned lessons
 
+- **Status:** ✅ Resolved 2026-06-20 — the `unit` op no longer calls the lock-blind `layLessonsAcrossClass`; it now uses a new pure `layUnit` primitive ([app/src/services/delivery.ts](app/src/services/delivery.ts)) that lays the unit's lessons into successive **non-locked** positions, flowing AROUND any pinned slot (the pin keeps its plan; the next lesson takes the next free position), and persists through the same atomic `applyPlacements` path as a single drop. A pinned **target** is rejected like an `insert`. Six pure tests cover lock-before/at/within-span, overwrite-non-pinned, run-out-of-room and out-of-range; the planner integration test asserts a whole-unit drop onto a pinned slot is refused (400).
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/routes/planner.ts:322-335`; `app/src/repos/delivery.ts:164-183`; `app/migrations/0043_planner_lock.sql`
 - **Problem and trigger:** Single-lesson operations reject a locked target, but the `unit` operation calls `layLessonsAcrossClass` over the raw stream. That repository method overwrites every target plan without reading `planner_locked`.
@@ -340,6 +342,7 @@ one-current-year) are now all DB-enforced, plus atomic resource-version appends.
 
 ### BUG-021 — Planner cascades and swaps are not atomic
 
+- **Status:** ✅ Resolved 2026-06-20 — `applyPlacements` ([app/src/repos/delivery.ts](app/src/repos/delivery.ts)) now applies the cascade's binding changes **all-or-nothing**: occurrence creation (idempotent/additive) stays in a first phase, then every `lesson_plan_id` UPDATE runs in **one transaction** serialised per class by a `pg_advisory_xact_lock` — a connection drop or error mid-cascade rolls the whole shift back, and two concurrent planner writes for the same class queue rather than interleave. The in-memory one-step undo snapshot is now armed **only after that write commits** ([app/src/routes/planner.ts](app/src/routes/planner.ts)), so a failed drop can't leave a bogus undo. Every place op (insert/move/swap/pull/unit/lock) routes through this path. **Residual:** the swap helper `moveBinding` and undo's lock-restoration loop are not yet wrapped (lower-traffic; the binding rewrite — the corruption risk called out — is covered); fault-injection of a mid-cascade DB failure is verified by inspection (needs an injectable failpoint).
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/routes/planner.ts:287-300, 338-375`; `app/src/repos/delivery.ts:166-181, 219-249`
 - **Problem and trigger:** Multi-position operations loop through separate repository calls. `applyPlacements`, unit layout, undo lock restoration, and `moveBinding` can commit some updates before a later query fails.
