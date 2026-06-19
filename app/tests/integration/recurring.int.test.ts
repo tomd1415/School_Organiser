@@ -35,6 +35,26 @@ describe('recurring tasks (integration — needs the dev DB up)', () => {
     expect(second.rows[0]!.n).toBe(first.rows[0]!.n); // no duplicates
   });
 
+  it('the DB itself rejects a second occurrence for one definition + due date (BUG-026)', async () => {
+    const id = await createRecurring();
+    defs.push(id);
+    const key = `${id}:2026-10-01`;
+    await pool.query(
+      `INSERT INTO tasks (title, source, recurring_task_id, recurring_slot_key, due_at, status)
+       VALUES ('dup probe', 'recurring', $1, $2, now(), 'inbox')`,
+      [id, key],
+    );
+    // The partial unique index (migration 0050) makes a duplicate impossible even if two concurrent
+    // sweeps both slipped past the generator's old WHERE-NOT-EXISTS check.
+    await expect(
+      pool.query(
+        `INSERT INTO tasks (title, source, recurring_task_id, recurring_slot_key, due_at, status)
+         VALUES ('dup probe', 'recurring', $1, $2, now(), 'inbox')`,
+        [id, key],
+      ),
+    ).rejects.toThrow(/duplicate key|unique/i);
+  });
+
   it('does not generate for a paused definition', async () => {
     const id = await createRecurring();
     defs.push(id);

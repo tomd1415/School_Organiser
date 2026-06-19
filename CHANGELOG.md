@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 8 (Wave A6 — DB-enforced invariants)
+
+Make two "maintained by convention" invariants impossible to violate, by enforcing them in the database
+rather than trusting every code path. Suite green: **522 unit / 323 integration; typecheck clean**.
+
+- **📐 One active, uniquely-versioned scheme per course (BUG-019, Medium).** A partial unique index
+  `(course_id) WHERE active` and a unique `(course_id, version)` ([migration 0051](app/migrations/0051_scheme_invariants.sql))
+  now make a second live scheme — or a duplicate version — a hard error. Every creation path
+  (`createScheme`, `materialiseScheme`, `importScheme`) routes through one helper that, under a per-course
+  advisory lock, takes `version = MAX+1` and goes live **only if the course has no live scheme yet** —
+  so authoring/importing a new scheme lands as a *draft* instead of silently replacing the one that's
+  teaching. Cloning uses the same `MAX+1` (the old `head.version+1` double-cloned to a duplicate), and
+  moving a scheme between courses re-versions into the destination and demotes to a draft if it's already
+  live. The migration defensively repairs any pre-existing violator so the auto-run can't fail.
+- **🔁 One recurring-task occurrence per definition per date (BUG-026, Medium).** Each materialised
+  occurrence carries an explicit `recurring_slot_key` with a partial unique index
+  ([migration 0050](app/migrations/0050_recurring_slot_key.sql)); the generator switched from a racy
+  `WHERE NOT EXISTS` to `INSERT … ON CONFLICT DO NOTHING` with the insert + cursor bump in one
+  transaction. Two overlapping sweeps (boot + cron) can no longer both slip a duplicate task through.
+
+With **024** (one-current-year) and **031** (migrator serialisation) already done, all four of the audit's
+"query-only invariants" are now enforced by the database. **26 / 50 findings fixed.**
+
 ### 2026-06-19 — Audit remediation, batch 7 (Wave A3 — auth hardening, code-fixes)
 
 Close the two auth defects that don't change deployment config. Suite green: **522 unit / 321 integration; typecheck clean**.

@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-19): in progress — 24 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done.** This is the
+> **Status (2026-06-20): in progress — 26 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -11,11 +11,14 @@
 > pupil-work authz **030**. **A2 (limits)** — **006/046** (route `fileSize` caps), **007** (folder/zip
 > guards), **042** (IMAP caps). **A4 (assessment correctness)** — **004** (drop a mark when its answer is
 > edited), **005** (all-or-nothing AI batches), **015** (mark by exact provenance), **047** (calendar-aware
-> daily print). Plus A8 **034/035/036/050**, A6 **024/031**, and A3 code-fixes **040** (a TA login no
-> longer resets the teacher-login IP brake) + **041** (first-run identity is claimed under an advisory
-> lock, so exactly one teacher session can ever be created). Suites green: 522 unit / 321 integration;
-> typecheck clean. **Next:** the remaining **A3 (auth/network/secrets)** items, **BUG-032 / 045**, are
-> deployment-config and await the operator's go-ahead; otherwise A5 (recovery/disposal) or A6 (txn invariants).
+> daily print). Plus A8 **034/035/036/050** and A3 code-fixes **040** (a TA login no longer resets the
+> teacher-login IP brake) + **041** (first-run identity is claimed under an advisory lock, so exactly one
+> teacher session can ever be created). **A6 (transactional invariants)** — **024/031** plus **019**
+> (DB-enforced one-active + unique-version per course; every create/author/import/clone/move path respects
+> it) and **026** (DB-enforced one recurring occurrence per definition/date, generator on `ON CONFLICT`);
+> the four query-only invariants are now all DB-enforced. Suites green: 522 unit / 323 integration;
+> typecheck clean. **Next:** remaining **A6** multi-step-write items (008/014/020/021/022/023/025/027/028),
+> then A5 (recovery/disposal) or A7 (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

@@ -1,6 +1,23 @@
 // SQL for schemes of work → units → lesson plans.
+import type { PoolClient } from 'pg';
 import { pool } from '../db/pool';
 import type { PlanRow, SchemeHeader, UnitRow } from '../services/scheme';
+
+// BUG-019: every scheme-creation path must respect the two DB-enforced invariants (migration 0051) —
+// one active scheme per course, and unique (course_id, version). This picks the next version + whether
+// the new scheme should go live, holding a per-course advisory lock so concurrent create/clone calls
+// can't read the same MAX and collide. A course's first scheme (or its first since all were archived)
+// goes live; any later one lands as a draft for the teacher to activate — so authoring never silently
+// replaces the scheme that's currently teaching.
+async function nextSchemeSlot(client: PoolClient, courseId: number): Promise<{ version: number; active: boolean }> {
+  await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`scheme-clone:${courseId}`]);
+  const r = await client.query<{ next: number; hasActive: boolean }>(
+    `SELECT COALESCE(MAX(version), 0) + 1 AS next, COALESCE(bool_or(active), false) AS "hasActive"
+     FROM schemes_of_work WHERE course_id = $1`,
+    [courseId],
+  );
+  return { version: r.rows[0]!.next, active: !r.rows[0]!.hasActive };
+}
 
 export interface CourseOpt {
   id: number;
@@ -83,8 +100,8 @@ export async function moveSchemeToCourse(id: number, courseId: number): Promise<
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const s = await client.query<{ title: string; oldCourse: string }>(
-      `SELECT s.title, c.name AS "oldCourse" FROM schemes_of_work s JOIN courses c ON c.id = s.course_id WHERE s.id = $1`,
+    const s = await client.query<{ title: string; oldCourse: string; active: boolean }>(
+      `SELECT s.title, s.active, c.name AS "oldCourse" FROM schemes_of_work s JOIN courses c ON c.id = s.course_id WHERE s.id = $1`,
       [id],
     );
     const target = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
@@ -94,7 +111,12 @@ export async function moveSchemeToCourse(id: number, courseId: number): Promise<
     }
     const wasDefault = s.rows[0].title === `${s.rows[0].oldCourse} — Scheme of Work`;
     const newTitle = wasDefault ? `${target.rows[0].name} — Scheme of Work` : s.rows[0].title;
-    await client.query(`UPDATE schemes_of_work SET course_id = $2, title = $3 WHERE id = $1`, [id, courseId, newTitle]);
+    // BUG-019: the destination course must keep its invariants. Give the moved scheme a fresh version in
+    // the destination's version space (its old number may already exist there), and keep it live only if
+    // it was live AND the destination has no live scheme — otherwise it lands as a draft to activate.
+    const slot = await nextSchemeSlot(client, courseId);
+    const active = s.rows[0].active && slot.active;
+    await client.query(`UPDATE schemes_of_work SET course_id = $2, title = $3, version = $4, active = $5 WHERE id = $1`, [id, courseId, newTitle, slot.version, active]);
     await client.query(`UPDATE lesson_plans SET course_id = $2 WHERE unit_id IN (SELECT id FROM units WHERE scheme_id = $1)`, [id, courseId]);
     await client.query('COMMIT');
     return true;
@@ -134,13 +156,27 @@ export async function getActiveScheme(courseId: number): Promise<SchemeHeader | 
 }
 
 export async function createScheme(courseId: number): Promise<number | null> {
-  const course = await pool.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
-  if (!course.rows[0]) return null;
-  const { rows } = await pool.query<{ id: number }>(
-    `INSERT INTO schemes_of_work (course_id, title) VALUES ($1, $2) RETURNING id`,
-    [courseId, `${course.rows[0].name} — Scheme of Work`],
-  );
-  return rows[0]?.id ?? null;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const course = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
+    if (!course.rows[0]) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const slot = await nextSchemeSlot(client, courseId); // BUG-019: version + live-vs-draft under the lock
+    const { rows } = await client.query<{ id: number }>(
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [courseId, `${course.rows[0].name} — Scheme of Work`, slot.version, slot.active],
+    );
+    await client.query('COMMIT');
+    return rows[0]?.id ?? null;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export interface AuthoredLesson {
@@ -164,9 +200,10 @@ export async function materialiseScheme(courseId: number, title: string, units: 
       await client.query('ROLLBACK');
       return null;
     }
+    const slot = await nextSchemeSlot(client, courseId); // BUG-019: version + live-vs-draft under the lock
     const s = await client.query<{ id: number }>(
-      `INSERT INTO schemes_of_work (course_id, title) VALUES ($1, $2) RETURNING id`,
-      [courseId, title || `${course.rows[0].name} — Scheme of Work`],
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [courseId, title || `${course.rows[0].name} — Scheme of Work`, slot.version, slot.active],
     );
     const schemeId = s.rows[0]!.id;
     // idea 10 slice 2b — resolve spec-point codes → ids once so AI-authored lessons auto-map coverage.
@@ -267,9 +304,10 @@ export async function importScheme(courseId: number, data: SchemeExport): Promis
     await client.query('BEGIN');
     const course = await client.query<{ name: string }>(`SELECT name FROM courses WHERE id = $1`, [courseId]);
     if (!course.rows[0]) { await client.query('ROLLBACK'); return null; }
+    const slot = await nextSchemeSlot(client, courseId); // BUG-019: version + live-vs-draft under the lock
     const s = await client.query<{ id: number }>(
-      `INSERT INTO schemes_of_work (course_id, title) VALUES ($1, $2) RETURNING id`,
-      [courseId, (data.schemeTitle || `${course.rows[0].name} — Scheme of Work`).slice(0, 200)],
+      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [courseId, (data.schemeTitle || `${course.rows[0].name} — Scheme of Work`).slice(0, 200), slot.version, slot.active],
     );
     const schemeId = s.rows[0]!.id;
     let uOrder = 0;
@@ -611,15 +649,19 @@ export async function activateSchemeVersion(id: number): Promise<boolean> {
 export async function cloneSchemeNewVersion(schemeId: number): Promise<number | null> {
   const head = await getScheme(schemeId);
   if (!head) return null;
-  const nextVersion = head.version + 1;
   // One transaction: a crash mid-clone must not leave a half-copied draft (missing units/lessons or
   // dropped coverage mappings) for the teacher to discover at the September rollover.
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    // BUG-019: derive the next version from the real MAX under the per-course lock, not head.version+1 —
+    // cloning the same scheme twice would otherwise mint two identical version numbers and collide on
+    // the (course_id, version) unique index. A clone is always a draft (active=false) regardless of the
+    // slot's live-vs-draft hint — it's an explicit "new version to redraft while the old keeps teaching".
+    const slot = await nextSchemeSlot(client, head.courseId);
     const created = await client.query<{ id: number }>(
       `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, false) RETURNING id`,
-      [head.courseId, head.title, nextVersion],
+      [head.courseId, head.title, slot.version],
     );
     const newSchemeId = created.rows[0]!.id;
     const units = await client.query<{ id: number; title: string; display_order: number }>(

@@ -4,6 +4,7 @@ import {
   addPlan,
   addUnit,
   cloneSchemeNewVersion,
+  createScheme,
   deleteScheme,
   getCourseTeachingContext,
   getScheme,
@@ -119,6 +120,42 @@ describe('schemes (integration — needs the dev DB up)', () => {
       await pool.query(`DELETE FROM lesson_plans WHERE unit_id IN (SELECT id FROM units WHERE scheme_id = $1)`, [schemeId]);
       await pool.query(`DELETE FROM units WHERE scheme_id = $1`, [schemeId]);
       await pool.query(`DELETE FROM schemes_of_work WHERE id = $1`, [schemeId]);
+    }
+  });
+
+  it('DB-enforces one active scheme + unique version per course (BUG-019)', async () => {
+    // a throwaway course, guaranteed to start with zero schemes, so we don't disturb real data
+    await pool.query(`DELETE FROM schemes_of_work WHERE course_id IN (SELECT id FROM courses WHERE name = 'TEST inv course')`);
+    await pool.query(`DELETE FROM courses WHERE name = 'TEST inv course'`);
+    const c = await pool.query<{ id: number }>(`INSERT INTO courses (name) VALUES ('TEST inv course') RETURNING id`);
+    const cid = c.rows[0]!.id;
+    try {
+      const a = await createScheme(cid); // first scheme → live, v1
+      const head = await getScheme(a!);
+      expect(head?.active).toBe(true);
+      expect(head?.version).toBe(1);
+
+      const b = await createScheme(cid); // a second create must NOT clobber the live one → draft, v2
+      const draft = await getScheme(b!);
+      expect(draft?.active).toBe(false);
+      expect(draft?.version).toBe(2);
+
+      // two clones of the same head mint DISTINCT versions (the old head.version+1 collided)
+      await cloneSchemeNewVersion(a!);
+      await cloneSchemeNewVersion(a!);
+      const versions = await listSchemeVersions(cid);
+      expect(new Set(versions.map((v) => v.version)).size).toBe(versions.length); // all distinct
+
+      // the database itself refuses a second active scheme…
+      await expect(pool.query(`UPDATE schemes_of_work SET active = true WHERE id = $1`, [b])).rejects.toThrow(/duplicate key|unique/i);
+      // …and a duplicate (course_id, version)
+      await expect(
+        pool.query(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'dup', 1, false)`, [cid]),
+      ).rejects.toThrow(/duplicate key|unique/i);
+    } finally {
+      await pool.query(`DELETE FROM units WHERE scheme_id IN (SELECT id FROM schemes_of_work WHERE course_id = $1)`, [cid]);
+      await pool.query(`DELETE FROM schemes_of_work WHERE course_id = $1`, [cid]);
+      await pool.query(`DELETE FROM courses WHERE id = $1`, [cid]);
     }
   });
 

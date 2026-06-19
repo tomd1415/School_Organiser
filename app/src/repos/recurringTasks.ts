@@ -99,28 +99,38 @@ export async function generateDueInstances(today: string): Promise<number> {
   const recurCtx = { groupSlots, terms: ctx.terms };
 
   let created = 0;
-  for (const def of defs) {
-    let after = def.lastGenerated ?? addDays(today, -1);
-    for (let guard = 0; guard < 12; guard++) {
-      const due = nextDueDate(def.pattern, after, recurCtx);
-      if (!due) break;
-      if (daysFromToday(due.date, today) > def.leadDays) break; // not yet within lead time
-      // Idempotent insert: skip if an instance for this definition + due date already exists. Without
-      // this, a crash AFTER the insert but BEFORE the last_generated bump would re-create the task on
-      // the next sweep (the cursor hadn't advanced). Count only when a row was actually inserted.
-      const ins = await pool.query(
-        `INSERT INTO tasks (title, detail, urgency, estimate_min, cognitive_load, group_id, course_id, source, recurring_task_id, due_at, status)
-         SELECT $1, $2, $3, $4, $5, $6, $7, 'recurring', $8,
-                ($9::date + make_interval(mins => $10)) AT TIME ZONE 'Europe/London', 'inbox'
-         WHERE NOT EXISTS (
-           SELECT 1 FROM tasks WHERE recurring_task_id = $8 AND source = 'recurring'
-             AND (due_at AT TIME ZONE 'Europe/London')::date = $9::date)`,
-        [def.title, def.detail, def.urgency, def.estimateMin, def.cognitiveLoad, def.groupId, def.courseId, def.id, due.date, due.startMin],
-      );
-      await pool.query(`UPDATE recurring_tasks SET last_generated = $2::date WHERE id = $1`, [def.id, due.date]);
-      after = due.date;
-      if (ins.rowCount) created++;
+  const client = await pool.connect();
+  try {
+    for (const def of defs) {
+      let after = def.lastGenerated ?? addDays(today, -1);
+      for (let guard = 0; guard < 12; guard++) {
+        const due = nextDueDate(def.pattern, after, recurCtx);
+        if (!due) break;
+        if (daysFromToday(due.date, today) > def.leadDays) break; // not yet within lead time
+        // BUG-026: one task per definition per due date is now a DB guarantee (partial unique index on
+        // recurring_slot_key, migration 0050), so a concurrent sweep can't slip a duplicate past a
+        // WHERE NOT EXISTS check. Insert + cursor bump go in ONE transaction; ON CONFLICT DO NOTHING
+        // makes a re-run (or a crash before the cursor advanced) a harmless no-op. Count real inserts.
+        const slotKey = `${def.id}:${due.date}`;
+        await client.query('BEGIN');
+        const ins = await client.query(
+          `INSERT INTO tasks (title, detail, urgency, estimate_min, cognitive_load, group_id, course_id, source, recurring_task_id, recurring_slot_key, due_at, status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, 'recurring', $8, $9,
+                   ($10::date + make_interval(mins => $11)) AT TIME ZONE 'Europe/London', 'inbox')
+           ON CONFLICT (recurring_slot_key) WHERE recurring_slot_key IS NOT NULL DO NOTHING`,
+          [def.title, def.detail, def.urgency, def.estimateMin, def.cognitiveLoad, def.groupId, def.courseId, def.id, slotKey, due.date, due.startMin],
+        );
+        await client.query(`UPDATE recurring_tasks SET last_generated = $2::date WHERE id = $1`, [def.id, due.date]);
+        await client.query('COMMIT');
+        after = due.date;
+        if (ins.rowCount) created++;
+      }
     }
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
   }
   return created;
 }

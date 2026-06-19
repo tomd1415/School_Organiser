@@ -26,28 +26,31 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (24):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+**Fixed so far (26):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
 BUG-007, BUG-012, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration, image/folder/IMAP
 buffering, exception leakage, safety-gate, **marks-vs-edited-answer & incomplete-AI-batch, login-limit
-reset & first-run-identity race**); BUG-015, BUG-016, BUG-017, BUG-024, BUG-030, BUG-031, BUG-046,
-BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc cap, **mark
-provenance & calendar-aware print**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1
-(authorization), A2 (limits) and A4 (assessment correctness) are complete; A3 (auth) has its two
-non-deployment fixes done — BUG-032/045 await an operator go-ahead.**
+reset & first-run-identity race**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-024, BUG-026, BUG-030,
+BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc
+cap, **mark provenance, calendar-aware print & DB-enforced scheme/recurring invariants**); BUG-034,
+BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment
+correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045 await an
+operator go-ahead; A6 (transactional invariants) is underway — the four query-only invariants
+(active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are now all
+DB-enforced.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 10 | 8 |
-| Medium | 26 | 8 | 18 |
+| Medium | 26 | 10 | 16 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **24** | **26** |
+| **Total** | **50** | **26** | **24** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 522 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **69 test files, 321 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **69 test files, 323 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -315,6 +318,7 @@ non-deployment fixes done — BUG-032/045 await an operator go-ahead.**
 
 ### BUG-019 — Database constraints do not enforce one active, uniquely versioned scheme per course
 
+- **Status:** ✅ Resolved 2026-06-20 — [migration 0051](app/migrations/0051_scheme_invariants.sql) adds a partial unique index `(course_id) WHERE active` and a unique `(course_id, version)` (defensively demoting/re-sequencing any pre-existing violators first, so the auto-run can't fail). **Every** creation path — `createScheme`, `materialiseScheme`, `importScheme` — now goes through `nextSchemeSlot`, which under a per-course advisory lock picks `version = MAX+1` and makes the new scheme live **only if the course has no live scheme** (else a draft, so authoring never silently clobbers the scheme that's currently teaching); `cloneSchemeNewVersion` uses the same lock+`MAX+1` (was `head.version+1`, which double-cloned to a duplicate); `moveSchemeToCourse` re-versions into the destination's space and demotes to a draft if the destination is already live. Integration test asserts first-create-is-live/v1, second-is-draft/v2, two clones get distinct versions, and the DB itself rejects a 2nd active scheme and a duplicate `(course_id, version)`.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/migrations/0006_phase3.sql:7-14`; `app/src/repos/schemes.ts:128-143, 156-200, 609-621`
 - **Problem and trigger:** There is no unique `(course_id, version)` constraint and no partial unique index for one active scheme per course. `createScheme` and materialisation use the default `active = true`; repeated creates can produce multiple active version-1 schemes. Concurrent/repeated cloning from the same source can create duplicate version numbers.
@@ -386,6 +390,7 @@ non-deployment fixes done — BUG-032/045 await an operator go-ahead.**
 
 ### BUG-026 — Concurrent recurring-task generators can insert duplicate instances
 
+- **Status:** ✅ Resolved 2026-06-20 — each materialised occurrence now carries an explicit `recurring_slot_key` (`<defId>:<dueDate>`) with a partial unique index ([migration 0050](app/migrations/0050_recurring_slot_key.sql), existing rows backfilled), so one task per definition per due date is a **DB guarantee** rather than a racy `WHERE NOT EXISTS`. `generateDueInstances` switched to `INSERT … ON CONFLICT DO NOTHING` with the insert + cursor bump in **one transaction**, so an overlapping boot/cron sweep (or a crash before the cursor advanced) is a harmless no-op. Integration test asserts the index rejects a duplicate occurrence outright, and the existing generator-idempotency test still holds. *(The index can't use the `due_at AT TIME ZONE …` expression directly — that's STABLE, not IMMUTABLE — hence the stored key.)*
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/repos/recurringTasks.ts:92-124`; `app/src/server.ts:215-227`; `app/migrations/0005_recurrence.sql:21-22`
 - **Problem and trigger:** Idempotency uses `INSERT ... WHERE NOT EXISTS`, but there is no unique constraint and no transaction/advisory lock. Two app/cron runs can both observe absence and insert the same definition/date before either updates `last_generated`.
