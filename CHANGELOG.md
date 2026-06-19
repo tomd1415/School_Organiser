@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Spaced retrieval (Wave 7.3, deterministic core) — Wave 7 complete
+
+The existing `retrieval_starter` is misses-driven; this adds the spacing source — the taught-when
+history — **AI-free**. Suite green: **493 unit / 290 integration; typecheck clean**.
+
+- **🔁 Spaced recall panel on the lesson** — what each class was taught ~2 and ~6 weeks ago (the nearest
+  lesson's objective), as a recap to open with. Lazy-loaded like the review flag
+  ([app/src/routes/lesson.ts](app/src/routes/lesson.ts) `/lesson/oc/:oc/spaced-recall`); empty and free
+  until a class has a term's worth of taught lessons.
+- **Pure selection** ([app/src/services/retrieval.ts](app/src/services/retrieval.ts) `pickSpacedRecall`,
+  unit-tested) over the dated taught-history ([app/src/repos/retrieval.ts](app/src/repos/retrieval.ts)).
+- **Deliberately deterministic**: no AI, no cost, always correct (shows the real prior objective).
+  AI-generated recall *questions* + *scheduled pre-generation* are the documented fast-follow on the
+  7.2 cost-safety seam ([docs/FUTURE_WAVES.md](docs/FUTURE_WAVES.md)).
+
 ### 2026-06-19 — Scheduled reviewer sweep (Wave 7.2)
 
 Wave 7's first scheduled-AI job, on the seam 7.1 established. **Off by default**; the existing

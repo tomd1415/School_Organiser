@@ -15,6 +15,8 @@ import { getLessonPlan, getPlanRow, listCoursePlans, updatePlanField, getActiveS
 import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
+import { ocClassAndDate, pastLessonsForClass } from '../repos/retrieval';
+import { pickSpacedRecall } from '../services/retrieval';
 import { getExperienceMode } from '../lib/nav';
 import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
 import { runClassIntake, applyClassIntake } from '../services/classIntake';
@@ -392,6 +394,7 @@ function renderSection(
       }
       ${s.lessonPlanId != null ? `<div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
+      <div class="ld-recall-slot" hx-get="/lesson/oc/${oc}/spaced-recall" hx-trigger="load" hx-swap="innerHTML"></div>
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -1218,6 +1221,23 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply
       .type('text/html')
       .send(`<p class="ld-review-flag">🔎 AI review (${esc(label)}) ready for this lesson — <a href="/schemes">open it on Schemes</a> to apply or dismiss.</p>`);
+  });
+
+  // Wave 7.3 — spaced retrieval: a recap of what this class did ~2 and ~6 weeks ago. Lazy-loaded like
+  // the review flag; empty (and free) until the class has a term's worth of taught lessons.
+  app.get('/lesson/oc/:oc/spaced-recall', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const ref = await ocClassAndDate(p.data.oc);
+    if (!ref) return reply.type('text/html').send('');
+    const items = pickSpacedRecall(await pastLessonsForClass(ref.groupCourseId, ref.date), ref.date);
+    if (items.length === 0) return reply.type('text/html').send('');
+    const lis = items
+      .map((i) => `<li><span class="recall-age">${esc(i.ageLabel)}</span> ${esc(i.objective)}${i.title ? ` <span class="muted">— ${esc(i.title)}</span>` : ''}</li>`)
+      .join('');
+    return reply
+      .type('text/html')
+      .send(`<details class="ld-recall"><summary>🔁 Spaced recall — quick recap to open with</summary><ul class="recall-list">${lis}</ul></details>`);
   });
 
   // Apply an accepted master improvement (teacher decision; the master changes for every group).

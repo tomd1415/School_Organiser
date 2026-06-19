@@ -1,6 +1,6 @@
 # Future waves — beyond Phase 11 (Wave 6+)
 
-> **Status (2026-06-19): proposals — Wave 7.1 (morning brief) + 7.2 (reviewer sweep) shipped, the rest proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
+> **Status (2026-06-19): Wave 7 complete (7.1 morning brief, 7.2 reviewer sweep, 7.3 spaced-recall core); Waves 6, 8, 9 proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
 > the numbered Phase plans (12 worksheets, 13 planner, 14 hardening) run on a parallel track. This is
 > the next idea backlog — strategic feature directions grounded in what the app now holds and two fresh
 > unlocks. Near-term operational follow-ups live in [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -35,7 +35,7 @@ no-op when AI is off.
 |---|---|---|---|---|
 | 7.1 ✅ | **Morning brief** *(v1 built 2026-06-19)* — a scheduled, deterministic digest on Now: coverage at risk before an exam date, next school day's teaching load, marking waiting. *(Deferred: tomorrow's lessons lacking a bound plan, the optional AI summary.)* | Pulls the scattered "needs me" signals into one glance *ahead*; every input already exists (`schemeCoverage`, marking backlog, tasks) | M | 🟠 |
 | 7.2 ✅ | **Scheduled reviewer sweep** *(built 2026-06-19)* — off-by-default nightly review (own `ai_review_sweep_daily` setting), once/day in a 4–7am window, claim-before-spend, cost-capped, writing advisory `lesson_reviews` findings surfaced in the morning brief | Was parked *only* for "no scheduler" — now solved. The manual reviewer already ships; this just schedules it | M | 🟡 |
-| 7.3 | **Spaced-retrieval scheduler** — auto-build a "do now" from coverage on a spacing curve (recall ~2-week-old + ~6-week-old points) via `retrieval_starter`, ready on the lesson each morning | Retrieval starters exist but are manual/one-off; spacing is where the learning gain is, and coverage supplies the source points | M | 🟡 |
+| 7.3 ✅ | **Spaced retrieval** *(deterministic core built 2026-06-19)* — a "🔁 Spaced recall" panel on the lesson showing what the class did ~2 and ~6 weeks ago, AI-free *(deferred: AI-generated questions + scheduled pre-generation on the 7.2 seam)* | Retrieval starters were manual + misses-driven; spacing is where the learning gain is, and the taught-history supplies the points | M | 🟡 |
 
 *Reuses:* `scheduleRecurring`'s idempotent daily-job pattern, `lesson_reviews`, `retrieval_starter`, `schemeCoverage`, the monthly £-cap.
 
@@ -123,3 +123,25 @@ The existing manual reviewer (`reviewLessonMaster`, `lesson_reviews`) does the w
    reviewer master switch.
 6. **Tests** — the safety one: reviewer off / AI key empty ⇒ `sweepReviews` is a no-op (no reviews
    created, no real call, no throw); plus the brief's reviews line.
+
+---
+
+## Sub-plan — 7.3 Spaced retrieval *(deterministic core built 2026-06-19)*
+
+The existing `retrieval_starter` is **misses-driven** (needs marked work); spaced retrieval is a
+different source — the **taught-when history**. v1 is **deterministic and AI-free**: surface what each
+class was taught ~2 and ~6 weeks ago as a recap to open with. Always-on, zero cost, no scheduler needed.
+
+1. **Source** — `repos/retrieval.ts`: `pastLessonsForClass(gc, beforeDate)` (dated occurrences + their
+   lesson-plan objectives) and `ocClassAndDate(oc)` (resolve the lazy panel's class + date).
+2. **Selection** — `services/retrieval.ts` (pure, unit-tested): `pickSpacedRecall(past, today)` picks
+   the lesson nearest each spacing target (≈14d ±5, ≈42d ±10), `firstObjective` extracts the recap line.
+3. **Surface** — a lazy `🔁 Spaced recall` panel per class on the lesson detail, mirroring the
+   review-flag's `hx-get … hx-trigger=load` (empty when there's no history → dormant until there's a
+   term's worth of taught lessons).
+4. **Tests** — unit (spacing windows, objective extraction); integration (endpoint graceful, SQL runs).
+
+Deferred (the original "scheduler" pitch, a clean fast-follow on the 7.2 seam): **AI-generated recall
+questions** from these points (reuse `retrieval_starter`), and **scheduled pre-generation** so they're
+ready each morning — both cost-gated exactly like 7.2. The deterministic recap is the trustworthy,
+free foundation they'd build on.
