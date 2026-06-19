@@ -17,6 +17,9 @@ import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
 import { ocClassAndDate, pastLessonsForClass } from '../repos/retrieval';
 import { pickSpacedRecall } from '../services/retrieval';
+import { coverPackSource } from '../repos/cover';
+import { COVER_PACK_SYSTEM, COVER_PACK_INSTRUCTION, COVER_PACK_VERSION, coverPackItem } from '../llm/prompts/coverPack';
+import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { getExperienceMode } from '../lib/nav';
 import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '../services/adaptLesson';
 import { runClassIntake, applyClassIntake } from '../services/classIntake';
@@ -395,6 +398,7 @@ function renderSection(
       ${s.lessonPlanId != null ? `<div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
       <div class="ld-recall-slot" hx-get="/lesson/oc/${oc}/spaced-recall" hx-trigger="load" hx-swap="innerHTML"></div>
+      ${s.lessonPlanId != null ? `<div class="ld-cover"><button type="button" class="link" title="Generate self-contained cover work + answers for a cover teacher (AI)" hx-post="/lesson/oc/${oc}/cover-pack" hx-target="#cover-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">📋 Generate cover work (AI)</button><span id="cover-${oc}"></span></div>` : ''}
       ${last}
       <label class="stop-label">Stopping point
         <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
@@ -1238,6 +1242,45 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply
       .type('text/html')
       .send(`<details class="ld-recall"><summary>🔁 Spaced recall — quick recap to open with</summary><ul class="recall-list">${lis}</ul></details>`);
+  });
+
+  // Wave 6.1 — generate self-contained cover work for this class from its planned lesson (objectives +
+  // a standalone task + answers), stored as a printable resource. One budget-enforced wrapper call.
+  app.post('/lesson/oc/:oc/cover-pack', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const src = await coverPackSource(p.data.oc);
+    if (!src) return reply.code(404).send('');
+    const context = coverPackItem(src);
+    if (context.length === 0)
+      return reply.type('text/html').send('<p class="muted">Add a lesson plan (objectives or outline) first — there is nothing to base cover work on.</p>');
+    const result = await callLLMStructured(
+      {
+        feature: 'cover_pack',
+        model: await modelForFeature('cover_pack', 'plan'),
+        promptVersion: COVER_PACK_VERSION,
+        system: COVER_PACK_SYSTEM,
+        context,
+        instruction: COVER_PACK_INSTRUCTION,
+        maxTokens: 6000,
+      },
+      generateResourceSchema,
+    );
+    if (result.status !== 'ok' || !result.data || !result.data.content.trim()) {
+      return reply.type('text/html').send(`<p class="muted">${esc(result.message ?? 'The AI could not generate cover work.')}</p>`);
+    }
+    const d = result.data;
+    const title = `Cover — ${src.className} ${src.date}`;
+    const base = safeFilename((d.filename || `cover-${src.className}-${src.date}`).replace(/\.(md|markdown|txt)$/i, ''));
+    const filename = `${base || 'cover'}.md`;
+    const buf = Buffer.from(d.content, 'utf8');
+    const id = await createResource(title, 'document', 'text/markdown', 'ai_generated');
+    const rel = relPathFor(id, 1, filename);
+    await storeBuffer(rel, buf);
+    await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated cover work');
+    return reply
+      .type('text/html')
+      .send(`<p class="cover-done">📋 Cover work ready: <a href="/resources/${id}/edit">${esc(title)}</a> — edit or print it on Resources.</p>`);
   });
 
   // Apply an accepted master improvement (teacher decision; the master changes for every group).

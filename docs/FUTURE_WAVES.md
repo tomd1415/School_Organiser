@@ -1,6 +1,6 @@
 # Future waves — beyond Phase 11 (Wave 6+)
 
-> **Status (2026-06-19): Wave 7 complete (7.1 morning brief, 7.2 reviewer sweep, 7.3 spaced-recall core); Waves 6, 8, 9 proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
+> **Status (2026-06-19): Wave 7 complete; Wave 6 started (6.1 cover-pack built); Waves 8, 9 proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
 > the numbered Phase plans (12 worksheets, 13 planner, 14 hardening) run on a parallel track. This is
 > the next idea backlog — strategic feature directions grounded in what the app now holds and two fresh
 > unlocks. Near-term operational follow-ups live in [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -23,7 +23,7 @@ no-op when AI is off.
 
 | # | What | Why | Effort | Pri |
 |---|---|---|---|---|
-| 6.1 | **Cover-pack generator** — when you mark a date off-timetable / yourself absent, generate self-contained cover work per affected class from its planned lesson (objectives + a standalone task + answers for the cover teacher) into the resource store; printable. New `cover_pack` AI feature, cohort-only (no pupil names) | Setting cover when you're out is high-friction, and the app already holds the planned lesson + the cover concept; reuses `draft_lesson`/`generate_resource` + the resource store | M | 🟠 |
+| 6.1 ✅ | **Cover-pack generator** *(built 2026-06-19)* — a per-class **📋 Generate cover work** button on the lesson produces self-contained cover work + answers from the planned lesson, stored as a printable resource; new `cover_pack` AI feature, cohort-only (no pupil names) | Setting cover when you're out is high-friction, and the app already holds the planned lesson + the cover concept; reuses the `generate_resource` store | M | 🟠 |
 | 6.2 | **Recurring exceptions** — a standing weekly duty / fortnightly meeting as a recurring lesson exception (reuse `recurrence` + the daily `scheduleRecurring` job to materialise dated rows), folding into availability automatically | Standing commitments are re-entered by hand each week; the recurrence engine and the scheduler already exist | S | 🟠 |
 | 6.3 | **Cover ledger + Now actions** — a cover owed/given tally from `cover` exceptions (AI-free), plus one-tap "you're on cover — open the cover note / start a work block" on the Now strip you already annotate | Closes the loop on the cover data you now capture; a pure query + a Now affordance | S | 🟡 |
 
@@ -145,3 +145,24 @@ Deferred (the original "scheduler" pitch, a clean fast-follow on the 7.2 seam): 
 questions** from these points (reuse `retrieval_starter`), and **scheduled pre-generation** so they're
 ready each morning — both cost-gated exactly like 7.2. The deterministic recap is the trustworthy,
 free foundation they'd build on.
+
+---
+
+## Sub-plan — 6.1 Cover-pack generator *(built 2026-06-19)*
+
+When you'll be out, generate self-contained cover work for a class from its planned lesson — a task
+pupils can do with a non-specialist supervisor, plus an answer key. Reuses the `/resources/generate`
+machinery (AI → store as a Markdown resource).
+
+1. **Source** — `repos/cover.ts` `coverPackSource(oc)`: one query → the class, year group, and the
+   lesson's title/objectives/outline for an occurrence-course.
+2. **Prompt** — `llm/prompts/coverPack.ts`: a cover-specific system + a `coverPackItem` context builder
+   (objectives/outline + year group; cohort-level, no pupil names — through the wrapper's `context[]`).
+   New `cover_pack` AI feature (Plan model); schema reused (`generateResourceSchema`).
+3. **Route + surface** — `POST /lesson/oc/:oc/cover-pack` generates and stores a "Cover — <class>
+   <date>" Markdown resource (printable/editable on Resources), behind a per-class **📋 Generate cover
+   work** button on the lesson. Degrades to a clear message when AI is off or no plan exists.
+4. **Cost** — one wrapper call per click (budget-enforced, manual-trigger); no schedule, no spend
+   unless you click.
+5. **Tests** — unit (`coverPackItem` builds the cohort context, empty when no plan); integration
+   (`coverPackSource` SQL; the route writes **no** resource when AI is unavailable).

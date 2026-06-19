@@ -22,6 +22,7 @@ export const AI_FEATURES: readonly FeatureDef[] = [
   { key: 'lesson_resources', label: 'Generate lesson resources', role: 'plan' },
   { key: 'convert_unit', label: 'Convert a downloaded unit', role: 'plan' },
   { key: 'generate_resource', label: 'Generate a one-off resource', role: 'plan' },
+  { key: 'cover_pack', label: 'Generate cover work', role: 'plan', note: "Self-contained work + answers for a cover teacher when you're absent." },
   { key: 'term_summary', label: "Summarise a term's notes", role: 'plan' },
   { key: 'mark_scheme', label: 'Derive a mark scheme', role: 'plan' },
   { key: 'captured_categorise', label: 'Auto-file a captured note', role: 'cheap' },

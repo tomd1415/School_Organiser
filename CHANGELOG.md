@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Cover-pack generator (Wave 6.1)
+
+First slice of Wave 6 (absence & cover). Suite green: **496 unit / 292 integration; typecheck clean**.
+
+- **📋 Generate cover work** button per class on the lesson — produces self-contained cover work from the
+  planned lesson (a task pupils can do with a non-specialist supervisor + an answer key), stored as a
+  printable/editable Markdown resource ("Cover — &lt;class&gt; &lt;date&gt;"). Reuses the generate→store
+  path; one budget-enforced wrapper call per click. New `cover_pack` AI feature, cohort-level (no pupil
+  names), Plan model.
+- [app/src/repos/cover.ts](app/src/repos/cover.ts) `coverPackSource` (one query → class + objectives/outline);
+  [app/src/llm/prompts/coverPack.ts](app/src/llm/prompts/coverPack.ts) (cohort context, unit-tested); route
+  in [app/src/routes/lesson.ts](app/src/routes/lesson.ts) `/lesson/oc/:oc/cover-pack`.
+- **Safety**: degrades to a clear message when AI is off or no plan exists; the integration test proves it
+  writes **no** resource when AI is unavailable.
+
 ### 2026-06-19 — Spaced retrieval (Wave 7.3, deterministic core) — Wave 7 complete
 
 The existing `retrieval_starter` is misses-driven; this adds the spacing source — the taught-when
