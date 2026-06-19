@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Static mockup of the Calm Command Centre UI direction for School Organiser">
+  <title>Calm Command Centre — School Organiser UI prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../shared/prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9H4Z"/><path d="M9.5 20v-6h5v6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3v5M16 3v5M3.5 10h17"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H11v17H7.5A3.5 3.5 0 0 0 4 22Z"/><path d="M20 5.5A3.5 3.5 0 0 0 16.5 2H13v17h3.5A3.5 3.5 0 0 1 20 22Z"/></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M15 15a5 5 0 0 1 6 4.8"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5ZM10 20h4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" data-navigation aria-label="Application navigation">
+      <div class="brand-row">
+        <a class="brand" href="#" aria-label="School Organiser home">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span><strong>School</strong><small>Organiser</small></span>
+        </a>
+        <button class="nav-close" type="button" data-menu-toggle aria-expanded="true" aria-label="Close navigation">
+          <svg aria-hidden="true"><use href="#i-menu"/></svg>
+        </button>
+      </div>
+
+      <nav class="primary-nav" aria-label="Main navigation">
+        <p class="nav-heading">Your day</p>
+        <a class="nav-item active" href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg><span>Now</span><span class="nav-count">3</span></a>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-calendar"/></svg><span>Timetable</span></a>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-check"/></svg><span>Focus</span><span class="nav-count calm">5</span></a>
+
+        <p class="nav-heading">Teaching</p>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-book"/></svg><span>Lessons</span></a>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-plan"/></svg><span>Curriculum</span></a>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-people"/></svg><span>Pupils</span></a>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-folder"/></svg><span>Resources</span></a>
+
+        <p class="nav-heading">Organise</p>
+        <a class="nav-item" href="#"><svg aria-hidden="true"><use href="#i-note"/></svg><span>Notes & tasks</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="accessibility-button" type="button" data-contrast-toggle aria-pressed="false">
+          <span class="contrast-icon" aria-hidden="true"></span><span>High contrast</span>
+        </button>
+        <button class="accessibility-button" type="button" data-density-toggle aria-pressed="false">
+          <svg aria-hidden="true"><use href="#i-eye"/></svg><span>Compact view</span>
+        </button>
+        <div class="user-mini"><span class="avatar">JD</span><span><strong>Jamie</strong><small>Teacher</small></span><button type="button" aria-label="Open account menu"><svg aria-hidden="true"><use href="#i-more"/></svg></button></div>
+      </div>
+    </aside>
+    <button class="nav-backdrop" type="button" data-nav-backdrop hidden aria-label="Close navigation"></button>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="menu-button" type="button" data-menu-toggle aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation">
+          <svg aria-hidden="true"><use href="#i-menu"/></svg>
+        </button>
+        <div class="search-wrap">
+          <svg aria-hidden="true"><use href="#i-search"/></svg>
+          <label class="sr-only" for="global-search">Search School Organiser</label>
+          <input id="global-search" type="search" placeholder="Search pupils, lessons, tasks…">
+          <kbd aria-hidden="true">⌘ K</kbd>
+        </div>
+        <button class="top-action" type="button" data-demo-action="There are two routine notifications" aria-label="Notifications, 2 unread">
+          <svg aria-hidden="true"><use href="#i-bell"/></svg><span class="notification-dot">2</span>
+        </button>
+        <button class="quick-note" type="button" data-demo-action="Quick note panel would open">
+          <svg aria-hidden="true"><use href="#i-note"/></svg><span>Quick note</span>
+        </button>
+      </header>
+
+      <main id="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="#">Home</a></li><li aria-current="page">Now</li></ol></nav>
+
+        <section class="page-heading" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Friday, 19 June</p>
+            <h1 id="page-title">Good morning, Jamie</h1>
+            <p class="heading-note">You have four lessons today. Everything important is in one place.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="button secondary" type="button" data-demo-action="Today briefing prepared">Print briefing</button>
+            <button class="button primary" type="button" data-demo-action="Quick capture opened"><span aria-hidden="true">＋</span> Capture</button>
+          </div>
+        </section>
+
+        <section class="current-lesson" aria-labelledby="current-title">
+          <div class="current-copy">
+            <div class="current-label"><span class="pulse" aria-hidden="true"></span> Happening now · 10:10–11:10</div>
+            <p class="subject">Science · Year 8</p>
+            <h2 id="current-title">Separating mixtures</h2>
+            <p class="lesson-meta">Lab 2 <span aria-hidden="true">•</span> 28 pupils <span aria-hidden="true">•</span> Practical lesson</p>
+            <div class="current-actions">
+              <button class="button light" type="button" data-demo-action="Lesson workspace opened">Open lesson <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              <button class="button ghost-light" type="button" data-demo-action="Presentation mode opened">Present slides</button>
+            </div>
+          </div>
+          <div class="readiness-card">
+            <div class="readiness-top"><span>Ready to teach</span><strong>3 of 4</strong></div>
+            <div class="progress" role="progressbar" aria-label="Lesson preparation" aria-valuemin="0" aria-valuemax="4" aria-valuenow="3"><span></span></div>
+            <ul>
+              <li class="done"><span aria-hidden="true">✓</span> Plan and slides ready</li>
+              <li class="done"><span aria-hidden="true">✓</span> Worksheet assigned</li>
+              <li class="done"><span aria-hidden="true">✓</span> Equipment collected</li>
+              <li><span aria-hidden="true">!</span> Print six support sheets</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel schedule-panel" aria-labelledby="schedule-title">
+            <div class="panel-heading">
+              <div><p class="panel-kicker">Your day</p><h2 id="schedule-title">Today’s schedule</h2></div>
+              <a href="#">Full timetable <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </div>
+            <ol class="timeline">
+              <li class="timeline-item complete">
+                <div class="time"><strong>08:35</strong><span>09:00</span></div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <div class="lesson-summary"><div><span class="status-label">Finished</span><h3>Morning form</h3><p>Form room · Registration</p></div><button type="button" aria-label="Open Morning form"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+              </li>
+              <li class="timeline-item current">
+                <div class="time"><strong>10:10</strong><span>11:10</span></div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <div class="lesson-summary"><div><span class="status-label">Now</span><h3>Year 8 Science</h3><p>Separating mixtures · Lab 2</p></div><button type="button" aria-label="Open Year 8 Science"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+              </li>
+              <li class="timeline-item">
+                <div class="time"><strong>11:30</strong><span>12:30</span></div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <div class="lesson-summary"><div><span class="status-label neutral">Next</span><h3>Year 10 Chemistry</h3><p>Rates of reaction · Lab 2</p></div><span class="prep-badge"><span aria-hidden="true">!</span> 1 prep</span></div>
+              </li>
+              <li class="timeline-item">
+                <div class="time"><strong>13:40</strong><span>14:40</span></div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <div class="lesson-summary"><div><h3>Year 9 Science</h3><p>Energy transfers · Room 14</p></div><span class="ready-badge"><span aria-hidden="true">✓</span> Ready</span></div>
+              </li>
+              <li class="timeline-item">
+                <div class="time"><strong>14:45</strong><span>15:25</span></div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <div class="lesson-summary"><div><h3>Department meeting</h3><p>Curriculum review · Office</p></div></div>
+              </li>
+            </ol>
+          </section>
+
+          <aside class="dashboard-aside" aria-label="Daily actions">
+            <section class="panel attention-panel" aria-labelledby="attention-title">
+              <div class="panel-heading compact"><div><p class="panel-kicker warm">Needs attention</p><h2 id="attention-title">Before you leave</h2></div><span class="total-badge">3</span></div>
+              <ul class="action-list">
+                <li><span class="action-icon amber" aria-hidden="true"><svg><use href="#i-check"/></svg></span><div><strong>12 answers to review</strong><small>Year 10 Chemistry · due today</small></div><button type="button" aria-label="Review 12 answers"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></li>
+                <li><span class="action-icon blue" aria-hidden="true"><svg><use href="#i-plan"/></svg></span><div><strong>Plan Monday’s lesson</strong><small>Year 9 Science · 35 minutes</small></div><button type="button" aria-label="Plan Monday's lesson"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></li>
+                <li><span class="action-icon teal" aria-hidden="true"><svg><use href="#i-note"/></svg></span><div><strong>Record stopping point</strong><small>Year 7 Science · yesterday</small></div><button type="button" aria-label="Record stopping point"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></li>
+              </ul>
+              <a class="panel-footer-link" href="#">View all tasks <span aria-hidden="true">→</span></a>
+            </section>
+
+            <section class="panel insight-panel" aria-labelledby="insight-title">
+              <div class="insight-icon"><svg aria-hidden="true"><use href="#i-spark"/></svg></div>
+              <div><p class="panel-kicker">Teaching insight</p><h2 id="insight-title">Revisit particle diagrams</h2><p>Five pupils confused particles with cells in yesterday’s exit check.</p><button class="text-button" type="button" data-demo-action="Retrieval starter drafted">Draft a retrieval starter <span aria-hidden="true">→</span></button></div>
+            </section>
+          </aside>
+        </div>
+
+        <section class="overview-row" aria-label="Weekly overview">
+          <article class="metric-card"><span class="metric-icon blue"><svg aria-hidden="true"><use href="#i-check"/></svg></span><div><strong>24</strong><span>Answers to review</span><small>8 fewer than yesterday</small></div></article>
+          <article class="metric-card"><span class="metric-icon teal"><svg aria-hidden="true"><use href="#i-plan"/></svg></span><div><strong>82%</strong><span>Next week planned</span><small>4 lessons remaining</small></div></article>
+          <article class="metric-card"><span class="metric-icon violet"><svg aria-hidden="true"><use href="#i-folder"/></svg></span><div><strong>7</strong><span>New resources</span><small>Added this week</small></div></article>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

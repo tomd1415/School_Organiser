@@ -9,6 +9,8 @@ import { esc } from '../lib/html';
 import { classifyDay, resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOrCreateOccurrence, getOccurrenceCourses, taMayAccessOccurrenceCourse } from '../repos/occurrence';
+import { listExceptionsBetween } from '../repos/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
 import { getEffectiveLesson } from '../repos/adaptations';
 import { listResourcesForPlan, listResourcesForAdaptation, type LinkedResource } from '../repos/resources';
 import { addTaFeedback, listTaFeedback } from '../repos/taFeedback';
@@ -195,8 +197,12 @@ export function registerTaRoutes(app: FastifyInstance): void {
         // A shared-password TA (taStaffId 0) gets no "my lessons" tab and may NOT deep-link to an
         // arbitrary lesson by id — only named TAs (their own staff row) or the teacher peeking.
         const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
+        const exFree =
+          l && describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId)).mode === 'free';
         if (!l || !allowed) {
           body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
+        } else if (exFree) {
+          body = `<section class="card">${tabs}<p class="muted">That lesson is off timetable / cancelled on ${esc(q.data.date)}.</p></section>`; // BUG-012
         } else {
           const block = await renderLessonBlock(l, q.data.date, csrf);
           body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
@@ -223,7 +229,11 @@ export function registerTaRoutes(app: FastifyInstance): void {
         // A NAMED TA (their own staff row) sees only their own lesson in the slot — not every lesson
         // running that period. Shared-account TAs (taStaffId 0) and the teacher peeking still see all.
         const slotLessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
-        const lessons = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
+        const mine = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
+        // BUG-012: drop cancelled / free / whole-day off-timetable lessons before rendering — they must
+        // not show OR materialise an occurrence for the TA. cover / room-change still run.
+        const dx = indexDayExceptions(await listExceptionsBetween(chosen.date, chosen.date));
+        const lessons = mine.filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free');
         const blocks: string[] = [];
         for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf));
         body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}

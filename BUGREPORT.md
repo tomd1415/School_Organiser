@@ -26,17 +26,18 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (11):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-038 (High —
-image-enumeration & safety-gate); BUG-017, BUG-024, BUG-031 (Medium — pupil session revocation & DB
-invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets).
+**Fixed so far (13):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-012, BUG-038 (High
+— image-enumeration, pupil/TA exception leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-031
+(Medium — TA & pupil session revocation, DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX
+reliability & secrets).
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 2 | 16 |
-| Medium | 26 | 3 | 23 |
+| High | 18 | 3 | 15 |
+| Medium | 26 | 4 | 22 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **11** | **39** |
+| **Total** | **50** | **13** | **37** |
 
 ## Testing and environment limitations
 
@@ -176,6 +177,7 @@ invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX reliability & secret
 
 ### BUG-012 — Pupil and TA “current lesson” views ignore cancellations and off-timetable exceptions
 
+- **Status:** ✅ Resolved 2026-06-19 — both surfaces now index the day's `lesson_exceptions` and drop any lesson whose effect is `free` (cancelled / free / whole-day off-timetable) **before** rendering or materialising an occurrence ([app/src/routes/me.ts](app/src/routes/me.ts), [app/src/routes/ta.ts](app/src/routes/ta.ts) via the shared [services/exceptions.ts](app/src/services/exceptions.ts)). cover / room-change still run. The TA deep-link shows a "off timetable / cancelled" notice. Integration test proves a cancelled lesson is suppressed and no occurrence is created. *(Daily print view, BUG-047, is the same class of fix and still open.)*
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/routes/me.ts:74-88, 185-204, 230-254`; `app/src/routes/ta.ts:47-68, 180-228`; `app/src/services/exceptions.ts:25-63`
 - **Problem and trigger:** Both surfaces resolve the weekly timetable and materialise/render occurrences without consulting `lesson_exceptions`. `cancelled`, `free`, and whole-day `off_timetable` exceptions are handled on teacher timetable/Now surfaces but not here.
@@ -269,6 +271,7 @@ invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX reliability & secret
 
 ### BUG-016 — Disabling, deleting, or re-passwording a TA account does not revoke its live session
 
+- **Status:** ✅ Resolved 2026-06-19 — symmetric to BUG-017: TA sessions carry `taAccountId` + `taEpoch`; the request hook re-checks `ta_accounts.active` + `session_epoch` ([migration 0049](app/migrations/0049_ta_session_epoch.sql)) and kills the session on a mismatch or a missing/inactive account. Disable / delete / password-change bump the epoch (delete removes the row), so revocation is immediate. A legacy shared-password TA loses its session when the shared password is cleared. Integration test proves each action bumps/clears.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/auth/routes.ts:65-81`; `app/src/server.ts:141-174`; `app/src/routes/settingsPage.ts:442-499`
 - **Problem and trigger:** TA sessions store role/name/staff ID but no account ID or revocation version. The global hook checks only the role allowlist. Account disable, password reset, deletion, and clearing the legacy shared password affect future logins only.

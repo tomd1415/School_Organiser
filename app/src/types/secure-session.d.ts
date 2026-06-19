@@ -8,6 +8,8 @@ declare module '@fastify/secure-session' {
     // Named TA accounts (8.1)
     taName: string;
     taStaffId: number;
+    taAccountId: number; // session-revocation: which ta_accounts row (BUG-016)
+    taEpoch: number; // must match ta_accounts.session_epoch
     // Pupil sessions (8.2/8.3) + shared-machine idle logout
     pupilId: number;
     pupilGroupId: number;

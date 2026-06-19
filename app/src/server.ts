@@ -53,6 +53,7 @@ import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { signLessonImages } from './lib/lessonImageSig';
 import { pupilCfg } from './auth/pupilAccessCache';
 import { getPupilSessionState } from './repos/pupils';
+import { getTaAccountState } from './repos/taAccounts';
 import { teacherIdleMins } from './auth/teacherIdleCache';
 import { generateDueInstances } from './repos/recurringTasks';
 import { coverageAtRisk } from './repos/brief';
@@ -179,6 +180,22 @@ export async function buildApp(): Promise<FastifyInstance> {
         return bounce(req, reply, '/pupil?timeout=1');
       }
       if (!poll) req.session.set('lastSeen', Date.now());
+    }
+    // Per-TA revocation (BUG-016): a named account that's been disabled / deleted (no row or inactive)
+    // or re-passworded (bumped epoch) loses its live session immediately; a legacy shared-password TA
+    // loses it when the teacher clears the shared password.
+    if (role === 'ta' && !req.url.startsWith('/static/')) {
+      const accId = Number(req.session.get('taAccountId') ?? 0);
+      if (accId) {
+        const st = await getTaAccountState(accId);
+        if (!st || !st.active || st.epoch !== Number(req.session.get('taEpoch') ?? 0)) {
+          req.session.delete();
+          return bounce(req, reply, '/login');
+        }
+      } else if ((((await getSetting('ta_password_hash').catch(() => null)) ?? '').trim() === '')) {
+        req.session.delete();
+        return bounce(req, reply, '/login');
+      }
     }
     if (!roleAllows(role, req.url)) return reply.redirect(ROLE_HOME[role]);
   });

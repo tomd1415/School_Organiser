@@ -70,6 +70,8 @@ export function registerAuthRoutes(app: FastifyInstance): void {
       req.session.set('role', 'ta');
       req.session.set('taName', ta.name);
       req.session.set('taStaffId', ta.staffId ?? 0);
+      req.session.set('taAccountId', ta.id); // BUG-016 revocation (named accounts)
+      req.session.set('taEpoch', ta.epoch);
       return reply.redirect('/ta');
     }
     // Legacy shared TA password — still honoured until the teacher clears it in Settings.

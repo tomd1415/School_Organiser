@@ -8,6 +8,8 @@ import { pool } from '../db/pool';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
+import { listExceptionsBetween } from '../repos/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
 import { getLessonWorksheet, getLessonWorksheetMeta, getLessonSlidesMarkdown } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { renderMarkdown } from '../lib/markdown';
@@ -202,6 +204,13 @@ export function registerMeRoutes(app: FastifyInstance): void {
           const id = await groupLessonAt(groupId, state.nextTeaching.weekday, state.nextTeaching.slotOrder);
           if (id) lesson = { lessonId: id, date: state.nextTeaching.date };
         }
+      }
+
+      // Honour dated exceptions (BUG-012): a cancelled / free / whole-day off-timetable lesson must NOT
+      // show OR materialise an occurrence for the pupil. cover / room-change still run, so they're left.
+      if (lesson && !isTest) {
+        const dx = indexDayExceptions(await listExceptionsBetween(lesson.date, lesson.date));
+        if (describeException(exceptionForLesson(dx, lesson.lessonId)).mode === 'free') lesson = null;
       }
 
       // "Stay signed in on this computer" — only when auto-marking is on and the class allows it,

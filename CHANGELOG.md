@@ -7,6 +7,20 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 3 (authorization: 2 findings)
+
+More A1 authorization. Suite green: **517 unit / 313 integration; typecheck clean**.
+
+- **🔑 TA session revocation (BUG-016, Medium).** Symmetric to the pupil epoch: TA sessions carry
+  `taAccountId` + `taEpoch`; the request hook re-checks `ta_accounts.active` + `session_epoch`
+  ([migration 0049](app/migrations/0049_ta_session_epoch.sql)) and kills the session on mismatch /
+  missing / inactive account. Disable, delete or password-change now revokes the live TA cookie
+  **immediately**; a legacy shared-password TA loses access when the shared password is cleared.
+- **🚫 No cancelled-lesson leakage to pupils/TAs (BUG-012, High).** The pupil `/me` and TA `/ta`
+  "current lesson" views now consult the day's `lesson_exceptions` and **suppress** any lesson whose
+  effect is free/cancelled/whole-day off-timetable **before** rendering or materialising an occurrence
+  (no ghost rows, no worksheet/plan disclosure). Cover/room-change lessons still run.
+
 ### 2026-06-19 — Audit remediation, batch 2 (authorization: 2 findings)
 
 Second slice of [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md) (A1 authorization). Suite green:
