@@ -57,6 +57,7 @@ export function renderResourceItem(r: ResourceRow): string {
     <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
     <a href="/resources/${r.id}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
     ${used}
+    ${r.unit || r.yearGroup ? `<span class="res-unit" title="year group · unit">${[r.yearGroup, r.unit].filter(Boolean).map((x) => esc(x as string)).join(' · ')}</span>` : ''}
     <span class="muted res-meta">${esc(r.source)}${r.versionNo ? ` · v${r.versionNo}` : ''}${r.byteSize ? ' · ' + fmtSize(r.byteSize) : ''}</span>
     <a class="link" href="/resources/${r.id}/download">download</a>
     <span class="res-usage" id="res-${r.id}-usage"></span>

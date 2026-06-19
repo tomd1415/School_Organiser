@@ -28,7 +28,7 @@ import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
 import { listActiveEquipment } from '../repos/equipment';
 import { equipmentItem } from '../llm/prompts/equipment';
-import { extractArchive, commitImport, cleanupBatch, defaultTitle, type ExtractResult, type CommitItem } from '../services/resourceImport';
+import { extractArchive, extractFolder, commitImport, cleanupBatch, buildStorePath, defaultTitle, type ExtractResult, type CommitItem, type UploadEntry } from '../services/resourceImport';
 import { resourceImportSchema } from '../llm/schemas/resourceImport';
 import { RESOURCE_IMPORT_SYSTEM, RESOURCE_IMPORT_INSTRUCTION, RESOURCE_IMPORT_VERSION, importGroupItem } from '../llm/prompts/resourceImport';
 
@@ -149,43 +149,56 @@ async function loadPage(q: string, kind: string, page: number) {
   return { rows, total, page, pageSize: PAGE_SIZE, q, kind };
 }
 
-// The review screen after an archive upload: every staged file with a (proposed) title, an import tick,
-// and a duplicate flag, grouped by the zip it came from. Nothing is imported until the form is posted.
-function renderReview(result: ExtractResult, proposal: Map<string, { title: string; category: string }>, csrf: string): string {
+interface UnitMeta {
+  unitName: string;
+  yearGroup: string;
+}
+
+// The review screen after an upload: each detected UNIT shows its year group + unit name (read from its
+// Word description — editable, because the folder is often just an opaque number), and every file under
+// it with a lesson-aware title + an import tick. The unit fields are stamped onto each file on commit.
+function renderReview(result: ExtractResult, unitMeta: Map<string, UnitMeta>, titles: Map<string, string>, csrf: string): string {
   if (result.fileCount === 0) {
-    return `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">No importable files found in that archive. <a href="/resources/import">Try another</a>.</p></section>`;
+    return `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">No importable files found. <a href="/resources/import">Try again</a>.</p></section>`;
   }
   const MAX = 1000;
-  let i = 0;
+  let fi = 0;
   const groupsHtml = result.groups
-    .map((g) => {
+    .map((g, gi) => {
       const rows = g.files
         .map((f) => {
-          if (i >= MAX) return '';
-          const p = proposal.get(f.path);
-          const title = p?.title || defaultTitle(f.name);
-          const cat = p?.category ? `<span class="imp-cat">${esc(p.category)}</span> ` : '';
+          if (fi >= MAX) return '';
+          const title = titles.get(f.path) || defaultTitle(f.name);
           const dup = f.duplicate ? '<span class="imp-dup" title="already in the store (same content)">duplicate</span> ' : '';
-          const idx = i++;
+          const idx = fi++;
           return `<tr>
             <td><input type="checkbox" name="inc_${idx}" value="1"${f.duplicate ? '' : ' checked'}></td>
-            <td><input type="hidden" name="path_${idx}" value="${esc(f.path)}"><input class="imp-title" name="title_${idx}" value="${esc(title)}" maxlength="200"></td>
-            <td class="muted imp-meta">${cat}${dup}<span class="imp-file">${esc(f.name)}</span> · ${Math.max(1, Math.round(f.bytes / 1024))} KB</td>
+            <td><input type="hidden" name="path_${idx}" value="${esc(f.path)}"><input type="hidden" name="grp_${idx}" value="${gi}"><input class="imp-title" name="title_${idx}" value="${esc(title)}" maxlength="200"></td>
+            <td class="muted imp-meta">${dup}<span class="imp-file">${esc(f.name)}</span> · ${Math.max(1, Math.round(f.bytes / 1024))} KB</td>
           </tr>`;
         })
         .join('');
-      const label = g.source ? esc(g.source) : 'Loose files';
-      return `<h3 class="imp-group">${label}${g.description ? ' <span class="muted">· described</span>' : ''}</h3>
-        <div class="table-scroll"><table class="setup-table"><thead><tr><th>Import?</th><th>Title</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      const meta = unitMeta.get(g.folder);
+      const unitDefault = meta?.unitName || (g.folder ? g.folder.split('/').pop() ?? g.folder : '');
+      const header = g.isUnit
+        ? `<div class="imp-unit">
+            <input type="hidden" name="folder_${gi}" value="${esc(g.folder)}">
+            <label>Year group <input name="yeargroup_${gi}" value="${esc(meta?.yearGroup ?? '')}" placeholder="e.g. Year 8" maxlength="40"></label>
+            <label>Unit (name + number) <input class="imp-unitname" name="unit_${gi}" value="${esc(unitDefault)}" placeholder="e.g. Unit 11: Networks" maxlength="120"></label>
+            ${g.folder ? `<span class="muted imp-folder">from folder “${esc(g.folder)}”</span>` : ''}${g.description ? ' <span class="muted">· described</span>' : ''}
+          </div>`
+        : `<h3 class="imp-group">Other files <span class="muted">— no unit detected</span></h3><input type="hidden" name="folder_${gi}" value="">`;
+      return `${header}
+        <div class="table-scroll"><table class="setup-table"><thead><tr><th>Import?</th><th>Title (incl. lesson)</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
     })
     .join('');
   const more = result.fileCount > MAX ? `<p class="muted">Showing the first ${MAX} of ${result.fileCount} files — re-upload smaller batches for the rest.</p>` : '';
   return `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
     <h1>Review import — ${result.fileCount} file${result.fileCount === 1 ? '' : 's'}</h1>
-    <p class="muted">Tick what to import and tweak any title. Duplicates (already in the store) are unticked. Nothing is added until you click Import.${result.truncated ? ' <strong>The archive was large and was capped.</strong>' : ''}</p>
+    <p class="muted">Check each unit's <strong>year group</strong> and <strong>unit name</strong> (read from its Word description — edit if wrong); they're recorded on every file in the unit, with the per-file lesson title. Duplicates are unticked. Nothing is added until you click Import.${result.truncated ? ' <strong>The upload was large and was capped.</strong>' : ''}</p>
     ${more}
     <form hx-post="/resources/import/${result.batchId}/commit" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
-      <input type="hidden" name="count" value="${i}">
+      <input type="hidden" name="count" value="${fi}">
       ${groupsHtml}
       <p class="imp-actions"><button type="submit" class="btn-secondary">Import ticked files →</button>
       <button type="button" class="link" hx-post="/resources/import/${result.batchId}/cancel" hx-target="closest section" hx-swap="outerHTML">cancel</button></p>
@@ -224,33 +237,57 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(renderResourceListPaged(paged));
   });
 
-  // Bulk import: upload a zip of a folder (nested zips + Word descriptions), review, then import.
+  // Bulk import: a whole selected folder (webkitdirectory) OR a single zip — nested zips + the Word docs
+  // that describe each unit. Unzipped, descriptions read for unit name + year group, reviewed, imported.
   app.get('/resources/import', { preHandler: requireAuth }, async (_req, reply) => {
     const csrf = reply.generateCsrf();
     const body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <h1>Import a folder of resources</h1>
-      <p class="muted">Zip up your folder of resources — nested zips and the Word docs that describe them are fine — and upload the one archive. It's unzipped, the Word descriptions are read, and a tidy title is proposed for each file (AI, when on). You review and tick what to import; nothing is added until you confirm. <a href="/resources">← Resources</a></p>
-      <form class="setup-add" hx-post="/resources/import" hx-encoding="multipart/form-data" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
-        <input type="file" name="archive" accept=".zip,application/zip" required>
+      <p class="muted">Pick a whole folder of unit resources (nested zips and the Word docs that describe each unit are fine), or a single .zip. Each unit's Word description is read for its <strong>year group</strong> and <strong>unit name</strong> — which the folder number alone can't give — and a lesson title is proposed per file (AI, when on). You review and tick what to import; nothing is added until you confirm. <a href="/resources">← Resources</a></p>
+      <form class="setup-add imp-upload" hx-post="/resources/import" hx-encoding="multipart/form-data" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
+        <label class="imp-pick">📁 A whole folder<br><input type="file" name="folder" webkitdirectory directory multiple></label>
+        <label class="imp-pick">🗜️ …or a single .zip<br><input type="file" name="archive" accept=".zip,application/zip"></label>
         <button type="submit" class="btn-secondary">Upload &amp; review →</button>
       </form>
+      <p class="muted imp-limit">Maximum upload size: <strong>500 MB per file</strong>, and about <strong>400 MB or 3,000 files</strong> per import (larger uploads are capped — import in batches).</p>
     </section>`;
     return reply.type('text/html').send(layout({ title: 'Import resources', body, authed: true, csrfToken: csrf }));
   });
 
   app.post('/resources/import', guard, async (req, reply) => {
     const csrf = reply.generateCsrf();
-    const data = await req.file().catch(() => null);
-    if (!data) return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">No file received. <a href="/resources/import">Try again</a>.</p></section>`);
-    if (!(data.filename || '').toLowerCase().endsWith('.zip')) {
-      return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">Please upload a <strong>.zip</strong> archive. <a href="/resources/import">Try again</a>.</p></section>`);
+    const fail = (msg: string) =>
+      reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">${msg} <a href="/resources/import">Try again</a>.</p></section>`);
+    const folderEntries: UploadEntry[] = [];
+    let archiveBuf: Buffer | null = null;
+    try {
+      // preservePath: keep the webkitdirectory relative path in each part's filename (busboy strips it
+      // by default) — it's how we reconstruct the unit/lesson folders. safeRel still defeats zip-slip.
+      for await (const part of req.parts({ preservePath: true })) {
+        if (part.type !== 'file') continue;
+        const buf = await part.toBuffer();
+        if (!buf.length) continue;
+        if (part.fieldname === 'archive') {
+          if ((part.filename || '').toLowerCase().endsWith('.zip')) archiveBuf = buf;
+        } else {
+          folderEntries.push({ relPath: part.filename || '', buf });
+        }
+      }
+    } catch {
+      return fail('That upload was too large or could not be read (limit: 500 MB per file).');
     }
-    const buf = await data.toBuffer();
-    const result = await extractArchive(buf);
-    const proposal = new Map<string, { title: string; category: string }>();
+    let result: ExtractResult;
+    if (folderEntries.length) result = await extractFolder(folderEntries);
+    else if (archiveBuf) result = await extractArchive(archiveBuf);
+    else return fail('No folder or .zip received.');
+
+    // One AI call per detected unit → its name + year group + a lesson title per file. Degrades to
+    // filename defaults when AI is off / over the monthly cap, the rest of the flow unchanged.
+    const unitMeta = new Map<string, UnitMeta>();
+    const titles = new Map<string, string>();
     let aiGroups = 0;
     for (const g of result.groups) {
-      if (aiGroups >= 25 || !g.description.trim() || g.files.length === 0) continue;
+      if (!g.isUnit || g.files.length === 0 || !g.description.trim() || aiGroups >= 25) continue;
       const r = await callLLMStructured(
         {
           feature: 'resource_import',
@@ -264,13 +301,14 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         resourceImportSchema,
       );
       if (r.status === 'ok' && r.data) {
-        for (const f of r.data.files) if (f.path) proposal.set(f.path, { title: f.title, category: f.category });
+        unitMeta.set(g.folder, { unitName: r.data.unitName || '', yearGroup: r.data.yearGroup || '' });
+        for (const f of r.data.files) if (f.path) titles.set(f.path, f.title);
         aiGroups += 1;
       } else if (r.status === 'blocked' || r.status === 'unavailable') {
-        break; // over the monthly cap / AI off → default the rest from filenames
+        break;
       }
     }
-    return reply.type('text/html').send(renderReview(result, proposal, csrf));
+    return reply.type('text/html').send(renderReview(result, unitMeta, titles, csrf));
   });
 
   app.post('/resources/import/:batch/commit', guard, async (req, reply) => {
@@ -281,14 +319,20 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     for (let n = 0; n < count; n += 1) {
       if (body[`inc_${n}`] !== '1') continue;
       const path = body[`path_${n}`];
-      if (path) items.push({ path, title: body[`title_${n}`] ?? '' });
+      if (!path) continue;
+      const gi = body[`grp_${n}`] ?? '';
+      const unit = (body[`unit_${gi}`] ?? '').trim().slice(0, 120);
+      const yearGroup = (body[`yeargroup_${gi}`] ?? '').trim().slice(0, 40);
+      const folder = body[`folder_${gi}`] ?? '';
+      items.push({ path, title: body[`title_${n}`] ?? '', unit, yearGroup, storePath: buildStorePath(yearGroup, unit, folder, path) });
     }
     const r = await commitImport(batch, items);
     const csrf = reply.generateCsrf();
     return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <h1>Import complete</h1>
       <p>Imported <strong>${r.imported}</strong> file${r.imported === 1 ? '' : 's'}${r.skipped ? `, skipped ${r.skipped} duplicate${r.skipped === 1 ? '' : 's'}` : ''}${r.failed ? `, ${r.failed} could not be read` : ''}.</p>
-      <p><a href="/resources">View on Resources →</a> · <a href="/resources/import">Import another</a></p>
+      <p>Units are recorded with each file — find them on <a href="/resources">Resources</a> (search by unit or year group) and turn them into schemes with <a href="/schemes">Schemes → Convert a downloaded unit</a>.</p>
+      <p><a href="/resources/import">Import another</a></p>
     </section>`);
   });
 

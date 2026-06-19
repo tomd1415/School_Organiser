@@ -1,0 +1,415 @@
+# Codebase Bug Report
+
+**Audit date:** 19 June 2026  
+**Scope:** Current working tree, including uncommitted changes  
+**Method:** Static cross-check of routes, services, repositories, migrations, client code, tests, operational scripts, specifications, and the resolved June 2026 review reports. Findings below are limited to deterministic defects and strongly supported risks; style-only observations and already-resolved findings are excluded.
+
+## Executive summary
+
+The audit found **36 current issues**. The most urgent defect is a pupil-name redaction bypass caused by typographic apostrophe variants. The main recurring patterns are insufficient binding of authentication steps, pupil/TA routes whose authorization scope is broader than the UI, non-atomic multi-step writes, memory limits applied after buffering, and recovery procedures that do not treat the database and file store as one recoverable unit.
+
+| Severity | Confirmed | Credible risk | Total |
+|---|---:|---:|---:|
+| Critical | 1 | 0 | 1 |
+| High | 12 | 1 | 13 |
+| Medium | 11 | 8 | 19 |
+| Low | 3 | 0 | 3 |
+| **Total** | **27** | **9** | **36** |
+
+“Confirmed” means the failure follows deterministically from the current code path. “Credible risk” means the code contains a concrete race or partial-failure path whose trigger depends on concurrency, I/O failure, or deployment conditions.
+
+## Testing and environment limitations
+
+- `npm run typecheck` passes on the audited working tree.
+- The completed unit-test baseline passes: **73 test files, 508 tests**.
+- Integration tests were not run because PostgreSQL was unavailable on `localhost:5434`. Findings involving database constraints, transactions, concurrent requests, backup, and restore were therefore validated statically rather than against a live database.
+- No Docker services, database state, migrations, dependencies, generated files, or application data were created or changed during this audit.
+- The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
+
+## Critical findings
+
+### BUG-001 — Typographic apostrophes bypass pupil-name redaction
+
+- **Severity / confidence:** Critical / Confirmed
+- **Affected:** `app/src/services/redact.ts:13-26, 41-49, 64-69`; `app/src/llm/client.ts:152-163`
+- **Problem and trigger:** `nameRegExp` escapes punctuation literally. A roster name stored as `O'Brien` does not match pupil text containing the routine typographic form `O’Brien` (U+2019), and the reverse is also true. Both `redactNames` and `containsRosterName` use the same literal pattern, so neither the replacement nor the final egress assertion catches the variant.
+- **Impact:** A real pupil name can be sent to the AI provider and written into the AI audit payload, violating the system’s explicit “no pupil name ever leaves” boundary.
+- **Evidence / reproduction:** Store a roster name with a straight apostrophe, then pass text containing the same name with a curly apostrophe through either redaction function. The output retains the name and `containsRosterName` returns false. Hyphen/dash variants create the same class of mismatch.
+- **Potential fix:** Canonicalise name punctuation before matching, or build separator-aware regex fragments that treat common apostrophe and hyphen variants as equivalent. Apply exactly the same canonicalisation to replacement and egress assertion.
+- **Regression test / notes:** Add straight/curly apostrophe and hyphen/en-dash pairs in both stored-name directions, including mixed whitespace and NFD text. Keep the fail-closed egress assertion as a separate test.
+
+## High findings
+
+### BUG-002 — The class code is not bound to the pupil PIN flow
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/routes/pupilAuth.ts:177-255`; `app/src/repos/pupilCredentials.ts:71-100`; `app/tests/integration/pupil.int.test.ts:124-190`
+- **Problem and trigger:** `/pupil/names` resolves a class code but stores no server-side proof of the selected group. `/pupil/pin` and `/pupil/login` trust posted `pupil` and `group` IDs and only check that the pupil is enrolled in that group. They can be called directly after obtaining a CSRF token, without ever submitting a valid class code.
+- **Impact:** The class code is not an authorization factor. A LAN client can enumerate pupil/group ID pairs, reveal names through the PIN page, and attempt PINs without knowing the group’s code. Rate limits slow the attack but do not restore the missing binding.
+- **Evidence / reproduction:** GET `/pupil` for a session/CSRF token, then POST an enrolled `pupil`/`group` pair directly to `/pupil/pin`. The route returns the pupil’s name. The integration tests also exercise `/pupil/pin` directly, demonstrating that no code-derived state is required.
+- **Potential fix:** Store the resolved group ID and a short expiry in the session, or issue a signed single-use group token from `/pupil/names`; require it on both later steps and reject posted groups that do not match it.
+- **Regression test / notes:** Assert that direct `/pupil/pin` and `/pupil/login` posts fail before a valid code step, and that changing the group after the code step fails.
+
+### BUG-003 — Pupils and TAs can enumerate unrelated image resources
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/auth/lockdown.ts:8-20`; `app/src/routes/resources.ts:489-525`; `app/src/services/resource.ts:6-16`
+- **Problem and trigger:** The limited-role allowlists permit every numeric `/lesson-image/:id`. The route checks only that the requested resource exists and has `kind = 'image'`; it does not verify that the image is linked to a lesson, worksheet, class, or occurrence the requester may see. Normal uploaded PNG/JPEG/GIF/WebP resources are also classified as images.
+- **Impact:** Any logged-in pupil or TA can enumerate IDs and read unrelated teacher image resources. These may include internal teaching material or images uploaded outside the requester’s class.
+- **Evidence / reproduction:** Log in as a pupil and request `/lesson-image/<id>` for an arbitrary uploaded image resource. A matching image is returned inline even when it has no relation to the pupil’s current lesson.
+- **Potential fix:** Serve worksheet illustrations through scoped signed URLs, or require a resource link to the requester’s current/allowed occurrence. Mark editor-created illustrations explicitly instead of treating every image resource as globally visible.
+- **Regression test / notes:** Test allowed current-lesson images and denied unlinked, other-class, historic, and teacher-only images for both pupil and TA roles.
+
+### BUG-004 — Confirmed marks survive later answer edits
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/repos/pupilWork.ts:63-82`; `app/src/repos/marking.ts:136-145`; `app/src/routes/me.ts:288-310`
+- **Problem and trigger:** `saveAnswer` updates the existing `pupil_answers` row but does not invalidate its `pupil_marks` row. The marking pass deliberately skips confirmed marks and teacher overrides. A pupil can therefore change an answer after confirmation while the old mark remains attached to the same answer ID.
+- **Impact:** Teachers and pupils can see a confirmed score and feedback for text that is no longer the text that was marked. Exports and attainment history can become materially wrong.
+- **Evidence / reproduction:** Save an answer, confirm its mark, then submit a different value for the same occurrence/field. The answer row changes, the confirmed mark remains, and subsequent marking skips it.
+- **Potential fix:** In one transaction, compare the old and new value and delete/demote the mark when the value changes. Alternatively lock confirmed/released answers and provide an audited teacher-approved reopen flow.
+- **Regression test / notes:** Cover suggested, confirmed, teacher-overridden, released, unchanged-resave, and changed-resave cases.
+
+### BUG-005 — Incomplete or duplicate AI marking batches are accepted as successful
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/llm/schemas/markAnswers.ts:5-19`; `app/src/services/marking.ts:183-270`; `app/src/services/markingQueue.ts:32-52`
+- **Problem and trigger:** The structured schema accepts an empty array, missing slots, duplicate slots, and unknown slots. `markOpen` writes whichever known results are returned, ignores unknowns, and reports success unless the provider call itself failed. The durable queue job is then consumed rather than retried.
+- **Impact:** Some pupils’ answers can remain silently unmarked while the operation appears successful. Duplicate output can repeatedly overwrite one answer while omitting others.
+- **Evidence / reproduction:** Stub the structured response with results for slot A only when A, B, and C were sent, or with two A rows. The service writes the accepted rows and does not flag the batch as unavailable/incomplete.
+- **Potential fix:** Compare the returned slot multiset with the exact expected slot set before any write. Reject empty, missing, duplicate, and unknown slots and re-arm the queue job. Prefer a transaction for a question batch.
+- **Regression test / notes:** Add malformed-but-schema-valid provider responses and assert zero partial writes plus retry scheduling.
+
+### BUG-006 — The 12 MB pupil/editor image limit is checked after buffering up to 500 MB
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/server.ts:95-96`; `app/src/routes/me.ts:360-378`; `app/src/routes/resources.ts:489-503`
+- **Problem and trigger:** Multipart is configured globally for 500 MB per file. Both image routes call `toBuffer()` before checking their intended 12 MB limit.
+- **Impact:** An authenticated pupil can repeatedly force the Node process to allocate hundreds of megabytes, causing garbage-collection stalls or process termination. The teacher image endpoint has the same memory-amplification path.
+- **Evidence / reproduction:** Upload a raster file larger than 12 MB but smaller than 500 MB. The complete body is buffered before the route returns 413.
+- **Potential fix:** Apply a route-level multipart limit or consume the stream with a byte counter that aborts at 12 MB before accumulating it.
+- **Regression test / notes:** Assert early stream termination and bounded memory for 12 MB + 1 byte, and verify valid files still store correctly.
+
+### BUG-007 — Folder and nested-zip import limits are enforced after dangerous allocations
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/routes/resources.ts:257-281`; `app/src/services/resourceImport.ts:100-157, 220-227`
+- **Problem and trigger:** A whole folder is fully buffered into `folderEntries` before the 400 MB aggregate cap is consulted. Nested zip entries are fully decompressed with `getData()` before the cap. `stageEntry` checks only the existing total, not `acc.bytes + buf.length`, so a single large entry can exceed the cap and is still written.
+- **Impact:** A teacher upload, malformed archive, or zip bomb can exhaust application memory and disk despite the UI’s stated aggregate limit.
+- **Evidence / reproduction:** Send many individually valid multipart files whose sum exceeds 400 MB, or an archive containing a highly compressed entry larger than the remaining allowance. Allocation occurs before truncation.
+- **Potential fix:** Stream folder parts directly to a staging area while incrementing a shared byte/file budget; inspect archive metadata and stream decompression with per-entry and cumulative hard limits.
+- **Regression test / notes:** Cover aggregate multipart overflow, oversized first entry, nested archive overflow, compression bombs, depth, and cleanup after abort.
+
+### BUG-008 — Concurrent resource version writes can corrupt version/file provenance
+
+- **Severity / confidence:** High / Credible risk
+- **Affected:** `app/src/routes/resources.ts:392-405, 447-485`; `app/src/repos/resources.ts:55-73`; `app/migrations/0006_phase3.sql:54-68`
+- **Problem and trigger:** Routes read the current version, choose `nextNo`, and write that path before `addVersion` independently recomputes `max(version_no)+1`. The version insert and current-pointer update are also separate autocommit statements. Concurrent saves can choose the same path/version.
+- **Impact:** One request may overwrite another request’s bytes, an inserted checksum can describe different bytes, a unique-key error can leave an orphan file, or `current_version_id` can point to an unexpected writer.
+- **Evidence / reproduction:** Issue two simultaneous saves for the same resource while both observe version N. Both target an N+1 path; interleaving determines the final bytes and which database operation fails/wins.
+- **Potential fix:** Lock the resource row and allocate the version inside one database transaction; use a unique immutable storage name based on the returned version ID/UUID; update the current pointer in the same transaction and delete staged files on rollback.
+- **Regression test / notes:** Use two barriers/concurrent connections and verify distinct immutable files, sequential version numbers, matching checksums, and a deterministic current pointer.
+
+### BUG-009 — The restore script cannot restore over the normal populated database
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `scripts/backup.sh:57-60`; `scripts/restore.sh:36-41`; `scripts/verify-backup.sh:34-44`
+- **Problem and trigger:** Backups are plain `pg_dump` SQL. `restore.sh` pipes that SQL into the existing `organiser` database without dropping/recreating the database or cleaning its schema. The dump contains object creation and data statements that conflict with an already-migrated installation.
+- **Impact:** The documented disaster-recovery command fails when it is most likely to be used: restoring an existing or freshly started stack whose schema already exists.
+- **Evidence / reproduction:** Run the restore script against a database that already contains the application tables. `psql -v ON_ERROR_STOP=1` stops at the first duplicate relation/object or data conflict. The verifier succeeds only because it creates an empty scratch database first.
+- **Potential fix:** Stop the app, restore into a newly created empty database/schema, or generate/restore a format that explicitly cleans objects with reviewed ownership/extension handling. Add a clear destructive confirmation.
+- **Regression test / notes:** Test both bare-metal disaster recovery and replacement of a populated test database, then start the application and run integrity checks.
+
+### BUG-010 — Database and resource backups are not published or verified as an atomic recovery set
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `scripts/backup.sh:47-70`; `scripts/verify-backup.sh:17-52`; `scripts/restore.sh:37-41`
+- **Problem and trigger:** The database artifact is moved to its final name before the resource archive is produced. If resource tar/encryption fails, the newest visible DB backup has no matching file-store snapshot. DB and resource files are pruned independently. Verification selects and restores only the newest DB artifact; resource decryption, archive integrity, stamp matching, and referenced-file presence are never checked.
+- **Impact:** Operators can receive a “PASS” for a backup that cannot restore worksheet/resource bytes, or select mismatched snapshots and recover database pointers to missing/wrong files.
+- **Evidence / reproduction:** Make the resource directory unreadable after the DB dump succeeds. A final `db-<stamp>` remains while `resources-<stamp>` does not. The verifier can still pass that DB artifact.
+- **Potential fix:** Keep both artifacts temporary until both succeed, publish a manifest/checksums last, prune by complete manifest set, and verify both artifacts together by restoring the DB and extracting the resources into temporary locations.
+- **Regression test / notes:** Fault-inject dump, tar, encryption, move, and pruning failures. Assert no incomplete set is discoverable as current and verification rejects missing/mismatched resources.
+
+### BUG-011 — The advertised monthly AI hard cap can be exceeded
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/llm/client.ts:41-52, 105-110, 141-149`; `app/src/services/reviewLesson.ts:71, 155`
+- **Problem and trigger:** The pre-call check includes estimated call cost only when the caller supplies `estimatedCostPence`. Only the lesson-review paths do so; every other AI feature passes an implicit zero. If current spend is below the cap, a call may start even when its actual cost will cross the cap. Concurrent calls can all pass the same non-reserving check.
+- **Impact:** Schools can spend beyond the configured budget ceiling, with larger overshoot under simultaneous bulk operations.
+- **Evidence / reproduction:** Set spend just below the cap and invoke any non-review AI feature. `overMonthlyCap(spent, cap, 0)` permits it regardless of `maxTokens` and model price.
+- **Potential fix:** Compute a conservative estimate centrally from model, input size, and `maxTokens`; atomically reserve budget before provider calls and reconcile actual cost afterward.
+- **Regression test / notes:** Test near-cap calls for every model role plus concurrent reservations; the total of reservations/actual charges must never exceed policy.
+
+### BUG-012 — Pupil and TA “current lesson” views ignore cancellations and off-timetable exceptions
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/routes/me.ts:74-88, 185-204, 230-254`; `app/src/routes/ta.ts:47-68, 180-228`; `app/src/services/exceptions.ts:25-63`
+- **Problem and trigger:** Both surfaces resolve the weekly timetable and materialise/render occurrences without consulting `lesson_exceptions`. `cancelled`, `free`, and whole-day `off_timetable` exceptions are handled on teacher timetable/Now surfaces but not here.
+- **Impact:** Pupils and TAs can receive worksheets, plans, resources, feedback, and writable occurrence IDs for a lesson that the teacher marked cancelled or unavailable. This is both a disclosure and operational correctness issue.
+- **Evidence / reproduction:** Add a cancelled or whole-day off-timetable exception for the current slot, then open `/me` or `/ta` in that slot. The original lesson still renders and may be materialised.
+- **Potential fix:** Use the shared exception index/effect before selecting or creating an occurrence. Suppress free/cancelled/off-timetable lessons and apply room/cover changes consistently.
+- **Regression test / notes:** Matrix-test whole-day and per-lesson exception kinds on pupil now/next, TA now/next/deep-link, and ordinary unaffected lessons.
+
+### BUG-013 — Unexpected HTMX failures are reported as successful and can erase unsaved form input
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/server.ts:98-116`; `app/public/app.js:83-117`; examples at `app/src/lib/resourceView.ts:118-128`, `app/src/lib/notesView.ts:38`, `app/src/routes/tasks.ts:50`, `app/src/routes/focus.ts:98`
+- **Problem and trigger:** The global error handler converts unexpected HTMX 500s into HTTP 200. HTMX therefore sets `event.detail.successful = true`. Several forms reset unconditionally after any request, and even forms guarded by `successful` now treat a server crash as success.
+- **Impact:** A failed upload, generated-resource brief, pasted email, follow-up, or other form can be cleared even though nothing was saved. The global toast incorrectly promises that the text remains on screen.
+- **Evidence / reproduction:** Force a route handler to throw after form submission. The response is 200 with `app:save-failed`; HTMX fires a successful `afterRequest`, and `this.reset()` clears the form.
+- **Potential fix:** Preserve a failing HTTP status and configure HTMX error swapping explicitly, or add a response header/detail that all reset handlers check. Reset only on an application-level confirmed-save event.
+- **Regression test / notes:** Browser-test 500, 400, network abort, timeout, and success for every form with an after-request reset.
+
+### BUG-014 — Whole-unit planner drops overwrite pinned lessons
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/routes/planner.ts:322-335`; `app/src/repos/delivery.ts:164-183`; `app/migrations/0043_planner_lock.sql`
+- **Problem and trigger:** Single-lesson operations reject a locked target, but the `unit` operation calls `layLessonsAcrossClass` over the raw stream. That repository method overwrites every target plan without reading `planner_locked`.
+- **Impact:** A one-gesture unit placement can replace an assessment or other lesson the teacher explicitly pinned. The lock flag remains, so the replacement may misleadingly appear intentionally pinned.
+- **Evidence / reproduction:** Pin a future planned slot, then drop a unit on an earlier slot whose sequence crosses it. The pinned row’s `lesson_plan_id` is overwritten.
+- **Potential fix:** Build unit placement with the same lock-aware cascade primitive as single inserts, skipping locked positions or rejecting the operation with a preview of conflicts.
+- **Regression test / notes:** Cover locks before, at, and within the unit span, insufficient trailing capacity, and undo.
+
+## Medium findings
+
+### BUG-015 — Marking applies one worksheet scheme to mixed answer provenance
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/services/marking.ts:45-72, 143-151, 189-201`; `app/src/repos/marking.ts:115-132`; `app/migrations/0019_pupil_answer_key.sql`
+- **Problem and trigger:** `answersVersionFor` selects only the maximum version for the currently resolved worksheet resource. `answersForMarking` then returns every answer for the occurrence without resource/version fields. All are evaluated against that one scheme and field map. Worksheet resource switches or mixed saved versions therefore collapse distinct provenance.
+- **Impact:** Older answers can be evaluated against a newer/different scheme, or fields from a prior worksheet can be ignored or misinterpreted.
+- **Evidence / reproduction:** Save pupil answers against worksheet resource/version A, switch/re-version the lesson worksheet, save another answer, then mark. Resolution chooses one version while the input set still contains all rows.
+- **Potential fix:** Return resource/version with each marking answer and partition marking by exact provenance, or freeze one worksheet version for an occurrence once pupil work starts.
+- **Regression test / notes:** Cover version changes, master/adapted resource switches, mixed pupils, removed/reused field keys, and exact scheme selection.
+
+### BUG-016 — Disabling, deleting, or re-passwording a TA account does not revoke its live session
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/auth/routes.ts:65-81`; `app/src/server.ts:141-174`; `app/src/routes/settingsPage.ts:442-499`
+- **Problem and trigger:** TA sessions store role/name/staff ID but no account ID or revocation version. The global hook checks only the role allowlist. Account disable, password reset, deletion, and clearing the legacy shared password affect future logins only.
+- **Impact:** A lost or compromised TA browser remains authorized until its session expires or logs out, despite an administrator taking an explicit revocation action.
+- **Evidence / reproduction:** Log in as a named/shared TA, disable/delete/change that credential in another teacher session, then continue using the original TA cookie.
+- **Potential fix:** Store `taAccountId` and a session/account version, revalidate active state on requests (with a short cache), and increment the version for all revocation actions. Provide “revoke all TA sessions.”
+- **Regression test / notes:** Verify immediate eviction after disable, delete, password change, shared-password clear, and staff deactivation.
+
+### BUG-017 — Pupil PIN/account changes do not revoke live pupil sessions
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/server.ts:158-173`; `app/src/routes/pupils.ts:175-182, 295-321`; `app/src/repos/pupilCredentials.ts:107-119`; `app/src/repos/pupilWork.ts:12-20`
+- **Problem and trigger:** Resetting or disabling a PIN and archiving a pupil revoke remembered-device rows, but not the self-contained live session. The request hook validates only the global access switch and idle time; it does not recheck pupil active/credential state. `pupilCanAccessOc` also ignores `pupils.active` and credential state.
+- **Impact:** A pupil browser can continue reading/writing after the teacher disables that pupil’s access, resets a compromised PIN, or archives the pupil.
+- **Evidence / reproduction:** Log in as a pupil, disable their PIN/archive them from a teacher session, then continue posting `/me/answer` with the existing cookie.
+- **Potential fix:** Revalidate active pupil + enabled credential/session version in the pupil hook, and bump/revoke that version on PIN reset, disable, archive, anonymise, and erase.
+- **Regression test / notes:** Verify immediate eviction for each individual action while unrelated pupil sessions continue.
+
+### BUG-018 — AI audit-write failures silently undercount spend and remove DPIA evidence
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/llm/client.ts:112-132, 183-195, 230-248`; `app/src/repos/aiCalls.ts:17-45`
+- **Problem and trigger:** After a successful billed provider call, `audit` catches and only logs any database insert failure. The successful result is returned without a durable `ai_calls` row. Monthly spend is calculated solely from those rows.
+- **Impact:** Cost caps undercount actual provider spend and the application loses the redacted request/response evidence expected for AI governance.
+- **Evidence / reproduction:** Make `insertAiCall` fail after a successful mocked provider response. The caller receives success, while spend and audit history remain unchanged.
+- **Potential fix:** Persist billing/audit records via a durable outbox or local append-only fallback and reconcile before allowing further calls; at minimum reserve estimated cost before the provider request.
+- **Regression test / notes:** Fault-inject DB unavailability after provider success and prove eventual audit persistence and conservative cap accounting.
+
+### BUG-019 — Database constraints do not enforce one active, uniquely versioned scheme per course
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/migrations/0006_phase3.sql:7-14`; `app/src/repos/schemes.ts:128-143, 156-200, 609-621`
+- **Problem and trigger:** There is no unique `(course_id, version)` constraint and no partial unique index for one active scheme per course. `createScheme` and materialisation use the default `active = true`; repeated creates can produce multiple active version-1 schemes. Concurrent/repeated cloning from the same source can create duplicate version numbers.
+- **Impact:** `getActiveScheme` silently chooses the highest version/one row, so coverage, planning, adaptation, and editing can disagree about which scheme is live.
+- **Evidence / reproduction:** Create two schemes for one course or clone the same version twice. The schema accepts both active rows/duplicate versions.
+- **Potential fix:** Add unique `(course_id, version)` and a partial unique `(course_id) WHERE active`; create/activate versions transactionally with row locking and explicit intended state.
+- **Regression test / notes:** Test repeated and concurrent create/clone/activate/move-to-course operations.
+
+### BUG-020 — Cloning a scheme silently drops labels, lesson kit, and resource links
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/repos/schemes.ts:609-649`; `app/migrations/0009_scheme_labels.sql`; `app/migrations/0040_lesson_kit.sql`; `app/migrations/0006_phase3.sql:70-83`
+- **Problem and trigger:** The scheme clone inserts only course/title/version; labels are omitted. Lesson copies omit `kit_needed`, and only spec-point mappings are copied. Unit and lesson-plan `resource_links` are not recreated for the new IDs.
+- **Impact:** A new-year draft appears complete structurally but loses organizational labels, equipment requirements, worksheets, slides, and attachments.
+- **Evidence / reproduction:** Add a scheme label, kit note, unit resource, and lesson resource; clone the scheme. Query/render the clone: those values/links are absent.
+- **Potential fix:** Define clone semantics explicitly and copy all owned planning metadata and links using old-to-new ID maps inside the existing transaction.
+- **Regression test / notes:** Deep-compare source and clone for labels, active flags, units, plans, kit, objectives, spec mappings, and resource links while ensuring IDs differ.
+
+### BUG-021 — Planner cascades and swaps are not atomic
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/routes/planner.ts:287-300, 338-375`; `app/src/repos/delivery.ts:166-181, 219-249`
+- **Problem and trigger:** Multi-position operations loop through separate repository calls. `applyPlacements`, unit layout, undo lock restoration, and `moveBinding` can commit some updates before a later query fails.
+- **Impact:** A connection drop, constraint failure, or process restart can leave a schedule half-shifted, duplicate a plan, lose a displaced plan, or restore bindings without their locks.
+- **Evidence / reproduction:** Fault the nth `setOccurrenceCoursePlan` during a cascade or the second statement of a swap. Earlier writes remain committed.
+- **Potential fix:** Execute each logical planner operation on one database client/transaction, lock affected occurrence-course rows, and update the in-memory undo snapshot only after commit.
+- **Regression test / notes:** Fault-inject every write position and assert the before-state is fully preserved on failure.
+
+### BUG-022 — Applying a lesson review marks it applied before its changes commit
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/repos/reviews.ts:121-138`; `app/src/routes/schemes.ts:621-646`; `app/src/repos/schemes.ts:418-427`
+- **Problem and trigger:** `claimOpenReview` first commits `status = 'applied'`; objective and outline updates then run as independent statements. A later failure leaves the review permanently applied with zero or partial changes. Dismiss also performs a read-then-unconditional-update, so it can race an apply and relabel an already-applied review as dismissed.
+- **Impact:** The UI/audit trail can claim a recommendation was applied when the lesson was not updated, or conceal that applied changes came from a review later marked dismissed.
+- **Evidence / reproduction:** Fault the first/second `updatePlanField`, or concurrently invoke apply and dismiss after both observe open state.
+- **Potential fix:** Lock/claim the open row and update all suggested fields/status in one transaction; make dismiss `UPDATE ... WHERE status='open'` and check the returned row.
+- **Regression test / notes:** Cover field-write failure, missing plan, double apply, apply-vs-dismiss, and dismiss-vs-dismiss.
+
+### BUG-023 — Deactivating a group’s course leaves it attached to timetable and occurrences
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/repos/setup.ts:625-664`; `app/src/repos/occurrence.ts:30-50, 84-99`; `app/src/repos/delivery.ts:27-43, 124-136`
+- **Problem and trigger:** `setGroupCourse(..., false)` only sets `group_courses.active = false`. Existing `timetabled_lesson_courses` mappings remain, and occurrence/delivery queries do not filter `gc.active`.
+- **Impact:** A course removed in Setup can continue appearing in slots, materialising occurrence-course rows, receiving plans, and surfacing to pupils/TAs.
+- **Evidence / reproduction:** Attach a course to a group/lesson, untick the group course, then open/materialise that lesson. The stale mapping is still selected.
+- **Potential fix:** Decide whether deactivation should detach all lesson mappings or make every consumer consistently filter active group courses; preserve historic occurrences explicitly where needed.
+- **Regression test / notes:** Test removal before and after occurrences exist, then reactivation, split lessons, history, planner, pupil, and TA views.
+
+### BUG-024 — Selecting a nonexistent academic year can leave no current year
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/repos/setup.ts:47-60`; `app/src/routes/setup.ts:473-479`
+- **Problem and trigger:** `makeYearCurrent` clears the current flag before updating the requested ID and does not verify that the second update matched a row.
+- **Impact:** A stale/forged/deleted year ID commits a state with no current academic year, breaking many scalar subqueries and current timetable/setup paths.
+- **Evidence / reproduction:** Call `makeYearCurrent` with a positive nonexistent ID. The first update succeeds, the second affects zero rows, and the transaction commits.
+- **Potential fix:** Lock and validate the target first, then update with a checked `RETURNING`; retain/add database enforcement appropriate to the exactly-one-current invariant.
+- **Regression test / notes:** Verify nonexistent/deleted IDs roll back and concurrent switches end with exactly one valid current year.
+
+### BUG-025 — `per_lesson` recurring tasks miss additional lessons on the same day
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/services/recurrence.ts:43-53`; `app/src/repos/recurringTasks.ts:100-121`
+- **Problem and trigger:** `nextLesson` advances by whole date and selects only the first group slot for a matching weekday. `last_generated` stores only a date. If a group has two lessons on one day, the second slot can never be returned.
+- **Impact:** “Per lesson” preparation/tasks are generated once per day rather than once per actual lesson, so work for double lessons is silently omitted.
+- **Evidence / reproduction:** Give a group two Monday slots and evaluate recurrence after Sunday. The function returns the first Monday slot; the next search starts Tuesday and skips the second Monday slot.
+- **Potential fix:** Track a due cursor including date plus timetabled lesson/slot, and enumerate the ordered slot stream rather than dates only.
+- **Regression test / notes:** Cover double lessons, multiple weekdays, holidays, timetable changes, and year boundaries.
+
+### BUG-026 — Concurrent recurring-task generators can insert duplicate instances
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/repos/recurringTasks.ts:92-124`; `app/src/server.ts:215-227`; `app/migrations/0005_recurrence.sql:21-22`
+- **Problem and trigger:** Idempotency uses `INSERT ... WHERE NOT EXISTS`, but there is no unique constraint and no transaction/advisory lock. Two app/cron runs can both observe absence and insert the same definition/date before either updates `last_generated`.
+- **Impact:** Duplicate recurring tasks appear during overlapping boot, cron, or multi-process generation.
+- **Evidence / reproduction:** Synchronise two transactions immediately after their NOT EXISTS checks for the same definition/date; both inserts are legal.
+- **Potential fix:** Add a database-level unique occurrence key (preferably definition + exact due slot/time), use `ON CONFLICT DO NOTHING`, and update the cursor transactionally.
+- **Regression test / notes:** Run two generator calls concurrently and assert one materialised task and a monotonic cursor.
+
+### BUG-027 — Email deduplication still has check/create/mark races and partial-write gaps
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/services/emailPoll.ts:123-162`; `app/src/repos/tasks.ts:45-80`; `app/migrations/0037_processed_emails.sql`
+- **Problem and trigger:** The current remediation checks `processed_emails`, creates/routs the destination through several autocommit writes, then inserts the dedup key. Concurrent poll/test runs can both pass the check. A failure after destination creation but before `markEmailProcessed` repeats the import on the next poll.
+- **Impact:** Duplicate tasks/events/notes/captured items and orphan/partially triaged intake records remain possible despite the processed-email table.
+- **Evidence / reproduction:** Race two handlers on one Message-ID, or fault `markEmailProcessed` after `createTaskFromEmail`. The unique key protects only the late marker, not the already-created destinations.
+- **Potential fix:** Atomically reserve the dedup key first (`INSERT ... ON CONFLICT ... RETURNING`) and perform destination/intake writes in the same transaction, with an explicit processing/complete state for retry recovery.
+- **Regression test / notes:** Cover concurrent handlers and failure after every write for each route type.
+
+### BUG-028 — Resource import commits can leave orphan database rows and files
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/services/resourceImport.ts:278-313`; `app/src/repos/resources.ts:40-73`; `app/src/routes/resources.ts:345-358`
+- **Problem and trigger:** Import creates a resource row, writes a file, inserts a version, updates metadata, and later cleans staging through independent operations. Failure midway leaves some combination of resource row, stored file, version, and staging directory. Duplicate detection is also check-then-create without a uniqueness constraint on checksums.
+- **Impact:** Failed or concurrent imports accumulate invisible/orphan files and incomplete resources; duplicates can be created despite the review warning.
+- **Evidence / reproduction:** Fault `storeBuffer`, `addVersion`, or `setResourceUnit` after the preceding step, or import identical content concurrently.
+- **Potential fix:** Stage files under temporary UUIDs, wrap database metadata in a transaction, publish/rename after commit with compensating cleanup, and enforce the intended checksum uniqueness policy in the database.
+- **Regression test / notes:** Fault each boundary and verify no orphan resource/version/file/staging state remains.
+
+### BUG-029 — Replacing a pupil screenshot with another format leaves the old image indefinitely
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/routes/me.ts:360-380`; `app/src/repos/pupils.ts:123-160`; `app/src/repos/pupilWork.ts:63-82`
+- **Problem and trigger:** Screenshot paths include the extension. Replacing `field.png` with `field.jpg` writes a new file and overwrites the single DB pointer, but never deletes the previous path. Pupil disposal only queries currently referenced `img:` values, so the old unreferenced image is no longer discoverable for deletion.
+- **Impact:** Sensitive pupil work remains on disk after replacement and can survive later anonymisation/erasure cleanup, contrary to data-minimisation expectations.
+- **Evidence / reproduction:** Upload PNG then JPEG for the same pupil/occurrence/key. Both files remain; only the JPEG path exists in `pupil_answers`.
+- **Potential fix:** Read the old pointer and transactionally/compensatingly unlink it after the new answer is durable, or use a stable extension-independent object key and overwrite atomically. Add orphan-store reconciliation.
+- **Regression test / notes:** Cover same/different formats, failed replacement, concurrent replacement, anonymise, and erase.
+
+### BUG-030 — Pupil work authorization permits forged historic/future writes and arbitrary answer fields
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/repos/pupilWork.ts:8-20`; `app/src/routes/me.ts:288-325, 341-378`; `app/src/lib/worksheetForm.ts`
+- **Problem and trigger:** `pupilCanAccessOc` proves only active enrolment in the occurrence course’s group. It does not require the session’s selected group, a current/next accessible date, a non-cancelled lesson, or the worksheet to contain the posted field key. A pupil who learns/guesses an occurrence-course ID can mutate old/future work for any group they are enrolled in and create up to one answer row per arbitrary 60-character key.
+- **Impact:** Pupils can alter historical evidence after lessons, pre-fill future lessons, trigger marking/done state, and create fake/unbounded fields not present on the worksheet.
+- **Evidence / reproduction:** While logged in, POST `/me/answer?oc=<historic enrolled oc>&key=fake.1`. The enrollment predicate passes and the row is inserted.
+- **Potential fix:** Authorize against a server-issued current lesson/worksheet capability tied to pupil, group, occurrence, resource version, and allowed field inventory; define whether/when historical edits are permitted.
+- **Regression test / notes:** Deny other session group, historic, future, cancelled, unknown-field, and stale-version writes; allow only the rendered current capability.
+
+### BUG-031 — Migration execution has no cross-process lock
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/db/migrate.ts:7-40`; `app/migrations/*.sql`
+- **Problem and trigger:** Each process reads the applied migration set before applying pending files, but no advisory lock serialises migrators. Two app instances starting together can both select the same pending migration; one then fails on DDL or the `schema_migrations` primary key.
+- **Impact:** Rolling/multi-process startup can crash-loop an instance or leave deployment availability dependent on timing, even though each individual migration is transactional.
+- **Evidence / reproduction:** Start two processes against a database with a pending migration and pause both after reading `schema_migrations`.
+- **Potential fix:** Acquire a PostgreSQL advisory lock for the full migration run, then re-read the applied set while holding it.
+- **Regression test / notes:** Launch two migration runners concurrently and assert both exit successfully with each migration applied once.
+
+### BUG-032 — Production Compose exposes the database and direct app port on all host interfaces
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/docker-compose.yml:7-18, 34-60`; `docs/SECURITY_AND_PRIVACY.md:124-131`
+- **Problem and trigger:** Compose publishes `5434:5432` and `44360:44360`, which bind all interfaces by default. The latter bypasses Caddy TLS/IP controls; the former exposes PostgreSQL directly to the LAN and falls back to a known default password if production provisioning is incomplete.
+- **Impact:** The deployment’s stated Caddy front-door controls are not the sole boundary. LAN clients may reach the app directly or attack the database service.
+- **Evidence / reproduction:** On a default Docker host without a restrictive firewall, connect to the host’s LAN address on ports 44360 and 5434.
+- **Potential fix:** Bind development ports to `127.0.0.1`, use a production override with no DB publication, and expose the app only to Caddy on an internal network. Fail production startup if the default DB password remains.
+- **Regression test / notes:** Add deployment validation that inspects effective Compose bindings and verifies only intended 80/443 exposure from another LAN host.
+
+### BUG-033 — Any unrelated successful HTMX action clears the “not saved” warning
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/public/app.js:98-117`; background poll emitters across `app/src/routes/now.ts`, `app/src/routes/focus.ts`, and `app/src/routes/pupilWork.ts`
+- **Problem and trigger:** After a save failure, the toast is cleared by the next successful non-background HTMX request, not by a retry of the failed request or field. A toggle, navigation fragment, or different save is enough.
+- **Impact:** The user can be told everything is healthy while the original text remains unsaved, increasing silent data-loss risk.
+- **Evidence / reproduction:** Cause an autosave failure, then perform an unrelated successful HTMX action. `clearToast()` runs even though the failed payload was never persisted.
+- **Potential fix:** Attach a save-operation/field ID to failure and success events and clear only when that same operation succeeds; retain a list/count if several fields are unsaved.
+- **Regression test / notes:** Test unrelated success, background success, retry success, multiple failed fields, and full-page navigation.
+
+## Low findings
+
+### BUG-034 — Aborted HTMX requests decrement the global in-flight counter twice
+
+- **Severity / confidence:** Low / Confirmed
+- **Affected:** `app/public/app.js:58-81`; bundled HTMX abort event behavior
+- **Problem and trigger:** `requestDone` is registered for both `htmx:afterRequest` and `htmx:sendAbort`. HTMX emits `afterRequest` and then `sendAbort` for an aborted XHR, so one request decrements twice.
+- **Impact:** With multiple concurrent requests, aborting one can clear the global busy indicator while another slow request is still running.
+- **Evidence / reproduction:** Start two requests, abort one, and observe the counter drop by two.
+- **Potential fix:** Decrement on one terminal event only, or track request identities in a `Set` and remove each once.
+- **Regression test / notes:** Browser-test success, error, timeout, abort, and overlapping requests.
+
+### BUG-035 — Clearing required titles causes a database error instead of validation
+
+- **Severity / confidence:** Low / Confirmed
+- **Affected:** `app/src/routes/tasks.ts:103-119`; `app/src/repos/tasks.ts:104-121`; `app/src/repos/schemes.ts:408-427`; `app/src/repos/recurringTasks.ts:52-75`; relevant NOT NULL migrations
+- **Problem and trigger:** Autosave routes normalise an empty title to `NULL`, while task, recurring-task, unit, and lesson-plan titles are NOT NULL. The repository sends that value to PostgreSQL instead of rejecting it or preserving a valid title.
+- **Impact:** Clearing a title produces a generic failure/save warning and inconsistent UX rather than a useful validation message.
+- **Evidence / reproduction:** Delete all text from an editable task/unit/lesson/recurring title and blur the field. The update violates NOT NULL.
+- **Potential fix:** Validate trimmed non-empty titles at the route/repository boundary and return a field-specific 422 response, or deliberately allow empty strings if that is the product rule.
+- **Regression test / notes:** Test empty, whitespace-only, maximum length, and ordinary title autosaves for each entity.
+
+### BUG-036 — Academic-year timetable preview loses its selected structure on week navigation
+
+- **Severity / confidence:** Low / Confirmed
+- **Affected:** `app/src/routes/timetable.ts:100-181`
+- **Problem and trigger:** `?year=<id>` selects an explicit academic-year structure, but Prev, Next, and This week links omit the `year` parameter.
+- **Impact:** A teacher previewing next year’s draft timetable is silently returned to date-derived/current-year structure after one navigation click and may believe they are still editing/reviewing the previewed year.
+- **Evidence / reproduction:** Open `/timetable?year=<draft>` and click Prev or Next; the resulting URL contains only `date`.
+- **Potential fix:** Preserve the explicit `year` query parameter in all week-navigation links until the user intentionally exits preview mode.
+- **Regression test / notes:** Assert navigation URLs and labels for current, archived, future, invalid, and no-explicit-year cases.
+
+## Cross-cutting risks
+
+1. **UI scope is repeatedly mistaken for authorization scope.** Class-code steps, lesson-image IDs, pupil occurrence writes, and session revocation rely on what the normal page exposes rather than a durable server-side capability.
+2. **Multi-step operations often lack one commit boundary.** Resource versions/imports, planner cascades, review application, recurring generation, email intake, and backup publication can expose partial state.
+3. **Limits are applied after materialisation.** Image, folder, and archive paths allocate the content before enforcing the smaller policy limit.
+4. **Database invariants are sometimes implemented only by query convention.** Active scheme uniqueness, recurring idempotency, migrator serialization, and exactly-one-current-year behavior need database-backed enforcement.
+5. **Database and file-store lifecycle is not unified.** Imports, pupil screenshots, version files, backup, verification, restore, and erasure can disagree about which bytes belong to which records.
+6. **The green unit suite does not cover the highest-risk boundaries.** Most findings need integration, concurrent-connection, streaming, browser-event, or disaster-recovery tests.
+
+## Suggested remediation priority
+
+1. **Immediate privacy/security containment:** BUG-001, BUG-002, BUG-003, BUG-006, BUG-007, BUG-012, BUG-016, BUG-017, and BUG-030.
+2. **Assessment correctness:** BUG-004, BUG-005, and BUG-015 before relying on automated/released marks.
+3. **Prove recovery:** BUG-009 and BUG-010; perform a full isolated restore drill including resource bytes before treating backups as operational.
+4. **Enforce transactional invariants:** BUG-008, BUG-014, BUG-019, BUG-021 through BUG-028, and BUG-031.
+5. **Cost/audit controls:** BUG-011 and BUG-018.
+6. **User-facing reliability and deployment hardening:** BUG-013, BUG-032 through BUG-036.
+
+Before fixes are merged, add a small set of reusable test harnesses: concurrent PostgreSQL barriers, injected repository failures, multipart/archive size probes, HTMX browser tests, and an automated scratch restore of a matched database/resource backup set.

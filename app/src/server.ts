@@ -92,7 +92,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     root: join(__dirname, '..', 'public'),
     prefix: '/static/',
   });
-  await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024 } });
+  // fileSize: a single big file; files/parts: a whole-folder import (webkitdirectory) is many parts.
+  await app.register(multipart, { limits: { fileSize: 500 * 1024 * 1024, files: 4000, parts: 4100 } });
 
   // HTMX 2.x won't swap a 4xx/5xx response, so a thrown handler error leaves the panel silently
   // doing nothing. For HTMX requests, reply 200 with a small error fragment the target CAN swap,

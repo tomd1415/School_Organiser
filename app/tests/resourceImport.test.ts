@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import AdmZip from 'adm-zip';
-import { safeRel, docxText, defaultTitle } from '../src/services/resourceImport';
+import { safeRel, docxText, defaultTitle, buildStorePath } from '../src/services/resourceImport';
 
 // The security-critical bit is path sanitisation: a malicious archive must never write outside the
 // batch dir, and OS noise must be dropped before it reaches the review screen.
@@ -47,5 +47,19 @@ describe('resourceImport — defaultTitle', () => {
     expect(defaultTitle('intro_worksheet-01.pdf')).toBe('intro worksheet 01');
     expect(defaultTitle('LESSON.pptx')).toBe('LESSON');
     expect(defaultTitle('noext')).toBe('noext');
+  });
+});
+
+describe('resourceImport — buildStorePath (normalised year/unit/lesson path for convert-unit)', () => {
+  it('prepends year group + unit name and keeps the lesson + filename', () => {
+    expect(buildStorePath('Year 8', 'Unit 11: Networks', '8', '8/Lesson 1/slides.pptx')).toBe(
+      'Year 8/Unit 11: Networks/Lesson 1/slides.pptx',
+    );
+  });
+  it('turns a bare lesson-number folder into "Lesson N" so the unit is recognisable', () => {
+    expect(buildStorePath('Year 7', 'Unit 3', '3', '3/2/worksheet.pdf')).toBe('Year 7/Unit 3/Lesson 2/worksheet.pdf');
+  });
+  it('falls back to the original path when there is no unit', () => {
+    expect(buildStorePath('', '', '', 'readme.txt')).toBe('readme.txt');
   });
 });

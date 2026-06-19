@@ -405,6 +405,7 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .res { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
 .res-kind { font-size: 1.1rem; }
 .res-meta { font-size: 0.78rem; margin-left: auto; }
+.res-unit { font-size: 0.72rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 0.35rem; }
 .res-linked { list-style: none; padding: 0; margin: 0.3rem 0; }
 .res-linked li { font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; }
 /* 13.6 — group a lesson's linked resources: images · original · generated. */
@@ -692,7 +693,15 @@ tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 
 .grp-course { display: inline-block; margin-right: 0.8rem; font-weight: 400; }
 .grp-pupils select { font: inherit; font-size: 0.8rem; padding: 0.2rem; border: 1px solid var(--line); border-radius: 4px; }
 
-/* Bulk resource import — the review screen */
+/* Bulk resource import — the upload + review screens */
+.imp-upload { align-items: stretch; }
+.imp-pick { border: 1px dashed var(--line); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.85rem; }
+.imp-limit { font-size: 0.8rem; margin-top: 0.6rem; }
+.imp-unit { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: end; margin: 1.1rem 0 0.3rem; padding: 0.5rem 0.7rem; background: var(--accent-soft); border-radius: 8px; }
+.imp-unit label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 700; }
+.imp-unit input { display: block; font: inherit; text-transform: none; letter-spacing: normal; color: var(--ink); font-weight: 400; border: 1px solid var(--line); border-radius: 4px; padding: 0.3rem 0.45rem; margin-top: 0.15rem; }
+.imp-unitname { min-width: 16rem; }
+.imp-folder { align-self: center; }
 .imp-group { margin: 1rem 0 0.2rem; font-size: 0.95rem; }
 .imp-title { width: 100%; min-width: 12rem; }
 .imp-meta { white-space: nowrap; font-size: 0.78rem; }

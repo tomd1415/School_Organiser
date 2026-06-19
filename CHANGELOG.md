@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Bulk import: whole folders + per-unit metadata
+
+Four follow-ups to the bulk importer. Suite green: **508 unit / 301 integration; typecheck clean**.
+
+- **Pick a whole folder, not just a zip.** The import page now offers a folder picker
+  (`webkitdirectory`) beside the single-zip option; its files arrive with their relative paths
+  (busboy `preservePath`), so the unit/lesson structure is reconstructed the same as from a zip.
+  [/resources/import](app/src/routes/resources.ts), [extractFolder](app/src/services/resourceImport.ts).
+- **Unit name + year group recorded on every file.** A unit folder is usually just an opaque number
+  (many units share one), so the importer reads the unit's Word description (AI) for the **unit name +
+  number** and **year group** and stamps both onto every file in the unit, keeping the per-file lesson
+  title. New nullable `resources.unit` / `resources.year_group` ([migration 0047](app/migrations/0047_resource_unit_meta.sql)),
+  shown and searchable on the Resources page. The review screen shows each unit's year group + unit name
+  (editable — the folder number can't supply them) before import.
+- **Imported units are now found by "Convert a downloaded unit".** The importer was recording the
+  literal `imported from archive`, so the scheme-author tool (which reads the original folder path) saw
+  nothing. It now records a normalised `Year group / Unit name / Lesson N / file` path, so units are
+  discoverable **and** disambiguated when they share a number. ([buildStorePath](app/src/services/resourceImport.ts),
+  consumed by [convertUnit.ts](app/src/services/convertUnit.ts) via [getImportedPaths](app/src/repos/resources.ts)).
+- **The upload size limit is stated on the page** (500 MB per file; ~400 MB / 3,000 files per import).
+- Nested zips are now unzipped **transparently** (a `Lesson 1.zip` becomes a `Lesson 1/` folder), and
+  multipart limits were raised (`files`/`parts`) for many-file folder uploads.
+
 ### 2026-06-19 — Timetable calendar-awareness + setup editor ordering
 
 Three reported timetable bugs. Suite green: **505 unit / 304 integration; typecheck clean**.

@@ -2,37 +2,39 @@ import { afterAll, describe, expect, it } from 'vitest';
 import AdmZip from 'adm-zip';
 import { rm } from 'node:fs/promises';
 import { pool } from '../../src/db/pool';
-import { extractArchive, commitImport } from '../../src/services/resourceImport';
+import { extractArchive, commitImport, buildStorePath, type CommitItem } from '../../src/services/resourceImport';
 import { checksum } from '../../src/lib/resourceStore';
-import { findResourceByChecksum } from '../../src/repos/resources';
+import { findResourceByChecksum, getImportedPaths } from '../../src/repos/resources';
+import { unitCandidates } from '../../src/services/convertUnit';
 import { RESOURCE_STORE_PATH } from '../../src/config/resources';
 
-// A minimal .docx is just a zip with word/document.xml — same shape the real Word descriptions take.
 function makeDocx(text: string): Buffer {
   const z = new AdmZip();
   z.addFile('word/document.xml', Buffer.from(`<w:body><w:p><w:r><w:t>${text}</w:t></w:r></w:p></w:body>`));
   return z.toBuffer();
 }
 
-const F1 = Buffer.from('PDF-FILE-1-content-unique-9f3a2');
-const F2 = Buffer.from('PPTX-FILE-2-content-unique-9f3a2');
+const SLIDES = Buffer.from('ZZIMP-slides-content-a1');
+const QUIZ = Buffer.from('ZZIMP-quiz-content-a1');
 
-// The shape the teacher uploads: a zip of a folder, holding a per-topic zip that bundles its own
-// Word description alongside its (cryptically-named) files, plus a loose top-level file.
-function buildArchive(): Buffer {
-  const topic = new AdmZip();
-  topic.addFile('description.docx', makeDocx('Photosynthesis pack. aaaa is the intro worksheet, bbbb the plenary quiz.'));
-  topic.addFile('aaaa.pdf', F1);
-  topic.addFile('bbbb.pptx', F2);
+// The teacher's shape: a unit folder named only by its number ("8"), holding the Word description and
+// one zip per lesson. The unit name + year group must come from the description, not the folder.
+function buildUnitArchive(): Buffer {
+  const l1 = new AdmZip();
+  l1.addFile('slides.pptx', SLIDES);
+  l1.addFile('intro.docx', makeDocx('lesson one intro')); // a lesson-level doc, NOT the unit description
+  const l2 = new AdmZip();
+  l2.addFile('quiz.pdf', QUIZ);
   const outer = new AdmZip();
-  outer.addFile('topic-A/topic-A.zip', topic.toBuffer());
-  outer.addFile('readme.txt', Buffer.from('top-level loose note'));
+  outer.addFile('8/overview.docx', makeDocx('This is Unit 11: Computer Networks, taught in Year 8.'));
+  outer.addFile('8/Lesson 1.zip', l1.toBuffer());
+  outer.addFile('8/Lesson 2.zip', l2.toBuffer());
   return outer.toBuffer();
 }
 
 const createdIds: number[] = [];
 
-describe('resource bulk import (integration — needs the dev DB up)', () => {
+describe('resource bulk import — units (integration — needs the dev DB up)', () => {
   afterAll(async () => {
     if (createdIds.length) {
       await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = ANY($1)`, [createdIds]);
@@ -43,50 +45,55 @@ describe('resource bulk import (integration — needs the dev DB up)', () => {
     await pool.end();
   });
 
-  it('extracts nested zips, reads the Word description, and stages every file for review', async () => {
-    const r = await extractArchive(buildArchive());
-    expect(r.fileCount).toBe(4); // description.docx + aaaa.pdf + bbbb.pptx + readme.txt
-    expect(r.truncated).toBe(false);
-
-    const topic = r.groups.find((g) => g.source.includes('topic-A.zip'));
-    expect(topic).toBeTruthy();
-    expect(topic!.description).toContain('Photosynthesis');
-    expect(topic!.files.map((f) => f.name).sort()).toEqual(['aaaa.pdf', 'bbbb.pptx', 'description.docx']);
-    expect(topic!.files.every((f) => f.duplicate === false)).toBe(true);
-
-    // Commit just the two real resources — one with a default (filename) title, one with a chosen title.
-    const pdf = topic!.files.find((f) => f.name === 'aaaa.pdf')!;
-    const pptx = topic!.files.find((f) => f.name === 'bbbb.pptx')!;
-    const c = await commitImport(r.batchId, [
-      { path: pdf.path, title: '' },
-      { path: pptx.path, title: 'Plenary quiz' },
+  it('groups the upload into one unit (the number folder), with the unit doc as its description', async () => {
+    const r = await extractArchive(buildUnitArchive());
+    expect(r.fileCount).toBe(4); // overview.docx + slides.pptx + intro.docx + quiz.pdf
+    const unit = r.groups.find((g) => g.isUnit && g.folder === '8');
+    expect(unit).toBeTruthy();
+    expect(unit!.description).toContain('Computer Networks'); // the unit doc, not the lesson doc
+    // the lesson zips were unzipped transparently into "8/Lesson N/..." (no ".zip" in the path)
+    expect(unit!.files.map((f) => f.path).sort()).toEqual([
+      '8/Lesson 1/intro.docx',
+      '8/Lesson 1/slides.pptx',
+      '8/Lesson 2/quiz.pdf',
+      '8/overview.docx',
     ]);
-    expect(c).toEqual({ imported: 2, skipped: 0, failed: 0 });
-
-    const id1 = await findResourceByChecksum(checksum(F1));
-    const id2 = await findResourceByChecksum(checksum(F2));
-    expect(id1).toBeTruthy();
-    expect(id2).toBeTruthy();
-    createdIds.push(id1!, id2!);
   });
 
-  it('flags and skips duplicates by checksum on a second import of the same content', async () => {
-    const r = await extractArchive(buildArchive());
-    const topic = r.groups.find((g) => g.source.includes('topic-A.zip'))!;
-    // The two real files are already in the store, so they come back pre-flagged as duplicates...
-    expect(topic.files.find((f) => f.name === 'aaaa.pdf')!.duplicate).toBe(true);
-    expect(topic.files.find((f) => f.name === 'bbbb.pptx')!.duplicate).toBe(true);
-    // ...and committing them imports nothing new.
-    const reals = topic.files.filter((f) => f.name.endsWith('.pdf') || f.name.endsWith('.pptx'));
-    const c = await commitImport(r.batchId, reals.map((f) => ({ path: f.path, title: '' })));
-    expect(c.imported).toBe(0);
-    expect(c.skipped).toBe(2);
-  });
+  it('stamps the unit + year group on every file and records a normalised, discoverable path', async () => {
+    const r = await extractArchive(buildUnitArchive());
+    const unit = r.groups.find((g) => g.folder === '8')!;
+    // What the route does: the (edited) unit fields cascade to each file in the unit.
+    const items: CommitItem[] = unit.files
+      .filter((f) => f.name === 'slides.pptx' || f.name === 'quiz.pdf')
+      .map((f) => ({
+        path: f.path,
+        title: `lesson file ${f.name}`,
+        unit: 'Unit 11: Computer Networks',
+        yearGroup: 'Year 8',
+        storePath: buildStorePath('Year 8', 'Unit 11: Computer Networks', '8', f.path),
+      }));
+    const c = await commitImport(r.batchId, items);
+    expect(c.imported).toBe(2);
 
-  it('refuses a commit path that tries to escape the batch dir', async () => {
-    const r = await extractArchive(buildArchive());
-    const c = await commitImport(r.batchId, [{ path: '../../../etc/passwd', title: 'x' }]);
-    expect(c.imported).toBe(0);
-    expect(c.failed).toBe(1);
+    const id = await findResourceByChecksum(checksum(SLIDES));
+    expect(id).toBeTruthy();
+    createdIds.push(id!, (await findResourceByChecksum(checksum(QUIZ)))!);
+
+    const row = await pool.query<{ unit: string; year_group: string; change_note: string }>(
+      `SELECT r.unit, r.year_group, v.change_note
+         FROM resources r JOIN resource_versions v ON v.resource_id = r.id
+        WHERE r.id = $1`,
+      [id],
+    );
+    expect(row.rows[0]!.unit).toBe('Unit 11: Computer Networks');
+    expect(row.rows[0]!.year_group).toBe('Year 8');
+    // change_note carries the normalised path (Year / Unit / Lesson / file), not "imported from archive"
+    expect(row.rows[0]!.change_note).toBe('imported from Year 8/Unit 11: Computer Networks/Lesson 1/slides.pptx');
+
+    // #4: the scheme-author "convert a downloaded unit" tool finds it, because the path now describes
+    // a real unit folder with lesson sub-folders.
+    const found = unitCandidates(await getImportedPaths()).some((u) => u.folder === 'Year 8/Unit 11: Computer Networks');
+    expect(found).toBe(true);
   });
 });

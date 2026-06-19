@@ -8,6 +8,8 @@ export interface ResourceRow {
   kind: string;
   mimeType: string | null;
   source: string;
+  unit: string | null; // bulk-import: the unit this resource belongs to (from its Word description)
+  yearGroup: string | null; // bulk-import: the year group / key stage of that unit
   versionNo: number | null;
   byteSize: number | null;
   usedCount: number; // lesson plans + units this resource is linked to (where-used)
@@ -30,7 +32,7 @@ export interface LinkedResource {
   source: string; // 'uploaded' | 'imported' | 'ai_generated' | … — used to group the linked list
 }
 
-const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source,
+const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source, r.unit AS "unit", r.year_group AS "yearGroup",
                   v.version_no AS "versionNo", v.byte_size AS "byteSize",
                   (SELECT count(*)::int FROM resource_links rl
                    WHERE rl.resource_id = r.id AND (rl.lesson_plan_id IS NOT NULL OR rl.unit_id IS NOT NULL OR rl.adaptation_id IS NOT NULL)) AS "usedCount"`;
@@ -43,6 +45,11 @@ export async function createResource(title: string, kind: string, mimeType: stri
   const id = rows[0]?.id;
   if (id === undefined) throw new Error('failed to create resource');
   return id;
+}
+
+/** Bulk import: record the unit + year group on a resource (read from the unit's Word description). */
+export async function setResourceUnit(id: number, unit: string | null, yearGroup: string | null): Promise<void> {
+  await pool.query(`UPDATE resources SET unit = $2, year_group = $3 WHERE id = $1`, [id, unit || null, yearGroup || null]);
 }
 
 /** Append a version (version_no = max+1) and make it current. */
@@ -94,7 +101,8 @@ function searchWhere(query: ResourceQuery): { clause: string; params: unknown[] 
   const params: unknown[] = [];
   if (query.q) {
     params.push(`%${query.q}%`);
-    where.push(`r.title ILIKE $${params.length}`);
+    // Search the title, and the bulk-import unit / year group, so a unit name finds all its files.
+    where.push(`(r.title ILIKE $${params.length} OR r.unit ILIKE $${params.length} OR r.year_group ILIKE $${params.length})`);
   }
   if (query.kind) {
     params.push(query.kind);

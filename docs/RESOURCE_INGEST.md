@@ -110,25 +110,35 @@ cd app && npm run import-resources -- ~/Downloads/TeachComputing/GCSE   # new GC
 ## 4. Web import (no CLI) — `/resources/import`
 
 The CLI above needs shell access; the web importer does the same from the browser, plus AI-assisted
-titling for the ambiguous Teach-Computing naming (§2's "named by activity not lesson" problem).
+identification of the unit/year-group/lesson for the ambiguous naming (§2's "named by activity not
+lesson" problem, and unit folders that are just opaque numbers).
 
-**Flow.** Zip the directory of resources (nested `.zip`s and per-zip Word descriptions are fine) and
-upload the one archive:
+**Upload.** Either **pick a whole folder** (the browser sends every file with its relative path —
+`<input webkitdirectory>`, busboy `preservePath`) **or a single `.zip`**. Nested `.zip`s and the Word
+docs that describe each unit are fine in both. Max **500 MB per file**, ~**400 MB / 3,000 files** per
+import (stated on the page; larger is capped).
 
-1. **Extract** — `services/resourceImport.ts` opens the archive with `adm-zip` and recursively extracts,
-   **entry by entry** (never `extractAllTo`, to defeat zip-slip): each name is sanitised (no `..`, no
-   absolute/drive paths, `__MACOSX`/dotfiles/`Thumbs.db` dropped), and it's capped on file count,
-   total uncompressed bytes, and nesting depth. Files are staged under
-   `<resource store>/imports/<batchId>/`; nested `.zip`s recurse, grouped by their path.
-2. **Describe** — each `.docx` is itself a zip, so its `word/document.xml` text is pulled (no Gotenberg)
-   and concatenated as the group's description.
-3. **Propose (AI, optional)** — per group, the `resource_import` feature gets {the Word description +
-   the file manifest} and proposes a clean title + category per file. AI off / no description ⇒
-   filename-derived defaults. Cohort-level only, through the one wrapper.
-4. **Review** — a page lists every file grouped by source zip: editable title, category, an *import?*
-   tick, and a "duplicate (already in the store)" flag from the checksum. Nothing is imported yet.
-5. **Commit** — the ticked files import into the resource store (checksum-dedup, like the CLI), the
-   staging batch is deleted, and a summary links to what landed.
+1. **Stage** — `services/resourceImport.ts` walks the upload **entry by entry** (never `extractAllTo`,
+   to defeat zip-slip): each path is sanitised (no `..`, no absolute/drive paths,
+   `__MACOSX`/dotfiles/`Thumbs.db` dropped). A nested `.zip` is unzipped **transparently** — `Lesson
+   1.zip` becomes a `Lesson 1/` folder — and files are staged under `<resource store>/imports/<batchId>/`.
+   Capped on file count, bytes, and nesting depth.
+2. **Group into units** — a **unit folder** is a directory that directly holds a `.docx` (the unit
+   description) and has lesson sub-folders. Each `.docx`'s `word/document.xml` text is the unit's
+   description (a `.docx` is itself a zip — no Gotenberg).
+3. **Identify (AI, optional)** — one `resource_import` call per unit gets {the Word description + the
+   file paths} and returns the **unit name + number**, the **year group**, and a lesson-aware **title**
+   per file — the folder number alone can't give the first two, and many units share a number. AI off /
+   no description ⇒ filename defaults + the folder name. Cohort-level only, through the one wrapper.
+4. **Review** — each unit shows its **year group** and **unit name** (editable), then its files with an
+   editable title, an *import?* tick, and a checksum "duplicate" flag. Nothing is imported yet.
+5. **Commit** — ticked files import into the store (checksum-dedup, like the CLI). Each file records the
+   unit + year group (`resources.unit` / `year_group` — shown and searchable on Resources) and a
+   **normalised `change_note` path** `imported from <Year group>/<Unit name>/<Lesson N>/<file>`. That
+   path is what **Schemes → Convert a downloaded unit** reads ([getImportedPaths](../app/src/repos/resources.ts)
+   → [unitCandidates](../app/src/services/convertUnit.ts)), so imported units are discoverable and stay
+   distinct even when they share a number. The staging batch is then deleted.
 
-Reuses the store + dedup the CLI importer already uses; the new parts are the secure in-browser
-extraction, the Word-doc reading, the AI titling, and the review-before-commit step.
+Reuses the store + dedup the CLI importer already uses; the new parts are the folder/zip in-browser
+extraction, the Word-doc reading, the unit/year-group/lesson identification, the review-before-commit
+step, and the normalised path that makes imports convertible into schemes.
