@@ -6,15 +6,15 @@
 
 ## Executive summary
 
-The audit found **36 current issues**. The most urgent defect is a pupil-name redaction bypass caused by typographic apostrophe variants. The main recurring patterns are insufficient binding of authentication steps, pupil/TA routes whose authorization scope is broader than the UI, non-atomic multi-step writes, memory limits applied after buffering, and recovery procedures that do not treat the database and file store as one recoverable unit.
+The audit found **50 current issues**. The most urgent defects are pupil-name redaction bypasses caused by punctuation variants and partial-name references. The main recurring patterns are insufficient binding of authentication steps, pupil/TA routes whose authorization scope is broader than the UI, non-atomic multi-step writes, limits applied after buffering, incomplete personal-data lifecycle handling, and recovery procedures that do not treat the database and file store as one recoverable unit.
 
 | Severity | Confirmed | Credible risk | Total |
 |---|---:|---:|---:|
-| Critical | 1 | 0 | 1 |
-| High | 12 | 1 | 13 |
-| Medium | 11 | 8 | 19 |
-| Low | 3 | 0 | 3 |
-| **Total** | **27** | **9** | **36** |
+| Critical | 2 | 0 | 2 |
+| High | 16 | 2 | 18 |
+| Medium | 15 | 11 | 26 |
+| Low | 4 | 0 | 4 |
+| **Total** | **37** | **13** | **50** |
 
 “Confirmed” means the failure follows deterministically from the current code path. “Credible risk” means the code contains a concrete race or partial-failure path whose trigger depends on concurrency, I/O failure, or deployment conditions.
 
@@ -22,8 +22,9 @@ The audit found **36 current issues**. The most urgent defect is a pupil-name re
 
 - `npm run typecheck` passes on the audited working tree.
 - The completed unit-test baseline passes: **73 test files, 508 tests**.
-- Integration tests were not run because PostgreSQL was unavailable on `localhost:5434`. Findings involving database constraints, transactions, concurrent requests, backup, and restore were therefore validated statically rather than against a live database.
-- No Docker services, database state, migrations, dependencies, generated files, or application data were created or changed during this audit.
+- The integration-test baseline passes against the local PostgreSQL service: **60 test files, 301 tests**. The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
+- Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
 
 ## Critical findings
@@ -37,6 +38,16 @@ The audit found **36 current issues**. The most urgent defect is a pupil-name re
 - **Evidence / reproduction:** Store a roster name with a straight apostrophe, then pass text containing the same name with a curly apostrophe through either redaction function. The output retains the name and `containsRosterName` returns false. Hyphen/dash variants create the same class of mismatch.
 - **Potential fix:** Canonicalise name punctuation before matching, or build separator-aware regex fragments that treat common apostrophe and hyphen variants as equivalent. Apply exactly the same canonicalisation to replacement and egress assertion.
 - **Regression test / notes:** Add straight/curly apostrophe and hyphen/en-dash pairs in both stored-name directions, including mixed whitespace and NFD text. Keep the fail-closed egress assertion as a separate test.
+
+### BUG-037 — Partial pupil-name references bypass redaction
+
+- **Severity / confidence:** Critical / Confirmed
+- **Affected:** `app/src/services/redact.ts:22-26, 41-49, 64-69`; `app/src/repos/pupils.ts:76-84`; `app/src/llm/client.ts:152-163`
+- **Problem and trigger:** The redactor builds one exact regular expression from each complete `display_name`. If the roster contains `Anna Lee`, ordinary prose containing only `Anna` or only `Lee` is neither replaced nor detected by the final assertion. Common accentless or nickname variants have the same failure mode.
+- **Impact:** A pupil's identifiable name can be sent to the AI provider and stored in the AI audit payload even when every roster display name is supplied to the redactor. This violates the stated no-pupil-name egress boundary in routine teacher-written context.
+- **Evidence / reproduction:** Add `Anna Lee` to the roster and pass `Anna struggled with fractions` through `redactNames`; the text is unchanged and `containsRosterName` returns false. The same deterministic result occurs for `Lee struggled` and for `Jose` when the stored display name is `José García`.
+- **Potential fix:** Maintain structured preferred-name, given-name, surname, and known-variant aliases; canonicalise accents and separators; then use ambiguity-aware matching that fails closed before egress. Common-word collisions need an explicit policy rather than silently weakening the assertion.
+- **Regression test / notes:** Cover given name, surname, accentless form, nickname, multi-part surname, initials, name collisions between pupils, and aliases that are also ordinary English words.
 
 ## High findings
 
@@ -169,6 +180,56 @@ The audit found **36 current issues**. The most urgent defect is a pupil-name re
 - **Evidence / reproduction:** Pin a future planned slot, then drop a unit on an earlier slot whose sequence crosses it. The pinned row’s `lesson_plan_id` is overwritten.
 - **Potential fix:** Build unit placement with the same lock-aware cascade primitive as single inserts, skipping locked positions or rejecting the operation with a preview of conflicts.
 - **Regression test / notes:** Cover locks before, at, and within the unit span, insufficient trailing capacity, and undo.
+
+### BUG-038 — Safeguarding phrases can bypass the local safety gate through trivial variants
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/lib/markSafetyGate.ts:9-23`; `app/src/services/emailPoll.ts:19-25, 133-151`; `app/src/services/marking.ts:207-230`
+- **Problem and trigger:** `guardMatch` lowercases text and performs literal substring checks, but does not normalise Unicode punctuation, repeated whitespace, or line breaks. Phrases such as `hurt  myself`, `hurt\nmyself`, and `self‑harm` with a non-breaking hyphen bypass the configured terms. Common direct language such as `I want to die` is also absent.
+- **Impact:** Safeguarding content can be sent to the AI provider and processed as ordinary marking/email intake instead of being blocked and routed to the safeguarding register.
+- **Evidence / reproduction:** Pass each variant above to `guardMatch`; it returns no match. Both marking and email polling treat that result as permission to continue to AI processing.
+- **Potential fix:** Canonicalise Unicode, whitespace, punctuation, and separator variants before matching; broaden and clinically review the local phrase set or use an approved local classifier. Keep this decision local and fail closed on uncertainty.
+- **Regression test / notes:** Add whitespace, newline, Unicode-dash, spelling, inflection, first-person intent, false-positive, and obfuscated-text cases to one shared safety-gate suite used by every AI entry point.
+
+### BUG-039 — Pupil anonymisation and erasure leave narrative personal data behind
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/repos/pupils.ts:115-164`; `app/tests/integration/disposals.int.test.ts:35-47, 99-146`; pupil-data lifecycle statements in `docs/SECURITY_AND_PRIVACY.md`
+- **Problem and trigger:** Anonymisation removes credentials, devices, profile fields, and comments but retains notes, tasks, events, and mentions associated with the pupil while merely replacing the pupil row's display name with a token. Erasure deletes mentions but sets linked note/task/event pupil IDs to `NULL`; free-text titles and bodies that identify the pupil remain. The integration test explicitly expects detached narrative records to survive.
+- **Impact:** The system cannot reliably claim that anonymisation makes an individual unidentifiable or that erasure removes their personal data. Staff-written sensitive details can remain searchable and backed up after disposal.
+- **Evidence / reproduction:** Create a pupil-linked note/task/event whose text contains the pupil's name and identifying details, then anonymise or erase the pupil. The narrative row and its identifying text remain; only the foreign key or pupil display name changes.
+- **Potential fix:** Define a data inventory and lawful retention rule for every linked/free-text record. Redact or delete identifying narratives during disposal, or retain them under an explicit restricted legal basis with documented review. Do not label an operation anonymisation when residual records permit re-identification.
+- **Regression test / notes:** Seed each pupil-linked table plus direct identifiers embedded in free text, perform both disposal modes, and assert the documented postcondition over database rows, search indexes, files, exports, backups, and audit-retention exceptions.
+
+### BUG-040 — A successful TA login resets the shared teacher-login IP limiter
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/auth/routes.ts:49-83`; `app/src/auth/rateLimit.ts:8-27`
+- **Problem and trigger:** Teacher and TA password attempts share the same `login:${req.ip}` counter. The route tests the teacher password first, then TA credentials, and clears the shared counter after any successful TA login. A person who knows their own TA password can repeatedly make teacher-password guesses and reset the limit by signing in as TA.
+- **Impact:** The teacher password has no durable attempt limit against a legitimate or compromised TA/LAN client; the attacker can repeat bounded batches indefinitely.
+- **Evidence / reproduction:** From one IP, make fewer than the blocking threshold of invalid teacher attempts, complete a valid TA login, and repeat. `clearAttempts` removes the key each cycle.
+- **Potential fix:** Use separate per-principal counters and a non-resetting IP/network backoff. A successful lower-privilege login must not clear failures for the teacher principal; successful teacher authentication should clear only the appropriate account counter.
+- **Regression test / notes:** Exercise alternating teacher failures/TA success, named and shared TA accounts, multiple IPs, account-specific success, expiry, and proxy-derived client addresses.
+
+### BUG-041 — Concurrent first-run identity submissions can both obtain teacher sessions
+
+- **Severity / confidence:** High / Credible risk
+- **Affected:** `app/src/routes/welcome.ts:106-130`; `app/src/repos/settings.ts:17-22`
+- **Problem and trigger:** `/welcome/identity` checks that no teacher hash exists, then independently inserts/updates staff and settings and upserts the new hash. There is no transaction, lock, or create-if-absent condition. Two concurrent requests can both pass the initial check; the later write wins the stored password and school values, but both responses grant a teacher session.
+- **Impact:** During first boot, a second LAN client can race the legitimate setup and gain an authenticated teacher session even if its password does not become the stored password.
+- **Evidence / reproduction:** Synchronise two identity requests after both read a missing hash, then release both. Each follows the success path and sets session role `teacher`; final configuration depends on write order.
+- **Potential fix:** Serialize first-run setup with a transaction and advisory/row lock, atomically insert the identity only when absent, and grant a session only to the request whose conditional insert succeeds.
+- **Regression test / notes:** Use two database connections and a barrier; assert exactly one successful setup/session, one immutable winning identity, and a safe rejection for the loser.
+
+### BUG-042 — IMAP ingestion accepts unbounded literals and buffers complete messages
+
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/lib/imapClient.ts:30-73, 121-155`; `app/src/lib/mime.ts:77-129`
+- **Problem and trigger:** The IMAP parser accepts the server's `{N}` literal length without a maximum, repeatedly grows a buffer until all N bytes arrive, and then passes the complete message to MIME parsing that creates further buffers/strings for multipart content. Mail polling fetches full unseen messages and has no message or attachment size policy.
+- **Impact:** A large email received by the configured mailbox, or a hostile/misconfigured IMAP server, can exhaust Node memory and CPU and terminate the application.
+- **Evidence / reproduction:** Feed an IMAP response advertising a literal larger than available memory, or poll a mailbox containing a very large multipart attachment. The client commits to buffering the advertised size before it can discard the content.
+- **Potential fix:** Reject oversized advertised literals before allocation, stream messages through a strict total/part limit, discard attachments that are not required, and bound the number/bytes of unread messages processed per poll.
+- **Regression test / notes:** Test just-over-limit literals split across chunks, large attachments, many unread messages, malformed lengths, cleanup after rejection, and continued processing of later valid mail.
 
 ## Medium findings
 
@@ -362,6 +423,76 @@ The audit found **36 current issues**. The most urgent defect is a pupil-name re
 - **Potential fix:** Attach a save-operation/field ID to failure and success events and clear only when that same operation succeeds; retain a list/count if several fields are unsaved.
 - **Regression test / notes:** Test unrelated success, background success, retry success, multiple failed fields, and full-page navigation.
 
+### BUG-043 — The pupil subject-access export omits substantial pupil-linked data
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/repos/pupils.ts:183-201`; `app/migrations/0003_phase2.sql:30-77`; `app/migrations/0018_pupils.sql:47-74`; `app/migrations/0022_marking.sql:58-67`; `app/migrations/0025_safeguarding_review.sql:13-20`; `app/migrations/0027_pupil_unit_signal.sql:3-8`; `app/tests/integration/disposals.int.test.ts:90-97`
+- **Problem and trigger:** `exportPupilRecord` includes current enrolment, note, answer, mark, feedback, comment, and profile data, but omits other pupil-linked records including completion state, levels, unit signals, remembered devices, linked tasks/events, and safeguarding workflow records. The integration test asserts only a subset of the implemented export and does not catch omissions as the schema grows.
+- **Impact:** A teacher relying on the export for a subject-access request can produce an incomplete disclosure and miss educational, device, and safeguarding personal data held by the system.
+- **Evidence / reproduction:** Seed `pupil_done`, `pupil_levels`, `pupil_unit_signal`, `pupil_devices`, pupil-linked tasks/events, and answer-linked safeguarding-review rows, then call `exportPupilRecord`; those records do not appear in the returned JSON.
+- **Potential fix:** Maintain a versioned, reviewed personal-data inventory and build the export from it. Include every applicable linked record with appropriate handling for secrets and third-party/confidential information, rather than treating four queries as a complete record.
+- **Regression test / notes:** Seed every pupil-bearing table/file category and assert inclusion or an explicitly documented legal exclusion. Add a schema-change checklist requiring export/disposal coverage for new pupil data.
+
+### BUG-044 — Failed screenshot deletion after pupil disposal has no durable retry path
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/repos/pupils.ts:123-164`; `app/src/services/resourceStore.ts:31-35`
+- **Problem and trigger:** Pupil disposal commits database deletion/anonymisation and removal of the screenshot pointers before deleting the referenced files. File removal failures are caught and logged only. Once the database pointers are gone, no deletion queue or tombstone records which sensitive paths still require cleanup.
+- **Impact:** Pupil work images can remain indefinitely after the system reports disposal complete, and routine reconciliation can no longer associate those files with the pupil.
+- **Evidence / reproduction:** Make one referenced screenshot temporarily undeletable while disposing a pupil. The database operation succeeds and the error is swallowed; restoring filesystem access does not trigger another deletion attempt.
+- **Potential fix:** Persist a deletion job/tombstone before removing the last pointer, process it idempotently with retries and completion audit, and add an orphan reconciliation process based on non-identifying object IDs.
+- **Regression test / notes:** Fault unlink for one/all files, restart the worker/app, and prove eventual deletion without rolling back already-completed database disposal or deleting unrelated objects.
+
+### BUG-045 — The production reverse proxy collapses client-IP rate limits to one address
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/server.ts:65-68`; `app/Caddyfile:10-14`; rate-limit consumers in `app/src/auth/routes.ts` and `app/src/routes/pupilAuth.ts`
+- **Problem and trigger:** Fastify is created without trusted-proxy handling, while the production Caddy service forwards requests to the app. Consequently `req.ip` is the Caddy container address for proxied clients, and all login, class-code, name, and PIN attempts share global proxy-IP buckets.
+- **Impact:** One LAN client can consume an attempt allowance and lock every other user out for the window. Logs and controls also cannot distinguish the originating clients. Direct access to the published app port behaves differently, making the security policy deployment-path dependent.
+- **Evidence / reproduction:** Send failed attempts through Caddy from two different clients and inspect the rate-limit key; both use the same Caddy peer address because forwarded addresses are not trusted by Fastify.
+- **Potential fix:** Configure `trustProxy` narrowly for the known Caddy network/address and ensure Caddy replaces, rather than trusts arbitrary client-supplied forwarding headers. Keep principal-specific controls in addition to IP controls.
+- **Regression test / notes:** Integration-test two simulated forwarded clients, spoofed headers from a direct connection, Caddy-only deployment, IPv4/IPv6, and the intended shared-network policy.
+
+### BUG-046 — Course-document upload buffers and parses files up to the global 500 MB limit
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/routes/coverage.ts:199-211`; `app/src/server.ts:95-96`; `app/src/lib/docText.ts:15-35`
+- **Problem and trigger:** `/coverage/doc/upload` calls `toBuffer()` without a smaller route limit. The global multipart allowance is 500 MB, after which the complete PDF/Office file is passed to PDF.js or document conversion/text extraction.
+- **Impact:** An accidental or malicious teacher upload can create very large Node allocations and expensive parsing/conversion work, causing long stalls or process termination.
+- **Evidence / reproduction:** Upload a course document below 500 MB but far above a reasonable specification-document size. The route buffers it completely before validating or extracting content.
+- **Potential fix:** Set a conservative route-specific streaming byte limit, reject on declared/observed overflow before buffering, and bound page count, decompressed/conversion output, and processing time.
+- **Regression test / notes:** Cover limit plus one byte, forged MIME/extension, compressed Office bombs, excessive PDF pages, converter timeout, and cleanup of rejected inputs.
+
+### BUG-047 — The daily print view ignores holidays and lesson exceptions and creates ghost occurrences
+
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/routes/lesson.ts:1339-1367`; `app/src/services/exceptions.ts:25-63`; occurrence creation used by `lessonPrintBlock`
+- **Problem and trigger:** `/today/print` selects lessons from the weekly weekday pattern without classifying the date against the academic calendar or applying per-lesson/whole-day exceptions. It then calls the print-block path that finds or creates occurrences for those weekly lessons.
+- **Impact:** Holiday, off-timetable, free, and cancelled dates print lessons that should not occur and can permanently materialise ghost occurrence rows. Cover/room/replacement details can also be wrong.
+- **Evidence / reproduction:** Mark a date as a holiday or add a cancelled/off-timetable exception, then request `/today/print?date=<date>`. The original weekly lessons remain in the output and occurrence creation is invoked.
+- **Potential fix:** Resolve the shared date classification and exception effect before rendering, apply replacement/cover/room semantics consistently, and keep a read-only print request from creating occurrence state unless explicitly required.
+- **Regression test / notes:** Matrix-test term day, holiday, closure, whole-day/per-lesson exceptions, replacements, and repeated print requests with assertions on both HTML and occurrence-row counts.
+
+### BUG-048 — The nightly review sweep records completion before work succeeds
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/src/server.ts:287-303`; `app/src/repos/settings.ts:17-22`; lesson-review sweep service called from the interval
+- **Problem and trigger:** The background interval checks the last-run date and writes today's date before invoking the review sweep. A crash or transient database/AI failure after that write causes later ticks to skip all remaining work for the day. The check and write are also not an atomic claim, so multiple processes can both run and spend concurrently.
+- **Impact:** Automated reviews may be silently skipped for a full day, or duplicated under multi-process deployment with unnecessary AI cost and competing writes.
+- **Evidence / reproduction:** Fault the sweep immediately after `setSetting` succeeds; restart or wait for the next tick and observe it skip because today's date is already stored. A barrier before two processes set the value demonstrates the duplicate-run race.
+- **Potential fix:** Use a database-backed lease/job row with atomic claim, `started`/`completed` state, expiry, per-item idempotency, and retryable failures. Record completion only after the intended work reaches a defined terminal state.
+- **Regression test / notes:** Cover crash after claim, partial item failure, lease expiry, two processes, retry limits, and successful completion without duplicate AI calls.
+
+### BUG-049 — A vulnerable `tar` version is reachable during dependency installation
+
+- **Severity / confidence:** Medium / Credible risk
+- **Affected:** `app/package-lock.json` dependency chain `pdfjs-dist` → `canvas` → `@mapbox/node-pre-gyp` → `tar@6.2.1`; dependency-install/build environments
+- **Problem and trigger:** `npm audit --omit=dev` reports high-severity path-traversal and arbitrary file read/write advisories for the installed transitive `tar@6.2.1`. The package is used by the native canvas installation path, so exploitation concerns the machine/container performing dependency installation or rebuilds rather than normal HTTP request handling.
+- **Impact:** A compromised or malicious archive encountered in the native dependency installation path could read or overwrite files outside the intended extraction directory, affecting build hosts or image contents.
+- **Evidence / reproduction:** Run `npm audit --omit=dev` in `app`; the audit traces the vulnerable package through the chain above. The separately reported `pdfjs-dist` JavaScript-evaluation advisory is not counted as another finding because `app/src/lib/docText.ts` explicitly sets `isEvalSupported: false`, the published mitigation.
+- **Potential fix:** Upgrade the PDF/canvas dependency chain to versions using a fixed `tar`, or apply a tested package-manager override where semver/API compatibility permits. Rebuild from a clean lockfile and retain audit enforcement in CI.
+- **Regression test / notes:** Assert the resolved `tar` version is outside all reported vulnerable ranges, run unit/integration PDF extraction tests, and build the production image from scratch.
+
 ## Low findings
 
 ### BUG-034 — Aborted HTMX requests decrement the global in-flight counter twice
@@ -394,22 +525,33 @@ The audit found **36 current issues**. The most urgent defect is a pupil-name re
 - **Potential fix:** Preserve the explicit `year` query parameter in all week-navigation links until the user intentionally exits preview mode.
 - **Regression test / notes:** Assert navigation URLs and labels for current, archived, future, invalid, and no-explicit-year cases.
 
+### BUG-050 — The stored IMAP password is returned to the browser in Settings HTML
+
+- **Severity / confidence:** Low / Confirmed
+- **Affected:** `app/src/routes/settingsPage.ts:70-75, 288-295`
+- **Problem and trigger:** The settings page reads the stored `email_imap_password` and renders it as the full value of a password input. Loading the page therefore sends the reusable mailbox credential into the browser DOM, and test/save requests include it again.
+- **Impact:** Any teacher-browser extension, DOM capture, diagnostic snapshot, or shoulder-access session that can inspect the page can recover a credential that did not need to leave server storage. This unnecessarily broadens exposure of a potentially sensitive mailbox password.
+- **Evidence / reproduction:** Configure IMAP, reload Settings, and inspect the password input's `value` property or the returned HTML; it contains the stored plaintext password.
+- **Potential fix:** Render an empty field with a separate “password configured” indicator, preserve the current secret when the submitted field is empty, and overwrite it only when an explicit new password is supplied. Prefer a dedicated secret store where deployment allows.
+- **Regression test / notes:** Assert the stored secret never appears in HTML or test responses, blank submission preserves it, explicit replacement works, and disable/delete semantics are clear.
+
 ## Cross-cutting risks
 
-1. **UI scope is repeatedly mistaken for authorization scope.** Class-code steps, lesson-image IDs, pupil occurrence writes, and session revocation rely on what the normal page exposes rather than a durable server-side capability.
-2. **Multi-step operations often lack one commit boundary.** Resource versions/imports, planner cascades, review application, recurring generation, email intake, and backup publication can expose partial state.
-3. **Limits are applied after materialisation.** Image, folder, and archive paths allocate the content before enforcing the smaller policy limit.
+1. **Trust-boundary checks are exact and brittle.** Name redaction and safeguarding gates rely on narrow literal matches, while class-code steps, image IDs, pupil occurrence writes, and session revocation rely on UI flow rather than durable server-side capabilities.
+2. **Multi-step operations often lack one commit boundary or durable recovery state.** First-run identity, resource versions/imports, planner cascades, review application/sweeps, recurring generation, email intake, pupil disposal, and backup publication can expose partial state.
+3. **Limits are absent or applied after materialisation.** Image, course-document, folder, archive, and IMAP paths accept or allocate content before enforcing an appropriate policy limit.
 4. **Database invariants are sometimes implemented only by query convention.** Active scheme uniqueness, recurring idempotency, migrator serialization, and exactly-one-current-year behavior need database-backed enforcement.
-5. **Database and file-store lifecycle is not unified.** Imports, pupil screenshots, version files, backup, verification, restore, and erasure can disagree about which bytes belong to which records.
-6. **The green unit suite does not cover the highest-risk boundaries.** Most findings need integration, concurrent-connection, streaming, browser-event, or disaster-recovery tests.
+5. **Personal-data and file-store lifecycle is not unified.** Exports, narrative records, imports, pupil screenshots, version files, backup, verification, restore, and erasure can disagree about which records/bytes belong to a person or operation.
+6. **Network identity is deployment-dependent.** Proxy handling collapses IP limits while directly published ports bypass that proxy, so authentication controls differ according to which listener receives the request.
+7. **Green unit and integration suites do not cover the highest-risk boundaries.** Several happy-path assertions encode incomplete disposal/export behavior; most remaining findings need concurrent-connection, injected-failure, streaming/memory, proxy, browser-event, or full disaster-recovery tests.
 
 ## Suggested remediation priority
 
-1. **Immediate privacy/security containment:** BUG-001, BUG-002, BUG-003, BUG-006, BUG-007, BUG-012, BUG-016, BUG-017, and BUG-030.
-2. **Assessment correctness:** BUG-004, BUG-005, and BUG-015 before relying on automated/released marks.
-3. **Prove recovery:** BUG-009 and BUG-010; perform a full isolated restore drill including resource bytes before treating backups as operational.
-4. **Enforce transactional invariants:** BUG-008, BUG-014, BUG-019, BUG-021 through BUG-028, and BUG-031.
-5. **Cost/audit controls:** BUG-011 and BUG-018.
-6. **User-facing reliability and deployment hardening:** BUG-013, BUG-032 through BUG-036.
+1. **Immediate privacy/security containment:** BUG-001 through BUG-003, BUG-006, BUG-007, BUG-012, BUG-016, BUG-017, BUG-030, and BUG-037 through BUG-046.
+2. **Assessment correctness:** BUG-004, BUG-005, BUG-015, and BUG-047 before relying on automated/released marks or daily lesson output.
+3. **Prove recovery and disposal:** BUG-009, BUG-010, BUG-039, and BUG-044; perform a full isolated restore and disposal drill including resource bytes before treating either workflow as operational.
+4. **Enforce transactional invariants:** BUG-008, BUG-014, BUG-019, BUG-021 through BUG-028, BUG-031, BUG-041, and BUG-048.
+5. **Cost, audit, and supply-chain controls:** BUG-011, BUG-018, and BUG-049.
+6. **User-facing reliability and deployment hardening:** BUG-013, BUG-032 through BUG-036, and BUG-050.
 
-Before fixes are merged, add a small set of reusable test harnesses: concurrent PostgreSQL barriers, injected repository failures, multipart/archive size probes, HTMX browser tests, and an automated scratch restore of a matched database/resource backup set.
+Before fixes are merged, add a small set of reusable test harnesses: concurrent PostgreSQL barriers, injected repository/filesystem failures, bounded-stream and multipart/archive/IMAP size probes, proxy-aware authentication tests, HTMX browser tests, exhaustive pupil-data fixtures, and an automated scratch restore of a matched database/resource backup set.
