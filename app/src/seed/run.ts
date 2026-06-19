@@ -58,7 +58,7 @@ async function main(): Promise<void> {
     for (const t of TERM_DATES) {
       await client.query(
         `INSERT INTO term_dates (academic_year_id, name, start_date, end_date, kind) VALUES ($1,$2,$3,$4,$5)
-         ON CONFLICT (academic_year_id, name) DO UPDATE SET start_date=EXCLUDED.start_date, end_date=EXCLUDED.end_date, kind=EXCLUDED.kind`,
+         ON CONFLICT (academic_year_id, name, start_date) DO UPDATE SET end_date=EXCLUDED.end_date, kind=EXCLUDED.kind`,
         [req(yearId.get(t.year), t.year), t.name, t.start, t.end, t.kind],
       );
     }

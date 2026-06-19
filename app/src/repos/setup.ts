@@ -80,19 +80,27 @@ export async function listTerms(yearId: number): Promise<TermRow[]> {
   return rows;
 }
 
-export async function createTerm(yearId: number, name: string, startDate: string, endDate: string, kind: string): Promise<number> {
+// Recurring names are fine (multiple INSET days, three "Half term"s); only an exact (name + start
+// date) duplicate is rejected — returned as null so the route can say so instead of erroring out.
+export async function createTerm(yearId: number, name: string, startDate: string, endDate: string, kind: string): Promise<number | null> {
   const { rows } = await pool.query<{ id: number }>(
-    `INSERT INTO term_dates (academic_year_id, name, start_date, end_date, kind) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+    `INSERT INTO term_dates (academic_year_id, name, start_date, end_date, kind) VALUES ($1,$2,$3,$4,$5)
+     ON CONFLICT (academic_year_id, name, start_date) DO NOTHING RETURNING id`,
     [yearId, name.slice(0, 100), startDate, endDate, kind],
   );
-  return rows[0]!.id;
+  return rows[0]?.id ?? null;
 }
 
 export async function updateTermField(id: number, field: string, value: string): Promise<boolean> {
   const col = ({ name: 'name', start_date: 'start_date', end_date: 'end_date', kind: 'kind' } as Record<string, string>)[field];
   if (!col) return false;
-  await pool.query(`UPDATE term_dates SET ${col} = $2 WHERE id = $1`, [id, value]);
-  return true;
+  try {
+    await pool.query(`UPDATE term_dates SET ${col} = $2 WHERE id = $1`, [id, value]);
+    return true;
+  } catch (e) {
+    if ((e as { code?: string }).code === '23505') return false; // an exact (name + start date) duplicate — soft-fail, no crash
+    throw e;
+  }
 }
 
 export async function deleteTerm(id: number): Promise<void> {

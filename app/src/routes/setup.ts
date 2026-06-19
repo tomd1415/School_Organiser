@@ -483,8 +483,9 @@ export function registerSetupRoutes(app: FastifyInstance): void {
       .object({ name: z.string().trim().min(1).max(100), kind: z.enum(['term', 'half_term', 'holiday', 'inset']), start: z.string().regex(DATE), end: z.string().regex(DATE) })
       .safeParse(req.body);
     if (!q.success || !b.success) return reply.code(400).send('');
-    await createTerm(q.data.year, b.data.name, b.data.start, b.data.end, b.data.kind);
-    return reply.type('text/html').send(await section(req, reply, 'year', q.data.year));
+    const termId = await createTerm(q.data.year, b.data.name, b.data.start, b.data.end, b.data.kind);
+    const notice = termId === null ? `<p class="muted lay-note">“${esc(b.data.name)}” on ${esc(b.data.start)} is already in this year — repeat names on other dates are fine.</p>` : '';
+    return reply.type('text/html').send(await section(req, reply, 'year', q.data.year, notice));
   });
   app.post('/setup/term/:id', guard, async (req, reply) => {
     const p = idParam.safeParse(req.params);
