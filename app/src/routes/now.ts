@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { resolveNow, termProgress, type NowState, type TermDate } from '../services/clock';
+import { resolveNow, termProgress, classifyDay, type NowState, type TermDate } from '../services/clock';
 import { getClockContext, getSelfLessonAt, type NowLesson } from '../repos/clock';
 import {
   countTaughtLessons,
@@ -31,8 +31,10 @@ import { currentInterests, type InterestItem } from '../services/currentInterest
 import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
+import { coverageAtRisk } from '../repos/brief';
+import { buildBrief, type BriefItem } from '../services/brief';
 import type { LessonRow, PeriodRow } from '../services/timetable';
-import { toMinutes, weekdayOf } from '../lib/time';
+import { addDays, toMinutes, weekdayOf } from '../lib/time';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -340,6 +342,30 @@ function renderCurrentInterests(items: InterestItem[]): string {
   </div>`;
 }
 
+// Wave 7.1 — the next school day's teaching load, for the morning brief.
+function nextSchoolDayInfo(fromIso: string, terms: TermDate[], lessons: LessonRow[], tz: string): { label: string; teachingCount: number } | null {
+  for (let i = 1; i <= 14; i++) {
+    const d = addDays(fromIso, i);
+    const wd = weekdayOf(d);
+    if (!classifyDay(d, wd, terms).isSchoolDay) continue;
+    const teachingCount = lessons.filter((l) => l.weekday === wd && l.isSelf && (l.purpose === 'teaching' || l.purpose === 'form')).length;
+    const label = i === 1 ? 'Tomorrow' : new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(`${d}T12:00:00Z`));
+    return { label, teachingCount };
+  }
+  return null;
+}
+
+function renderMorningBrief(items: BriefItem[]): string {
+  if (items.length === 0) return '';
+  const rows = items
+    .map((i) => `<li class="brief-${i.level}">${i.icon} ${i.href ? `<a href="${i.href}">${esc(i.text)}</a>` : esc(i.text)}</li>`)
+    .join('');
+  return `<div class="now-card now-brief">
+    <p class="kicker">📋 Morning brief</p>
+    <ul class="brief-list">${rows}</ul>
+  </div>`;
+}
+
 export function registerNowRoutes(app: FastifyInstance): void {
   app.get('/', { preHandler: requireAuth }, async (_req, reply) => {
     const now = new Date();
@@ -432,6 +458,14 @@ export function registerNowRoutes(app: FastifyInstance): void {
         }
       }
 
+      // Wave 7.1 — forward-looking morning brief (coverage-at-risk + next day + marking); hidden when empty.
+      const briefItems = buildBrief({
+        today: state.isoDate,
+        coverage: await coverageAtRisk(),
+        nextSchoolDay: nextSchoolDayInfo(state.isoDate, ctx.terms, allLessons, ctx.tz),
+        markingClasses: marksWaiting.length,
+      });
+
       const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
         ${renderTimerBanner(running)}
         ${renderStrip(state, current, next, now, ctx.tz, ctx.terms, false, curEx, nextEx)}
@@ -456,6 +490,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           </div>
           <div class="now-col now-col-next">
             ${nextCard}
+            ${renderMorningBrief(briefItems)}
             ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
             ${renderCurrentInterests(interests)}
             ${renderDayCard(dayPart, dayItems, state.isoDate)}

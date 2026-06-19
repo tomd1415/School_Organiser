@@ -7,6 +7,22 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Morning brief + the daily-job seam (Wave 7.1)
+
+First slice of [docs/FUTURE_WAVES.md](docs/FUTURE_WAVES.md) Wave 7 (quiet automation). Suite green:
+**487 unit / 284 integration; typecheck clean**.
+
+- **Morning brief card on Now** — a forward-looking digest: exam courses **at risk on coverage**
+  (banded by weeks-to-exam so it won't over-flag), the next school day's teaching load, and marking
+  waiting. Deterministic + AI-free; hidden when there's nothing to say. Pure core in
+  [app/src/services/brief.ts](app/src/services/brief.ts) (unit-tested), coverage query in
+  [app/src/repos/brief.ts](app/src/repos/brief.ts), card in [app/src/routes/now.ts](app/src/routes/now.ts).
+- **The daily-job seam** — `scheduleMorningBrief` joins the existing in-process schedulers
+  ([app/src/server.ts](app/src/server.ts)), computing the brief on boot + daily and logging coverage
+  risks. This is the hook 7.2 (reviewer sweep) and 7.3 (spaced retrieval) attach scheduled AI work onto.
+- Coverage-at-risk is dormant until **/coverage** has spec points + a course `exam_date`, then it lights
+  up automatically.
+
 ### 2026-06-18 — Cover/free now feed the availability planner
 
 Follow-up to the cover/free work ([docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) C8): dated exceptions were

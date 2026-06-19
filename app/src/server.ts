@@ -53,6 +53,8 @@ import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { pupilCfg } from './auth/pupilAccessCache';
 import { teacherIdleMins } from './auth/teacherIdleCache';
 import { generateDueInstances } from './repos/recurringTasks';
+import { coverageAtRisk } from './repos/brief';
+import { buildBrief } from './services/brief';
 import { runDueMarkJobs } from './services/markingQueue';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting } from './repos/settings';
@@ -260,6 +262,23 @@ function scheduleMarkingQueue(app: FastifyInstance): void {
   setInterval(() => void run(), 30_000);
 }
 
+/** Wave 7.1: compute the morning brief on boot then daily, logging a one-line summary. This is the
+ * seam scheduled AI work (7.2 reviewer sweep, 7.3 spaced retrieval) will hook onto. Read-only. */
+function scheduleMorningBrief(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const today = localParts(new Date(), 'Europe/London').isoDate;
+      const items = buildBrief({ today, coverage: await coverageAtRisk(), nextSchoolDay: null, markingClasses: 0 });
+      const risks = items.filter((i) => i.level !== 'info').length;
+      if (risks > 0) app.log.info(`morning brief: ${risks} coverage risk(s) flagged`);
+    } catch (err) {
+      app.log.error({ err }, 'morning brief job crashed');
+    }
+  };
+  void run();
+  setInterval(() => void run(), 24 * 60 * 60 * 1000);
+}
+
 /** Production entrypoint: migrate, then listen. */
 export async function start(): Promise<void> {
   await migrate();
@@ -282,6 +301,7 @@ export async function start(): Promise<void> {
     scheduleRecurring(app);
     scheduleEmailPoll(app);
     scheduleMarkingQueue(app);
+    scheduleMorningBrief(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

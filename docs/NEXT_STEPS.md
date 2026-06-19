@@ -2,7 +2,8 @@
 
 A living checklist of the follow-ups suggested while building the setup/deploy and cover/free work
 (2026-06-18). Phase-level direction lives in [ROADMAP.md](ROADMAP.md); shipped detail in
-[../CHANGELOG.md](../CHANGELOG.md). Items are ticked here as they land.
+[../CHANGELOG.md](../CHANGELOG.md); the longer-horizon idea backlog (Wave 6+) is in
+[FUTURE_WAVES.md](FUTURE_WAVES.md). Items are ticked here as they land.
 
 ## A. Get it live on the Proxmox box (operator actions)
 
