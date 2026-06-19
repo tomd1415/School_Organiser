@@ -108,6 +108,11 @@ async function stageEntry(logicalPath: string, buf: Buffer, depth: number, acc: 
     await stageZip(buf, logicalPath.replace(/\.zip$/i, ''), depth + 1, acc);
     return;
   }
+  // A single file must not push the running total past the cap (BUG-007) — check BEFORE writing it.
+  if (acc.bytes + buf.length > MAX_TOTAL_BYTES) {
+    acc.truncated = true;
+    return;
+  }
   const absDest = join(acc.base, logicalPath);
   if (absDest !== acc.base && !absDest.startsWith(`${acc.base}/`)) return; // defence in depth
   await mkdir(dirname(absDest), { recursive: true });
@@ -146,6 +151,12 @@ async function stageZip(zipBuf: Buffer, baseDir: string, depth: number, acc: Acc
     }
     const rel = safeRel(e.entryName);
     if (!rel) continue;
+    // Inspect the advertised UNCOMPRESSED size before decompressing — a zip-bomb entry (tiny compressed,
+    // huge inflated) must never be expanded into memory past the budget (BUG-007).
+    if (acc.bytes + (e.header?.size ?? 0) > MAX_TOTAL_BYTES) {
+      acc.truncated = true;
+      continue;
+    }
     let inner: Buffer;
     try {
       inner = e.getData();

@@ -19,6 +19,12 @@ interface Line {
   literal: Buffer | null;
 }
 
+// Hard cap on a single advertised IMAP literal (and on an unterminated line) — bounds memory against a
+// hostile or misconfigured server advertising a huge {N} (BUG-042). A message above this aborts the poll
+// cleanly rather than growing the buffer to N bytes and exhausting the process.
+const MAX_LITERAL = 25 * 1024 * 1024;
+const MAX_PER_POLL = 50; // messages fetched per poll cycle (BUG-042) — the backlog drains over cycles
+
 class ImapSession {
   private sock!: Socket | TLSSocket;
   private buf = Buffer.alloc(0);
@@ -57,11 +63,19 @@ class ImapSession {
     this.buf = Buffer.concat([this.buf, d]);
     for (;;) {
       const nl = this.buf.indexOf('\r\n');
-      if (nl === -1) return;
+      if (nl === -1) {
+        if (this.buf.length > MAX_LITERAL) this.abort('IMAP line too long'); // unbounded line with no CRLF
+        return;
+      }
       const text = this.buf.subarray(0, nl).toString('utf8');
       const lit = text.match(/\{(\d+)\}$/);
       if (lit) {
         const size = Number(lit[1]);
+        // BUG-042: reject an oversized advertised literal BEFORE buffering it — never grow to N bytes.
+        if (!Number.isFinite(size) || size > MAX_LITERAL) {
+          this.abort('IMAP literal too large');
+          return;
+        }
         if (this.buf.length < nl + 2 + size) return; // wait for the full literal
         const literal = this.buf.subarray(nl + 2, nl + 2 + size);
         this.buf = this.buf.subarray(nl + 2 + size);
@@ -71,6 +85,19 @@ class ImapSession {
         this.deliver({ text, literal: null });
       }
     }
+  }
+
+  /** Tear down on a protocol/limit violation: record the error, drop the buffer, kill the socket and
+   *  release any waiter so the in-flight command rejects and the poll ends cleanly. */
+  private abort(msg: string): void {
+    this.err ??= new Error(msg);
+    this.buf = Buffer.alloc(0);
+    try {
+      this.sock?.destroy();
+    } catch {
+      /* already gone */
+    }
+    this.flushWaiters();
   }
 
   private deliver(l: Line): void {
@@ -137,7 +164,9 @@ export async function pollMailbox(
       .filter((n) => Number.isInteger(n) && n > 0);
     let imported = 0;
     let failed = 0;
-    for (const seq of seqs) {
+    // BUG-042: bound work (and memory) per poll — fetch at most MAX_PER_POLL messages; the rest stay
+    // UNSEEN and are picked up next cycle. A backlog can't be turned into one giant burst of fetches.
+    for (const seq of seqs.slice(0, MAX_PER_POLL)) {
       try {
         const fetched = await s.cmd(`FETCH ${seq} (BODY.PEEK[])`);
         const withLiteral = fetched.find((l) => l.literal);

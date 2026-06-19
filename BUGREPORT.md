@@ -26,18 +26,19 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (14):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-012, BUG-038 (High
-— image-enumeration, pupil/TA exception leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-030,
-BUG-031 (Medium — TA & pupil session revocation, pupil-work authz core, DB invariants); BUG-034,
-BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authorization wave is complete.**
+**Fixed so far (18):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-006, BUG-007,
+BUG-012, BUG-038, BUG-042 (High — image-enumeration, image/folder/IMAP unbounded buffering, exception
+leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-030, BUG-031, BUG-046 (Medium — TA & pupil session
+revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-035, BUG-036, BUG-050
+(Low — UX reliability & secrets). **Waves A1 (authorization) and A2 (limits) are complete.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 3 | 15 |
-| Medium | 26 | 5 | 21 |
+| High | 18 | 6 | 12 |
+| Medium | 26 | 6 | 20 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **14** | **36** |
+| **Total** | **50** | **18** | **32** |
 
 ## Testing and environment limitations
 
@@ -117,6 +118,7 @@ BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authoriza
 
 ### BUG-006 — The 12 MB pupil/editor image limit is checked after buffering up to 500 MB
 
+- **Status:** ✅ Resolved 2026-06-19 — both image routes (`/me/answer-image`, `/resources/:id/image`) now pass a **route-level `req.file({ limits: { fileSize: 12 MB } })`**, so busboy stops reading at 12 MB instead of buffering toward the global 500 MB; `toBuffer()` is wrapped (and `file.truncated` checked) → 413. Integration test (`uploadLimits.int.test`) asserts a 12 MB+ image is rejected with no orphan resource.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/server.ts:95-96`; `app/src/routes/me.ts:360-378`; `app/src/routes/resources.ts:489-503`
 - **Problem and trigger:** Multipart is configured globally for 500 MB per file. Both image routes call `toBuffer()` before checking their intended 12 MB limit.
@@ -127,6 +129,7 @@ BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authoriza
 
 ### BUG-007 — Folder and nested-zip import limits are enforced after dangerous allocations
 
+- **Status:** ✅ Resolved 2026-06-19 — the folder-upload loop now uses a **per-part `fileSize` cap + a running total** (stops before `folderEntries` grows past ~400 MB); `stageEntry` checks `acc.bytes + buf.length` **before** writing a file; and `stageZip` inspects each entry's advertised **uncompressed size (`e.header.size`) before `getData()`** — a zip-bomb entry is never inflated past the budget. Existing importer tests confirm normal extraction is unaffected. *(The 400 MB / 3000-file caps themselves are verified by inspection — testing them needs injectable limits.)*
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/routes/resources.ts:257-281`; `app/src/services/resourceImport.ts:100-157, 220-227`
 - **Problem and trigger:** A whole folder is fully buffered into `folderEntries` before the 400 MB aggregate cap is consulted. Nested zip entries are fully decompressed with `getData()` before the cap. `stageEntry` checks only the existing total, not `acc.bytes + buf.length`, so a single large entry can exceed the cap and is still written.
@@ -249,6 +252,7 @@ BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authoriza
 
 ### BUG-042 — IMAP ingestion accepts unbounded literals and buffers complete messages
 
+- **Status:** ✅ Resolved 2026-06-19 — the IMAP client now **rejects an advertised `{N}` literal larger than 25 MB before buffering it** (and caps an unterminated line) by aborting the connection cleanly; `pollMailbox` fetches **at most 50 messages per poll** (the backlog drains over cycles). Integration test feeds a hostile ~95 MB literal and asserts the poll returns promptly with nothing imported (no OOM, no hang).
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/lib/imapClient.ts:30-73, 121-155`; `app/src/lib/mime.ts:77-129`
 - **Problem and trigger:** The IMAP parser accepts the server's `{N}` literal length without a maximum, repeatedly grows a buffer until all N bytes arrive, and then passes the complete message to MIME parsing that creates further buffers/strings for multipart content. Mail polling fetches full unseen messages and has no message or attachment size policy.
@@ -486,6 +490,7 @@ BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authoriza
 
 ### BUG-046 — Course-document upload buffers and parses files up to the global 500 MB limit
 
+- **Status:** ✅ Resolved 2026-06-19 — `/coverage/doc/upload` now passes a **route-level 30 MB `fileSize` cap** so busboy stops at the limit instead of buffering up to 500 MB and handing a huge blob to PDF/Office extraction; over-limit → 413. *(Page-count / conversion-time bounds inside the extractor remain a smaller follow-up.)*
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/routes/coverage.ts:199-211`; `app/src/server.ts:95-96`; `app/src/lib/docText.ts:15-35`
 - **Problem and trigger:** `/coverage/doc/upload` calls `toBuffer()` without a smaller route limit. The global multipart allowance is 500 MB, after which the complete PDF/Office file is passed to PDF.js or document conversion/text extraction.

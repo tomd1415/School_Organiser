@@ -121,6 +121,43 @@ describe('email intake v2 (integration — fake IMAP server)', () => {
     }
   });
 
+  it('a hostile server advertising a huge IMAP literal is rejected — not buffered or hung (BUG-042)', async () => {
+    // FETCH advertises a ~95 MB literal but never sends the bytes. Pre-fix the client would grow its
+    // buffer toward N (or hang waiting); now it aborts immediately and the poll returns fast.
+    const server = createServer((sock: Socket) => {
+      sock.write('* OK ready\r\n');
+      let b = '';
+      sock.on('data', (d) => {
+        b += d.toString('utf8');
+        let nl: number;
+        while ((nl = b.indexOf('\r\n')) !== -1) {
+          const line = b.slice(0, nl);
+          b = b.slice(nl + 2);
+          const [tag, ...rest] = line.split(' ');
+          const cmd = rest.join(' ').toUpperCase();
+          if (cmd.startsWith('LOGIN')) sock.write(`${tag} OK\r\n`);
+          else if (cmd.startsWith('SELECT')) sock.write(`* 1 EXISTS\r\n${tag} OK\r\n`);
+          else if (cmd.startsWith('SEARCH')) sock.write(`* SEARCH 1\r\n${tag} OK\r\n`);
+          else if (cmd.startsWith('FETCH')) sock.write('* 1 FETCH (BODY[] {99999999}\r\n'); // oversized; no bytes follow
+          else sock.write(`${tag} OK\r\n`);
+        }
+      });
+    });
+    await new Promise<void>((res) => server.listen(0, '127.0.0.1', () => res()));
+    const port = (server.address() as { port: number }).port;
+    try {
+      await setSetting('email_imap_host', '127.0.0.1');
+      await setSetting('email_imap_port', String(port));
+      await setSetting('email_imap_user', 'intake');
+      await setSetting('email_imap_password', 'pw');
+      await setSetting('email_imap_tls', 'false');
+      const r = await pollEmailOnce(); // completes promptly (no OOM, no hang)
+      expect(r.imported).toBe(0); // the oversized message is not imported
+    } finally {
+      server.close();
+    }
+  });
+
   it('unconfigured → clear message, no crash', async () => {
     await pool.query(`DELETE FROM settings WHERE key LIKE 'email_imap_%'`);
     const r = await pollEmailOnce();

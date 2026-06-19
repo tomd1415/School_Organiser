@@ -377,12 +377,20 @@ export function registerMeRoutes(app: FastifyInstance): void {
     if (!q.success) return reply.code(400).send('');
     // BUG-030: only the pupil's session group's lesson dated today (not cancelled) is writable.
     if (!acting.isTest && !(await pupilMayWriteOc(acting.id, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
-    const data = await req.file();
+    // BUG-006: a route-level 12 MB cap so busboy stops reading at the limit — never buffer up to the
+    // global 500 MB. Type is checked before the body is read; an over-limit file aborts the stream.
+    const tooBig = () => reply.code(413).type('text/html').send('<span class="ws-saved show">that image is too big</span>');
+    const data = await req.file({ limits: { fileSize: 12 * 1024 * 1024 } });
     if (!data) return reply.code(400).type('text/html').send('<span class="ws-saved show">no image</span>');
     const ext = IMG_EXT[data.mimetype];
     if (!ext) return reply.code(400).type('text/html').send('<span class="ws-saved show">that file type isn’t allowed</span>'); // raster only; no SVG
-    const buf = await data.toBuffer();
-    if (buf.length > 12 * 1024 * 1024) return reply.code(413).type('text/html').send('<span class="ws-saved show">that image is too big</span>');
+    let buf: Buffer;
+    try {
+      buf = await data.toBuffer();
+    } catch {
+      return tooBig();
+    }
+    if (data.file.truncated) return tooBig();
     const safeKey = q.data.key.replace(/[^a-z0-9._-]/gi, '_');
     const rel = `pupil-work/${q.data.oc}/${acting.id}/${safeKey}.${ext}`;
     await storeBuffer(rel, buf);

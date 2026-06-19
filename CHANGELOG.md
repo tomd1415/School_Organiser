@@ -7,6 +7,26 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 5 (Wave A2 — limits before materialisation)
+
+Bound every upload/ingest path so it can't be made to allocate unbounded memory. Suite green:
+**517 unit / 315 integration; typecheck clean**.
+
+- **🖼 Image uploads bounded (BUG-006, High).** `/me/answer-image` and `/resources/:id/image` pass a
+  route-level `req.file({ limits: { fileSize: 12 MB } })`, so busboy stops at 12 MB instead of buffering
+  toward the global 500 MB; over-limit → 413.
+- **📦 Folder/zip import bounded (BUG-007, High).** The folder-upload loop caps each part and keeps a
+  running total (no unbounded `folderEntries`); the stager checks the running total **before** writing a
+  file and inspects each zip entry's **uncompressed size before decompressing** — a zip-bomb entry is
+  never inflated past the budget.
+- **📧 IMAP ingestion bounded (BUG-042, High).** The dependency-free IMAP client rejects an advertised
+  `{N}` literal over 25 MB **before** buffering it (aborts cleanly), and fetches at most 50 messages per
+  poll (the backlog drains over cycles).
+- **📄 Course-doc upload bounded (BUG-046, Medium).** `/coverage/doc/upload` gets a 30 MB route cap before
+  PDF/Office extraction.
+
+**Waves A1 + A2 are now complete — 18 / 50 findings fixed.**
+
 ### 2026-06-19 — Audit remediation, batch 4 (pupil-work authz — A1 wave complete)
 
 Final A1 finding. Suite green: **517 unit / 313 integration; typecheck clean**.

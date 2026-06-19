@@ -1,18 +1,19 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-19): in progress — 14 of 50 fixed; the A1 wave is complete.** This is the
+> **Status (2026-06-19): in progress — 18 of 50 fixed; Waves A1 + A2 complete.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
 > Each wave is a reviewable, independently-shippable slice.
 >
-> **Landed (2026-06-19):** **Wave A1 (trust boundaries + authorization) is done** — redaction
-> **BUG-001 / 037**, safety gate **BUG-038**, image-enumeration capability **BUG-003**, TA + pupil session
-> revocation **BUG-016 / 017**, pupil/TA exception leakage **BUG-012**, and pupil-work authz core
-> **BUG-030** (field-inventory + version checks noted as a residual). Plus the A8 reliability quick wins —
-> **BUG-034 / 035 / 036 / 050** — and two A6 invariants — **BUG-024 / 031**. Suites green: 517 unit /
-> 313 integration; typecheck clean. **Next:** Wave **A2 (limits before materialisation)** — BUG-006 / 007
-> / 042 / 046 — needs the Wave-0 bounded-stream probe first.
+> **Landed (2026-06-19):** **Wave A1 (trust boundaries + authorization)** — redaction **BUG-001 / 037**,
+> safety gate **BUG-038**, image-enumeration capability **BUG-003**, TA + pupil session revocation
+> **BUG-016 / 017**, pupil/TA exception leakage **BUG-012**, pupil-work authz core **BUG-030**. **Wave A2
+> (limits before materialisation)** — image/course-doc route-level `fileSize` caps **BUG-006 / 046**,
+> folder/zip per-part + running-total + zip-bomb guard **BUG-007**, IMAP literal + per-poll caps
+> **BUG-042**. Plus A8 reliability **BUG-034 / 035 / 036 / 050** and A6 invariants **BUG-024 / 031**.
+> Suites green: 517 unit / 315 integration; typecheck clean. **Next:** Wave **A3 (auth/network/secrets)** —
+> BUG-040 / 041 / 045 / 032 — or **A4 (assessment correctness)**.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

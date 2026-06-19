@@ -198,9 +198,18 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
 
   // idea 9 — official course documents: upload + extract, edit the text, delete.
   app.post('/coverage/doc/upload', guard, async (req, reply) => {
-    const data = await req.file();
+    // BUG-046: a conservative 30 MB route cap for a specification document — busboy stops at the limit
+    // instead of buffering up to the global 500 MB, then handing a huge blob to PDF/Office extraction.
+    const tooBig = () => reply.code(413).type('text/html').send('<p class="error">That document is too large (max 30 MB).</p>');
+    const data = await req.file({ limits: { fileSize: 30 * 1024 * 1024 } });
     if (!data) return reply.code(400).type('text/html').send('<p class="error">No file received.</p>');
-    const buf = await data.toBuffer();
+    let buf: Buffer;
+    try {
+      buf = await data.toBuffer();
+    } catch {
+      return tooBig();
+    }
+    if (data.file.truncated) return tooBig();
     const fields = data.fields as Record<string, { value?: string } | undefined>;
     const course = Number(fields.course?.value);
     const role = (fields.role?.value ?? '').trim();

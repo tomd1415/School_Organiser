@@ -260,15 +260,27 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
     const fail = (msg: string) =>
       reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">${msg} <a href="/resources/import">Try again</a>.</p></section>`);
+    const MAX_TOTAL = 400 * 1024 * 1024; // matches the staging aggregate cap in resourceImport.ts
     const folderEntries: UploadEntry[] = [];
     let archiveBuf: Buffer | null = null;
+    let total = 0;
     try {
       // preservePath: keep the webkitdirectory relative path in each part's filename (busboy strips it
       // by default) — it's how we reconstruct the unit/lesson folders. safeRel still defeats zip-slip.
-      for await (const part of req.parts({ preservePath: true })) {
+      // BUG-007: a per-part fileSize cap (busboy stops at the limit) + a running total bound memory, so a
+      // huge file or a many-file folder can't be buffered unbounded before the aggregate cap is consulted.
+      for await (const part of req.parts({ preservePath: true, limits: { fileSize: MAX_TOTAL } })) {
         if (part.type !== 'file') continue;
-        const buf = await part.toBuffer();
+        let buf: Buffer;
+        try {
+          buf = await part.toBuffer();
+        } catch {
+          return fail('A file in that upload was too large.');
+        }
+        if (part.file.truncated) return fail('A file in that upload was too large.');
         if (!buf.length) continue;
+        total += buf.length;
+        if (total > MAX_TOTAL) return fail('That upload is too large — import in smaller batches (about 400 MB total).');
         if (part.fieldname === 'archive') {
           if ((part.filename || '').toLowerCase().endsWith('.zip')) archiveBuf = buf;
         } else {
@@ -276,7 +288,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         }
       }
     } catch {
-      return fail('That upload was too large or could not be read (limit: 500 MB per file).');
+      return fail('That upload was too large or could not be read.');
     }
     let result: ExtractResult;
     if (folderEntries.length) result = await extractFolder(folderEntries);
@@ -492,12 +504,18 @@ export function registerResourceRoutes(app: FastifyInstance): void {
   // resource; returns the URL to embed. Served via /lesson-image (below) so PUPILS and TAs can see it.
   const EDITOR_IMG_EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
   app.post('/resources/:id/image', guard, async (req, reply) => {
-    const data = await req.file();
+    // BUG-006: route-level 12 MB cap (busboy stops at the limit) — never buffer up to the global 500 MB.
+    const data = await req.file({ limits: { fileSize: 12 * 1024 * 1024 } });
     if (!data) return reply.code(400).send('no image');
     const ext = EDITOR_IMG_EXT[data.mimetype];
     if (!ext) return reply.code(400).send('that file type isn’t allowed'); // raster only; no SVG
-    const buf = await data.toBuffer();
-    if (buf.length > 12 * 1024 * 1024) return reply.code(413).send('that image is too big');
+    let buf: Buffer;
+    try {
+      buf = await data.toBuffer();
+    } catch {
+      return reply.code(413).send('that image is too big');
+    }
+    if (data.file.truncated) return reply.code(413).send('that image is too big');
     const name = safeFilename(data.filename || `image.${ext}`);
     const imgId = await createResource(name, 'image', data.mimetype, 'uploaded');
     const rel = relPathFor(imgId, 1, name);
