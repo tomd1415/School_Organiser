@@ -204,6 +204,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-038 — Safeguarding phrases can bypass the local safety gate through trivial variants
 
+- **Status:** ✅ Resolved 2026-06-19 — `guardMatch` now canonicalises (strip accents/zero-width, fold apostrophe/hyphen-dash families, collapse all whitespace incl. newlines/NBSP) before the substring check, so `hurt  myself`, `hurt\nmyself` and `self‑harm` (non-breaking hyphen) all match; the phrase set was broadened to direct first-person intent ("want to die", "end my life", "hate my life", …). Shared by marking + email intake.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/lib/markSafetyGate.ts:9-23`; `app/src/services/emailPoll.ts:19-25, 133-151`; `app/src/services/marking.ts:207-230`
 - **Problem and trigger:** `guardMatch` lowercases text and performs literal substring checks, but does not normalise Unicode punctuation, repeated whitespace, or line breaks. Phrases such as `hurt  myself`, `hurt\nmyself`, and `self‑harm` with a non-breaking hyphen bypass the configured terms. Common direct language such as `I want to die` is also absent.
@@ -346,6 +347,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-024 — Selecting a nonexistent academic year can leave no current year
 
+- **Status:** ✅ Resolved 2026-06-19 — `makeYearCurrent` now `SELECT … FOR UPDATE`s the target first and rolls back (returning `false`) for an unknown id, so the current flag is never cleared without a replacement; the route rejects a bad id. Regression test asserts a nonexistent id leaves exactly one (unchanged) current year.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/repos/setup.ts:47-60`; `app/src/routes/setup.ts:473-479`
 - **Problem and trigger:** `makeYearCurrent` clears the current flag before updating the requested ID and does not verify that the second update matched a row.
@@ -416,6 +418,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-031 — Migration execution has no cross-process lock
 
+- **Status:** ✅ Resolved 2026-06-19 — the migration run now holds a session-level `pg_advisory_lock` for its whole duration and re-reads `schema_migrations` under the lock, so a serialised second migrator sees the winner's work and applies nothing. Test runs two `migrate()` calls concurrently and asserts both succeed.
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/db/migrate.ts:7-40`; `app/migrations/*.sql`
 - **Problem and trigger:** Each process reads the applied migration set before applying pending files, but no advisory lock serialises migrators. Two app instances starting together can both select the same pending migration; one then fails on DDL or the `schema_migrations` primary key.
@@ -518,6 +521,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-034 — Aborted HTMX requests decrement the global in-flight counter twice
 
+- **Status:** ✅ Resolved 2026-06-19 — the in-flight counter now decrements on `htmx:afterRequest` only (which fires for success, error, timeout AND abort); the duplicate `htmx:sendAbort` listener was removed. (Client-side; the cross-request busy-bar behaviour is exercised manually pending the Wave-0 HTMX browser harness.)
 - **Severity / confidence:** Low / Confirmed
 - **Affected:** `app/public/app.js:58-81`; bundled HTMX abort event behavior
 - **Problem and trigger:** `requestDone` is registered for both `htmx:afterRequest` and `htmx:sendAbort`. HTMX emits `afterRequest` and then `sendAbort` for an aborted XHR, so one request decrements twice.
@@ -528,6 +532,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-035 — Clearing required titles causes a database error instead of validation
 
+- **Status:** ✅ Resolved 2026-06-19 — the task / unit / lesson-plan / recurring-task autosave routes reject an empty `title` with an in-place red message and write nothing; the repo updaters also refuse to null a required title (defence-in-depth), so a NOT NULL column never receives a null. Regression test covers empty / whitespace / null and a valid re-save.
 - **Severity / confidence:** Low / Confirmed
 - **Affected:** `app/src/routes/tasks.ts:103-119`; `app/src/repos/tasks.ts:104-121`; `app/src/repos/schemes.ts:408-427`; `app/src/repos/recurringTasks.ts:52-75`; relevant NOT NULL migrations
 - **Problem and trigger:** Autosave routes normalise an empty title to `NULL`, while task, recurring-task, unit, and lesson-plan titles are NOT NULL. The repository sends that value to PostgreSQL instead of rejecting it or preserving a valid title.
@@ -538,6 +543,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-036 — Academic-year timetable preview loses its selected structure on week navigation
 
+- **Status:** ✅ Resolved 2026-06-19 — Prev/Next now carry the explicit `?year=` through navigation, with an "exit preview →" affordance ("This week" still returns to the current year intentionally). Integration test asserts both nav links keep `year=`.
 - **Severity / confidence:** Low / Confirmed
 - **Affected:** `app/src/routes/timetable.ts:100-181`
 - **Problem and trigger:** `?year=<id>` selects an explicit academic-year structure, but Prev, Next, and This week links omit the `year` parameter.
@@ -548,6 +554,7 @@ BUG-024, BUG-031 (DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (UX reliabi
 
 ### BUG-050 — The stored IMAP password is returned to the browser in Settings HTML
 
+- **Status:** ✅ Resolved 2026-06-19 — the password field renders empty with a "configured ✓" indicator; a blank submit preserves the stored secret and only an explicitly typed value overwrites it. Integration test asserts the secret never appears in the HTML and blank-preserves / explicit-replaces correctly.
 - **Severity / confidence:** Low / Confirmed
 - **Affected:** `app/src/routes/settingsPage.ts:70-75, 288-295`
 - **Problem and trigger:** The settings page reads the stored `email_imap_password` and renders it as the full value of a password input. Loading the page therefore sends the reusable mailbox credential into the browser DOM, and test/save requests include it again.

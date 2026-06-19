@@ -1,10 +1,15 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-19): planned.** This is the fix-and-finish programme for the 50 findings in
-> [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026 audit) **plus** the still-outstanding features
-> drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md), [PHASE_14_PLAN.md](PHASE_14_PLAN.md),
-> [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md). Nothing here is built yet; each wave is
-> a reviewable, independently-shippable slice.
+> **Status (2026-06-19): in progress — 9 of 50 fixed.** This is the fix-and-finish programme for the 50
+> findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026 audit) **plus** the still-outstanding
+> features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md), [PHASE_14_PLAN.md](PHASE_14_PLAN.md),
+> [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md). Each wave is a reviewable,
+> independently-shippable slice.
+>
+> **Landed (2026-06-19):** the A1 trust-boundary canonicalisation cluster — **BUG-001 / 037** (redaction)
+> and **BUG-038** (safety gate); the A8 reliability quick wins — **BUG-034 / 035 / 036 / 050**; and two A6
+> invariants — **BUG-024 / 031**. Suites green: 515 unit / 307 integration; typecheck clean. Per-finding
+> detail in the BUGREPORT progress section.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 1 (9 findings)
+
+First execution slice of [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Suite green:
+**515 unit / 307 integration; typecheck clean**. Per-finding status in [BUGREPORT.md](BUGREPORT.md).
+
+- **🔒 Redaction bypasses closed (BUG-001/037, Critical).** The pupil-name boundary
+  ([app/src/services/redact.ts](app/src/services/redact.ts)) now matches each name character's
+  apostrophe / hyphen-dash / accent / case variants, and runs a second pass over distinctive
+  given/sur-name parts (accent-folded, with an explicit ambiguous-common-word policy and a two-pass
+  full-then-parts order to avoid mis-assigning a shared first name) — in both redaction **and** the
+  egress assert. `O'Brien` vs `O'Brien`, `Anna` from `Anna Lee`, and `Jose` from `José` are all caught.
+- **🛟 Safety-gate variants closed (BUG-038).** `guardMatch`
+  ([app/src/lib/markSafetyGate.ts](app/src/lib/markSafetyGate.ts)) canonicalises whitespace / newlines /
+  non-breaking hyphen / accents before matching and the phrase set was broadened to direct first-person
+  intent — so `hurt  myself`, `hurt\nmyself`, `self‑harm` and "I want to die" no longer slip through.
+- **DB invariants:** `makeYearCurrent` validates+locks the target first and refuses an unknown id, so
+  there's never zero current years (BUG-024); the migration run holds a `pg_advisory_lock` so concurrent
+  migrators serialise (BUG-031).
+- **Reliability & secrets:** the IMAP password is no longer echoed into Settings HTML (empty field +
+  "configured ✓", blank-preserves) (BUG-050); required titles validate instead of throwing a NOT NULL
+  error (BUG-035); the HTMX busy counter decrements once (BUG-034); and a `?year=` timetable preview
+  survives Prev/Next navigation (BUG-036).
+
 ### 2026-06-19 — Remediation & completion plan (planning)
 
 Turned the 19 June audit ([BUGREPORT.md](BUGREPORT.md), 50 findings) into an actionable programme:
