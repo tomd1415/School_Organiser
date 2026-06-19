@@ -28,6 +28,9 @@ import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
 import { listActiveEquipment } from '../repos/equipment';
 import { equipmentItem } from '../llm/prompts/equipment';
+import { extractArchive, commitImport, cleanupBatch, defaultTitle, type ExtractResult, type CommitItem } from '../services/resourceImport';
+import { resourceImportSchema } from '../llm/schemas/resourceImport';
+import { RESOURCE_IMPORT_SYSTEM, RESOURCE_IMPORT_INSTRUCTION, RESOURCE_IMPORT_VERSION, importGroupItem } from '../llm/prompts/resourceImport';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -146,6 +149,50 @@ async function loadPage(q: string, kind: string, page: number) {
   return { rows, total, page, pageSize: PAGE_SIZE, q, kind };
 }
 
+// The review screen after an archive upload: every staged file with a (proposed) title, an import tick,
+// and a duplicate flag, grouped by the zip it came from. Nothing is imported until the form is posted.
+function renderReview(result: ExtractResult, proposal: Map<string, { title: string; category: string }>, csrf: string): string {
+  if (result.fileCount === 0) {
+    return `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">No importable files found in that archive. <a href="/resources/import">Try another</a>.</p></section>`;
+  }
+  const MAX = 1000;
+  let i = 0;
+  const groupsHtml = result.groups
+    .map((g) => {
+      const rows = g.files
+        .map((f) => {
+          if (i >= MAX) return '';
+          const p = proposal.get(f.path);
+          const title = p?.title || defaultTitle(f.name);
+          const cat = p?.category ? `<span class="imp-cat">${esc(p.category)}</span> ` : '';
+          const dup = f.duplicate ? '<span class="imp-dup" title="already in the store (same content)">duplicate</span> ' : '';
+          const idx = i++;
+          return `<tr>
+            <td><input type="checkbox" name="inc_${idx}" value="1"${f.duplicate ? '' : ' checked'}></td>
+            <td><input type="hidden" name="path_${idx}" value="${esc(f.path)}"><input class="imp-title" name="title_${idx}" value="${esc(title)}" maxlength="200"></td>
+            <td class="muted imp-meta">${cat}${dup}<span class="imp-file">${esc(f.name)}</span> · ${Math.max(1, Math.round(f.bytes / 1024))} KB</td>
+          </tr>`;
+        })
+        .join('');
+      const label = g.source ? esc(g.source) : 'Loose files';
+      return `<h3 class="imp-group">${label}${g.description ? ' <span class="muted">· described</span>' : ''}</h3>
+        <div class="table-scroll"><table class="setup-table"><thead><tr><th>Import?</th><th>Title</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    })
+    .join('');
+  const more = result.fileCount > MAX ? `<p class="muted">Showing the first ${MAX} of ${result.fileCount} files — re-upload smaller batches for the rest.</p>` : '';
+  return `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+    <h1>Review import — ${result.fileCount} file${result.fileCount === 1 ? '' : 's'}</h1>
+    <p class="muted">Tick what to import and tweak any title. Duplicates (already in the store) are unticked. Nothing is added until you click Import.${result.truncated ? ' <strong>The archive was large and was capped.</strong>' : ''}</p>
+    ${more}
+    <form hx-post="/resources/import/${result.batchId}/commit" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
+      <input type="hidden" name="count" value="${i}">
+      ${groupsHtml}
+      <p class="imp-actions"><button type="submit" class="btn-secondary">Import ticked files →</button>
+      <button type="button" class="link" hx-post="/resources/import/${result.batchId}/cancel" hx-target="closest section" hx-swap="outerHTML">cancel</button></p>
+    </form>
+  </section>`;
+}
+
 export function registerResourceRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
 
@@ -157,7 +204,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       const [kinds, paged] = await Promise.all([listKinds(), loadPage(q, kind, page)]);
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Resources</h1>
-        <p class="muted">The single source of truth — uploaded, versioned, downloadable. PDFs/images preview in the browser; Office files preview as PDF. Bulk-import with <code>npm run import-resources</code>.</p>
+        <p class="muted">The single source of truth — uploaded, versioned, downloadable. PDFs/images preview in the browser; Office files preview as PDF. Bulk-import a zip of a whole folder (nested zips + Word descriptions) on <a href="/resources/import">Import →</a>.</p>
         ${renderUploadForm()}
         ${renderGenerateForm()}
         ${renderSearchBar(kinds, q, kind)}
@@ -175,6 +222,80 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const { q, kind, page } = parseQuery(req.query);
     const paged = await loadPage(q, kind, page);
     return reply.type('text/html').send(renderResourceListPaged(paged));
+  });
+
+  // Bulk import: upload a zip of a folder (nested zips + Word descriptions), review, then import.
+  app.get('/resources/import', { preHandler: requireAuth }, async (_req, reply) => {
+    const csrf = reply.generateCsrf();
+    const body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <h1>Import a folder of resources</h1>
+      <p class="muted">Zip up your folder of resources — nested zips and the Word docs that describe them are fine — and upload the one archive. It's unzipped, the Word descriptions are read, and a tidy title is proposed for each file (AI, when on). You review and tick what to import; nothing is added until you confirm. <a href="/resources">← Resources</a></p>
+      <form class="setup-add" hx-post="/resources/import" hx-encoding="multipart/form-data" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
+        <input type="file" name="archive" accept=".zip,application/zip" required>
+        <button type="submit" class="btn-secondary">Upload &amp; review →</button>
+      </form>
+    </section>`;
+    return reply.type('text/html').send(layout({ title: 'Import resources', body, authed: true, csrfToken: csrf }));
+  });
+
+  app.post('/resources/import', guard, async (req, reply) => {
+    const csrf = reply.generateCsrf();
+    const data = await req.file().catch(() => null);
+    if (!data) return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">No file received. <a href="/resources/import">Try again</a>.</p></section>`);
+    if (!(data.filename || '').toLowerCase().endsWith('.zip')) {
+      return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">Please upload a <strong>.zip</strong> archive. <a href="/resources/import">Try again</a>.</p></section>`);
+    }
+    const buf = await data.toBuffer();
+    const result = await extractArchive(buf);
+    const proposal = new Map<string, { title: string; category: string }>();
+    let aiGroups = 0;
+    for (const g of result.groups) {
+      if (aiGroups >= 25 || !g.description.trim() || g.files.length === 0) continue;
+      const r = await callLLMStructured(
+        {
+          feature: 'resource_import',
+          model: await modelForFeature('resource_import', 'plan'),
+          promptVersion: RESOURCE_IMPORT_VERSION,
+          system: RESOURCE_IMPORT_SYSTEM,
+          context: importGroupItem(g.description, g.files.slice(0, 80).map((f) => f.path)),
+          instruction: RESOURCE_IMPORT_INSTRUCTION,
+          maxTokens: 4000,
+        },
+        resourceImportSchema,
+      );
+      if (r.status === 'ok' && r.data) {
+        for (const f of r.data.files) if (f.path) proposal.set(f.path, { title: f.title, category: f.category });
+        aiGroups += 1;
+      } else if (r.status === 'blocked' || r.status === 'unavailable') {
+        break; // over the monthly cap / AI off → default the rest from filenames
+      }
+    }
+    return reply.type('text/html').send(renderReview(result, proposal, csrf));
+  });
+
+  app.post('/resources/import/:batch/commit', guard, async (req, reply) => {
+    const batch = String((req.params as { batch: string }).batch);
+    const body = (req.body ?? {}) as Record<string, string>;
+    const count = Math.min(Number(body.count) || 0, 1000);
+    const items: CommitItem[] = [];
+    for (let n = 0; n < count; n += 1) {
+      if (body[`inc_${n}`] !== '1') continue;
+      const path = body[`path_${n}`];
+      if (path) items.push({ path, title: body[`title_${n}`] ?? '' });
+    }
+    const r = await commitImport(batch, items);
+    const csrf = reply.generateCsrf();
+    return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <h1>Import complete</h1>
+      <p>Imported <strong>${r.imported}</strong> file${r.imported === 1 ? '' : 's'}${r.skipped ? `, skipped ${r.skipped} duplicate${r.skipped === 1 ? '' : 's'}` : ''}${r.failed ? `, ${r.failed} could not be read` : ''}.</p>
+      <p><a href="/resources">View on Resources →</a> · <a href="/resources/import">Import another</a></p>
+    </section>`);
+  });
+
+  app.post('/resources/import/:batch/cancel', guard, async (req, reply) => {
+    await cleanupBatch(String((req.params as { batch: string }).batch));
+    const csrf = reply.generateCsrf();
+    return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'><h1>Import resources</h1><p class="muted">Cancelled — nothing was imported. <a href="/resources/import">Start over</a>.</p></section>`);
   });
 
   app.post('/resources', guard, async (req, reply) => {

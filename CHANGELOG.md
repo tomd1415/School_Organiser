@@ -7,6 +7,30 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Bulk resource import (zip of a folder)
+
+Upload a whole folder of resources at once instead of one file at a time. Suite green:
+**505 unit / 300 integration; typecheck clean**.
+
+- **📦 Import a folder of resources** ([/resources/import](app/src/routes/resources.ts)) — zip your
+  folder (nested zips and their Word descriptions included) and upload the one archive. It's unzipped
+  securely, each per-zip Word doc is read, and a clear title + category is proposed for every file
+  before anything is stored. You review (tick what to import, tweak titles), then commit. A two-step
+  **stage → review → commit** flow: nothing touches the store until you confirm.
+- **Security**: never `extractAllTo` — every entry's path is sanitised (`safeRel`, unit-tested) to
+  defeat zip-slip; the commit step re-validates each path stays inside the batch dir. Caps on file
+  count / total bytes / nesting depth; OS noise (`__MACOSX`, dotfiles, `Thumbs.db`) dropped.
+- **Dedup**: staged files already in the store (same checksum) are flagged and unticked; committing a
+  duplicate is skipped, never a second copy. Reuses the resource store's checksum path.
+- **AI titling** is the new cohort-level `resource_import` feature (Plan model, one capped wrapper
+  call per zip-group from its Word description) — and is **optional**: with AI off or over the monthly
+  cap it degrades to sensible filename-derived titles, the rest of the flow unchanged.
+- [app/src/services/resourceImport.ts](app/src/services/resourceImport.ts) (extract/stage/commit),
+  [app/src/llm/prompts/resourceImport.ts](app/src/llm/prompts/resourceImport.ts) +
+  [schema](app/src/llm/schemas/resourceImport.ts), routes in
+  [app/src/routes/resources.ts](app/src/routes/resources.ts). Docs:
+  [docs/RESOURCE_INGEST.md](docs/RESOURCE_INGEST.md) §4.
+
 ### 2026-06-19 — Cover-pack generator (Wave 6.1)
 
 First slice of Wave 6 (absence & cover). Suite green: **496 unit / 292 integration; typecheck clean**.

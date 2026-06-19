@@ -104,3 +104,31 @@ for getting the *new* curriculum to teach from, not for this reconcile.
 cd app && npm run import-resources -- ~/Downloads/TeachComputing/GCSE   # new GCSE units
 # A --filter mode to import only the files listed in own.tsv is a small follow-up — ask if wanted.
 ```
+
+---
+
+## 4. Web import (no CLI) — `/resources/import`
+
+The CLI above needs shell access; the web importer does the same from the browser, plus AI-assisted
+titling for the ambiguous Teach-Computing naming (§2's "named by activity not lesson" problem).
+
+**Flow.** Zip the directory of resources (nested `.zip`s and per-zip Word descriptions are fine) and
+upload the one archive:
+
+1. **Extract** — `services/resourceImport.ts` opens the archive with `adm-zip` and recursively extracts,
+   **entry by entry** (never `extractAllTo`, to defeat zip-slip): each name is sanitised (no `..`, no
+   absolute/drive paths, `__MACOSX`/dotfiles/`Thumbs.db` dropped), and it's capped on file count,
+   total uncompressed bytes, and nesting depth. Files are staged under
+   `<resource store>/imports/<batchId>/`; nested `.zip`s recurse, grouped by their path.
+2. **Describe** — each `.docx` is itself a zip, so its `word/document.xml` text is pulled (no Gotenberg)
+   and concatenated as the group's description.
+3. **Propose (AI, optional)** — per group, the `resource_import` feature gets {the Word description +
+   the file manifest} and proposes a clean title + category per file. AI off / no description ⇒
+   filename-derived defaults. Cohort-level only, through the one wrapper.
+4. **Review** — a page lists every file grouped by source zip: editable title, category, an *import?*
+   tick, and a "duplicate (already in the store)" flag from the checksum. Nothing is imported yet.
+5. **Commit** — the ticked files import into the resource store (checksum-dedup, like the CLI), the
+   staging batch is deleted, and a summary links to what landed.
+
+Reuses the store + dedup the CLI importer already uses; the new parts are the secure in-browser
+extraction, the Word-doc reading, the AI titling, and the review-before-commit step.

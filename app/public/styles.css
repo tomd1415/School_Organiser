@@ -688,6 +688,15 @@ tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 
 .grp-course { display: inline-block; margin-right: 0.8rem; font-weight: 400; }
 .grp-pupils select { font: inherit; font-size: 0.8rem; padding: 0.2rem; border: 1px solid var(--line); border-radius: 4px; }
 
+/* Bulk resource import — the review screen */
+.imp-group { margin: 1rem 0 0.2rem; font-size: 0.95rem; }
+.imp-title { width: 100%; min-width: 12rem; }
+.imp-meta { white-space: nowrap; font-size: 0.78rem; }
+.imp-cat { display: inline-block; border-radius: 999px; padding: 0.05rem 0.5rem; background: var(--accent-soft); color: var(--accent); font-size: 0.72rem; }
+.imp-dup { display: inline-block; border-radius: 999px; padding: 0.05rem 0.5rem; background: #fdf2e2; color: var(--warn); font-size: 0.72rem; }
+.imp-file { color: var(--muted); }
+.imp-actions { display: flex; gap: 0.8rem; align-items: center; margin-top: 0.9rem; }
+
 /* 6.3: timetable editor */
 .tt-ed td { vertical-align: top; min-width: 11rem; }
 .tt-ed-cell { padding: 0.3rem !important; }
