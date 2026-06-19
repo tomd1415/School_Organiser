@@ -7,6 +7,24 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 6 (Wave A4 — assessment correctness)
+
+Make marks and the daily print trustworthy. Suite green: **522 unit / 318 integration; typecheck clean**.
+
+- **✅ A mark never describes edited text (BUG-004, High).** `saveAnswer` now drops an answer's mark — a
+  confirmed/teacher one included — in the same transaction when the pupil changes the value, so a
+  released score/feedback can't survive an edit; the next pass re-marks.
+- **✅ All-or-nothing AI marking (BUG-005, High).** A batch is written only if it returns EXACTLY the
+  answer slots sent (no empty/missing/duplicate/unknown); a garbled batch is rejected and the job
+  re-arms — no pupil is silently left unmarked, no answer overwritten twice.
+- **✅ Marks respect provenance (BUG-015, Medium).** Each answer carries its worksheet resource+version
+  and is marked only against the scheme for that provenance — a switched worksheet or stale-version
+  answer is left for the teacher, not evaluated against the wrong scheme.
+- **🖨 Calendar-aware daily print (BUG-047, Medium).** `/today/print` honours holidays/INSET/term and
+  per-lesson exceptions, and **creates no ghost occurrence rows** on non-teaching/cancelled days.
+
+**Waves A1 + A2 + A4 complete — 22 / 50 findings fixed.**
+
 ### 2026-06-19 — Audit remediation, batch 5 (Wave A2 — limits before materialisation)
 
 Bound every upload/ingest path so it can't be made to allocate unbounded memory. Suite green:

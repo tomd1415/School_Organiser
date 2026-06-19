@@ -26,19 +26,20 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (18):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-006, BUG-007,
-BUG-012, BUG-038, BUG-042 (High — image-enumeration, image/folder/IMAP unbounded buffering, exception
-leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-030, BUG-031, BUG-046 (Medium — TA & pupil session
-revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-035, BUG-036, BUG-050
-(Low — UX reliability & secrets). **Waves A1 (authorization) and A2 (limits) are complete.**
+**Fixed so far (22):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+BUG-007, BUG-012, BUG-038, BUG-042 (High — image-enumeration, image/folder/IMAP buffering, exception
+leakage, safety-gate, **marks-vs-edited-answer & incomplete-AI-batch**); BUG-015, BUG-016, BUG-017,
+BUG-024, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
+invariants, course-doc cap, **mark provenance & calendar-aware print**); BUG-034, BUG-035, BUG-036,
+BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correctness) are complete.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 6 | 12 |
-| Medium | 26 | 6 | 20 |
+| High | 18 | 8 | 10 |
+| Medium | 26 | 8 | 18 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **18** | **32** |
+| **Total** | **50** | **22** | **28** |
 
 ## Testing and environment limitations
 
@@ -98,6 +99,7 @@ revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-
 
 ### BUG-004 — Confirmed marks survive later answer edits
 
+- **Status:** ✅ Resolved 2026-06-19 — `saveAnswer` now runs in one transaction: it `SELECT … FOR UPDATE`s the existing answer and, when the value actually CHANGES, **deletes the answer's `pupil_marks` row** (a confirmed/teacher mark included) — so a mark never describes text that no longer exists; the next pass re-marks. Integration test: a confirmed mark survives an unchanged re-save and is dropped on a changed one.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/repos/pupilWork.ts:63-82`; `app/src/repos/marking.ts:136-145`; `app/src/routes/me.ts:288-310`
 - **Problem and trigger:** `saveAnswer` updates the existing `pupil_answers` row but does not invalidate its `pupil_marks` row. The marking pass deliberately skips confirmed marks and teacher overrides. A pupil can therefore change an answer after confirmation while the old mark remains attached to the same answer ID.
@@ -108,6 +110,7 @@ revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-
 
 ### BUG-005 — Incomplete or duplicate AI marking batches are accepted as successful
 
+- **Status:** ✅ Resolved 2026-06-19 — before any write, `markOpen` now checks the returned slots are EXACTLY the slots sent (`isCompleteBatch`: no empty/missing/duplicate/unknown); an invalid batch is rejected, the question is left unmarked, and the job re-arms (`'unavailable'`) so it retries. Unit tests cover every malformed-batch shape.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/llm/schemas/markAnswers.ts:5-19`; `app/src/services/marking.ts:183-270`; `app/src/services/markingQueue.ts:32-52`
 - **Problem and trigger:** The structured schema accepts an empty array, missing slots, duplicate slots, and unknown slots. `markOpen` writes whichever known results are returned, ignores unknowns, and reports success unless the provider call itself failed. The durable queue job is then consumed rather than retried.
@@ -265,6 +268,7 @@ revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-
 
 ### BUG-015 — Marking applies one worksheet scheme to mixed answer provenance
 
+- **Status:** ✅ Resolved 2026-06-19 — `answersForMarking` now returns each answer's `resource_id` + `version_no`, and both marking passes mark an answer ONLY when its provenance matches the resolved scheme's resource + version (`matchesProvenance`). A switched worksheet or a stale-version answer is **left for the teacher**, never evaluated against the wrong scheme (unknown/null provenance still marked best-effort). Integration test: a v2 answer is left while the v1 answer is marked.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/services/marking.ts:45-72, 143-151, 189-201`; `app/src/repos/marking.ts:115-132`; `app/migrations/0019_pupil_answer_key.sql`
 - **Problem and trigger:** `answersVersionFor` selects only the maximum version for the currently resolved worksheet resource. `answersForMarking` then returns every answer for the occurrence without resource/version fields. All are evaluated against that one scheme and field map. Worksheet resource switches or mixed saved versions therefore collapse distinct provenance.
@@ -501,6 +505,7 @@ revocation, pupil-work authz core, DB invariants, course-doc cap); BUG-034, BUG-
 
 ### BUG-047 — The daily print view ignores holidays and lesson exceptions and creates ghost occurrences
 
+- **Status:** ✅ Resolved 2026-06-19 — `/today/print` now classifies the date first: a holiday / INSET / weekend / out-of-term day prints "no teaching" and **materialises nothing**; on a school day, cancelled / free / whole-day off-timetable lessons are dropped (via the shared exception index) before any occurrence is created. Integration test: a holiday prints "no teaching" and creates zero occurrence rows. *(Read-only-on-future-school-days — not materialising a real not-yet-opened lesson — is a smaller residual; cover/room lessons still print.)*
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/routes/lesson.ts:1339-1367`; `app/src/services/exceptions.ts:25-63`; occurrence creation used by `lessonPrintBlock`
 - **Problem and trigger:** `/today/print` selects lessons from the weekly weekday pattern without classifying the date against the academic calendar or applying per-lesson/whole-day exceptions. It then calls the print-block path that finds or creates occurrences for those weekly lessons.

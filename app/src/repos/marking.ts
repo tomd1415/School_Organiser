@@ -110,11 +110,14 @@ export interface MarkingAnswer {
   pupilId: number;
   fieldKey: string;
   value: string;
+  resourceId: number | null; // provenance: which worksheet resource this answer was given against
+  versionNo: number | null; // …and which version, so it's only marked against ITS scheme (BUG-015)
 }
 /** Non-empty answers for a lesson instance — the marking inputs (objective + open). */
 export async function answersForMarking(occurrenceCourseId: number): Promise<MarkingAnswer[]> {
   const { rows } = await pool.query<MarkingAnswer>(
-    `SELECT id AS "pupilAnswerId", pupil_id AS "pupilId", field_key AS "fieldKey", value
+    `SELECT id AS "pupilAnswerId", pupil_id AS "pupilId", field_key AS "fieldKey", value,
+            resource_id AS "resourceId", version_no AS "versionNo"
      FROM pupil_answers WHERE occurrence_course_id = $1 AND value <> '' ORDER BY field_key, id`,
     [occurrenceCourseId],
   );

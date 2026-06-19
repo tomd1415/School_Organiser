@@ -313,6 +313,30 @@ describe('pupil login + surface (integration)', () => {
     expect(fb?.liked).toContain('practical');
   });
 
+  it('a confirmed mark is dropped when the pupil edits the answer it described (BUG-004)', async () => {
+    const { saveAnswer } = await import('../../src/repos/pupilWork');
+    const key = 'bug004.field';
+    const markCount = async (answerId: number) =>
+      (await pool.query<{ n: number }>(`SELECT count(*)::int n FROM pupil_marks WHERE pupil_answer_id = $1`, [answerId])).rows[0]!.n;
+
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: key, value: 'first answer' });
+    const a = await pool.query<{ id: number }>(
+      `SELECT id FROM pupil_answers WHERE pupil_id = $1 AND occurrence_course_id = $2 AND field_key = $3`,
+      [pupilId, occurrenceCourseId, key],
+    );
+    const answerId = a.rows[0]!.id;
+    // a teacher-confirmed mark on that exact answer row (the marking pass would otherwise skip it)
+    await pool.query(`INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, marker, status) VALUES ($1, 2, 2, 'teacher', 'confirmed')`, [answerId]);
+
+    // re-saving the SAME value keeps the mark (a pupil re-blurring an unchanged field)
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: key, value: 'first answer' });
+    expect(await markCount(answerId)).toBe(1);
+
+    // CHANGING the value drops the now-stale confirmed mark — it described text that no longer exists
+    await saveAnswer({ pupilId, occurrenceCourseId, resourceId, versionNo: 1, fieldKey: key, value: 'a different answer' });
+    expect(await markCount(answerId)).toBe(0);
+  });
+
   it('a pupil PIN locks out after 5 wrong tries (durable lockout)', async () => {
     const { verifyPin, setPupilPin, unlockPupil } = await import('../../src/repos/pupilCredentials');
     await setPupilPin(otherPupilId, '1111');

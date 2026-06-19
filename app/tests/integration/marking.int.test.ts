@@ -232,7 +232,11 @@ describe('Phase 9 marking — safety invariants (integration)', () => {
   });
 
   it('recentClassMisses (10.15) surfaces a low-success question by its worksheet label, anonymously', async () => {
-    // A second pupil gets the same question wrong → the class "missed" it (Ada full + Ben zero).
+    // Ada full + Ben zero on the same question → the class "missed" it. (Ada's earlier auto-mark was
+    // correctly dropped when an earlier test edited her answer (BUG-004), so set both up explicitly here
+    // rather than relying on cross-test state.)
+    const adaAns = Number((await pool.query<{ id: number }>(`SELECT id FROM pupil_answers WHERE pupil_id=$1 AND occurrence_course_id=$2 AND field_key='t1.r1.c2'`, [pupil, oc])).rows[0]!.id);
+    await pool.query(`INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, marker, status) VALUES ($1, 2, 2, 'ai', 'suggested') ON CONFLICT (pupil_answer_id) DO UPDATE SET marks_awarded=2, marks_total=2`, [adaAns]);
     const ben = Number((await pool.query<{ id: number }>(`INSERT INTO pupils (display_name, ai_token) VALUES ('ZZM Ben','PUPIL_ZM2') RETURNING id`)).rows[0]!.id);
     const ansId = Number((await pool.query<{ id: number }>(`INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value) VALUES ($1,$2,$3,1,'t1.r1.c2','no idea') RETURNING id`, [ben, oc, resourceId])).rows[0]!.id);
     await pool.query(`INSERT INTO pupil_marks (pupil_answer_id, marks_awarded, marks_total, marker, status) VALUES ($1, 0, 2, 'ai', 'suggested')`, [ansId]);
@@ -246,9 +250,29 @@ describe('Phase 9 marking — safety invariants (integration)', () => {
       // It carries cohort counts only — no pupil name anywhere in the structure.
       expect(JSON.stringify(misses)).not.toContain('ZZM');
     } finally {
-      await pool.query(`DELETE FROM pupil_marks WHERE pupil_answer_id=$1`, [ansId]);
+      await pool.query(`DELETE FROM pupil_marks WHERE pupil_answer_id IN ($1, $2)`, [ansId, adaAns]);
       await pool.query(`DELETE FROM pupil_answers WHERE id=$1`, [ansId]);
       await pool.query(`DELETE FROM pupils WHERE id=$1`, [ben]);
+    }
+  });
+
+  it('marks only answers matching the scheme’s provenance — a stale-version answer is left (BUG-015)', async () => {
+    // A fresh occurrence-course with one answer at the current version (1, scheme exists) and one at a
+    // STALE version (2, no scheme) — the stale one must NOT be marked against the version-1 scheme.
+    const occ = Number((await pool.query<{ id: number }>(`INSERT INTO lesson_occurrences (timetabled_lesson_id, date) SELECT id, DATE '2001-06-06' FROM timetabled_lessons ORDER BY id LIMIT 1 RETURNING id`)).rows[0]!.id);
+    const ocX = Number((await pool.query<{ id: number }>(`INSERT INTO occurrence_courses (occurrence_id, group_course_id, lesson_plan_id) VALUES ($1,$2,$3) RETURNING id`, [occ, gc, lessonPlanId])).rows[0]!.id);
+    await saveAnswer({ pupilId: pupil, occurrenceCourseId: ocX, resourceId, versionNo: 1, fieldKey: 't1.r1.c2', value: 'a sequence of items' });
+    const staleId = Number((await pool.query<{ id: number }>(`INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value) VALUES ($1,$2,$3,2,'task.1','x') RETURNING id`, [pupil, ocX, resourceId])).rows[0]!.id);
+    try {
+      const r = await markObjective(ocX);
+      expect(r.marked).toBe(1); // only the version-1 answer
+      const stale = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM pupil_marks WHERE pupil_answer_id=$1`, [staleId]);
+      expect(stale.rows[0]!.n).toBe(0); // the stale (v2) answer was left for the teacher, not mismarked
+    } finally {
+      await pool.query(`DELETE FROM pupil_marks WHERE pupil_answer_id IN (SELECT id FROM pupil_answers WHERE occurrence_course_id=$1)`, [ocX]);
+      await pool.query(`DELETE FROM pupil_answers WHERE occurrence_course_id=$1`, [ocX]);
+      await pool.query(`DELETE FROM occurrence_courses WHERE id=$1`, [ocX]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE id=$1`, [occ]);
     }
   });
 });

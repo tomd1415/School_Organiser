@@ -68,18 +68,38 @@ export async function saveAnswer(args: {
   fieldKey: string;
   value: string;
 }): Promise<void> {
-  // Keyed on the lesson instance, not the worksheet resource (survives a master↔adapted /
-  // re-version flip). Only clear seen_by_teacher when the value actually CHANGED, so a pupil
-  // re-blurring an unchanged field doesn't spuriously re-flag it as new to the teacher.
-  await pool.query(
-    `INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, now())
-     ON CONFLICT (pupil_id, occurrence_course_id, field_key)
-     DO UPDATE SET value = EXCLUDED.value, resource_id = EXCLUDED.resource_id, version_no = EXCLUDED.version_no,
-                   seen_by_teacher = CASE WHEN pupil_answers.value IS DISTINCT FROM EXCLUDED.value THEN false ELSE pupil_answers.seen_by_teacher END,
-                   updated_at = now()`,
-    [args.pupilId, args.occurrenceCourseId, args.resourceId, args.versionNo, args.fieldKey, args.value],
-  );
+  // Keyed on the lesson instance, not the worksheet resource (survives a master↔adapted / re-version
+  // flip). Only clear seen_by_teacher when the value actually CHANGED, so a pupil re-blurring an
+  // unchanged field doesn't spuriously re-flag it as new to the teacher.
+  // BUG-004: if the pupil CHANGES a previously-marked answer, its mark (incl. a confirmed/teacher one,
+  // which the marking pass otherwise skips) no longer describes this text — drop it in the SAME
+  // transaction so the answer never carries a score/feedback for text it isn't. The next pass re-marks.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const prev = await client.query<{ id: number; value: string }>(
+      `SELECT id, value FROM pupil_answers WHERE pupil_id = $1 AND occurrence_course_id = $2 AND field_key = $3 FOR UPDATE`,
+      [args.pupilId, args.occurrenceCourseId, args.fieldKey],
+    );
+    await client.query(
+      `INSERT INTO pupil_answers (pupil_id, occurrence_course_id, resource_id, version_no, field_key, value, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, now())
+       ON CONFLICT (pupil_id, occurrence_course_id, field_key)
+       DO UPDATE SET value = EXCLUDED.value, resource_id = EXCLUDED.resource_id, version_no = EXCLUDED.version_no,
+                     seen_by_teacher = CASE WHEN pupil_answers.value IS DISTINCT FROM EXCLUDED.value THEN false ELSE pupil_answers.seen_by_teacher END,
+                     updated_at = now()`,
+      [args.pupilId, args.occurrenceCourseId, args.resourceId, args.versionNo, args.fieldKey, args.value],
+    );
+    if (prev.rows[0] && prev.rows[0].value !== args.value) {
+      await client.query(`DELETE FROM pupil_marks WHERE pupil_answer_id = $1`, [prev.rows[0].id]);
+    }
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
 }
 
 export async function markAnswersSeen(occurrenceCourseId: number, pupilId?: number): Promise<void> {

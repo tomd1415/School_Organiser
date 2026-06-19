@@ -21,6 +21,7 @@ import {
   upsertScheme,
   writeMark,
   type SchemePoint,
+  type MarkingAnswer,
 } from '../repos/marking';
 import { callLLM, callLLMStructured } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
@@ -37,8 +38,16 @@ interface Resolved {
   groupCourseId: number;
   resourceId: number;
   versionNo: number;
+  schemeVersionNo: number | null; // the version the CHOSEN scheme is for — only answers of that provenance are marked (BUG-015)
   pointsByField: Map<string, SchemePoint[]>;
   labelByKey: Map<string, string>;
+}
+
+/** Mark an answer ONLY against the scheme for its own provenance — never an older version's or a
+ *  different worksheet's answer against this scheme (BUG-015). Unknown (null) provenance is marked
+ *  best-effort against the resolved scheme, preserving pre-provenance behaviour. */
+function matchesProvenance(a: MarkingAnswer, r: Resolved): boolean {
+  return (a.resourceId == null || a.resourceId === r.resourceId) && (a.versionNo == null || a.versionNo === r.schemeVersionNo);
 }
 
 /** The worksheet version the pupils' answers were recorded against (provenance), if any. */
@@ -59,7 +68,14 @@ async function resolve(occurrenceCourseId: number): Promise<Resolved | null> {
   const ws = await getLessonWorksheet(oc.groupCourseId, oc.lessonPlanId);
   if (!ws) return null;
   const answersVer = await answersVersionFor(occurrenceCourseId, ws.resourceId);
-  const scheme = (answersVer != null ? await getScheme(ws.resourceId, answersVer) : null) ?? (await getScheme(ws.resourceId, ws.versionNo));
+  // The scheme for the VERSION the pupils actually answered (provenance), falling back to the current
+  // version — recording WHICH version it is so only answers of that provenance are marked (BUG-015).
+  let schemeVersionNo = answersVer;
+  let scheme = answersVer != null ? await getScheme(ws.resourceId, answersVer) : null;
+  if (!scheme) {
+    schemeVersionNo = ws.versionNo;
+    scheme = await getScheme(ws.resourceId, ws.versionNo);
+  }
   if (!scheme || scheme.scheme.status !== 'ready') return null; // never mark against an unreviewed draft
   const pointsByField = new Map<string, SchemePoint[]>();
   for (const p of scheme.points) {
@@ -68,7 +84,7 @@ async function resolve(occurrenceCourseId: number): Promise<Resolved | null> {
     pointsByField.set(p.fieldKey, arr);
   }
   const labelByKey = new Map(renderWorksheet(ws.markdown, { mode: 'review' }).fields.map((f) => [f.key, f.label]));
-  return { groupCourseId: oc.groupCourseId, resourceId: ws.resourceId, versionNo: ws.versionNo, pointsByField, labelByKey };
+  return { groupCourseId: oc.groupCourseId, resourceId: ws.resourceId, versionNo: ws.versionNo, schemeVersionNo, pointsByField, labelByKey };
 }
 
 const toMarkPoints = (pts: SchemePoint[]): MarkPoint[] => pts.map((p) => ({ id: p.id, kind: p.kind, expected: p.expected, alternatives: p.alternatives, marks: p.marks, required: p.required }));
@@ -141,7 +157,9 @@ export async function markObjective(occurrenceCourseId: number): Promise<Objecti
   const r = await resolve(occurrenceCourseId);
   if (!r) return { marked: 0, openAnswers: 0 };
   const done = await alreadyMarkedAnswerIds(occurrenceCourseId);
-  const answers = await answersForMarking(occurrenceCourseId);
+  // BUG-015: only mark answers whose provenance matches the resolved scheme — a switched worksheet or
+  // an older saved version is left for the teacher, never evaluated against the wrong scheme.
+  const answers = (await answersForMarking(occurrenceCourseId)).filter((a) => matchesProvenance(a, r));
   let marked = 0;
   let openAnswers = 0;
   for (const a of answers) {
@@ -180,6 +198,17 @@ export interface OpenResult {
 
 /** Mark open answers with the AI, one anonymous per-question batch at a time. Guard-matched answers
  *  are withheld from the AI and stored flagged for the teacher. Only marks not-yet-marked answers. */
+/** A marking batch is acceptable only if it returns EXACTLY the slots we sent — no empty, missing,
+ *  duplicate or unknown slots (BUG-005). Pure, so the all-or-nothing rule is unit-tested directly. */
+export function isCompleteBatch(expectedSlots: string[], returnedSlots: string[]): boolean {
+  const expected = new Set(expectedSlots);
+  return (
+    returnedSlots.length === expected.size && // right count: no missing, no extra
+    new Set(returnedSlots).size === returnedSlots.length && // no duplicates
+    returnedSlots.every((s) => expected.has(s)) // no unknown slots
+  );
+}
+
 export async function markOpen(occurrenceCourseId: number): Promise<OpenResult> {
   // Re-check the gate here too: the debounced pass can fire minutes after the trigger, by which
   // time the teacher may have turned auto-marking off — no pupil answer goes to the AI then.
@@ -187,7 +216,8 @@ export async function markOpen(occurrenceCourseId: number): Promise<OpenResult> 
   const r = await resolve(occurrenceCourseId);
   if (!r) return { status: 'nothing', marked: 0, flagged: 0 };
   const done = await alreadyMarkedAnswerIds(occurrenceCourseId);
-  const answers = (await answersForMarking(occurrenceCourseId)).filter((a) => !done.has(a.pupilAnswerId));
+  // BUG-015: provenance filter (see markObjective) — don't mark a different worksheet/version's answers.
+  const answers = (await answersForMarking(occurrenceCourseId)).filter((a) => !done.has(a.pupilAnswerId) && matchesProvenance(a, r));
 
   // Group open answers by field (the question).
   const openByField = new Map<string, typeof answers>();
@@ -250,6 +280,14 @@ export async function markOpen(occurrenceCourseId: number): Promise<OpenResult> 
     if (result.status !== 'ok' || !result.data) {
       aiDown = true;
       continue; // leave this question's answers unmarked; the teacher can mark/retry
+    }
+    // BUG-005: accept the batch ONLY if it covers EXACTLY the slots we sent — reject empty, missing,
+    // duplicate or unknown slots. A partial/garbled batch must NOT be written as if complete (some
+    // pupils silently unmarked, or one answer overwritten twice); leave the question unmarked and
+    // re-arm (the queue retries it; the teacher can also mark manually).
+    if (!isCompleteBatch(slots.map((s) => s.slot), result.data.results.map((res) => res.slot))) {
+      aiDown = true;
+      continue;
     }
     for (const res of result.data.results) {
       const a = slotMap.get(res.slot);

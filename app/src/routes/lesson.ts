@@ -86,10 +86,12 @@ import { saveLessonDocMarkdown } from '../services/lessonDocEdit';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
-import { addException, deleteException, listExceptionsFor, type ExceptionRow } from '../repos/exceptions';
+import { addException, deleteException, listExceptionsFor, listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
+import { classifyDay } from '../services/clock';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
-import { getTimetabledLessons, getPeriodDefinitions } from '../repos/timetable';
+import { getTimetabledLessons, getPeriodDefinitions, getTermDatesAll } from '../repos/timetable';
 import { localParts, weekdayOf } from '../lib/time';
 import { formatObjectives, formatOutline, outlineSteps } from '../lib/formatLesson';
 
@@ -1340,10 +1342,19 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const q = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).safeParse(req.query);
     const date = (q.success && q.data.date) || localParts(new Date(), 'Europe/London').isoDate;
     const weekday = weekdayOf(date);
-    const [lessons, periods] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions()]);
+    // BUG-047: honour the calendar. A holiday / INSET / weekend / out-of-term day has no lessons to
+    // print — and, crucially, we must NOT materialise occurrences for it.
+    if (!classifyDay(date, weekday, await getTermDatesAll()).isSchoolDay) {
+      return reply.type('text/html').send(printPage(`Cover / briefing — ${date}`, '<p>No teaching on this day (holiday, INSET, weekend or outside term).</p>'));
+    }
+    const [lessons, periods, exRows] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions(), listExceptionsBetween(date, date)]);
+    const dx = indexDayExceptions(exRows);
     const order = new Map(periods.map((p) => [`${p.weekday}:${p.slotOrder}`, p.slotOrder]));
     const todays = lessons
       .filter((l) => l.weekday === weekday && l.isSelf && (l.purpose === 'teaching' || l.purpose === 'form'))
+      // BUG-047: drop cancelled / free / whole-day off-timetable lessons — they don't run and must not
+      // be materialised. cover / room-change still print (the lesson runs, just adjusted).
+      .filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free')
       .sort((a, b) => (order.get(`${a.weekday}:${a.slotOrder}`) ?? 0) - (order.get(`${b.weekday}:${b.slotOrder}`) ?? 0));
     const blocks = (await Promise.all(todays.map((l) => lessonPrintBlock(l.lessonId, date)))).filter(Boolean);
     const body = blocks.length ? blocks.join('') : '<p>No lessons timetabled for this day.</p>';
