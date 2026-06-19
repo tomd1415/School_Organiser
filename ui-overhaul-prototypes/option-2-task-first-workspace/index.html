@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Static mockup of the Task-First Daily Workspace UI direction for School Organiser">
+  <title>Task-First Daily Workspace — School Organiser UI prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../shared/prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-teach" viewBox="0 0 24 24"><path d="M4 5h16v11H4zM8 21l4-5 4 5M8 9h8M8 12h5"/></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-assess" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7M5 5h5M5 9h5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-8 12h7l-1 8 8-12h-7z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5ZM10 20h4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M15 15a5 5 0 0 1 6 4.8"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.1 7-13a7 7 0 1 0-14 0c0 6.9 7 13 7 13Z"/><circle cx="12" cy="9" r="2.2"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-slides" viewBox="0 0 24 24"><path d="M3 4h18v13H3zM8 21l4-4 4 4M8 9h8M8 13h5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  </svg>
+
+  <header class="app-header">
+    <div class="header-primary">
+      <a class="brand" href="#" aria-label="School Organiser home"><span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></span><span>School <strong>Organiser</strong></span></a>
+      <div class="command-search"><svg aria-hidden="true"><use href="#i-search"/></svg><label class="sr-only" for="task-search">Search or run a command</label><input id="task-search" type="search" placeholder="Search or run a command"><kbd aria-hidden="true">Ctrl K</kbd></div>
+      <div class="header-actions">
+        <button type="button" class="circle-button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast"><svg aria-hidden="true"><use href="#i-eye"/></svg></button>
+        <button type="button" class="circle-button" data-demo-action="There are two routine notifications" aria-label="Notifications, 2 unread"><svg aria-hidden="true"><use href="#i-bell"/></svg><span class="unread">2</span></button>
+        <button type="button" class="create-button" data-demo-action="Capture menu opened"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>Create</span></button>
+        <button type="button" class="profile-button" aria-label="Open account menu"><span>JD</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button>
+      </div>
+    </div>
+
+    <nav id="task-navigation" class="task-navigation" data-navigation aria-label="Primary tasks">
+      <a class="task-link active" href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-sun"/></svg><span>Today</span></a>
+      <a class="task-link" href="#"><svg aria-hidden="true"><use href="#i-teach"/></svg><span>Teach</span></a>
+      <a class="task-link" href="#"><svg aria-hidden="true"><use href="#i-plan"/></svg><span>Plan</span></a>
+      <a class="task-link" href="#"><svg aria-hidden="true"><use href="#i-assess"/></svg><span>Assess</span><span class="task-count">24</span></a>
+      <a class="task-link" href="#"><svg aria-hidden="true"><use href="#i-grid"/></svg><span>Organise</span></a>
+      <div class="mobile-nav-tools">
+        <button type="button" data-density-toggle aria-pressed="false"><svg aria-hidden="true"><use href="#i-eye"/></svg> Compact view</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="welcome-bar" aria-labelledby="page-title">
+      <div><p>Friday, 19 June <span aria-hidden="true">•</span> Week 7</p><h1 id="page-title">Your Friday</h1></div>
+      <div class="day-summary" aria-label="Day summary"><span><strong>4</strong> lessons</span><span><strong>2</strong> prep actions</span><span class="all-good"><strong aria-hidden="true">✓</strong> No urgent alerts</span></div>
+    </section>
+
+    <div class="daily-workspace">
+      <aside class="day-rail" aria-labelledby="day-rail-title">
+        <div class="rail-heading"><div><p class="section-label">Timeline</p><h2 id="day-rail-title">Your day</h2></div><button type="button" aria-label="Timeline options"><svg aria-hidden="true"><use href="#i-more"/></svg></button></div>
+        <ol class="day-list">
+          <li class="day-item finished">
+            <time datetime="2026-06-19T08:35">08:35</time><span class="day-dot" aria-hidden="true"></span>
+            <div><span class="day-status">Finished</span><strong>Morning form</strong><small>Form room</small></div>
+          </li>
+          <li class="day-item active">
+            <time datetime="2026-06-19T10:10">10:10</time><span class="day-dot" aria-hidden="true"></span>
+            <div><span class="day-status">Now</span><strong>Year 8 Science</strong><small>Lab 2 · until 11:10</small></div>
+          </li>
+          <li class="day-item next">
+            <time datetime="2026-06-19T11:30">11:30</time><span class="day-dot" aria-hidden="true"></span>
+            <div><span class="day-status">Next</span><strong>Year 10 Chemistry</strong><small>Lab 2 · one prep action</small></div>
+          </li>
+          <li class="day-item">
+            <time datetime="2026-06-19T13:40">13:40</time><span class="day-dot" aria-hidden="true"></span>
+            <div><strong>Year 9 Science</strong><small>Room 14 · ready</small></div>
+          </li>
+          <li class="day-item">
+            <time datetime="2026-06-19T14:45">14:45</time><span class="day-dot" aria-hidden="true"></span>
+            <div><strong>Department meeting</strong><small>Office</small></div>
+          </li>
+        </ol>
+        <button class="agenda-button" type="button" data-demo-action="Full accessible agenda opened">Open full agenda <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      </aside>
+
+      <section class="lesson-workspace" aria-labelledby="active-lesson-title">
+        <div class="lesson-hero">
+          <div class="hero-topline"><span class="live-pill"><span aria-hidden="true"></span> Teaching now</span><div><button type="button" aria-label="Lesson options"><svg aria-hidden="true"><use href="#i-more"/></svg></button></div></div>
+          <div class="hero-main">
+            <div><p>Science <span aria-hidden="true">/</span> Year 8</p><h2 id="active-lesson-title">Separating mixtures</h2><ul class="lesson-facts"><li><svg aria-hidden="true"><use href="#i-clock"/></svg>10:10–11:10</li><li><svg aria-hidden="true"><use href="#i-pin"/></svg>Lab 2</li><li><svg aria-hidden="true"><use href="#i-people"/></svg>28 pupils</li></ul></div>
+            <div class="hero-actions"><button class="present-button" type="button" data-demo-action="Presentation mode opened"><svg aria-hidden="true"><use href="#i-slides"/></svg> Present lesson</button><button class="outline-button" type="button" data-demo-action="Stopping point dialog opened">Record stopping point</button></div>
+          </div>
+          <div class="lesson-progress"><div><span>Lesson progress</span><strong>Starter complete</strong></div><div class="progress-track" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="28"><span></span></div><button type="button" data-demo-action="Moved to practical activity">Move to practical <svg aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
+        </div>
+
+        <div class="workspace-tabs" data-tablist role="tablist" aria-label="Lesson workspace views">
+          <button id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0">Overview</button>
+          <button id="tab-plan" role="tab" aria-selected="false" aria-controls="panel-plan" tabindex="-1">Plan</button>
+          <button id="tab-resources" role="tab" aria-selected="false" aria-controls="panel-resources" tabindex="-1">Resources <span>4</span></button>
+          <button id="tab-pupils" role="tab" aria-selected="false" aria-controls="panel-pupils" tabindex="-1">Pupils <span>28</span></button>
+        </div>
+
+        <div id="panel-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview">
+          <section class="lesson-sequence" aria-labelledby="sequence-title">
+            <div class="content-heading"><div><p class="section-label">Live sequence</p><h3 id="sequence-title">What comes next</h3></div><button type="button" class="small-button" data-demo-action="Lesson sequence editor opened">Edit sequence</button></div>
+            <ol class="sequence-list">
+              <li class="complete"><span class="sequence-number" aria-hidden="true">✓</span><div><strong>Do now: identify the mixtures</strong><small>8 minutes · completed at 10:19</small></div><span class="state-text">Done</span></li>
+              <li class="current"><span class="sequence-number" aria-hidden="true">2</span><div><strong>Teacher demonstration</strong><small>Filtration and evaporation · 10 minutes</small></div><span class="state-text">Current</span></li>
+              <li><span class="sequence-number" aria-hidden="true">3</span><div><strong>Practical investigation</strong><small>Pairs · equipment trays 1–14 · 25 minutes</small></div><button type="button" class="start-button" data-demo-action="Practical activity started">Start</button></li>
+              <li><span class="sequence-number" aria-hidden="true">4</span><div><strong>Exit check</strong><small>Worksheet questions 4–6 · 8 minutes</small></div><span class="state-text muted">Later</span></li>
+            </ol>
+          </section>
+
+          <div class="workspace-bottom">
+            <section class="prep-strip" aria-labelledby="prep-title"><div class="prep-icon"><svg aria-hidden="true"><use href="#i-bolt"/></svg></div><div><p class="section-label">Before your next lesson</p><h3 id="prep-title">Print six support sheets</h3><p>Year 10 Chemistry starts at 11:30.</p></div><button type="button" data-demo-action="Support sheets opened for printing">Print now</button></section>
+            <section class="quick-resources" aria-labelledby="resources-title"><div class="content-heading"><div><p class="section-label">At hand</p><h3 id="resources-title">Lesson resources</h3></div><a href="#">View all</a></div><div class="resource-links"><a href="#"><span class="file-icon slides"><svg aria-hidden="true"><use href="#i-slides"/></svg></span><span><strong>Mixtures slides</strong><small>12 slides</small></span></a><a href="#"><span class="file-icon doc"><svg aria-hidden="true"><use href="#i-doc"/></svg></span><span><strong>Pupil worksheet</strong><small>Assigned · editable</small></span></a></div></section>
+          </div>
+        </div>
+
+        <div id="panel-plan" class="tab-panel placeholder-panel" role="tabpanel" aria-labelledby="tab-plan" hidden><svg aria-hidden="true"><use href="#i-plan"/></svg><h3>Lesson plan</h3><p>The complete objectives, outline, adaptations, and review suggestions would appear here without leaving the active lesson.</p><button type="button" class="small-button" data-demo-action="Lesson plan editor opened">Open plan editor</button></div>
+        <div id="panel-resources" class="tab-panel placeholder-panel" role="tabpanel" aria-labelledby="tab-resources" hidden><svg aria-hidden="true"><use href="#i-doc"/></svg><h3>Four linked resources</h3><p>Slides, worksheets, answer packs, and source files would be managed in this contextual panel.</p><button type="button" class="small-button" data-demo-action="Resource manager opened">Manage resources</button></div>
+        <div id="panel-pupils" class="tab-panel placeholder-panel" role="tabpanel" aria-labelledby="tab-pupils" hidden><svg aria-hidden="true"><use href="#i-people"/></svg><h3>28 pupils</h3><p>Attendance, worksheet progress, support levels, and teacher-confirmed marks would appear here.</p><button type="button" class="small-button" data-demo-action="Pupil progress grid opened">Open progress grid</button></div>
+      </section>
+
+      <aside class="context-column" aria-label="Teaching context">
+        <section class="context-card class-pulse" aria-labelledby="pulse-title"><div class="context-heading"><div><p class="section-label">Live class pulse</p><h2 id="pulse-title">Worksheet progress</h2></div><span class="live-dot"><span aria-hidden="true"></span> Live</span></div><div class="donut-row"><div class="donut" role="img" aria-label="19 of 28 pupils active"><span><strong>19</strong><small>active</small></span></div><dl><div><dt>Completed</dt><dd>6</dd></div><div><dt>Working</dt><dd>19</dd></div><div><dt>Not started</dt><dd>3</dd></div></dl></div><button type="button" class="wide-button" data-demo-action="Live pupil progress opened">See pupil progress <svg aria-hidden="true"><use href="#i-arrow"/></svg></button></section>
+
+        <section class="context-card marking-card" aria-labelledby="marking-title"><div class="context-heading"><div><p class="section-label">Assessment</p><h2 id="marking-title">Marking queue</h2></div><strong class="big-number">24</strong></div><div class="queue-bar"><span style="width: 66%"></span></div><p><strong>12 need your review</strong><br>AI suggestions are ready for Year 10.</p><button type="button" class="wide-button dark" data-demo-action="Marking queue opened">Review answers</button></section>
+
+        <section class="context-card note-card" aria-labelledby="note-title"><div class="note-symbol"><svg aria-hidden="true"><use href="#i-bolt"/></svg></div><div><p class="section-label">Suggested next step</p><h2 id="note-title">Revisit particle diagrams</h2><p>Five pupils showed the same misconception yesterday.</p><button type="button" data-demo-action="Retrieval starter drafted">Draft starter <span aria-hidden="true">→</span></button></div></section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

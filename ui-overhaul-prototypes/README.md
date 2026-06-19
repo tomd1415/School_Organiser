@@ -11,11 +11,6 @@ Open either `index.html` directly in a browser:
 
 The pages are responsive. Resize the browser to compare desktop, tablet, and mobile layouts. Their buttons demonstrate local visual interactions only.
 
-Preview images are also included after the source mockups are rendered:
-
-- `option-1-calm-command-centre/preview.png`
-- `option-2-task-first-workspace/preview.png`
-
 ## Contents
 
 ```text
@@ -26,12 +21,10 @@ ui-overhaul-prototypes/
 │   └── prototype.js
 ├── option-1-calm-command-centre/
 │   ├── index.html
-│   ├── styles.css
-│   └── preview.png
+│   └── styles.css
 └── option-2-task-first-workspace/
     ├── index.html
-    ├── styles.css
-    └── preview.png
+    └── styles.css
 ```
 
 ## Prototype boundaries

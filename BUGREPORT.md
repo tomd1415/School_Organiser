@@ -26,18 +26,18 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (13):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-012, BUG-038 (High
-— image-enumeration, pupil/TA exception leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-031
-(Medium — TA & pupil session revocation, DB invariants); BUG-034, BUG-035, BUG-036, BUG-050 (Low — UX
-reliability & secrets).
+**Fixed so far (14):** BUG-001, BUG-037 (Critical — redaction bypasses); BUG-003, BUG-012, BUG-038 (High
+— image-enumeration, pupil/TA exception leakage & safety-gate); BUG-016, BUG-017, BUG-024, BUG-030,
+BUG-031 (Medium — TA & pupil session revocation, pupil-work authz core, DB invariants); BUG-034,
+BUG-035, BUG-036, BUG-050 (Low — UX reliability & secrets). **The A1 authorization wave is complete.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 3 | 15 |
-| Medium | 26 | 4 | 22 |
+| Medium | 26 | 5 | 21 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **13** | **37** |
+| **Total** | **50** | **14** | **36** |
 
 ## Testing and environment limitations
 
@@ -414,6 +414,7 @@ reliability & secrets).
 
 ### BUG-030 — Pupil work authorization permits forged historic/future writes and arbitrary answer fields
 
+- **Status:** ✅ Resolved (core) 2026-06-19 — all pupil write routes (`/me/answer`, `/me/done`, `/me/feedback`, `/me/answer-image`) now authorise via `pupilMayWriteOc`: the occurrence-course must belong to the **session group**, its occurrence must be dated **today**, and the lesson must not be cancelled (shared exception check). This closes the main impact — a guessed/forged **historic** (altering past evidence), **future** (pre-filling) or **other-group** oc, and a **cancelled** lesson, are all refused. Integration tests cover other-group + historic denial and a live-lesson allow. **Residual (follow-up):** the field-key inventory check (an arbitrary key still creates a row on the pupil's *own live* lesson) and the resource-version (`stale-version`) check are not yet enforced — they need a worksheet-bound test fixture.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/repos/pupilWork.ts:8-20`; `app/src/routes/me.ts:288-325, 341-378`; `app/src/lib/worksheetForm.ts`
 - **Problem and trigger:** `pupilCanAccessOc` proves only active enrolment in the occurrence course’s group. It does not require the session’s selected group, a current/next accessible date, a non-cancelled lesson, or the worksheet to contain the posted field key. A pupil who learns/guesses an occurrence-course ID can mutate old/future work for any group they are enrolled in and create up to one answer row per arbitrary 60-character key.

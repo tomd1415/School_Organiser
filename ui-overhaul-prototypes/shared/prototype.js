@@ -3,6 +3,7 @@
 
   var root = document.documentElement;
   var menuButton = document.querySelector('[data-menu-toggle]');
+  var menuCloseButtons = document.querySelectorAll('[data-menu-close]');
   var nav = document.querySelector('[data-navigation]');
   var backdrop = document.querySelector('[data-nav-backdrop]');
   var announcement = document.getElementById('prototype-status');
@@ -32,6 +33,9 @@
       setMenu(menuButton.getAttribute('aria-expanded') !== 'true');
     });
   }
+  menuCloseButtons.forEach(function (button) {
+    button.addEventListener('click', function () { setMenu(false); });
+  });
   if (backdrop) backdrop.addEventListener('click', function () { setMenu(false); });
 
   document.addEventListener('keydown', function (event) {

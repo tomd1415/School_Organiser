@@ -7,6 +7,18 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-19 — Audit remediation, batch 4 (pupil-work authz — A1 wave complete)
+
+Final A1 finding. Suite green: **517 unit / 313 integration; typecheck clean**.
+
+- **🔐 Pupil-work write authorization (BUG-030, Medium — core).** All pupil write routes
+  (`/me/answer`, `/me/done`, `/me/feedback`, `/me/answer-image`) now authorise through a single
+  `pupilMayWriteOc`: the occurrence-course must be the pupil's **session group**, dated **today**, and
+  the lesson **not cancelled**. A guessed/forged **historic** (altering past evidence), **future**
+  (pre-filling), **other-group** or **cancelled** occurrence is refused. *(Residual: the worksheet
+  field-key inventory + resource-version checks are a noted follow-up — they need a worksheet-bound
+  fixture.)* **This completes the A1 authorization wave** (BUG-001/037/038/003/012/016/017/030).
+
 ### 2026-06-19 — Audit remediation, batch 3 (authorization: 2 findings)
 
 More A1 authorization. Suite green: **517 unit / 313 integration; typecheck clean**.

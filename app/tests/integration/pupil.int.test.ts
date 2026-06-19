@@ -51,14 +51,17 @@ beforeAll(async () => {
   otherPupilId = Number(p2.rows[0]!.id);
   await pool.query(`INSERT INTO enrolments (pupil_id, group_id, active) VALUES ($1, $3, true), ($2, $3, true)`, [pupilId, otherPupilId, groupId]);
 
-  // An occurrence-course to attach answers to (date is irrelevant for the autosave path).
+  // An occurrence-course to attach answers to. BUG-030 binds pupil writes to TODAY's lesson, so the
+  // occurrence is dated CURRENT_DATE (reused if it already exists for that lesson).
   const oc = await pool.query<{ id: number }>(
     `WITH occ AS (
        INSERT INTO lesson_occurrences (timetabled_lesson_id, date)
-       SELECT id, '2001-02-03' FROM timetabled_lessons ORDER BY id LIMIT 1
-       ON CONFLICT DO NOTHING RETURNING id)
+       SELECT id, CURRENT_DATE FROM timetabled_lessons ORDER BY id LIMIT 1
+       ON CONFLICT (timetabled_lesson_id, date) DO NOTHING RETURNING id)
      INSERT INTO occurrence_courses (occurrence_id, group_course_id)
-     SELECT COALESCE((SELECT id FROM occ), (SELECT id FROM lesson_occurrences ORDER BY id LIMIT 1)), $1
+     SELECT COALESCE((SELECT id FROM occ),
+                     (SELECT id FROM lesson_occurrences
+                       WHERE timetabled_lesson_id = (SELECT id FROM timetabled_lessons ORDER BY id LIMIT 1) AND date = CURRENT_DATE)), $1
      RETURNING id`,
     [groupCourseId],
   );
@@ -81,6 +84,11 @@ afterAll(async () => {
   await pool.query(`DELETE FROM pupil_done WHERE occurrence_course_id = $1`, [occurrenceCourseId]);
   await pool.query(`DELETE FROM pupil_levels WHERE group_course_id = $1`, [groupCourseId]);
   await pool.query(`DELETE FROM occurrence_courses WHERE id = $1`, [occurrenceCourseId]);
+  // remove the today-dated occurrence we may have created, but only if nothing else references it
+  await pool.query(
+    `DELETE FROM lesson_occurrences lo WHERE lo.timetabled_lesson_id = (SELECT id FROM timetabled_lessons ORDER BY id LIMIT 1)
+       AND lo.date = CURRENT_DATE AND NOT EXISTS (SELECT 1 FROM occurrence_courses oc WHERE oc.occurrence_id = lo.id)`,
+  );
   await pool.query(`DELETE FROM pupil_credentials WHERE pupil_id IN ($1, $2)`, [pupilId, otherPupilId]);
   await pool.query(`DELETE FROM enrolments WHERE group_id = $1`, [groupId]);
   await pool.query(`DELETE FROM group_courses WHERE id = $1`, [groupCourseId]);
@@ -255,24 +263,43 @@ describe('pupil login + surface (integration)', () => {
     expect(saved.rows[0]?.value).toBe('chlorophyll');
   });
 
-  it('refuses an answer to an occurrence-course the pupil is not enrolled in', async () => {
+  it('refuses an answer outside the pupil’s live lesson — other group OR historic date (BUG-030)', async () => {
     const session = await pupilLogin();
     const me = await app.inject({ method: 'GET', url: '/me', headers: { cookie: session } });
     const token = /x-csrf-token":"([^"]+)"/.exec(me.body)?.[1] ?? '';
     const cookie = firstCookie(me.headers['set-cookie']) || session;
-    // An occurrence-course belonging to a different group_course (the first seeded one ≠ ours).
+    const post = (oc: number, key: string) =>
+      app.inject({ method: 'POST', url: `/me/answer?oc=${oc}&key=${key}`, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'value=should-not-save' });
+
+    // (a) An occurrence-course belonging to a DIFFERENT group_course (not the pupil's session group).
     const foreign = await pool.query<{ id: number }>(
       `SELECT oc.id FROM occurrence_courses oc WHERE oc.group_course_id <> $1 ORDER BY oc.id LIMIT 1`,
       [groupCourseId],
     );
-    if (foreign.rows[0]) {
-      const res = await app.inject({
-        method: 'POST',
-        url: `/me/answer?oc=${foreign.rows[0].id}&key=t1.r1.c1`,
-        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
-        payload: 'value=should-not-save',
-      });
-      expect(res.statusCode).toBe(403);
+    if (foreign.rows[0]) expect((await post(foreign.rows[0].id, 't1.r1.c1')).statusCode).toBe(403);
+
+    // (b) A HISTORIC-dated occurrence of the pupil's OWN group — only the DATE makes it invalid.
+    const past = await pool.query<{ id: number }>(
+      `WITH o AS (
+         INSERT INTO lesson_occurrences (timetabled_lesson_id, date)
+         SELECT id, DATE '2001-02-03' FROM timetabled_lessons ORDER BY id LIMIT 1
+         ON CONFLICT (timetabled_lesson_id, date) DO NOTHING RETURNING id)
+       INSERT INTO occurrence_courses (occurrence_id, group_course_id)
+       SELECT COALESCE((SELECT id FROM o),
+                       (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = (SELECT id FROM timetabled_lessons ORDER BY id LIMIT 1) AND date = DATE '2001-02-03')), $1
+       RETURNING id`,
+      [groupCourseId],
+    );
+    const pastOc = Number(past.rows[0]!.id);
+    try {
+      expect((await post(pastOc, 't1.r1.c2')).statusCode).toBe(403); // own group, past date → not the live lesson
+    } finally {
+      await pool.query(`DELETE FROM occurrence_courses WHERE id = $1`, [pastOc]);
+      await pool.query(
+        `DELETE FROM lesson_occurrences lo WHERE lo.date = DATE '2001-02-03'
+           AND lo.timetabled_lesson_id = (SELECT id FROM timetabled_lessons ORDER BY id LIMIT 1)
+           AND NOT EXISTS (SELECT 1 FROM occurrence_courses oc WHERE oc.occurrence_id = lo.id)`,
+      );
     }
   });
 

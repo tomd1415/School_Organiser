@@ -25,7 +25,6 @@ import {
   isDone,
   getPupilFeedback,
   upsertPupilFeedback,
-  pupilCanAccessOc,
 } from '../repos/pupilWork';
 import { pupilLayout, pupilAccessEnabled } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
@@ -300,9 +299,10 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const pupilId = acting.id;
     const q = z.object({ oc: z.coerce.number().int().positive(), key: z.string().min(1).max(60) }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    // The pupil may only write to a lesson their group is enrolled in (defence in depth). The test
-    // pupil isn't enrolled anywhere — it's allowed any lesson (teacher-only, fictitious).
-    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    // BUG-030: a real pupil may write ONLY to a field of their SESSION group's CURRENT (non-cancelled)
+    // lesson — never a guessed historic / future / other-group oc, nor a key not on the worksheet. The
+    // test pupil (teacher-only, fictitious, enrolled nowhere) is allowed any lesson/field.
+    if (!acting.isTest && !(await pupilMayWriteOc(pupilId, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
     const b = z.object({ value: z.string().max(8000).optional() }).safeParse(req.body);
     const value = (b.success && b.data.value) || '';
     // Resolve the worksheet server-side for provenance — never trust a client-supplied resource id.
@@ -326,7 +326,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     const b = z.object({ done: z.enum(['true', 'false']) }).safeParse(req.body);
     if (!q.success || !b.success) return reply.code(400).send('');
-    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    // BUG-030: only the pupil's session group's lesson dated today (not cancelled) is writable.
+    if (!acting.isTest && !(await pupilMayWriteOc(pupilId, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
     const done = b.data.done === 'true';
     await setDone(pupilId, q.data.oc, done);
     // "Mark as pupils finish" (Q34): tapping Done triggers marking (objective now; open debounced).
@@ -353,7 +354,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const pupilId = acting.id;
     const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    if (!acting.isTest && !(await pupilCanAccessOc(pupilId, q.data.oc))) return reply.code(403).send('');
+    // BUG-030: only the pupil's session group's lesson dated today (not cancelled) is writable.
+    if (!acting.isTest && !(await pupilMayWriteOc(pupilId, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
     const body = (req.body ?? {}) as Record<string, unknown>;
     const toList = (v: unknown): string => {
       const arr = Array.isArray(v) ? v : v != null ? [v] : [];
@@ -373,7 +375,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
     if (!acting) return reply.code(401).send('');
     const q = z.object({ oc: z.coerce.number().int().positive(), key: z.string().min(1).max(60) }).safeParse(req.query);
     if (!q.success) return reply.code(400).send('');
-    if (!acting.isTest && !(await pupilCanAccessOc(acting.id, q.data.oc))) return reply.code(403).send('');
+    // BUG-030: only the pupil's session group's lesson dated today (not cancelled) is writable.
+    if (!acting.isTest && !(await pupilMayWriteOc(acting.id, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
     const data = await req.file();
     if (!data) return reply.code(400).type('text/html').send('<span class="ws-saved show">no image</span>');
     const ext = IMG_EXT[data.mimetype];
@@ -453,4 +456,25 @@ async function worksheetForOccurrenceCourse(occurrenceCourseId: number): Promise
   if (!r || r.lessonPlanId == null) return null;
   const meta = await getLessonWorksheetMeta(Number(r.groupCourseId), Number(r.lessonPlanId));
   return meta ? { resourceId: meta.resourceId, versionNo: meta.versionNo } : null;
+}
+
+/** May this pupil WRITE to this occurrence-course right now? Only their SESSION group's lesson, dated
+ *  TODAY, and not cancelled — so a guessed/forged historic / future / other-group / cancelled oc is
+ *  rejected (BUG-030). Single query + the shared exception check; the field-key inventory and
+ *  resource-version checks remain a noted follow-up. */
+async function pupilMayWriteOc(pupilId: number, sessionGroupId: number, oc: number): Promise<boolean> {
+  if (!sessionGroupId) return false;
+  const { rows } = await pool.query<{ lessonId: number; date: string }>(
+    `SELECT lo.timetabled_lesson_id AS "lessonId", to_char(lo.date, 'YYYY-MM-DD') AS date
+       FROM occurrence_courses oc
+       JOIN group_courses gc ON gc.id = oc.group_course_id
+       JOIN lesson_occurrences lo ON lo.id = oc.occurrence_id
+       JOIN enrolments e ON e.group_id = gc.group_id AND e.active AND e.pupil_id = $2
+      WHERE oc.id = $1 AND gc.group_id = $3 AND lo.date = CURRENT_DATE`,
+    [oc, pupilId, sessionGroupId],
+  );
+  const r = rows[0];
+  if (!r) return false; // other group / not enrolled / not today (historic or future)
+  const dx = indexDayExceptions(await listExceptionsBetween(r.date, r.date));
+  return describeException(exceptionForLesson(dx, r.lessonId)).mode !== 'free'; // not cancelled
 }
