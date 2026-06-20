@@ -4,6 +4,15 @@ Response to [UI_OVERHAUL_DEVELOPER_INPUTS.md](UI_OVERHAUL_DEVELOPER_INPUTS.md). 
 codebase as of 2026-06-20. Section numbers mirror that checklist. Where an answer is a **product
 decision only you can make**, it's tagged **[DECIDE]**.
 
+**Companion documents (produced alongside this):**
+
+- [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) — the complete per-route table (all 295 routes: method, path,
+  gate, page/fragment/action).
+- [CONTRACTS_TO_PRESERVE.md](CONTRACTS_TO_PRESERVE.md) — the ids, `data-*` attributes, events, state
+  classes, CSRF/OOB wiring and swap targets a re-skin must keep (the #1 silent-breakage risk).
+- [PAGE_HANDOFFS.md](PAGE_HANDOFFS.md) — completed §5 templates for Now, Lesson, Schemes and Pupil `/me`
+  (the Marking one is §8 below).
+
 ---
 
 ## 0. Read this first — two facts that reframe the whole checklist

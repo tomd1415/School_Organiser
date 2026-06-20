@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Unified ADHD/ASD Teacher Command Console with top contextual actions and side global ribbon">
+  <title>Unified Teacher Command Cockpit</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body data-active-screen="now-before" data-orientation="landscape">
+  <a class="skip-link" href="#main-content">Skip to cockpit workspace</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Mockup Navigator Bar -->
+  <div class="mockup-navigator-bar">
+    <div class="nav-brand">
+      <span class="badge live">Unified Cockpit</span>
+      <span>Select Prototype Page:</span>
+    </div>
+    <div class="nav-buttons">
+      <a class="nav-link" href="../option-3-adhd-asd-checklist/index.html">
+        <strong>Option 3</strong>
+        <small>Teacher Checklist Stack</small>
+      </a>
+      <a class="nav-link" href="../option-4-adhd-asd-visual-seating/index.html">
+        <strong>Option 4</strong>
+        <small>Teacher Classroom Grid</small>
+      </a>
+      <a class="nav-link" href="../pupil-workspace/index.html">
+        <strong>Pupil Workspace</strong>
+        <small>Student Coding Console</small>
+      </a>
+      <a class="nav-link" href="../grading-dashboard/index.html">
+        <strong>Grading Console</strong>
+        <small>AI Response Verifier</small>
+      </a>
+      <a class="nav-link" href="../now-dashboard/index.html">
+        <strong>Now Screen</strong>
+        <small>Command Centre Hub</small>
+      </a>
+      <a class="nav-link" href="../menu-mockups/index.html">
+        <strong>Menu Simulator</strong>
+        <small>Alternative Nav Systems</small>
+      </a>
+      <a class="nav-link active" href="index.html">
+        <strong>Unified Cockpit</strong>
+        <small>Combined Navigation</small>
+      </a>
+    </div>
+    <div class="nav-actions">
+      <button class="button small ghost" type="button" data-orientation-toggle style="font-weight: 800; border-color: var(--line-strong); min-height: 38px; padding: 0.45rem 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+        🖥️ Landscape View
+      </button>
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONSOLE LAYOUT WRAPPER -->
+  <div class="unified-console-wrapper">
+    
+    <!-- LEFT SIDEBAR: Option 3 Scaffolded Ribbon (Global Navigation) -->
+    <nav class="scaffolded-ribbon" id="scaffolded-ribbon" aria-label="Global navigation">
+      <!-- Tier 1: Safety & Active Tracking -->
+      <div class="ribbon-tier tier-urgency">
+        <span class="tier-label">Tier 1: Safety</span>
+        <a href="#" class="ribbon-link active" title="Today's Now Dashboard">
+          <span class="icon">🌅</span>
+          <span class="lbl-txt">Now Screen</span>
+        </a>
+        <a href="#" class="ribbon-link sg-flag" title="Safeguarding Queue">
+          <span class="icon">⚑</span>
+          <span class="lbl-txt">Safeguarding</span>
+          <span class="ribbon-indicator"></span>
+        </a>
+        <a href="#" class="ribbon-link" title="Classroom Telemetry">
+          <span class="icon">🖥️</span>
+          <span class="lbl-txt">Oversee</span>
+        </a>
+      </div>
+
+      <!-- Tier 2: Daily Operations -->
+      <div class="ribbon-tier tier-operations">
+        <span class="tier-label">Tier 2: Daily Ops</span>
+        <a href="#" class="ribbon-link" title="Interactive Timetable">
+          <span class="icon">📅</span>
+          <span class="lbl-txt">Timetable</span>
+        </a>
+        <a href="#" class="ribbon-link" title="Tasks Checklists">
+          <span class="icon">📝</span>
+          <span class="lbl-txt">Checklists</span>
+        </a>
+        <a href="#" class="ribbon-link" title="AI Verification Marking">
+          <span class="icon">🏆</span>
+          <span class="lbl-txt">Marking Queue</span>
+        </a>
+        <a href="#" class="ribbon-link" title="Mind Dump Captured Inbox">
+          <span class="icon">📥</span>
+          <span class="lbl-txt">Mind Inbox</span>
+        </a>
+      </div>
+
+      <!-- Tier 3: Collapsible Drawer (Long-term admin/planning) -->
+      <div class="ribbon-tier tier-admin collapsible-drawer" id="ribbon-drawer">
+        <button class="drawer-header-btn" type="button" id="ribbon-drawer-toggle">
+          <span class="icon">⚙️</span>
+          <span class="lbl-txt">Advanced Drawer</span>
+          <span class="drawer-arrow">▶</span>
+        </button>
+        <div class="drawer-links">
+          <a href="#" class="ribbon-link" title="Schemes of Work">
+            <span class="icon">📚</span>
+            <span class="lbl-txt">Schemes</span>
+          </a>
+          <a href="#" class="ribbon-link" title="Concepts Index">
+            <span class="icon">🧬</span>
+            <span class="lbl-txt">Concepts</span>
+          </a>
+          <a href="#" class="ribbon-link" title="Classroom Configurations">
+            <span class="icon">🔌</span>
+            <span class="lbl-txt">Setup</span>
+          </a>
+          <a href="#" class="ribbon-link" title="Hardware Carts">
+            <span class="icon">🛒</span>
+            <span class="lbl-txt">Kit Carts</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- RIGHT CONTAINER: Top Context Header + Main Content Workspace -->
+    <div class="console-main-container">
+      
+      <!-- TOP HEADER: Less Cluttered Option 1 (Contextual Page Actions) -->
+      <header class="dynamic-context-header">
+        <div class="header-left">
+          
+          <!-- Next-Up Executive Scaffold Anchor -->
+          <div class="context-scaffold-anchor">
+            <span class="live-dot" id="scaffold-dot"></span>
+            <span class="scaffold-meta" id="scaffold-meta">Before School</span>
+            <strong class="scaffold-title" id="scaffold-title">Morning briefing starts in 35 mins</strong>
+          </div>
+
+          <!-- Quick interactive simulator toggles -->
+          <div class="simulator-phase-pill">
+            <button class="sim-btn active" type="button" data-phase-target="now-before">Before</button>
+            <button class="sim-btn" type="button" data-phase-target="now-between">Between</button>
+            <button class="sim-btn" type="button" data-phase-target="now-after">After</button>
+          </div>
+        </div>
+
+        <!-- Middle Column: Context-dependent Page-Specific Action Menu -->
+        <div class="header-context-actions" id="context-action-menu">
+          <!-- Before School Actions -->
+          <div class="action-set action-set-before">
+            <button class="action-chip primary-chip" type="button">🖨️ Print Loops Worksheets</button>
+            <button class="action-chip" type="button">🔌 Power Lab IT2</button>
+          </div>
+          
+          <!-- Between Lessons Actions -->
+          <div class="action-set action-set-between">
+            <button class="action-chip primary-chip" type="button" id="start-timer-btn">⏱️ Start 7m Break Timer</button>
+            <button class="action-chip" type="button">👥 View Hassan B Info</button>
+          </div>
+          
+          <!-- After School Actions -->
+          <div class="action-set action-set-after">
+            <button class="action-chip primary-chip" type="button" id="process-inbox-btn">📂 Process Mind Inbox (3)</button>
+            <button class="action-chip" type="button">🔒 Lock Charging Carts</button>
+          </div>
+        </div>
+
+        <!-- Right Column: Clock & Time Info -->
+        <div class="header-clock-section">
+          <div class="clock-display" id="simulated-clock">08:00</div>
+          <div class="date-display">Friday, 20 June 2026</div>
+        </div>
+      </header>
+
+      <!-- CENTER WORKSPACE: Now Screen Contents -->
+      <main id="main-content" class="cockpit-workspace">
+        
+        <div class="now-grid">
+          
+          <!-- COLUMN 1: Contextual Action Cards -->
+          <div class="now-col-left">
+            
+            <!-- Before School Card -->
+            <div class="phase-card phase-before-card">
+              <div class="card-head">
+                <h2>Morning Duties</h2>
+                <span class="badge red">IT Corridor Duty</span>
+              </div>
+              <div class="briefing-info">
+                <strong>Briefing Note:</strong> Fire drill scheduled during Period 3 today. Exit maps are on clipboard.
+              </div>
+              <div class="sub-tasks">
+                <h3>Prep Checklist</h3>
+                <ul class="checklist-items">
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="before"><span class="lbl-txt">Photocopy loops worksheets (28 copies)</span></label></li>
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="before"><span class="lbl-txt">Boot projector and register system</span></label></li>
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="before"><span class="lbl-txt">Review pre-computed Chemistry Y10 grades</span></label></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Between Lessons Card -->
+            <div class="phase-card phase-between-card">
+              <div class="card-head">
+                <h2>Next Transition (7 mins)</h2>
+                <span class="badge warn">Room IT2</span>
+              </div>
+              <div class="transition-card">
+                <strong>Period 3: Y9 Computer Science</strong>
+                <p class="topic">Topic: Python Loops & Syntax</p>
+              </div>
+              <div class="sub-tasks">
+                <h3>Transition checklist</h3>
+                <ul class="checklist-items">
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="between"><span class="lbl-txt">Reset display to Loop Slide 1</span></label></li>
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="between"><span class="lbl-txt">Distribute Support/Extend worksheets</span></label></li>
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="between"><span class="lbl-txt">Check in with Daniel Reed early</span></label></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- After School Card -->
+            <div class="phase-card phase-after-card">
+              <div class="card-head">
+                <h2>Post-School agenda</h2>
+                <span class="badge ai">Coding Club today</span>
+              </div>
+              <div class="obligations-list">
+                <div class="ob-row"><strong>15:40</strong><span>Python Coding Club (IT2)</span></div>
+                <div class="ob-row warn-row"><strong>16:35</strong><span>Department detentions (IT1)</span></div>
+              </div>
+              <div class="sub-tasks">
+                <h3>Prep for Tomorrow</h3>
+                <ul class="checklist-items">
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="after"><span class="lbl-txt">Shutdown Lab IT2 lab workstations</span></label></li>
+                  <li><label class="check-item"><input type="checkbox" class="task-check" data-section="after"><span class="lbl-txt">Draft slides for Y7 cells lesson tomorrow P1</span></label></li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- COLUMN 2: Today's Agenda -->
+          <div class="now-col-middle">
+            <section class="card agenda-card">
+              <div class="card-head">
+                <h2>Today's Timetable</h2>
+                <span class="badge good">5 slots</span>
+              </div>
+              
+              <div class="agenda-timeline">
+                <div class="timeline-slot done"><span class="time">08:40</span><div class="slot-details"><strong>Tutor Registration</strong><small>Room IT2</small></div></div>
+                <div class="timeline-slot done"><span class="time">09:00</span><div class="slot-details"><strong>Period 1: Y10 Chemistry</strong><small>Reaction Rates · Sc3</small></div></div>
+                <div class="timeline-slot done"><span class="time">10:00</span><div class="slot-details"><strong>Period 2: Y8 Science</strong><small>Particle Model · Sc3</small></div></div>
+                <div class="timeline-slot active" id="agenda-slot-break"><span class="time">11:00</span><div class="slot-details"><strong>Break & IT Corridor Duty</strong><small>Corridor starts 10:45</small></div></div>
+                <div class="timeline-slot" id="agenda-slot-y9"><span class="time">11:25</span><div class="slot-details"><strong>Period 3: Y9 CS</strong><small>Loops & Syntax · IT2</small></div></div>
+                <div class="timeline-slot"><span class="time">12:25</span><div class="slot-details"><strong>Lunch Break</strong><small>Refectory duty 13:00</small></div></div>
+              </div>
+            </section>
+          </div>
+
+          <!-- COLUMN 3: Mind Clearing Capture & Processing -->
+          <div class="now-col-right">
+            
+            <section class="card capture-dock-card">
+              <div class="card-head">
+                <div>
+                  <p class="eyebrow-accent">🧠 Mind Dump</p>
+                  <h2>Capture thought</h2>
+                </div>
+              </div>
+              
+              <form id="now-capture-form" class="capture-form">
+                <div class="textarea-wrapper">
+                  <textarea id="now-capture-input" placeholder="Jot down notes (e.g. 'Order green whiteboard markers' or 'Daniel Reed did great iteration today')..."></textarea>
+                  <button class="button small ghost dictate-btn" type="button" id="now-dictate-btn">🎤 Dictate</button>
+                </div>
+                <div class="quick-inbox-tags">
+                  <button class="tag-btn" type="button" data-tag-text="Task">📝 Task</button>
+                  <button class="tag-btn" type="button" data-tag-text="Pupil Info">👤 Pupil</button>
+                  <button class="tag-btn" type="button" data-tag-text="Supply Alert">🛒 Supply</button>
+                </div>
+                <button class="button primary submit-inbox-btn" type="submit">📥 Capture to Inbox</button>
+              </form>
+            </section>
+
+            <section class="card inbox-queue-card">
+              <div class="card-head">
+                <h2>Inbox Queue</h2>
+                <span class="badge warn" id="inbox-count-badge">3 items</span>
+              </div>
+              <div class="inbox-list" id="inbox-items-container">
+                <!-- Injected dynamically -->
+              </div>
+            </section>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- DIALOGS AND OVERLAYS -->
+  <dialog id="process-dialog" class="process-dialog" aria-labelledby="dialog-title">
+    <header class="dialog-head">
+      <div>
+        <p class="eyebrow">Organise captured thought</p>
+        <h2 id="dialog-title">Process Note</h2>
+      </div>
+      <button class="dialog-close" type="button" id="dialog-close-btn" aria-label="Close dialog">×</button>
+    </header>
+    
+    <div class="dialog-body">
+      <div class="note-preview-box">
+        <span class="badge" id="dialog-note-badge">Task</span>
+        <p id="dialog-note-text">The text of the note goes here...</p>
+      </div>
+
+      <form id="dialog-process-form" class="process-form">
+        <div class="form-group">
+          <label for="process-action-select">Convert to Action Type:</label>
+          <select id="process-action-select">
+            <option value="todo">Create Todo Task Checklist item</option>
+            <option value="pupil">Save as Student Observation Note</option>
+            <option value="calendar">Schedule on Calendar Agenda</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="process-details-todo">
+          <label for="process-target-checklist">Add to Checklist:</label>
+          <select id="process-target-checklist">
+            <option value="before">Before School Checklist</option>
+            <option value="between">Between Lessons Checklist</option>
+            <option value="after">Prep for Tomorrow Checklist</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="process-details-pupil" style="display: none;">
+          <label for="process-target-pupil">Link to Student:</label>
+          <select id="process-target-pupil">
+            <option value="Alex Morgan">Alex Morgan</option>
+            <option value="Bethany Cole">Bethany Cole</option>
+            <option value="Daniel Reed">Daniel Reed</option>
+            <option value="Hassan Begum">Hassan Begum</option>
+          </select>
+        </div>
+
+        <div class="form-buttons-row">
+          <button class="button ghost" type="button" id="dialog-cancel-btn">Cancel</button>
+          <button class="button primary" type="submit">Complete Processing</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+</body>
+</html>

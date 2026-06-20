@@ -152,6 +152,29 @@ The isolated static prototypes implemented the following resolutions for these a
 - **Tasks & Captured Notes:** Captured notes are submitted via the **Mind Dump Dock** in the "Now" dashboard. These go to a **Captured Inbox Queue** to be deleted, deferred for tomorrow, or processed into checklist items (before, between, or after school), student observations, or calendar alerts dynamically.
 - **Pupil Workspace:** Re-engineered as an accessible student console supporting layout modes (View A: Slides + Worksheet; View B: Worksheet + Coding; View C: Graded Review), self-paced slide audio text-to-speech, differentiated interactive questions, sticky editor columns to support working memory, and star grades.
 
+### 4.3 Overhauled Page List and Dynamic Top-Bar Specifications
+
+In the unified design shell, every teacher-facing page features:
+1.  **A Left Collapsible Ribbon (Option 3):** Fixed global navigation (icon-only 60px expanding to 200px on hover).
+2.  **A Dynamic Top Header (Option 1 Streamlined):** Height 64px, containing context-aware metadata/countdown anchors on the left, page-specific action chips in the center, and a clock/date display on the right.
+
+Below is the complete inventory of pages to be overhauled, specifying the content of the dynamic top header bar for each page:
+
+| Page / Route | Role & Task-Area | Top-Bar Left: Context Anchor | Top-Bar Middle: Contextual Action Chips | Top-Bar Right: Clock & Date |
+|---|---|---|---|---|
+| **1. Now Dashboard**<br>`/` | Teacher<br>**Today** | **Before School:** `🌅 Morning briefing starts in 35 mins`<br>**Between Lessons:** `Period 3 · Y9 CS (IT2) starts in 10 mins`<br>**After School:** `Coding Club starts in 10 mins` | **Before:** `🖨️ Print Loops Worksheets` · `🔌 Power Lab IT2`<br>**Between:** `⏱️ Start 7m Break Timer` · `👥 View Hassan B Info`<br>**After:** `📂 Process Mind Inbox (3)` · `🔒 Lock Charging Carts` | `1.25rem` tabular clock + date |
+| **2. Timetable Grid**<br>`/timetable` | Teacher<br>**Today / Plan** | **Active:** `📅 Period 3 Active`<br>**Non-Teaching:** `📅 Morning Break` (or `📅 Next: Lunch in 20 mins`) | `📅 Go to Today` · `📅 Week A/B Toggle` · `🖨️ Print Week` | `1.25rem` tabular clock + date |
+| **3. Classroom Oversee**<br>`/oversee` | Teacher / TA<br>**Teach** | **Active:** `🖥️ Y9 CS (IT2) - Active telemetry online`<br>**Idle:** `🖥️ No active class currently logged in` | `🖥️ Share Slide Screen` · `🔊 TTS broadcast` · `⏱️ Start 15m Task Timer` | `1.25rem` tabular clock + date |
+| **4. Marking Backlog**<br>`/marking` | Teacher<br>**Assess** | **Unmarked:** `🏆 Y9 Loops Practice - 28 Submissions`<br>**All Graded:** `🏆 All submissions checked & confirmed` | `🤖 Run AI Auto-Grading` · `📈 View Class Analytics` · `✅ Confirm All High-Confidence` | `1.25rem` tabular clock + date |
+| **5. Tasks & Checklists**<br>`/tasks` | Teacher<br>**Organise** | **Pending:** `📝 4 Tasks Pending for Today`<br>**Done:** `📝 All daily prep completed` | `📥 Capture Task` · `🧹 Clear Completed` · `📅 View Recurring` | `1.25rem` tabular clock + date |
+| **6. Captured Inbox**<br>`/captured` | Teacher<br>**Today / Organise** | **Items:** `📥 3 Captured thoughts in inbox`<br>**Empty:** `📥 Inbox empty - all notes filed` | `📂 Batch Process` · `🗑️ Empty Trash` · `🎤 Dictate Note` | `1.25rem` tabular clock + date |
+| **7. Schemes of Work**<br>`/schemes` | Teacher<br>**Plan** | **Browsing:** `📚 Computing Scheme of Work - Year 9`<br>**Editing:** `📚 Editing Unit: Iterative Structures` | `📚 Create Scheme` · `📂 Import curriculum` · `📁 Export PDF` | `1.25rem` tabular clock + date |
+| **8. Concepts Index**<br>`/concepts` | Teacher<br>**Plan / Organise** | **Count:** `🧬 12 Python Concepts Documented`<br>**Viewing:** `🧬 Syntax: for loop versus while loop` | `🧬 Add New Concept` · `🔍 Search Index` · `🔗 Link to Scheme` | `1.25rem` tabular clock + date |
+| **9. Workstations Setup**<br>`/setup` | Teacher / TA<br>**Organise / Advanced** | **Status:** `🔌 Lab 2 Setup - 28 Workstations online`<br>**Issue:** `🔌 Workstation B3 offline` | `🔌 Ping All Machines` · `🔄 Restart IDEs` · `🚀 Push Helper Update` | `1.25rem` tabular clock + date |
+| **10. Kit Carts Inventory**<br>`/kit` | Teacher / TA<br>**Organise / Advanced** | **Charging:** `🛒 Laptop Cart B - 100% charged`<br>**Audit:** `🛒 Last cart audit 2 days ago` | `🛒 Audit Carts` · `⚠️ Report Broken Hardware` · `🔌 Toggle Charge` | `1.25rem` tabular clock + date |
+| **11. Safeguarding Queue**<br>`/safeguarding` | Teacher / TA<br>**Safeguarding** | **Secure:** `⚑ Safeguarding active & secure`<br>**Alert:** `⚑ 1 Urgent pupil flag requires review` | `⚑ File Observation` · `📁 Open DPIA` · `🔒 Export Logs` | `1.25rem` tabular clock + date |
+| **12. System Settings**<br>`/settings` | Teacher<br>**Organise / Advanced** | **Preferences:** `⚙️ System settings` | `⚙️ Save Settings` · `🔄 Reset Defaults` · `👤 Experience mode: power` | `1.25rem` tabular clock + date |
+
 ## 5. Per-page handoff template
 
 Ask the owning developer to complete this template for each migrated page or dialog:

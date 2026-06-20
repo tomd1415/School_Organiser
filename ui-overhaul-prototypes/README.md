@@ -15,6 +15,7 @@ Open any `index.html` directly in a browser:
 - [Teacher Grading & AI Verification Dashboard](grading-dashboard/index.html)
 - [Teacher "Now" Screen Command Centre (ADHD/ASD Support)](now-dashboard/index.html)
 - [Teacher Navigation Menu Systems (ADHD/ASD Support)](menu-mockups/index.html)
+- [Teacher Unified Cockpit Dashboard (ADHD/ASD Support)](combined-nav-mockup/index.html)
 
 The pages are responsive. Resize the browser to compare desktop, tablet, and mobile layouts. Their buttons demonstrate local visual interactions only.
 
@@ -56,6 +57,10 @@ ui-overhaul-prototypes/
 │   ├── styles.css
 │   └── prototype.js
 ├── menu-mockups/
+│   ├── index.html
+│   ├── styles.css
+│   └── prototype.js
+├── combined-nav-mockup/
 │   ├── index.html
 │   ├── styles.css
 │   └── prototype.js
