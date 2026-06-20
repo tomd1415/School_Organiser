@@ -105,11 +105,18 @@ redaction *and* withholding rules apply regardless of provider.
   under the school's existing data-protection policy. Confirm with the school DPO before go-live.
 - **Data minimisation:** store only what the tool needs (names + the notes the teacher would
   keep anyway). No home addresses, no special-category data unless explicitly justified.
-- **Retention:** pupil rows and their notes are deleted on a deliberate, audited retention
-  action (e.g. end of the pupil's time in the class/school), not silently. Mirrors the
-  `exam_questions` retention approach.
-- **Subject access / portability:** all data is exportable (DATA_MODEL §"Data portability"),
-  so an SAR can be satisfied.
+- **Retention / disposal:** pupil data is removed on a deliberate, audited action, not silently.
+  Two modes (`disposePupil`): **anonymise** keeps cohort *attainment* (answers/marks/feedback/levels)
+  but strips identity, login, screenshots **and the individual narrative** — the pupil's own
+  notes/tasks/events are deleted and their name is redacted out of any shared note that merely mentioned
+  them, so an "anonymised" record can no longer be re-identified (BUG-039). **Erase** is a full
+  right-to-erasure: every dependent personal record is deleted (the narrative is **deleted, not just
+  detached**), leaving only the non-identifying disposal-audit token.
+- **Subject access / portability:** `exportPupilRecord` assembles the pupil's *whole* record — profile,
+  enrolments, answers/marks/feedback, teacher comments, linked notes/tasks/events + mentions, per-class
+  levels, unit signals, completions, and login/device **metadata** (never the PIN or device-token
+  hashes). Safeguarding records are excluded by design and released case-by-case by the DSL under the
+  DPA 2018 safeguarding exemption (BUG-043).
 - **DPIA:** [docs/DPIA.md](DPIA.md) is a **working draft** covering what's held, why, the
   AI-redaction control, retention/disposal and backup handling. It awaits DPO + SLT (safeguarding)
   sign-off; the pupil-login and auto-marking surfaces stay **code-disabled** until that sign-off is

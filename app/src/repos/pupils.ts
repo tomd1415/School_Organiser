@@ -128,6 +128,33 @@ async function rowsAffected(client: import('pg').PoolClient, sql: string, params
   return r.rowCount ?? 0;
 }
 
+/**
+ * BUG-039: remove this pupil's identifying NARRATIVE — the free text that names them. Their OWN
+ * notes/tasks/events are personal data about them and are deleted; in notes about OTHER pupils that
+ * merely mention them, the exact matched name (recorded on the mention row) is redacted from the body
+ * and the mention removed. Shared by both disposal modes — so an anonymisation can no longer leave a
+ * note that still names the supposedly-anonymised pupil, and an erasure DELETES the narrative rather
+ * than merely detaching it (which left the identifying text behind).
+ */
+async function scrubPupilNarrative(client: import('pg').PoolClient, id: number): Promise<Record<string, number>> {
+  const c: Record<string, number> = {};
+  // notes ABOUT OTHERS that mention this pupil: redact the exact matched name from the body, keep the note.
+  await client.query(
+    `UPDATE notes n SET body = replace(n.body, m.text, '[removed]')
+     FROM note_pupil_mentions m
+     WHERE m.note_id = n.id AND m.pupil_id = $1 AND n.body IS NOT NULL AND coalesce(m.text, '') <> ''`,
+    [id],
+  );
+  c.mentionsRedacted = await rowsAffected(client, `DELETE FROM note_pupil_mentions WHERE pupil_id = $1`, [id]);
+  // the pupil's OWN narrative records are deleted (mentions on those cascade away). Detach any child
+  // tasks first so a sub-tasked parent doesn't hit the parent_task_id RESTRICT.
+  await client.query(`UPDATE tasks SET parent_task_id = NULL WHERE parent_task_id IN (SELECT id FROM tasks WHERE pupil_id = $1)`, [id]);
+  c.notes = await rowsAffected(client, `DELETE FROM notes WHERE pupil_id = $1`, [id]);
+  c.tasks = await rowsAffected(client, `DELETE FROM tasks WHERE pupil_id = $1`, [id]);
+  c.events = await rowsAffected(client, `DELETE FROM events WHERE pupil_id = $1`, [id]);
+  return c;
+}
+
 export async function disposePupil(id: number, mode: DisposalMode): Promise<DisposalResult | null> {
   const client = await pool.connect();
   try {
@@ -151,18 +178,20 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
       counts.devices = await rowsAffected(client, `DELETE FROM pupil_devices WHERE pupil_id = $1`, [id]);
       counts.profile = await rowsAffected(client, `DELETE FROM pupil_profiles WHERE pupil_id = $1`, [id]);
       counts.comments = await rowsAffected(client, `DELETE FROM pupil_lesson_comments WHERE pupil_id = $1`, [id]);
+      // BUG-039: the individual narrative (notes/tasks/events about them + mentions) names the pupil, so
+      // it must go too — otherwise "anonymisation" leaves records that still identify them. Attainment
+      // (answers/marks/feedback/levels) stays, now nameless under the token.
+      Object.assign(counts, await scrubPupilNarrative(client, id));
       // Text answers/marks stay as nameless attainment, but raw screenshots are re-identifying — drop
       // their pointers (the files themselves are removed after COMMIT, below) so nothing dangles.
       if (imgPaths.length) await client.query(`UPDATE pupil_answers SET value = '' WHERE pupil_id = $1 AND value LIKE 'img:%'`, [id]);
       // Name → the stable token, archived. The token stays so the redaction roster + aggregates hold.
       await client.query(`UPDATE pupils SET display_name = ai_token, active = false WHERE id = $1`, [id]);
     } else {
-      // Full erasure: clear the RESTRICT blockers, detach the nullable links, then DELETE cascades.
+      // Full erasure: clear the RESTRICT blockers, DELETE the narrative (not just detach — BUG-039: a
+      // detached note/task/event keeps the pupil's name in its free text), then DELETE cascades the rest.
       counts.enrolments = await rowsAffected(client, `DELETE FROM enrolments WHERE pupil_id = $1`, [id]);
-      counts.mentions = await rowsAffected(client, `DELETE FROM note_pupil_mentions WHERE pupil_id = $1`, [id]);
-      counts.notes_detached = await rowsAffected(client, `UPDATE notes SET pupil_id = NULL WHERE pupil_id = $1`, [id]);
-      counts.tasks_detached = await rowsAffected(client, `UPDATE tasks SET pupil_id = NULL WHERE pupil_id = $1`, [id]);
-      counts.events_detached = await rowsAffected(client, `UPDATE events SET pupil_id = NULL WHERE pupil_id = $1`, [id]);
+      Object.assign(counts, await scrubPupilNarrative(client, id));
       counts.answers = (await client.query<{ n: number }>(`SELECT count(*)::int n FROM pupil_answers WHERE pupil_id = $1`, [id])).rows[0]!.n;
       // safeguarding_review has a polymorphic (FK-less) source_id, so the answer cascade won't clear
       // its 'answer' rows — do it explicitly here, while the answers still exist to resolve the ids.
@@ -214,5 +243,21 @@ export async function exportPupilRecord(id: number): Promise<Record<string, unkn
     feedback: await q(`SELECT occurrence_course_id AS "occurrenceCourseId", rating, liked, disliked, comment FROM pupil_lesson_feedback WHERE pupil_id = $1`),
     teacherComments: await q(`SELECT occurrence_course_id AS "occurrenceCourseId", comment FROM pupil_lesson_comments WHERE pupil_id = $1`),
     profile: (await q(`SELECT digest, updated_at AS "updatedAt" FROM pupil_profiles WHERE pupil_id = $1`))[0] ?? null,
+    // BUG-043: the SAR must be the WHOLE record, not four queries. Add every other pupil-linked table.
+    linkedTasks: await q(`SELECT id, title, detail, status, due_at AS "dueAt", created_at AS "createdAt" FROM tasks WHERE pupil_id = $1 ORDER BY created_at`),
+    linkedEvents: await q(`SELECT id, kind, title, detail, date, status FROM events WHERE pupil_id = $1 ORDER BY date NULLS LAST, id`),
+    levels: await q(`SELECT c.name AS course, gr.name AS "group", pl.level, pl.updated_at AS "updatedAt"
+                     FROM pupil_levels pl JOIN group_courses gc ON gc.id = pl.group_course_id
+                     JOIN courses c ON c.id = gc.course_id LEFT JOIN groups gr ON gr.id = gc.group_id WHERE pl.pupil_id = $1`),
+    unitSignal: await q(`SELECT u.title AS unit, s.signal, s.updated_at AS "updatedAt" FROM pupil_unit_signal s JOIN units u ON u.id = s.unit_id WHERE s.pupil_id = $1`),
+    completed: await q(`SELECT occurrence_course_id AS "occurrenceCourseId", done_at AS "doneAt" FROM pupil_done WHERE pupil_id = $1 ORDER BY done_at`),
+    // Devices: the cookie SECRET (token_hash) is never exported — only the non-secret metadata.
+    devices: await q(`SELECT label, last_used_at AS "lastUsedAt", expires_at AS "expiresAt", created_at AS "createdAt" FROM pupil_devices WHERE pupil_id = $1 ORDER BY created_at`),
+    // Login credential: existence + state only — the PIN hash is a secret and is never disclosed.
+    credential: (await q(`SELECT enabled, (pin_hash IS NOT NULL) AS "pinSet", failed_count AS "failedCount", (failed_count >= 5) AS locked, updated_at AS "updatedAt" FROM pupil_credentials WHERE pupil_id = $1`))[0] ?? null,
+    // Safeguarding records are deliberately EXCLUDED from this automated export: they may name third
+    // parties and are subject to the DPA 2018 safeguarding exemption — release is handled by the DSL
+    // case-by-case, not dumped here. (Documented exclusion, per the SAR completeness review.)
+    safeguardingNote: 'Safeguarding records (if any) are held separately and are not included in this automated export — request via the Designated Safeguarding Lead; release is assessed under the DPA 2018 safeguarding exemption.',
   };
 }

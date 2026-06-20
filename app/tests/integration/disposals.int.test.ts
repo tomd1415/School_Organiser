@@ -12,6 +12,7 @@ let groupId = 0;
 let eraseId = 0, anonId = 0;
 let eraseToken = '', anonToken = '';
 let noteEraseId = 0, taskEraseId = 0, eventEraseId = 0;
+let eraseSharedNoteId = 0, eraseMarker = '', anonSharedNoteId = 0, anonMarker = '';
 let ocId = 0;                       // an existing occurrence_course to hang a screenshot answer on
 let eraseShot = '', anonShot = '';  // the relative paths of each pupil's seeded screenshot file
 
@@ -32,19 +33,24 @@ async function seedScreenshot(pupilId: number): Promise<string> {
   return rel;
 }
 
-async function seedPupilData(pupilId: number): Promise<{ noteId: number; taskId: number; eventId: number }> {
+async function seedPupilData(pupilId: number): Promise<{ noteId: number; taskId: number; eventId: number; sharedNoteId: number; marker: string }> {
   await pool.query(`INSERT INTO enrolments (pupil_id, group_id, active) VALUES ($1, $2, true)`, [pupilId, groupId]);
   const noteId = Number((await pool.query<{ id: number }>(`INSERT INTO notes (kind, body, pupil_id) VALUES ('general', 'ZZD note about the pupil', $1) RETURNING id`, [pupilId])).rows[0]!.id);
   await pool.query(`INSERT INTO note_pupil_mentions (note_id, pupil_id, text) VALUES ($1, $2, 'ZZD mention')`, [noteId, pupilId]);
   const taskId = Number((await pool.query<{ id: number }>(`INSERT INTO tasks (title, pupil_id) VALUES ('ZZD task', $1) RETURNING id`, [pupilId])).rows[0]!.id);
   const eventId = Number((await pool.query<{ id: number }>(`INSERT INTO events (kind, title, pupil_id) VALUES ('other', 'ZZD event', $1) RETURNING id`, [pupilId])).rows[0]!.id);
+  // A SHARED note (owned by no-one) that MENTIONS this pupil by a unique marker — disposal must redact
+  // that marker from the body while keeping the (otherwise about-others) note. (BUG-039)
+  const marker = `ZZDM${pupilId}`;
+  const sharedNoteId = Number((await pool.query<{ id: number }>(`INSERT INTO notes (kind, body, pupil_id) VALUES ('general', $1, NULL) RETURNING id`, [`ZZD shared note naming ${marker} here`])).rows[0]!.id);
+  await pool.query(`INSERT INTO note_pupil_mentions (note_id, pupil_id, text) VALUES ($1, $2, $3)`, [sharedNoteId, pupilId, marker]);
   // Cheap CASCADE dependents (no occurrence/resource needed): credential, device, profile.
   const { setPupilPin } = await import('../../src/repos/pupilCredentials');
   await setPupilPin(pupilId, '1234');
   const { rememberDevice, newDeviceSecret } = await import('../../src/repos/pupilDevices');
   await rememberDevice(pupilId, newDeviceSecret(), 'ZZD device');
   await pool.query(`INSERT INTO pupil_profiles (pupil_id, digest) VALUES ($1, 'ZZD profile prose')`, [pupilId]);
-  return { noteId, taskId, eventId };
+  return { noteId, taskId, eventId, sharedNoteId, marker };
 }
 
 // Idempotent cleanup, RESTRICT-order-correct. Scoped to the 'ZZD' labels + the 'ZZDGRP' group, so it
@@ -74,8 +80,10 @@ beforeAll(async () => {
   const b = await createPupil('ZZD Anon'); anonId = b.id; anonToken = b.aiToken;
   const seeded = await seedPupilData(eraseId);
   noteEraseId = seeded.noteId; taskEraseId = seeded.taskId; eventEraseId = seeded.eventId;
+  eraseSharedNoteId = seeded.sharedNoteId; eraseMarker = seeded.marker;
   eraseShot = await seedScreenshot(eraseId);
-  await seedPupilData(anonId);
+  const seededAnon = await seedPupilData(anonId);
+  anonSharedNoteId = seededAnon.sharedNoteId; anonMarker = seededAnon.marker;
   anonShot = await seedScreenshot(anonId);
 });
 
@@ -94,9 +102,20 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     expect(rec.enrolments.length).toBeGreaterThanOrEqual(1);
     expect(rec.linkedNotes.length).toBeGreaterThanOrEqual(1);
     expect(rec.mentions.length).toBeGreaterThanOrEqual(1);
+    // BUG-043: the previously-omitted pupil-linked data is now included…
+    expect(rec.linkedTasks.some((t: any) => t.title === 'ZZD task')).toBe(true);
+    expect(rec.linkedEvents.some((e: any) => e.title === 'ZZD event')).toBe(true);
+    expect(rec.devices.some((d: any) => d.label === 'ZZD device')).toBe(true);
+    expect(rec.credential?.pinSet).toBe(true); // a PIN exists…
+    expect(typeof rec.safeguardingNote).toBe('string'); // documented safeguarding exclusion
+    // …but NO secret is ever exported — not the PIN hash, not the device token hash.
+    const blob = JSON.stringify(rec);
+    expect(blob).not.toMatch(/scrypt:/); // no credential / device hash
+    expect(blob).not.toContain('pin_hash');
+    expect(blob).not.toContain('token_hash');
   });
 
-  it('erase removes the pupil + all CASCADE data, deletes RESTRICT rows, DETACHES notes/tasks/events, and audits', async () => {
+  it('erase removes the pupil + all CASCADE data, deletes RESTRICT rows, DELETES & redacts narrative, and audits', async () => {
     const r = await disposePupil(eraseId, 'erase');
     expect(r).not.toBeNull();
     expect(r!.mode).toBe('erase');
@@ -108,10 +127,14 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     // The RESTRICT blockers were cleared (would have thrown otherwise).
     expect((await pool.query(`SELECT 1 FROM enrolments WHERE pupil_id = $1`, [eraseId])).rowCount).toBe(0);
     expect((await pool.query(`SELECT 1 FROM note_pupil_mentions WHERE pupil_id = $1`, [eraseId])).rowCount).toBe(0);
-    // The teacher's own note/task/event SURVIVE, just detached from the (now erased) pupil.
-    expect((await pool.query(`SELECT pupil_id FROM notes WHERE id = $1`, [noteEraseId])).rows[0]!.pupil_id).toBeNull();
-    expect((await pool.query(`SELECT pupil_id FROM tasks WHERE id = $1`, [taskEraseId])).rows[0]!.pupil_id).toBeNull();
-    expect((await pool.query(`SELECT pupil_id FROM events WHERE id = $1`, [eventEraseId])).rows[0]!.pupil_id).toBeNull();
+    // BUG-039: the pupil's OWN note/task/event are DELETED (not detached — their text named the pupil).
+    expect((await pool.query(`SELECT 1 FROM notes WHERE id = $1`, [noteEraseId])).rowCount).toBe(0);
+    expect((await pool.query(`SELECT 1 FROM tasks WHERE id = $1`, [taskEraseId])).rowCount).toBe(0);
+    expect((await pool.query(`SELECT 1 FROM events WHERE id = $1`, [eventEraseId])).rowCount).toBe(0);
+    // …and a SHARED note that merely mentioned them survives, with the name redacted out of its body.
+    const shared = (await pool.query<{ body: string }>(`SELECT body FROM notes WHERE id = $1`, [eraseSharedNoteId])).rows[0]!;
+    expect(shared.body).not.toContain(eraseMarker); // the matched name is gone…
+    expect(shared.body).toContain('[removed]'); // …replaced by a marker
     // The name is gone from the redaction roster, and a disposal audit row records it.
     expect((await listRoster()).some((p) => p.id === eraseId)).toBe(false);
     expect((await listDisposals()).some((d) => d.aiToken === eraseToken && d.action === 'erase')).toBe(true);
@@ -134,6 +157,16 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     // …but cohort membership stays (now nameless), and the pupil is still in the redaction roster.
     expect((await pool.query(`SELECT 1 FROM enrolments WHERE pupil_id = $1`, [anonId])).rowCount).toBe(1);
     expect((await listRoster()).some((p) => p.id === anonId)).toBe(true);
+    // BUG-039: the individual narrative naming the pupil is gone — otherwise "anonymisation" would leave
+    // records that still identify them. Owned notes/tasks/events + their mentions are deleted…
+    expect((await pool.query(`SELECT 1 FROM notes WHERE pupil_id = $1`, [anonId])).rowCount).toBe(0);
+    expect((await pool.query(`SELECT 1 FROM tasks WHERE pupil_id = $1`, [anonId])).rowCount).toBe(0);
+    expect((await pool.query(`SELECT 1 FROM events WHERE pupil_id = $1`, [anonId])).rowCount).toBe(0);
+    expect((await pool.query(`SELECT 1 FROM note_pupil_mentions WHERE pupil_id = $1`, [anonId])).rowCount).toBe(0);
+    // …and a shared note that mentioned them keeps the note but redacts the name.
+    const shared = (await pool.query<{ body: string }>(`SELECT body FROM notes WHERE id = $1`, [anonSharedNoteId])).rows[0]!;
+    expect(shared.body).not.toContain(anonMarker);
+    expect(shared.body).toContain('[removed]');
     expect((await listDisposals()).some((d) => d.aiToken === anonToken && d.action === 'anonymise')).toBe(true);
     // Worksheets v2: a raw screenshot is re-identifying, so anonymise removes the FILE and blanks the
     // pointer, while the (now-nameless) text-attainment row itself is kept.

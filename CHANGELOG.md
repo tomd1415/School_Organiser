@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 14 (Wave A5 — pupil data-protection lifecycle)
+
+Make disposal and subject-access genuinely complete for the pupil-data lifecycle. Suite green:
+**528 unit / 331 integration; typecheck clean**.
+
+- **🗑 Disposal removes the identifying narrative, not just the identity (BUG-039, High).** Anonymise used
+  to leave the pupil's notes/tasks/events (and any note that named them) untouched, and erase merely
+  *detached* them (`pupil_id=NULL`) — so the pupil's name survived in free text either way. Both modes now
+  run one `scrubPupilNarrative`: the pupil's own notes/tasks/events are **deleted**, and in shared notes the
+  exact matched name is **redacted out of the body** with the mention removed. Anonymise keeps cohort
+  attainment (now nameless under the token); erase deletes the narrative outright.
+- **📋 The subject-access export is now the whole record (BUG-043, Medium).** `exportPupilRecord` covered
+  four areas; it now includes linked tasks/events, per-class levels, unit signals, completions, and device +
+  login-credential **metadata** — with the PIN and device-token hashes never disclosed, and safeguarding
+  records excluded by design (a documented note points the requester to the DSL under the DPA 2018
+  safeguarding exemption). Privacy doc's retention/SAR statements were corrected to match.
+
+**40 / 50 findings fixed.** Remaining: backup-restore drill (009/010), HTMX client-JS (013/033),
+per-lesson recurrence cursor (025), email-dedup transaction (027), disposal-delete retry (044), the `tar`
+dependency upgrade (049), and the deployment-config items (032/045) awaiting an operator.
+
 ### 2026-06-20 — Audit remediation, batch 13 (auth, cost cap, data-retention, consistency)
 
 Six findings across security, the project's #1 cost risk, data-retention, and timetable consistency.

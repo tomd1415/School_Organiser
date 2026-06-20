@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 38 of 50 fixed; Waves A1–A4 + A7 + most of A6 complete, A3 code-fixes done.** This is the
+> **Status (2026-06-20): in progress — 40 of 50 fixed; Waves A1–A4 + A7 + most of A5/A6 complete, A3 code-fixes done.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -30,11 +30,15 @@
 > under an advisory lock; the reservation row persists the redacted request + spend so a failed reconcile
 > never undercounts). Plus **002** (pupil class-code bound to the session, gating the name/PIN steps), **029**
 > (a reformatted screenshot replace unlinks the old file), and **048** (the review sweep releases its day-claim
-> on failure so a crash doesn't lose the day). Suites green: 528 unit / 331 integration; typecheck clean.
-> **Remaining 12:** **009/010** (backup-restore drill — operational), **013/033** (HTMX client-JS — need the
-> Wave-0 browser harness), **025** (per-lesson recurrence cursor), **027** (email-dedup txn), **039/043/044**
-> (disposal/SAR — data inventory), **049** (tar — needs a clean dependency rebuild). **032 / 045**
-> (deployment-config) await the operator.
+> on failure so a crash doesn't lose the day). **A5 (data-protection code)** — **039** (both disposal modes
+> delete the pupil's own notes/tasks/events and redact their name from shared notes — anonymisation can no
+> longer leave identifying records; erasure deletes rather than detaches) and **043** (the SAR export now
+> covers every pupil-linked table — tasks/events/levels/unit-signals/completions/device+credential metadata —
+> with secrets excluded and a documented safeguarding-exemption note). Suites green: 528 unit / 331
+> integration; typecheck clean. **Remaining 10:** **009/010** (backup-restore drill — operational), **013/033**
+> (HTMX client-JS — need the Wave-0 browser harness), **025** (per-lesson recurrence cursor), **027**
+> (email-dedup txn), **044** (disposal-delete durable retry), **049** (tar — needs a clean dependency rebuild).
+> **032 / 045** (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

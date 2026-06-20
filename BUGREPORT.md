@@ -26,29 +26,29 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (38):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
-BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High —
-pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
+**Fixed so far (40):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
+BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040, BUG-041, BUG-042 (High
+— pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
 safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
-atomic resource versioning, lock-aware unit placement & **atomic monthly-AI-cap reservation**);
-BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-026,
-BUG-028, BUG-029, BUG-030, BUG-031, BUG-046, BUG-047, BUG-048 (Medium — session revocation, pupil-work
-authz, DB invariants, mark provenance, calendar-aware print, DB-enforced scheme/recurring invariants,
-atomic planner cascades, complete scheme clone, atomic review apply, atomic resource creation, **AI
-audit-durability, group-course deactivation consistency, screenshot-replace cleanup & restart-safe
-review sweep**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A4 + most of A6 complete; A3 auth
-code-fixes done (BUG-032/045 deployment-config await an operator); A7 cost/audit done (011/018).
-Remaining 12: High 009/010 (backup-restore drill), 013 (HTMX client-JS), 039 (disposal narrative);
-Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045 (deployment), 033 (client-JS),
-043 (SAR export), 044 (disposal-delete retry), 049 (tar — needs clean rebuild).**
+atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & **disposal
+narrative removal**); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
+BUG-024, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-046, BUG-047, BUG-048 (Medium —
+session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware print, DB-enforced
+scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic review apply, atomic
+resource creation, AI audit-durability, group-course deactivation consistency, screenshot-replace
+cleanup, restart-safe review sweep & **complete SAR export**); BUG-034, BUG-035, BUG-036, BUG-050 (Low).
+**Waves A1–A4 + A7 + most of A6 complete; A3 auth code-fixes done (BUG-032/045 deployment-config await an
+operator); A5 data-protection code done (029/039/043). Remaining 10: High 009/010 (backup-restore
+drill), 013 (HTMX client-JS); Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045
+(deployment), 033 (client-JS), 044 (disposal-delete retry), 049 (tar — needs clean rebuild).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 14 | 4 |
-| Medium | 26 | 18 | 8 |
+| High | 18 | 15 | 3 |
+| Medium | 26 | 19 | 7 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **38** | **12** |
+| **Total** | **50** | **40** | **10** |
 
 ## Testing and environment limitations
 
@@ -238,6 +238,7 @@ Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045 (deplo
 
 ### BUG-039 — Pupil anonymisation and erasure leave narrative personal data behind
 
+- **Status:** ✅ Resolved 2026-06-20 — both disposal modes now run a shared `scrubPupilNarrative` ([app/src/repos/pupils.ts](app/src/repos/pupils.ts)): the pupil's OWN notes/tasks/events (their individual narrative) are **deleted**, and in notes about OTHER pupils that merely mention them the exact matched name is **redacted out of the body** (`replace(body, mention.text, '[removed]')`) with the mention row removed. So **anonymise** no longer leaves records that still name the supposedly-anonymised pupil (attainment stays, now nameless under the token), and **erase** deletes the narrative instead of merely detaching it (`pupil_id=NULL`, which kept the identifying text). Integration test asserts owned narrative is gone for both modes, a shared note survives with the name redacted, and disposal stays audited. Privacy doc's lifecycle statements updated. *(Residual: redaction matches the exact text the mention recorded; a name written a different way in the same note isn't caught — the mention extractor's coverage bounds this.)*
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/repos/pupils.ts:115-164`; `app/tests/integration/disposals.int.test.ts:35-47, 99-146`; pupil-data lifecycle statements in `docs/SECURITY_AND_PRIVACY.md`
 - **Problem and trigger:** Anonymisation removes credentials, devices, profile fields, and comments but retains notes, tasks, events, and mentions associated with the pupil while merely replacing the pupil row's display name with a token. Erasure deletes mentions but sets linked note/task/event pupil IDs to `NULL`; free-text titles and bodies that identify the pupil remain. The integration test explicitly expects detached narrative records to survive.
@@ -488,6 +489,7 @@ Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045 (deplo
 
 ### BUG-043 — The pupil subject-access export omits substantial pupil-linked data
 
+- **Status:** ✅ Resolved 2026-06-20 — `exportPupilRecord` ([app/src/repos/pupils.ts](app/src/repos/pupils.ts)) now covers every pupil-linked table found in the schema sweep, not four queries: it adds **linked tasks**, **linked events**, per-class **levels**, **unit signals**, **completions** (`pupil_done`), **device metadata**, and **login-credential state** — alongside the existing profile/enrolments/answers/marks/feedback/comments/notes/mentions. Secrets are never disclosed (PIN hash and device `token_hash` are excluded — only existence/state). Safeguarding records are **deliberately excluded** with a documented `safeguardingNote` (released case-by-case by the DSL under the DPA 2018 safeguarding exemption). Integration test asserts the new sections appear and that no `scrypt:`/`pin_hash`/`token_hash` secret leaks into the export.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/repos/pupils.ts:183-201`; `app/migrations/0003_phase2.sql:30-77`; `app/migrations/0018_pupils.sql:47-74`; `app/migrations/0022_marking.sql:58-67`; `app/migrations/0025_safeguarding_review.sql:13-20`; `app/migrations/0027_pupil_unit_signal.sql:3-8`; `app/tests/integration/disposals.int.test.ts:90-97`
 - **Problem and trigger:** `exportPupilRecord` includes current enrolment, note, answer, mark, feedback, comment, and profile data, but omits other pupil-linked records including completion state, levels, unit signals, remembered devices, linked tasks/events, and safeguarding workflow records. The integration test asserts only a subset of the implemented export and does not catch omissions as the schema grows.
