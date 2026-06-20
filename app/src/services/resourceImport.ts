@@ -11,8 +11,8 @@ import AdmZip from 'adm-zip';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join, dirname, basename } from 'node:path';
-import { absPath, checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
-import { addVersion, createResource, findResourceByChecksum, setResourceUnit } from '../repos/resources';
+import { absPath, checksum } from '../lib/resourceStore';
+import { createResourceWithVersion, findResourceByChecksum } from '../repos/resources';
 import { kindFromFilename, mimeFromFilename, safeFilename } from './resource';
 
 const MAX_FILES = 3000;
@@ -312,12 +312,13 @@ export async function commitImport(batchId: string, items: CommitItem[]): Promis
     }
     const name = safeFilename(basename(item.path));
     const title = (item.title || '').trim().slice(0, 200) || defaultTitle(name);
-    const id = await createResource(title, kindFromFilename(name), mimeFromFilename(name), 'imported');
-    const rel = relPathFor(id, 1, name);
-    await storeBuffer(rel, buf);
     const storePath = (item.storePath || item.path).slice(0, 500);
-    await addVersion(id, rel, buf.length, sum, 'teacher', `imported from ${storePath}`);
-    if (item.unit || item.yearGroup) await setResourceUnit(id, item.unit || null, item.yearGroup || null);
+    // BUG-028: resource row + v1 + current pointer + unit/year metadata + file, all in one transaction —
+    // a failure on any step leaves no orphan resource and no orphan file (rolled back + unlinked).
+    await createResourceWithVersion(
+      { title, kind: kindFromFilename(name), mimeType: mimeFromFilename(name), source: 'imported', unit: item.unit || null, yearGroup: item.yearGroup || null },
+      { filename: name, buf, checksum: sum, author: 'teacher', changeNote: `imported from ${storePath}` },
+    );
     res.imported += 1;
   }
   await cleanupBatch(batchId);

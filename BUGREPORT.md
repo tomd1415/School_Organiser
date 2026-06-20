@@ -26,34 +26,34 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (31):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+**Fixed so far (32):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
 BUG-007, BUG-008, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
 image/folder/IMAP buffering, exception leakage, safety-gate, **marks-vs-edited-answer &
 incomplete-AI-batch, login-limit reset, first-run-identity race, atomic resource versioning &
 lock-aware unit placement**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-020, BUG-021, BUG-022, BUG-024,
-BUG-026, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
+BUG-026, BUG-028, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
 invariants, course-doc cap, **mark provenance, calendar-aware print, DB-enforced scheme/recurring
-invariants, atomic planner cascades, complete scheme clone & atomic review apply**); BUG-034, BUG-035,
-BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correctness) are
-complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045 await an operator go-ahead; A6
-(transactional invariants) is well underway — the four query-only invariants (active-scheme,
-recurring-idempotency, migrator-serialisation, one-current-year) are all DB-enforced, plus atomic
-resource-version appends, atomic lock-aware planner placement, complete scheme cloning, and atomic
-review apply/dismiss.**
+invariants, atomic planner cascades, complete scheme clone, atomic review apply & atomic resource
+creation**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4
+(assessment correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045
+await an operator go-ahead; A6 (transactional invariants) is nearly complete — the four query-only
+invariants (active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are all
+DB-enforced, plus atomic resource-version appends & creation, atomic lock-aware planner placement,
+complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025, 027.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 12 | 6 |
-| Medium | 26 | 13 | 13 |
+| Medium | 26 | 14 | 12 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **31** | **19** |
+| **Total** | **50** | **32** | **18** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **70 test files, 326 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **70 test files, 327 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -419,6 +419,7 @@ review apply/dismiss.**
 
 ### BUG-028 — Resource import commits can leave orphan database rows and files
 
+- **Status:** ✅ Resolved 2026-06-20 — a new `createResourceWithVersion` ([app/src/repos/resources.ts](app/src/repos/resources.ts)) writes the resource row, its v1, the current-version pointer **and** the unit/year metadata in ONE transaction, staging the file inside that transaction's success path — so a failure on any step rolls the rows back and unlinks the file, leaving no orphan of either. The import loop ([app/src/services/resourceImport.ts](app/src/services/resourceImport.ts)) and the three new-resource routes (upload / AI-generate / worksheet-image) all use it — which also closes the **BUG-008 residual** (a resource was previously INSERTed a statement before its first version). Integration test asserts the resource, its v1 pointer, the unit/year metadata and the on-disk file all appear together; the existing import test confirms the same end-to-end. **Residuals (lower priority, noted not done):** the file is staged at its final token-bearing path with rollback-unlink rather than a temp-UUID-then-publish rename (equivalent safety for this single-writer app, minus the narrow commit-then-rename-fails window); cross-resource dedup is still the `findResourceByChecksum` query rather than a DB checksum-uniqueness constraint (a global `UNIQUE(checksum)` would change behaviour and risk existing duplicate-content rows). The AI-markdown writers in lesson/schemes/services still use `createResource`+`addVersion` (they inherit the atomic append; their new-resource orphan-row window is a small follow-up).
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/services/resourceImport.ts:278-313`; `app/src/repos/resources.ts:40-73`; `app/src/routes/resources.ts:345-358`
 - **Problem and trigger:** Import creates a resource row, writes a file, inserts a version, updates metadata, and later cleans staging through independent operations. Failure midway leaves some combination of resource row, stored file, version, and staging directory. Duplicate detection is also check-then-create without a uniqueness constraint on checksums.

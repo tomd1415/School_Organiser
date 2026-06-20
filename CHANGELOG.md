@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 12 (Wave A6 — atomic resource creation)
+
+Make creating a resource all-or-nothing — no half-made rows, no orphaned files. Suite green:
+**528 unit / 327 integration; typecheck clean**.
+
+- **🧱 New resources are created atomically (BUG-028, Medium).** A bulk import (or upload, AI-generate,
+  worksheet-image) used to write the resource row, its first version, the current-version pointer, the
+  unit/year metadata and the file in five separate steps — a failure partway left an orphan resource with
+  no version, or a file on disk with no row. A new `createResourceWithVersion` does all of it in **one
+  transaction**, staging the file inside the transaction's success path so a failure rolls the rows back
+  *and* unlinks the file. This also closes the BUG-008 residual (a resource was previously inserted a
+  statement before its first version). *(Residuals: the file is staged at its final path with
+  rollback-unlink rather than temp-then-rename; cross-resource dedup is still a checksum query, not a DB
+  constraint; the AI-markdown writers keep the older two-call shape.)*
+
 ### 2026-06-20 — Audit remediation, batch 11 (Wave A6 — complete clone + atomic review apply)
 
 Two schemes-subsystem multi-step writes made whole. Suite green: **528 unit / 326 integration; typecheck clean**.

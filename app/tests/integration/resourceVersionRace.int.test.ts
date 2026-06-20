@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { addVersion, createResource, getResource, listVersions } from '../../src/repos/resources';
+import { addVersion, createResource, createResourceWithVersion, getCurrentVersion, getResource, listVersions } from '../../src/repos/resources';
 import { checksum, readStored, relPathFor, storeBuffer } from '../../src/lib/resourceStore';
 
 // BUG-008: appending a resource version is atomic + serialised. Two concurrent appends — as two real
@@ -47,5 +47,26 @@ describe('resource version append (integration — BUG-008)', () => {
     expect(new Set(contents)).toEqual(new Set(['AAA', 'BBB']));
 
     expect((await getResource(rid))?.versionNo).toBe(3); // current pointer is on the newest version
+  });
+
+  it('createResourceWithVersion writes resource + v1 + pointer + metadata + file atomically (BUG-028)', async () => {
+    const buf = Buffer.from('atomic-create-bytes');
+    const id = await createResourceWithVersion(
+      { title: 'ZZATOMIC.md', kind: 'document', mimeType: 'text/markdown', source: 'imported', unit: 'Unit Z', yearGroup: 'Year 7' },
+      { filename: 'ZZATOMIC.md', buf, checksum: checksum(buf), author: 'teacher', changeNote: 'imported from test' },
+    );
+    try {
+      const res = await getResource(id);
+      expect(res?.versionNo).toBe(1); // current pointer set to the v1 created in the same txn
+      expect(res?.unit).toBe('Unit Z'); // unit/year metadata written together — no separate follow-up UPDATE
+      expect(res?.yearGroup).toBe('Year 7');
+      const v = await getCurrentVersion(id);
+      expect(v?.checksum).toBe(checksum(buf));
+      expect((await readStored(v!.storagePath)).toString('utf8')).toBe('atomic-create-bytes'); // file present on disk
+    } finally {
+      await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [id]);
+      await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [id]);
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [id]);
+    }
   });
 });

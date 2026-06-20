@@ -7,7 +7,7 @@ import { esc, layout } from '../lib/html';
 import {
   addVersion,
   countResources,
-  createResource,
+  createResourceWithVersion,
   findResourceByChecksum,
   getCurrentVersion,
   getResource,
@@ -363,9 +363,10 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const filename = safeFilename(data.filename || 'file');
     const sum = checksum(buf);
     const dup = await findResourceByChecksum(sum);
-    const id = await createResource(filename, kindFromFilename(filename), data.mimetype || mimeFromFilename(filename), 'uploaded');
-    const rel = relPathFor(id, 1, filename);
-    await withStagedFile(rel, buf, () => addVersion(id, rel, buf.length, sum, 'teacher', 'uploaded'));
+    const id = await createResourceWithVersion(
+      { title: filename, kind: kindFromFilename(filename), mimeType: data.mimetype || mimeFromFilename(filename), source: 'uploaded' },
+      { filename, buf, checksum: sum, author: 'teacher', changeNote: 'uploaded' },
+    );
     const r = await getResource(id);
     const warn = dup ? `<li class="muted">⚠ a copy already existed (resource #${dup}).</li>` : '';
     return reply.type('text/html').send((r ? renderResourceItem(r) : '') + warn);
@@ -394,9 +395,10 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const base = safeFilename((d.filename || d.title || 'resource').replace(/\.(md|markdown|txt)$/i, ''));
     const filename = `${base || 'resource'}.md`;
     const buf = Buffer.from(d.content, 'utf8');
-    const id = await createResource(filename, 'document', 'text/markdown', 'ai_generated');
-    const rel = relPathFor(id, 1, filename);
-    await withStagedFile(rel, buf, () => addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated'));
+    const id = await createResourceWithVersion(
+      { title: filename, kind: 'document', mimeType: 'text/markdown', source: 'ai_generated' },
+      { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-generated' },
+    );
     const r = await getResource(id);
     return reply.type('text/html').send(r ? renderResourceItem(r) : '');
   });
@@ -512,9 +514,10 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     }
     if (data.file.truncated) return reply.code(413).send('that image is too big');
     const name = safeFilename(data.filename || `image.${ext}`);
-    const imgId = await createResource(name, 'image', data.mimetype, 'uploaded');
-    const rel = relPathFor(imgId, 1, name);
-    await withStagedFile(rel, buf, () => addVersion(imgId, rel, buf.length, checksum(buf), 'teacher', 'worksheet image'));
+    const imgId = await createResourceWithVersion(
+      { title: name, kind: 'image', mimeType: data.mimetype, source: 'uploaded' },
+      { filename: name, buf, checksum: checksum(buf), author: 'teacher', changeNote: 'worksheet image' },
+    );
     return reply.type('application/json').send(JSON.stringify({ url: `/lesson-image/${imgId}`, alt: name.replace(/\.[a-z0-9]+$/i, '') }));
   });
 

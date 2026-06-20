@@ -1,5 +1,6 @@
 // SQL for the hosted resource store: resources, their versions, and links.
 import { pool } from '../db/pool';
+import { relPathFor, removeStored, storeBuffer } from '../lib/resourceStore';
 import type { LinkTarget } from '../services/resource';
 
 export interface ResourceRow {
@@ -83,6 +84,46 @@ export async function addVersion(
     return vid;
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * BUG-028 / BUG-008: create a brand-new resource together with its first version, ATOMICALLY. The
+ * resource row, its v1 row, the current-version pointer and any unit/year metadata are written in ONE
+ * transaction, and the file is staged inside that transaction's success path — so a failure leaves no
+ * orphan resource row (the BUG-008 residual: a resource used to be INSERTed a statement before its
+ * version) and no orphan file (rolled back, then unlinked). Returns the new resource id. For an APPEND
+ * to an existing resource, use addVersion instead.
+ */
+export async function createResourceWithVersion(
+  meta: { title: string; kind: string; mimeType: string | null; source: string; unit?: string | null; yearGroup?: string | null },
+  file: { filename: string; buf: Buffer; checksum: string; author: 'teacher' | 'ai'; changeNote: string | null },
+): Promise<number> {
+  const client = await pool.connect();
+  let rel: string | null = null;
+  try {
+    await client.query('BEGIN');
+    const r = await client.query<{ id: number }>(
+      `INSERT INTO resources (title, kind, mime_type, source, unit, year_group) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [meta.title, meta.kind, meta.mimeType, meta.source, meta.unit ?? null, meta.yearGroup ?? null],
+    );
+    const id = r.rows[0]!.id;
+    rel = relPathFor(id, 1, file.filename);
+    const v = await client.query<{ id: number }>(
+      `INSERT INTO resource_versions (resource_id, version_no, storage_path, byte_size, checksum, author, change_note)
+       VALUES ($1, 1, $2, $3, $4, $5, $6) RETURNING id`,
+      [id, rel, file.buf.length, file.checksum, file.author, file.changeNote],
+    );
+    await client.query(`UPDATE resources SET current_version_id = $2 WHERE id = $1`, [id, v.rows[0]!.id]);
+    await storeBuffer(rel, file.buf); // stage the bytes last; a throw here rolls the rows back below
+    await client.query('COMMIT');
+    return id;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    if (rel) await removeStored(rel).catch(() => {});
     throw err;
   } finally {
     client.release();
