@@ -286,7 +286,12 @@ export interface CommitResult {
   failed: number;
 }
 
-export async function commitImport(batchId: string, items: CommitItem[]): Promise<CommitResult> {
+// The Open Government Licence credit for reusing the NCCE Teach Computing Curriculum (OGL v3.0). The
+// import form offers this as a one-click preset; it's stored on each imported resource for display.
+export const TEACH_COMPUTING_ATTRIBUTION =
+  'Contains material from the NCCE Teach Computing Curriculum, © Crown copyright / Raspberry Pi Foundation, licensed under the Open Government Licence v3.0.';
+
+export async function commitImport(batchId: string, items: CommitItem[], attribution = ''): Promise<CommitResult> {
   const res: CommitResult = { imported: 0, skipped: 0, failed: 0 };
   for (const item of items) {
     const abs = safeBatchPath(batchId, item.path);
@@ -316,7 +321,7 @@ export async function commitImport(batchId: string, items: CommitItem[]): Promis
     // BUG-028: resource row + v1 + current pointer + unit/year metadata + file, all in one transaction —
     // a failure on any step leaves no orphan resource and no orphan file (rolled back + unlinked).
     await createResourceWithVersion(
-      { title, kind: kindFromFilename(name), mimeType: mimeFromFilename(name), source: 'imported', unit: item.unit || null, yearGroup: item.yearGroup || null },
+      { title, kind: kindFromFilename(name), mimeType: mimeFromFilename(name), source: 'imported', unit: item.unit || null, yearGroup: item.yearGroup || null, sourceAttribution: attribution.slice(0, 300) },
       { filename: name, buf, checksum: sum, author: 'teacher', changeNote: `imported from ${storePath}` },
     );
     res.imported += 1;

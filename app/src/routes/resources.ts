@@ -30,7 +30,7 @@ import { generateResourceSchema } from '../llm/schemas/generateResource';
 import { GENERATE_RESOURCE_SYSTEM, GENERATE_RESOURCE_VERSION } from '../llm/prompts/generateResource';
 import { listActiveEquipment } from '../repos/equipment';
 import { equipmentItem } from '../llm/prompts/equipment';
-import { extractArchive, extractFolder, commitImport, cleanupBatch, buildStorePath, defaultTitle, type ExtractResult, type CommitItem, type UploadEntry } from '../services/resourceImport';
+import { extractArchive, extractFolder, commitImport, cleanupBatch, buildStorePath, defaultTitle, TEACH_COMPUTING_ATTRIBUTION, type ExtractResult, type CommitItem, type UploadEntry } from '../services/resourceImport';
 import { resourceImportSchema } from '../llm/schemas/resourceImport';
 import { RESOURCE_IMPORT_SYSTEM, RESOURCE_IMPORT_INSTRUCTION, RESOURCE_IMPORT_VERSION, importGroupItem } from '../llm/prompts/resourceImport';
 
@@ -202,6 +202,7 @@ function renderReview(result: ExtractResult, unitMeta: Map<string, UnitMeta>, ti
     <form hx-post="/resources/import/${result.batchId}/commit" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
       <input type="hidden" name="count" value="${fi}">
       ${groupsHtml}
+      <label class="imp-attrib"><input type="checkbox" name="tc_ogl" value="1"> These are <strong>Teach Computing Curriculum</strong> resources — add the Open Government Licence credit to each (required when reusing them).</label>
       <p class="imp-actions"><button type="submit" class="btn-secondary">Import ticked files →</button>
       <button type="button" class="link" hx-post="/resources/import/${result.batchId}/cancel" hx-target="closest section" hx-swap="outerHTML">cancel</button></p>
     </form>
@@ -340,7 +341,8 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       const folder = body[`folder_${gi}`] ?? '';
       items.push({ path, title: body[`title_${n}`] ?? '', unit, yearGroup, storePath: buildStorePath(yearGroup, unit, folder, path) });
     }
-    const r = await commitImport(batch, items);
+    const attribution = body.tc_ogl === '1' ? TEACH_COMPUTING_ATTRIBUTION : '';
+    const r = await commitImport(batch, items, attribution);
     const csrf = reply.generateCsrf();
     return reply.type('text/html').send(`<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <h1>Import complete</h1>

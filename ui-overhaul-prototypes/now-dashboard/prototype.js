@@ -433,6 +433,24 @@
     });
   });
 
+  // Orientation Toggle
+  const orientationBtn = document.querySelector('[data-orientation-toggle]');
+  if (orientationBtn) {
+    orientationBtn.addEventListener('click', function () {
+      const current = body.getAttribute('data-orientation') || 'landscape';
+      const next = current === 'landscape' ? 'portrait' : 'landscape';
+      body.setAttribute('data-orientation', next);
+      
+      if (next === 'portrait') {
+        this.innerHTML = '📱 Portrait View';
+        announce('Switched to Portrait Screen layout.');
+      } else {
+        this.innerHTML = '🖥️ Landscape View';
+        announce('Switched to Landscape Desk layout.');
+      }
+    });
+  }
+
   // Initialize
   updatePhaseContext('now-before');
   renderInboxItems();

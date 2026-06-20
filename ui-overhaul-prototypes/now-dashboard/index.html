@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="prototype.js" defer></script>
 </head>
-<body data-active-screen="now-before">
+<body data-active-screen="now-before" data-orientation="landscape">
   <a class="skip-link" href="#main-content">Skip to teacher dashboard</a>
   <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
 
@@ -39,8 +39,15 @@
         <strong>Now Screen</strong>
         <small>Command Centre Hub</small>
       </a>
+      <a class="nav-link" href="../menu-mockups/index.html">
+        <strong>Menu Simulator</strong>
+        <small>Alternative Nav Systems</small>
+      </a>
     </div>
     <div class="nav-actions">
+      <button class="button small ghost" type="button" data-orientation-toggle style="font-weight: 800; border-color: var(--line-strong); min-height: 38px; padding: 0.45rem 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+        🖥️ Landscape View
+      </button>
       <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
       <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
       <a class="button small ghost" href="../README.md">Exit</a>
@@ -289,7 +296,10 @@
 
         </div>
 
-        <!-- General Day Agenda Timeline (Stays persistent in the column) -->
+      </div>
+
+      <!-- COLUMN 2: Persistent Agenda Timeline -->
+      <div class="now-col-middle">
         <section class="card agenda-card">
           <div class="card-head">
             <h2>Today's Lesson Agenda</h2>
@@ -341,7 +351,6 @@
             </div>
           </div>
         </section>
-
       </div>
 
       <!-- RIGHT COLUMN: Mind Clearing & Inbox Processing (Always persistent) -->

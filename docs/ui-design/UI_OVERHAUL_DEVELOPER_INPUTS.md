@@ -2,7 +2,7 @@
 
 **Purpose:** Collect the contracts, decisions, examples, and ownership information needed to complete
 the UI overhaul while changing as little non-UI code as possible.  
-**Companion document:** [UI developer guide](UI_DEVELOPER_GUIDE.md)  
+**Companion documents:** [UI developer guide](UI_DEVELOPER_GUIDE.md) · [Menu proposals](MENU_SYSTEMS_PROPOSALS.md)  
 **Target direction:** Option 2 dark, task-first workspace
 
 This is an input checklist, not a request for other developers to redesign the UI. The UI work should
@@ -143,6 +143,14 @@ Confirm the destination for at least these existing areas:
 | Safeguarding | Persistent global destination | Confirm placement outside task-area hiding |
 
 Existing URLs can remain stable even if navigation labels or grouping change.
+
+### 4.2 Prototyped Resolutions from the UI Overhaul (ADHD/ASD Support)
+
+The isolated static prototypes implemented the following resolutions for these areas:
+- **Now & Focus:** Merged. "Now" is the landing dashboard for the **Today** task-area, featuring togglable Landscape (3-column) and Portrait (1-column stack) views. "Focus Mode" is implemented as a sensorily simplified workspace layout switch inside the desk cockpit view (Option 4) that collapses alerts and sidebars.
+- **Marking & Pupil Work:** Resolved under the **Assess** task-area. Consists of a class-level marking queue dashboard displaying automated grading status, launching a full-screen, student-by-student marking verification modal supporting multiple assessment sheets, syntax-highlighted code errors, criteria checklists, and voice comments.
+- **Tasks & Captured Notes:** Captured notes are submitted via the **Mind Dump Dock** in the "Now" dashboard. These go to a **Captured Inbox Queue** to be deleted, deferred for tomorrow, or processed into checklist items (before, between, or after school), student observations, or calendar alerts dynamically.
+- **Pupil Workspace:** Re-engineered as an accessible student console supporting layout modes (View A: Slides + Worksheet; View B: Worksheet + Coding; View C: Graded Review), self-paced slide audio text-to-speech, differentiated interactive questions, sticky editor columns to support working memory, and star grades.
 
 ## 5. Per-page handoff template
 
@@ -576,3 +584,228 @@ Stable after:
 Store completed handoffs in this `docs/ui-design/` directory or link them from a maintained index. Keep
 the handoff updated when a contract changes; a chat message or screenshot should not be the sole source
 of truth.
+
+## 20. Technical View-Model and Endpoint Contracts (Modeled in Prototypes)
+
+To support the production implementation of the ADHD/ASD-Supportive dashboards, the backend must implement the following view-model data types and endpoint behavior modeled in the UI prototypes:
+
+### 20.1 Teacher "Now" Dashboard (Today Command Centre)
+
+#### Read View-Model
+```typescript
+interface NowDashboardViewModel {
+  currentPhase: 'now-before' | 'now-between' | 'now-after';
+  simulatedTime: string; // e.g. "08:00"
+  dateLabel: string; // e.g. "Friday, 20 June 2026"
+  
+  // Before-School Context
+  dutiesAlert: {
+    message: string;
+    priority: 'high' | 'info';
+  }[];
+  
+  // Between-Lessons Context
+  transitionTimer: number; // minutes remaining (e.g. 7)
+  nextClass: {
+    period: string; // e.g. "Period 3"
+    room: string; // e.g. "Room IT2"
+    subject: string; // e.g. "Year 9 Computer Science"
+    topic: string; // e.g. "Python Loops & Syntax"
+  };
+  pupilCues: {
+    pupilName: string;
+    needsLevel: 'Support' | 'Extend' | 'Core';
+    note: string;
+  }[];
+  
+  // After-School Context
+  afterSchoolAgenda: {
+    time: string; // e.g. "15:40"
+    title: string;
+    description: string;
+    type: 'default' | 'detention';
+  }[];
+  
+  // Task Checklists (keyed by section)
+  checklists: {
+    before: ChecklistItem[];
+    between: ChecklistItem[];
+    after: ChecklistItem[];
+  };
+  
+  // Persistent Lesson Agenda (Persistent timeline)
+  dayAgenda: {
+    time: string;
+    title: string;
+    description: string;
+    status: 'done' | 'active' | 'upcoming';
+  }[];
+  
+  // Captured Mind Dump Inbox Items
+  inboxItems: CapturedInboxItem[];
+}
+
+interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+interface CapturedInboxItem {
+  id: number;
+  tag: 'Task' | 'Pupil Info' | 'Supply Alert' | 'Reminder';
+  text: string;
+  time: string; // e.g. "Today, 09:45"
+}
+```
+
+#### Write Actions / HTMX Endpoints
+- **Capture Thought:**
+  `POST /today/capture`
+  - Body: `{ text: string, tag: string }`
+  - Response: HTMX partial swapping `#inbox-items-container` with an updated list of rows, or a single prepended item row.
+- **Defer Item to Tomorrow:**
+  `POST /today/inbox/:id/defer`
+  - Response: Updates item status to "Reminder", changes time to "Tomorrow, 08:00", and swaps the updated item row.
+- **Delete Item:**
+  `DELETE /today/inbox/:id`
+  - Response: Removes the item and returns HTTP 200 (or HTMX empty response) to delete the row from DOM.
+- **Process Note:**
+  `POST /today/inbox/:id/process`
+  - Body: `{ actionType: 'todo' | 'pupil' | 'calendar' | 'alert', targetList?: 'before' | 'between' | 'after', pupilName?: string }`
+  - Response: Converts the note. If `actionType === 'todo'`, appends a new item to the corresponding checklist and returns the updated checklist markup fragment.
+
+---
+
+### 20.2 Grading & AI Verification Console
+
+#### Read View-Model (Lesson Dashboard & Modal Overlay)
+```typescript
+interface GradingDashboardViewModel {
+  lessonsReadyToGrade: ReadyLessonItem[];
+  markingQueue: QueueTableItem[];
+}
+
+interface ReadyLessonItem {
+  id: string; // e.g. "lesson-prog"
+  title: string; // e.g. "Python Loops Practice"
+  type: 'Short Ans / MCQ' | 'Programming' | 'Long Answer' | 'Mixed Types';
+  sheetsCount: number;
+  description: string;
+  studentCount: number;
+}
+
+interface QueueTableItem {
+  date: string;
+  className: string;
+  lessonTitle: string;
+  submittedRatio: string; // e.g. "28 / 28 finished"
+  gradingStatus: string; // e.g. "98% Auto-graded"
+  statusLevel: 'good' | 'warn' | 'red' | 'ai';
+  lessonId: string;
+}
+
+// Student Modal view-model (called dynamically per student)
+interface StudentGradingViewModel {
+  studentName: string;
+  pupilBadge: 'Core' | 'Support' | 'Extend';
+  pupilIndexText: string; // e.g. "Pupil 1 of 28"
+  sheets: { id: string; label: string; active: boolean }[];
+  questions: GradingQuestionItem[];
+  teacherComment: string;
+}
+
+interface GradingQuestionItem {
+  id: string;
+  type: 'mcq' | 'short-answer' | 'programming' | 'long-answer';
+  title: string; // original question text
+  studentAnswer: string;
+  aiSuggestedMark: number;
+  maxMark: number;
+  confidenceScore?: number; // e.g. 98 for MCQ
+  
+  // MCQ/Short Answer specific
+  aiStatus: 'correct' | 'incorrect' | 'neutral';
+  
+  // Programming specific
+  compilerError?: string; // IndentationError, etc.
+  parsonsOrder?: string[]; // student ordered list
+  
+  // Long-Answer specific
+  criteriaChecklist?: {
+    text: string;
+    matched: boolean;
+  }[];
+}
+```
+
+#### Write Actions / HTMX Endpoints
+- **Confirm Marks & Next:**
+  `POST /assess/grade/:lessonId/:pupilId/confirm`
+  - Body: `{ teacherFeedback: string, marks: Record<string, number> }`
+  - Response: Saves the evaluation and returns the modal layout fragment for the *next* student in the queue, updating the `#grading-modal` content.
+- **Flag Answer:**
+  `POST /assess/grade/:lessonId/:pupilId/flag`
+  - Body: `{ reason?: string }`
+  - Response: Flags student response for senior moderator review.
+- **Get Sheet Tab:**
+  `GET /assess/grade/:lessonId/:pupilId?sheet=:sheetId`
+  - Response: Swaps `#modal-questions-container` with the questions list fragment corresponding to the selected sheet.
+
+---
+
+### 20.3 Pupil Workspace
+
+#### Read View-Model
+```typescript
+interface PupilWorkspaceViewModel {
+  lessonTitle: string;
+  activeTaskIndex: number;
+  totalTasks: number;
+  currentLayoutMode: 'noncoding' | 'coding' | 'review';
+  
+  // Slides
+  slides: {
+    id: string;
+    imageUrl: string;
+    ttsAudioUrl?: string; // Text-To-Speech audio clip
+  }[];
+  activeSlideIdx: number;
+  
+  // Worksheet Questions
+  worksheet: {
+    id: string;
+    questions: PupilQuestionItem[];
+  };
+  
+  // Code editor (if layout supports coding)
+  editor: {
+    fileName: string;
+    code: string;
+    terminalOutput?: string;
+  };
+  
+  // Graded review (if layout is review)
+  review: {
+    gradeLabel: string; // e.g. "Excellent!"
+    starsCount: number;
+    teacherNotes: string;
+    teacherNotesAudioUrl?: string;
+  };
+}
+```
+
+#### Write Actions / HTMX Endpoints
+- **Autosave Question Answer:**
+  `POST /pupil/worksheet/autosave`
+  - Body: `{ questionId: string, answer: string | string[] }`
+  - Response: HTTP 200. Sends HTMX headers to show a brief "Auto-saved ✓" toast in the pupil UI.
+- **Execute Code:**
+  `POST /pupil/code/run`
+  - Body: `{ code: string }`
+  - Response: Swaps `#compiler-terminal` with the execution logs and output of the Python sandbox compile.
+- **Submit Self-Assessment:**
+  `POST /pupil/self-assess`
+  - Body: `{ feeling: 'confident' | 'okay' | 'confused' }`
+  - Response: Saves student self-assessment emotional state and locks the session, displaying a completion page.
+```

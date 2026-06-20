@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Neurodivergent-Supportive Navigation and Menu Mockup Systems for Teachers">
+  <title>Menu Systems Mockup Console</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body data-active-system="option-1" data-option1-phase="before" data-orientation="landscape">
+  <a class="skip-link" href="#main-content">Skip to menu simulator</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Mockup Navigator Bar -->
+  <div class="mockup-navigator-bar">
+    <div class="nav-brand">
+      <span class="badge live">Menu Simulator</span>
+      <span>Select Prototype Page:</span>
+    </div>
+    <div class="nav-buttons">
+      <a class="nav-link" href="../option-3-adhd-asd-checklist/index.html">
+        <strong>Option 3</strong>
+        <small>Teacher Checklist Stack</small>
+      </a>
+      <a class="nav-link" href="../option-4-adhd-asd-visual-seating/index.html">
+        <strong>Option 4</strong>
+        <small>Teacher Classroom Grid</small>
+      </a>
+      <a class="nav-link" href="../pupil-workspace/index.html">
+        <strong>Pupil Workspace</strong>
+        <small>Student Coding Console</small>
+      </a>
+      <a class="nav-link" href="../grading-dashboard/index.html">
+        <strong>Grading Console</strong>
+        <small>AI Response Verifier</small>
+      </a>
+      <a class="nav-link" href="../now-dashboard/index.html">
+        <strong>Now Screen</strong>
+        <small>Command Centre Hub</small>
+      </a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="menu-demo-container">
+    
+    <!-- Top Simulator Controls -->
+    <header class="menu-demo-header card">
+      <div class="header-left-col">
+        <p class="eyebrow">Cognitive Layout Lab</p>
+        <h1>Compare Neurodivergent-Supportive Menus</h1>
+        <p class="muted">Test three menu systems designed for teachers with ADHD/autism to reduce decision paralysis, save screen width, and utilize spatial muscle memory.</p>
+      </div>
+
+      <div class="menu-system-selector">
+        <button class="system-btn active" type="button" data-system-target="option-1">
+          <div class="sys-num">Option 1</div>
+          <strong>Time-Slice Header</strong>
+          <small>Dynamic Phase Dock</small>
+        </button>
+        <button class="system-btn" type="button" data-system-target="option-2">
+          <div class="sys-num">Option 2</div>
+          <strong>Calm HUD & Palette</strong>
+          <small>Hover Rails + Hotkeys</small>
+        </button>
+        <button class="system-btn" type="button" data-system-target="option-3">
+          <div class="sys-num">Option 3</div>
+          <strong>Scaffolded Ribbon</strong>
+          <small>3-Tier Collapsible Rail</small>
+        </button>
+      </div>
+    </header>
+
+    <!-- Simulated Desktop Screen Area -->
+    <div class="mock-workspace-window">
+      
+      <!-- Option 1: Dynamic Top Time-Slice Header -->
+      <div class="menu-preview-wrapper wrapper-option-1">
+        <nav class="time-slice-header">
+          <div class="header-left">
+            <!-- Active Anchor Context -->
+            <div class="active-context-anchor" id="opt1-active-anchor">
+              <span class="pulse-dot"></span>
+              <strong id="opt1-anchor-title">Morning Briefing</strong>
+              <small id="opt1-anchor-desc">IT2 · Starts 08:35</small>
+            </div>
+            
+            <div class="context-phase-indicators">
+              <button class="phase-indicator-btn active" type="button" data-phase-opt1="before">🌅 Morning</button>
+              <button class="phase-indicator-btn" type="button" data-phase-opt1="lesson">⚡ Lesson</button>
+              <button class="phase-indicator-btn" type="button" data-phase-opt1="after">🌆 After School</button>
+            </div>
+          </div>
+
+          <!-- Pinned Shortcuts: Swaps dynamically in CSS based on body[data-option1-phase] -->
+          <div class="header-middle-pins">
+            <!-- Before pins -->
+            <div class="pins-group pins-group-before">
+              <a href="#" class="pin-link active">📅 Timetable</a>
+              <a href="#" class="pin-link">📝 Prep Checklist</a>
+              <a href="#" class="pin-link">📥 Captured Notes <span class="badge red">3</span></a>
+            </div>
+            
+            <!-- Lesson pins -->
+            <div class="pins-group pins-group-lesson">
+              <a href="#" class="pin-link active">🛡️ Focus Screen</a>
+              <a href="#" class="pin-link">👥 Seating Map</a>
+              <a href="#" class="pin-link">🖥️ Oversee</a>
+            </div>
+            
+            <!-- After School pins -->
+            <div class="pins-group pins-group-after">
+              <a href="#" class="pin-link active">🏆 Marking Queue <span class="badge warn">5</span></a>
+              <a href="#" class="pin-link">📚 Scheme Planner</a>
+              <a href="#" class="pin-link">⚙️ settings</a>
+            </div>
+          </div>
+
+          <div class="header-right-actions">
+            <a href="#" class="safeguarding-header-flag" aria-label="Alert Safeguarding Department">⚑ Safeguarding</a>
+            
+            <!-- All Admin Drawer Toggle -->
+            <div class="admin-dropdown-container">
+              <button class="button small ghost" type="button" id="admin-drawer-toggle">All Admin ▾</button>
+              <div class="admin-dropdown-menu" id="admin-dropdown-menu">
+                <span class="dropdown-header">Planning & Schemes</span>
+                <a href="#">Schemes of Work</a>
+                <a href="#">Curriculum Maps</a>
+                <a href="#">Concepts Reference</a>
+                <hr class="divider">
+                <span class="dropdown-header">Configuration</span>
+                <a href="#">Workstation Setup</a>
+                <a href="#">Charging Carts / Kit</a>
+                <a href="#">Advanced Settings</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div class="design-rationale-overlay">
+          <h3>ADHD/ASD Rationale: Option 1 (Dynamic Header)</h3>
+          <ul>
+            <li><strong>Decision Containment:</strong> Shows only 3 contextually relevant links at a time, protecting working memory from Timetable stress during lessons, and Lesson stress after school.</li>
+            <li><strong>Full Workspace Width:</strong> No persistent vertical bar eating up space. Perfect for displaying side-by-side IDE code telemetry or seated charts.</li>
+            <li><strong>Active anchor:</strong> Large color-coded block in the left corner serves as a persistent anchor of what is happening right now.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Option 2: Calm HUD & Keyboard Palette -->
+      <div class="menu-preview-wrapper wrapper-option-2">
+        <!-- Thin glow strip on left margin -->
+        <div class="hud-margin-strip" id="hud-trigger-strip">
+          <span class="strip-label">HOVER TO OPEN MENU</span>
+        </div>
+
+        <!-- The Slide-out HUD Drawer -->
+        <nav class="hud-navigation-drawer" id="hud-drawer">
+          <div class="hud-header">
+            <h3>Command HUD</h3>
+            <span class="quiet">Predictable Grid</span>
+          </div>
+
+          <!-- Fixed Spatial Grid layout -->
+          <div class="hud-grid">
+            <div class="hud-category">
+              <span class="hud-cat-title">Today</span>
+              <a href="#" class="hud-btn"><span class="icon">🌅</span> Now</a>
+              <a href="#" class="hud-btn"><span class="icon">📅</span> Timetable</a>
+              <a href="#" class="hud-btn"><span class="icon">📥</span> Captured</a>
+            </div>
+            
+            <div class="hud-category">
+              <span class="hud-cat-title">Teaching</span>
+              <a href="#" class="hud-btn"><span class="icon">👥</span> Seating Map</a>
+              <a href="#" class="hud-btn"><span class="icon">🛡️</span> Focus Desk</a>
+              <a href="#" class="hud-btn"><span class="icon">🖥</span> Oversee</a>
+            </div>
+            
+            <div class="hud-category">
+              <span class="hud-cat-title">Admin & Setup</span>
+              <a href="#" class="hud-btn"><span class="icon">🏆</span> Marking</a>
+              <a href="#" class="hud-btn"><span class="icon">📚</span> Schemes</a>
+              <a href="#" class="hud-btn"><span class="icon">⚙️</span> Settings</a>
+            </div>
+          </div>
+          
+          <a href="#" class="hud-sg-btn">⚑ SAFEGUARDING</a>
+        </nav>
+
+        <!-- Center Workspace simulating work -->
+        <div class="hud-workspace-body">
+          <div class="palette-helper-card">
+            <h3>Calm HUD Simulator</h3>
+            <p>1. Move your cursor to the **left edge strip** to slide open the spatial grid menu.</p>
+            <p>2. Tap the button below or press **`Space` twice** on your keyboard to toggle the overlay Command Palette.</p>
+            
+            <button class="button primary" type="button" id="palette-sim-btn">
+              ⌨️ Open Command Palette (Double Space)
+            </button>
+          </div>
+        </div>
+
+        <!-- Translucent Overlay Command Palette -->
+        <div class="command-palette-overlay" id="command-palette">
+          <div class="palette-box">
+            <div class="palette-search-wrapper">
+              <span class="palette-search-icon">🔍</span>
+              <input type="text" id="palette-search-input" placeholder="Type a command or page (e.g. 'marking', 'safeguarding')..." autofocus>
+              <button class="palette-esc-badge" type="button" id="palette-close-btn">ESC</button>
+            </div>
+            
+            <div class="palette-results">
+              <span class="section-title">Jump Map (g + key)</span>
+              <div class="palette-item" data-target-href="/"><span class="key-combo">g h</span> <strong>Now Dashboard</strong> <small>Today's landing cockpit</small></div>
+              <div class="palette-item" data-target-href="/timetable"><span class="key-combo">g t</span> <strong>Timetable Agenda</strong> <small>View daily lesson slots</small></div>
+              <div class="palette-item" data-target-href="/marking"><span class="key-combo">g a</span> <strong>Marking Console</strong> <small>Verify AI gradings</small></div>
+              <div class="palette-item" data-target-href="/safeguarding"><span class="key-combo">g g</span> <strong class="red-text">Safeguarding Flags</strong> <small>Urgent safety alerts</small></div>
+              <div class="palette-item" data-target-href="/focus"><span class="key-combo">g f</span> <strong>Focus Shell</strong> <small>Distraction-free desktop view</small></div>
+              <div class="palette-item" data-target-href="/captured"><span class="key-combo">g c</span> <strong>Captured Notes</strong> <small>Mind dump processing queue</small></div>
+              <div class="palette-item" data-target-href="/schemes"><span class="key-combo">g s</span> <strong>Schemes of Work</strong> <small>Curriculum planner</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="design-rationale-overlay">
+          <h3>ADHD/ASD Rationale: Option 2 (Calm HUD)</h3>
+          <ul>
+            <li><strong>Zero Persistent Clutter:</strong> The menu vanishes entirely when you are working. Peripheral vision is protected from layout noise, preventing focus shifts.</li>
+            <li><strong>Spatial Predictability:</strong> Tapping the hover bar opens a 3x3 layout of links. Autistic teachers benefit from items always sitting at the exact same coordinates.</li>
+            <li><strong>Zero-Friction Hotkeys:</strong> Instantly jump anywhere on the LAN application in two keystrokes (e.g., double space -> `g` + `a` for marking).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Option 3: Collapsible 3-Tier Tab Ribbon -->
+      <div class="menu-preview-wrapper wrapper-option-3">
+        
+        <!-- Left vertical Ribbon -->
+        <nav class="scaffolded-ribbon" id="scaffolded-ribbon">
+          <!-- Tier 1: Urgency & Safety -->
+          <div class="ribbon-tier tier-urgency">
+            <span class="tier-label">Tier 1: Urgency</span>
+            <a href="#" class="ribbon-link active" title="Now Screen">
+              <span class="icon">🌅</span>
+              <span class="lbl-txt">Now Screen</span>
+            </a>
+            <a href="#" class="ribbon-link sg-flag" title="Safeguarding Flags">
+              <span class="icon">⚑</span>
+              <span class="lbl-txt">Safeguarding</span>
+              <span class="ribbon-indicator"></span>
+            </a>
+            <a href="#" class="ribbon-link" title="Live Oversee Console">
+              <span class="icon">🖥️</span>
+              <span class="lbl-txt">Oversee</span>
+            </a>
+          </div>
+
+          <!-- Tier 2: Daily Operations -->
+          <div class="ribbon-tier tier-operations">
+            <span class="tier-label">Tier 2: Daily Ops</span>
+            <a href="#" class="ribbon-link" title="Timetable Grid">
+              <span class="icon">📅</span>
+              <span class="lbl-txt">Timetable</span>
+            </a>
+            <a href="#" class="ribbon-link" title="Prep Tasks">
+              <span class="icon">📝</span>
+              <span class="lbl-txt">Checklists</span>
+            </a>
+            <a href="#" class="ribbon-link" title="AI Marking Console">
+              <span class="icon">🏆</span>
+              <span class="lbl-txt">Marking</span>
+            </a>
+            <a href="#" class="ribbon-link" title="Captured Inbox">
+              <span class="icon">📥</span>
+              <span class="lbl-txt">Mind Inbox</span>
+            </a>
+          </div>
+
+          <!-- Tier 3: Gated Advanced Prep -->
+          <div class="ribbon-tier tier-admin collapsible-drawer" id="ribbon-drawer">
+            <button class="drawer-header-btn" type="button" id="ribbon-drawer-toggle">
+              <span class="icon">⚙️</span>
+              <span class="lbl-txt">Advanced Drawer</span>
+              <span class="drawer-arrow">▶</span>
+            </button>
+            <div class="drawer-links" id="ribbon-drawer-links">
+              <a href="#" class="ribbon-link" title="Schemes Planner">
+                <span class="icon">📚</span>
+                <span class="lbl-txt">Schemes</span>
+              </a>
+              <a href="#" class="ribbon-link" title="Concepts Map">
+                <span class="icon">🧬</span>
+                <span class="lbl-txt">Concepts</span>
+              </a>
+              <a href="#" class="ribbon-link" title="Workstation Setup">
+                <span class="icon">🔌</span>
+                <span class="lbl-txt">Setup</span>
+              </a>
+              <a href="#" class="ribbon-link" title="Kit inventory">
+                <span class="icon">🛒</span>
+                <span class="lbl-txt">Kit Carts</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Right workspace -->
+        <div class="ribbon-workspace-body">
+          <div class="ribbon-instructions card">
+            <h3>Scaffolded Ribbon Simulator</h3>
+            <p>1. Hover your cursor over the **left vertical ribbon** to expand the labels from icon-only mode.</p>
+            <p>2. Click the **⚙️ Advanced Drawer** tab at the bottom to expand/collapse setup settings.</p>
+          </div>
+        </div>
+
+        <div class="design-rationale-overlay">
+          <h3>ADHD/ASD Rationale: Option 3 (3-Tier Ribbon)</h3>
+          <ul>
+            <li><strong>Cognitive Urgency Split:</strong> Links are scaffolded. High-importance/safeguarding is at the top, daily checklists in the middle, and long-term settings are gated at the bottom.</li>
+            <li><strong>Icon-Only by Default:</strong> Collapses to a 60px strip, preserving width for multi-screen dashboard displays, and expands smoothly on hover.</li>
+            <li><strong>Permanent Visual Anchor:</strong> Always exists in the same vertical margin, supporting spatial reassurance without shifting the center workspace text layout.</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</body>
+</html>

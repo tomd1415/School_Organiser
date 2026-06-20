@@ -14,6 +14,7 @@ Open any `index.html` directly in a browser:
 - [Pupil Workspace — Accessible Coding Console (Autism/ADHD/Motor Support)](pupil-workspace/index.html)
 - [Teacher Grading & AI Verification Dashboard](grading-dashboard/index.html)
 - [Teacher "Now" Screen Command Centre (ADHD/ASD Support)](now-dashboard/index.html)
+- [Teacher Navigation Menu Systems (ADHD/ASD Support)](menu-mockups/index.html)
 
 The pages are responsive. Resize the browser to compare desktop, tablet, and mobile layouts. Their buttons demonstrate local visual interactions only.
 
@@ -51,6 +52,10 @@ ui-overhaul-prototypes/
 │   ├── styles.css
 │   └── prototype.js
 ├── now-dashboard/
+│   ├── index.html
+│   ├── styles.css
+│   └── prototype.js
+├── menu-mockups/
 │   ├── index.html
 │   ├── styles.css
 │   └── prototype.js

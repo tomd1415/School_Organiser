@@ -61,6 +61,7 @@ export function renderResourceItem(r: ResourceRow): string {
     <span class="muted res-meta">${esc(r.source)}${r.versionNo ? ` · v${r.versionNo}` : ''}${r.byteSize ? ' · ' + fmtSize(r.byteSize) : ''}</span>
     <a class="link" href="/resources/${r.id}/download">download</a>
     <span class="res-usage" id="res-${r.id}-usage"></span>
+    ${r.sourceAttribution ? `<div class="res-attrib muted" title="attribution / licence">⚖ ${esc(r.sourceAttribution)}</div>` : ''}
   </li>`;
 }
 

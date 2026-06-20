@@ -9,6 +9,7 @@ export interface ResourceRow {
   kind: string;
   mimeType: string | null;
   source: string;
+  sourceAttribution: string; // licence/credit line for reused material (e.g. Teach Computing OGL); '' for own work
   unit: string | null; // bulk-import: the unit this resource belongs to (from its Word description)
   yearGroup: string | null; // bulk-import: the year group / key stage of that unit
   versionNo: number | null;
@@ -33,7 +34,8 @@ export interface LinkedResource {
   source: string; // 'uploaded' | 'imported' | 'ai_generated' | … — used to group the linked list
 }
 
-const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source, r.unit AS "unit", r.year_group AS "yearGroup",
+const RES_COLS = `r.id, r.title, r.kind, r.mime_type AS "mimeType", r.source, r.source_attribution AS "sourceAttribution",
+                  r.unit AS "unit", r.year_group AS "yearGroup",
                   v.version_no AS "versionNo", v.byte_size AS "byteSize",
                   (SELECT count(*)::int FROM resource_links rl
                    WHERE rl.resource_id = r.id AND (rl.lesson_plan_id IS NOT NULL OR rl.unit_id IS NOT NULL OR rl.adaptation_id IS NOT NULL)) AS "usedCount"`;
@@ -99,7 +101,7 @@ export async function addVersion(
  * to an existing resource, use addVersion instead.
  */
 export async function createResourceWithVersion(
-  meta: { title: string; kind: string; mimeType: string | null; source: string; unit?: string | null; yearGroup?: string | null },
+  meta: { title: string; kind: string; mimeType: string | null; source: string; unit?: string | null; yearGroup?: string | null; sourceAttribution?: string | null },
   file: { filename: string; buf: Buffer; checksum: string; author: 'teacher' | 'ai'; changeNote: string | null },
 ): Promise<number> {
   const client = await pool.connect();
@@ -107,8 +109,8 @@ export async function createResourceWithVersion(
   try {
     await client.query('BEGIN');
     const r = await client.query<{ id: number }>(
-      `INSERT INTO resources (title, kind, mime_type, source, unit, year_group) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [meta.title, meta.kind, meta.mimeType, meta.source, meta.unit ?? null, meta.yearGroup ?? null],
+      `INSERT INTO resources (title, kind, mime_type, source, unit, year_group, source_attribution) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [meta.title, meta.kind, meta.mimeType, meta.source, meta.unit ?? null, meta.yearGroup ?? null, meta.sourceAttribution ?? ''],
     );
     const id = r.rows[0]!.id;
     rel = relPathFor(id, 1, file.filename);
