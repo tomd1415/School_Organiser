@@ -54,19 +54,43 @@ TMP_RES="$BACKUP_DIR/.tmp-res-$STAMP"
 trap 'rm -f "$TMP_DB" "$TMP_RES"' EXIT
 RESOURCE_DIR="${RESOURCE_DIR:-$ROOT/data/resources}"
 
-echo "[backup] dumping database -> db-$STAMP.sql.gz$EXT"
+DB_NAME="db-$STAMP.sql.gz$EXT"
+RES_NAME="resources-$STAMP.tar.gz$EXT"
+MAN_NAME="manifest-$STAMP.sha256"
+
+echo "[backup] dumping database -> $DB_NAME"
 docker compose exec -T db pg_dump -U organiser organiser | gzip | enc > "$TMP_DB"
 [ -s "$TMP_DB" ] || { echo "[backup] DB dump produced no data — aborting (no backup written)" >&2; exit 1; }
-mv "$TMP_DB" "$BACKUP_DIR/db-$STAMP.sql.gz$EXT"
 
-echo "[backup] snapshotting resource file-store -> resources-$STAMP.tar.gz$EXT"
+echo "[backup] snapshotting resource file-store -> $RES_NAME"
 # The store is a bind-mounted host directory (app/docker-compose.yml), so tar it directly.
 tar czf - -C "$RESOURCE_DIR" . | enc > "$TMP_RES"
 [ -s "$TMP_RES" ] || { echo "[backup] resources archive empty — aborting" >&2; exit 1; }
-mv "$TMP_RES" "$BACKUP_DIR/resources-$STAMP.tar.gz$EXT"
 
-echo "[backup] pruning to the most recent $KEEP of each (all suffixes)"
-ls -1t "$BACKUP_DIR"/db-*.sql.gz*        2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f
-ls -1t "$BACKUP_DIR"/resources-*.tar.gz* 2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f
+# BUG-010: a backup is the DB + resources as ONE recovery set. Publish both only after BOTH succeeded,
+# and write a checksum MANIFEST last — its presence is what marks the set complete. verify/restore key off
+# the manifest, so a half-written set (e.g. a crash between the two moves) is ignored, never restored.
+DB_SHA="$(sha256sum "$TMP_DB" | awk '{print $1}')"
+RES_SHA="$(sha256sum "$TMP_RES" | awk '{print $1}')"
+mv "$TMP_DB"  "$BACKUP_DIR/$DB_NAME"
+mv "$TMP_RES" "$BACKUP_DIR/$RES_NAME"
+printf '%s  %s\n%s  %s\n' "$DB_SHA" "$DB_NAME" "$RES_SHA" "$RES_NAME" > "$BACKUP_DIR/$MAN_NAME"
+echo "[backup] published set $STAMP (manifest $MAN_NAME)"
+
+# Prune by COMPLETE SET: keep the most recent $KEEP manifests, delete older manifests + the files they
+# name. Then sweep any db-*/resources-* NOT named by a surviving manifest (orphans from an aborted run),
+# so a half-set can never be mistaken for a restorable backup.
+echo "[backup] pruning to the most recent $KEEP complete sets"
+ls -1t "$BACKUP_DIR"/manifest-*.sha256 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r old; do
+  while read -r _sha fname; do rm -f "$BACKUP_DIR/$fname"; done < "$old"
+  rm -f "$old"
+done
+referenced="$(cat "$BACKUP_DIR"/manifest-*.sha256 2>/dev/null | awk '{print $2}' | sort -u)"
+if [ -n "$referenced" ]; then
+  for f in "$BACKUP_DIR"/db-*.sql.gz* "$BACKUP_DIR"/resources-*.tar.gz*; do
+    [ -e "$f" ] || continue
+    grep -qxF "$(basename "$f")" <<<"$referenced" || { echo "[backup] removing orphan (no manifest): $(basename "$f")"; rm -f "$f"; }
+  done
+fi
 
 echo "[backup] done -> $BACKUP_DIR"

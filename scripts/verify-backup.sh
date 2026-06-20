@@ -14,10 +14,21 @@ BACKUP_DIR="${BACKUP_DIR:-$ROOT/backups}"
 LOG="$BACKUP_DIR/verify.log"
 SCRATCH="organiser_verify"
 
-NEWEST="$(ls -1t "$BACKUP_DIR"/db-*.sql.gz* 2>/dev/null | head -1 || true)"
-[ -n "$NEWEST" ] || { echo "[verify] no db-*.sql.gz* backups found in $BACKUP_DIR" >&2; exit 1; }
+# BUG-010: verify the newest COMPLETE SET — both artifacts against the manifest checksums, the DB
+# restores into a scratch database, AND the matching resources archive unpacks. Falls back to the newest
+# db alone only when there is no manifest yet (a pre-this-change backup).
+MAN="$(ls -1t "$BACKUP_DIR"/manifest-*.sha256 2>/dev/null | head -1 || true)"
+RES=""
+if [ -n "$MAN" ]; then
+  NEWEST="$BACKUP_DIR/$(awk '$2 ~ /^db-/{print $2; exit}' "$MAN")"
+  RES="$BACKUP_DIR/$(awk '$2 ~ /^resources-/{print $2; exit}' "$MAN")"
+else
+  echo "[verify] no manifest found — verifying the newest db alone (legacy backup)" >&2
+  NEWEST="$(ls -1t "$BACKUP_DIR"/db-*.sql.gz* 2>/dev/null | head -1 || true)"
+fi
+[ -n "${NEWEST:-}" ] && [ -f "$NEWEST" ] || { echo "[verify] no db backup found in $BACKUP_DIR" >&2; exit 1; }
 
-# Decrypt-by-suffix → gzip stream (same scheme as restore.sh).
+# Decrypt-by-suffix → gzip stream (same scheme as restore.sh). The resources file shares the suffix.
 case "$NEWEST" in
   *.age) [ -n "${BACKUP_AGE_IDENTITY:-}" ] || { echo "set BACKUP_AGE_IDENTITY" >&2; exit 1; }; dec() { age -d -i "$BACKUP_AGE_IDENTITY"; } ;;
   *.gpg) [ -n "${BACKUP_GPG_PASSPHRASE:-}" ] || { echo "set BACKUP_GPG_PASSPHRASE" >&2; exit 1; }; dec() { gpg --batch --yes --quiet --decrypt --passphrase-fd 3 3<<<"$BACKUP_GPG_PASSPHRASE"; } ;;
@@ -26,25 +37,38 @@ case "$NEWEST" in
 esac
 
 cd "$APP_DIR"
+TMPRES=""
 psql_scratch() { docker compose exec -T db psql -v ON_ERROR_STOP=1 -U organiser "$@"; }
-fail() { echo "$(date '+%Y-%m-%d %H:%M:%S') FAIL  $NEWEST  ($1)" >> "$LOG"; echo "[verify] FAIL: $1" >&2; cleanup; exit 1; }
-cleanup() { docker compose exec -T db psql -U organiser -d postgres -c "DROP DATABASE IF EXISTS $SCRATCH" >/dev/null 2>&1 || true; }
+cleanup() { docker compose exec -T db psql -U organiser -d postgres -c "DROP DATABASE IF EXISTS $SCRATCH" >/dev/null 2>&1 || true; [ -n "$TMPRES" ] && rm -rf "$TMPRES"; }
+fail() { echo "$(date '+%Y-%m-%d %H:%M:%S') FAIL  $(basename "$NEWEST")  ($1)" >> "$LOG"; echo "[verify] FAIL: $1" >&2; cleanup; exit 1; }
 trap cleanup EXIT
 
-echo "[verify] verifying $NEWEST -> scratch DB '$SCRATCH'"
+# 1) Integrity: both artifacts match the manifest checksums (catches truncation / corruption / tampering).
+if [ -n "$MAN" ]; then
+  ( cd "$BACKUP_DIR" && sha256sum -c "$(basename "$MAN")" ) >/dev/null 2>&1 || fail "manifest checksum mismatch — an artifact is corrupt or altered"
+fi
+
+# 2) The DB actually restores into a throwaway scratch database.
+echo "[verify] verifying $(basename "$NEWEST") -> scratch DB '$SCRATCH'"
 docker compose exec -T db psql -U organiser -d postgres -c "DROP DATABASE IF EXISTS $SCRATCH" >/dev/null
 docker compose exec -T db psql -U organiser -d postgres -c "CREATE DATABASE $SCRATCH" >/dev/null
-
 dec < "$NEWEST" | gunzip -c | psql_scratch -d "$SCRATCH" >/dev/null || fail "restore errored"
 
-# Assert the core tables came back and the dump wasn't an empty/truncated file.
 SETTINGS="$(psql_scratch -d "$SCRATCH" -tAc "SELECT count(*) FROM settings" 2>/dev/null || echo x)"
 YEARS="$(psql_scratch -d "$SCRATCH" -tAc "SELECT count(*) FROM academic_years" 2>/dev/null || echo x)"
 [ "$SETTINGS" != "x" ] && [ "$YEARS" != "x" ] || fail "core tables missing after restore"
 [ "$YEARS" -ge 1 ] 2>/dev/null || fail "academic_years empty after restore (suspect truncated dump)"
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') PASS  $NEWEST  (settings=$SETTINGS years=$YEARS)" >> "$LOG"
-echo "[verify] PASS — settings=$SETTINGS academic_years=$YEARS"
+# 3) The matching resources archive unpacks (an empty store is legitimate on a fresh instance, so we
+#    require only that it extracts cleanly — proving the encryption + tar are intact for the SAME set).
+if [ -n "$RES" ] && [ -f "$RES" ]; then
+  TMPRES="$(mktemp -d)"
+  dec < "$RES" | tar xz -C "$TMPRES" || fail "resources archive failed to extract"
+  echo "[verify] resources archive unpacks OK ($(basename "$RES"))"
+fi
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') PASS  $(basename "$NEWEST")  (settings=$SETTINGS years=$YEARS${RES:+ +resources})" >> "$LOG"
+echo "[verify] PASS — settings=$SETTINGS academic_years=$YEARS${RES:+, resources OK}"
 
 # Stamp the live DB so Settings → Data health can show "last verified".
 docker compose exec -T db psql -U organiser -d organiser -v ON_ERROR_STOP=1 -c \

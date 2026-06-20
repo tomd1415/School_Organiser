@@ -26,32 +26,33 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (45):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
-BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040, BUG-041, BUG-042 (High
-— pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
-safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
-atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & disposal
-narrative removal); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
-BUG-024, BUG-025, BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-032, BUG-043, BUG-044,
-BUG-045, BUG-046, BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark
-provenance, calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades,
-complete scheme clone, atomic review apply, atomic resource creation, AI audit-durability, group-course
-deactivation consistency, screenshot-replace cleanup, restart-safe review sweep, **DB/app loopback
-binding + default-password guard**, complete SAR export, durable disposal-delete retry, **proxy-aware
-client-IP rate limiting**, per-lesson recurrence cursor & email-dedup claim/recovery); BUG-034, BUG-035,
-BUG-036, BUG-050 (Low). **Waves A1–A7 complete, plus the deployment-config hardening (032/045). Remaining
-5 are all NON-application-logic: High 009/010 (backup-restore drill — operational), 013 (HTMX client-JS);
-Medium 033 (client-JS), 049 (tar — needs a clean dependency rebuild). 032/045 are committed but take
-effect on the operator's next deploy (`docker compose --profile proxy up -d --force-recreate`; add
-`TRUST_PROXY=true` to an existing `.env`, or re-run `deploy/install.sh`).**
+**Fixed so far (47):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
+BUG-006, BUG-007, BUG-008, BUG-009, BUG-010, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040,
+BUG-041, BUG-042 (High — pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering,
+exception leakage, safety-gate, marks-vs-edited-answer & incomplete-AI-batch, **clean-slate restore**,
+**atomic backup set + manifest verify**, login-limit reset, first-run-identity race, atomic resource
+versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & disposal narrative removal);
+BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025,
+BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-032, BUG-043, BUG-044, BUG-045, BUG-046,
+BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance,
+calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme
+clone, atomic review apply, atomic resource creation, AI audit-durability, group-course deactivation
+consistency, screenshot-replace cleanup, restart-safe review sweep, DB/app loopback binding +
+default-password guard, complete SAR export, durable disposal-delete retry, proxy-aware client-IP rate
+limiting, per-lesson recurrence cursor & email-dedup claim/recovery); BUG-034, BUG-035, BUG-036, BUG-050
+(Low). **Every audit finding is now fixed in code/config except the two client-JS items. Remaining 3:
+High 013 (HTMX reported-as-success) + Medium 033 (unrelated-success clears warning) — both `public/app.js`
+reset behaviour, needing the not-yet-built Wave-0 browser harness for safe verification; Medium 049 (tar —
+needs a clean dependency rebuild). Operator actions outstanding: deploy 032/045 (`docker compose
+--profile proxy up -d --force-recreate`) and run the 009/010 restore drill (docs/RUNBOOK.md) to confirm.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 15 | 3 |
+| High | 18 | 17 | 1 |
 | Medium | 26 | 24 | 2 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **45** | **5** |
+| **Total** | **50** | **47** | **3** |
 
 ## Testing and environment limitations
 
@@ -167,6 +168,7 @@ effect on the operator's next deploy (`docker compose --profile proxy up -d --fo
 
 ### BUG-009 — The restore script cannot restore over the normal populated database
 
+- **Status:** ✅ Resolved 2026-06-20 — `scripts/restore.sh` now restores from a **clean slate**: it requires a typed `REPLACE` confirmation (or `FORCE=1` for the drill), **stops the app**, terminates lingering connections, **`DROP`s + re-`CREATE`s the `organiser` database**, loads the dump into the empty DB, **restores the matching `resources-<stamp>` snapshot** (same set), and restarts the app — so a plain `pg_dump` no longer fails/duplicates against a populated database. `bash -n` clean. **Operator action (acceptance):** run the **restore drill** in [docs/RUNBOOK.md](docs/RUNBOOK.md) on a throwaway copy to prove the from-cold path end-to-end (I can't run a destructive restore against your live data).
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `scripts/backup.sh:57-60`; `scripts/restore.sh:36-41`; `scripts/verify-backup.sh:34-44`
 - **Problem and trigger:** Backups are plain `pg_dump` SQL. `restore.sh` pipes that SQL into the existing `organiser` database without dropping/recreating the database or cleaning its schema. The dump contains object creation and data statements that conflict with an already-migrated installation.
@@ -177,6 +179,7 @@ effect on the operator's next deploy (`docker compose --profile proxy up -d --fo
 
 ### BUG-010 — Database and resource backups are not published or verified as an atomic recovery set
 
+- **Status:** ✅ Resolved 2026-06-20 — `scripts/backup.sh` now treats the DB + resources as ONE set: it stages both, then publishes a checksum **`manifest-<stamp>.sha256` LAST** (its presence marks the set complete), and **prunes by whole set** — keeping the newest 14 manifests + the files they name and sweeping any artifact no manifest references, so a half-written set can never be mistaken for restorable. `scripts/verify-backup.sh` now verifies the newest **set** end-to-end: both artifacts' **checksums** against the manifest, the DB **restores** into a scratch database (core tables non-empty), AND the **resources** archive **unpacks** — falling back to legacy db-only verification when no manifest exists. All three scripts `bash -n` clean. **Operator action (acceptance):** the same restore drill as BUG-009 exercises the matched DB+resources path; `verify-backup.sh` (already cron-scheduled) now covers the set automatically.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `scripts/backup.sh:47-70`; `scripts/verify-backup.sh:17-52`; `scripts/restore.sh:37-41`
 - **Problem and trigger:** The database artifact is moved to its final name before the resource archive is produced. If resource tar/encryption fails, the newest visible DB backup has no matching file-store snapshot. DB and resource files are pruned independently. Verification selects and restores only the newest DB artifact; resource decryption, archive integrity, stamp matching, and referenced-file presence are never checked.

@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 45 of 50 fixed; Waves A1–A7 + deployment hardening (032/045) complete; only the backup drill, tar rebuild + client-JS items remain.** This is the
+> **Status (2026-06-20): in progress — 47 of 50 fixed; every finding fixed in code/config except the two client-JS items + the tar rebuild. Operator actions: deploy 032/045, run the restore drill.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -46,9 +46,13 @@
 > with the real client, so per-IP rate limits key on the device, not the proxy). These are committed but
 > take effect on the operator's **next deploy** (`docker compose --profile proxy up -d --force-recreate`;
 > add `TRUST_PROXY=true` to an existing `.env` or re-run `deploy/install.sh`). **Every code finding in Waves
-> A1–A7 is fixed.** **Remaining 5 (none are isolated application logic):** **009/010** (backup-restore
-> drill — operational), **013/033** (HTMX client-JS — need the Wave-0 browser harness), **049** (tar — needs
-> a clean dependency rebuild).
+> A1–A7 is fixed.** **A5 backup/restore** — **009** (`restore.sh` rebuilds from a clean slate: confirm →
+> stop app → drop/recreate DB → load → restore matching resources → restart) and **010** (`backup.sh`
+> publishes a checksum manifest last + prunes by whole set; `verify-backup.sh` proves the set —
+> checksums + DB restore + resources unpack). Scripts `bash -n` clean; the **restore drill** runbook is in
+> RUNBOOK.md for the operator to run on a throwaway copy. **Remaining 3:** **013/033** (HTMX client-JS —
+> need the Wave-0 browser harness), **049** (tar — needs a clean dependency rebuild). **Operator actions:**
+> deploy 032/045 (`docker compose --profile proxy up -d --force-recreate`); run the restore drill.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

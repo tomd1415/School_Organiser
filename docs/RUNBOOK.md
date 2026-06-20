@@ -57,7 +57,9 @@ The app restarts automatically (`restart: unless-stopped`) and re-runs migration
 ## Backups (non-negotiable)
 
 Notes and resource files are irreplaceable. `scripts/backup.sh` dumps the database **and**
-snapshots the resource file-store volume, pruning to the most recent 14 of each.
+snapshots the resource file-store volume as **one recovery set**: it writes both, then a checksum
+`manifest-<stamp>.sha256` **last** (its presence is what marks the set complete), and prunes by whole
+set — keeping the most recent 14 manifests and the files they name, never half a set (BUG-010).
 
 **The dumps are encrypted at rest (10.1)** — they contain every pupil name, note, answer, mark
 *and* the IMAP/AI secrets in the settings table, so the script **refuses to write plaintext** on a
@@ -91,35 +93,61 @@ scripts/backup.sh                          # writes to ./backups (override with 
 Point `BACKUP_DIR` at a location the school's existing off-site regime already sweeps. For **local
 dev only**, `BACKUP_ALLOW_PLAINTEXT=1` lets the script write an unencrypted dump.
 
-### Restore
+### Restore (⚠ destructive — replaces the live database)
 
-The artifact suffix selects decryption automatically (`.age` → `BACKUP_AGE_IDENTITY`,
-`.gpg` → `BACKUP_GPG_PASSPHRASE`, `.gz` → plaintext):
+`scripts/restore.sh` rebuilds the database **from a clean slate** (BUG-009): a plain `pg_dump` can't be
+layered over a populated database, so the script **stops the app, drops & recreates the `organiser`
+database, loads the dump, and restores the matching `resources-<stamp>` snapshot** (same set), then
+restarts the app. It asks you to type `REPLACE` to confirm; the artifact suffix selects decryption
+automatically (`.age` → `BACKUP_AGE_IDENTITY`, `.gpg` → `BACKUP_GPG_PASSPHRASE`, `.gz` → plaintext).
 
 ```bash
-scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz.age
+scripts/restore.sh backups/db-YYYYmmdd-HHMMSS.sql.gz.age      # prompts: type REPLACE
+FORCE=1 scripts/restore.sh backups/db-…sql.gz.age            # no prompt (for the automated drill)
 ```
 
-### Verify a restore actually works (don't trust an untested backup)
+### Verify a backup actually restores (don't trust an untested backup)
 
-`scripts/verify-backup.sh` restores the **newest** dump into a throwaway scratch database, asserts
-the core tables came back non-empty, drops the scratch DB, and writes a dated PASS/FAIL to
-`backups/verify.log` plus a `backup_last_verified` row shown on **Settings → Data health**.
+`scripts/verify-backup.sh` takes the newest **complete set** (by manifest) and proves all three: the
+two artifacts match the manifest **checksums**, the DB **restores** into a throwaway scratch database
+with its core tables non-empty, and the **resources** archive **unpacks** — then drops the scratch DB.
+It writes a dated PASS/FAIL to `backups/verify.log` plus a `backup_last_verified` row shown on
+**Settings → Data health**.
 
 ```bash
 scripts/verify-backup.sh                   # safe — never touches the live `organiser` database
 ```
 
+### Restore DRILL (do this once after install, then quarterly)
+
+A backup you've never restored is a hope, not a backup. Prove the **whole path** on a **throwaway copy**,
+never your live box:
+
+1. On a spare machine (or a clone of the LXC/VM), install Docker + Compose, clone the repo, create a
+   minimal `app/.env` (`SESSION_KEY`, `DB_PASSWORD`, `COOKIE_SECURE=false`).
+2. Copy over a recent **set** — the three files that share a stamp: `db-<stamp>…`, `resources-<stamp>…`,
+   and `manifest-<stamp>.sha256` — into `backups/`, plus your decrypt secret (`BACKUP_AGE_IDENTITY`).
+3. `docker compose up -d db` and wait for it to be healthy.
+4. `BACKUP_AGE_IDENTITY=/path/key scripts/verify-backup.sh` → expect **PASS** (checksums + DB + resources).
+5. `BACKUP_AGE_IDENTITY=/path/key FORCE=1 scripts/restore.sh backups/db-<stamp>…` → loads the DB + files.
+6. `docker compose up -d --build app` and open the app — confirm a couple of lessons/notes/pupils and a
+   resource (worksheet/screenshot) load. **Record the date** you did this (e.g. in Settings → Data health
+   note, or your ops log).
+
+If any step fails, your backups are not recoverable — fix it **before** you need them.
+
 ### Disaster recovery (bare server → running app)
 
-1. Install Docker + Compose; clone the repo; create `app/.env` (`SESSION_KEY`, `APP_PASSWORD_HASH`
-   or set a password via `/welcome`, `ANTHROPIC_API_KEY` if used).
-2. `docker compose up -d --build` (migrations run on boot — this creates an empty schema).
-3. Restore the DB over it: `scripts/restore.sh backups/db-LATEST.sql.gz.age` (this brings back the
-   settings table — IMAP/AI secrets included — so the app is configured as it was).
-4. Restore the resource files:
-   `(age -d -i "$BACKUP_AGE_IDENTITY" < backups/resources-LATEST.tar.gz.age) | tar xz -C data/resources`
-5. Restart the stack and confirm `/healthz` and a couple of lessons/notes load.
+1. Install Docker + Compose; clone the repo; run `deploy/install.sh <SITE_ADDRESS>` (writes `app/.env`
+   with a fresh `SESSION_KEY`, a random `DB_PASSWORD`, `TRUST_PROXY=true`). Put back your
+   `ANTHROPIC_API_KEY` if used. **Important:** you also need the original backup **decrypt secret**.
+2. `docker compose up -d db` and wait for healthy.
+3. Restore the latest set (DB **and** its resources, in one go):
+   `BACKUP_AGE_IDENTITY=/secure/.key FORCE=1 scripts/restore.sh backups/db-LATEST.sql.gz.age`
+   — this drops/recreates the DB, loads the dump (settings, IMAP/AI secrets included), and unpacks the
+   matching `resources-LATEST` snapshot to `data/resources`.
+4. `docker compose --profile proxy up -d --build` (migrations run on boot) and confirm `/healthz` plus a
+   few lessons/notes/resources load.
 
 ## Troubleshooting
 

@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 18 (backup/restore integrity)
+
+Make the backups a recovery set you can actually restore. Scripts only (`bash -n` clean); **run the
+restore drill** (docs/RUNBOOK.md) on a throwaway copy to prove it end-to-end.
+
+- **♻ Restore rebuilds from a clean slate (BUG-009, High).** A plain `pg_dump` can't be loaded over a
+  populated database, so `restore.sh` now confirms (`type REPLACE`, or `FORCE=1`), **stops the app, drops
+  & recreates the `organiser` database, loads the dump, restores the matching `resources-<stamp>` snapshot,
+  and restarts** — instead of erroring against existing objects and leaving resources to a manual step.
+- **🧩 Backups are one atomic, verified set (BUG-010, High).** `backup.sh` writes the DB + resources, then
+  a checksum **manifest last** (its presence marks the set complete) and **prunes by whole set** — never
+  half a set, and orphaned artifacts are swept. `verify-backup.sh` now proves the newest set three ways:
+  the artifacts match the manifest **checksums**, the DB **restores** into a scratch database, and the
+  **resources** archive **unpacks**.
+- **📓 Restore-drill runbook** added — a step-by-step, do-it-on-a-throwaway-copy procedure plus an updated
+  disaster-recovery flow (the restore now brings back the resources automatically).
+
+**47 / 50 findings fixed in code/config.** Remaining: the two `public/app.js` HTMX reset items (013/033 —
+need the Wave-0 browser harness) and the `tar` dependency rebuild (049). **Operator actions:** deploy
+032/045 and run the restore drill.
+
 ### 2026-06-20 — Audit remediation, batch 17 (deployment & network hardening)
 
 Config + a startup guard; **these take effect on your next production deploy** (see "Operator action").
