@@ -659,9 +659,11 @@ export async function cloneSchemeNewVersion(schemeId: number): Promise<number | 
     // the (course_id, version) unique index. A clone is always a draft (active=false) regardless of the
     // slot's live-vs-draft hint — it's an explicit "new version to redraft while the old keeps teaching".
     const slot = await nextSchemeSlot(client, head.courseId);
+    // BUG-020: carry the scheme's labels onto the clone (copied straight from the source row).
     const created = await client.query<{ id: number }>(
-      `INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, $2, $3, false) RETURNING id`,
-      [head.courseId, head.title, slot.version],
+      `INSERT INTO schemes_of_work (course_id, title, version, active, labels)
+       VALUES ($1, $2, $3, false, (SELECT labels FROM schemes_of_work WHERE id = $4)) RETURNING id`,
+      [head.courseId, head.title, slot.version, schemeId],
     );
     const newSchemeId = created.rows[0]!.id;
     const units = await client.query<{ id: number; title: string; display_order: number }>(
@@ -674,21 +676,32 @@ export async function cloneSchemeNewVersion(schemeId: number): Promise<number | 
         [newSchemeId, u.title, u.display_order],
       );
       const newUnitId = nu.rows[0]!.id;
+      // BUG-020: carry the unit's source-file links (converted-unit provenance) forward to the clone.
+      await client.query(
+        `INSERT INTO resource_links (resource_id, unit_id) SELECT resource_id, $1 FROM resource_links WHERE unit_id = $2`,
+        [newUnitId, u.id],
+      );
       // Copy each plan individually so we know the old→new id, then carry its spec-point coverage
-      // mappings forward (idea 10). A bulk INSERT…SELECT would lose the id link and reset coverage to
-      // zero on every version bump.
+      // mappings (idea 10) AND its resource links (BUG-020) forward. A bulk INSERT…SELECT would lose the
+      // id link and reset coverage/materials to zero on every version bump — and kit_needed was dropped
+      // entirely, so a redraft silently lost the equipment list.
       const oldPlans = await client.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE unit_id = $1 ORDER BY display_order, id`, [u.id]);
       for (const op of oldPlans.rows) {
         const np = await client.query<{ id: number }>(
-          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min)
-           SELECT $1, course_id, title, display_order, objectives, outline, duration_min FROM lesson_plans WHERE id = $2
+          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline, duration_min, kit_needed)
+           SELECT $1, course_id, title, display_order, objectives, outline, duration_min, kit_needed FROM lesson_plans WHERE id = $2
            RETURNING id`,
           [newUnitId, op.id],
         );
+        const newPlanId = np.rows[0]!.id;
         await client.query(
           `INSERT INTO lesson_plan_spec_points (lesson_plan_id, spec_point_id, source)
            SELECT $1, spec_point_id, source FROM lesson_plan_spec_points WHERE lesson_plan_id = $2`,
-          [np.rows[0]!.id, op.id],
+          [newPlanId, op.id],
+        );
+        await client.query(
+          `INSERT INTO resource_links (resource_id, lesson_plan_id) SELECT resource_id, $1 FROM resource_links WHERE lesson_plan_id = $2`,
+          [newPlanId, op.id],
         );
       }
     }

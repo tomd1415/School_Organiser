@@ -7,6 +7,21 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 11 (Wave A6 — complete clone + atomic review apply)
+
+Two schemes-subsystem multi-step writes made whole. Suite green: **528 unit / 326 integration; typecheck clean**.
+
+- **🧬 Cloning a scheme carries everything forward (BUG-020, Medium).** Redrafting a scheme to a new version
+  silently dropped the scheme's **labels**, each lesson's **kit list**, and every **resource link** — so a
+  September rollover quietly lost the equipment lists and attached materials. The clone now copies all
+  three (labels from the source row, `kit_needed` in the plan copy, and resource links at both unit and
+  plan level) via the same old→new id maps it already used for spec-point coverage, inside its transaction.
+- **📝 Applying a lesson review is all-or-nothing (BUG-022, Medium).** Apply used to flip the review to
+  "applied" and *then* write the suggestion to the master in a separate statement — a failure between left
+  the review closed but the lesson unchanged, with no way to retry. `applyReview` now claims the review and
+  writes the master objectives/outline in **one transaction**; dismiss is a single conditional `UPDATE …
+  WHERE status='open'`, so a stale click or a race with apply is a clean no-op.
+
 ### 2026-06-20 — Audit remediation, batch 10 (Wave A6 — atomic, lock-aware planner placement)
 
 Make planner drops respect pins and never half-apply. Suite green: **528 unit / 324 integration; typecheck clean**.

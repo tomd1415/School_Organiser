@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 29 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 underway.** This is the
+> **Status (2026-06-20): in progress — 31 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 well underway.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -18,11 +18,13 @@
 > it), **026** (DB-enforced one recurring occurrence per definition/date, generator on `ON CONFLICT`) — so
 > the four query-only invariants are now all DB-enforced — **008** (resource-version appends are atomic +
 > row-locked, storage paths carry a random token so concurrent writers can't overwrite, staged files
-> cleaned on rollback), and **014 + 021** (planner: whole-unit drops flow around pinned slots via the new
+> cleaned on rollback), **014 + 021** (planner: whole-unit drops flow around pinned slots via the new
 > lock-aware `layUnit`, and the cascade's binding rewrite is one all-or-nothing transaction per class with
-> undo armed only after commit). Suites green: 528 unit / 324 integration; typecheck clean. **Next:**
-> remaining **A6** multi-step-write items (020/022/023/025/027/028), then A5 (recovery/disposal) or A7
-> (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
+> undo armed only after commit), and **020 + 022** (scheme clone now carries labels/kit/resource-links;
+> review apply claims-and-writes in one transaction, dismiss is a single conditional UPDATE). Suites green:
+> 528 unit / 326 integration; typecheck clean. **Next:** remaining **A6** multi-step-write items
+> (023/025/027/028), then A5 (recovery/disposal) or A7 (cost/audit). **BUG-032 / 045** (deployment-config)
+> await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

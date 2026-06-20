@@ -89,7 +89,7 @@ import { courseDocItems } from '../llm/prompts/courseDocs';
 import { reviewLessonMaster, reviewUnitMaster, spotCheckCurriculum, reviewSchemeSequence } from '../services/reviewLesson';
 import { pastReviewItems } from '../llm/prompts/lessonReview';
 import { recentAppliedFindings } from '../repos/reviews';
-import { claimOpenReview, getOpenReviewForPlan, getReview, openReviewPlanIds, setReviewStatus } from '../repos/reviews';
+import { applyReview, dismissOpenReview, getOpenReviewForPlan, openReviewPlanIds } from '../repos/reviews';
 import { renderReview, renderClassCompare, renderConvertDup } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
 
@@ -622,27 +622,21 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
   app.post('/schemes/review/:id/apply', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
-    // Atomically claim the open review (flip to 'applied') so two quick clicks can't double-apply and a
-    // stale suggestion can't land after the review was closed.
-    const review = await claimOpenReview(id.data.id);
-    if (!review) return reply.type('text/html').send('<span class="muted">That review is no longer open.</span>');
-    const obj = (review.suggestedObjectives ?? '').trim();
-    const out = (review.suggestedOutline ?? '').trim();
-    if (obj) await updatePlanField(review.lessonPlanId, 'objectives', obj);
-    if (out) await updatePlanField(review.lessonPlanId, 'outline', out);
-    const updated = await getPlanRow(review.lessonPlanId);
+    // BUG-022: claim the review AND write its suggestion to the master in one transaction, so the review
+    // is never marked 'applied' unless the master change actually committed (else it stays open to retry).
+    const planId = await applyReview(id.data.id);
+    if (planId == null) return reply.type('text/html').send('<span class="muted">That review is no longer open.</span>');
+    const updated = await getPlanRow(planId);
     if (!updated) return reply.code(404).send('');
     return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: 'review applied to the master ✓' }));
   });
 
-  // Dismiss a review (the lesson is unchanged). Guarded like apply: only an OPEN review can be
-  // dismissed, so an already-applied review can't be flipped and a stale/replayed id is a clean no-op.
+  // Dismiss a review (the lesson is unchanged). Guarded like apply: a single atomic conditional UPDATE,
+  // so only an OPEN review flips and a stale/replayed id (or a race with apply) is a clean no-op.
   app.post('/schemes/review/:id/dismiss', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
-    const review = await getReview(id.data.id);
-    if (!review || review.status !== 'open') return reply.type('text/html').send('<p class="muted">That review is no longer open.</p>');
-    await setReviewStatus(id.data.id, 'dismissed');
+    if (!(await dismissOpenReview(id.data.id))) return reply.type('text/html').send('<p class="muted">That review is no longer open.</p>');
     return reply.type('text/html').send('<p class="muted">Review dismissed.</p>');
   });
 

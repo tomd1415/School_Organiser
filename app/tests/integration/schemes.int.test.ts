@@ -20,6 +20,7 @@ import {
   movePlan,
   updatePlanField,
 } from '../../src/repos/schemes';
+import { createResource, linkResourceToPlan, listResourcesForPlan } from '../../src/repos/resources';
 
 let courseId = 0;
 const schemes: number[] = [];
@@ -166,5 +167,29 @@ describe('schemes (integration — needs the dev DB up)', () => {
     if (newId) schemes.push(newId);
     expect((await listSchemeVersions(courseId)).some((v) => v.id === newId && !v.active)).toBe(true);
     expect((await listUnits(newId!)).length).toBe((await listUnits(schemeId)).length);
+  });
+
+  it('cloning carries labels, kit_needed and resource links forward (BUG-020)', async () => {
+    // a self-contained source scheme: a unit + a plan that has kit, a linked resource, and scheme labels
+    const srcId = await materialiseScheme(courseId, 'CLONE-SRC scheme', [{ title: 'CU', lessons: ['CL1'] }]);
+    expect(srcId).not.toBeNull();
+    schemes.push(srcId!);
+    await setSchemeLabels(srcId!, 'Year 9, Robotics');
+    const srcPlan = (await listPlansForScheme(srcId!))[0]!;
+    await updatePlanField(srcPlan.id, 'kit_needed', '6× Arduino, jumper wires');
+    const resId = await createResource('CLONE-RES.md', 'document', 'text/markdown', 'uploaded');
+    await linkResourceToPlan(resId, srcPlan.id);
+
+    const cloneId = await cloneSchemeNewVersion(srcId!);
+    expect(cloneId).not.toBeNull();
+    schemes.push(cloneId!);
+    try {
+      expect((await getScheme(cloneId!))?.labels).toBe('Year 9, Robotics'); // scheme labels carried
+      const clonePlan = (await listPlansForScheme(cloneId!))[0]!;
+      expect((await getPlanRow(clonePlan.id))?.kitNeeded).toBe('6× Arduino, jumper wires'); // kit carried
+      expect((await listResourcesForPlan(clonePlan.id)).some((r) => Number(r.resourceId) === resId)).toBe(true); // link carried
+    } finally {
+      await pool.query(`DELETE FROM resources WHERE id = $1`, [resId]); // cascades its resource_links
+    }
   });
 });

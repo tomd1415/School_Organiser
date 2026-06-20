@@ -138,6 +138,52 @@ export async function claimOpenReview(id: number): Promise<ReviewRow | null> {
   return rows[0] ?? null;
 }
 
+/**
+ * BUG-022: apply a review's suggestion to its master lesson ATOMICALLY. Claiming the review (open →
+ * applied) and writing its suggested objectives/outline to the lesson plan happen in ONE transaction, so
+ * the review is never left marked 'applied' while the master change was lost — a mid-apply failure rolls
+ * both back, leaving the review open to retry. Returns the affected lessonPlanId, or null if the review
+ * was not open (already applied/dismissed/gone).
+ */
+export async function applyReview(id: number): Promise<number | null> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const claimed = await client.query<{ lesson_plan_id: number; suggested_objectives: string | null; suggested_outline: string | null }>(
+      `UPDATE lesson_reviews SET status = 'applied'
+       WHERE id = $1 AND status = 'open'
+       RETURNING lesson_plan_id, suggested_objectives, suggested_outline`,
+      [id],
+    );
+    const row = claimed.rows[0];
+    if (!row) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const obj = (row.suggested_objectives ?? '').trim();
+    const out = (row.suggested_outline ?? '').trim();
+    if (obj) await client.query(`UPDATE lesson_plans SET objectives = $2, updated_at = now() WHERE id = $1`, [row.lesson_plan_id, obj]);
+    if (out) await client.query(`UPDATE lesson_plans SET outline = $2, updated_at = now() WHERE id = $1`, [row.lesson_plan_id, out]);
+    await client.query('COMMIT');
+    return Number(row.lesson_plan_id);
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/** Atomically dismiss an OPEN review — a single conditional UPDATE checking the returned row, so a
+ *  stale/replayed click or a race with apply is a clean no-op (BUG-022). Returns true iff it was open. */
+export async function dismissOpenReview(id: number): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    `UPDATE lesson_reviews SET status = 'dismissed' WHERE id = $1 AND status = 'open'`,
+    [id],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
 /** Plan ids (within a set) that currently have an open master review — for badging the tree. */
 export async function openReviewPlanIds(planIds: number[]): Promise<Set<number>> {
   if (planIds.length === 0) return new Set();

@@ -26,32 +26,34 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (29):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
+**Fixed so far (31):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
 BUG-007, BUG-008, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
 image/folder/IMAP buffering, exception leakage, safety-gate, **marks-vs-edited-answer &
 incomplete-AI-batch, login-limit reset, first-run-identity race, atomic resource versioning &
-lock-aware unit placement**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-021, BUG-024, BUG-026, BUG-030,
-BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB invariants, course-doc
-cap, **mark provenance, calendar-aware print, DB-enforced scheme/recurring invariants & atomic planner
-cascades**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4
-(assessment correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045
-await an operator go-ahead; A6 (transactional invariants) is underway — the four query-only invariants
-(active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are now all
-DB-enforced, plus atomic resource-version appends and atomic, lock-aware planner placement.**
+lock-aware unit placement**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-020, BUG-021, BUG-022, BUG-024,
+BUG-026, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
+invariants, course-doc cap, **mark provenance, calendar-aware print, DB-enforced scheme/recurring
+invariants, atomic planner cascades, complete scheme clone & atomic review apply**); BUG-034, BUG-035,
+BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4 (assessment correctness) are
+complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045 await an operator go-ahead; A6
+(transactional invariants) is well underway — the four query-only invariants (active-scheme,
+recurring-idempotency, migrator-serialisation, one-current-year) are all DB-enforced, plus atomic
+resource-version appends, atomic lock-aware planner placement, complete scheme cloning, and atomic
+review apply/dismiss.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 12 | 6 |
-| Medium | 26 | 11 | 15 |
+| Medium | 26 | 13 | 13 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **29** | **21** |
+| **Total** | **50** | **31** | **19** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **70 test files, 324 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **70 test files, 326 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -332,6 +334,7 @@ DB-enforced, plus atomic resource-version appends and atomic, lock-aware planner
 
 ### BUG-020 — Cloning a scheme silently drops labels, lesson kit, and resource links
 
+- **Status:** ✅ Resolved 2026-06-20 — `cloneSchemeNewVersion` ([app/src/repos/schemes.ts](app/src/repos/schemes.ts)) now copies, inside its existing transaction: the scheme's **labels** (from the source row), each plan's **kit_needed** (added to the plan-copy SELECT — it was dropped entirely, so a redraft lost the equipment list), and **resource_links** at both unit level (converted-unit source provenance) and plan level (the materials a redraft should still reference), carried via the old→new id maps it already builds for spec-point coverage. Integration test clones a scheme with labels + a kitted, resource-linked plan and asserts all three survive on the draft.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/repos/schemes.ts:609-649`; `app/migrations/0009_scheme_labels.sql`; `app/migrations/0040_lesson_kit.sql`; `app/migrations/0006_phase3.sql:70-83`
 - **Problem and trigger:** The scheme clone inserts only course/title/version; labels are omitted. Lesson copies omit `kit_needed`, and only spec-point mappings are copied. Unit and lesson-plan `resource_links` are not recreated for the new IDs.
@@ -353,6 +356,7 @@ DB-enforced, plus atomic resource-version appends and atomic, lock-aware planner
 
 ### BUG-022 — Applying a lesson review marks it applied before its changes commit
 
+- **Status:** ✅ Resolved 2026-06-20 — apply is now one transaction: `applyReview` ([app/src/repos/reviews.ts](app/src/repos/reviews.ts)) claims the open review (`UPDATE … status='applied' WHERE status='open' RETURNING`) **and** writes its suggested objectives/outline to the master lesson plan in the same transaction, so the review is never marked applied unless the master change committed (a mid-apply failure rolls both back, leaving it open to retry). Dismiss is now a single atomic `dismissOpenReview` (`UPDATE … 'dismissed' WHERE status='open'`, acting on the affected-row count) — no read-then-write TOCTOU. The route uses both ([app/src/routes/schemes.ts](app/src/routes/schemes.ts)). Integration test proves claim+write land together and that a closed review can never rewrite the master.
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/repos/reviews.ts:121-138`; `app/src/routes/schemes.ts:621-646`; `app/src/repos/schemes.ts:418-427`
 - **Problem and trigger:** `claimOpenReview` first commits `status = 'applied'`; objective and outline updates then run as independent statements. A later failure leaves the review permanently applied with zero or partial changes. Dismiss also performs a read-then-unconditional-update, so it can race an apply and relabel an already-applied review as dismissed.

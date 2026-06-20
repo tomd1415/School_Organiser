@@ -5,6 +5,7 @@ import { pool } from '../../src/db/pool';
 import { getSetting, setSetting } from '../../src/repos/settings';
 import { getLessonPlan } from '../../src/repos/schemes';
 import {
+  applyReview,
   createReview,
   getOpenReviewForPlan,
   getReview,
@@ -190,6 +191,33 @@ describe('apply / dismiss routes', () => {
     expect(reDismiss.body).toContain('no longer open'); // guard: can't re-transition a closed review
     const plan = await getLessonPlan(planId2);
     expect(plan?.objectives).toBe('MASTER objectives B'); // untouched
+  });
+
+  it('applyReview claims + writes together, and a closed review never rewrites the master (BUG-022)', async () => {
+    // a self-contained throwaway plan with a known master, and a review suggesting new content
+    const tp = Number(
+      (
+        await pool.query<{ id: number }>(
+          `INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline) VALUES ($1, $2, 'ZZREV-022', 5, 'm-obj', 'm-out') RETURNING id`,
+          [unitId, courseId],
+        )
+      ).rows[0]!.id,
+    );
+    const rid = await createReview({ lessonPlanId: tp, groupCourseId: null, verdict: 'tweak', findings: [], suggestedObjectives: 'applied-obj', suggestedOutline: 'applied-out', rationale: null, model: null, promptVersion: null });
+    try {
+      // the claim (open→applied) and the master write commit TOGETHER
+      expect(await applyReview(rid!)).toBe(tp);
+      expect((await getLessonPlan(tp))?.objectives).toBe('applied-obj');
+      expect((await getReview(rid!))?.status).toBe('applied');
+      // a now-closed review can never re-write the master: applyReview is a null no-op (the claim gates
+      // the write — pre-fix, claim and write were separate statements that could diverge).
+      await pool.query(`UPDATE lesson_plans SET objectives = 'edited-after' WHERE id = $1`, [tp]);
+      expect(await applyReview(rid!)).toBeNull();
+      expect((await getLessonPlan(tp))?.objectives).toBe('edited-after');
+    } finally {
+      await pool.query(`DELETE FROM lesson_reviews WHERE id = $1`, [rid]);
+      await pool.query(`DELETE FROM lesson_plans WHERE id = $1`, [tp]);
+    }
   });
 });
 
