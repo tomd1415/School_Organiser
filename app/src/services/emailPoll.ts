@@ -5,7 +5,7 @@
 import { pollMailbox, type ImapConfig } from '../lib/imapClient';
 import { parseMime, type ParsedMime } from '../lib/mime';
 import { createHash } from 'node:crypto';
-import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage, emailAlreadyProcessed, markEmailProcessed } from '../repos/tasks';
+import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage, claimEmail, completeEmail, releaseEmail } from '../repos/tasks';
 import { createEventFromIntake } from '../repos/events';
 import { fileCaptured } from '../repos/captured';
 import { createNote, updateNoteBody } from '../repos/notes';
@@ -130,35 +130,41 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
     const r = await pollMailbox(cfg, async (mail) => {
       const m = parseMime(mail.raw);
       const raw = mail.raw.toString('utf8').slice(0, 100_000);
-      // #21 idempotency: if this exact message was already imported (a prior poll wrote it but failed to
-      // set \Seen, so it came back UNSEEN), skip it — don't create a duplicate task/event.
       const dedupKey = m.messageId ?? createHash('sha256').update(mail.raw).digest('hex');
-      if (await emailAlreadyProcessed(dedupKey)) return;
-      // 10.5: screen for safeguarding BEFORE any AI egress. A trip is filed locally, flagged, and
-      // NEVER sent to the AI (it's withheld everywhere downstream by the safeguarding flag).
-      if (screenEmailForSafeguarding(m.subject, m.text)) {
-        await fileCaptured({
-          body: `⚠ Possible safeguarding content — screened on intake, NOT sent to AI.\nSubject: ${m.subject ?? '(none)'}${m.from ? `\nFrom: ${m.from}` : ''}\n\n${m.text.slice(0, 5000)}`,
-          category: 'safeguarding',
-          groupId: null,
-          safeguarding: true,
-        });
-        await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
-        await markEmailProcessed(dedupKey);
-        counts.awareness++;
-        return;
+      // BUG-027: atomically CLAIM the message before any destination write. A concurrent poll, or a
+      // re-seen copy whose \Seen flag failed, finds it already claimed/complete and skips — no duplicate.
+      // A claim left 'processing' by a crash is reclaimed after a stale window; a processing FAILURE
+      // releases the claim so the next poll retries promptly (and pollMailbox leaves the message unseen).
+      if (!(await claimEmail(dedupKey))) return;
+      try {
+        // 10.5: screen for safeguarding BEFORE any AI egress. A trip is filed locally, flagged, and
+        // NEVER sent to the AI (it's withheld everywhere downstream by the safeguarding flag).
+        if (screenEmailForSafeguarding(m.subject, m.text)) {
+          await fileCaptured({
+            body: `⚠ Possible safeguarding content — screened on intake, NOT sent to AI.\nSubject: ${m.subject ?? '(none)'}${m.from ? `\nFrom: ${m.from}` : ''}\n\n${m.text.slice(0, 5000)}`,
+            category: 'safeguarding',
+            groupId: null,
+            safeguarding: true,
+          });
+          await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+          counts.awareness++;
+        } else {
+          const triage = await triageEmail(m, groups.map((g) => g.name));
+          if (triage) {
+            counts[await routeTriagedEmail(triage, m, raw, groups)]++;
+          } else {
+            // AI unavailable → never block intake: plain task, exactly as v1 behaved
+            const title = (m.subject ?? m.text.split('\n')[0] ?? 'Email task').trim().slice(0, 200) || 'Email task';
+            const detail = [m.from ? `From: ${m.from}` : '', m.text.slice(0, 5000)].filter(Boolean).join('\n');
+            await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw);
+            counts.task++;
+          }
+        }
+        await completeEmail(dedupKey); // imported OK — the dedup is now permanent
+      } catch (err) {
+        await releaseEmail(dedupKey).catch(() => {}); // failed mid-process → release for a prompt retry
+        throw err; // let pollMailbox leave it UNSEEN + count it failed
       }
-      const triage = await triageEmail(m, groups.map((g) => g.name));
-      if (triage) {
-        counts[await routeTriagedEmail(triage, m, raw, groups)]++;
-      } else {
-        // AI unavailable → never block intake: plain task, exactly as v1 behaved
-        const title = (m.subject ?? m.text.split('\n')[0] ?? 'Email task').trim().slice(0, 200) || 'Email task';
-        const detail = [m.from ? `From: ${m.from}` : '', m.text.slice(0, 5000)].filter(Boolean).join('\n');
-        await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw);
-        counts.task++;
-      }
-      await markEmailProcessed(dedupKey); // imported OK — a re-seen copy won't be re-imported
     });
     const routed = (Object.entries(counts) as Array<[EmailRoute, number]>)
       .filter(([, n]) => n > 0)

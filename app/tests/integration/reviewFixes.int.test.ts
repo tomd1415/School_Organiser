@@ -118,6 +118,33 @@ describe('#21 — email intake is idempotent (a re-seen message is not re-import
       await pool.query(`DELETE FROM processed_emails WHERE dedup_key = $1`, [key]);
     }
   });
+
+  it('claimEmail is single-winner with stale-claim recovery (BUG-027)', async () => {
+    const { claimEmail, completeEmail, releaseEmail } = await import('../../src/repos/tasks');
+    const key = 'ZZFIX-claim-' + Math.random().toString(36).slice(2);
+    const key2 = 'ZZFIX-stale-' + Math.random().toString(36).slice(2);
+    const key3 = 'ZZFIX-rel-' + Math.random().toString(36).slice(2);
+    try {
+      expect(await claimEmail(key)).toBe(true); // the first poll wins the claim
+      expect(await claimEmail(key)).toBe(false); // a concurrent poll finds it 'processing' → skips (no dup)
+      await completeEmail(key);
+      expect(await claimEmail(key)).toBe(false); // complete → never reprocessed
+      await releaseEmail(key); // release only touches 'processing' rows…
+      expect(await claimEmail(key)).toBe(false); // …so a completed claim stays put
+
+      // a STALE 'processing' claim (a crashed prior attempt) is reclaimable — the message isn't lost
+      await claimEmail(key2);
+      await pool.query(`UPDATE processed_emails SET claimed_at = now() - interval '20 minutes' WHERE dedup_key = $1`, [key2]);
+      expect(await claimEmail(key2)).toBe(true);
+
+      // releasing a FAILED (still-processing) claim lets the next poll retry promptly
+      await claimEmail(key3);
+      await releaseEmail(key3);
+      expect(await claimEmail(key3)).toBe(true);
+    } finally {
+      await pool.query(`DELETE FROM processed_emails WHERE dedup_key = ANY($1)`, [[key, key2, key3]]);
+    }
+  });
 });
 
 describe('#9 — pupil ai_token is derived from the row id (no collision, no reuse)', () => {

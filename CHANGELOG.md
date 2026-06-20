@@ -7,6 +7,18 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 16 (Wave A6 finish — email-intake idempotency)
+
+- **📧 Email intake can't duplicate or lose a message (BUG-027, Medium).** Dedup was a check-then-mark with
+  the mark written *after* the destination write, so a concurrent poll or a re-seen copy (whose IMAP `\Seen`
+  flag failed) could create a duplicate, and a crash mid-process could re-import. The dedup store gained a
+  processing/complete state, and the poll now **atomically claims** a message before any write — an
+  `INSERT … ON CONFLICT DO UPDATE … WHERE state='processing' AND claimed_at < now()-15min RETURNING` that's
+  single-winner. On success the claim is completed; on a processing failure it's released for a prompt retry;
+  a claim left processing by a crash is reclaimed after a 15-minute stale window — so the failure direction is
+  always a (rare, bounded) duplicate, never a lost email. **This completes every code finding in Waves
+  A1–A7.** Suite green: **529 unit / 335 integration; typecheck clean**.
+
 ### 2026-06-20 — Audit remediation, batch 15 (Wave A6 finish — per-lesson recurrence)
 
 - **🔁 A per-lesson task taught twice in a day now recurs twice (BUG-025, Medium).** `per_lesson` recurring

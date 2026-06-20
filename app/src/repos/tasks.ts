@@ -64,11 +64,42 @@ export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: str
 /** Email-intake idempotency (#21): has this message already been imported? (keyed by Message-ID, or a
  *  content hash when absent) — so a re-seen message after a failed \Seen-set isn't imported twice. */
 export async function emailAlreadyProcessed(dedupKey: string): Promise<boolean> {
-  const { rows } = await pool.query<{ n: number }>(`SELECT 1 AS n FROM processed_emails WHERE dedup_key = $1`, [dedupKey]);
+  const { rows } = await pool.query<{ n: number }>(`SELECT 1 AS n FROM processed_emails WHERE dedup_key = $1 AND state = 'complete'`, [dedupKey]);
   return rows.length > 0;
 }
 export async function markEmailProcessed(dedupKey: string): Promise<void> {
-  await pool.query(`INSERT INTO processed_emails (dedup_key) VALUES ($1) ON CONFLICT DO NOTHING`, [dedupKey]);
+  await pool.query(`INSERT INTO processed_emails (dedup_key, state) VALUES ($1, 'complete') ON CONFLICT (dedup_key) DO UPDATE SET state = 'complete', processed_at = now()`, [dedupKey]);
+}
+
+// How long a 'processing' claim is honoured before it's treated as a crashed attempt and may be reclaimed.
+const EMAIL_CLAIM_STALE = '15 minutes';
+
+/**
+ * BUG-027: atomically CLAIM an email for processing. Returns true iff THIS caller won the claim — a fresh
+ * key, or a STALE 'processing' claim (older than the window above, i.e. a crashed prior attempt) reclaimed.
+ * A 'complete' key, or a fresh 'processing' claim held by a concurrent poll, returns false (skip). This is
+ * the dedup that makes intake idempotent when the IMAP \Seen flag fails or two polls overlap.
+ */
+export async function claimEmail(dedupKey: string): Promise<boolean> {
+  const { rows } = await pool.query(
+    `INSERT INTO processed_emails (dedup_key, state, claimed_at) VALUES ($1, 'processing', now())
+     ON CONFLICT (dedup_key) DO UPDATE SET state = 'processing', claimed_at = now()
+       WHERE processed_emails.state = 'processing' AND processed_emails.claimed_at < now() - interval '${EMAIL_CLAIM_STALE}'
+     RETURNING dedup_key`,
+    [dedupKey],
+  );
+  return rows.length > 0;
+}
+
+/** Mark a claimed email fully processed — the dedup is now permanent. */
+export async function completeEmail(dedupKey: string): Promise<void> {
+  await pool.query(`UPDATE processed_emails SET state = 'complete', processed_at = now() WHERE dedup_key = $1`, [dedupKey]);
+}
+
+/** Release a claim whose processing FAILED, so the next poll retries promptly rather than waiting out the
+ *  stale window. Only ever releases a still-'processing' row — never a completed one. */
+export async function releaseEmail(dedupKey: string): Promise<void> {
+  await pool.query(`DELETE FROM processed_emails WHERE dedup_key = $1 AND state = 'processing'`, [dedupKey]);
 }
 
 /** Record an email in the intake log without a task (triage filed it elsewhere). */

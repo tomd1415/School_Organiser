@@ -32,29 +32,30 @@ BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040,
 safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
 atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & **disposal
 narrative removal**); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
-BUG-024, BUG-025, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046, BUG-047,
-BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware
-print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic
-review apply, atomic resource creation, AI audit-durability, group-course deactivation consistency,
-screenshot-replace cleanup, restart-safe review sweep, complete SAR export, durable disposal-delete
-retry & **per-lesson recurrence cursor**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A5 + A7
-+ most of A6 complete; A3 auth code-fixes done (BUG-032/045 deployment-config await an operator).
-Remaining 8: High 009/010 (backup-restore drill), 013 (HTMX client-JS); Medium 027 (email dedup txn),
-032/045 (deployment), 033 (client-JS), 049 (tar — needs clean rebuild).**
+BUG-024, BUG-025, BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046,
+BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance,
+calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme
+clone, atomic review apply, atomic resource creation, AI audit-durability, group-course deactivation
+consistency, screenshot-replace cleanup, restart-safe review sweep, complete SAR export, durable
+disposal-delete retry, per-lesson recurrence cursor & **email-dedup claim/recovery**); BUG-034, BUG-035,
+BUG-036, BUG-050 (Low). **Waves A1–A7 complete (every code finding in those waves fixed); only the
+operational/deployment + client-JS items remain. A3 auth code-fixes done; BUG-032/045 deployment-config
+await an operator. Remaining 7: High 009/010 (backup-restore drill — operational), 013 (HTMX client-JS);
+Medium 032/045 (deployment), 033 (client-JS), 049 (tar — needs a clean dependency rebuild).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 15 | 3 |
-| Medium | 26 | 21 | 5 |
+| Medium | 26 | 22 | 4 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **42** | **8** |
+| **Total** | **50** | **43** | **7** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 529 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **71 test files, 334 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **71 test files, 335 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -416,6 +417,7 @@ Remaining 8: High 009/010 (backup-restore drill), 013 (HTMX client-JS); Medium 0
 
 ### BUG-027 — Email deduplication still has check/create/mark races and partial-write gaps
 
+- **Status:** ✅ Resolved 2026-06-20 — the dedup store gained a **processing/complete state + claim timestamp** ([migration 0054](app/migrations/0054_processed_emails_state.sql)), and the poll now `claimEmail`s a message ATOMICALLY before any destination write ([app/src/repos/tasks.ts](app/src/repos/tasks.ts), [app/src/services/emailPoll.ts](app/src/services/emailPoll.ts)): the `INSERT … ON CONFLICT DO UPDATE … WHERE state='processing' AND claimed_at < now()-15min RETURNING` makes the claim single-winner — a concurrent poll, or a re-seen copy whose `\Seen` flag failed, finds it claimed/complete and skips (no duplicate). On success the claim is marked `complete`; on a processing **failure** it's released so the next poll retries promptly; a claim left `processing` by a crash is **reclaimed after a 15-min stale window** so nothing is permanently lost. Integration test proves single-winner claiming, complete-blocks-reprocess, stale-reclaim, and release-for-retry; the end-to-end poll test still imports + dedups. **Residual:** this is robust at-least-once with bounded recovery rather than a single cross-write transaction (the destination writes fan out across event/note/captured/task repos) — a crash between the destination commit and the `complete` mark yields one delayed duplicate after the stale window, which for email intake is the safe failure direction (a duplicate, never a lost message).
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/services/emailPoll.ts:123-162`; `app/src/repos/tasks.ts:45-80`; `app/migrations/0037_processed_emails.sql`
 - **Problem and trigger:** The current remediation checks `processed_emails`, creates/routs the destination through several autocommit writes, then inserts the dedup key. Concurrent poll/test runs can both pass the check. A failure after destination creation but before `markEmailProcessed` repeats the import on the next poll.
