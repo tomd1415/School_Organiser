@@ -26,35 +26,35 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (40):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
+**Fixed so far (41):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
 BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040, BUG-041, BUG-042 (High
 — pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
 safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
 atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & **disposal
 narrative removal**); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
-BUG-024, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-046, BUG-047, BUG-048 (Medium —
-session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware print, DB-enforced
-scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic review apply, atomic
-resource creation, AI audit-durability, group-course deactivation consistency, screenshot-replace
-cleanup, restart-safe review sweep & **complete SAR export**); BUG-034, BUG-035, BUG-036, BUG-050 (Low).
-**Waves A1–A4 + A7 + most of A6 complete; A3 auth code-fixes done (BUG-032/045 deployment-config await an
-operator); A5 data-protection code done (029/039/043). Remaining 10: High 009/010 (backup-restore
-drill), 013 (HTMX client-JS); Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045
-(deployment), 033 (client-JS), 044 (disposal-delete retry), 049 (tar — needs clean rebuild).**
+BUG-024, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046, BUG-047, BUG-048
+(Medium — session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware print,
+DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic review
+apply, atomic resource creation, AI audit-durability, group-course deactivation consistency,
+screenshot-replace cleanup, restart-safe review sweep, complete SAR export & **durable disposal-delete
+retry**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A4 + A5 + A7 + most of A6 complete; A3
+auth code-fixes done (BUG-032/045 deployment-config await an operator). Remaining 9: High 009/010
+(backup-restore drill), 013 (HTMX client-JS); Medium 025 (per-lesson recurrence cursor), 027 (email dedup
+txn), 032/045 (deployment), 033 (client-JS), 049 (tar — needs clean rebuild).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 15 | 3 |
-| Medium | 26 | 19 | 7 |
+| Medium | 26 | 20 | 6 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **40** | **10** |
+| **Total** | **50** | **41** | **9** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **70 test files, 331 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **71 test files, 333 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -500,6 +500,7 @@ drill), 013 (HTMX client-JS); Medium 025 (per-lesson recurrence cursor), 027 (em
 
 ### BUG-044 — Failed screenshot deletion after pupil disposal has no durable retry path
 
+- **Status:** ✅ Resolved 2026-06-20 — disposal now enqueues a durable deletion **tombstone** for each screenshot path **inside the disposal transaction** ([migration 0052](app/migrations/0052_pending_file_deletions.sql), [app/src/repos/fileDeletions.ts](app/src/repos/fileDeletions.ts)), then attempts the unlink after commit and clears the tombstone on success. If the unlink fails (fs error) — or the process crashes before it runs — the tombstone survives, and a boot-plus-15-min sweep (`processPendingDeletions`, scheduled in [app/src/server.ts](app/src/server.ts)) retries idempotently (`removeStored` is a no-op on an already-gone file, so the tombstone clears whether the file was just deleted or already absent). The stored path is a non-identifying object key. Integration tests prove the sweep deletes a tombstoned file + clears the row, clears a tombstone for an already-missing file without error, and that a normal disposal leaves no lingering tombstone. *(Residual: no max-attempts dead-lettering — a permanently un-deletable path would be retried forever; a small follow-up given how rare that is.)*
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/repos/pupils.ts:123-164`; `app/src/services/resourceStore.ts:31-35`
 - **Problem and trigger:** Pupil disposal commits database deletion/anonymisation and removal of the screenshot pointers before deleting the referenced files. File removal failures are caught and logged only. Once the database pointers are gone, no deletion queue or tombstone records which sensitive paths still require cleanup.

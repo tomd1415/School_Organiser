@@ -142,6 +142,8 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     if (eraseShot) {
       expect(r!.counts.screenshots).toBe(1);
       expect(existsSync(absPath(eraseShot))).toBe(false);
+      // BUG-044: the deletion tombstone was enqueued in the txn and cleared once the unlink succeeded.
+      expect((await pool.query(`SELECT 1 FROM pending_file_deletions WHERE storage_path = $1`, [eraseShot])).rowCount).toBe(0);
     }
   });
 

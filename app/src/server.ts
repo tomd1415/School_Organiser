@@ -59,6 +59,7 @@ import { generateDueInstances } from './repos/recurringTasks';
 import { coverageAtRisk } from './repos/brief';
 import { buildBrief } from './services/brief';
 import { runDueMarkJobs } from './services/markingQueue';
+import { processPendingDeletions } from './repos/fileDeletions';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting, setSetting } from './repos/settings';
 import { sweepReviews } from './services/reviewLesson';
@@ -304,6 +305,21 @@ function scheduleMarkingQueue(app: FastifyInstance): void {
   setInterval(() => void run(), 30_000);
 }
 
+/** BUG-044: retry any outstanding resource-file deletions (e.g. a pupil screenshot whose unlink failed
+ * during disposal). Idempotent + durable — runs on boot (catching up after a crash) then every 15 min. */
+function schedulePendingDeletions(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const r = await processPendingDeletions();
+      if (r.cleared > 0 || r.failed > 0) app.log.info(`file deletions: cleared ${r.cleared}, ${r.failed} still pending`);
+    } catch (err) {
+      app.log.error({ err }, 'pending-file-deletion sweep crashed');
+    }
+  };
+  void run(); // boot sweep — finish deletions interrupted by a restart
+  setInterval(() => void run(), 15 * 60 * 1000);
+}
+
 /** Wave 7.1: compute the morning brief on boot then daily, logging a one-line summary. This is the
  * seam scheduled AI work (7.2 reviewer sweep, 7.3 spaced retrieval) will hook onto. Read-only. */
 function scheduleMorningBrief(app: FastifyInstance): void {
@@ -371,6 +387,7 @@ export async function start(): Promise<void> {
     scheduleRecurring(app);
     scheduleEmailPoll(app);
     scheduleMarkingQueue(app);
+    schedulePendingDeletions(app);
     scheduleMorningBrief(app);
     scheduleReviewSweep(app);
   } catch (err) {

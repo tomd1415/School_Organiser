@@ -1,5 +1,6 @@
 import { pool } from '../db/pool';
 import { removeStored } from '../lib/resourceStore';
+import { clearFileDeletion, enqueueFileDeletion } from './fileDeletions';
 
 export interface RosterEntry {
   id: number;
@@ -199,12 +200,18 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
       counts.deleted = await rowsAffected(client, `DELETE FROM pupils WHERE id = $1`, [id]); // CASCADE clears the rest
     }
 
+    // BUG-044: the screenshot files can't join the DB transaction, so enqueue a durable deletion
+    // tombstone for each IN the transaction. If the post-commit unlink fails (fs error) or the process
+    // crashes before it runs, the tombstone survives and the periodic sweep retries it — so a pupil's
+    // screenshot can never silently outlive an erasure.
+    const tombstones: Array<{ id: number; rel: string }> = [];
+    for (const rel of imgPaths) tombstones.push({ id: await enqueueFileDeletion(client, rel, `disposal-${mode}`), rel });
     await client.query(`INSERT INTO pupil_disposals (ai_token, action, detail) VALUES ($1, $2, $3::jsonb)`, [who.aiToken, mode, JSON.stringify(counts)]);
     await client.query('COMMIT');
-    // Files can't join the DB transaction, so delete them after a successful COMMIT. Best-effort: the
-    // disposal is already audited; a failed unlink shouldn't undo it, but we surface any orphan.
-    for (const rel of imgPaths) {
-      try { await removeStored(rel); } catch (err) { console.warn(`disposePupil: could not remove ${rel}:`, err); }
+    // Delete now; a failure leaves the tombstone for the sweep rather than orphaning the file silently.
+    for (const t of tombstones) {
+      try { await removeStored(t.rel); await clearFileDeletion(t.id); }
+      catch (err) { console.warn(`disposePupil: deferred unlink of ${t.rel} to the sweep:`, err); }
     }
     return { aiToken: who.aiToken, mode, counts };
   } catch (err) {

@@ -23,10 +23,15 @@ Make disposal and subject-access genuinely complete for the pupil-data lifecycle
   login-credential **metadata** — with the PIN and device-token hashes never disclosed, and safeguarding
   records excluded by design (a documented note points the requester to the DSL under the DPA 2018
   safeguarding exemption). Privacy doc's retention/SAR statements were corrected to match.
+- **♻ A failed screenshot deletion is now retried, not orphaned (BUG-044, Medium).** Disposal writes a
+  durable deletion **tombstone** inside the transaction, then unlinks the file and clears the tombstone on
+  success. If the unlink fails (fs error) or the process crashes first, the tombstone survives and a
+  boot-plus-15-minute sweep retries it idempotently — so an erased pupil's image can't silently outlive the
+  erasure on disk.
 
-**40 / 50 findings fixed.** Remaining: backup-restore drill (009/010), HTMX client-JS (013/033),
-per-lesson recurrence cursor (025), email-dedup transaction (027), disposal-delete retry (044), the `tar`
-dependency upgrade (049), and the deployment-config items (032/045) awaiting an operator.
+**41 / 50 findings fixed.** Remaining: backup-restore drill (009/010), HTMX client-JS (013/033),
+per-lesson recurrence cursor (025), email-dedup transaction (027), the `tar` dependency upgrade (049), and
+the deployment-config items (032/045) awaiting an operator.
 
 ### 2026-06-20 — Audit remediation, batch 13 (auth, cost cap, data-retention, consistency)
 

@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 40 of 50 fixed; Waves A1–A4 + A7 + most of A5/A6 complete, A3 code-fixes done.** This is the
+> **Status (2026-06-20): in progress — 41 of 50 fixed; Waves A1–A5 + A7 + most of A6 complete, A3 code-fixes done.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -34,11 +34,13 @@
 > delete the pupil's own notes/tasks/events and redact their name from shared notes — anonymisation can no
 > longer leave identifying records; erasure deletes rather than detaches) and **043** (the SAR export now
 > covers every pupil-linked table — tasks/events/levels/unit-signals/completions/device+credential metadata —
-> with secrets excluded and a documented safeguarding-exemption note). Suites green: 528 unit / 331
-> integration; typecheck clean. **Remaining 10:** **009/010** (backup-restore drill — operational), **013/033**
+> with secrets excluded and a documented safeguarding-exemption note), and **044** (disposal enqueues a
+> durable deletion tombstone in the txn; a boot+15-min sweep retries any screenshot unlink that failed or was
+> interrupted, so an erased pupil's image can't silently survive on disk). Suites green: 528 unit / 333
+> integration; typecheck clean. **Remaining 9:** **009/010** (backup-restore drill — operational), **013/033**
 > (HTMX client-JS — need the Wave-0 browser harness), **025** (per-lesson recurrence cursor), **027**
-> (email-dedup txn), **044** (disposal-delete durable retry), **049** (tar — needs a clean dependency rebuild).
-> **032 / 045** (deployment-config) await the operator.
+> (email-dedup txn), **049** (tar — needs a clean dependency rebuild). **032 / 045** (deployment-config)
+> await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new
