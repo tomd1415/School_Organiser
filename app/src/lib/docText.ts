@@ -1,18 +1,29 @@
 // Phase 11 idea 9 — extract plain text from an uploaded course document so the AI can reference it.
-// PDFs via pdfjs (v3 CJS legacy build, fake worker in Node); .txt/.md/.csv read directly; Office files
+// PDFs via pdfjs (v4 legacy build, fake worker in Node); .txt/.md/.csv read directly; Office files
 // routed through the existing Gotenberg sidecar (→ PDF) then pdfjs. Returns '' if it can't extract —
 // the teacher then pastes/edits the text (extraction is ALWAYS previewed before the AI uses it).
 import { convertToPdf } from './officePreview';
 
-// pdfjs-dist v3's ESM main clashes with this CommonJS build; the legacy build is plain CJS and
-// require()s cleanly. No published types for the subpath, so it's loaded untyped.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires
-const pdfjs: any = require('pdfjs-dist/legacy/build/pdf.js');
+// pdfjs-dist v4's legacy build is ESM (`pdf.mjs`); this app compiles to CommonJS, so a bare `import()`
+// would be down-levelled to `require()` and fail on an ES module. Load it through a runtime dynamic
+// import the compiler can't rewrite, lazily + cached (it's only needed when a PDF is actually extracted).
+// BUG-049: v4 drops the node-canvas → node-pre-gyp → vulnerable-tar chain (prebuilt @napi-rs/canvas) AND
+// clears the pdfjs arbitrary-JS advisory; we keep `isEvalSupported: false` regardless.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pdfjsPromise: Promise<any> | null = null;
+function loadPdfjs(): Promise<any> {
+  // A plain dynamic import: vitest/vite handle it natively, and at runtime tsc down-levels it to
+  // require(), which Node ≥22 resolves for an ES module (require(esm)). (A `new Function`-based import
+  // can't be used — it breaks under vitest's VM with ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING.)
+  if (!pdfjsPromise) pdfjsPromise = import('pdfjs-dist/legacy/build/pdf.mjs');
+  return pdfjsPromise;
+}
 
 const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'odt', 'odp', 'rtf']);
 const PLAIN = new Set(['txt', 'md', 'markdown', 'csv', 'text']);
 
 export async function extractPdfText(buf: Buffer): Promise<string> {
+  const pdfjs = await loadPdfjs();
   const doc = await pdfjs.getDocument({ data: new Uint8Array(buf), isEvalSupported: false }).promise;
   const parts: string[] = [];
   for (let i = 1; i <= doc.numPages; i += 1) {

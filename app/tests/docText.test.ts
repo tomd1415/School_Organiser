@@ -12,6 +12,28 @@ describe('extractDocText (idea 9)', () => {
     expect(await extractDocText(Buffer.from('x'), 'a.zip')).toBe('');
     expect(await extractDocText(Buffer.from('x'), 'noext')).toBe('');
   });
+
+  // BUG-049: pdfjs upgraded to v4 (ESM legacy build, loaded via a runtime dynamic import) to drop the
+  // vulnerable tar chain. Prove text extraction still works end-to-end on a real PDF.
+  it('extracts text from a real PDF (pdfjs v4 dynamic-import path)', async () => {
+    const pdf = Buffer.from(
+      [
+        '%PDF-1.4',
+        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
+        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
+        '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj',
+        '4 0 obj << /Length 47 >>',
+        'stream',
+        'BT /F1 24 Tf 72 700 Td (Hello PDF world) Tj ET',
+        'endstream endobj',
+        '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
+        'trailer << /Root 1 0 R /Size 6 >>',
+        '%%EOF',
+      ].join('\n'),
+      'latin1',
+    );
+    expect(await extractDocText(pdf, 'note.pdf')).toContain('Hello PDF world');
+  });
 });
 
 describe('courseDocItems (idea 9)', () => {

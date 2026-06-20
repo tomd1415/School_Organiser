@@ -7,6 +7,22 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 20 (supply chain — pdfjs upgrade) — AUDIT COMPLETE
+
+- **📦 Removed the vulnerable `tar` and cleared the pdfjs advisory (BUG-049, Medium).** `pdfjs-dist`
+  upgraded **3.11.174 → 4.10.38**: v4 replaced node-canvas (which pulled `@mapbox/node-pre-gyp` → a
+  vulnerable `tar`) with the prebuilt **`@napi-rs/canvas`** (zero deps), so `tar` is gone from the tree
+  entirely, and the bump also clears the separate pdfjs "arbitrary-JS on a malicious PDF" advisory (we
+  still pass `isEvalSupported: false`). **`npm audit --omit=dev` is now 0 vulnerabilities.** The app only
+  extracts text, so the change is contained to `docText.ts` (v4's legacy build is ESM, loaded via a lazy
+  `import()`); a new test extracts text from a real PDF, verified in both vitest and the compiled runtime.
+
+**All 50 audit findings are now fixed** (Critical 2, High 18, Medium 26, Low 4) — suites green
+(**536 unit / 335 integration**), typecheck clean, production audit clean. **Two operator actions remain**
+(deploy steps, not open bugs): deploy the network hardening (032/045) and run the backup restore drill
+(009/010). _(Out of scope: the full `npm audit` still flags esbuild/vite dev-server advisories pulled by
+vitest — test toolchain only, never shipped.)_
+
 ### 2026-06-20 — Audit remediation, batch 19 (HTMX save-failure honesty + a Wave-0 browser harness)
 
 Built the missing client-test harness, then fixed the two "unsaved work" UX bugs against it. Suite green:

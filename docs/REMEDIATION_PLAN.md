@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): 49 of 50 fixed — every audit finding resolved in code/config except 049 (tar, needs a clean Docker rebuild). Operator actions remain: deploy 032/045, run the restore drill.** This is the
+> **Status (2026-06-20): ALL 50 of 50 findings fixed — code/config complete, suites green, `npm audit --omit=dev` clean. Two OPERATOR actions remain (not bugs): deploy 032/045 and run the restore drill.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -54,9 +54,12 @@
 > **013** (a 200-swallowed server error is no longer cleared by the same request's "success") and **033**
 > (the unsaved-warning is tracked per operation, so an unrelated success/poll never wipes it; it counts
 > outstanding fields), both verified by a new **jsdom** harness that runs the real `public/app.js` against
-> synthetic htmx events. **Remaining 1:** **049** (tar — needs a clean Docker dependency rebuild; runtime
-> already mitigated by `isEvalSupported:false`). **Operator actions (not bugs):** deploy 032/045 (`docker
-> compose --profile proxy up -d --force-recreate`); run the restore drill once on a throwaway copy.
+> synthetic htmx events. **Supply chain** — **049** (`pdfjs-dist` 3→4.10.38: v4 swaps node-canvas for the
+> prebuilt `@napi-rs/canvas`, removing the `node-pre-gyp` → vulnerable-`tar` chain entirely AND clearing
+> the pdfjs arbitrary-JS advisory; `npm audit --omit=dev` is now 0 vulnerabilities, verified by a real-PDF
+> extraction test in both vitest and the compiled runtime). **All 50 findings are now fixed.** **Operator
+> actions (not bugs):** deploy 032/045 (`docker compose --profile proxy up -d --force-recreate`); run the
+> restore drill once on a throwaway copy.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

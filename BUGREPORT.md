@@ -26,40 +26,36 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (47):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
-BUG-006, BUG-007, BUG-008, BUG-009, BUG-010, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040,
-BUG-041, BUG-042 (High — pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering,
-exception leakage, safety-gate, marks-vs-edited-answer & incomplete-AI-batch, **clean-slate restore**,
-**atomic backup set + manifest verify**, login-limit reset, first-run-identity race, atomic resource
-versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & disposal narrative removal);
-BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025,
-BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-032, BUG-043, BUG-044, BUG-045, BUG-046,
-BUG-033, BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark
-provenance, calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades,
-complete scheme clone, atomic review apply, atomic resource creation, AI audit-durability, group-course
-deactivation consistency, screenshot-replace cleanup, restart-safe review sweep, DB/app loopback binding
-+ default-password guard, complete SAR export, durable disposal-delete retry, proxy-aware client-IP rate
-limiting, per-lesson recurrence cursor, email-dedup claim/recovery & **unsaved-warning operation
-scoping**); BUG-013, BUG-034, BUG-035, BUG-036, BUG-050 (Low/High incl. HTMX save-failure honesty).
-**Every audit finding is now fixed in code/config except the single supply-chain item. Remaining 1:
-Medium 049 (tar — needs a clean Docker dependency rebuild; runtime already mitigated). Operator actions
-outstanding (not bugs): deploy 032/045 (`docker compose --profile proxy up -d --force-recreate`) and run
-the 009/010 restore drill (docs/RUNBOOK.md) to confirm.**
+**Fixed: ALL 50 findings.** Critical — BUG-001, BUG-037 (redaction). High — BUG-002, BUG-003, BUG-004,
+BUG-005, BUG-006, BUG-007, BUG-008, BUG-009, BUG-010, BUG-011, BUG-012, BUG-013, BUG-014, BUG-038,
+BUG-039, BUG-040, BUG-041, BUG-042. Medium — BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020,
+BUG-021, BUG-022, BUG-023, BUG-024, BUG-025, BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031,
+BUG-032, BUG-033, BUG-043, BUG-044, BUG-045, BUG-046, BUG-047, BUG-048, BUG-049. Low — BUG-034, BUG-035,
+BUG-036, BUG-050.
+
+**Every audit finding is resolved in code/config, suites green, each with a red-then-green regression
+test (incl. a jsdom harness for client JS and a real-PDF extraction check). Two items still need the
+OPERATOR to act in their environment (the fixes are committed; these are deploy/ops steps, not open
+bugs):** (1) **deploy 032/045** — `docker compose --profile proxy up -d --force-recreate` (add
+`TRUST_PROXY=true` to an existing `app/.env`, or re-run `deploy/install.sh`); (2) **run the 009/010
+restore drill** on a throwaway copy ([docs/RUNBOOK.md](docs/RUNBOOK.md)) to prove from-cold recovery.
+**Note (out of scope):** the full `npm audit` still flags esbuild/vite **dev-server** advisories via
+vitest — test-toolchain only, not shipped; production (`npm audit --omit=dev`) is **0 vulnerabilities**.
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 18 | 0 |
-| Medium | 26 | 25 | 1 |
+| Medium | 26 | 26 | 0 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **49** | **1** |
+| **Total** | **50** | **50** | **0** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
-- The unit-test suite passes: **76 test files, 535 tests** (508 at audit time; remediation has added regression coverage, incl. a jsdom harness for `app.js`).
+- The unit-test suite passes: **76 test files, 536 tests** (508 at audit time; remediation has added regression coverage, incl. a jsdom harness for `app.js` and a real-PDF extraction check). `npm audit --omit=dev` is now **0 vulnerabilities** (the prior `tar`/`pdfjs` advisories are cleared).
 - The integration-test suite passes against the local PostgreSQL service: **71 test files, 335 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
-- `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
+- `npm audit --omit=dev` reports **0 vulnerabilities** (was three high-severity: the `tar` chain and the `pdfjs-dist` arbitrary-JS advisory, both cleared by the `pdfjs-dist` 3→4 upgrade — see BUG-049). The full `npm audit` (incl. dev) still flags esbuild/vite **dev-server** advisories pulled in by vitest; these are test-toolchain only, never shipped, and out of scope for the production audit.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
 
@@ -566,6 +562,7 @@ the 009/010 restore drill (docs/RUNBOOK.md) to confirm.**
 
 ### BUG-049 — A vulnerable `tar` version is reachable during dependency installation
 
+- **Status:** ✅ Resolved 2026-06-20 — `pdfjs-dist` upgraded **3.11.174 → 4.10.38**. v4 replaced node-canvas (which pulled `@mapbox/node-pre-gyp` → the vulnerable `tar`) with the prebuilt **`@napi-rs/canvas`** (zero dependencies), so `tar` is now **gone from the tree entirely** (`npm ls tar` → empty), and the bump also clears the separate pdfjs "arbitrary-JS on a malicious PDF" advisory (we still pass `isEvalSupported: false`). `npm audit --omit=dev` is now **0 vulnerabilities**. The app only extracts TEXT, so the change is contained to `app/src/lib/docText.ts`: v4's legacy build is ESM (`pdf.mjs`), loaded via a lazy plain `import()` (vitest/vite handle it; at runtime tsc down-levels to `require()`, which Node 24 resolves for ESM). A new test extracts text from a real PDF, verified in **both** vitest and the compiled `dist/` runtime. **Residual (out of scope, dev-only):** the full `npm audit` still flags esbuild/vite **dev-server** advisories pulled by vitest — these are not shipped (test toolchain only) and would need a breaking vitest v4 bump; production (`--omit=dev`) is clean.
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/package-lock.json` dependency chain `pdfjs-dist` → `canvas` → `@mapbox/node-pre-gyp` → `tar@6.2.1`; dependency-install/build environments
 - **Problem and trigger:** `npm audit --omit=dev` reports high-severity path-traversal and arbitrary file read/write advisories for the installed transitive `tar@6.2.1`. The package is used by the native canvas installation path, so exploitation concerns the machine/container performing dependency installation or rebuilds rather than normal HTTP request handling.
