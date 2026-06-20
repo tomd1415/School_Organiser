@@ -14,10 +14,13 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image' | 'choice' | 'blank';
+  kind: 'text' | 'check' | 'image' | 'choice' | 'blank' | 'code' | 'parsons';
   level: BlockLevel;
   label: string;
   options?: string[]; // choice fields only — the selectable options, in source order
+  // Parson's Problems only: the code lines in their CORRECT order. Used to mark the pupil's ordering
+  // and to show the model answer — never emitted into the form-mode HTML (it must not reveal the order).
+  solution?: string[];
 }
 
 export interface WorksheetRender {
@@ -37,6 +40,10 @@ export interface WorksheetOptions {
   // Online the pupil's name and the date are known — auto-fill those header cells read-only instead
   // of asking the pupil to type them. Applies in form/preview only.
   autofill?: { name?: string; date?: string };
+  // Multiple worksheets per lesson: a per-worksheet prefix prepended to every field key so two sheets
+  // bound to the same lesson never collide on a shared key (e.g. both starting at `t1.r1.c2`). The
+  // first/only worksheet uses '' (unprefixed) so all existing answers, schemes and marks are untouched.
+  keyPrefix?: string;
 }
 
 function saveUrl(action: string | undefined, key: string): string {
@@ -71,6 +78,10 @@ const CHOICE_MARK = /\(\s*\)/g;
 function isChoiceCell(s: string): boolean {
   return (s.match(CHOICE_MARK) ?? []).length >= 2;
 }
+// A CODE-WRITING answer cell: the pupil types code, so the box is monospaced and roomier. The cell (or
+// its column header) names code, e.g. "Type your code here", "Write your program here". Pedagogy P11
+// (Use–Modify–Create) — the "Modify"/"Make" answer where pupils write or change code.
+const CODE_CELL = /\b(?:code|program|programme|script|pseudocode|algorithm)\b/i;
 /** Split a choice cell into its options (the text after each "( )" marker), in source order. */
 function choiceOptions(s: string): string[] {
   return s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
@@ -320,6 +331,25 @@ function textControl(key: string, label: string, placeholder: string, opts: Work
   return `${field}${saved}`;
 }
 
+/** A CODE-WRITING answer: a monospaced, roomier textarea so pupils can write/modify code (P11). Same
+ * autosave wiring + keys as a typed answer, so marking treats it as open text. Review shows the code
+ * in a <pre> so indentation survives. */
+function codeControl(key: string, label: string, opts: WorksheetOptions): string {
+  const value = opts.values?.get(key) ?? '';
+  if (opts.mode === 'review') {
+    return value.trim() !== ''
+      ? `<pre class="ws-answer ws-code-answer">${esc(value)}</pre>`
+      : `<div class="ws-answer ws-empty">—</div>`;
+  }
+  const al = esc(label || 'your code');
+  if (opts.mode === 'preview') {
+    return `<textarea class="ws-input ws-code-input" rows="4" placeholder="Type your code here" disabled aria-label="${al}" spellcheck="false"></textarea>`;
+  }
+  const saved = `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+  return `<textarea class="ws-input ws-code-input" name="value" rows="4" placeholder="Type your code here" spellcheck="false" autocapitalize="off" autocomplete="off"
+    hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none" aria-label="${al}">${esc(value)}</textarea>${saved}`;
+}
+
 /** The OOB "saved ✓" span /me/answer returns so the field that just saved confirms instantly. */
 export function savedTick(key: string): string {
   return `<span class="ws-saved show" id="ws-sv-${esc(key)}" aria-live="polite" hx-swap-oob="true">saved ✓</span>`;
@@ -479,6 +509,64 @@ function blankInput(key: string, opts: WorksheetOptions): string {
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
 }
 
+// ── Parson's Problems (P6 — program comprehension) ──────────────────────────────────────────────
+// A ```parsons fenced block lists the code lines in their CORRECT order; the pupil drags the jumbled
+// lines back into order. The solution never reaches form-mode HTML.
+const PARSONS_FENCE = /^\s*(?:```|~~~)\s*parsons\b/i;
+const FENCE_ANY = /^\s*(?:```|~~~)/;
+
+/** Pull a ```parsons … ``` region out of an md block: prose before, the solution lines (correct
+ * order), prose after. Null when there's no parsons fence. */
+function extractParsons(lines: string[]): { before: string[]; solution: string[]; after: string[] } | null {
+  let open = -1;
+  for (let i = 0; i < lines.length; i++) if (PARSONS_FENCE.test(lines[i]!)) { open = i; break; }
+  if (open === -1) return null;
+  let close = -1;
+  for (let i = open + 1; i < lines.length; i++) if (FENCE_ANY.test(lines[i]!)) { close = i; break; }
+  const end = close === -1 ? lines.length : close;
+  const solution = lines.slice(open + 1, end).map((l) => l.replace(/\s+$/, '')).filter((l) => l.trim() !== '');
+  return { before: lines.slice(0, open), solution, after: close === -1 ? [] : lines.slice(close + 1) };
+}
+
+/** A stable, NON-identity jumble: order lines by a hash of their text — the same on every render, yet
+ * never the answer order (if the hash-sort happens to land on the original order, rotate by one so the
+ * solution is never shown as-is). */
+function shuffleStable(lines: string[]): string[] {
+  if (lines.length < 2) return lines.slice();
+  const h = (s: string): number => { let x = 5381; for (let i = 0; i < s.length; i++) x = ((x << 5) + x + s.charCodeAt(i)) | 0; return x >>> 0; };
+  const sorted = lines.map((l, i) => ({ l, i })).sort((a, b) => h(a.l) - h(b.l) || a.i - b.i).map((o) => o.l);
+  return sorted.every((l, i) => l === lines[i]) ? lines.slice(1).concat(lines[0]!) : sorted;
+}
+
+function parsonsLabel(before: string[]): string {
+  const txt = before.map((l) => l.replace(/[#>*_`]/g, '').trim()).filter(Boolean);
+  return (txt[txt.length - 1] ?? 'Put the code lines in the correct order').slice(0, 200);
+}
+
+/** Render a Parson's Problem: jumbled draggable code lines (form/preview) or the pupil's order
+ * (review). pupil.js wires drag + ▲▼ and autosaves the order (lines joined by "\n") to the field. */
+function parsonsControl(key: string, solution: string[], opts: WorksheetOptions): string {
+  const saved = (opts.values?.get(key) ?? '').split('\n').filter((l) => l.trim() !== '');
+  if (opts.mode === 'review') {
+    return saved.length
+      ? `<ol class="ws-parsons ws-parsons-review">${saved.map((l) => `<li><code>${esc(l)}</code></li>`).join('')}</ol>`
+      : `<div class="ws-answer ws-empty">— (not ordered yet)</div>`;
+  }
+  const display = saved.length ? saved : shuffleStable(solution); // the pupil's order, else a stable jumble — never the solution
+  const inert = opts.mode === 'preview';
+  const tiles = display
+    .map(
+      (l) =>
+        `<li class="ws-parsons-line" ${inert ? 'aria-disabled="true"' : 'draggable="true" tabindex="0" role="button"'} data-line="${esc(l)}">` +
+        `<span class="ws-parsons-grip" aria-hidden="true">⋮⋮</span><code>${esc(l)}</code>` +
+        `${inert ? '' : '<span class="ws-parsons-btns"><button type="button" class="ws-parsons-up" aria-label="move up">▲</button><button type="button" class="ws-parsons-down" aria-label="move down">▼</button></span>'}</li>`,
+    )
+    .join('');
+  const help = inert ? '' : '<p class="ws-parsons-help">Drag the lines into the right order — or use ▲ ▼.</p>';
+  const savedSpan = inert ? '' : `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+  return `<div class="ws-parsons-wrap${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, key))}"`}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -525,7 +613,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   if (!headerIsData && header.length === 2) {
     const m = detectMatching(bodyRows);
     if (m) {
-      const matchFields: WorksheetField[] = m.prompts.map((prompt, i) => ({ key: `t${tableIdx}.r${i + 1}.c2`, kind: 'choice', level: block.level, label: prompt, options: m.options }));
+      const matchFields: WorksheetField[] = m.prompts.map((prompt, i) => ({ key: `${opts.keyPrefix ?? ''}t${tableIdx}.r${i + 1}.c2`, kind: 'choice', level: block.level, label: prompt, options: m.options }));
       fields.push(...matchFields);
       return renderMatching(tableIdx, matchFields, m.options, opts);
     }
@@ -574,11 +662,16 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
         }
         return `<td>${esc(cell)}</td>`;
       }
-      const key = `t${tableIdx}.r${rowNo}.c${colNo}`;
+      const key = `${opts.keyPrefix ?? ''}t${tableIdx}.r${rowNo}.c${colNo}`;
       // In a grid (trace/truth table) the column HEADER is the clearest label for a cell input;
       // otherwise prefer a sibling cell value (the question text), falling back to the header.
       const headerLabel = (theadCells?.[c] ?? '').trim();
-      const label = isGrid && headerLabel ? headerLabel : (row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? headerLabel);
+      // Prefer a sibling cell that ISN'T an answer-column label; but if every sibling looks like a
+      // prompt (e.g. a code task "Write an if statement…" starts with a verb PROMPT matches), fall back
+      // to that sibling question text rather than the column header — it's the real question.
+      const label = isGrid && headerLabel
+        ? headerLabel
+        : (row.find((x, ci) => ci !== c && x.trim() !== '' && !PROMPT.test(x)) ?? row.find((x, ci) => ci !== c && x.trim() !== '') ?? headerLabel);
       // The name/date identity header is known online — auto-fill it read-only (no field emitted, so
       // it isn't counted as something the pupil must do). Tightly matched to the identity header
       // ("Name"/"Date" label, or a "Type your name/date here" placeholder) so a real question that
@@ -608,6 +701,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
           return `<td class="ws-answer-cell ws-choice-cell">${choiceControl(key, label, options, opts)}</td>`;
         }
       }
+      // A code-writing answer → a monospaced box. Restricted to an ANSWER-column cell (so a question
+      // prompt that merely mentions "code" can't become an input), and not a grid/choice/screenshot.
+      const isCode = !isShot && !cho && !isGrid && answerCol[c] && (CODE_CELL.test(cell) || CODE_CELL.test(theadCells?.[c] ?? ''));
+      if (isCode) {
+        localFields.push({ key, kind: 'code', level: block.level, label });
+        return `<td class="ws-answer-cell ws-code-cell">${codeControl(key, label, opts)}</td>`;
+      }
       localFields.push({ key, kind: isShot ? 'image' : 'text', level: block.level, label });
       const control = isShot ? imageControl(key, label, opts) : textControl(key, label, placeholder ? cell : '', opts, isGrid);
       return `<td class="ws-answer-cell${isShot ? ' ws-shot-cell' : ''}">${control}</td>`;
@@ -636,7 +736,7 @@ function renderTasks(block: Block, startIdx: number, opts: WorksheetOptions, fie
   const items = block.lines.map((line) => {
     const m = line.match(TASK)!;
     idx += 1;
-    const key = `task.${idx}`;
+    const key = `${opts.keyPrefix ?? ''}task.${idx}`;
     const label = m[2]!.trim();
     fields.push({ key, kind: 'check', level: block.level, label });
     return checkControl(key, label, opts);
@@ -657,6 +757,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
   let tableIdx = 0;
   let taskIdx = 0;
   let blankIdx = 0;
+  let parsonsIdx = 0;
 
   for (const block of blocks) {
     const shown = include === null || include.has(block.level);
@@ -677,6 +778,21 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         out.push(html);
       }
     } else {
+      // A Parson's Problem fence (```parsons) in this md block → the reorder widget. parsonsIdx is bumped
+      // even when the block isn't in the shown slice, so keys stay stable across level slices (like tasks).
+      const par = extractParsons(block.lines);
+      if (par) {
+        parsonsIdx += 1;
+        const key = `${opts.keyPrefix ?? ''}parsons.${parsonsIdx}`;
+        if (!shown) continue;
+        fields.push({ key, kind: 'parsons', level: block.level, label: parsonsLabel(par.before), solution: par.solution });
+        const beforeHtml = par.before.some((l) => l.trim() !== '') ? renderMarkdown(par.before.join('\n')) : '';
+        const afterHtml = par.after.some((l) => l.trim() !== '') ? renderMarkdown(par.after.join('\n')) : '';
+        const spk = opts.mode === 'form' ? speakBtn(par.before.join(' ')) : '';
+        out.push(`<div class="ws-block ws-parsons-block">${spk}${beforeHtml}${parsonsControl(key, par.solution, opts)}${afterHtml}</div>`);
+        continue;
+      }
+
       // An md block (heading / instruction prose / note). Count any [[ ]] fill-in blanks FIRST so their
       // global blank.{n} keys stay stable whether or not this block is in the shown slice (like tasks).
       const blockText = block.lines.join('\n');
@@ -702,7 +818,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         const labels = blankLabels(body);
         let bi = 0;
         md = md.replace(/\[\[\s*\]\]/g, () => {
-          const key = `blank.${startBlank + bi + 1}`;
+          const key = `${opts.keyPrefix ?? ''}blank.${startBlank + bi + 1}`;
           fields.push({ key, kind: 'blank', level: block.level, label: labels[bi] ?? '' });
           bi += 1;
           return blankInput(key, opts);

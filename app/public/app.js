@@ -31,6 +31,17 @@
     }
   });
 
+  // Marking modal: ← / → walk the class roster (prev / skip-next), unless you're typing a mark or a
+  // comment. Esc already closes a native <dialog>. The buttons carry the network action; we just click.
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var d = document.getElementById('mark-modal');
+    if (!d || !d.open || isTyping(document.activeElement)) return;
+    var btn = d.querySelector('[data-mark-nav="' + (e.key === 'ArrowRight' ? 'next' : 'prev') + '"]');
+    if (btn && !btn.disabled) { e.preventDefault(); btn.click(); }
+  });
+
   // When a new note is appended to a notes list, focus its textarea so you can
   // type immediately.
   document.body.addEventListener('htmx:afterSwap', function (e) {

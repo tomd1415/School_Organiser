@@ -8,7 +8,7 @@ import { esc } from '../lib/html';
 import { pool } from '../db/pool';
 import { renderMarkdown } from '../lib/markdown';
 import { renderWorksheet, type Level } from '../lib/worksheetForm';
-import { getLessonWorksheet } from '../services/worksheet';
+import { getLessonWorksheet, getLessonWorksheets } from '../services/worksheet';
 import {
   pupilWorkRows,
   setPupilLevel,
@@ -142,11 +142,15 @@ async function buildGrid(oc: number, info: OcInfo, msg?: string): Promise<BuiltG
   const totals: Record<Level, number> = { support: 0, core: 0, challenge: 0 };
   let wsMeta: Awaited<ReturnType<typeof getLessonWorksheetMeta>> = null;
   if (info.lessonPlanId != null) {
-    const ws = await getLessonWorksheet(info.groupCourseId, info.lessonPlanId);
-    if (ws) {
-      wsMeta = { resourceId: ws.resourceId, versionNo: ws.versionNo, storagePath: '', title: ws.title, adapted: ws.adapted };
-      for (const f of renderWorksheet(ws.markdown, { mode: 'review' }).fields) {
-        if (f.kind !== 'text') continue;
+    // Sum the typed-answer totals across ALL the lesson's worksheets (each with its key prefix). The
+    // marking bar's AI scheme/derive still targets the first worksheet; per-pupil marking (the modal)
+    // covers them all.
+    const worksheets = await getLessonWorksheets(info.groupCourseId, info.lessonPlanId);
+    const w0 = worksheets[0];
+    if (w0) wsMeta = { resourceId: w0.resourceId, versionNo: w0.versionNo, storagePath: '', title: w0.title, adapted: w0.adapted };
+    for (const w of worksheets) {
+      for (const f of renderWorksheet(w.markdown, { mode: 'review', keyPrefix: w.keyPrefix }).fields) {
+        if (f.kind !== 'text' && f.kind !== 'code') continue;
         if (f.level === 'shared') { totals.support++; totals.core++; totals.challenge++; }
         else totals[f.level]++;
       }

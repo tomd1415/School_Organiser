@@ -34,16 +34,25 @@ export interface WorksheetDef {
   title: string;
   intro: string;
   questions: { q: string; a: string }[]; // a = the expected/model answer (drives marking)
+  codeQuestions?: { q: string; a: string }[]; // a code-writing answer box ("Type your code here")
+  parsons?: { instruction: string; lines: string[] }; // a Parson's Problem; lines in CORRECT order
   checks: string[];
   blank?: { sentence: string; answer: string }; // sentence MUST contain "[[ ]]"
 }
 
-/** Build pupil-facing worksheet markdown from a structured def. One answer table (→ text fields),
- *  a self-check list (→ check fields) and an optional fill-in-the-blank (→ blank field). */
+/** Build pupil-facing worksheet markdown from a structured def: an answer table (→ text fields), an
+ *  optional code-writing table (→ code fields), an optional Parson's block (→ a parsons field), a
+ *  self-check list (→ check fields) and an optional fill-in-the-blank (→ blank field). */
 export function worksheetMarkdown(ws: WorksheetDef): string {
   const rows = ws.questions.map((it) => `| ${it.q} | Type your answer here |`).join('\n');
   const checks = ws.checks.map((c) => `- [ ] ${c}`).join('\n');
   const blank = ws.blank ? `\n\n> Key idea: ${ws.blank.sentence}\n` : '';
+  const code = ws.codeQuestions?.length
+    ? `\n\n## Write code\n| Task | Your code |\n|---|---|\n${ws.codeQuestions.map((it) => `| ${it.q} | Type your code here |`).join('\n')}\n`
+    : '';
+  const parsons = ws.parsons
+    ? `\n\n## Put the code in order\n${ws.parsons.instruction}\n\n\`\`\`parsons\n${ws.parsons.lines.join('\n')}\n\`\`\`\n`
+    : '';
   return `# ${ws.title}
 
 ${ws.intro}
@@ -51,7 +60,7 @@ ${ws.intro}
 ## Questions
 | Question | Your answer |
 |---|---|
-${rows}
+${rows}${code}${parsons}
 
 ## Check your understanding
 ${checks}${blank}
@@ -74,6 +83,7 @@ export interface LessonDef {
   duration?: number; // default 50
   kit?: string;
   worksheet?: WorksheetDef;
+  extraWorksheets?: WorksheetDef[]; // additional worksheets on the same lesson (→ pupil tabs)
   slides?: string[]; // slide bullet lines "Heading — body"
 }
 export interface UnitDef {
@@ -192,14 +202,36 @@ const wsWaves: WorksheetDef = {
 };
 const wsSelection: WorksheetDef = {
   title: 'Selection (if / else)',
-  intro: 'Write short pseudocode where asked.',
+  intro: 'Read the code first, then write and order some of your own.',
   questions: [
     { q: 'What does selection let a program do?', a: 'choose between different paths based on a condition' },
-    { q: 'Write an if statement that prints "Pass" when score >= 40.', a: 'if score >= 40 then print("Pass")' },
+    { q: 'Predict the output: if 7 > 4 then print("yes") else print("no")', a: 'yes' },
     { q: 'What is the role of else?', a: 'it runs when the if condition is false' },
   ],
-  checks: ['I can write an if statement', 'I can use else'],
+  codeQuestions: [
+    { q: 'Write an if statement that prints "Pass" when score is 40 or more.', a: 'if score >= 40:\n    print("Pass")' },
+  ],
+  parsons: {
+    instruction: 'Drag these lines into order so the program asks for a score and prints Pass or Fail.',
+    lines: ['score = int(input("Score? "))', 'if score >= 40:', '    print("Pass")', 'else:', '    print("Fail")'],
+  },
+  checks: ['I can write an if statement', 'I can use else', 'I can read code before writing it'],
   blank: { sentence: 'selection chooses a path using a [[ ]].', answer: 'condition' },
+};
+
+// A short EXTENSION worksheet — bound to the same lesson as wsSelection to show MULTIPLE worksheets
+// per lesson (the pupil gets tabs; the teacher marks each from the modal's worksheet picker).
+const wsSelectionExt: WorksheetDef = {
+  title: 'Selection — extension',
+  intro: 'Stretch tasks once you have finished the main worksheet.',
+  questions: [
+    { q: 'Give a real-world example where a program must choose between two actions.', a: 'e.g. a thermostat turning heating on if the temperature is below target' },
+    { q: 'What is a nested if?', a: 'an if statement inside another if' },
+  ],
+  codeQuestions: [
+    { q: 'Write code that prints "Even" or "Odd" for a number n.', a: 'if n % 2 == 0:\n    print("Even")\nelse:\n    print("Odd")' },
+  ],
+  checks: ['I tried a stretch task'],
 };
 const wsRobot: WorksheetDef = {
   title: 'Driving and turning',
@@ -337,7 +369,7 @@ export const SCHEMES: SchemeDef[] = [
         title: 'Core constructs',
         lessons: [
           { title: 'Sequencing', objectives: obj('Order instructions correctly'), outline: 'Algorithm for a everyday task; debug a jumbled one.' },
-          { title: 'Selection (if / else)', objectives: obj('Write an if/else', 'Use comparison operators'), outline: 'Branching challenges; the worksheet.', worksheet: wsSelection },
+          { title: 'Selection (if / else)', objectives: obj('Write an if/else', 'Use comparison operators'), outline: 'Branching challenges; the worksheet.', worksheet: wsSelection, extraWorksheets: [wsSelectionExt] },
           { title: 'Iteration (loops)', objectives: obj('Use a count-controlled loop', 'Use a condition-controlled loop'), outline: 'Repeat with for and while; trace the output.' },
         ],
       },

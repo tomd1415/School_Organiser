@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ADHD/ASD Support Option 4: Visual Seating Grid & Sensory Navigator">
+  <title>Option 4 — Visual Seating Grid & Sensory Navigator (ADHD/ASD Support)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-active-screen="screen-2">
+  <a class="skip-link" href="#main-content">Skip to screen content</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Simulator Bar -->
+  <div class="screen-simulator-bar">
+    <div class="sim-info">
+      <span class="badge ai">Multi-Screen Simulator</span>
+      <span>Select a screen to view:</span>
+    </div>
+    <div class="sim-buttons">
+      <button class="sim-btn" type="button" data-screen-target="screen-1">
+        <span class="icon">🖥️</span>
+        <div class="btn-lbl">
+          <strong>Screen 1: Board Display</strong>
+          <small>Pupil-Safe Whiteboard (IWB)</small>
+        </div>
+      </button>
+      <button class="sim-btn active" type="button" data-screen-target="screen-2">
+        <span class="icon">📱</span>
+        <div class="btn-lbl">
+          <strong>Screen 2: Seating Tracker</strong>
+          <small>Rotated 90° Classroom Visual Grid</small>
+        </div>
+      </button>
+      <button class="sim-btn" type="button" data-screen-target="screen-3">
+        <span class="icon">💻</span>
+        <div class="btn-lbl">
+          <strong>Screen 3: Focus Desk Shell</strong>
+          <small>Landscape Distraction-Free Workspace</small>
+        </div>
+      </button>
+    </div>
+    <div class="sim-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="page-container">
+
+    <!-- SCREEN 1: Pupil-Safe Board Display (IWB) -->
+    <div class="screen-content screen-1-content">
+      <div class="screen-header">
+        <div>
+          <span class="badge live">IWB Facing Pupils</span>
+          <h1>Python Loop Reference Sheet</h1>
+        </div>
+        <div class="present-time">10:32</div>
+      </div>
+
+      <div class="screen-1-grid">
+        <!-- Syntax Code Cards -->
+        <div class="card board-slide">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Syntax Reference Card</p>
+              <h2>Two Types of Python Loops</h2>
+            </div>
+            <span class="badge ai">GCSE CS Cheat-sheet</span>
+          </div>
+
+          <div class="slide-body grid-cards-2">
+            <div class="code-container">
+              <div class="code-header">1. WHILE Loop (Condition-Controlled)</div>
+              <pre><code><span class="comment"># Repeat while condition is TRUE</span>
+count = <span class="number">0</span>
+<span class="keyword">while</span> count &lt; <span class="number">5</span>:
+    <span class="builtin">print</span>(<span class="string">"Count:"</span>, count)
+    count = count + <span class="number">1</span></code></pre>
+              <div class="syntax-explanation">
+                Runs until <code>count</code> reaches 5. If you forget to increment, you get an <strong>infinite loop</strong>!
+              </div>
+            </div>
+
+            <div class="code-container">
+              <div class="code-header">2. FOR Loop (Count-Controlled)</div>
+              <pre><code><span class="comment"># Repeat for a set list of items</span>
+names = [<span class="string">"Aisha"</span>, <span class="string">"Daniel"</span>, <span class="string">"Eva"</span>]
+<span class="keyword">for</span> x <span class="keyword">in</span> names:
+    <span class="builtin">print</span>(<span class="string">"Hello"</span>, x)</code></pre>
+              <div class="syntax-explanation">
+                Runs exactly 3 times (once for each name in the list). Safe from infinite loops.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sensory Progress Arc and Timer -->
+        <aside class="board-sidebar">
+          <div class="card timer-circular">
+            <p class="eyebrow">Lesson Timer</p>
+            <div class="arc-container">
+              <!-- SVG circular timer indicator -->
+              <svg viewBox="0 0 100 100" class="timer-svg">
+                <circle cx="50" cy="50" r="42" class="timer-bg-ring"></circle>
+                <circle cx="50" cy="50" r="42" class="timer-progress-ring" style="stroke-dashoffset: 120;"></circle>
+              </svg>
+              <div class="timer-text">
+                <strong id="screen1-circ-timer">12:45</strong>
+                <span>coding time</span>
+              </div>
+            </div>
+            
+            <div class="lesson-phases">
+              <span class="phase done">Intro</span>
+              <span class="phase done">Demo</span>
+              <span class="phase active">Coding</span>
+              <span class="phase">Review</span>
+            </div>
+          </div>
+
+          <div class="card board-alert-card">
+            <h3>💡 Live Coding Objectives</h3>
+            <p class="quiet">Use these code structures in your active assignments.</p>
+            <hr class="line-divider">
+            <ul class="pupil-goals">
+              <li class="done"><span class="check">✓</span> Task 1: Basic count loop</li>
+              <li class="active"><span class="check">→</span> Task 2: Custom list iteration</li>
+              <li><span class="check">○</span> Task 3: Infinite loop prevention</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+
+    <!-- SCREEN 2: Portrait Screen - The Seating Grid -->
+    <div class="screen-content screen-2-content">
+      <div class="portrait-cockpit">
+        
+        <!-- Header -->
+        <header class="card portrait-header">
+          <div class="header-split">
+            <div>
+              <p class="eyebrow">Classroom Spatial Map</p>
+              <h2>Lab 2 Seating Plan</h2>
+              <small class="muted">Click a student workstation to inspect</small>
+            </div>
+            <div class="lesson-time-status">
+              <span class="badge live">28 Active</span>
+            </div>
+          </div>
+          
+          <div class="seating-legend">
+            <span class="legend-dot active"></span> Active
+            <span class="legend-dot stuck"></span> Stuck
+            <span class="legend-dot idle"></span> Idle
+            <span class="legend-dot done"></span> Done
+            <span class="legend-dot offline"></span> Offline
+          </div>
+        </header>
+
+        <!-- Interactive Seating Grid -->
+        <section class="card seating-card">
+          <!-- 4 rows of 7 workstations representing physical layout -->
+          <div class="seating-grid">
+            
+            <!-- ROW 1 (Teacher desk is at front) -->
+            <button type="button" class="seat-cell stuck" data-pupil="Daniel Reed" data-level="Support" data-file="loops.py" data-status="Syntax Error" data-detail="IndentationError: unexpected indent (5m ago)" data-desk="Desk A1">
+              <strong>Daniel R</strong>
+              <small>A1</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Ruby Patel" data-level="Support" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk A2">
+              <strong>Ruby P</strong>
+              <small>A2</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Eva Morris" data-level="Support" data-file="loops.py" data-status="Active Coding" data-detail="No syntax errors" data-desk="Desk A3">
+              <strong>Eva M</strong>
+              <small>A3</small>
+            </button>
+            <button type="button" class="seat-cell offline" data-pupil="Empty Workstation" data-level="N/A" data-file="None" data-status="Offline" data-detail="Computer logged out" data-desk="Desk A4">
+              <strong>Empty</strong>
+              <small>A4</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Callum Fraser" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk A5">
+              <strong>Callum F</strong>
+              <small>A5</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Daisy Ward" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Completed task 1" data-desk="Desk A6">
+              <strong>Daisy W</strong>
+              <small>A6</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Ellis Jones" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="No syntax errors" data-desk="Desk A7">
+              <strong>Ellis J</strong>
+              <small>A7</small>
+            </button>
+
+            <!-- ROW 2 -->
+            <button type="button" class="seat-cell stuck" data-pupil="Aisha Khan" data-level="Support" data-file="loops.py" data-status="Syntax Error" data-detail="NameError: 'range' not defined (2m ago)" data-desk="Desk B1">
+              <strong>Aisha K</strong>
+              <small>B1</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Sam Taylor" data-level="Support" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 1" data-desk="Desk B2">
+              <strong>Sam T</strong>
+              <small>B2</small>
+            </button>
+            <button type="button" class="seat-cell idle" data-pupil="Hassan Begum" data-level="Support" data-file="loops.py" data-status="Idle 6m" data-detail="No keyboard strokes since 10:26" data-desk="Desk B3">
+              <strong>Hassan B</strong>
+              <small>B3</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Frankie Smith" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk B4">
+              <strong>Frankie S</strong>
+              <small>B4</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Grace Lewis" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk B5">
+              <strong>Grace L</strong>
+              <small>B5</small>
+            </button>
+            <button type="button" class="seat-cell done" data-pupil="Max Owen" data-level="Extend" data-file="loops_challenge.py" data-status="Done" data-detail="Completed all tasks, working on loops_challenge.py" data-desk="Desk B6">
+              <strong>Max O</strong>
+              <small>B6</small>
+            </button>
+            <button type="button" class="seat-cell done" data-pupil="Jacob Neri" data-level="Extend" data-file="loops.py" data-status="Done" data-detail="Completed core tasks" data-desk="Desk B7">
+              <strong>Jacob N</strong>
+              <small>B7</small>
+            </button>
+
+            <!-- ROW 3 -->
+            <button type="button" class="seat-cell active" data-pupil="Imani Diallo" data-level="Extend" data-file="loops.py" data-status="Active Coding" data-detail="Working on challenge" data-desk="Desk C1">
+              <strong>Imani D</strong>
+              <small>C1</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Leah Gallagher" data-level="Extend" data-file="loops.py" data-status="Active Coding" data-detail="Working on challenge" data-desk="Desk C2">
+              <strong>Leah G</strong>
+              <small>C2</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Zara Hussain" data-level="Extend" data-file="loops.py" data-status="Active Coding" data-detail="No syntax errors" data-desk="Desk C3">
+              <strong>Zara H</strong>
+              <small>C3</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Alex Morgan" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Completed task 2" data-desk="Desk C4">
+              <strong>Alex M</strong>
+              <small>C4</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Bethany Cole" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk C5">
+              <strong>Bethany C</strong>
+              <small>C5</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Ben Davis" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 1" data-desk="Desk C6">
+              <strong>Ben D</strong>
+              <small>C6</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Chloe Thompson" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk C7">
+              <strong>Chloe T</strong>
+              <small>C7</small>
+            </button>
+
+            <!-- ROW 4 -->
+            <button type="button" class="seat-cell active" data-pupil="Ethan Miller" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="No syntax errors" data-desk="Desk D1">
+              <strong>Ethan M</strong>
+              <small>D1</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Freya Adams" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="No syntax errors" data-desk="Desk D2">
+              <strong>Freya A</strong>
+              <small>D2</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Harry Wilson" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 1" data-desk="Desk D3">
+              <strong>Harry W</strong>
+              <small>D3</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Isabella Baker" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk D4">
+              <strong>Isabella B</strong>
+              <small>D4</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Liam Carter" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk D5">
+              <strong>Liam C</strong>
+              <small>D5</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Mia Hill" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Completed task 1" data-desk="Desk D6">
+              <strong>Mia H</strong>
+              <small>D6</small>
+            </button>
+            <button type="button" class="seat-cell active" data-pupil="Oliver Green" data-level="Core" data-file="loops.py" data-status="Active Coding" data-detail="Working on task 2" data-desk="Desk D7">
+              <strong>Oliver G</strong>
+              <small>D7</small>
+            </button>
+          </div>
+        </section>
+
+        <!-- Floating Workstation Inspector Panel (shows details of clicked student) -->
+        <section class="card portrait-inspector" id="workstation-inspector">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow" id="inspect-desk">Desk A1</p>
+              <h2 id="inspect-pupil">Daniel Reed</h2>
+            </div>
+            <span class="badge warn" id="inspect-level">Support</span>
+          </div>
+
+          <div class="inspector-details">
+            <div class="detail-row"><span>IDE File:</span> <code id="inspect-file">loops.py</code></div>
+            <div class="detail-row"><span>Status:</span> <strong id="inspect-status" class="red-text">Syntax Error</strong></div>
+            <div class="detail-row"><span class="quiet" id="inspect-desc">IndentationError: unexpected indent (5m ago)</span></div>
+            
+            <hr class="line-divider">
+            
+            <div class="inspector-actions">
+              <button class="button primary small" type="button" id="push-helper-btn">Push Indent Helper</button>
+              <button class="button small" type="button" id="change-level-btn">Change Level</button>
+              <button class="button ghost small" type="button" id="log-note-btn">Quick Note</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+
+    <!-- SCREEN 3: Landscape Screen - Distraction-Free Focus Panel -->
+    <div class="screen-content screen-3-content">
+      
+      <!-- Central Focus Panel (hides standard widgets for ADHD sensory safety) -->
+      <div class="focus-console">
+        <div class="focus-alert">
+          <span class="badge ai">🛡️ Focus Mode Active</span>
+          <span>Secondary widgets collapsed. Visual clutter minimized.</span>
+          <button class="button small ghost" type="button" id="toggle-focus-mode">Toggle Full Sidebar</button>
+        </div>
+
+        <div class="focus-grid" id="focus-workspace-grid">
+          
+          <!-- Column 1: Active Slide Notes (Script) -->
+          <div class="card focus-main-card">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Active Slide 3 Notes</p>
+                <h2>Demonstration Checklist</h2>
+              </div>
+              <span class="badge live">Board Paired</span>
+            </div>
+
+            <div class="focus-instructions">
+              <div class="instruction-block">
+                <h3>🗣️ Key Teacher Prompts:</h3>
+                <ul>
+                  <li>Direct pupils' attention to the colon <code>:</code>. In Python, this specifies a block follows.</li>
+                  <li>Explain the exclusive nature of stopping range: <code>range(1, 11)</code> ends at 10.</li>
+                </ul>
+              </div>
+
+              <div class="instruction-block">
+                <h3>⚠️ Common Student Misconceptions:</h3>
+                <ul>
+                  <li><strong>Off-by-one error:</strong> Range stops 1 item short. Using <code>range(10)</code> prints 0 to 9.</li>
+                  <li><strong>Indentation:</strong> Python uses tabs/spaces to group block lines. A mismatch yields `IndentationError`.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="focus-quick-capture">
+              <label class="notes-lbl">Private Lesson Memo (saved to session):</label>
+              <textarea placeholder="Type a reminder to look back on after lesson..." id="focus-memo-box"></textarea>
+              <div class="focus-memo-footer">
+                <small class="quiet">Notes synced to Year 9 Scheme of Work.</small>
+                <button class="button small primary" type="button" id="save-focus-memo">Save Memo</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Simplified Student Attention Panel -->
+          <div class="card focus-side-card" id="focus-attention-sidebar">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Action List</p>
+                <h2>Immediate Tasks</h2>
+              </div>
+              <span class="badge red">3 Needs Attention</span>
+            </div>
+
+            <div class="focus-action-list">
+              <article class="focus-action-row stuck">
+                <div class="act-main">
+                  <strong>Daniel Reed (Desk A1)</strong>
+                  <span class="quiet">Stuck 5m · Syntax Error</span>
+                </div>
+                <button class="button small primary" type="button" data-resolve-pupil-focus="Daniel Reed">Push Help</button>
+              </article>
+
+              <article class="focus-action-row stuck">
+                <div class="act-main">
+                  <strong>Aisha Khan (Desk B1)</strong>
+                  <span class="quiet">Stuck 2m · NameError</span>
+                </div>
+                <button class="button small" type="button" data-resolve-pupil-focus="Aisha Khan">Push Help</button>
+              </article>
+
+              <article class="focus-action-row idle">
+                <div class="act-main">
+                  <strong>Hassan Begum (Desk B3)</strong>
+                  <span class="quiet">Idle 6m · No code change</span>
+                </div>
+                <button class="button small ghost" type="button">Log Check</button>
+              </article>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Screen toggle script
+    (function () {
+      'use strict';
+      
+      const body = document.body;
+      const buttons = document.querySelectorAll('[data-screen-target]');
+      const statusAnnounce = document.getElementById('prototype-status');
+
+      function announce(message) {
+        if (!statusAnnounce) return;
+        statusAnnounce.textContent = '';
+        setTimeout(function() {
+          statusAnnounce.textContent = message;
+        }, 20);
+      }
+
+      buttons.forEach(button => {
+        button.addEventListener('click', function () {
+          const targetScreen = button.getAttribute('data-screen-target');
+          body.setAttribute('data-active-screen', targetScreen);
+          
+          buttons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          const label = button.querySelector('strong').textContent;
+          announce('Switched workspace view to: ' + label);
+        });
+      });
+
+      // Contrast Toggle
+      document.querySelectorAll('[data-contrast-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const high = document.documentElement.dataset.contrast !== 'high';
+          document.documentElement.dataset.contrast = high ? 'high' : 'standard';
+          button.setAttribute('aria-pressed', String(high));
+          announce(high ? 'High contrast enabled' : 'Standard contrast enabled');
+        });
+      });
+
+      // Density Toggle
+      document.querySelectorAll('[data-density-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const compact = document.documentElement.dataset.density !== 'compact';
+          document.documentElement.dataset.density = compact ? 'compact' : 'comfortable';
+          button.setAttribute('aria-pressed', String(compact));
+          announce(compact ? 'Compact layout enabled' : 'Comfortable layout enabled');
+        });
+      });
+
+      // Seating plan interaction
+      const seatCells = document.querySelectorAll('.seat-cell');
+      const inspectDesk = document.getElementById('inspect-desk');
+      const inspectPupil = document.getElementById('inspect-pupil');
+      const inspectLevel = document.getElementById('inspect-level');
+      const inspectFile = document.getElementById('inspect-file');
+      const inspectStatus = document.getElementById('inspect-status');
+      const inspectDesc = document.getElementById('inspect-desc');
+      const pushHelperBtn = document.getElementById('push-helper-btn');
+
+      seatCells.forEach(cell => {
+        cell.addEventListener('click', function () {
+          const pupil = this.getAttribute('data-pupil');
+          const desk = this.getAttribute('data-desk');
+          const level = this.getAttribute('data-level');
+          const file = this.getAttribute('data-file');
+          const status = this.getAttribute('data-status');
+          const detail = this.getAttribute('data-detail');
+
+          inspectDesk.textContent = desk;
+          inspectPupil.textContent = pupil;
+          inspectLevel.textContent = level;
+          inspectFile.textContent = file;
+          inspectStatus.textContent = status;
+          inspectDesc.textContent = detail;
+
+          // Color and style adjustment for inspector status
+          inspectStatus.className = '';
+          if (status === 'Syntax Error') {
+            inspectStatus.classList.add('red-text');
+          } else if (status === 'Done') {
+            inspectStatus.classList.add('green-text');
+          } else if (status === 'Idle 6m') {
+            inspectStatus.classList.add('amber-text');
+          } else {
+            inspectStatus.classList.add('blue-text');
+          }
+
+          // Trigger active highlights in grid
+          seatCells.forEach(c => c.classList.remove('selected-seat'));
+          this.classList.add('selected-seat');
+
+          announce('Inspecting workstation ' + desk + ' (' + pupil + ')');
+        });
+      });
+
+      // Action inside inspector
+      if (pushHelperBtn) {
+        pushHelperBtn.addEventListener('click', function () {
+          const pupil = inspectPupil.textContent;
+          announce('Sent tailored loops help sheet to ' + pupil);
+          
+          // Find cell and clear stuck status
+          seatCells.forEach(cell => {
+            if (cell.getAttribute('data-pupil') === pupil) {
+              cell.className = 'seat-cell active';
+              cell.setAttribute('data-status', 'Active');
+              cell.setAttribute('data-detail', 'Recieved helper prompt');
+            }
+          });
+
+          // update inspector
+          inspectStatus.textContent = 'Active';
+          inspectStatus.className = 'blue-text';
+          inspectDesc.textContent = 'Helper prompt sent';
+        });
+      }
+
+      // Distraction-free Focus Toggle
+      const toggleFocusBtn = document.getElementById('toggle-focus-mode');
+      const focusAttentionSidebar = document.getElementById('focus-attention-sidebar');
+      const focusWorkspaceGrid = document.getElementById('focus-workspace-grid');
+
+      if (toggleFocusBtn && focusAttentionSidebar && focusWorkspaceGrid) {
+        toggleFocusBtn.addEventListener('click', function () {
+          const hidden = focusAttentionSidebar.style.display === 'none';
+          if (hidden) {
+            focusAttentionSidebar.style.display = 'block';
+            focusWorkspaceGrid.style.gridTemplateColumns = '1fr 340px';
+            this.textContent = 'Toggle Focus (Hide Alert Pane)';
+            announce('Focus alert panel displayed');
+          } else {
+            focusAttentionSidebar.style.display = 'none';
+            focusWorkspaceGrid.style.gridTemplateColumns = '1fr';
+            this.textContent = 'Toggle Focus (Show Alert Pane)';
+            announce('Sensory layout simplified. Alert panel hidden.');
+          }
+        });
+      }
+
+      // Save focus memo
+      const saveFocusMemoBtn = document.getElementById('save-focus-memo');
+      const focusMemoBox = document.getElementById('focus-memo-box');
+
+      if (saveFocusMemoBtn && focusMemoBox) {
+        saveFocusMemoBtn.addEventListener('click', function () {
+          const note = focusMemoBox.value.trim();
+          if (!note) {
+            announce('Type a memo before saving');
+            return;
+          }
+          announce('Memo saved: ' + note.substring(0, 15) + '...');
+          focusMemoBox.value = '';
+        });
+      }
+
+      // Resolve alert in focus view
+      document.querySelectorAll('[data-resolve-pupil-focus]').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const pupil = this.getAttribute('data-resolve-pupil-focus');
+          const row = this.closest('.focus-action-row');
+          if (row) {
+            row.style.opacity = '0.3';
+            this.textContent = 'Sent';
+            this.disabled = true;
+          }
+          // Mirror to seating plan cells
+          seatCells.forEach(cell => {
+            if (cell.getAttribute('data-pupil') === pupil) {
+              cell.className = 'seat-cell active';
+            }
+          });
+          announce('Instructional loops cheat-sheet dispatched to ' + pupil);
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>

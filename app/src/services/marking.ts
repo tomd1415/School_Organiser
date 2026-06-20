@@ -101,9 +101,10 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
   if (!oc || oc.lessonPlanId == null) return { ok: false, message: 'No worksheet is bound to this lesson.' };
   const ws = await getLessonWorksheet(oc.groupCourseId, oc.lessonPlanId);
   if (!ws) return { ok: false, message: 'No worksheet to build a scheme from.' };
-  // Screenshot (image) fields aren't auto-marked — the teacher reviews them — so keep them out of
-  // the mark scheme entirely (no point is created or kept for them).
-  const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => f.kind !== 'image');
+  // Screenshot (image) fields aren't auto-marked — the teacher reviews them — so keep them out of the
+  // mark scheme. Parson's (parsons) carry their own correct order in the worksheet and are checked
+  // against it (in the marking modal), so they're left out of the AI scheme too.
+  const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => f.kind !== 'image' && f.kind !== 'parsons');
   if (fields.length === 0) return { ok: false, message: 'This worksheet has no answerable fields.' };
   const answersMd = await getLessonDocMarkdown(oc.groupCourseId, oc.lessonPlanId, 'answers');
 
@@ -117,7 +118,7 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
         worksheetTitle: ws.title,
         worksheetMarkdown: ws.markdown,
         answersMarkdown: answersMd,
-        fields: fields.map((f) => ({ key: f.key, label: f.label, kindHint: f.kind === 'image' ? 'text' : f.kind, options: f.options })), // image is already filtered out above
+        fields: fields.map((f) => ({ key: f.key, label: f.label, kindHint: f.kind === 'choice' || f.kind === 'check' || f.kind === 'blank' ? f.kind : ('text' as const), options: f.options })), // code → open text; image/parsons already filtered out
       }),
       instruction: MARK_SCHEME_INSTRUCTION,
       maxTokens: 6000,

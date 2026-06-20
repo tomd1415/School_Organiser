@@ -144,7 +144,8 @@ async function makePupils(groups: GroupRow[], gcs: GcRow[]): Promise<{
 }
 
 // ── 3. schemes: author, enrich plans, attach worksheet/slide resources ──────────────────────────
-interface PlanInfo { planId: number; lesson: LessonDef; worksheet?: { resId: number; fields: WorksheetField[] } }
+interface WsEntry { resId: number; fields: WorksheetField[]; keyPrefix: string; def: WorksheetDef }
+interface PlanInfo { planId: number; lesson: LessonDef; worksheets: WsEntry[] }
 
 async function makeSchemes(courseByName: Map<string, number>): Promise<{
   plansByCourse: Map<number, PlanInfo[]>;
@@ -180,10 +181,13 @@ async function makeSchemes(courseByName: Map<string, number>): Promise<{
         `UPDATE lesson_plans SET objectives = $2, outline = $3, duration_min = $4, kit_needed = $5, updated_at = now() WHERE id = $1`,
         [planId, lesson.objectives, lesson.outline, lesson.duration ?? 50, lesson.kit ?? null],
       );
-      const info: PlanInfo = { planId, lesson };
-      if (lesson.worksheet) {
-        const res = await attachWorksheet(planId, lesson.worksheet);
-        info.worksheet = res;
+      const info: PlanInfo = { planId, lesson, worksheets: [] };
+      // A lesson can carry several worksheets (main + extensions); slot 0 is unprefixed, later slots
+      // get a `w{n}.` key prefix so their fields never collide.
+      const wsList = [lesson.worksheet, ...(lesson.extraWorksheets ?? [])].filter(Boolean) as WorksheetDef[];
+      for (let wi = 0; wi < wsList.length; wi += 1) {
+        const res = await attachWorksheet(planId, wsList[wi]!);
+        info.worksheets.push({ resId: res.resId, fields: res.fields, keyPrefix: wi === 0 ? '' : `w${wi}.`, def: wsList[wi]! });
         worksheetCount++;
       }
       if (lesson.slides) await attachSlides(planId, lesson.title, lesson.slides);
@@ -219,6 +223,11 @@ async function attachWorksheet(planId: number, ws: WorksheetDef): Promise<{ resI
   if (blankFields[0] && ws.blank) {
     points.push({ fieldKey: blankFields[0].key, kind: 'keyword', expected: ws.blank.answer, alternatives: [], marks: 1, required: false });
   }
+  // Code-writing answers are open marks; Parson's carry their own correct order, so they get no point.
+  fields.filter((f) => f.kind === 'code').forEach((f, i) => {
+    const a = (ws.codeQuestions?.[i]?.a ?? '').trim();
+    if (a) points.push({ fieldKey: f.key, kind: 'open', expected: a, alternatives: [], marks: 2, required: false });
+  });
   await upsertScheme(resId, 1, 'teacher', 'ready', points);
   return { resId, fields };
 }
@@ -279,9 +288,12 @@ async function deliverAndWork(
         await setOccurrenceProgress(oc.occurrenceCourseId, 5, pick(STOP_TEMPLATES)(plan.lesson.title));
         taughtOccurrenceIds.add(occId);
         c.taught++;
-        if (plan.worksheet) {
-          const w = await generateWork(oc.occurrenceCourseId, plan.worksheet, gc, pupilsByGroup, levelByPupilGc);
-          c.answers += w.answers; c.marks += w.marks; c.done += w.done;
+        if (plan.worksheets.length) {
+          for (const w of plan.worksheets) {
+            const r = await generateWork(oc.occurrenceCourseId, w, gc, pupilsByGroup, levelByPupilGc);
+            c.answers += r.answers; c.marks += r.marks;
+          }
+          c.done += await generateDone(oc.occurrenceCourseId, gc, pupilsByGroup); // Done ✓ once per lesson, not per worksheet
           taughtWorksheetOcs.unshift({ ocId: oc.occurrenceCourseId, plan });
         }
       }
@@ -322,80 +334,83 @@ const FB_PART = ['On the right track — add the key term.', 'Partly there; give
 
 async function generateWork(
   ocId: number,
-  ws: { resId: number; fields: WorksheetField[] },
+  ws: WsEntry,
   gc: GcRow,
   pupilsByGroup: Map<number, number[]>,
   levelByPupilGc: Map<string, Level>,
-): Promise<{ answers: number; marks: number; done: number }> {
+): Promise<{ answers: number; marks: number }> {
+  const K = (k: string): string => ws.keyPrefix + k; // the STORED (prefixed) key for this worksheet
   const textFields = ws.fields.filter((f) => f.kind === 'text');
+  const codeFields = ws.fields.filter((f) => f.kind === 'code');
   const blankFields = ws.fields.filter((f) => f.kind === 'blank');
   const checkFields = ws.fields.filter((f) => f.kind === 'check');
-  const expected = findExpected(ws); // expected answers aligned to textFields, plus the blank answer
+  const parsonsFields = ws.fields.filter((f) => f.kind === 'parsons');
   const pupils = (pupilsByGroup.get(gc.groupId) ?? []).slice(0, WORK_PUPILS);
 
-  let answers = 0; let done = 0;
-  // remember (pupilId, fieldKey) → quality so we can mark after a single fetch
-  const quality = new Map<string, 'full' | 'partial'>();
+  let answers = 0;
+  const band = new Map<string, 'full' | 'partial' | 'zero'>(); // pupilId:STOREDkey → mark band (for marking)
+  const outOf = new Map<string, number>(); // STOREDkey → marks available
+  const save = async (pid: number, storedKey: string, value: string): Promise<void> => {
+    await saveAnswer({ pupilId: pid, occurrenceCourseId: ocId, resourceId: ws.resId, versionNo: 1, fieldKey: storedKey, value });
+    answers += 1;
+  };
 
   for (const pid of pupils) {
     const level = levelByPupilGc.get(`${pid}:${gc.id}`) ?? 'core';
-    for (let i = 0; i < textFields.length; i++) {
-      const f = textFields[i]!;
-      const a = answerFor(expected.questions[i] ?? f.label, level);
+    for (let i = 0; i < textFields.length; i += 1) {
+      const a = answerFor(ws.def.questions[i]?.a ?? textFields[i]!.label, level);
       if (!a) continue;
-      await saveAnswer({ pupilId: pid, occurrenceCourseId: ocId, resourceId: ws.resId, versionNo: 1, fieldKey: f.key, value: a.value });
-      quality.set(`${pid}:${f.key}`, a.quality);
-      answers++;
+      const sk = K(textFields[i]!.key); await save(pid, sk, a.value); band.set(`${pid}:${sk}`, a.quality); outOf.set(sk, 2);
     }
-    if (blankFields[0] && expected.blank && chance(level === 'support' ? 0.7 : 0.9)) {
-      await saveAnswer({ pupilId: pid, occurrenceCourseId: ocId, resourceId: ws.resId, versionNo: 1, fieldKey: blankFields[0].key, value: expected.blank });
-      quality.set(`${pid}:${blankFields[0].key}`, 'full');
-      answers++;
+    for (let i = 0; i < codeFields.length; i += 1) {
+      const a = answerFor(ws.def.codeQuestions?.[i]?.a ?? '', level);
+      if (!a) continue;
+      const sk = K(codeFields[i]!.key); await save(pid, sk, a.value); band.set(`${pid}:${sk}`, a.quality); outOf.set(sk, 2);
     }
-    for (const cf of checkFields) {
-      if (chance(0.8)) { await saveAnswer({ pupilId: pid, occurrenceCourseId: ocId, resourceId: ws.resId, versionNo: 1, fieldKey: cf.key, value: 'x' }); answers++; }
+    if (blankFields[0] && ws.def.blank && chance(level === 'support' ? 0.7 : 0.9)) {
+      const sk = K(blankFields[0].key); await save(pid, sk, ws.def.blank.answer); band.set(`${pid}:${sk}`, 'full'); outOf.set(sk, 1);
     }
-    if (chance(0.85)) { await setDone(pid, ocId, true); done++; }
+    for (const cf of checkFields) if (chance(0.8)) await save(pid, K(cf.key), 'x');
+    for (const pf of parsonsFields) {
+      const sol = pf.solution ?? [];
+      if (!sol.length) continue;
+      const correct = chance(level === 'support' ? 0.55 : 0.8); // most order it right; some reverse it
+      const sk = K(pf.key); await save(pid, sk, (correct ? sol : [...sol].reverse()).join('\n'));
+      band.set(`${pid}:${sk}`, correct ? 'full' : 'zero'); outOf.set(sk, 1);
+    }
   }
 
-  // marks for the open (text/blank) answers, from one fetch
+  // marks for the open answers (text/code/blank/parsons) — one fetch; only THIS worksheet's keys are in `band`.
   const { rows } = await pool.query<{ id: number; pupil_id: number; field_key: string; value: string }>(
     `SELECT id, pupil_id, field_key, value FROM pupil_answers WHERE occurrence_course_id = $1`,
     [ocId],
   );
   let marks = 0;
   for (const row of rows) {
-    const q = quality.get(`${row.pupil_id}:${row.field_key}`);
-    if (!q) continue; // checkbox ticks aren't marked
-    const total = row.field_key.startsWith('blank') ? 1 : 2;
-    const awarded = q === 'full' ? total : 1;
+    const q = band.get(`${row.pupil_id}:${row.field_key}`);
+    if (!q) continue; // not this worksheet's, or a checkbox tick — skip
+    const tot = outOf.get(row.field_key) ?? 2;
+    const awarded = q === 'full' ? tot : q === 'partial' ? Math.max(1, Math.floor(tot / 2)) : 0;
     const r = rng();
     const marker = r < 0.55 ? 'ai' : r < 0.9 ? 'teacher' : 'ai';
     const status = marker === 'teacher' || r >= 0.8 ? 'confirmed' : 'suggested';
     await writeMark({
-      pupilAnswerId: row.id,
-      marksAwarded: awarded,
-      marksTotal: total,
-      pointsHit: [],
-      evidence: [row.value.slice(0, 60)],
-      marker: marker as 'ai' | 'teacher',
-      confidence: marker === 'ai' ? Number((0.7 + rng() * 0.25).toFixed(2)) : null,
-      status: status as 'suggested' | 'confirmed',
-      needsReview: marker === 'ai' && status === 'suggested' && chance(0.12),
-      feedback: q === 'full' ? pick(FB_FULL) : pick(FB_PART),
+      pupilAnswerId: row.id, marksAwarded: awarded, marksTotal: tot, pointsHit: [], evidence: [row.value.slice(0, 60)],
+      marker: marker as 'ai' | 'teacher', confidence: marker === 'ai' ? Number((0.7 + rng() * 0.25).toFixed(2)) : null,
+      status: status as 'suggested' | 'confirmed', needsReview: marker === 'ai' && status === 'suggested' && chance(0.12),
+      feedback: q === 'zero' ? pick(FB_PART) : q === 'full' ? pick(FB_FULL) : pick(FB_PART),
     });
-    marks++;
+    marks += 1;
   }
-  return { answers, marks, done };
+  return { answers, marks };
 }
 
-// pull the expected answers back out of the SCHEMES content for this worksheet (matched by title in label[0])
-function findExpected(ws: { fields: WorksheetField[] }): { questions: string[]; blank?: string } {
-  const allWs = SCHEMES.flatMap((s) => s.units).flatMap((u) => u.lessons).map((l) => l.worksheet).filter(Boolean) as WorksheetDef[];
-  // a worksheet's text-field labels are exactly its question prompts, in order — match on the first one
-  const firstLabel = ws.fields.find((f) => f.kind === 'text')?.label;
-  const def = allWs.find((w) => w.questions[0]?.q === firstLabel);
-  return { questions: (def?.questions ?? []).map((x) => x.a), blank: def?.blank?.answer };
+/** Done ✓ for ~85% of the worked pupils on a lesson (once per lesson, not per worksheet). */
+async function generateDone(ocId: number, gc: GcRow, pupilsByGroup: Map<number, number[]>): Promise<number> {
+  const pupils = (pupilsByGroup.get(gc.groupId) ?? []).slice(0, WORK_PUPILS);
+  let n = 0;
+  for (const pid of pupils) if (chance(0.85)) { await setDone(pid, ocId, true); n += 1; }
+  return n;
 }
 
 const LIKED = ['the hands-on bit', 'working with a partner', 'the quiz at the end', 'the slides were clear', 'the practical task'];

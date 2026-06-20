@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Accessible Teacher Grading Dashboard and AI Assessment Verification Console">
+  <title>Teacher Grading & AI Verification Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body data-active-screen="dashboard">
+  <a class="skip-link" href="#main-content">Skip to grading dashboard</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Mockup Navigator Bar -->
+  <div class="mockup-navigator-bar">
+    <div class="nav-brand">
+      <span class="badge live">Teacher Grading Console</span>
+      <span>Select Prototype Page:</span>
+    </div>
+    <div class="nav-buttons">
+      <a class="nav-link" href="../option-3-adhd-asd-checklist/index.html">
+        <strong>Option 3</strong>
+        <small>Teacher Checklist Stack</small>
+      </a>
+      <a class="nav-link" href="../option-4-adhd-asd-visual-seating/index.html">
+        <strong>Option 4</strong>
+        <small>Teacher Classroom Grid</small>
+      </a>
+      <a class="nav-link" href="../pupil-workspace/index.html">
+        <strong>Pupil Workspace</strong>
+        <small>Student Coding Console</small>
+      </a>
+      <a class="nav-link active" href="index.html">
+        <strong>Grading Console</strong>
+        <small>AI Response Verifier</small>
+      </a>
+      <a class="nav-link" href="../now-dashboard/index.html">
+        <strong>Now Screen</strong>
+        <small>Command Centre Hub</small>
+      </a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="dashboard-container">
+    
+    <!-- Dashboard Header -->
+    <header class="dashboard-header card">
+      <div>
+        <p class="eyebrow">Verify & Assess</p>
+        <h1>Grading & AI Marking Console</h1>
+        <p class="muted">Review AI-suggested marks, verify code correctness, and click <strong>Confirm & Next</strong> to cycle through pupils.</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-tile">
+          <strong>4</strong>
+          <span>Lessons ready</span>
+        </div>
+        <div class="stat-tile alert">
+          <strong>5</strong>
+          <span>Need teacher review</span>
+        </div>
+        <div class="stat-tile good">
+          <strong>112</strong>
+          <span>AI marks pre-computed</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Interactive Navigation Hub: Select Example Lesson -->
+    <section class="card example-selection-card">
+      <h2>Select an Example Lesson to Grade:</h2>
+      <p class="quiet">Each lesson represents a specific grading task. Click <strong>Mark Submissions</strong> to open the modal grading queue.</p>
+      
+      <div class="example-grid">
+        
+        <!-- Example 1: MCQ / Short Answer -->
+        <article class="example-box">
+          <div class="ex-badge-row">
+            <span class="badge ai">Short Ans / MCQ</span>
+            <span class="badge good">1 Sheet</span>
+          </div>
+          <h3>1. Python Syntax Basics</h3>
+          <p class="ex-desc">Tests fill-in-the-blank text inputs and multiple-choice options. AI suggestions have high confidence (95-100%).</p>
+          <div class="ex-footer">
+            <span class="student-count">👥 28 pupils</span>
+            <button class="button primary small" type="button" data-launch-lesson="lesson-mcq">Mark Submissions</button>
+          </div>
+        </article>
+
+        <!-- Example 2: Programming Loops -->
+        <article class="example-box">
+          <div class="ex-badge-row">
+            <span class="badge warn">Programming</span>
+            <span class="badge good">1 Sheet</span>
+          </div>
+          <h3>2. Python Loops Practice</h3>
+          <p class="ex-desc">Tests Parsons reordering output code and custom syntax-highlighted python scripts. AI checks compilation errors.</p>
+          <div class="ex-footer">
+            <span class="student-count">👥 28 pupils</span>
+            <button class="button primary small" type="button" data-launch-lesson="lesson-prog">Mark Submissions</button>
+          </div>
+        </article>
+
+        <!-- Example 3: Long Answer -->
+        <article class="example-box">
+          <div class="ex-badge-row">
+            <span class="badge red">Long Answer</span>
+            <span class="badge good">1 Sheet</span>
+          </div>
+          <h3>3. Loop Theory & Choice</h3>
+          <p class="ex-desc">Tests paragraph explanations. Displays AI-highlighted criteria match cards and suggested score out of 4 marks.</p>
+          <div class="ex-footer">
+            <span class="student-count">👥 28 pupils</span>
+            <button class="button primary small" type="button" data-launch-lesson="lesson-theory">Mark Submissions</button>
+          </div>
+        </article>
+
+        <!-- Example 4: Mixed Multi-Sheet -->
+        <article class="example-box">
+          <div class="ex-badge-row">
+            <span class="badge ai">Mixed Types</span>
+            <span class="badge warn">2 Sheets</span>
+          </div>
+          <h3>4. End of Unit Assessment</h3>
+          <p class="ex-desc">Tests multiple sheets per student. Shows Sheet A (Concepts) and Sheet B (Coding Challenge) tab toggles.</p>
+          <div class="ex-footer">
+            <span class="student-count">👥 28 pupils</span>
+            <button class="button primary small" type="button" data-launch-lesson="lesson-mixed">Mark Submissions</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- General Marking Queue Table -->
+    <section class="card queue-section">
+      <h2>General Marking Queue</h2>
+      <p class="quiet">Standard listing of all school organiser classes awaiting review.</p>
+      
+      <div class="queue-table-wrapper">
+        <table class="queue-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Class</th>
+              <th>Lesson Title</th>
+              <th>Submitted Work</th>
+              <th>AI Suggestion Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Today</strong> <small>09:00</small></td>
+              <td>Year 9 CS (9A)</td>
+              <td>Python Syntax Basics</td>
+              <td>28 / 28 finished</td>
+              <td><span class="badge good">98% Auto-graded</span></td>
+              <td><button class="button small ghost" type="button" data-launch-lesson="lesson-mcq">Open Queue</button></td>
+            </tr>
+            <tr>
+              <td><strong>Yesterday</strong> <small>14:00</small></td>
+              <td>Year 9 CS (9A)</td>
+              <td>Python Loops Practice</td>
+              <td>26 / 28 finished</td>
+              <td><span class="badge warn">3 check compile</span></td>
+              <td><button class="button small ghost" type="button" data-launch-lesson="lesson-prog">Open Queue</button></td>
+            </tr>
+            <tr>
+              <td><strong>18 Jun</strong> <small>11:30</small></td>
+              <td>Year 9 CS (9A)</td>
+              <td>Loop Theory & Choice</td>
+              <td>27 / 28 finished</td>
+              <td><span class="badge red">5 verify criteria</span></td>
+              <td><button class="button small ghost" type="button" data-launch-lesson="lesson-theory">Open Queue</button></td>
+            </tr>
+            <tr>
+              <td><strong>17 Jun</strong> <small>10:10</small></td>
+              <td>Year 9 CS (9A)</td>
+              <td>End of Unit Assessment</td>
+              <td>28 / 28 finished</td>
+              <td><span class="badge ai">Multi-Sheet Suggestion</span></td>
+              <td><button class="button small ghost" type="button" data-launch-lesson="lesson-mixed">Open Queue</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DIALOG: Large-Format Student Marking Modal -->
+  <dialog id="grading-modal" class="grading-modal" aria-labelledby="modal-title">
+    
+    <!-- Sticky Modal Header -->
+    <header class="modal-header-nav">
+      <div class="modal-title-section">
+        <p class="eyebrow" id="modal-lesson-meta">Year 9 Computer Science · Python Loops</p>
+        <h2 id="modal-title">Alex Morgan</h2>
+        
+        <div class="student-navigation-badge">
+          <button class="button small ghost icon" type="button" id="modal-prev-pupil-btn" aria-label="Previous pupil">◀</button>
+          <span class="pupil-index-text" id="modal-pupil-index">Pupil 1 of 28</span>
+          <button class="button small ghost icon" type="button" id="modal-next-pupil-btn" aria-label="Next pupil">▶</button>
+          <span class="badge" id="modal-pupil-badge">Core</span>
+        </div>
+      </div>
+      
+      <!-- Dynamic Sheets tab bar (Only shown when lesson has > 1 sheet) -->
+      <div class="modal-sheets-tabs" id="modal-sheets-tabs-bar" style="display: none;">
+        <span class="quiet">Sheets:</span>
+        <div class="tab-buttons" id="modal-tab-buttons-container">
+          <!-- Toggles dynamically inserted here -->
+        </div>
+      </div>
+
+      <button class="modal-close-btn" type="button" id="modal-close-x" aria-label="Close marking overlay">×</button>
+    </header>
+
+    <!-- Scrollable Modal Body -->
+    <div class="modal-body-content">
+      
+      <!-- Questions Container -->
+      <div class="modal-questions-list" id="modal-questions-container">
+        <!-- Rendered dynamically by prototype.js -->
+      </div>
+
+      <!-- Teacher Feedback Summary & Comments -->
+      <div class="modal-feedback-summary card">
+        <h3>Classroom Feedback Note</h3>
+        <p class="quiet">This note will appear on the pupil's dashboard under "Teacher Feedback".</p>
+        
+        <div class="feedback-comment-textarea-wrap">
+          <textarea id="modal-teacher-comment-box" placeholder="Write a supportive comment back to the pupil..."></textarea>
+          <div class="audio-dictation-sim">
+            <button class="button small ghost" type="button" id="modal-dictate-feedback-btn">🎤 Dictate Feed</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sticky Modal Footer -->
+    <footer class="modal-footer-nav">
+      <button class="button ghost" type="button" id="modal-cancel-btn">Back to Dashboard</button>
+      
+      <div class="footer-middle">
+        <span class="badge good" id="modal-saved-status">Auto-saved ✓</span>
+      </div>
+
+      <div class="footer-actions-right">
+        <button class="button ghost" type="button" id="modal-prev-footer-btn">← Previous Pupil</button>
+        <button class="button danger ghost" type="button" id="modal-flag-btn">🚩 Flag Answer</button>
+        <button class="button primary" type="button" id="modal-confirm-next-btn">Confirm & Next Pupil →</button>
+      </div>
+    </footer>
+
+  </dialog>
+
+</body>
+</html>

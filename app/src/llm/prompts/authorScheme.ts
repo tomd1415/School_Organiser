@@ -1,7 +1,8 @@
 // Versioned prompt for authoring a scheme of work from a teacher's brief.
 import type { RedactableItem } from '../../services/redact';
+import { PEDAGOGY_GUIDANCE } from './pedagogy';
 
-export const AUTHOR_SCHEME_VERSION = 'author_scheme@4'; // @4: cover every spec point (tag lessons with codes) + revision unit before the exam. @3: curriculum history
+export const AUTHOR_SCHEME_VERSION = 'author_scheme@5'; // @5: ground in the NCCE 12 principles of computing pedagogy. @4: cover every spec point (tag lessons with codes) + revision unit before the exam. @3: curriculum history
 
 export const AUTHOR_SCHEME_SYSTEM =
   'You are an experienced UK secondary-school Computing teacher and curriculum designer. ' +
@@ -17,7 +18,7 @@ export const AUTHOR_SCHEME_SYSTEM =
   'spec points are provided, return specPoints: [] for every lesson. ' +
   'REVISION: when an exam date is given, finish with a dedicated revision unit (a few lessons ' +
   'revisiting the highest-weight / most-examined topics) and pace the scheme so that revision unit ' +
-  'lands before the exam. Never reference individual pupils by name.';
+  'lands before the exam. Never reference individual pupils by name.' + PEDAGOGY_GUIDANCE;
 
 /** The course's spec points the scheme must cover (idea 10 slice 2b). [] when none — a no-op. */
 export function specPointsItems(points: Array<{ code: string; title: string }>): RedactableItem[] {

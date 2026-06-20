@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ADHD/ASD Support Option 3: Task-Scaffolded Checklist Cockpit">
+  <title>Option 3 — Task-Scaffolded Checklist Cockpit (ADHD/ASD Support)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-active-screen="screen-2">
+  <a class="skip-link" href="#main-content">Skip to screen content</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Simulator Bar -->
+  <div class="screen-simulator-bar">
+    <div class="sim-info">
+      <span class="badge ai">Multi-Screen Simulator</span>
+      <span>Select a screen to view:</span>
+    </div>
+    <div class="sim-buttons">
+      <button class="sim-btn" type="button" data-screen-target="screen-1">
+        <span class="icon">🖥️</span>
+        <div class="btn-lbl">
+          <strong>Screen 1: Board Display</strong>
+          <small>Pupil-Safe Whiteboard (IWB)</small>
+        </div>
+      </button>
+      <button class="sim-btn active" type="button" data-screen-target="screen-2">
+        <span class="icon">📱</span>
+        <div class="btn-lbl">
+          <strong>Screen 2: Portrait Companion</strong>
+          <small>Rotated 90° Working Memory Stack</small>
+        </div>
+      </button>
+      <button class="sim-btn" type="button" data-screen-target="screen-3">
+        <span class="icon">💻</span>
+        <div class="btn-lbl">
+          <strong>Screen 3: Desk Cockpit</strong>
+          <small>Landscape Primary Console</small>
+        </div>
+      </button>
+    </div>
+    <div class="sim-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="page-container">
+
+    <!-- SCREEN 1: Pupil-Safe Board Display (IWB) -->
+    <div class="screen-content screen-1-content">
+      <div class="screen-header">
+        <div>
+          <span class="badge live">IWB Facing Pupils</span>
+          <h1>Python Loop Reference Sheet</h1>
+        </div>
+        <div class="present-time">10:32</div>
+      </div>
+
+      <div class="screen-1-grid">
+        <!-- Syntax Code Cards -->
+        <div class="card board-slide">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Syntax Reference Card</p>
+              <h2>Two Types of Python Loops</h2>
+            </div>
+            <span class="badge ai">GCSE CS Cheat-sheet</span>
+          </div>
+
+          <div class="slide-body grid-cards-2">
+            <div class="code-container">
+              <div class="code-header">1. WHILE Loop (Condition-Controlled)</div>
+              <pre><code><span class="comment"># Repeat while condition is TRUE</span>
+count = <span class="number">0</span>
+<span class="keyword">while</span> count &lt; <span class="number">5</span>:
+    <span class="builtin">print</span>(<span class="string">"Count:"</span>, count)
+    count = count + <span class="number">1</span></code></pre>
+              <div class="syntax-explanation">
+                Runs until <code>count</code> reaches 5. If you forget to increment, you get an <strong>infinite loop</strong>!
+              </div>
+            </div>
+
+            <div class="code-container">
+              <div class="code-header">2. FOR Loop (Count-Controlled)</div>
+              <pre><code><span class="comment"># Repeat for a set list of items</span>
+names = [<span class="string">"Aisha"</span>, <span class="string">"Daniel"</span>, <span class="string">"Eva"</span>]
+<span class="keyword">for</span> x <span class="keyword">in</span> names:
+    <span class="builtin">print</span>(<span class="string">"Hello"</span>, x)</code></pre>
+              <div class="syntax-explanation">
+                Runs exactly 3 times (once for each name in the list). Safe from infinite loops.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sensory Progress Arc and Timer -->
+        <aside class="board-sidebar">
+          <div class="card timer-circular">
+            <p class="eyebrow">Lesson Timer</p>
+            <div class="arc-container">
+              <!-- SVG circular timer indicator -->
+              <svg viewBox="0 0 100 100" class="timer-svg">
+                <circle cx="50" cy="50" r="42" class="timer-bg-ring"></circle>
+                <circle cx="50" cy="50" r="42" class="timer-progress-ring" style="stroke-dashoffset: 120;"></circle>
+              </svg>
+              <div class="timer-text">
+                <strong id="screen1-timer">12:45</strong>
+                <span>coding time</span>
+              </div>
+            </div>
+            
+            <div class="lesson-phases">
+              <span class="phase done">Intro</span>
+              <span class="phase done">Demo</span>
+              <span class="phase active">Coding</span>
+              <span class="phase">Review</span>
+            </div>
+          </div>
+
+          <div class="card board-alert-card">
+            <h3>💡 Live Coding Objectives</h3>
+            <p class="quiet">Use these code structures in your active assignments.</p>
+            <hr class="line-divider">
+            <ul class="pupil-goals">
+              <li class="done"><span class="check">✓</span> Task 1: Basic count loop</li>
+              <li class="active"><span class="check">→</span> Task 2: Custom list iteration</li>
+              <li><span class="check">○</span> Task 3: Infinite loop prevention</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+
+    <!-- SCREEN 2: Portrait Companion (Rotated 90° Working Memory Stack) -->
+    <div class="screen-content screen-2-content">
+      <div class="portrait-cockpit">
+        
+        <!-- Header / Executive Nav -->
+        <header class="card portrait-header">
+          <div class="header-split">
+            <div>
+              <p class="eyebrow">Now Teaching</p>
+              <h2>Year 9 CS (Room 3)</h2>
+              <small class="muted">Ends 11:10 · 28 pupils</small>
+            </div>
+            <div class="lesson-time-status">
+              <div class="clock-display">10:32</div>
+              <span class="badge warn">12m left</span>
+            </div>
+          </div>
+          
+          <!-- EXECUTIVE DECISION SCROLL - ADHD support: What to do right now -->
+          <div class="executive-anchor">
+            <p class="eyebrow-accent">⚡ Next Teacher Action:</p>
+            <div id="executive-instruction">
+              <strong>Check Aisha & Daniel's screens</strong>. They are currently stuck on syntax errors (Indentation/NameError). Check code formatting.
+            </div>
+          </div>
+        </header>
+
+        <!-- Vertical Flow Timeline -->
+        <section class="card portrait-timeline">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Memory Hook</p>
+              <h2>Lesson Flow Checklist</h2>
+            </div>
+            <span class="badge live">Active step 4</span>
+          </div>
+          
+          <ol class="action-timeline">
+            <li class="done">
+              <label class="tl-checkbox">
+                <input type="checkbox" checked disabled>
+                <span class="tl-lbl">Take attendance & log cover alert</span>
+                <span class="tl-time">10:10</span>
+              </label>
+            </li>
+            <li class="done">
+              <label class="tl-checkbox">
+                <input type="checkbox" checked disabled>
+                <span class="tl-lbl">Do-Now checking (loops starter)</span>
+                <span class="tl-time">10:15</span>
+              </label>
+            </li>
+            <li class="done">
+              <label class="tl-checkbox">
+                <input type="checkbox" checked disabled>
+                <span class="tl-lbl">Live code demo (indentation / range)</span>
+                <span class="tl-time">10:20</span>
+              </label>
+            </li>
+            <li class="active-step">
+              <label class="tl-checkbox">
+                <input type="checkbox" id="step-timer-check" data-step-id="4">
+                <span class="tl-lbl">Start 15-minute student practice</span>
+                <span class="tl-time">10:25</span>
+              </label>
+              <div class="inner-step-info">
+                <span class="badge warn">Currently running (12m left)</span>
+              </div>
+            </li>
+            <li>
+              <label class="tl-checkbox">
+                <input type="checkbox" id="step-support-check" data-step-id="5">
+                <span class="tl-lbl">Support checks (Aisha, Daniel, Eva)</span>
+                <span class="tl-time">10:35</span>
+              </label>
+            </li>
+            <li>
+              <label class="tl-checkbox">
+                <input type="checkbox" id="step-marking-check" data-step-id="6">
+                <span class="tl-lbl">Log behavior & code check points</span>
+                <span class="tl-time">10:45</span>
+              </label>
+            </li>
+            <li>
+              <label class="tl-checkbox">
+                <input type="checkbox" id="step-exit-check" data-step-id="7">
+                <span class="tl-lbl">Launch loop Exit Ticket (4 marks)</span>
+                <span class="tl-time">10:55</span>
+              </label>
+            </li>
+          </ol>
+        </section>
+
+        <!-- Always-Open Capture Dock -->
+        <section class="card portrait-capture">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Instant Capture</p>
+              <h2>Direct Memory Dock</h2>
+            </div>
+            <span class="badge">Saves to Inbox</span>
+          </div>
+
+          <div class="capture-workspace">
+            <div class="capture-fields">
+              <select id="quick-pupil" aria-label="Select pupil">
+                <option value="">-- Associate Pupil (Optional) --</option>
+                <option value="Aisha Khan">Aisha Khan (Support)</option>
+                <option value="Daniel Reed">Daniel Reed (Support)</option>
+                <option value="Eva Morris">Eva Morris (Support)</option>
+                <option value="Hassan Begum">Hassan Begum (Support)</option>
+                <option value="Max Owen">Max Owen (Extend)</option>
+                <option value="Jacob Neri">Jacob Neri (Extend)</option>
+              </select>
+
+              <div class="quick-tags">
+                <button type="button" class="tag-btn" data-tag="Syntax Error">💻 Syntax</button>
+                <button type="button" class="tag-btn" data-tag="Logic Error">🧠 Logic</button>
+                <button type="button" class="tag-btn" data-tag="Distracted">⚠️ Off-Task</button>
+                <button type="button" class="tag-btn" data-tag="Excellent Help">🌟 Praise</button>
+              </div>
+            </div>
+
+            <textarea id="quick-note-text" placeholder="Type notes or click tags... text is auto-saved here."></textarea>
+            
+            <div class="capture-footer">
+              <small class="quiet">Capture now, classify/route later.</small>
+              <button class="button primary small" type="button" id="save-capture-btn">Save Entry</button>
+            </div>
+
+            <ul class="capture-history" id="capture-history-list">
+              <li><span class="badge">Syntax Error</span> <span><strong>Daniel R:</strong> Struggled with indent indentation.</span> <span class="time">10:28</span></li>
+              <li><span class="badge ai">Log</span> <span><strong>Aisha K:</strong> Responding well to physical range diagram.</span> <span class="time">10:24</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Live Student Help Queue -->
+        <section class="card portrait-queue">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Help Queue</p>
+              <h2>Student Alert Queue</h2>
+            </div>
+            <span class="badge red" id="queue-count">3 alerts</span>
+          </div>
+
+          <ul class="help-queue-list">
+            <li class="alert-item high-priority">
+              <div class="alert-main">
+                <strong>Daniel Reed</strong>
+                <span class="badge red">Stuck 4m</span>
+                <span class="alert-desc">SyntaxError: unexpected indent</span>
+              </div>
+              <button class="button primary small" type="button" data-resolve-pupil="Daniel Reed">Send Hint</button>
+            </li>
+            <li class="alert-item medium-priority">
+              <div class="alert-main">
+                <strong>Aisha Khan</strong>
+                <span class="badge warn">Stuck 2m</span>
+                <span class="alert-desc">NameError: name 'range' is not defined</span>
+              </div>
+              <button class="button small" type="button" data-resolve-pupil="Aisha Khan">Send CheatSheet</button>
+            </li>
+            <li class="alert-item low-priority">
+              <div class="alert-main">
+                <strong>Max Owen</strong>
+                <span class="badge good">Finished</span>
+                <span class="alert-desc">Completed core loop task. Wants extend challenge.</span>
+              </div>
+              <button class="button ghost small" type="button" data-resolve-pupil="Max Owen">Push Extend</button>
+            </li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
+
+
+    <!-- SCREEN 3: Landscape Desk Cockpit (Primary Control Console) -->
+    <div class="screen-content screen-3-content">
+      <header class="app-header-sim">
+        <div class="header-main-sim">
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>School <strong>Organiser</strong> Cockpit</span>
+          </div>
+          <div class="lesson-meta-sim">
+            <span><strong>Friday, 20 June</strong></span>
+            <span class="divider">|</span>
+            <span>Year 9 Computer Science · Lesson 3</span>
+            <span class="divider">|</span>
+            <span class="badge live"><span class="dot" aria-hidden="true"></span> 12m left</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Cockpit View Mode Switcher -->
+      <div class="cockpit-mode-selector">
+        <span class="quiet">Select Desk Cockpit mode:</span>
+        <div class="mode-buttons">
+          <button class="button small active" type="button" id="cockpit-mode-coding-btn">Active Coding Practice (IDE Telemetry)</button>
+          <button class="button small" type="button" id="cockpit-mode-noncoding-btn">Non-Coding Lesson Phase (Worksheet Tracker)</button>
+        </div>
+      </div>
+
+      <div class="cockpit-layout">
+        
+        <!-- Left Column: Lesson Slide Controls & Private Teacher Script -->
+        <div class="cockpit-col-left">
+          <section class="card slides-card">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Slide Navigation</p>
+                <h2>Whiteboard Presentation Mirror</h2>
+              </div>
+              <span class="badge">Slide 3 of 6</span>
+            </div>
+
+            <div class="slide-mirror-preview">
+              <div class="slide-mirror-meta">Pupils are seeing this on the main board:</div>
+              <div class="mirror-box">
+                <span class="slide-type-tag">Demonstration</span>
+                <h3>For Loops & Range Function</h3>
+                <pre><code>for i in range(1, 11):
+    print(i)</code></pre>
+              </div>
+              <div class="mirror-controls">
+                <button class="button ghost small" type="button">← Prev Slide</button>
+                <button class="button small" type="button">Next Slide →</button>
+                <button class="button danger small ghost" type="button">Blank Board</button>
+              </div>
+            </div>
+
+            <!-- PRIVATE TEACHER SCRIPT - ADHD Working Memory Scaffolding -->
+            <div class="teacher-script-card">
+              <p class="eyebrow-accent">🧠 Teacher Private Script (Slide 3)</p>
+              
+              <div class="script-section">
+                <strong>Pedagogical Reminders:</strong>
+                <ul>
+                  <li>Emphasize that <code>range(1, 11)</code> is <em>exclusive</em> of the final parameter.</li>
+                  <li>Check indentation (autistic pupils often prefer precise formatting rules; suggest standardizing on 4 spaces).</li>
+                </ul>
+              </div>
+
+              <div class="script-section">
+                <strong>Key Questions to Ask (Name-Selector Prompt):</strong>
+                <ul>
+                  <li>"What happens if I omit the starting number, e.g., <code>range(11)</code>?"</li>
+                  <li>"What is the step count if not specified?"</li>
+                </ul>
+                <div class="cold-call-generator">
+                  <span>Cold-Call Recommendation:</span>
+                  <strong class="cold-call-name" id="cold-call-target">Daniel Reed</strong>
+                  <button class="button small ghost" type="button" id="roll-cold-call-btn">Roll Random</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column: CS IDE Live Telemetry / Worksheets -->
+        <div class="cockpit-col-right">
+          
+          <!-- CODING LESSON PHASE: Student Code Telemetry -->
+          <section class="card telemetry-card" id="cockpit-coding-card">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">IDE & Worksheets</p>
+                <h2>Live Student Code Monitor</h2>
+              </div>
+              <span class="badge live">28 coding</span>
+            </div>
+
+            <div class="telemetry-summary">
+              <div class="t-stat warn">
+                <strong>2</strong>
+                <span>Syntax Errors</span>
+              </div>
+              <div class="t-stat alert">
+                <strong>1</strong>
+                <span>Idle 5m+</span>
+              </div>
+              <div class="t-stat good">
+                <strong>22</strong>
+                <span>Active Keypresses</span>
+              </div>
+              <div class="t-stat">
+                <strong>3</strong>
+                <span>Not Checked In</span>
+              </div>
+            </div>
+
+            <div class="telemetry-table-wrapper">
+              <table class="telemetry-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Ability Level</th>
+                    <th>Current File</th>
+                    <th>IDE Status</th>
+                    <th>Recent Keypresses</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="stuck-row">
+                    <td><strong>Daniel Reed</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td><code>loops.py</code></td>
+                    <td><span class="badge red">Syntax Error</span></td>
+                    <td class="code-error">IndentationError (4m ago)</td>
+                    <td><button class="button small primary" type="button" data-resolve-pupil="Daniel Reed">Send Hint</button></td>
+                  </tr>
+                  <tr class="stuck-row">
+                    <td><strong>Aisha Khan</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td><code>loops.py</code></td>
+                    <td><span class="badge warn">Stuck</span></td>
+                    <td class="code-error">NameError (2m ago)</td>
+                    <td><button class="button small" type="button" data-resolve-pupil="Aisha Khan">Send CheatSheet</button></td>
+                  </tr>
+                  <tr class="idle-row">
+                    <td><strong>Hassan Begum</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td><code>loops.py</code></td>
+                    <td><span class="badge red">Idle 6m</span></td>
+                    <td class="quiet">No changes since 10:26</td>
+                    <td><button class="button small ghost" type="button">Push Alert</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Max Owen</strong></td>
+                    <td><span class="badge ai">Extend</span></td>
+                    <td><code>loops_challenge.py</code></td>
+                    <td><span class="badge good">Active</span></td>
+                    <td>Modified loops_challenge.py 15s ago</td>
+                    <td><button class="button small ghost" type="button" disabled>Core Ticked</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Bethany Cole</strong></td>
+                    <td><span class="badge">Core</span></td>
+                    <td><code>loops.py</code></td>
+                    <td><span class="badge good">Active</span></td>
+                    <td>Modified loops.py 1m ago</td>
+                    <td><button class="button small ghost" type="button">View Code</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Jacob Neri</strong></td>
+                    <td><span class="badge ai">Extend</span></td>
+                    <td><code>loops.py</code></td>
+                    <td><span class="badge good">Active</span></td>
+                    <td>Completed tasks 1-3</td>
+                    <td><button class="button small ghost" type="button">View Code</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="telemetry-legend">
+              <span class="quiet">IDE telemetry updates automatically. Stuck pupils are pushed to the Portrait screen's help queue.</span>
+            </div>
+          </section>
+
+          <!-- NON-CODING LESSON PHASE: Worksheet Progress Tracker -->
+          <section class="card telemetry-card worksheet-progress-card" id="cockpit-worksheet-card" style="display: none;">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Worksheet Tracker</p>
+                <h2>Differentiated Worksheet Progress</h2>
+              </div>
+              <span class="badge warn">2 stuck</span>
+            </div>
+
+            <div class="telemetry-summary">
+              <div class="t-stat good">
+                <strong>25 / 28</strong>
+                <span>Q1 (Gaps) Done</span>
+              </div>
+              <div class="t-stat good">
+                <strong>18 / 28</strong>
+                <span>Q2 (Parsons) Done</span>
+              </div>
+              <div class="t-stat warn">
+                <strong>10 / 28</strong>
+                <span>Q3 (Choice) Done</span>
+              </div>
+              <div class="t-stat alert">
+                <strong>2</strong>
+                <span>Stuck now</span>
+              </div>
+            </div>
+
+            <div class="telemetry-table-wrapper">
+              <table class="telemetry-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Ability Level</th>
+                    <th>Active Question</th>
+                    <th>Worksheet Status</th>
+                    <th>Last Active</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="stuck-row">
+                    <td><strong>Daniel Reed</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td>Question 2 (Parsons)</td>
+                    <td><span class="badge red">Stuck on order</span></td>
+                    <td>Modified 2m ago</td>
+                    <td><button class="button small primary" type="button" data-resolve-pupil="Daniel Reed">Send Hint</button></td>
+                  </tr>
+                  <tr class="stuck-row">
+                    <td><strong>Aisha Khan</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td>Question 1 (Gaps)</td>
+                    <td><span class="badge warn">Stuck</span></td>
+                    <td>Modified 30s ago</td>
+                    <td><button class="button small" type="button" data-resolve-pupil="Aisha Khan">Send CheatSheet</button></td>
+                  </tr>
+                  <tr class="idle-row">
+                    <td><strong>Hassan Begum</strong></td>
+                    <td><span class="badge">Support</span></td>
+                    <td>Question 1 (Gaps)</td>
+                    <td><span class="badge red">Idle 5m</span></td>
+                    <td class="quiet">No answers entered</td>
+                    <td><button class="button small ghost" type="button">Push Prompt</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Max Owen</strong></td>
+                    <td><span class="badge ai">Extend</span></td>
+                    <td>Question 3 (Choice)</td>
+                    <td><span class="badge good">All Completed</span></td>
+                    <td>Completed 1m ago</td>
+                    <td><button class="button small ghost" type="button" disabled>Early Finisher</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Bethany Cole</strong></td>
+                    <td><span class="badge">Core</span></td>
+                    <td>Question 3 (Choice)</td>
+                    <td><span class="badge good">Q2 Complete</span></td>
+                    <td>Modified 1m ago</td>
+                    <td><button class="button small ghost" type="button">View Sheet</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Jacob Neri</strong></td>
+                    <td><span class="badge ai">Extend</span></td>
+                    <td>Question 3 (Choice)</td>
+                    <td><span class="badge good">All Completed</span></td>
+                    <td>Completed 3m ago</td>
+                    <td><button class="button small ghost" type="button">View Sheet</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="telemetry-legend">
+              <span class="quiet">Worksheet answers sync automatically. Help alerts are pushed to the Portrait screen's help queue.</span>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Screen toggle script
+    (function () {
+      'use strict';
+      
+      const body = document.body;
+      const buttons = document.querySelectorAll('[data-screen-target]');
+      const statusAnnounce = document.getElementById('prototype-status');
+
+      function announce(message) {
+        if (!statusAnnounce) return;
+        statusAnnounce.textContent = '';
+        setTimeout(function() {
+          statusAnnounce.textContent = message;
+        }, 20);
+      }
+
+      buttons.forEach(button => {
+        button.addEventListener('click', function () {
+          const targetScreen = button.getAttribute('data-screen-target');
+          body.setAttribute('data-active-screen', targetScreen);
+          
+          buttons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          const label = button.querySelector('strong').textContent;
+          announce('Switched workspace view to: ' + label);
+        });
+      });
+
+      // Cockpit layout mode switcher (Coding vs Non-Coding phase)
+      const cockpitModeNoncodingBtn = document.getElementById('cockpit-mode-noncoding-btn');
+      const cockpitModeCodingBtn = document.getElementById('cockpit-mode-coding-btn');
+      const cockpitCodingCard = document.getElementById('cockpit-coding-card');
+      const cockpitWorksheetCard = document.getElementById('cockpit-worksheet-card');
+
+      if (cockpitModeNoncodingBtn && cockpitModeCodingBtn && cockpitCodingCard && cockpitWorksheetCard) {
+        cockpitModeNoncodingBtn.addEventListener('click', function () {
+          cockpitModeNoncodingBtn.classList.add('active');
+          cockpitModeCodingBtn.classList.remove('active');
+          cockpitCodingCard.style.display = 'none';
+          cockpitWorksheetCard.style.display = 'block';
+          announce('Desk Cockpit switched to Non-Coding view: Showing Worksheet Progress.');
+        });
+
+        cockpitModeCodingBtn.addEventListener('click', function () {
+          cockpitModeCodingBtn.classList.add('active');
+          cockpitModeNoncodingBtn.classList.remove('active');
+          cockpitCodingCard.style.display = 'block';
+          cockpitWorksheetCard.style.display = 'none';
+          announce('Desk Cockpit switched to Coding view: Showing Live Code Telemetry.');
+        });
+      }
+
+      // Contrast Toggle
+      document.querySelectorAll('[data-contrast-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const high = document.documentElement.dataset.contrast !== 'high';
+          document.documentElement.dataset.contrast = high ? 'high' : 'standard';
+          button.setAttribute('aria-pressed', String(high));
+          announce(high ? 'High contrast enabled' : 'Standard contrast enabled');
+        });
+      });
+
+      // Density Toggle
+      document.querySelectorAll('[data-density-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const compact = document.documentElement.dataset.density !== 'compact';
+          document.documentElement.dataset.density = compact ? 'compact' : 'comfortable';
+          button.setAttribute('aria-pressed', String(compact));
+          announce(compact ? 'Compact layout enabled' : 'Comfortable layout enabled');
+        });
+      });
+
+      // Executive prompt updating when timeline checks are changed
+      const stepCheckboxes = document.querySelectorAll('.action-timeline input[type="checkbox"]');
+      const execInstruction = document.getElementById('executive-instruction');
+      const stepInstructions = {
+        '4': '<strong>Check Aisha & Daniel\'s screens</strong>. They are currently stuck on syntax errors (Indentation/NameError). Check code formatting.',
+        '5': '<strong>Assess Support group progress</strong>. Walk around to Daniel, Aisha, and Eva. Check if their range function works.',
+        '6': '<strong>Review and confirm AI marks</strong>. Open the marking queue to check loop submissions. Log participation behavior.',
+        '7': '<strong>Trigger exit ticket</strong>. Direct pupils to open their worksheets and answer loop questions 4-6.'
+      };
+
+      stepCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+          const stepId = this.getAttribute('data-step-id');
+          const isChecked = this.checked;
+          const li = this.closest('li');
+
+          if (isChecked) {
+            li.classList.add('done');
+            li.classList.remove('active-step');
+            
+            // Activate next sibling
+            const nextLi = li.nextElementSibling;
+            if (nextLi && nextLi.tagName === 'LI') {
+              nextLi.classList.add('active-step');
+              const nextCheck = nextLi.querySelector('input[type="checkbox"]');
+              if (nextCheck) {
+                const nextId = nextCheck.getAttribute('data-step-id');
+                if (stepInstructions[nextId]) {
+                  execInstruction.innerHTML = stepInstructions[nextId];
+                }
+              }
+            } else {
+              execInstruction.innerHTML = '<strong>All lesson timeline steps completed!</strong> Good job keeping on track. Ready for next lesson.';
+            }
+          }
+        });
+      });
+
+      // Instant capture note logic
+      const pupilSelect = document.getElementById('quick-pupil');
+      const textNote = document.getElementById('quick-note-text');
+      const tagButtons = document.querySelectorAll('.tag-btn');
+      const saveBtn = document.getElementById('save-capture-btn');
+      const historyList = document.getElementById('capture-history-list');
+
+      tagButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const tagText = this.getAttribute('data-tag');
+          const pupilName = pupilSelect.value || 'General';
+          textNote.value += '[' + tagText + ' for ' + pupilName + '] ';
+          textNote.focus();
+        });
+      });
+
+      saveBtn.addEventListener('click', function () {
+        const text = textNote.value.trim();
+        if (!text) {
+          announce('Type a note or click a tag first');
+          textNote.focus();
+          return;
+        }
+
+        const pupil = pupilSelect.value || 'General';
+        const tag = text.includes('Syntax Error') ? 'Syntax Error' : 
+                    text.includes('Logic Error') ? 'Logic Error' : 
+                    text.includes('Off-Task') ? 'Off-Task' : 
+                    text.includes('Praise') ? 'Praise' : 'Log';
+
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="badge ' + (tag === 'Syntax Error' || tag === 'Off-Task' ? 'red' : 'ai') + '">' + tag + '</span> <span><strong>' + pupil + ':</strong> ' + escapeHtml(text) + '</span> <span class="time">' + timeStr + '</span>';
+        
+        historyList.prepend(li);
+        textNote.value = '';
+        pupilSelect.value = '';
+        announce('Note captured for ' + pupil);
+      });
+
+      // Resolve student alerts
+      document.querySelectorAll('[data-resolve-pupil]').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const pupil = this.getAttribute('data-resolve-pupil');
+          const alertItem = this.closest('.alert-item');
+          
+          if (alertItem) {
+            alertItem.style.opacity = '0.3';
+            this.textContent = 'Sent';
+            this.disabled = true;
+          }
+          
+          // Also check off stuck table row if present
+          document.querySelectorAll('.telemetry-table tbody tr').forEach(row => {
+            const nameCell = row.querySelector('td:first-child');
+            if (nameCell && nameCell.textContent.includes(pupil)) {
+              row.classList.remove('stuck-row');
+              const statusBadge = row.querySelector('.badge');
+              if (statusBadge) {
+                statusBadge.className = 'badge good';
+                statusBadge.textContent = 'Active';
+              }
+            }
+          });
+
+          announce('Help materials dispatched to ' + pupil + '\'s screen.');
+        });
+      });
+
+      // Cold call selector
+      const students = ["Daniel Reed", "Aisha Khan", "Eva Morris", "Hassan Begum", "Max Owen", "Jacob Neri", "Bethany Cole", "Ruby Patel", "Sam Taylor", "Frankie Smith", "Grace Lewis"];
+      const coldCallTarget = document.getElementById('cold-call-target');
+      const rollBtn = document.getElementById('roll-cold-call-btn');
+
+      if (rollBtn && coldCallTarget) {
+        rollBtn.addEventListener('click', function () {
+          const randomStudent = students[Math.floor(Math.random() * students.length)];
+          coldCallTarget.textContent = randomStudent;
+          announce('Selected random pupil: ' + randomStudent);
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, function (char) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char];
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>

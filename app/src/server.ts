@@ -50,6 +50,7 @@ import { registerMeRoutes } from './routes/me';
 import { registerPupilWorkRoutes } from './routes/pupilWork';
 import { registerMarkModalRoutes } from './routes/markModal';
 import { registerMarkingPageRoutes } from './routes/markingPage';
+import { registerPedagogyRoutes } from './routes/pedagogyPage';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { registerSearchRoutes } from './routes/search';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
@@ -262,6 +263,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerPupilWorkRoutes(app);
   registerMarkModalRoutes(app);
   registerMarkingPageRoutes(app);
+  registerPedagogyRoutes(app);
   registerSafeguardingRoutes(app);
   registerSearchRoutes(app);
 

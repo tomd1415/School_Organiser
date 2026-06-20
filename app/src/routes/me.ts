@@ -10,7 +10,7 @@ import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
 import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
-import { getLessonWorksheet, getLessonWorksheetMeta, getLessonSlidesMarkdown } from '../services/worksheet';
+import { getLessonSlidesMarkdown, getLessonWorksheets, worksheetForKey } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { renderMarkdown } from '../lib/markdown';
 import { sliceSlidesForLevel } from '../lib/slideDeck';
@@ -244,12 +244,12 @@ export function registerMeRoutes(app: FastifyInstance): void {
             const oc = Number(s.occurrenceCourseId);
             let inner = '';
             if (s.lessonPlanId != null) {
-              // Worksheet + slides for this section, resolved together (class copy preferred).
-              const [ws, slidesMd] = await Promise.all([
-                getLessonWorksheet(Number(s.groupCourseId), Number(s.lessonPlanId)),
+              // ALL worksheets for this lesson (a lesson may have several) + slides, resolved together.
+              const [worksheets, slidesMd] = await Promise.all([
+                getLessonWorksheets(Number(s.groupCourseId), Number(s.lessonPlanId)),
                 getLessonSlidesMarkdown(Number(s.groupCourseId), Number(s.lessonPlanId)),
               ]);
-              if (ws) {
+              if (worksheets.length) {
                 // independent per-section reads — run them together, not one after another
                 const [level, values, done, fb] = await Promise.all([
                   isTest ? Promise.resolve(testLevel) : getPupilLevel(pupilId, Number(s.groupCourseId)),
@@ -257,11 +257,23 @@ export function registerMeRoutes(app: FastifyInstance): void {
                   isDone(pupilId, oc),
                   getPupilFeedback(pupilId, oc),
                 ]);
+                // Each worksheet renders with its own keyPrefix so two sheets never share a field key.
                 // Online the name/date are auto-filled (the pupil never types them) — pass who + today.
-                const rendered = renderWorksheet(ws.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel } });
+                const renderOne = (w: (typeof worksheets)[number]): string =>
+                  `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
+                let wsHtml: string;
+                if (worksheets.length === 1) {
+                  wsHtml = renderOne(worksheets[0]!);
+                } else {
+                  // Several worksheets → tabs (pupil.js switches panels). First tab is shown.
+                  const tabLabel = (w: (typeof worksheets)[number], i: number): string => esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`);
+                  const tabs = worksheets.map((w, i) => `<button type="button" class="ws-tab${i === 0 ? ' is-on' : ''}" role="tab" aria-selected="${i === 0}" data-ws-tab="${i}">${tabLabel(w, i)}</button>`).join('');
+                  const panels = worksheets.map((w, i) => `<div class="ws-panel${i === 0 ? ' is-on' : ''}" data-ws-panel="${i}">${renderOne(w)}</div>`).join('');
+                  wsHtml = `<div class="ws-tabs" role="tablist" aria-label="Worksheets">${tabs}</div>${panels}`;
+                }
                 const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
                 // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
-                const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p><div class="ws-doc">${rendered.html}</div>${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p>${wsHtml}${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
                 // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
                 // follow the board while you work. No slides bound → the worksheet uses the full width.
                 const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
@@ -306,7 +318,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const b = z.object({ value: z.string().max(8000).optional() }).safeParse(req.body);
     const value = (b.success && b.data.value) || '';
     // Resolve the worksheet server-side for provenance — never trust a client-supplied resource id.
-    const ws = await worksheetForOccurrenceCourse(q.data.oc);
+    const ws = await worksheetForOccurrenceCourse(q.data.oc, q.data.key);
     await saveAnswer({
       pupilId,
       occurrenceCourseId: q.data.oc,
@@ -394,7 +406,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const safeKey = q.data.key.replace(/[^a-z0-9._-]/gi, '_');
     const rel = `pupil-work/${q.data.oc}/${acting.id}/${safeKey}.${ext}`;
     await storeBuffer(rel, buf);
-    const ws = await worksheetForOccurrenceCourse(q.data.oc);
+    const ws = await worksheetForOccurrenceCourse(q.data.oc, q.data.key);
     const { previousValue } = await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` });
     // BUG-029: a replacement in a different format lands at a different path (the key embeds the
     // extension), so the old screenshot would linger indefinitely. Once the new answer is durable, unlink
@@ -460,17 +472,17 @@ export function registerMeRoutes(app: FastifyInstance): void {
   });
 }
 
-/** Resolve the worksheet bound to an occurrence-course (for answer provenance), or null.
- * Metadata only — no file read, since this runs on every autosave. */
-async function worksheetForOccurrenceCourse(occurrenceCourseId: number): Promise<{ resourceId: number; versionNo: number } | null> {
+/** Resolve the worksheet a saved field belongs to (for answer provenance), or null. With several
+ * worksheets per lesson, the field key's `w{n}.` prefix selects which one. Metadata only — no file
+ * read, since this runs on every autosave. */
+async function worksheetForOccurrenceCourse(occurrenceCourseId: number, key: string): Promise<{ resourceId: number; versionNo: number } | null> {
   const { rows } = await pool.query<{ groupCourseId: number; lessonPlanId: number | null }>(
     `SELECT group_course_id AS "groupCourseId", lesson_plan_id AS "lessonPlanId" FROM occurrence_courses WHERE id = $1`,
     [occurrenceCourseId],
   );
   const r = rows[0];
   if (!r || r.lessonPlanId == null) return null;
-  const meta = await getLessonWorksheetMeta(Number(r.groupCourseId), Number(r.lessonPlanId));
-  return meta ? { resourceId: meta.resourceId, versionNo: meta.versionNo } : null;
+  return worksheetForKey(Number(r.groupCourseId), Number(r.lessonPlanId), key);
 }
 
 /** May this pupil WRITE to this occurrence-course right now? Only their SESSION group's lesson, dated

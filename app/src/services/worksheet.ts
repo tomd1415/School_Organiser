@@ -47,6 +47,68 @@ export async function getLessonWorksheet(groupCourseId: number, lessonPlanId: nu
   }
 }
 
+// ── Multiple worksheets per lesson ──────────────────────────────────────────────────────────────
+// A lesson may have several worksheets. Each gets a per-worksheet KEY PREFIX so their fields never
+// collide on a shared key (both would otherwise start at `t1.r1.c2`). Slot 0 is UNPREFIXED ('') — so
+// every existing single-worksheet lesson, answer, scheme and mark is untouched — and prefers the
+// class's adapted copy; later slots ('w1.', 'w2.', …) are the master plan's additional worksheets.
+export interface WorksheetSlot extends WorksheetMeta {
+  index: number;
+  keyPrefix: string;
+}
+export interface LessonWorksheet extends WorksheetSlot {
+  markdown: string;
+}
+
+/** Metadata for every worksheet bound to a lesson, ordered + prefixed (no file read). */
+export async function lessonWorksheetMetas(groupCourseId: number, lessonPlanId: number): Promise<WorksheetSlot[]> {
+  const isWs = (r: LinkedResource): boolean => r.kind === 'worksheet';
+  const adaptation = await getAdaptation(groupCourseId, lessonPlanId);
+  // Order by resourceId (creation order) so the slot index — and therefore each worksheet's KEY
+  // PREFIX — is deterministic and stable: the worksheet added first is always slot 0 (unprefixed),
+  // no matter what order listResourcesForPlan happens to return. Pupil answers stay attached.
+  const master = (await listResourcesForPlan(lessonPlanId)).filter(isWs).sort((a, b) => a.resourceId - b.resourceId);
+  const adapted = adaptation ? (await listResourcesForAdaptation(adaptation.id)).filter(isWs) : [];
+  // slot 0 = the class's adapted main worksheet if it has one, else master[0]; later slots = master extras
+  const picks: Array<{ res: LinkedResource; adapted: boolean }> = [];
+  if (adapted.length) {
+    picks.push({ res: adapted[0]!, adapted: true });
+    for (let i = 1; i < master.length; i += 1) picks.push({ res: master[i]!, adapted: false });
+  } else {
+    for (const r of master) picks.push({ res: r, adapted: false });
+  }
+  const out: WorksheetSlot[] = [];
+  for (let i = 0; i < picks.length; i += 1) {
+    const v = await getCurrentVersion(picks[i]!.res.resourceId);
+    if (!v) continue;
+    out.push({ resourceId: picks[i]!.res.resourceId, versionNo: v.versionNo, storagePath: v.storagePath, title: picks[i]!.res.title, adapted: picks[i]!.adapted, index: i, keyPrefix: i === 0 ? '' : `w${i}.` });
+  }
+  return out;
+}
+
+/** All a lesson's worksheets WITH their markdown (reads each file). Use only when rendering. */
+export async function getLessonWorksheets(groupCourseId: number, lessonPlanId: number): Promise<LessonWorksheet[]> {
+  const metas = await lessonWorksheetMetas(groupCourseId, lessonPlanId);
+  const out: LessonWorksheet[] = [];
+  for (const m of metas) {
+    try {
+      out.push({ ...m, markdown: (await readStored(m.storagePath)).toString('utf8') });
+    } catch { /* skip an unreadable file */ }
+  }
+  return out;
+}
+
+/** The worksheet (resource/version) a field key belongs to, by its `w{n}.` prefix — answer provenance
+ *  when several worksheets share a lesson. Falls back to the first. Metadata only. */
+export async function worksheetForKey(groupCourseId: number, lessonPlanId: number, key: string): Promise<{ resourceId: number; versionNo: number } | null> {
+  const metas = await lessonWorksheetMetas(groupCourseId, lessonPlanId);
+  if (!metas.length) return null;
+  const m = key.match(/^w(\d+)\./);
+  const idx = m ? Number(m[1]) : 0;
+  const hit = metas.find((x) => x.index === idx) ?? metas[0]!;
+  return { resourceId: hit.resourceId, versionNo: hit.versionNo };
+}
+
 /** The AI-generated MARKDOWN slide deck for a lesson (class copy preferred, else master) — for the
  * pupil's slide pane. Filters to a `.md` slides resource so an uploaded source `.pptx` (also stored
  * with kind='slides') is never mistaken for a renderable deck. Null if none. */

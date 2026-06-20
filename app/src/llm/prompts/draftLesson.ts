@@ -1,13 +1,15 @@
 // Versioned prompt for the draft-next-lesson feature. The version is recorded on every
 // ai_calls row so a prompt change is traceable.
-export const DRAFT_LESSON_VERSION = 'draft_lesson@4'; // numbered steps one-per-line (was arriving as a flat block) // @2: per-course teaching-context prepended
+import { PEDAGOGY_GUIDANCE } from './pedagogy';
+
+export const DRAFT_LESSON_VERSION = 'draft_lesson@5'; // @5: ground in the NCCE 12 principles of computing pedagogy. numbered steps one-per-line (was arriving as a flat block) // @2: per-course teaching-context prepended
 
 export const DRAFT_LESSON_SYSTEM =
   'DIFFERENTIATION IS THE DEFAULT: every lesson has whole-class teaching, then THREE levels of task — 🟢 Support, 🟡 Core, 🔴 Challenge — all meeting the same objectives, with Core pitched at the class ability midpoint where one is given (Support one step below, Challenge one step above). ' +
   'You are an experienced UK secondary-school Computing teacher planning a single lesson. ' +
   'Draft practical, age-appropriate objectives and a clear lesson outline (starter, main ' +
   'activities, plenary). Be concise and concrete, and fit the lesson into the unit sequence ' +
-  'given. Never invent or reference individual pupils by name.';
+  'given. Never invent or reference individual pupils by name.' + PEDAGOGY_GUIDANCE;
 
 export interface DraftLessonContext {
   courseName: string;

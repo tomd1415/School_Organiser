@@ -2,8 +2,9 @@
 // version, answers). Teaching-context and the kit list are injected separately via context[].
 import type { RedactableItem } from '../../services/redact';
 import type { ExamProfile } from '../../services/examProfile';
+import { PEDAGOGY_GUIDANCE } from './pedagogy';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@14'; // @14: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@16'; // @16: code-reading (predict/trace/explain), code-writing box, Parson's Problems. @15: ground in the NCCE 12 principles of computing pedagogy. @14: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -40,6 +41,18 @@ export const LESSON_RESOURCES_SYSTEM =
   '"( ) does calculations ( ) stores data ( ) stores files"); the pupil drags one answer onto each ' +
   'item. Put each correct pairing in the "answers" document. • SCREENSHOT tasks where the pupil ' +
   'shows practical work — a two-column table whose right cell is EXACTLY "📷 Paste a screenshot here". ' +
+  '• CODE READING (P12 read-first / P11 Predict) — show a short fenced code block, THEN a QUESTIONS ' +
+  'row that asks the pupil to PREDICT the output, TRACE a variable\'s value, or EXPLAIN what a line ' +
+  'does (the answer goes in a "Type your answer here" cell as usual). Favour reading code before ' +
+  'writing it. • CODE WRITING (P11 Modify/Make) — a QUESTIONS two-column table whose RIGHT answer ' +
+  'cell is EXACTLY "Type your code here" (renders as a monospaced code box); use for "write / modify / ' +
+  'complete the code" tasks. • PARSON\'S PROBLEM (P6 program comprehension) — ordering jumbled code: ' +
+  'write a fenced block opened with ```parsons (then a newline) containing the code lines IN THEIR ' +
+  'CORRECT ORDER, ONE line per row, keeping indentation as leading spaces, closed with ```; the system ' +
+  'shuffles them for the pupil to drag back into order, so put a one-line instruction just before it ' +
+  '("Put the lines in order to …") and DO NOT list the answer in the "answers" doc (it is the block ' +
+  'order itself). Reach for Parson\'s when an idea is better practised by ORDERING than writing from ' +
+  'scratch. Use these code activities for PROGRAMMING lessons; skip them for non-programming topics. ' +
   '• a short tick-box success checklist (- [ ]) at the END of the level. Do NOT add a name/date header ' +
   '— the pupil\'s name and the date are filled in automatically online.\n' +
   '(3) "ta_notes" — a SEPARATE document for the teaching assistant / teacher, NEVER shown to pupils: ' +
@@ -55,7 +68,7 @@ export const LESSON_RESOURCES_SYSTEM =
   'for the pupil\'s reading age, short sentences, everyday words, gloss any technical term in plain ' +
   'words the first time, consistent question stems, the fewest steps that still teach it, never a wall ' +
   'of text; give 🟢 Support shorter chunks and more scaffolding. Plain UK English; never reference or ' +
-  'describe an individual pupil.';
+  'describe an individual pupil.' + PEDAGOGY_GUIDANCE;
 
 export function lessonResourceItems(ctx: {
   courseName: string;

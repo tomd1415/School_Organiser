@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ADHD/ASD Teacher Now Screen with Quick Capture Inbox and Lesson Transition Scaffolding">
+  <title>Teacher Command Centre — Now Screen Mockup</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body data-active-screen="now-before">
+  <a class="skip-link" href="#main-content">Skip to teacher dashboard</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Multi-Screen Mockup Navigator Bar -->
+  <div class="mockup-navigator-bar">
+    <div class="nav-brand">
+      <span class="badge live">Teacher Dashboard</span>
+      <span>Select Prototype Page:</span>
+    </div>
+    <div class="nav-buttons">
+      <a class="nav-link" href="../option-3-adhd-asd-checklist/index.html">
+        <strong>Option 3</strong>
+        <small>Teacher Checklist Stack</small>
+      </a>
+      <a class="nav-link" href="../option-4-adhd-asd-visual-seating/index.html">
+        <strong>Option 4</strong>
+        <small>Teacher Classroom Grid</small>
+      </a>
+      <a class="nav-link" href="../pupil-workspace/index.html">
+        <strong>Pupil Workspace</strong>
+        <small>Student Coding Console</small>
+      </a>
+      <a class="nav-link" href="../grading-dashboard/index.html">
+        <strong>Grading Console</strong>
+        <small>AI Response Verifier</small>
+      </a>
+      <a class="nav-link active" href="index.html">
+        <strong>Now Screen</strong>
+        <small>Command Centre Hub</small>
+      </a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="now-container">
+    
+    <!-- Now Screen Control Panel / Phase Selector -->
+    <header class="now-header card">
+      <div class="header-left">
+        <p class="eyebrow">Interactive Simulator Mode</p>
+        <h1>Teacher "Now" Cockpit</h1>
+        <p class="muted">Toggle lesson phases to preview the screen's contextual shifts throughout the school day:</p>
+        
+        <div class="phase-selector">
+          <button class="phase-btn active" type="button" data-phase-target="now-before">
+            <span class="icon">🌅</span>
+            <div class="btn-lbl">
+              <strong>Before School</strong>
+              <small>08:00 · Morning Prep</small>
+            </div>
+          </button>
+          <button class="phase-btn" type="button" data-phase-target="now-between">
+            <span class="icon">🔔</span>
+            <div class="btn-lbl">
+              <strong>Between Lessons</strong>
+              <small>11:15 · Break Transition</small>
+            </div>
+          </button>
+          <button class="phase-btn" type="button" data-phase-target="now-after">
+            <span class="icon">🌆</span>
+            <div class="btn-lbl">
+              <strong>After School</strong>
+              <small>15:30 · Processing & tomorrow</small>
+            </div>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Live clock display -->
+      <div class="header-clock">
+        <span class="badge live">Active Clock</span>
+        <div class="clock-time" id="simulated-clock">08:00</div>
+        <div class="clock-date">Friday, 20 June 2026</div>
+      </div>
+    </header>
+
+    <div class="now-grid">
+      
+      <!-- LEFT COLUMN: Contextual Action Hub (Changes based on selected phase) -->
+      <div class="now-col-left">
+        
+        <!-- BEFORE SCHOOL PANEL -->
+        <div class="phase-content phase-before-content">
+          
+          <!-- Duty/Alert summary -->
+          <section class="card alert-summary-card">
+            <div class="card-head">
+              <h2>Morning Briefing & Duties</h2>
+              <span class="badge red">1 duty today</span>
+            </div>
+            <div class="alert-list">
+              <div class="alert-item high-priority">
+                <span class="alert-icon">⚠️</span>
+                <div>
+                  <strong>Morning Break Duty:</strong>
+                  <p class="muted">IT corridor duty starts at 10:45. Keep corridor clear.</p>
+                </div>
+              </div>
+              <div class="alert-item info-priority">
+                <span class="alert-icon">ℹ️</span>
+                <div>
+                  <strong>Staff Briefing Note:</strong>
+                  <p class="muted">Fire drill scheduled during Period 3 today. Check exit route map.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Morning prep list -->
+          <section class="card task-list-card">
+            <div class="card-head">
+              <h2>Before-School Prep Checklist</h2>
+              <span class="badge" id="before-checklist-count">0 / 4 done</span>
+            </div>
+            <p class="quiet">Complete these tasks before morning tutor group starts at 08:35:</p>
+            
+            <ul class="checklist-items">
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="before">
+                  <span class="lbl-txt">Photocopy loops worksheets (28 copies) for Y9 class</span>
+                </label>
+              </li>
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="before">
+                  <span class="lbl-txt">Boot desktop, presentation projector, and IWB in Room IT2</span>
+                </label>
+              </li>
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="before">
+                  <span class="lbl-txt">Open slide deck and lesson plan for Y9 Loops session</span>
+                </label>
+              </li>
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="before">
+                  <span class="lbl-txt">Review grading queue (AI suggestions computed for Chemistry Y10)</span>
+                </label>
+              </li>
+            </ul>
+          </section>
+
+        </div>
+
+        <!-- BETWEEN LESSONS PANEL -->
+        <div class="phase-content phase-between-content">
+          
+          <!-- Next Class Transition Card -->
+          <section class="card transition-focus-card">
+            <div class="card-head">
+              <span class="badge live">Next Lesson in 7 mins</span>
+              <span class="badge warn">Room IT2</span>
+            </div>
+            
+            <div class="transition-title-section">
+              <span class="quiet">Period 3 (11:25)</span>
+              <h2>Year 9 Computer Science (9A/Cs1)</h2>
+              <p class="topic-tag">Topic: Python Loops & Syntax</p>
+            </div>
+
+            <!-- ADHD Scaffolding: Visual checklist of what to grab/do during transition -->
+            <div class="transition-micro-tasks">
+              <h3>⚡ Quick Transition Action Stack</h3>
+              <ul class="checklist-items">
+                <li>
+                  <label class="check-item">
+                    <input type="checkbox" class="task-check" data-section="between">
+                    <span class="lbl-txt">Reset presentation projector to slide 1 (Python Loops)</span>
+                  </label>
+                </li>
+                <li>
+                  <label class="check-item">
+                    <input type="checkbox" class="task-check" data-section="between">
+                    <span class="lbl-txt">Distribute worksheets on pupil desks (Support/Core/Extend layouts)</span>
+                  </label>
+                </li>
+                <li>
+                  <label class="check-item">
+                    <input type="checkbox" class="task-check" data-section="between">
+                    <span class="lbl-txt">Grab Year 9 backup laptop basket from charging locker</span>
+                  </label>
+                </li>
+                <li>
+                  <label class="check-item">
+                    <input type="checkbox" class="task-check" data-section="between">
+                    <span class="lbl-txt">Open attendance register on lanscape monitor</span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Student specific focus cues -->
+          <section class="card pupil-cue-card">
+            <div class="card-head">
+              <h2>Pupil Cues (For Y9 CS)</h2>
+              <span class="badge warn">2 notifications</span>
+            </div>
+            <p class="quiet">Working memory cues to review before pupils enter the room:</p>
+            
+            <div class="cue-list">
+              <div class="cue-item support">
+                <strong class="pupil-name">Daniel Reed</strong>
+                <p class="muted">Check in early. Struggled with loops yesterday. Seat him next to Aisha for peer scaffolding.</p>
+              </div>
+              <div class="cue-item behavior">
+                <strong class="pupil-name">Hassan Begum</strong>
+                <p class="muted">Low reading comprehension. Read worksheet questions aloud or confirm he launched TTS.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- AFTER SCHOOL PANEL -->
+        <div class="phase-content phase-after-content">
+          
+          <!-- Post school obligations -->
+          <section class="card after-school-card">
+            <div class="card-head">
+              <h2>After-School Schedule</h2>
+              <span class="badge ai">Coding Club today</span>
+            </div>
+            
+            <div class="ob-list">
+              <div class="ob-item">
+                <div class="time-badge">15:40</div>
+                <div class="ob-details">
+                  <strong>Python Coding Club (IT2)</strong>
+                  <p class="muted">Optional pupil drop-in for challenge projects. 15:40 - 16:30.</p>
+                </div>
+              </div>
+              <div class="ob-item detention">
+                <div class="time-badge warn">16:35</div>
+                <div class="ob-details">
+                  <strong>School Detention duty (IT1)</strong>
+                  <p class="muted">Supervise department detentions (15 mins duration).</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tomorrow prep card -->
+          <section class="card task-list-card">
+            <div class="card-head">
+              <h2>Prep for Tomorrow (Monday)</h2>
+              <span class="badge" id="after-checklist-count">0 / 3 done</span>
+            </div>
+            <p class="quiet">Clear these tasks to ensure a calm morning tomorrow:</p>
+            
+            <ul class="checklist-items">
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="after">
+                  <span class="lbl-txt">Shut down all IT corridor lab workstations and charge carts</span>
+                </label>
+              </li>
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="after">
+                  <span class="lbl-txt">Draft and schedule slides for Y7 Cells lesson tomorrow P1</span>
+                </label>
+              </li>
+              <li>
+                <label class="check-item">
+                  <input type="checkbox" class="task-check" data-section="after">
+                  <span class="lbl-txt">Process items in the Quick Capture Inbox (empty inbox rule)</span>
+                </label>
+              </li>
+            </ul>
+          </section>
+
+        </div>
+
+        <!-- General Day Agenda Timeline (Stays persistent in the column) -->
+        <section class="card agenda-card">
+          <div class="card-head">
+            <h2>Today's Lesson Agenda</h2>
+            <span class="badge good">5 lessons</span>
+          </div>
+          
+          <div class="agenda-timeline">
+            <div class="timeline-slot done">
+              <span class="time">08:40</span>
+              <div class="slot-details">
+                <strong>Morning Tutor Registration</strong>
+                <small>Tutor room IT2</small>
+              </div>
+            </div>
+            <div class="timeline-slot done">
+              <span class="time">09:00</span>
+              <div class="slot-details">
+                <strong>Period 1: Y10 Chemistry</strong>
+                <small>Rates of Reaction · Room Sc3</small>
+              </div>
+            </div>
+            <div class="timeline-slot done">
+              <span class="time">10:00</span>
+              <div class="slot-details">
+                <strong>Period 2: Y8 Science</strong>
+                <small>Particle Model · Room Sc3</small>
+              </div>
+            </div>
+            <div class="timeline-slot active" id="agenda-slot-break">
+              <span class="time">11:00</span>
+              <div class="slot-details">
+                <strong>Morning Break & IT Corridor Duty</strong>
+                <small>Corridor duty starts at 10:45</small>
+              </div>
+            </div>
+            <div class="timeline-slot" id="agenda-slot-y9">
+              <span class="time">11:25</span>
+              <div class="slot-details">
+                <strong>Period 3: Y9 Computer Science</strong>
+                <small>Python Loops & Syntax · Room IT2</small>
+              </div>
+            </div>
+            <div class="timeline-slot">
+              <span class="time">12:25</span>
+              <div class="slot-details">
+                <strong>Lunch Break</strong>
+                <small>Refectory duty starts at 13:00</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Mind Clearing & Inbox Processing (Always persistent) -->
+      <div class="now-col-right">
+        
+        <!-- Quick Capture Inbox Card -->
+        <section class="card capture-dock-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow-accent">🧠 Mind Dump Dock</p>
+              <h2>Unload Working Memory</h2>
+            </div>
+            <span class="badge live">Jot down now, sort later</span>
+          </div>
+          
+          <p class="quiet">Don't lose focus by switching screens. Dump your observations, todo items, or student notes instantly:</p>
+
+          <form id="now-capture-form" class="capture-form">
+            <div class="textarea-wrapper">
+              <textarea id="now-capture-input" placeholder="Type a note (e.g. 'Daniel Reed did great with range loop' or 'Order white board markers')..."></textarea>
+              
+              <!-- Quick Dictation Simulation -->
+              <div class="dictation-wrapper">
+                <button class="button small ghost" type="button" id="now-dictate-btn">🎤 Dictate</button>
+              </div>
+            </div>
+
+            <!-- Quick category tags (appends tag text automatically) -->
+            <div class="quick-inbox-tags">
+              <span class="quiet" style="font-size: 0.72rem; font-weight: 800;">Quick Tags:</span>
+              <div class="tag-buttons">
+                <button class="tag-btn" type="button" data-tag-text="Task">📝 Task</button>
+                <button class="tag-btn" type="button" data-tag-text="Pupil Info">👤 Pupil</button>
+                <button class="tag-btn" type="button" data-tag-text="Supply Alert">🛒 Supply</button>
+                <button class="tag-btn" type="button" data-tag-text="Reminder">⏰ Reminder</button>
+              </div>
+            </div>
+
+            <button class="button primary confirm-suggestion-btn" type="submit">
+              📥 Capture to Inbox
+            </button>
+          </form>
+        </section>
+
+        <!-- The Processing Queue Card -->
+        <section class="card inbox-queue-card">
+          <div class="card-head">
+            <div>
+              <h2>Inbox to Process Later</h2>
+              <p class="quiet">Review and organize these notes when you have time before or after school.</p>
+            </div>
+            <span class="badge warn" id="inbox-count-badge">3 items</span>
+          </div>
+
+          <div class="inbox-list" id="inbox-items-container">
+            <!-- Items rendered dynamically. Sample baseline items: -->
+            <div class="inbox-item-row" data-item-id="1">
+              <div class="inbox-item-meta">
+                <span class="badge warn">Pupil Info</span>
+                <span class="time-ago">Today, 09:45</span>
+              </div>
+              <p class="inbox-item-text">Alex Morgan explained rates of reaction perfectly. Needs extend worksheets next week.</p>
+              <div class="inbox-item-actions">
+                <button class="button small ghost" type="button" onclick="processInboxItem(1)">Process Now</button>
+                <button class="button small ghost" type="button" onclick="scheduleInboxItem(1)">Tomorrow</button>
+                <button class="button small ghost danger" type="button" onclick="deleteInboxItem(1)">×</button>
+              </div>
+            </div>
+
+            <div class="inbox-item-row" data-item-id="2">
+              <div class="inbox-item-meta">
+                <span class="badge ai">Supply Alert</span>
+                <span class="time-ago">Yesterday, 15:10</span>
+              </div>
+              <p class="inbox-item-text">Room IT2 is out of green dry-erase markers. Grab a box from stationery cupboard.</p>
+              <div class="inbox-item-actions">
+                <button class="button small ghost" type="button" onclick="processInboxItem(2)">Process Now</button>
+                <button class="button small ghost" type="button" onclick="scheduleInboxItem(2)">Tomorrow</button>
+                <button class="button small ghost danger" type="button" onclick="deleteInboxItem(2)">×</button>
+              </div>
+            </div>
+
+            <div class="inbox-item-row" data-item-id="3">
+              <div class="inbox-item-meta">
+                <span class="badge red">Task</span>
+                <span class="time-ago">Yesterday, 16:30</span>
+              </div>
+              <p class="inbox-item-text">Prepare slides for Year 10 carbon chemistry lesson on Tuesday.</p>
+              <div class="inbox-item-actions">
+                <button class="button small ghost" type="button" onclick="processInboxItem(3)">Process Now</button>
+                <button class="button small ghost" type="button" onclick="scheduleInboxItem(3)">Tomorrow</button>
+                <button class="button small ghost danger" type="button" onclick="deleteInboxItem(3)">×</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- DIALOG: Process Inbox Item Modal Overlay -->
+  <dialog id="process-dialog" class="process-dialog" aria-labelledby="dialog-title">
+    <header class="dialog-head">
+      <div>
+        <p class="eyebrow">Organise Captured thought</p>
+        <h2 id="dialog-title">Process Note</h2>
+      </div>
+      <button class="dialog-close" type="button" id="dialog-close-btn" aria-label="Close dialog">×</button>
+    </header>
+    
+    <div class="dialog-body">
+      <div class="note-preview-box">
+        <span class="badge" id="dialog-note-badge">Task</span>
+        <p id="dialog-note-text">The text of the note goes here...</p>
+      </div>
+
+      <form id="dialog-process-form" class="process-form">
+        <div class="form-group">
+          <label for="process-action-select">Convert to Action Type:</label>
+          <select id="process-action-select">
+            <option value="todo">Create Todo Task Checklist item</option>
+            <option value="pupil">Save as Student Observation Note</option>
+            <option value="calendar">Schedule on Calendar Agenda</option>
+            <option value="alert">Push to Duty Alert box</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="process-details-todo">
+          <label for="process-target-checklist">Add to Checklist:</label>
+          <select id="process-target-checklist">
+            <option value="before">Before School Checklist</option>
+            <option value="between">Between Lessons Checklist</option>
+            <option value="after">Prep for Tomorrow Checklist</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="process-details-pupil" style="display: none;">
+          <label for="process-target-pupil">Link to Student:</label>
+          <select id="process-target-pupil">
+            <option value="Alex Morgan">Alex Morgan</option>
+            <option value="Bethany Cole">Bethany Cole</option>
+            <option value="Daniel Reed">Daniel Reed</option>
+            <option value="Hassan Begum">Hassan Begum</option>
+            <option value="Aisha Khan">Aisha Khan</option>
+          </select>
+        </div>
+
+        <div class="form-buttons-row">
+          <button class="button ghost" type="button" id="dialog-cancel-btn">Cancel</button>
+          <button class="button primary" type="submit">Complete Processing</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+</body>
+</html>

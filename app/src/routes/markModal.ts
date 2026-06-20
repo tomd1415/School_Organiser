@@ -9,7 +9,7 @@ import { requireAuth } from '../auth/guard';
 import { esc } from '../lib/html';
 import { pool } from '../db/pool';
 import { renderWorksheet } from '../lib/worksheetForm';
-import { getLessonWorksheet } from '../services/worksheet';
+import { getLessonWorksheets } from '../services/worksheet';
 import { getOccurrenceHeader } from '../repos/occurrence';
 import { pupilWorkRows, getAnswers, getPupilLevel, pupilCanAccessOc } from '../repos/pupilWork';
 import { marksEnabled } from '../auth/marksGate';
@@ -36,6 +36,13 @@ async function ocInfo(occurrenceCourseId: number): Promise<OcInfo | null> {
 
 const firstNameOf = (full: string): string => full.split(/\s+/)[0] ?? full;
 
+/** Read a worksheet index (`ws`) from a query/body, default 0. */
+function wsOf(src: unknown): number {
+  const v = (src as { ws?: unknown } | null)?.ws;
+  const n = typeof v === 'string' || typeof v === 'number' ? Number(v) : 0;
+  return Number.isInteger(n) && n >= 0 ? n : 0;
+}
+
 // Shared "open the marking modal" attributes — load a pupil's body into the dialog and show it.
 // Used by the work grid, the /marking page and the Now screen so every entry point behaves the same.
 const SHOW = `hx-on::after-request="if(event.detail.successful){var d=document.getElementById('mark-modal');if(d&&!d.open)d.showModal();}"`;
@@ -44,11 +51,11 @@ export function markOpenAttrs(url: string): string {
 }
 
 // ── one question's mark control (a tick for 1-mark, a number for more) ──────────────────────────
-function markControl(oc: number, pid: number, answerId: number, mk: PupilMarkRow | undefined, maxMarks: number): string {
+function markControl(oc: number, pid: number, answerId: number, mk: PupilMarkRow | undefined, maxMarks: number, wi: number): string {
   const awarded = mk?.marksAwarded;
   const set = (m: number | string) =>
     `hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/save" hx-target="#mark-modal-body" hx-swap="innerHTML"`
-    + ` hx-vals='{"answerId":"${answerId}","marks":"${m}","total":"${maxMarks}"}'`;
+    + ` hx-vals='{"answerId":"${answerId}","marks":"${m}","total":"${maxMarks}","ws":"${wi}"}'`;
   if (maxMarks <= 1) {
     return `<div class="mm-tick">
       <button type="button" class="mm-t mm-t-yes${awarded === 1 ? ' on' : ''}" ${set(1)} title="correct">✓</button>
@@ -58,7 +65,7 @@ function markControl(oc: number, pid: number, answerId: number, mk: PupilMarkRow
     <button type="button" class="mm-t mm-t-yes" ${set(maxMarks)} title="full marks">✓</button>
     <input class="mm-score" type="number" min="0" max="${maxMarks}" value="${awarded ?? ''}" inputmode="numeric"
       hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/save" hx-trigger="change" hx-target="#mark-modal-body" hx-swap="innerHTML"
-      hx-vals='js:{"answerId":"${answerId}","marks":event.target.value,"total":"${maxMarks}"}'>
+      hx-vals='js:{"answerId":"${answerId}","marks":event.target.value,"total":"${maxMarks}","ws":"${wi}"}'>
     <span class="mm-of">/ ${maxMarks}</span>
     <button type="button" class="mm-t mm-t-no" ${set(0)} title="zero">✗</button></div>`;
 }
@@ -72,15 +79,16 @@ function statusBadge(mk: PupilMarkRow | undefined): string {
   return `<span class="mm-badge mm-sugg" title="AI suggested — confirm to check it">✨ AI${conf}</span>${mk.needsReview ? ' <span class="mm-badge mm-warn" title="the AI was unsure — please check">⚠ check</span>' : ''}`;
 }
 
-/** Build the inner HTML of #mark-modal-body for one pupil. Null if the oc/pupil/worksheet is missing. */
-async function buildModal(oc: number, pid: number, marking: boolean): Promise<string | null> {
+/** Build the inner HTML of #mark-modal-body for one pupil. `wsIndex` picks which worksheet (a lesson
+ * may have several). Null if the oc/pupil/worksheet is missing. */
+async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0): Promise<string | null> {
   const info = await ocInfo(oc);
   if (!info || info.lessonPlanId == null) return null;
   if (!(await pupilCanAccessOc(pid, oc))) return null;
 
-  const [header, ws, roster, level] = await Promise.all([
+  const [header, worksheets, roster, level] = await Promise.all([
     getOccurrenceHeader(info.occurrenceId),
-    getLessonWorksheet(info.groupCourseId, info.lessonPlanId),
+    getLessonWorksheets(info.groupCourseId, info.lessonPlanId),
     pupilWorkRows(oc, info.groupCourseId),
     getPupilLevel(pid, info.groupCourseId),
   ]);
@@ -90,6 +98,8 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
   const prev = idx > 0 ? roster[idx - 1] : null;
   const next = idx >= 0 && idx < roster.length - 1 ? roster[idx + 1] : null;
   const first = firstNameOf(me.displayName);
+  const wi = Math.max(0, Math.min(wsIndex, worksheets.length - 1));
+  const ws = worksheets[wi];
 
   if (!ws) {
     return `<div class="mm"><header class="mm-head"><div class="mm-htop"><span class="mm-name">${esc(me.displayName)}</span>
@@ -97,12 +107,21 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
       <p class="muted mm-empty">No worksheet is bound to this lesson, so there's nothing to mark.</p></div>`;
   }
 
-  // questions in document order; the scheme supplies model answers + per-question marks
-  const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields;
-  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice');
+  // questions in document order; the scheme supplies model answers + per-question marks. Parson's
+  // (parsons) carry their own model order in the field; code is open text shown monospaced. Render
+  // with this worksheet's key prefix so the keys match the stored answers.
+  const fields = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields;
+  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons');
   const checks = fields.filter((f) => f.kind === 'check');
   const scheme = await getScheme(ws.resourceId, ws.versionNo);
-  const pointByKey = new Map((scheme?.points ?? []).map((p) => [p.fieldKey, p]));
+  // scheme point keys are stored unprefixed (per the worksheet's own resource) → prefix to match.
+  const pointByKey = new Map((scheme?.points ?? []).map((p) => [ws.keyPrefix + p.fieldKey, p]));
+  // when there are several worksheets, a picker switches between them (same pupil).
+  const wsTabs = worksheets.length > 1
+    ? `<div class="mm-wstabs" role="tablist" aria-label="Worksheets">${worksheets
+        .map((w, i) => `<button type="button" class="ws-tab${i === wi ? ' is-on' : ''}" role="tab" aria-selected="${i === wi}" hx-get="/lesson/oc/${oc}/pupil/${pid}/mark?ws=${i}" hx-target="#mark-modal-body" hx-swap="innerHTML">${esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`)}</button>`)
+        .join('')}</div>`
+    : '';
 
   // pupil answers (with ids, so we can mark even an as-yet-unmarked answer) + their marks
   const ansRows = (await pool.query<{ id: number; field_key: string; value: string }>(
@@ -119,23 +138,37 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
       const pt = pointByKey.get(f.key);
       const ans = ansByKey.get(f.key);
       const mk = markByKey.get(f.key);
-      const maxMarks = pt?.marks ?? 2;
-      markable += 1; total += maxMarks;
+      const codey = f.kind === 'code' || f.kind === 'parsons';
+      const maxMarks = pt?.marks ?? (f.kind === 'parsons' ? 1 : 2);
+      total += maxMarks; // score is out of every question's marks (a blank scores 0/n)
+      if (ans) markable += 1; // ...but only an answered question can be marked & "checked"
       if (mk) { awarded += mk.marksAwarded; if (mk.status === 'confirmed') checked += 1; }
       const state = !mk ? 'mm-todo' : mk.needsReview ? 'mm-review' : mk.marksAwarded >= maxMarks ? 'mm-full' : mk.marksAwarded <= 0 ? 'mm-zero' : 'mm-part';
       const alts = pt && pt.alternatives.length ? ` <span class="mm-alts">also accept: ${esc(pt.alternatives.join(', '))}</span>` : '';
+      // Parson's model = the correct line order (carried on the field); others = the scheme's expected.
+      const modelText = f.kind === 'parsons' ? (f.solution ?? []).join('\n') : (pt?.expected ?? '');
+      const ansVal = ans?.value ?? '';
+      const mono = (s: string): string => `<pre class="mm-code">${esc(s)}</pre>`;
+      const modelHtml = modelText ? (codey ? mono(modelText) : esc(modelText) + alts) : '<span class="muted">— no model answer —</span>';
+      const ansHtml = ansVal ? (codey ? mono(ansVal) : esc(ansVal)) : '<span class="mm-blank">— left blank —</span>';
+      // For Parson's, a quick "right order?" hint for the teacher (whitespace-normalised compare).
+      const norm = (s: string): string => s.replace(/\r/g, '').split('\n').map((l) => l.trimEnd()).join('\n').trim();
+      const parsonsHint = f.kind === 'parsons' && ansVal
+        ? norm(ansVal) === norm(modelText) ? ' <span class="mm-badge mm-ok">✓ correct order</span>' : ' <span class="mm-badge mm-warn">order differs</span>'
+        : '';
+      const kindTag = f.kind === 'parsons' ? '<span class="mm-tag">Parson’s</span>' : f.kind === 'code' ? '<span class="mm-tag">code</span>' : '';
       const control = marking
         ? ans
-          ? markControl(oc, pid, ans.id, mk, maxMarks)
+          ? markControl(oc, pid, ans.id, mk, maxMarks, wi)
           : `<span class="muted mm-noans">nothing to mark</span>`
         : '';
       return `<div class="mm-row ${state}">
-        <div class="mm-q"><span class="mm-qn">Q${i + 1}</span><span class="mm-qtext">${esc(f.label)}</span></div>
+        <div class="mm-q"><span class="mm-qn">Q${i + 1}</span><span class="mm-qtext">${esc(f.label)}</span>${kindTag}</div>
         <div class="mm-grid">
-          <div class="mm-model"><span class="mm-lbl">Model answer${pt ? ` · ${pt.marks} mark${pt.marks > 1 ? 's' : ''}` : ''}</span>
-            <div class="mm-modeltext">${pt && pt.expected ? esc(pt.expected) : '<span class="muted">— no model answer —</span>'}${alts}</div></div>
-          <div class="mm-ans"><span class="mm-lbl">${esc(first)}'s answer</span>
-            <div class="mm-anstext">${ans && ans.value ? esc(ans.value) : '<span class="mm-blank">— left blank —</span>'}</div></div>
+          <div class="mm-model"><span class="mm-lbl">${f.kind === 'parsons' ? 'Correct order' : 'Model answer'}${pt ? ` · ${pt.marks} mark${pt.marks > 1 ? 's' : ''}` : ''}</span>
+            <div class="mm-modeltext">${modelHtml}</div></div>
+          <div class="mm-ans"><span class="mm-lbl">${esc(first)}'s answer${parsonsHint}</span>
+            <div class="mm-anstext">${ansHtml}</div></div>
           <div class="mm-mk">${control}<div class="mm-mkmeta">${marking ? statusBadge(mk) : ''}</div>
             ${mk && mk.feedback ? `<div class="mm-fb">${esc(mk.feedback)}</div>` : ''}</div>
         </div></div>`;
@@ -154,9 +187,10 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
   const className = header?.groupName ?? info.courseName;
   const dateStr = header?.date ?? '';
 
-  const navBtn = (p: typeof prev, label: string, kind: 'get') =>
+  // `data-mark-nav` lets the keyboard handler (app.js) drive ← / → through the class.
+  const navBtn = (p: typeof prev, label: string, dir: 'prev' | 'next') =>
     p
-      ? `<button type="button" class="mm-navbtn" hx-${kind}="/lesson/oc/${oc}/pupil/${p.pupilId}/mark" hx-target="#mark-modal-body" hx-swap="innerHTML">${label}</button>`
+      ? `<button type="button" class="mm-navbtn" data-mark-nav="${dir}" hx-get="/lesson/oc/${oc}/pupil/${p.pupilId}/mark" hx-target="#mark-modal-body" hx-swap="innerHTML">${label}</button>`
       : `<button type="button" class="mm-navbtn" disabled>${label}</button>`;
 
   const footer = marking
@@ -165,16 +199,16 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
           <textarea rows="2" placeholder="a kind line they'll see with their marks"
             hx-post="/lesson/oc/${oc}/pupil/${pid}/comment" hx-trigger="change" hx-swap="none">${esc(comment)}</textarea></label>
         <div class="mm-actions">
-          ${navBtn(prev, `← ${prev ? esc(firstNameOf(prev.displayName)) : 'Prev'}`, 'get')}
-          <button type="button" class="mm-confirm" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-target="#mark-modal-body" hx-swap="innerHTML"
+          ${navBtn(prev, `← ${prev ? esc(firstNameOf(prev.displayName)) : 'Prev'}`, 'prev')}
+          <button type="button" class="mm-confirm" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-vals='{"ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML"
             title="accept every AI mark for this pupil as checked">✓ Confirm all</button>
           ${next
-            ? `<button type="button" class="mm-next" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-vals='{"next":"${next.pupilId}"}' hx-target="#mark-modal-body" hx-swap="innerHTML">Confirm &amp; next → ${esc(firstNameOf(next.displayName))}</button>`
+            ? `<button type="button" class="mm-next" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-vals='{"next":"${next.pupilId}","ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML">Confirm &amp; next → ${esc(firstNameOf(next.displayName))}</button>`
             : `<span class="mm-last">last pupil</span>`}
-          ${navBtn(next, `skip →`, 'get')}
+          ${navBtn(next, `skip →`, 'next')}
         </div></footer>`
     : `<footer class="mm-foot"><p class="muted">Auto-marking is off — turn it on in <a href="/settings">Settings → Auto-marking</a> to record marks here. (Model answers and pupil answers are shown above.)</p>
-        <div class="mm-actions">${navBtn(prev, '← Prev', 'get')}${navBtn(next, 'Next →', 'get')}</div></footer>`;
+        <div class="mm-actions">${navBtn(prev, '← Prev', 'prev')}${navBtn(next, 'Next →', 'next')}</div></footer>`;
 
   return `<div class="mm">
     <header class="mm-head">
@@ -186,7 +220,9 @@ async function buildModal(oc: number, pid: number, marking: boolean): Promise<st
       <div class="mm-stat">
         <span class="mm-pos">Pupil ${idx + 1} of ${roster.length}</span>
         ${marking ? `<span class="mm-score-tot ${scoreState}">${awarded}/${total}</span> <span class="mm-checked">${checked}/${markable} checked</span>` : ''}
+        ${roster.length > 1 ? '<span class="mm-kbd" title="use the arrow keys to move through the class">← →</span>' : ''}
       </div>
+      ${wsTabs}
     </header>
     <div class="mm-rows">${rowsHtml || '<p class="muted">This worksheet has no answerable questions.</p>'}</div>
     ${checksHtml}
@@ -215,7 +251,7 @@ export function registerMarkModalRoutes(app: FastifyInstance): void {
   app.get('/lesson/oc/:id/pupil/:pid/mark', { preHandler: requireAuth }, async (req, reply) => {
     const p = params.safeParse(req.params);
     if (!p.success) return reply.code(400).type('text/html').send('<p class="muted mm-empty">Bad reference.</p>');
-    const body = await buildModal(p.data.id, p.data.pid, await marksEnabled());
+    const body = await buildModal(p.data.id, p.data.pid, await marksEnabled(), wsOf(req.query));
     return reply.type('text/html').send(body ?? '<p class="muted mm-empty">Nothing to mark here.</p>');
   });
 
@@ -235,7 +271,7 @@ export function registerMarkModalRoutes(app: FastifyInstance): void {
         await writeMark({ pupilAnswerId: b.data.answerId, marksAwarded: awarded, marksTotal: b.data.total, pointsHit: [], evidence: [], marker: 'teacher', confidence: null, status: 'confirmed', needsReview: false, feedback: '' });
       }
     }
-    const body = await buildModal(p.data.id, p.data.pid, true);
+    const body = await buildModal(p.data.id, p.data.pid, true, wsOf(req.body));
     return reply.type('text/html').send(body ?? '');
   });
 
@@ -248,7 +284,7 @@ export function registerMarkModalRoutes(app: FastifyInstance): void {
     const nextRaw = (req.body as { next?: unknown })?.next;
     const nextPid = typeof nextRaw === 'string' || typeof nextRaw === 'number' ? Number(nextRaw) : NaN;
     const target = Number.isInteger(nextPid) && nextPid > 0 && (await pupilCanAccessOc(nextPid, p.data.id)) ? nextPid : p.data.pid;
-    const body = await buildModal(p.data.id, target, true);
+    const body = await buildModal(p.data.id, target, true, wsOf(req.body));
     return reply.type('text/html').send(body ?? '');
   });
 }

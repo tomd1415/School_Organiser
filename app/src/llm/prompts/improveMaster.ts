@@ -1,8 +1,9 @@
 // Versioned prompt for "suggest a master-lesson improvement" (5.5b): what one group's adaptation
 // and lesson record suggest should change in the canonical lesson for everyone, next time round.
 import type { RedactableItem } from '../../services/redact';
+import { PEDAGOGY_GUIDANCE } from './pedagogy';
 
-export const IMPROVE_MASTER_VERSION = 'improve_master@1';
+export const IMPROVE_MASTER_VERSION = 'improve_master@2'; // @2: ground in the NCCE 12 principles of computing pedagogy
 
 export const IMPROVE_MASTER_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher improving YOUR OWN master lesson ' +
@@ -11,7 +12,7 @@ export const IMPROVE_MASTER_SYSTEM =
   'class (clearer steps, better timings, a recap that was clearly needed, a task that obviously ' +
   'overran) and leave out anything class-specific. Keep the lesson\'s coverage and intent, keep ' +
   'the structure predictable, and keep numbered steps with rough minutes. Plain UK English. ' +
-  'Never reference individual pupils by name.';
+  'Never reference individual pupils by name.' + PEDAGOGY_GUIDANCE;
 
 export function masterPairItems(
   title: string,

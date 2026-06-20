@@ -232,7 +232,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const today = localParts(new Date(), clockCtx.tz).isoDate;
         body = `
           <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
-            <h1>Schemes of work</h1>
+            <h1>Schemes of work <a class="ped-link" href="/pedagogy" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a></h1>
             <nav class="task-tabs">${courses.map(tab).join(' ')}</nav>
             <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong>
               <button type="button" class="link" hx-post="/schemes/course/${courseId}/summary" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>

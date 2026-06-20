@@ -32,6 +32,21 @@ Open questions for the teacher: are stages course-specific or whole-school? Is a
 or can strands advance independently (Stage 3 Programming but Stage 2 Data)? What counts as "evidence" —
 a manual tick, or auto-suggested from marks/levels? → capture answers, then write a PHASE plan.
 
+## ★ External resources — Teach Computing & CAS (investigated 2026-06-20)
+
+Full findings: [EXTERNAL_RESOURCES.md](EXTERNAL_RESOURCES.md). Outcome: **Teach Computing is already
+integrated** (OGL v3.0; the `/resources/import` + `/schemes/.../convert` pipeline does exactly this);
+**CAS is a reference source, not a pipeline** (mixed member licensing, no API). Follow-ons:
+
+- [ ] **Auto-attribution on imported resources** — a `source_attribution` field + a standard OGL credit
+  line for Teach Computing imports ("Contains material from the NCCE Teach Computing Curriculum, OGL
+  v3.0"). Keeps OGL reuse clean. *(small)*
+- [ ] **Finish the KS4/GCSE import** — units 9–16 still "to do" in [RESOURCE_INGEST.md](RESOURCE_INGEST.md).
+- [ ] **External reference link on lessons/units** — a URL + note field so a CAS (or any) resource can be
+  linked from a lesson without copying it (licence-safe). *(small)*
+- [ ] **Optional: TCC scheme templates** — seed the Teach Computing unit/lesson *titles + spec mapping*
+  (structure only) as pick-and-go scheme skeletons. *(medium)*
+
 ## A. Get it live on the Proxmox box (operator actions)
 
 - [ ] **Deploy the new features** — in the container: `cd /opt/school-organiser && git pull && cd app

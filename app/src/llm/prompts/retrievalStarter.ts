@@ -3,8 +3,9 @@
 // start of the next lesson. Inputs travel via context[] (redaction + withholding + audit) as always.
 import type { RedactableItem } from '../../services/redact';
 import type { MissQuestion } from '../../services/marking';
+import { PEDAGOGY_GUIDANCE } from './pedagogy';
 
-export const RETRIEVAL_STARTER_VERSION = 'retrieval_starter@1';
+export const RETRIEVAL_STARTER_VERSION = 'retrieval_starter@2'; // @2: ground in the NCCE 12 principles of computing pedagogy
 
 export const RETRIEVAL_STARTER_SYSTEM =
   'You write a short retrieval-practice starter for a UK secondary SEND Computing class. You are ' +
@@ -12,7 +13,7 @@ export const RETRIEVAL_STARTER_SYSTEM =
   'not at all). Write EXACTLY 3 short, plain questions that re-test the SAME underlying ideas in a ' +
   'slightly different way — one idea per question, recall-friendly, concrete language, suitable to ' +
   'put on the board at the start of a lesson. For each, give a brief model answer so the teacher can ' +
-  'mark instantly. Keep it kind and low-stakes; this is spaced retrieval, not a test.';
+  'mark instantly. Keep it kind and low-stakes; this is spaced retrieval, not a test.' + PEDAGOGY_GUIDANCE;
 
 export function missesItem(misses: MissQuestion[]): RedactableItem {
   const lines = misses.map(

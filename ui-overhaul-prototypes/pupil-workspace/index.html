@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ADHD/ASD and Motor-Supportive Pupil Workspace Mockup">
+  <title>Pupil Workspace — Accessible Coding Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-active-screen="pupil-screen-a">
+  <a class="skip-link" href="#main-content">Skip to pupil workspace</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- Pupil Simulator Bar -->
+  <div class="pupil-simulator-bar">
+    <div class="sim-info">
+      <span class="badge live">Pupil Workspace Simulator</span>
+      <span>Taught View (1920x1080 target):</span>
+    </div>
+    <div class="sim-buttons">
+      <button class="sim-btn active" type="button" data-screen-target="pupil-screen-noncoding">
+        <span class="icon">📄</span>
+        <div class="btn-lbl">
+          <strong>View A: Slides + Worksheet</strong>
+          <small>Non-programming lesson layout</small>
+        </div>
+      </button>
+      <button class="sim-btn" type="button" data-screen-target="pupil-screen-coding">
+        <span class="icon">💻</span>
+        <div class="btn-lbl">
+          <strong>View B: Worksheet + Coding</strong>
+          <small>Active programming lesson layout</small>
+        </div>
+      </button>
+      <button class="sim-btn" type="button" data-screen-target="pupil-screen-review">
+        <span class="icon">🏆</span>
+        <div class="btn-lbl">
+          <strong>View C: Graded Review</strong>
+          <small>Teacher feedback & assessment</small>
+        </div>
+      </button>
+    </div>
+    <div class="sim-actions">
+      <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+      <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+      <a class="button small ghost" href="../README.md">Exit</a>
+    </div>
+  </div>
+
+  <main id="main-content" class="workspace-container">
+
+    <!-- VIEW A: Coding Task (Active practice) -->
+    <div class="pupil-view pupil-screen-a-content">
+      
+      <!-- Top Workspace Progress & Controls -->
+      <header class="pupil-header card">
+        <div class="header-left">
+          <span class="badge ai">Python loops · Task 2 of 3</span>
+          <h1>Repeating names from a list</h1>
+        </div>
+        
+        <!-- Large buttons for motor difficulties / Help Alerts -->
+        <div class="header-actions">
+          <button class="pupil-btn audio-btn" type="button" id="tts-task-btn" aria-label="Read task aloud">
+            <span class="icon">🔊</span> Read Aloud
+          </button>
+          <button class="pupil-btn help-btn" type="button" id="pupil-help-alert-btn">
+            <span class="icon">🙋</span> I Need Help
+          </button>
+        </div>
+      </header>
+
+      <!-- Task Progress Blocks (Visual & Predictable) -->
+      <div class="task-progress-tracker">
+        <div class="progress-block done" title="Task 1: Basic Loop (Done)">
+          <span class="lbl">Task 1: Simple Count</span>
+          <span class="state">✓ Done</span>
+        </div>
+        <div class="progress-block active" title="Task 2: List loop (Active)">
+          <span class="lbl">Task 2: Repeat Names</span>
+          <span class="state">✏️ Doing</span>
+        </div>
+        <div class="progress-block locked" title="Task 3: Challenge loop (Locked)">
+          <span class="lbl">Task 3: Challenge</span>
+          <span class="state">🔒 Locked</span>
+        </div>
+      </div>
+
+      <!-- Workspace Layout Toggle Bar (ASD/ADHD & Motor support) -->
+      <div class="workspace-mode-selector">
+        <span class="quiet">Choose your view:</span>
+        <div class="mode-buttons">
+          <button class="pupil-mode-btn active" type="button" id="mode-slides-ws-btn">
+            <span class="icon">📄</span> Slides + Worksheet
+          </button>
+          <button class="pupil-mode-btn" type="button" id="mode-ws-coding-btn">
+            <span class="icon">💻</span> Worksheet + Coding Editor
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Layout: Slide/Instruction (left) vs Editor (right) -->
+      <div class="workspace-grid" id="pupil-workspace-grid">
+        
+        <!-- Slide Viewer Card (Visually Impaired / Look-back support) -->
+        <section class="card slide-viewer-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Slide Viewer (Self-Paced)</p>
+              <h2 id="pupil-slide-title">Slide 1: Intro to Loops</h2>
+            </div>
+            <button class="pupil-btn audio-btn small" type="button" id="tts-slide-btn" aria-label="Read slide content aloud">🔊 Read Slide</button>
+          </div>
+
+          <div class="slide-viewer-body">
+            <div class="pupil-slide-display" id="pupil-slide-display-box">
+              <p class="slide-subtitle">Why do we use loops?</p>
+              <ul class="slide-bullet-points">
+                <li>Loops repeat a block of code automatically.</li>
+                <li>Instead of copying and pasting the same code 5 times, we write a **loop** to run it 5 times.</li>
+                <li>This makes our code shorter, cleaner, and easier to fix!</li>
+              </ul>
+            </div>
+            
+            <!-- Slide Thumbnails for looking back -->
+            <div class="pupil-slide-nav-section">
+              <p class="quiet" style="font-size: 0.72rem; margin-bottom: 0.4rem;">Select a slide to look back or catch up:</p>
+              <div class="pupil-slide-thumbs">
+                <button type="button" class="slide-p-thumb active" data-p-slide="1"><span>1</span> Intro</button>
+                <button type="button" class="slide-p-thumb" data-p-slide="2"><span>2</span> Syntax</button>
+                <button type="button" class="slide-p-thumb" data-p-slide="3"><span>3</span> Example</button>
+                <button type="button" class="slide-p-thumb" data-p-slide="4"><span>4</span> Summary</button>
+              </div>
+              
+              <div class="pupil-slide-arrows">
+                <button class="pupil-btn audio-btn small" type="button" id="pupil-slide-prev" disabled>⬅️ Back</button>
+                <button class="pupil-btn audio-btn small" type="button" id="pupil-slide-next">Next ➡️</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Left: Differentiated Interactive Worksheet -->
+        <section class="card instruction-panel">
+          <div class="card-head">
+            <h2>Worksheet Sheet 2A</h2>
+            <button class="pupil-btn audio-btn small" type="button" id="tts-worksheet-btn" aria-label="Read worksheet questions aloud">🔊 Read Questions</button>
+          </div>
+
+          <div class="simple-reading-content">
+            
+            <!-- Question 1: Fill-in-the-blank -->
+            <div class="ws-block">
+              <p class="eyebrow-accent">Question 1: Loop Gaps</p>
+              <div class="ws-instruction">
+                Fill in the blank space in this sentence:
+              </div>
+              <p class="ws-sentence-blank">
+                A <code>for</code> loop repeats code for each item in a list. If a list has 5 names, the loop repeats 
+                <input class="ws-blank" type="text" placeholder="number" aria-label="gap 1" style="width: 70px;"> 
+                times.
+              </p>
+            </div>
+
+            <hr class="line-divider">
+
+            <!-- Question 2: Parsons Problem Code Reordering -->
+            <div class="ws-block">
+              <p class="eyebrow-accent">Question 2: Parsons Reorder</p>
+              <div class="ws-instruction">
+                Put these code lines in order to print the variable <code>x</code>:
+              </div>
+              
+              <!-- Drag and drop / button ordered list -->
+              <div class="ws-parsons-wrap" data-parsons-key="parsons.1">
+                <p class="ws-parsons-help">Click the ▲ and ▼ buttons to move the lines of code.</p>
+                <ol class="ws-parsons" id="parsons-list">
+                  <li class="ws-parsons-line" tabindex="0" role="button">
+                    <span class="ws-parsons-grip" aria-hidden="true">⋮⋮</span>
+                    <code>print(x)</code>
+                    <span class="ws-parsons-btns">
+                      <button type="button" class="ws-parsons-up" aria-label="move up">▲</button>
+                      <button type="button" class="ws-parsons-down" aria-label="move down">▼</button>
+                    </span>
+                  </li>
+                  <li class="ws-parsons-line" tabindex="0" role="button">
+                    <span class="ws-parsons-grip" aria-hidden="true">⋮⋮</span>
+                    <code>for x in range(5):</code>
+                    <span class="ws-parsons-btns">
+                      <button type="button" class="ws-parsons-up" aria-label="move up">▲</button>
+                      <button type="button" class="ws-parsons-down" aria-label="move down">▼</button>
+                    </span>
+                  </li>
+                </ol>
+                <span class="ws-saved" id="ws-sv-parsons-1" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <hr class="line-divider">
+
+            <!-- Question 3: Multiple Choice Radios -->
+            <div class="ws-block">
+              <p class="eyebrow-accent">Question 3: Multiple Choice</p>
+              <div class="ws-instruction">
+                What number does Python start counting from when using <code>range(5)</code>?
+              </div>
+              
+              <form class="ws-choice-form">
+                <fieldset class="ws-choice">
+                  <legend class="sr-only">Choose loop starting number</legend>
+                  <ul class="ws-choice-opts">
+                    <li class="ws-choice-opt">
+                      <label>
+                        <input type="radio" name="mc-q3" value="1">
+                        <span>Counts from 1 (1, 2, 3, 4, 5)</span>
+                      </label>
+                    </li>
+                    <li class="ws-choice-opt">
+                      <label>
+                        <input type="radio" name="mc-q3" value="0">
+                        <span>Counts from 0 (0, 1, 2, 3, 4)</span>
+                      </label>
+                    </li>
+                    <li class="ws-choice-opt">
+                      <label>
+                        <input type="radio" name="mc-q3" value="random">
+                        <span>Counts from a random number</span>
+                      </label>
+                    </li>
+                  </ul>
+                </fieldset>
+              </form>
+            </div>
+
+            <hr class="line-divider">
+
+            <!-- Link to Active Coding Task -->
+            <div class="ws-block active-coding-instruction">
+              <p class="eyebrow">Active Coding Assignment</p>
+              <strong>Now complete Task 2 on the right:</strong>
+              <p class="quiet">Write a for loop in the editor to print each name from the <code>names</code> list, then click <strong>Run Code</strong>.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Right: Code Editor & Big Action Buttons -->
+        <section class="editor-panel">
+          
+          <div class="card code-workspace">
+            <div class="card-head">
+              <h2>Write your code here:</h2>
+              <span class="badge">python 3</span>
+            </div>
+            
+            <!-- Large, highly readable text editor -->
+            <div class="editor-textarea-wrapper">
+              <textarea class="code-editor" id="pupil-editor" spellcheck="false" aria-label="Code Editor">names = ["Aisha", "Daniel", "Eva"]
+
+# Write your loop statement below:
+for x in names
+    print(x)
+</textarea>
+            </div>
+
+            <!-- Big Tap Targets for Action Buttons (Motor-Friendly) -->
+            <div class="editor-controls">
+              <button class="pupil-action-btn run-btn" type="button" id="run-code-btn">
+                <span class="icon">▶️</span> Run Code
+              </button>
+              <button class="pupil-action-btn submit-btn" type="button" id="submit-code-btn">
+                <span class="icon">💾</span> Hand in Work
+              </button>
+            </div>
+          </div>
+
+          <!-- Large Monospaced Terminal Output (Errors Translated to Simple English) -->
+          <div class="card terminal-workspace">
+            <div class="card-head">
+              <h3>Terminal Output</h3>
+              <button class="button small ghost" type="button" id="clear-term-btn">Clear</button>
+            </div>
+            <div class="terminal-box" id="terminal-console" aria-live="polite">
+              <span class="system-message">Press "Run Code" to compile loops.py...</span>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+
+
+    <!-- VIEW B: Graded Review (Teacher feedback & self-assessment) -->
+    <div class="pupil-view pupil-screen-b-content">
+      
+      <header class="pupil-header card review-header">
+        <div class="feedback-reinforcement">
+          <span class="reinforce-icon">🎉</span>
+          <div>
+            <h1>Task 1: Basic Count Loop Complete!</h1>
+            <p class="muted">Your teacher has checked your submission.</p>
+          </div>
+        </div>
+        <div class="score-display">
+          <span class="score-stars">⭐⭐⭐</span>
+          <strong>3 / 3 marks</strong>
+        </div>
+      </header>
+
+      <div class="workspace-grid">
+        
+        <!-- Left: Pupil's Submitted Code (Read-Only with highlights) -->
+        <section class="card submission-viewer">
+          <div class="card-head">
+            <h2>Your Saved Code</h2>
+            <span class="badge good">Passed</span>
+          </div>
+
+          <div class="code-review-box">
+            <pre><code><span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, <span class="number">6</span>):
+    <span class="builtin">print</span>(i)</code></pre>
+          </div>
+
+          <div class="review-annotations">
+            <div class="annotation-item correct">
+              <span class="badge good">✓ Correct</span>
+              <span>Your loop iterates from 1 up to 5 successfully.</span>
+            </div>
+            <div class="annotation-item correct">
+              <span class="badge good">✓ Spacing</span>
+              <span>Line 2 has 4 spaces of indentation. Perfect!</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Teacher & AI Feedback / Self Assessment check-in -->
+        <section class="feedback-panel">
+          
+          <!-- Teacher feedback box with Read Aloud -->
+          <div class="card feedback-details-card">
+            <div class="card-head">
+              <h2>Teacher Feedback</h2>
+              <button class="pupil-btn audio-btn" type="button" id="tts-feedback-btn" aria-label="Read feedback aloud">
+                <span class="icon">🔊</span> Read Feedback
+              </button>
+            </div>
+
+            <div class="feedback-comment-box">
+              <p><strong>"Excellent loop, Daniel!</strong> You successfully printed all numbers from 1 to 5. Your indentation spacing is perfectly lined up. Try changing the range stops to <code>range(1, 11)</code> in the next task to print 1 to 10!"</p>
+            </div>
+          </div>
+
+          <!-- Pupil Self-Assessment Check-in (ADHD/ASD Self-Regulation) -->
+          <div class="card self-assessment-card">
+            <div class="card-head">
+              <h2>How do you feel about this task?</h2>
+            </div>
+            <p class="quiet">Click the face that matches how you feel. Your teacher will see this.</p>
+
+            <div class="emoji-selector">
+              <button class="emoji-btn" type="button" data-emoji="confident">
+                <span class="emoji">😄</span>
+                <strong>Confident!</strong>
+                <small>I fully understand</small>
+              </button>
+              <button class="emoji-btn" type="button" data-emoji="okay">
+                <span class="emoji">😐</span>
+                <strong>Okay</strong>
+                <small>Need a bit of practice</small>
+              </button>
+              <button class="emoji-btn" type="button" data-emoji="stuck">
+                <span class="emoji">😟</span>
+                <strong>Confused</strong>
+                <small>I need help next time</small>
+              </button>
+            </div>
+
+            <div class="feedback-thanks" id="self-assess-thanks" style="display: none;">
+              <span class="badge good">Saved</span>
+              <span>Thank you! Your response has been sent to your teacher's dashboard.</span>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Screen toggle script
+    (function () {
+      'use strict';
+      
+      const body = document.body;
+      const buttons = document.querySelectorAll('[data-screen-target]');
+      const statusAnnounce = document.getElementById('prototype-status');
+
+      function announce(message) {
+        if (!statusAnnounce) return;
+        statusAnnounce.textContent = '';
+        setTimeout(function() {
+          statusAnnounce.textContent = message;
+        }, 20);
+      }
+
+      buttons.forEach(button => {
+        button.addEventListener('click', function () {
+          const targetScreen = button.getAttribute('data-screen-target');
+          
+          if (targetScreen === 'pupil-screen-noncoding') {
+            body.setAttribute('data-active-screen', 'pupil-screen-a');
+            const toggleBtn = document.getElementById('mode-slides-ws-btn');
+            if (toggleBtn) toggleBtn.click();
+          } else if (targetScreen === 'pupil-screen-coding') {
+            body.setAttribute('data-active-screen', 'pupil-screen-a');
+            const toggleBtn = document.getElementById('mode-ws-coding-btn');
+            if (toggleBtn) toggleBtn.click();
+          } else if (targetScreen === 'pupil-screen-review') {
+            body.setAttribute('data-active-screen', 'pupil-screen-b');
+          }
+          
+          buttons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          const label = button.querySelector('strong').textContent;
+          announce('Switched pupil view to: ' + label);
+        });
+      });
+
+      // Contrast Toggle
+      document.querySelectorAll('[data-contrast-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const high = document.documentElement.dataset.contrast !== 'high';
+          document.documentElement.dataset.contrast = high ? 'high' : 'standard';
+          button.setAttribute('aria-pressed', String(high));
+          announce(high ? 'High contrast enabled' : 'Standard contrast enabled');
+        });
+      });
+
+      // Density Toggle
+      document.querySelectorAll('[data-density-toggle]').forEach(button => {
+        button.addEventListener('click', function () {
+          const compact = document.documentElement.dataset.density !== 'compact';
+          document.documentElement.dataset.density = compact ? 'compact' : 'comfortable';
+          button.setAttribute('aria-pressed', String(compact));
+          announce(compact ? 'Compact layout enabled' : 'Comfortable layout enabled');
+        });
+      });
+
+      // Text to speech simulation
+      const ttsTaskBtn = document.getElementById('tts-task-btn');
+      const ttsFeedbackBtn = document.getElementById('tts-feedback-btn');
+
+      if (ttsTaskBtn) {
+        ttsTaskBtn.addEventListener('click', function () {
+          this.classList.toggle('speaking');
+          if (this.classList.contains('speaking')) {
+            this.innerHTML = '<span class="icon">⏹️</span> Stop Reading';
+            announce('Reading task instructions aloud: What to do: Step 1: Look at the list called names in the code box. Step 2: Write a for loop to print each name from the list. Step 3: Press the green Run Code button to check your work.');
+          } else {
+            this.innerHTML = '<span class="icon">🔊</span> Read Aloud';
+            announce('Text reading stopped.');
+          }
+        });
+      }
+
+      if (ttsFeedbackBtn) {
+        ttsFeedbackBtn.addEventListener('click', function () {
+          this.classList.toggle('speaking');
+          if (this.classList.contains('speaking')) {
+            this.innerHTML = '<span class="icon">⏹️</span> Stop Reading';
+            announce('Reading teacher feedback aloud: Excellent loop, Daniel! You successfully printed all numbers from 1 to 5. Your indentation spacing is perfectly lined up. Try changing the range stops to range 1, 11 in the next task to print 1 to 10.');
+          } else {
+            this.innerHTML = '<span class="icon">🔊</span> Read Feedback';
+            announce('Text reading stopped.');
+          }
+        });
+      }
+
+      // Pupil Help Alert
+      const helpBtn = document.getElementById('pupil-help-alert-btn');
+      if (helpBtn) {
+        helpBtn.addEventListener('click', function () {
+          this.classList.toggle('alert-sent');
+          if (this.classList.contains('alert-sent')) {
+            this.innerHTML = '<span class="icon">🚨</span> Cancel Help Request';
+            this.style.background = 'var(--red-soft)';
+            this.style.borderColor = 'var(--red)';
+            announce('Help request sent. Your teacher has been notified on their dashboard.');
+          } else {
+            this.innerHTML = '<span class="icon">🙋</span> I Need Help';
+            this.style.background = 'var(--amber-soft)';
+            this.style.borderColor = 'var(--amber)';
+            announce('Help request cancelled.');
+          }
+        });
+      }
+
+      // Run Code simulation (Translating standard stack trace into clean English)
+      const runCodeBtn = document.getElementById('run-code-btn');
+      const pupilEditor = document.getElementById('pupil-editor');
+      const terminalConsole = document.getElementById('terminal-console');
+
+      if (runCodeBtn && pupilEditor && terminalConsole) {
+        runCodeBtn.addEventListener('click', function () {
+          const code = pupilEditor.value;
+          terminalConsole.innerHTML = '<span class="system-message">Running loops.py...</span>';
+          
+          setTimeout(function() {
+            // Check for missing colon on the for loop
+            if (code.includes('for x in names') && !code.includes('for x in names:')) {
+              terminalConsole.innerHTML = '<span class="error-header">❌ Syntax Error (Line 4):</span>' +
+                                           '<p class="error-desc">You are missing a colon <code>:</code> at the end of the loop header.</p>' +
+                                           '<div class="error-helper"><strong>How to fix:</strong> Change line 4 to: <code>for x in names:</code></div>';
+              announce('Compilation failed. Syntax Error: Missing colon on line 4.');
+            } 
+            // Check for indentation issues
+            else if (code.includes('for x in names:') && code.includes('\nprint') && !code.includes('\n    print')) {
+              terminalConsole.innerHTML = '<span class="error-header">❌ Indentation Error (Line 5):</span>' +
+                                           '<p class="error-desc">The print statement inside the loop needs to be indented.</p>' +
+                                           '<div class="error-helper"><strong>How to fix:</strong> Add 4 spaces before <code>print(x)</code> on line 5.</div>';
+              announce('Compilation failed. Indentation Error: Spacing missing on line 5.');
+            }
+            // Correct loop
+            else if (code.includes('for x in names:') && code.includes('\n    print(x)')) {
+              terminalConsole.innerHTML = '<span class="success-message">Aisha</span><br>' +
+                                           '<span class="success-message">Daniel</span><br>' +
+                                           '<span class="success-message">Eva</span><br>' +
+                                           '<span class="success-header">✔️ Program Completed Successfully!</span>';
+              announce('Program completed successfully. Outputted Aisha, Daniel, Eva.');
+            }
+            // Empty/Custom
+            else {
+              terminalConsole.innerHTML = '<span class="error-header">❌ Syntax Error:</span>' +
+                                           '<p class="error-desc">Your loop structure does not match the names list. Please check the spelling.</p>';
+              announce('Compilation failed.');
+            }
+          }, 600);
+        });
+      }
+
+      // Hand in work simulation
+      const submitBtn = document.getElementById('submit-code-btn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function () {
+          announce('Work submitted! Your teacher will see your active solution on their grading page.');
+          alert('Task submitted successfully!');
+        });
+      }
+
+      // Self assessment selection
+      const emojiBtns = document.querySelectorAll('.emoji-btn');
+      const selfAssessThanks = document.getElementById('self-assess-thanks');
+
+      emojiBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          emojiBtns.forEach(b => b.classList.remove('selected-emoji'));
+          this.classList.add('selected-emoji');
+          
+          if (selfAssessThanks) {
+            selfAssessThanks.style.display = 'flex';
+          }
+          const label = this.querySelector('strong').textContent;
+          announce('Self-assessment recorded: ' + label);
+        });
+      });
+
+      // Clear terminal
+      const clearTermBtn = document.getElementById('clear-term-btn');
+      if (clearTermBtn && terminalConsole) {
+        clearTermBtn.addEventListener('click', function () {
+          terminalConsole.innerHTML = '<span class="system-message">Console cleared.</span>';
+          announce('Terminal console cleared.');
+        });
+      }
+
+      // Worksheet Questions Read Aloud Simulation
+      const ttsWorksheetBtn = document.getElementById('tts-worksheet-btn');
+      if (ttsWorksheetBtn) {
+        ttsWorksheetBtn.addEventListener('click', function () {
+          this.classList.toggle('speaking');
+          if (this.classList.contains('speaking')) {
+            this.innerHTML = '<span class="icon">⏹️</span> Stop Reading';
+            announce('Reading worksheet questions aloud: Question 1: Loop Gaps. Fill in the blank space in this sentence: A for loop repeats code for each item in a list. If a list has 5 names, the loop repeats blank times. Question 2: Parsons Reorder. Put these code lines in order to print the variable x: print(x) and for x in range(5). Question 3: Multiple Choice. What number does Python start counting from when using range(5)?');
+          } else {
+            this.innerHTML = '🔊 Read Questions';
+            announce('Text reading stopped.');
+          }
+        });
+      }
+
+      // Parsons problem reordering logic (Motor-friendly click targets)
+      const parsonsList = document.getElementById('parsons-list');
+      const parsonsSavedSpan = document.getElementById('ws-sv-parsons-1');
+
+      if (parsonsList) {
+        parsonsList.addEventListener('click', function (e) {
+          const upBtn = e.target.closest('.ws-parsons-up');
+          const downBtn = e.target.closest('.ws-parsons-down');
+          
+          if (!upBtn && !downBtn) return;
+          
+          const line = e.target.closest('.ws-parsons-line');
+          if (!line) return;
+          
+          if (upBtn) {
+            const prev = line.previousElementSibling;
+            if (prev) {
+              parsonsList.insertBefore(line, prev);
+              announce('Moved line ' + line.querySelector('code').textContent + ' up.');
+              flashSaved();
+            }
+          } else if (downBtn) {
+            const next = line.nextElementSibling;
+            if (next) {
+              parsonsList.insertBefore(next, line);
+              announce('Moved line ' + line.querySelector('code').textContent + ' down.');
+              flashSaved();
+            }
+          }
+        });
+      }
+
+      function flashSaved() {
+        if (!parsonsSavedSpan) return;
+        parsonsSavedSpan.innerHTML = 'saved ✓';
+        parsonsSavedSpan.classList.add('show');
+        setTimeout(function () {
+          parsonsSavedSpan.classList.remove('show');
+          parsonsSavedSpan.innerHTML = '';
+        }, 1500);
+      }
+
+      // Workspace layout toggles (Slides + WS vs WS + Coding)
+      const modeSlidesWsBtn = document.getElementById('mode-slides-ws-btn');
+      const modeWsCodingBtn = document.getElementById('mode-ws-coding-btn');
+      const pupilWorkspaceGrid = document.getElementById('pupil-workspace-grid');
+
+      // Initialize workspace grid layout state
+      if (pupilWorkspaceGrid) {
+        pupilWorkspaceGrid.setAttribute('data-layout', 'slides-ws');
+      }
+
+      if (modeSlidesWsBtn && modeWsCodingBtn && pupilWorkspaceGrid) {
+        modeSlidesWsBtn.addEventListener('click', function () {
+          pupilWorkspaceGrid.setAttribute('data-layout', 'slides-ws');
+          modeSlidesWsBtn.classList.add('active');
+          modeWsCodingBtn.classList.remove('active');
+          announce('Workspace view changed: Showing Slides and Worksheet.');
+        });
+
+        modeWsCodingBtn.addEventListener('click', function () {
+          pupilWorkspaceGrid.setAttribute('data-layout', 'ws-coding');
+          modeWsCodingBtn.classList.add('active');
+          modeSlidesWsBtn.classList.remove('active');
+          announce('Workspace view changed: Showing Worksheet and Python Code Editor.');
+        });
+      }
+
+      // Slide Viewer navigation and data (Visually Impaired Catch Up support)
+      const slidesData = {
+        1: {
+          title: "Slide 1: Intro to Loops",
+          subtitle: "Why do we use loops?",
+          bullets: [
+            "Loops repeat a block of code automatically.",
+            "Instead of copying and pasting the same code 5 times, we write a <strong>loop</strong> to run it 5 times.",
+            "This makes our code shorter, cleaner, and easier to fix!"
+          ]
+        },
+        2: {
+          title: "Slide 2: Python Syntax",
+          subtitle: "Writing a loop statement",
+          bullets: [
+            "In Python, we use the <strong>for</strong> and <strong>in</strong> keywords.",
+            "We specify a temporary variable (like <strong>x</strong>) to hold the current item.",
+            "The list or range comes after the <strong>in</strong> keyword (e.g. <code>names</code>)."
+          ]
+        },
+        3: {
+          title: "Slide 3: Loop Example",
+          subtitle: "Reading Python loop code",
+          bullets: [
+            "A basic loop: <code>for x in names: print(x)</code>",
+            "Starts with <strong>for</strong>, then the variable <strong>x</strong>.",
+            "Repeats the indented code block for each name in the list."
+          ]
+        },
+        4: {
+          title: "Slide 4: Summary",
+          subtitle: "Key loops rules to remember",
+          bullets: [
+            "Always end the loop header with a colon <code>:</code>.",
+            "Indent the loop body with exactly 4 spaces.",
+            "Avoid infinite loops by using bounded lists."
+          ]
+        }
+      };
+
+      let activeSlide = 1;
+      const slideTitle = document.getElementById('pupil-slide-title');
+      const slideDisplayBox = document.getElementById('pupil-slide-display-box');
+      const slidePrevBtn = document.getElementById('pupil-slide-prev');
+      const slideNextBtn = document.getElementById('pupil-slide-next');
+      const slideThumbs = document.querySelectorAll('[data-p-slide]');
+      const ttsSlideBtn = document.getElementById('tts-slide-btn');
+
+      function updateSlideViewer(idx) {
+        activeSlide = idx;
+        const slide = slidesData[activeSlide];
+        if (!slide) return;
+
+        // Update Text
+        if (slideTitle) slideTitle.textContent = slide.title;
+        if (slideDisplayBox) {
+          slideDisplayBox.innerHTML = '<p class="slide-subtitle">' + slide.subtitle + '</p>' +
+                                       '<ul class="slide-bullet-points">' +
+                                         slide.bullets.map(b => '<li>' + b + '</li>').join('') +
+                                       '</ul>';
+        }
+
+        // Update boundary buttons
+        if (slidePrevBtn) slidePrevBtn.disabled = activeSlide === 1;
+        if (slideNextBtn) slideNextBtn.disabled = activeSlide === 4;
+
+        // Update active class on thumbnails
+        slideThumbs.forEach(thumb => {
+          const thumbIdx = parseInt(thumb.getAttribute('data-p-slide'), 10);
+          if (thumbIdx === activeSlide) {
+            thumb.classList.add('active');
+          } else {
+            thumb.classList.remove('active');
+          }
+        });
+
+        announce('Showing ' + slide.title + ': ' + slide.subtitle);
+      }
+
+      // Thumbnail clicks
+      slideThumbs.forEach(thumb => {
+        thumb.addEventListener('click', function () {
+          const idx = parseInt(this.getAttribute('data-p-slide'), 10);
+          updateSlideViewer(idx);
+        });
+      });
+
+      // Next / Back buttons
+      if (slidePrevBtn) {
+        slidePrevBtn.addEventListener('click', function () {
+          if (activeSlide > 1) {
+            updateSlideViewer(activeSlide - 1);
+          }
+        });
+      }
+
+      if (slideNextBtn) {
+        slideNextBtn.addEventListener('click', function () {
+          if (activeSlide < 4) {
+            updateSlideViewer(activeSlide + 1);
+          }
+        });
+      }
+
+      // Slide Read Aloud
+      if (ttsSlideBtn) {
+        ttsSlideBtn.addEventListener('click', function () {
+          this.classList.toggle('speaking');
+          const slide = slidesData[activeSlide];
+          if (this.classList.contains('speaking')) {
+            this.innerHTML = '<span class="icon">⏹️</span> Stop Reading';
+            // Speak content
+            const speakText = slide.title + '. ' + slide.subtitle + '. ' + slide.bullets.join('. ').replace(/<[^>]*>/g, '');
+            announce('Reading slide aloud: ' + speakText);
+          } else {
+            this.innerHTML = '🔊 Read Slide';
+            announce('Text reading stopped.');
+          }
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>

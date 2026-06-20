@@ -54,3 +54,19 @@ v2** (CHANGELOG "Pupil worksheets v2") then deepened it well past the table abov
 
 Options B–E (fillable PDF, DOCX content controls, Forms/Teams, ODT) remain unbuilt — the per-level Word
 export covers the "hand it back on paper / Teams" case without them.
+
+- **Computing question types** (2026-06-20, migration-free) — added for the NCCE pedagogy
+  ([PEDAGOGY.md](PEDAGOGY.md): P6 program comprehension, P11 PRIMM/Use-Modify-Create, P12 read-code-first):
+  - **Code-reading / Predict** — a fenced code block followed by a normal question ("predict the output
+    / trace / explain"); the code renders read-only above the answer box. No new syntax.
+  - **Code-writing** (`code`) — an answer cell `Type your code here` → a monospaced code box; marked as
+    open text.
+  - **Parson's Problems** (`parsons`) — a fenced code block tagged `parsons` listing the code lines in
+    their CORRECT order; the pupil drags the (stably-jumbled) lines back into order (▲▼ / Alt+arrows
+    fallback). The solution stays server-side; marking compares the pupil's order to it.
+- **Multiple worksheets per lesson** (2026-06-20) — a lesson can carry several worksheets (main +
+  extensions). The pupil gets **tabs**; the teacher marks each via the marking modal's worksheet picker.
+  Fields are namespaced with a per-worksheet **key prefix** (slot 0 unprefixed = backward-compatible;
+  later slots `w1.`, `w2.`…), so two sheets that both start at `t1.r1.c2` never collide. Worksheet order
+  is by resource id (creation order) so the prefix is stable and answers stay attached across an
+  adapted↔master flip or re-version.

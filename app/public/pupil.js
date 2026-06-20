@@ -84,6 +84,14 @@
         var on = t === tab; t.classList.toggle('is-on', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
       });
     });
+    // Worksheet tabs: a lesson with several worksheets — tap a tab to show that worksheet's panel.
+    main.addEventListener('click', function (e) {
+      var tab = e.target.closest('.ws-tab'); if (!tab) return;
+      var i = tab.getAttribute('data-ws-tab');
+      var scope = tab.closest('.pupil-work-card') || document;
+      scope.querySelectorAll('.ws-tab').forEach(function (t) { var on = t.getAttribute('data-ws-tab') === i; t.classList.toggle('is-on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      scope.querySelectorAll('.ws-panel').forEach(function (p) { p.classList.toggle('is-on', p.getAttribute('data-ws-panel') === i); });
+    });
   }
 
   // ── 10.11 read-aloud (Web Speech API; click any words to hear them when it's on) ───────────────
@@ -130,7 +138,8 @@
       var choices = card.querySelectorAll('.ws-choice-form');
       var blanks = card.querySelectorAll('.ws-blank');
       var slots = card.querySelectorAll('.ws-match-slot[data-key]');
-      var total = texts.length + checks.length + choices.length + blanks.length + slots.length;
+      var parsons = card.querySelectorAll('.ws-parsons-wrap[data-save-url]');
+      var total = texts.length + checks.length + choices.length + blanks.length + slots.length + parsons.length;
       if (total === 0) { chip.textContent = ''; return; }
       var done = 0;
       texts.forEach(function (t) { if ((t.value || '').trim()) done++; });
@@ -138,6 +147,7 @@
       choices.forEach(function (f) { if (f.querySelector('input[type=radio]:checked')) done++; });
       blanks.forEach(function (b) { if ((b.value || '').trim()) done++; });
       slots.forEach(function (s) { if (s.querySelector('.ws-match-placed')) done++; });
+      parsons.forEach(function (p) { if (p.classList.contains('is-ordered')) done++; });
       chip.textContent = done >= total ? 'All done — great work! (' + done + ' of ' + total + ') ✓' : "You've done " + done + ' of ' + total + ' — keep going!';
       chip.classList.toggle('ws-progress-done', done >= total);
     });
@@ -427,5 +437,52 @@
     });
     document.querySelectorAll('.ws-match').forEach(refreshTray);
     document.body.addEventListener('htmx:afterSwap', function () { document.querySelectorAll('.ws-match').forEach(refreshTray); });
+  }
+
+  // ── Parson's Problems: drag (or ▲▼ / Alt+arrows) the code lines into order; autosave the order as
+  // the lines joined by "\n". Same csrf + saved-flash pattern as matching. ────────────────────────
+  if (main) {
+    function pWrap(el) { return el && el.closest ? el.closest('.ws-parsons-wrap') : null; }
+    function pSave(wrap) {
+      if (!wrap) return;
+      var url = wrap.getAttribute('data-save-url'); if (!url) return;
+      var lines = [];
+      wrap.querySelectorAll('.ws-parsons-line').forEach(function (li) { lines.push(li.getAttribute('data-line') || ''); });
+      var span = wrap.querySelector('.ws-saved');
+      if (span) { span.textContent = 'saving…'; span.classList.add('show'); }
+      wrap.classList.add('is-ordered');
+      fetch(url, { method: 'POST', headers: { 'x-csrf-token': csrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'value=' + encodeURIComponent(lines.join('\n')), credentials: 'same-origin' })
+        .then(function (r) { if (span) { span.textContent = r.ok ? 'saved ✓' : 'could not save — try again'; span.classList.add('show'); } })
+        .catch(function () { if (span) { span.textContent = 'could not save — try again'; span.classList.add('show'); } });
+    }
+    function pMove(li, dir) {
+      if (!li) return;
+      var ol = li.parentNode;
+      if (dir < 0 && li.previousElementSibling) ol.insertBefore(li, li.previousElementSibling);
+      else if (dir > 0 && li.nextElementSibling) ol.insertBefore(li.nextElementSibling, li);
+      pSave(pWrap(li));
+    }
+    main.addEventListener('click', function (e) {
+      var up = e.target.closest('.ws-parsons-up'); if (up) { e.preventDefault(); pMove(up.closest('.ws-parsons-line'), -1); return; }
+      var dn = e.target.closest('.ws-parsons-down'); if (dn) { e.preventDefault(); pMove(dn.closest('.ws-parsons-line'), 1); return; }
+    });
+    main.addEventListener('keydown', function (e) {
+      var li = e.target.closest && e.target.closest('.ws-parsons-line'); if (!li) return;
+      if (e.key === 'ArrowUp' && (e.altKey || e.ctrlKey)) { e.preventDefault(); pMove(li, -1); li.focus(); }
+      else if (e.key === 'ArrowDown' && (e.altKey || e.ctrlKey)) { e.preventDefault(); pMove(li, 1); li.focus(); }
+    });
+    var pDrag = null;
+    main.addEventListener('dragstart', function (e) { var li = e.target.closest && e.target.closest('.ws-parsons-line'); if (li) { pDrag = li; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', ''); } catch (x) {} li.classList.add('is-dragging'); } });
+    main.addEventListener('dragend', function () { if (pDrag) pDrag.classList.remove('is-dragging'); pDrag = null; });
+    main.addEventListener('dragover', function (e) {
+      var li = e.target.closest && e.target.closest('.ws-parsons-line');
+      if (li && pDrag && pWrap(li) === pWrap(pDrag) && li !== pDrag) {
+        e.preventDefault();
+        var rect = li.getBoundingClientRect();
+        var after = (e.clientY - rect.top) > rect.height / 2;
+        li.parentNode.insertBefore(pDrag, after ? li.nextElementSibling : li);
+      }
+    });
+    main.addEventListener('drop', function (e) { if (pDrag) { e.preventDefault(); pSave(pWrap(pDrag)); } });
   }
 })();

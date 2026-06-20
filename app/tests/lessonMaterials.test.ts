@@ -66,7 +66,7 @@ describe('lessonMaterials — isTextBearing', () => {
 
 describe('generation prompts — usability is paramount (A7)', () => {
   it('both resource-generation prompts carry the reading-age / no-wall-of-text directive', () => {
-    expect(LESSON_RESOURCES_VERSION).toBe('lesson_resources@14');
+    expect(LESSON_RESOURCES_VERSION).toBe('lesson_resources@16');
     expect(ADAPT_RESOURCES_VERSION).toBe('adapt_resources@12');
     expect(LESSON_RESOURCES_SYSTEM).toContain('USABILITY IS PARAMOUNT');
     expect(LESSON_RESOURCES_SYSTEM).toMatch(/reading age/);

@@ -37,7 +37,7 @@ describe('author-scheme schema + prompt (4.4 / @4)', () => {
     expect(items[0]!.text).toContain('1.1.1: Purpose of the CPU');
   });
 
-  it('version is author_scheme@4', () => {
-    expect(AUTHOR_SCHEME_VERSION).toBe('author_scheme@4');
+  it('version is author_scheme@5', () => {
+    expect(AUTHOR_SCHEME_VERSION).toBe('author_scheme@5');
   });
 });
