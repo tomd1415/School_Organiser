@@ -34,30 +34,30 @@ exception leakage, safety-gate, marks-vs-edited-answer & incomplete-AI-batch, **
 versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & disposal narrative removal);
 BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-025,
 BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-032, BUG-043, BUG-044, BUG-045, BUG-046,
-BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance,
-calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme
-clone, atomic review apply, atomic resource creation, AI audit-durability, group-course deactivation
-consistency, screenshot-replace cleanup, restart-safe review sweep, DB/app loopback binding +
-default-password guard, complete SAR export, durable disposal-delete retry, proxy-aware client-IP rate
-limiting, per-lesson recurrence cursor & email-dedup claim/recovery); BUG-034, BUG-035, BUG-036, BUG-050
-(Low). **Every audit finding is now fixed in code/config except the two client-JS items. Remaining 3:
-High 013 (HTMX reported-as-success) + Medium 033 (unrelated-success clears warning) — both `public/app.js`
-reset behaviour, needing the not-yet-built Wave-0 browser harness for safe verification; Medium 049 (tar —
-needs a clean dependency rebuild). Operator actions outstanding: deploy 032/045 (`docker compose
---profile proxy up -d --force-recreate`) and run the 009/010 restore drill (docs/RUNBOOK.md) to confirm.**
+BUG-033, BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark
+provenance, calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades,
+complete scheme clone, atomic review apply, atomic resource creation, AI audit-durability, group-course
+deactivation consistency, screenshot-replace cleanup, restart-safe review sweep, DB/app loopback binding
++ default-password guard, complete SAR export, durable disposal-delete retry, proxy-aware client-IP rate
+limiting, per-lesson recurrence cursor, email-dedup claim/recovery & **unsaved-warning operation
+scoping**); BUG-013, BUG-034, BUG-035, BUG-036, BUG-050 (Low/High incl. HTMX save-failure honesty).
+**Every audit finding is now fixed in code/config except the single supply-chain item. Remaining 1:
+Medium 049 (tar — needs a clean Docker dependency rebuild; runtime already mitigated). Operator actions
+outstanding (not bugs): deploy 032/045 (`docker compose --profile proxy up -d --force-recreate`) and run
+the 009/010 restore drill (docs/RUNBOOK.md) to confirm.**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 17 | 1 |
-| Medium | 26 | 24 | 2 |
+| High | 18 | 18 | 0 |
+| Medium | 26 | 25 | 1 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **47** | **3** |
+| **Total** | **50** | **49** | **1** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
-- The unit-test suite passes: **75 test files, 529 tests** (508 at audit time; remediation has added regression coverage).
+- The unit-test suite passes: **76 test files, 535 tests** (508 at audit time; remediation has added regression coverage, incl. a jsdom harness for `app.js`).
 - The integration-test suite passes against the local PostgreSQL service: **71 test files, 335 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
@@ -212,6 +212,7 @@ needs a clean dependency rebuild). Operator actions outstanding: deploy 032/045 
 
 ### BUG-013 — Unexpected HTMX failures are reported as successful and can erase unsaved form input
 
+- **Status:** ✅ Resolved 2026-06-20 — the server already swallows a 5xx on an HTMX request into a 200 fragment + an `app:save-failed` HX-Trigger (so the panel isn't dead); the gap was the client treating that 200 as a success and clearing the "not saved" banner the trigger had just raised. `public/app.js` now flags the swallowed failure and, in the **single** `htmx:afterRequest` decision point, marks that request as a FAILURE despite its 2xx — so a swallowed server error keeps the banner up; the typed text was never touched (autosaves are `hx-swap="none"`). Verified by a new **jsdom harness** ([app/tests/appjsUnsaved.test.ts](app/tests/appjsUnsaved.test.ts), `jsdom` dev-dep) that runs the real `app.js` and dispatches synthetic htmx events — the audit's "Wave-0 HTMX harness", now built.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/server.ts:98-116`; `app/public/app.js:83-117`; examples at `app/src/lib/resourceView.ts:118-128`, `app/src/lib/notesView.ts:38`, `app/src/routes/tasks.ts:50`, `app/src/routes/focus.ts:98`
 - **Problem and trigger:** The global error handler converts unexpected HTMX 500s into HTTP 200. HTMX therefore sets `event.detail.successful = true`. Several forms reset unconditionally after any request, and even forms guarded by `successful` now treat a server crash as success.
@@ -488,6 +489,7 @@ needs a clean dependency rebuild). Operator actions outstanding: deploy 032/045 
 
 ### BUG-033 — Any unrelated successful HTMX action clears the “not saved” warning
 
+- **Status:** ✅ Resolved 2026-06-20 — the banner is no longer a single global flag cleared by any success. `public/app.js` now tracks unsaved work **per operation** (a stable key off the field's `data-save-id` / `name` / `id`): a failed save records its key, and a later success clears **only that key** — an unrelated field or a background poll succeeding leaves the warning up. The banner counts outstanding fields ("2 changes not saved") and clears only when the last one saves; the old `[data-bg-poll]` special-case is gone (a read/poll never marks unsaved work, so nothing to skip). Same jsdom harness asserts: unrelated success doesn't clear, the matching retry does, the count tracks several, and a failed read isn't counted.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/public/app.js:98-117`; background poll emitters across `app/src/routes/now.ts`, `app/src/routes/focus.ts`, and `app/src/routes/pupilWork.ts`
 - **Problem and trigger:** After a save failure, the toast is cleared by the next successful non-background HTMX request, not by a retry of the failed request or field. A toggle, navigation fragment, or different save is enough.

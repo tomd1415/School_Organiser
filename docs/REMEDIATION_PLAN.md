@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 47 of 50 fixed; every finding fixed in code/config except the two client-JS items + the tar rebuild. Operator actions: deploy 032/045, run the restore drill.** This is the
+> **Status (2026-06-20): 49 of 50 fixed — every audit finding resolved in code/config except 049 (tar, needs a clean Docker rebuild). Operator actions remain: deploy 032/045, run the restore drill.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -50,9 +50,13 @@
 > stop app → drop/recreate DB → load → restore matching resources → restart) and **010** (`backup.sh`
 > publishes a checksum manifest last + prunes by whole set; `verify-backup.sh` proves the set —
 > checksums + DB restore + resources unpack). Scripts `bash -n` clean; the **restore drill** runbook is in
-> RUNBOOK.md for the operator to run on a throwaway copy. **Remaining 3:** **013/033** (HTMX client-JS —
-> need the Wave-0 browser harness), **049** (tar — needs a clean dependency rebuild). **Operator actions:**
-> deploy 032/045 (`docker compose --profile proxy up -d --force-recreate`); run the restore drill.
+> RUNBOOK.md for the operator to run on a throwaway copy. **Client-JS (Wave-0 harness now built)** —
+> **013** (a 200-swallowed server error is no longer cleared by the same request's "success") and **033**
+> (the unsaved-warning is tracked per operation, so an unrelated success/poll never wipes it; it counts
+> outstanding fields), both verified by a new **jsdom** harness that runs the real `public/app.js` against
+> synthetic htmx events. **Remaining 1:** **049** (tar — needs a clean Docker dependency rebuild; runtime
+> already mitigated by `isEvalSupported:false`). **Operator actions (not bugs):** deploy 032/045 (`docker
+> compose --profile proxy up -d --force-recreate`); run the restore drill once on a throwaway copy.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

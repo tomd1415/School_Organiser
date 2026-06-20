@@ -82,9 +82,16 @@
   // aborted request and could clear the busy bar while another request was still in flight (BUG-034).
   document.body.addEventListener('htmx:afterRequest', requestDone);
 
-  // 10.8 — never lose work silently. Autosaves use hx-swap="none", so a failed save (connection
-  // drop, server error, timeout) would otherwise show nothing. Surface a persistent banner; the
-  // typed text stays on screen (hx-swap="none" doesn't touch the field), so nothing is lost.
+  // 10.8 / BUG-013 / BUG-033 — never lose work silently, and never LIE about whether it saved. Autosaves
+  // use hx-swap="none", so a failed save would otherwise show nothing; we surface a persistent banner and
+  // the typed text stays on screen (hx-swap="none" doesn't touch the field). Two subtleties the old code
+  // got wrong:
+  //   • A server crash on a background autosave is swallowed into a 200 fragment, so HTMX sees SUCCESS and
+  //     used to clear the banner the route had just raised. The route fires an `app:save-failed` HX-Trigger,
+  //     and we now treat the matching "successful" request as the failure it really was (BUG-013).
+  //   • An UNRELATED success (another field, a 30s background poll) must NOT wipe the warning while a save
+  //     is still unsaved. We track unsaved work PER OPERATION and clear only when that same operation later
+  //     succeeds — the banner counts how many fields are outstanding (BUG-033).
   function saveToast(msg) {
     var t = document.getElementById('hx-toast');
     if (!t) {
@@ -102,20 +109,44 @@
     if (t) t.classList.remove('show');
   }
   var LOST = '⚠ Not saved — your text is still on screen. Check the connection and try again.';
-  document.body.addEventListener('htmx:sendError', function () { saveToast(LOST); });
-  document.body.addEventListener('htmx:responseError', function () { saveToast(LOST); });
-  document.body.addEventListener('htmx:timeout', function () { saveToast('⚠ Still trying to save — your text is safe on screen.'); });
-  // A server crash on a background autosave returns a swallowed 200 fragment, so the route fires
-  // this HX-Trigger event instead (see server.ts error handler).
-  document.body.addEventListener('app:save-failed', function () { saveToast(LOST); });
-  // Any subsequent successful request means we're back — clear the banner. But a background poll
-  // (the 30s Now clock, the 45s Focus poll) succeeding does NOT mean the failed SAVE went through —
-  // skip those, or the "Not saved" warning is wiped while the work is still unsaved.
+  var unsavedOps = {};          // opKey -> true, one entry per field/operation still unsaved
+  var swallowedFailure = false; // set by app:save-failed (a 200 that was really a server error)
+
+  function refreshToast() {
+    var n = 0, k;
+    for (k in unsavedOps) if (Object.prototype.hasOwnProperty.call(unsavedOps, k)) n++;
+    if (n === 0) { clearToast(); return; }
+    saveToast(n === 1 ? LOST : '⚠ ' + n + ' changes not saved — your text is still on screen. Check the connection and try again.');
+  }
+  // A stable per-element key so a RETRY of the same field clears its OWN failure and an unrelated request
+  // never does. Falls back to a stamped id when the element has no name/id of its own.
+  var opSeq = 0;
+  function opKey(elt) {
+    if (!elt || !elt.getAttribute) return null;
+    if (!elt.__saveKey) elt.__saveKey = elt.getAttribute('data-save-id') || elt.getAttribute('name') || elt.id || ('op-' + ++opSeq);
+    return elt.__saveKey;
+  }
+  function markUnsaved(elt) { var k = opKey(elt); if (k) unsavedOps[k] = true; refreshToast(); }
+  function markSaved(elt) { var k = opKey(elt); if (k && unsavedOps[k]) delete unsavedOps[k]; refreshToast(); }
+  function isWrite(detail) {
+    var v = ((detail && detail.requestConfig && detail.requestConfig.verb) || '').toLowerCase();
+    return v === 'post' || v === 'put' || v === 'patch' || v === 'delete';
+  }
+
+  // The route swallowed a server crash into a 200 fragment — flag it so the MATCHING afterRequest treats
+  // the "successful" 2xx as the failure it really was.
+  document.body.addEventListener('app:save-failed', function () { swallowedFailure = true; });
+
+  // ONE terminal handler decides saved-vs-failed. htmx:afterRequest fires for success, error, timeout AND
+  // abort, so it's the single source of truth (no separate sendError/responseError/timeout listeners that
+  // raced the clear).
   document.body.addEventListener('htmx:afterRequest', function (e) {
-    if (!e.detail || !e.detail.successful) return;
-    var t = e.target;
-    if (t && t.closest && t.closest('[data-bg-poll]')) return;
-    clearToast();
+    var d = e.detail || {};
+    var elt = d.elt || e.target;
+    if (swallowedFailure) { swallowedFailure = false; markUnsaved(elt); return; } // 200 that was really an error
+    if (d.successful) { markSaved(elt); return; }                                 // a genuine success clears its op
+    if (isWrite(d)) markUnsaved(elt);                                             // a failed WRITE is unsaved work
+    // a failed READ (a search, a background poll) is not "unsaved work" — leave the banner state alone.
   });
 
   // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a

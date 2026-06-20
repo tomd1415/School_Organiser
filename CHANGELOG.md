@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 19 (HTMX save-failure honesty + a Wave-0 browser harness)
+
+Built the missing client-test harness, then fixed the two "unsaved work" UX bugs against it. Suite green:
+**535 unit / 335 integration; typecheck clean**.
+
+- **🧪 jsdom harness for `public/app.js`.** A new `app/tests/appjsUnsaved.test.ts` (with the `jsdom`
+  dev-dependency) loads the *real* `app.js` and drives it with synthetic htmx events — so the
+  client-side "never lose work" logic is now covered by deterministic tests, no browser needed.
+- **🚨 A failed save no longer pretends it succeeded (BUG-013, High).** A server crash on a background
+  autosave is swallowed into a `200` fragment, so HTMX saw "success" and cleared the "not saved" banner
+  the route had just raised. `app.js` now flags that swallowed failure and, in one `htmx:afterRequest`
+  decision point, treats the `200`-that-was-really-an-error as a failure — the banner stays up (the typed
+  text was never touched: autosaves are `hx-swap="none"`).
+- **🔔 The warning is scoped to the operation that failed (BUG-033, Medium).** It was a single global flag
+  any success cleared. It's now tracked **per field**: an unrelated action or a 30-second background poll
+  succeeding leaves the warning up; it counts outstanding fields ("2 changes not saved") and clears only
+  when the matching field finally saves.
+
+**49 / 50 findings fixed.** The last one — **049** (`tar` in the `pdfjs-dist`→`canvas` build chain) — needs
+a clean Docker rebuild to verify and is already mitigated at runtime. **Operator actions remain:** deploy
+the network hardening (032/045) and run the restore drill (009/010).
+
 ### 2026-06-20 — Audit remediation, batch 18 (backup/restore integrity)
 
 Make the backups a recovery set you can actually restore. Scripts only (`bash -n` clean); **run the
