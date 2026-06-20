@@ -21,10 +21,12 @@ backups/
 *.dump
 *.sql.gz
 
-# Editor / OS
+# Editor / OS / Agent metadata
 .DS_Store
 Thumbs.db
 .idea/
+.agents/
+.claude/
 
 # Hosted resource store (large; bind-mounted into the app)
 data/resources/

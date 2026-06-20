@@ -53,6 +53,48 @@ export function sliceSlidesForLevel(md: string, level: SlideLevel): string[] {
   return out;
 }
 
+// ── Per-slide teacher notes (private — NEVER shown to pupils / the board) ───────────────────────
+// Teacher notes are authored as a blockquote whose first line is marked 🧑‍🏫, e.g.
+//   > 🧑‍🏫 Drop in the fact that the first webcam watched a coffee pot…
+// The legacy `*Say:*` talking-points line (which used to leak onto the pupil/board slides) is treated
+// as a teacher note too, so old decks are cleaned automatically. A `> key idea` callout (no 🧑‍🏫)
+// stays — it's pupil-facing.
+const TEACHER_QUOTE = /^\s*>\s*🧑‍🏫/; // a teacher-notes blockquote (marked first line)
+const QUOTE_LINE = /^\s*>/;
+const SAY_LINE = /^\s*[*_]+\s*say\s*[:：][*_]*\s*/i; // legacy "*Say:* …" talking-points line (eats the markers)
+
+/** Split one slide's Markdown into the pupil-visible part and the (private) teacher notes. The clean
+ *  part NEVER contains teacher notes; that's the safety boundary the pupil/board render relies on. */
+export function splitTeacherNotes(md: string): { clean: string; notes: string } {
+  const lines = (md ?? '').replace(/\r\n/g, '\n').split('\n');
+  const clean: string[] = [];
+  const notes: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const l = lines[i]!;
+    if (SAY_LINE.test(l)) {
+      notes.push(l.replace(SAY_LINE, '').replace(/[*_]+\s*$/, '').trim()); // keep the talking point as a note (old decks)
+      i += 1;
+      continue;
+    }
+    if (TEACHER_QUOTE.test(l)) {
+      while (i < lines.length && QUOTE_LINE.test(lines[i]!)) {
+        notes.push(lines[i]!.replace(/^\s*>\s?/, '').replace(/^🧑‍🏫\s*/, '').trim()); // the whole contiguous block is teacher-only
+        i += 1;
+      }
+      continue;
+    }
+    clean.push(l);
+    i += 1;
+  }
+  return { clean: clean.join('\n').trim(), notes: notes.filter((n) => n !== '').join('\n').trim() };
+}
+
+/** Pupil/board-safe slide Markdown: the slide with every teacher note removed. */
+export function stripTeacherNotes(md: string): string {
+  return splitTeacherNotes(md).clean;
+}
+
 /** Whether a slides document is levelled (has per-ability sections) — for UI hints. */
 export function slidesAreLevelled(md: string): boolean {
   return (md ?? '')

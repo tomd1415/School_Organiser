@@ -130,6 +130,42 @@ export function renderRail(
   experience: Experience = getExperienceMode(),
   dailyHrefs: readonly string[] = getNavDailyHrefs(),
 ): string {
+  if (getUiShell() === 'next') {
+    const link = (href: string, label: string) => `<a href="${href}">${label}</a>`;
+    return `<nav class="rail" aria-label="Main navigation">
+      <div class="rail-tier rail-tier-1">
+        ${link('/', 'Now')}
+        ${link('/safeguarding', 'Safeguarding')}
+        ${link('/oversee', 'Oversee')}
+      </div>
+      <div class="rail-tier rail-tier-2">
+        ${link('/timetable', 'Timetable')}
+        ${link('/tasks', 'Tasks')}
+        ${link('/marking', 'Marking')}
+        ${link('/captured', 'Captured')}
+        ${link('/events', 'Events')}
+        ${link('/notes', 'Notes')}
+        ${link('/coverage', 'Coverage')}
+        ${link('/map', 'Map')}
+        ${link('/planner', 'Planner')}
+      </div>
+      <details class="ribbon-drawer rail-sec">
+        <summary>Prep & Advanced</summary>
+        <div class="rail-tier rail-tier-3">
+          ${link('/schemes', 'Schemes')}
+          ${link('/concepts', 'Concepts')}
+          ${link('/setup', 'Setup')}
+          ${link('/kit', 'Kit')}
+          ${link('/resources', 'Resources')}
+          ${link('/settings', 'Settings')}
+          ${link('/recurring', 'Recurring')}
+          ${link('/time', 'Time')}
+          ${link('/pupils', 'Pupils')}
+        </div>
+      </details>
+    </nav>`;
+  }
+
   const daily = new Set((dailyHrefs.length ? dailyHrefs : DEFAULT_DAILY).filter((h) => h !== SAFEGUARDING_HREF));
   const link = (i: NavItem) => `<a href="${i.href}">${i.label}</a>`;
   const today = NAV_MODEL.filter((i) => daily.has(i.href));
@@ -151,6 +187,17 @@ export function renderRail(
     ${advSec}
   </nav>`;
 }
+
+/** Output a dynamic header block containing placeholders to load asynchronously via HTMX. */
+export function renderHeader(title: string): string {
+  const escTitle = encodeURIComponent(title);
+  return `<header id="context-header" class="context-header" hx-get="/header-overhaul?title=${escTitle}" hx-trigger="load" hx-swap="outerHTML">
+    <div class="header-left">Loading...</div>
+    <div class="header-middle"></div>
+    <div class="header-right"></div>
+  </header>`;
+}
+
 
 /** The keyed items, for the client's `g`+letter jump map and the shortcut cheat-sheet. */
 export function navClientModel(): Array<{ key: string; href: string; label: string }> {

@@ -378,7 +378,8 @@ function renderSection(
       ${renderResourcesBlock(oc, s, eff?.adapted ?? false, resources, adaptedRes, materialTitles)}
       ${
         s.lessonPlanId != null
-          ? `<p class="pv-open"><a class="link" href="/lesson/pupil-view?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Open this lesson exactly as the pupil sees it, in a new tab — with an edit toggle to tweak the slides/worksheet for this class or the master">👁 Open as pupil (new tab) ↗</a></p>
+          ? `<p class="pv-open"><a class="link" href="/lesson/pupil-view?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Open this lesson exactly as the pupil sees it, in a new tab — with an edit toggle to tweak the slides/worksheet for this class or the master">👁 Open as pupil (new tab) ↗</a>
+            <a class="link" href="/lesson/present?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Presenter view for your own screen — the slides WITH your private teaching notes. The board (Open as pupil) never shows them.">🧑‍🏫 Presenter (your notes) ↗</a></p>
       <details class="ws-preview" id="ws-prev-d-${oc}">
         <summary>quick peek — each ability level inline</summary>
         <div class="ws-preview-tabs" role="tablist">
@@ -827,6 +828,40 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       bodyContent = banner + editor('slides', '📊 Slides', slidesMd ?? '') + editor('worksheet', '📝 Worksheet', ws?.markdown ?? '');
     }
     const page = `<section class="pupil-card pv-card" hx-headers='{"x-csrf-token":"${csrf}"}'>${header}${bodyContent}</section>`;
+    return reply.type('text/html').send(pupilLayout(page, csrf));
+  });
+
+  // Presenter view — the slides on the TEACHER's own screen WITH the per-slide teaching notes. The board
+  // (/lesson/pupil-view) stays clean; this route is requireAuth so notes never reach a pupil.
+  app.get('/lesson/present', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({
+        gc: z.coerce.number().int().positive().optional(),
+        lp: z.coerce.number().int().positive(),
+        level: z.enum(['support', 'core', 'challenge']).default('core'),
+      })
+      .safeParse(req.query);
+    if (!q.success) return reply.code(400).type('text/html').send('<p>Bad request.</p>');
+    const { gc, lp, level } = q.data;
+    const gcKey = gc ?? 0;
+    const csrf = reply.generateCsrf();
+    const [slidesMd, info, master] = await Promise.all([
+      getLessonSlidesMarkdown(gcKey, lp),
+      gc == null ? Promise.resolve(null) : getGroupCourseInfo(gc),
+      getPlanRow(lp),
+    ]);
+    const className = gc == null ? 'master lesson' : info?.groupName ?? 'class';
+    const scopeQ = gc == null ? 'master=1' : `gc=${gc}`;
+    const lvlTab = (l: Level, label: string): string =>
+      `<a class="ws-tab${l === level ? ' is-on' : ''}" href="/lesson/present?${scopeQ}&amp;lp=${lp}&amp;level=${l}">${label}</a>`;
+    const deck = slidesMd ? renderSlideDeck(slidesMd, `present-${gcKey}-${lp}`, level, 'teacher') : '<p class="pupil-note">No slides for this lesson yet.</p>';
+    const page = `<section class="pupil-card pv-card present-card">
+      <div class="pv-bar">
+        <div><strong>${esc(master?.title ?? 'Lesson')}</strong> <span class="muted">${esc(className)} · 🧑‍🏫 presenter — your notes show here, never on the board</span></div>
+        <div class="pv-levels">${lvlTab('support', '🟢')}${lvlTab('core', '🟡')}${lvlTab('challenge', '🔴')}</div>
+        <div><a class="link" href="/lesson/pupil-view?${scopeQ}&amp;lp=${lp}&amp;level=${level}" target="_blank" rel="noopener">🖥 Open the clean board ↗</a></div>
+      </div>
+      ${deck}</section>`;
     return reply.type('text/html').send(pupilLayout(page, csrf));
   });
 

@@ -38,9 +38,8 @@ Full findings: [EXTERNAL_RESOURCES.md](EXTERNAL_RESOURCES.md). Outcome: **Teach 
 integrated** (OGL v3.0; the `/resources/import` + `/schemes/.../convert` pipeline does exactly this);
 **CAS is a reference source, not a pipeline** (mixed member licensing, no API). Follow-ons:
 
-- [ ] **Auto-attribution on imported resources** — a `source_attribution` field + a standard OGL credit
-  line for Teach Computing imports ("Contains material from the NCCE Teach Computing Curriculum, OGL
-  v3.0"). Keeps OGL reuse clean. *(small)*
+- [x] **Auto-attribution on imported resources** (2026-06-20) — `source_attribution` (migration `0055`) +
+  a one-click OGL preset on the import screen for Teach Computing files, shown on each resource.
 - [ ] **Finish the KS4/GCSE import** — units 9–16 still "to do" in [RESOURCE_INGEST.md](RESOURCE_INGEST.md).
 - [ ] **External reference link on lessons/units** — a URL + note field so a CAS (or any) resource can be
   linked from a lesson without copying it (licence-safe). *(small)*

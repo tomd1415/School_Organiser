@@ -67,10 +67,17 @@ ${checks}${blank}
 `;
 }
 
-/** A tiny markdown slide deck for a lesson (kind='slides', title ends .md). */
+/** A tiny markdown slide deck for a lesson (kind='slides', title ends .md). Each slide carries a
+ *  private `> 🧑‍🏫` teacher note (engagement/tips) — shown on the presenter view, stripped from pupils. */
+const SLIDE_TIPS = [
+  'Take 2–3 hands on a quick question before revealing the answer.',
+  'Turn-to-your-partner: 30 seconds to explain this, then cold-call one pair.',
+  'Mini-whiteboards here — everyone shows an answer so you spot misconceptions fast.',
+  'Drop in a real-world example and ask who has seen it before.',
+];
 export function slidesMarkdown(title: string, bullets: string[]): string {
   const slides = bullets
-    .map((b, i) => `---\n\n## ${i + 1}. ${b.split(' — ')[0]}\n\n${b.split(' — ')[1] ?? b}`)
+    .map((b, i) => `---\n\n## ${i + 1}. ${b.split(' — ')[0]}\n\n${b.split(' — ')[1] ?? b}\n\n> 🧑‍🏫 ${SLIDE_TIPS[i % SLIDE_TIPS.length]}`)
     .join('\n\n');
   return `# ${title}\n\n${slides}\n`;
 }

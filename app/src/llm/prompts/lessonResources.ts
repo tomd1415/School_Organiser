@@ -4,7 +4,7 @@ import type { RedactableItem } from '../../services/redact';
 import type { ExamProfile } from '../../services/examProfile';
 import { PEDAGOGY_GUIDANCE } from './pedagogy';
 
-export const LESSON_RESOURCES_VERSION = 'lesson_resources@16'; // @16: code-reading (predict/trace/explain), code-writing box, Parson's Problems. @15: ground in the NCCE 12 principles of computing pedagogy. @14: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
+export const LESSON_RESOURCES_VERSION = 'lesson_resources@17'; // @17: private per-slide teacher notes (🧑‍🏫 — tips/facts/engagement, never shown to pupils) replace the leaky *Say:* line. @16: code-reading (predict/trace/explain), code-writing box, Parson's Problems. @15: ground in the NCCE 12 principles of computing pedagogy. @14: usability — write for the pupil's reading age, fewest steps, never a wall of text (A7). @13: OCR GCSE exam-style question weighting by proximity to exams (B5) via context[]. @12: build on the lesson's own prepared materials (extracted text of uploaded slides/worksheets) via context[]. @11: matching (a choice table sharing one option set). @10: fill-in-the-blank "[[ ]]" gaps + word bank. @9: multiple-choice / true-false question cells "( ) option". @8: per-level slides + pupil-only worksheet (typed blocks, screenshot tasks) + SEPARATE ta_notes doc. @7: image placeholders. @6: all slides in one entry.
 
 export const LESSON_RESOURCES_SYSTEM =
   'You are an experienced UK secondary SEND Computing teacher producing the ready-to-use resources for ' +
@@ -13,8 +13,15 @@ export const LESSON_RESOURCES_SYSTEM =
   'given; Support one step below; Challenge one step above). Produce EXACTLY four documents, one entry ' +
   'each:\n' +
   '(1) "slides" — the teaching deck, ALL slides in ONE entry, one `## ` heading per slide; after each ' +
-  'heading put a large supporting emoji on its own line, then ≤4 short large-print bullets, a *Say:* ' +
-  'teacher talking-points line, and a `> key idea` callout where one fits. THE DECK IS DIFFERENTIATED ' +
+  'heading put a large supporting emoji on its own line, then ≤4 short large-print bullets, an optional ' +
+  '`> key idea` callout (pupil-facing), and — on EVERY slide — a PRIVATE TEACHER-NOTES block written as a ' +
+  'blockquote whose FIRST line starts with 🧑‍🏫 (e.g. "> 🧑‍🏫 Drop in that the first webcam watched a ' +
+  'coffee pot…"). These notes show ONLY on the teacher\'s presenter screen and are NEVER shown to pupils ' +
+  'or on the board, so make them genuinely useful to a confident subject expert: a teaching TIP or analogy ' +
+  'for the trickiest idea, an interesting/surprising FACT to throw in, a HINT for what pupils usually find ' +
+  'hard here, and a quick ENGAGEMENT idea (a question to pose, a turn-to-your-partner, a 30-second demo). ' +
+  'Do NOT explain the subject content or write a word-for-word "say this" script — the teacher knows the ' +
+  'material well. Keep each slide\'s notes to ≤4 short lines. THE DECK IS DIFFERENTIATED ' +
   'BY LEVEL so each pupil follows a version pitched to them: put the shared opening slides first, then ' +
   'a `# 🟢 Support` divider and the Support slides, then `# 🟡 Core` and the Core slides, then ' +
   '`# 🔴 Challenge` and the Challenge slides. Level dividers are depth-1 `# `; slides are depth-2 ' +

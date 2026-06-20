@@ -36,7 +36,7 @@ import { coverageAtRisk } from '../repos/brief';
 import { openReviewCount } from '../repos/reviews';
 import { buildBrief, type BriefItem } from '../services/brief';
 import type { LessonRow, PeriodRow } from '../services/timetable';
-import { addDays, toMinutes, weekdayOf } from '../lib/time';
+import { addDays, toMinutes, weekdayOf, tzDateToEpoch } from '../lib/time';
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -528,4 +528,70 @@ export function registerNowRoutes(app: FastifyInstance): void {
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');
     }
   });
+
+  app.get('/header-overhaul', { preHandler: requireAuth }, async (req, reply) => {
+    const title = typeof (req.query as { title?: unknown }).title === 'string' ? (req.query as { title: string }).title : 'School Organiser';
+    const now = new Date();
+    try {
+      const ctx = await getClockContext();
+      const state = resolveNow(now, ctx);
+
+      let leftAnchorHtml = '';
+      if (state.current) {
+        const currentLesson = await getSelfLessonAt(state.current.weekday, state.current.slotOrder);
+        const currentLabel = currentLesson ? (currentLesson.groupName ?? purposeLabel(currentLesson.purpose)) : 'Lesson';
+        const currentEndEpochMs = tzDateToEpoch(state.isoDate, state.current.endMin, ctx.tz);
+        leftAnchorHtml = `<span class="header-current-lesson">Now: <strong>${esc(currentLabel)}</strong> (${esc(state.current.label)}) <span data-epoch-ms="${currentEndEpochMs}">ends...</span></span>`;
+      } else if (state.nextTeaching) {
+        const next = await getSelfLessonAt(state.nextTeaching.weekday, state.nextTeaching.slotOrder);
+        const nextLabel = next ? (next.groupName ?? purposeLabel(next.purpose)) : 'Lesson';
+        const nextEpochMs = tzDateToEpoch(state.nextTeaching.date, state.nextTeaching.startMin, ctx.tz);
+        leftAnchorHtml = `<span class="header-next-lesson">Next: <strong>${esc(nextLabel)}</strong> (${esc(state.nextTeaching.label)}) <span data-epoch-ms="${nextEpochMs}">starts...</span></span>`;
+      } else {
+        leftAnchorHtml = `<span class="header-next-lesson">No more lessons today</span>`;
+      }
+
+      const [bellAll, groupSlots] = await Promise.all([
+        listBellTasks(),
+        getGroupSlots(),
+      ]);
+      const nextBell = state.nextTeaching
+        ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
+        : null;
+      const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
+      const tasksCount = bell.length;
+
+      const marksWaiting = (await marksEnabled()) ? await marksBacklog() : [];
+      const markingCount = marksWaiting.length;
+
+      const { dateLabel } = nowLabels(now, ctx.tz);
+      const clockStr = new Intl.DateTimeFormat('en-GB', { timeZone: ctx.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(now);
+
+      const html = `<header id="context-header" class="context-header">
+        <div class="header-left">
+          ${leftAnchorHtml}
+        </div>
+        <div class="header-middle">
+          <div class="search-box">
+            <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search or jump to a page…  press /" autocomplete="off" aria-label="Search or jump to a page"
+              hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
+            <div id="search-results" class="search-results"></div>
+          </div>
+          <button type="button" id="note-btn" class="chip chip-btn" title="Quick note (or press n)">📝 Note</button>
+          <a href="/tasks" class="chip">Tasks: <span class="chip-count">${tasksCount}</span></a>
+          <a href="/marking" class="chip">Marking: <span class="chip-count">${markingCount}</span></a>
+          <button type="button" id="focus-mode-btn" class="chip chip-btn" title="Toggle Focus Mode">🎯 Focus Mode</button>
+        </div>
+        <div class="header-right">
+          <span id="monospace-date" class="monospace-date">${esc(dateLabel)}</span>
+          <span id="monospace-clock" class="monospace-clock">${esc(clockStr)}</span>
+        </div>
+      </header>`;
+      return reply.type('text/html').send(html);
+    } catch (err) {
+      app.log.error({ err }, 'header overhaul render failed');
+      return reply.type('text/html').send('<header id="context-header" class="context-header"><div class="header-left">Unavailable</div></header>');
+    }
+  });
 }
+

@@ -13,7 +13,7 @@ import { indexDayExceptions, exceptionForLesson, describeException } from '../se
 import { getLessonSlidesMarkdown, getLessonWorksheets, worksheetForKey } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { renderMarkdown } from '../lib/markdown';
-import { sliceSlidesForLevel } from '../lib/slideDeck';
+import { sliceSlidesForLevel, splitTeacherNotes } from '../lib/slideDeck';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
 import { readStored, removeStored, storeBuffer } from '../lib/resourceStore';
@@ -136,11 +136,22 @@ function resultsCard(r: PupilResults): string {
 
 // The pupil's slide deck (left pane) — their ability's slides, one shown at a time, Prev/Next driven
 // by pupil.js. The pupil follows the lesson on the board with a simplified deck matching their level.
-export function renderSlideDeck(md: string, deckId: string, level: Level): string {
+// `audience` defaults to 'pupil' — which STRIPS every per-slide teacher note, so the pupil surface AND
+// the projector board never show them (the safety boundary). Only 'teacher' (the presenter view) renders
+// the notes, in a clearly-labelled side panel.
+export function renderSlideDeck(md: string, deckId: string, level: Level, audience: 'pupil' | 'teacher' = 'pupil'): string {
   const slides = sliceSlidesForLevel(md, level);
   if (slides.length === 0) return '';
-  const html = slides.map((s, i) => `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">${renderMarkdown(s)}</div>`).join('');
-  return `<section class="pupil-slides" data-deck="${esc(deckId)}" aria-label="Lesson slides">
+  const html = slides
+    .map((s, i) => {
+      const { clean, notes } = splitTeacherNotes(s);
+      const notesPanel = audience === 'teacher' && notes
+        ? `<aside class="pslide-notes" aria-label="Teaching notes — not shown to pupils"><span class="pslide-notes-h">🧑‍🏫 Teaching notes <span class="muted">— only you see these</span></span><div class="pslide-notes-body">${renderMarkdown(notes)}</div></aside>`
+        : '';
+      return `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">${renderMarkdown(clean)}${notesPanel}</div>`;
+    })
+    .join('');
+  return `<section class="pupil-slides${audience === 'teacher' ? ' teacher-present' : ''}" data-deck="${esc(deckId)}" aria-label="Lesson slides">
     <div class="pslide-head"><span class="pslide-title">📊 Slides</span><span class="pslide-count">Slide <b class="pslide-n">1</b> / ${slides.length}</span></div>
     <div class="pslide-stage">${html}</div>
     <div class="pslide-nav">

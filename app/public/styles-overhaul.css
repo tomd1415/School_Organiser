@@ -1,0 +1,242 @@
+@import url('/static/styles.css');
+
+/* --- Overhaul UI Shell CSS --- */
+
+body[data-shell="next"] {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color, #fdfdfd);
+  color: var(--text-color, #111);
+}
+
+body[data-shell="next"] .app {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+body[data-shell="next"] .rail-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 1000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #1e1e24;
+  color: #eee;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-shell="next"] .rail-wrap:hover,
+body[data-shell="next"] .rail-wrap.expanded {
+  width: 200px;
+}
+
+body[data-shell="next"] .rail-wrap .brand {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 16px;
+  border-bottom: 1px solid #2d2d35;
+  margin-bottom: 8px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+}
+
+body[data-shell="next"] .rail-wrap .rail,
+body[data-shell="next"] .rail-wrap .rail-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+body[data-shell="next"] .rail-wrap .rail-tier-1,
+body[data-shell="next"] .rail-wrap .rail-tier-2,
+body[data-shell="next"] .rail-wrap .rail-tier-3 {
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-shell="next"] .rail-wrap a,
+body[data-shell="next"] .rail-wrap button,
+body[data-shell="next"] .rail-wrap summary {
+  padding: 10px 16px;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  color: #ccc;
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+body[data-shell="next"] .rail-wrap a:hover,
+body[data-shell="next"] .rail-wrap button:hover,
+body[data-shell="next"] .rail-wrap summary:hover {
+  background: #2d2d35;
+  color: #fff;
+}
+
+body[data-shell="next"] .rail-wrap a.active {
+  background: #3e3e4a;
+  color: #fff;
+  font-weight: bold;
+}
+
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) a,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) button,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) summary,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) .brand {
+  color: transparent !important;
+  text-shadow: none;
+}
+
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) a::first-letter,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) button::first-letter,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) summary::first-letter,
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) .brand::first-letter {
+  color: #eee !important;
+}
+
+body[data-shell="next"] .rail-wrap:not(:hover):not(.expanded) a.active::first-letter {
+  color: #fff !important;
+}
+
+/* Stage placement and stability */
+body[data-shell="next"] .stage {
+  flex: 1;
+  margin-left: 60px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: none; /* preserves spatial stability */
+}
+
+/* Context Header styling */
+body[data-shell="next"] .context-header {
+  height: 64px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--card-bg, #fff);
+  border-bottom: 1px solid var(--border-color, #eaeaea);
+  box-sizing: border-box;
+}
+
+body[data-shell="next"] .header-left {
+  font-size: 14px;
+  color: var(--text-muted, #555);
+  font-weight: 500;
+}
+
+body[data-shell="next"] .header-middle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body[data-shell="next"] .header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Tabular Monospace Clock & Date */
+.monospace-clock, .monospace-date {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.monospace-clock {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-color, #111);
+}
+
+.monospace-date {
+  font-size: 14px;
+  color: var(--text-muted, #666);
+}
+
+/* Overhauled chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--card-bg, #f3f4f6);
+  color: var(--text-color, #374151);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-color, #e5e7eb);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.chip:hover {
+  background: #e5e7eb;
+}
+
+.chip-btn {
+  font-family: inherit;
+}
+
+.chip-count {
+  margin-left: 6px;
+  font-weight: bold;
+  background: #0070f3;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+/* Focus Mode Overrides */
+body.focus-mode[data-shell="next"] .rail-wrap {
+  display: none !important;
+}
+
+body.focus-mode[data-shell="next"] .stage {
+  margin-left: 0 !important;
+  max-width: 840px;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+body.focus-mode[data-shell="next"] .context-header {
+  border-bottom: none;
+  background: transparent;
+  padding: 0;
+  margin-top: 16px;
+}
+
+body.focus-mode[data-shell="next"] .header-left,
+body.focus-mode[data-shell="next"] .context-header .search-box,
+body.focus-mode[data-shell="next"] .context-header #note-btn,
+body.focus-mode[data-shell="next"] .context-header .chip:not(#focus-mode-btn) {
+  display: none !important;
+}
+
+body.focus-mode[data-shell="next"] .header-middle {
+  margin-left: 0;
+}

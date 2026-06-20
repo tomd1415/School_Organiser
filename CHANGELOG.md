@@ -23,6 +23,13 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
   the teacher marks each via a picker in the modal. Fields are namespaced with a per-worksheet key prefix
   (slot 0 unprefixed = backward-compatible) so two sheets never collide; order is by resource id so
   answers stay attached across a master↔adapted flip or re-version.
+- **🧑‍🏫 Per-slide private teacher notes.** Each slide can carry a `> 🧑‍🏫` note that shows **only** on the
+  teacher's **presenter view** (`/lesson/present`) and is **stripped from the pupil surface and the
+  projector board** (`renderSlideDeck` defaults to the pupil/strip audience — `lib/slideDeck.ts`
+  `splitTeacherNotes`, with a test asserting no leak). Fixes the old behaviour where the `Say:`
+  talking-points line leaked onto pupils' slides (now auto-stripped). The AI (`lesson_resources@17`) now
+  writes these as **teaching tips, fun facts, learning hints and engagement ideas — not subject-knowledge
+  scripts** (the teacher's stated need).
 - **📘 Pedagogy grounding.** Integrated the **NCCE 12 Principles of Computing Pedagogy**
   (teachcomputing.org/pedagogy) as a single source of truth ([`llm/prompts/pedagogy.ts`](app/src/llm/prompts/pedagogy.ts)),
   appended to the system prompt of every content-generating AI feature (scheme author, draft/adapt lesson,
