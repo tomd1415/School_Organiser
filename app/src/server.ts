@@ -67,7 +67,7 @@ import { processPendingDeletions } from './repos/fileDeletions';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting, setSetting } from './repos/settings';
 import { sweepReviews } from './services/reviewLesson';
-import { setNavDailyOverride, setExperienceMode } from './lib/nav';
+import { setNavDailyOverride, setExperienceMode, setUiShell } from './lib/nav';
 import { localParts } from './lib/time';
 
 // BUG-045: turn the TRUST_PROXY string into the value Fastify's trust-proxy expects — false (dev, no
@@ -402,6 +402,7 @@ export async function start(): Promise<void> {
   }
   try {
     setExperienceMode(await getSetting('experience'));
+    setUiShell(await getSetting('ui_shell')); // UI-overhaul shell selector (defaults to 'classic')
   } catch (err) {
     app.log.warn({ err }, 'experience preload failed; defaulting to everyday');
   }

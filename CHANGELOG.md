@@ -7,6 +7,43 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Teaching features, pedagogy, external resources + UI-overhaul handoff
+
+- **🖊 Per-pupil marking modal.** Replaced the bottom-of-page read-back with a one-screen modal
+  ([`routes/markModal.ts`](app/src/routes/markModal.ts)): pupil name at the top, each question shown with
+  its **model answer** (from the mark scheme) and the pupil's answer side by side, a tick/number to mark,
+  the AI's suggested mark pre-filled and the confirmed/"checked" state kept distinct. **Prev/Next (and
+  `←`/`→`) walk the class**; reachable from the work grid, a new **`/marking`** page
+  ([`markingPage.ts`](app/src/routes/markingPage.ts), nav `g a`) and the Now "Needs me" rows. Colour-coded.
+- **🧩 New worksheet question types** (migration-free) for the NCCE pedagogy: **code-reading / Predict**
+  (a fenced code block + a question), **code-writing** (a monospaced `Type your code here` box) and
+  **Parson's Problems** (drag jumbled code lines into order; ▲▼/Alt-arrow fallback; solution stays
+  server-side). Marking, the AI generator and the seed all handle them.
+- **🗂 Multiple worksheets per lesson.** A lesson can carry several worksheets; the pupil gets **tabs**,
+  the teacher marks each via a picker in the modal. Fields are namespaced with a per-worksheet key prefix
+  (slot 0 unprefixed = backward-compatible) so two sheets never collide; order is by resource id so
+  answers stay attached across a master↔adapted flip or re-version.
+- **📘 Pedagogy grounding.** Integrated the **NCCE 12 Principles of Computing Pedagogy**
+  (teachcomputing.org/pedagogy) as a single source of truth ([`llm/prompts/pedagogy.ts`](app/src/llm/prompts/pedagogy.ts)),
+  appended to the system prompt of every content-generating AI feature (scheme author, draft/adapt lesson,
+  generate resources, retrieval starter, improve master — versions bumped), with a read-only **`/pedagogy`**
+  page rendered from the same constant. See [docs/PEDAGOGY.md](docs/PEDAGOGY.md).
+- **⚖ Teach Computing attribution.** Imported resources can carry a licence/credit line
+  (`source_attribution`, migration `0055`); the import screen offers a one-click **Open Government Licence**
+  preset for Teach Computing Curriculum files, shown on each resource. Investigation of reusing
+  teachcomputing.org (OGL — already integrated via the import + convert pipeline) and computingatschool.org.uk
+  (reference-only) in [docs/EXTERNAL_RESOURCES.md](docs/EXTERNAL_RESOURCES.md).
+- **🧪 Test-data instance.** A reusable seed ([`seed/testData.ts`](app/src/seed/testData.ts)) fills an
+  isolated instance (`instances/testdata`, port 44370) with a fictional mid-term school — 272 pupils, 13
+  classes, 7 assigned schemes, taught history, marks/feedback — for manual testing and as a **no-real-data
+  sandbox** for an external UI dev.
+- **🎨 UI-overhaul handoff + flag.** A complete handoff set under [docs/ui-design/](docs/ui-design/): the
+  filled-in developer-inputs response, the full **route inventory** (295 routes), a **contracts-to-preserve**
+  reference, **per-page handoffs**, and a **working-model** doc (trunk + feature flag, external-dev workflow).
+  Added a **`ui_shell`** feature flag (`classic`/`next`, Settings → UI preview) — `layout()` renders
+  `<body data-shell>` as the seam for the new task-first shell, off by default so the redesign can land on
+  `main` and stay dark.
+
 ### 2026-06-20 — Audit remediation, batch 20 (supply chain — pdfjs upgrade) — AUDIT COMPLETE
 
 - **📦 Removed the vulnerable `tar` and cleared the pdfjs advisory (BUG-049, Medium).** `pdfjs-dist`

@@ -17,7 +17,7 @@ import { invalidatePupilCfg } from '../auth/pupilAccessCache';
 import { invalidateTeacherIdle } from '../auth/teacherIdleCache';
 import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
-import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily, setExperienceMode } from '../lib/nav';
+import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily, setExperienceMode, setUiShell, getUiShell } from '../lib/nav';
 
 function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
   const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
@@ -129,6 +129,16 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           ${NAV_MODEL.map((i) => `<label class="nav-config-item"><input type="checkbox" name="daily" value="${esc(i.href)}"${navDailySet.has(i.href) ? ' checked' : ''}> ${esc(i.label)}</label>`).join('')}
           <button type="submit" class="btn-secondary">Save navigation</button>
           <span class="note-status" id="nav-status"></span>
+        </form>
+
+        <h2>UI preview <span class="muted">(experimental)</span></h2>
+        <p class="muted">The new task-first workspace is being built behind a flag. <strong>Off</strong>
+          (default) shows the current design; <strong>on</strong> previews the redesign as it lands.
+          Nothing changes until the new shell is built — this just flips <code>data-shell</code>. Reload after saving.</p>
+        <form class="setup-add" hx-post="/settings/ui-shell" hx-target="#shell-status" hx-swap="innerHTML">
+          <label><input type="checkbox" name="next" value="1"${getUiShell() === 'next' ? ' checked' : ''}> Preview the new UI</label>
+          <button type="submit" class="btn-secondary">Save</button>
+          <span class="note-status" id="shell-status"></span>
         </form>
 
         <h2>Password</h2>
@@ -355,6 +365,15 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     await setSetting('experience', b.data.experience);
     setExperienceMode(b.data.experience);
     return reply.send('');
+  });
+
+  // UI-overhaul shell selector (classic | next). Same write-through pattern as experience; default
+  // classic. See docs/ui-design/WORKING_MODEL.md — the new shell is built behind this flag.
+  app.post('/settings/ui-shell', guard, async (req, reply) => {
+    const next = (req.body as { next?: unknown })?.next === '1';
+    await setSetting('ui_shell', next ? 'next' : 'classic');
+    setUiShell(next ? 'next' : 'classic');
+    return reply.type('text/html').send(`<span class="ok">Saved — ${next ? 'previewing the new UI' : 'classic UI'}. Reload to apply.</span>`);
   });
 
   // Dismiss the earned-unlock nudge (once; never shown again). Separate from turning power on, so

@@ -91,6 +91,23 @@ export function getExperienceMode(): Experience {
   return experienceMode;
 }
 
+// ── UI overhaul shell selector ──────────────────────────────────────────────────────────────────
+// 'classic' = the current Rail & Stage shell; 'next' = the new task-first workspace, built behind this
+// flag (docs/ui-design/WORKING_MODEL.md). Same write-through in-memory machinery as experienceMode:
+// layout() reads it synchronously (it can't await a DB read), server.ts primes it at boot from the
+// `ui_shell` setting, and Settings updates it. Defaults to 'classic' so there is NO change until the
+// new shell exists and the flag is flipped — a redesign can therefore merge to main and stay dark.
+export type UiShell = 'classic' | 'next';
+let uiShell: UiShell = 'classic';
+
+export function setUiShell(mode: UiShell | string | null): void {
+  uiShell = mode === 'next' ? 'next' : 'classic';
+}
+
+export function getUiShell(): UiShell {
+  return uiShell;
+}
+
 // Earned, opt-in unlock: once the teacher has taught enough lessons, offer (once, dismissibly) to
 // reveal the advanced tools — never auto-promote, never nag. Pure so it's unit-testable.
 export const EXPERIENCE_NUDGE_AT = 20;

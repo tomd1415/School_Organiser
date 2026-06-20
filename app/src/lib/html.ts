@@ -1,4 +1,4 @@
-import { renderRail, navClientJson, getExperienceMode } from './nav';
+import { renderRail, navClientJson, getExperienceMode, getUiShell } from './nav';
 
 const ENTITIES: Record<string, string> = {
   '&': '&amp;',
@@ -23,6 +23,11 @@ interface LayoutOptions {
 /** The single page chrome (Rail & Stage): a persistent left nav rail + a main "stage" pane. */
 export function layout({ title, body, authed = false, csrfToken }: LayoutOptions): string {
   const exp = getExperienceMode();
+  // UI-overhaul seam (docs/ui-design/WORKING_MODEL.md): the new task-first shell is built behind this
+  // flag. It's exposed as `data-shell` for CSS/JS to hook, and is the branch point — when the 'next'
+  // shell exists, render it here `if (shell === 'next') return nextShell({...})`. Default 'classic' →
+  // no change today, so the redesign can land on main and stay dark until flipped in Settings.
+  const shell = getUiShell();
   const csrfHdr = authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : '';
   const logout =
     authed && csrfToken
@@ -90,7 +95,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <script>(function(){try{var d=document.documentElement,s=window.localStorage;var m={theme:'data-theme',fontsize:'data-fontsize',font:'data-font'};for(var k in m){var v=s.getItem('a11y-'+k);if(v)d.setAttribute(m[k],v);}}catch(e){}})();</script>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body data-experience="${esc(exp)}">
+<body data-experience="${esc(exp)}" data-shell="${esc(shell)}">
   <div class="app${authed ? '' : ' app-bare'}">
     <aside class="rail-wrap">
       <a class="brand" href="/">School Organiser</a>

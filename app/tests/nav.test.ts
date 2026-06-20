@@ -11,7 +11,10 @@ import {
   getExperienceMode,
   shouldShowExperienceNudge,
   EXPERIENCE_NUDGE_AT,
+  setUiShell,
+  getUiShell,
 } from '../src/lib/nav';
+import { layout } from '../src/lib/html';
 
 const ALL_HREFS = NAV_MODEL.map((i) => i.href);
 const DEFAULT_DAILY = ['/', '/focus', '/timetable', '/tasks', '/captured'];
@@ -143,5 +146,26 @@ describe('client jump-map (unchanged)', () => {
     const json = navClientJson();
     expect(json).not.toContain('<');
     expect(JSON.parse(json)).toEqual(navClientModel());
+  });
+});
+
+describe('ui_shell flag (UI overhaul seam)', () => {
+  afterEach(() => setUiShell('classic')); // never leak the flag into other tests
+
+  it('defaults to classic and only "next" turns it on', () => {
+    expect(getUiShell()).toBe('classic');
+    setUiShell('next');
+    expect(getUiShell()).toBe('next');
+    setUiShell('anything-else');
+    expect(getUiShell()).toBe('classic');
+    setUiShell(null);
+    expect(getUiShell()).toBe('classic');
+  });
+
+  it('layout() reflects the shell as data-shell on <body> (the seam for the new shell)', () => {
+    setUiShell('classic');
+    expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="classic"');
+    setUiShell('next');
+    expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="next"');
   });
 });
