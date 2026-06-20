@@ -7,6 +7,34 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 13 (auth, cost cap, data-retention, consistency)
+
+Six findings across security, the project's #1 cost risk, data-retention, and timetable consistency.
+Suite green: **528 unit / 331 integration; typecheck clean**.
+
+- **🔑 Pupil class code now gates the PIN flow (BUG-002, High).** The class code was only checked at the
+  name-list step; `/pupil/pin` and `/pupil/login` then trusted a client-supplied group, so the code could
+  be skipped entirely. The code-resolved group is now bound to the session (30-min TTL) and required on both
+  later steps — the code, not a guessable id, gates roster reveal and PIN attempts.
+- **💷 The monthly AI cap can no longer be overshot (BUG-011 + BUG-018, High/Medium).** Every call computes a
+  conservative estimate centrally and **atomically reserves** it against the cap (advisory-locked) before the
+  provider call, so concurrent calls can't both pass a pre-check and overshoot. The reservation row persists
+  the redacted request + estimated spend *before* the call and is reconciled to the actual after — so a failed
+  audit write never silently undercounts spend or loses DPIA evidence.
+- **🗑 A reformatted screenshot replace no longer orphans the old image (BUG-029, Medium).** Replacing a PNG
+  with a JPEG wrote a new path and left the PNG on disk forever; `saveAnswer` now reports the superseded
+  value and the route unlinks the old file once the new answer is durable.
+- **🧹 Deactivating a class detaches it from forward planning (BUG-023, Medium).** A deactivated group_course
+  kept materialising occurrences and showing in the planner/curriculum map; consumers now filter active
+  group_courses, while already-materialised historic occurrences are preserved.
+- **🌙 The nightly review sweep survives a failure (BUG-048, Medium).** It still claims the day before
+  spending (restart-safe), but now releases the claim if the work throws, so a transient failure retries
+  later instead of silently skipping the day (the sweep is per-lesson idempotent).
+
+Deferred with rationale: **049** (tar — needs a clean dependency-chain rebuild to verify; runtime already
+mitigated), **013/033** (HTMX reset behaviour — needs the Wave-0 browser harness to change `app.js` safely).
+**38 / 50 findings fixed.**
+
 ### 2026-06-20 — Audit remediation, batch 12 (Wave A6 — atomic resource creation)
 
 Make creating a resource all-or-nothing — no half-made rows, no orphaned files. Suite green:

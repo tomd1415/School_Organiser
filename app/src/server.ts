@@ -326,18 +326,24 @@ function scheduleMorningBrief(app: FastifyInstance): void {
  * so a restart can't double-spend. Capped per run; the monthly £-cap is the backstop. */
 function scheduleReviewSweep(app: FastifyInstance): void {
   const run = async (): Promise<void> => {
+    const daily = Number(await getSetting('ai_review_sweep_daily').catch(() => null)) || 0;
+    if (daily <= 0) return; // off by default — no AI spend
+    const today = localParts(new Date(), 'Europe/London').isoDate;
+    const prev = (await getSetting('ai_review_sweep_last').catch(() => null)) ?? '';
+    if (prev === today) return; // already swept today
+    const hour = new Date().getHours();
+    if (hour < 4 || hour >= 8) return; // only the early-morning window
+    // BUG-048: claim the day BEFORE spending so a restart/overlapping tick can't double-spend — but if
+    // the work then FAILS, RELEASE the claim (restore the prior value) so a later tick in the window
+    // retries instead of silently losing the day. sweepReviews is per-lesson idempotent (a lesson with an
+    // open review is skipped), so a retry tops up toward the cap rather than re-reviewing what's done.
+    await setSetting('ai_review_sweep_last', today);
     try {
-      const daily = Number(await getSetting('ai_review_sweep_daily').catch(() => null)) || 0;
-      if (daily <= 0) return; // off by default — no AI spend
-      const today = localParts(new Date(), 'Europe/London').isoDate;
-      if ((await getSetting('ai_review_sweep_last').catch(() => null)) === today) return; // already swept today
-      const hour = new Date().getHours();
-      if (hour < 4 || hour >= 8) return; // only the early-morning window
-      await setSetting('ai_review_sweep_last', today); // claim the day BEFORE spending (restart-safe)
       const r = await sweepReviews(Math.min(daily, 10));
       if (r.reviewed > 0) app.log.info(`review sweep: reviewed ${r.reviewed} lesson(s)${r.stopped ? ' (stopped at cap)' : ''}`);
     } catch (err) {
-      app.log.error({ err }, 'review sweep crashed');
+      await setSetting('ai_review_sweep_last', prev).catch(() => {}); // release for retry
+      app.log.error({ err }, 'review sweep crashed — released the day for a later retry');
     }
   };
   setInterval(() => void run(), 30 * 60 * 1000); // every 30 min, gated to once/day in the AM window

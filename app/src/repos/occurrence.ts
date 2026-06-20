@@ -39,12 +39,15 @@ export async function findOrCreateOccurrence(lessonId: number, date: string): Pr
   const id = rows[0]?.id;
   if (id === undefined) throw new Error('failed to find or create occurrence');
 
-  // One occurrence_course per course in the slot (splits → several). Idempotent.
+  // One occurrence_course per ACTIVE course in the slot (splits → several). Idempotent.
+  // BUG-023: a deactivated group_course must not keep materialising new occurrences — already-created
+  // (historic) ones are left untouched, but a slot opened after deactivation no longer revives it.
   await pool.query(
     `INSERT INTO occurrence_courses (occurrence_id, group_course_id)
      SELECT $1, tlc.group_course_id
      FROM timetabled_lesson_courses tlc
-     WHERE tlc.timetabled_lesson_id = $2
+     JOIN group_courses gc ON gc.id = tlc.group_course_id
+     WHERE tlc.timetabled_lesson_id = $2 AND gc.active
      ON CONFLICT (occurrence_id, group_course_id) DO NOTHING`,
     [id, lessonId],
   );

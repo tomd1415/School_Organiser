@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 32 of 50 fixed; Waves A1 + A2 + A4 complete, A3 code-fixes done, A6 nearly complete.** This is the
+> **Status (2026-06-20): in progress — 38 of 50 fixed; Waves A1–A4 + A7 + most of A6 complete, A3 code-fixes done.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -23,10 +23,18 @@
 > undo armed only after commit), and **020 + 022** (scheme clone now carries labels/kit/resource-links;
 > review apply claims-and-writes in one transaction, dismiss is a single conditional UPDATE), and **028**
 > (new-resource creation — import + upload + AI-generate + worksheet-image — writes resource + v1 + pointer
-> + unit/year metadata + file in one transaction with rollback-unlink, also closing the 008 residual).
-> Suites green: 528 unit / 327 integration; typecheck clean. **Next:** remaining **A6** multi-step-write
-> items (023 group-course deactivation consistency, 025 recurring per-lesson cursor, 027 email-dedup),
-> then A5 (recovery/disposal) or A7 (cost/audit). **BUG-032 / 045** (deployment-config) await the operator.
+> + unit/year metadata + file in one transaction with rollback-unlink, also closing the 008 residual),
+> and **023** (a deactivated group_course stops materialising occurrences + drops from the planner/curriculum
+> slot lists, historic occurrences preserved). **A7 (cost/audit)** — **011 + 018** (every AI call computes a
+> central conservative estimate and atomically reserves it against the monthly cap before the provider call,
+> under an advisory lock; the reservation row persists the redacted request + spend so a failed reconcile
+> never undercounts). Plus **002** (pupil class-code bound to the session, gating the name/PIN steps), **029**
+> (a reformatted screenshot replace unlinks the old file), and **048** (the review sweep releases its day-claim
+> on failure so a crash doesn't lose the day). Suites green: 528 unit / 331 integration; typecheck clean.
+> **Remaining 12:** **009/010** (backup-restore drill — operational), **013/033** (HTMX client-JS — need the
+> Wave-0 browser harness), **025** (per-lesson recurrence cursor), **027** (email-dedup txn), **039/043/044**
+> (disposal/SAR — data inventory), **049** (tar — needs a clean dependency rebuild). **032 / 045**
+> (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new

@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
-import { applyPlacements, classPlacements, classSchedule, classSlots, getSlotWeekday, layLessonsAcrossClass, layLessonsIntoSlot, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
+import { applyPlacements, classPlacements, classSchedule, classSlots, getSlotWeekday, layLessonsAcrossClass, layLessonsIntoSlot, listAllSlots, listSlotsForCourse, moveBinding } from '../../src/repos/delivery';
+import { findOrCreateOccurrence, getOccurrenceCourses } from '../../src/repos/occurrence';
+import { setGroupCourse } from '../../src/repos/setup';
 import { cascadeInsert, pullForward } from '../../src/services/delivery';
 import { addDays, weekdayOf } from '../../src/lib/time';
 
@@ -144,6 +146,30 @@ describe('calendar lay-down (5.4 — integration, needs the dev DB up)', () => {
     expect(slots.length).toBe(n);
     expect(new Set(slots.map((s) => s.timetabledLessonId)).size).toBe(n); // distinct weekly periods
     expect(n).toBeGreaterThanOrEqual(2); // confirms multi-lesson-per-week classes exist in the data
+  });
+
+  it('deactivating a group_course drops it from forward slot lists but keeps historic occurrences (BUG-023)', async () => {
+    const gid = Number((await pool.query<{ group_id: number }>(`SELECT group_id FROM group_courses WHERE id = $1`, [groupCourseId])).rows[0]!.group_id);
+    const HIST = '2099-07-06';
+    const FUTURE = '2099-07-13';
+    // active → present in the course's slot list, and a materialised occurrence carries it (historic record)
+    expect((await listSlotsForCourse(courseId)).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(true);
+    const histOcc = await findOrCreateOccurrence(slotLessonId, HIST);
+    expect((await getOccurrenceCourses(histOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(true);
+    try {
+      await setGroupCourse(gid, courseId, false);
+      // forward-planning slot lists no longer surface the deactivated class
+      expect((await listSlotsForCourse(courseId)).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(false);
+      expect((await listAllSlots()).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(false);
+      // a NEW occurrence opened after deactivation does NOT revive it…
+      const futureOcc = await findOrCreateOccurrence(slotLessonId, FUTURE);
+      expect((await getOccurrenceCourses(futureOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(false);
+      // …but the historic occurrence_course (created while active) is preserved
+      expect((await getOccurrenceCourses(histOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(true);
+    } finally {
+      await setGroupCourse(gid, courseId, true); // restore for the other tests + real data
+      await pool.query(`DELETE FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = ANY($2)`, [slotLessonId, [HIST, FUTURE]]);
+    }
   });
 
   it('layLessonsAcrossClass binds the stream and classSchedule reads it back, date-ordered (13.1)', async () => {

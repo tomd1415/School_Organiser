@@ -6,7 +6,13 @@ import { z } from 'zod/v4';
 // repos so there's no network and no DB, and assert the load-bearing behaviour — names are redacted
 // BEFORE send, tokens are re-expanded to names AFTER (display only), the audit stores the redacted
 // request + cost, and safeguarding-flagged items are withheld entirely.
-const h = vi.hoisted(() => ({ create: vi.fn(), parse: vi.fn(), insertAiCall: vi.fn(async () => {}) }));
+const h = vi.hoisted(() => ({
+  create: vi.fn(),
+  parse: vi.fn(),
+  insertAiCall: vi.fn(async () => {}),
+  reserve: vi.fn(async () => 1), // reserveAiCall → a reservation id
+  reconcile: vi.fn(async () => {}), // reconcileAiCall → records the actual outcome
+}));
 
 vi.mock('@anthropic-ai/sdk', () => {
   class APIError extends Error {}
@@ -21,12 +27,12 @@ vi.mock('@anthropic-ai/sdk/helpers/zod', () => ({ zodOutputFormat: () => ({}) })
 vi.mock('../src/config/llm', () => ({ ANTHROPIC_API_KEY: 'sk-mock', PROVIDER: 'anthropic', PRICE_PENCE_PER_MTOK: {} }));
 vi.mock('../src/repos/settings', () => ({ aiEnabled: async () => true, getSetting: async () => null, monthCapPence: async () => 100000 }));
 vi.mock('../src/repos/pupils', () => ({ listRoster: async () => [{ id: 1, displayName: 'Zoë Quibble', aiToken: 'PUPIL_1', active: true }] }));
-vi.mock('../src/repos/aiCalls', () => ({ insertAiCall: h.insertAiCall, monthSpendPence: async () => 0 }));
+vi.mock('../src/repos/aiCalls', () => ({ insertAiCall: h.insertAiCall, reserveAiCall: h.reserve, reconcileAiCall: h.reconcile, monthSpendPence: async () => 0 }));
 
 import { callLLM, callLLMStructured } from '../src/llm/client';
 
 describe('LLM wrapper success path (mocked SDK — no network, no DB)', () => {
-  beforeEach(() => { h.create.mockReset(); h.parse.mockReset(); h.insertAiCall.mockReset(); });
+  beforeEach(() => { h.create.mockReset(); h.parse.mockReset(); h.insertAiCall.mockClear(); h.reserve.mockClear(); h.reconcile.mockClear(); });
 
   it('callLLM redacts the name before send, re-expands tokens for display, audits ok + cost (redacted only)', async () => {
     h.create.mockResolvedValue({ usage: { input_tokens: 10, output_tokens: 5 }, content: [{ type: 'text', text: 'PUPIL_1 did really well today' }] });
@@ -36,9 +42,12 @@ describe('LLM wrapper success path (mocked SDK — no network, no DB)', () => {
     const sent = JSON.stringify(h.create.mock.calls[0]![0]);
     expect(sent).toContain('PUPIL_1'); // the model only ever saw the token
     expect(sent).not.toContain('Zoë Quibble'); // never the real name
-    const ok = h.insertAiCall.mock.calls.map((c) => c[0] as { status: string; requestRedacted: unknown; costPence: number }).find((a) => a.status === 'ok');
+    // BUG-011/018: the reservation (made BEFORE the call) holds the redacted request only…
+    const reserved = h.reserve.mock.calls[0]![0] as { requestRedacted: unknown };
+    expect(JSON.stringify(reserved.requestRedacted)).not.toContain('Zoë Quibble');
+    // …and the post-call reconcile records status ok + a real cost
+    const ok = h.reconcile.mock.calls.map((c) => c[1] as { status: string; costPence?: number }).find((a) => a.status === 'ok');
     expect(ok).toBeTruthy();
-    expect(JSON.stringify(ok!.requestRedacted)).not.toContain('Zoë Quibble'); // audit holds the redacted request only
     expect(ok!.costPence).toBeGreaterThan(0);
   });
 

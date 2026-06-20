@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { setSetting, getSetting } from '../../src/repos/settings';
+import { resetRateLimiter } from '../../src/auth/rateLimit';
 
 // Phase 8: pupil login (class code → name → PIN), the locked-down /me surface, answer autosave
 // with ownership checks, and the level/feedback machinery. All scratch rows are torn down; the
@@ -102,10 +103,29 @@ afterAll(async () => {
   await pool.end();
 });
 
-async function pupilLogin(): Promise<string> {
+// BUG-002: the name/PIN steps are now gated on the class code being entered first (which binds the
+// group to the session). This performs that first step and returns the rotated cookie + the CSRF token
+// carried in the /pupil/names response, for the follow-up pin/login request on the SAME session.
+async function enterCode(): Promise<{ cookie: string; token: string }> {
   const page = await app.inject({ method: 'GET', url: '/pupil' });
-  const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
-  const cookie = firstCookie(page.headers['set-cookie']);
+  const t0 = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
+  const c0 = firstCookie(page.headers['set-cookie']);
+  const res = await app.inject({
+    method: 'POST',
+    url: '/pupil/names',
+    headers: { cookie: c0, 'x-csrf-token': t0, 'content-type': 'application/x-www-form-urlencoded' },
+    payload: `code=${encodeURIComponent(CODE)}`,
+  });
+  return { cookie: firstCookie(res.headers['set-cookie']) || c0, token: /x-csrf-token":"([^"]+)"/.exec(res.body)?.[1] ?? t0 };
+}
+
+// BUG-002 added a per-IP class-code attempt budget consumed by enterCode's /pupil/names; clearing the
+// in-memory limiter between tests keeps that budget (and the PIN-attempt budget) from accumulating across
+// the suite. The durable per-pupil PIN lockout lives in the DB, so this never masks a real lockout.
+beforeEach(() => resetRateLimiter());
+
+async function pupilLogin(): Promise<string> {
+  const { cookie, token } = await enterCode();
   const res = await app.inject({
     method: 'POST',
     url: '/pupil/login',
@@ -135,9 +155,7 @@ describe('pupil login + surface (integration)', () => {
   });
 
   it('the PIN step offers a picture (emoji) keypad — same numeric PIN (10.14)', async () => {
-    const page = await app.inject({ method: 'GET', url: '/pupil' });
-    const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
-    const cookie = firstCookie(page.headers['set-cookie']);
+    const { cookie, token } = await enterCode();
     const pin = await app.inject({
       method: 'POST',
       url: '/pupil/pin',
@@ -166,9 +184,7 @@ describe('pupil login + surface (integration)', () => {
   });
 
   it('a wrong PIN is rejected and a wrong code finds no class', async () => {
-    const page = await app.inject({ method: 'GET', url: '/pupil' });
-    const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
-    const cookie = firstCookie(page.headers['set-cookie']);
+    const { cookie, token } = await enterCode();
     const bad = await app.inject({
       method: 'POST', url: '/pupil/login',
       headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
@@ -179,10 +195,31 @@ describe('pupil login + surface (integration)', () => {
     expect(bad.headers['hx-redirect']).toBeUndefined();
   });
 
-  it('/pupil/pin will not reveal a name for a pupil outside the class code used (no roster enumeration)', async () => {
+  it('refuses the PIN step and login when the class code was not entered first (BUG-002)', async () => {
     const page = await app.inject({ method: 'GET', url: '/pupil' });
     const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
     const cookie = firstCookie(page.headers['set-cookie']);
+    // straight to /pupil/pin with a VALID (pupil, group) but no code entered on this session → rejected,
+    // and no name/keypad disclosed (the class code, not a guessable id, gates the roster + PIN attempts)
+    const pin = await app.inject({
+      method: 'POST', url: '/pupil/pin',
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `pupil=${pupilId}&group=${groupId}`,
+    });
+    expect(pin.body).toContain('class code first');
+    expect(pin.body).not.toContain('data-pinpad');
+    // and /pupil/login won't even check the PIN without the code binding
+    const login = await app.inject({
+      method: 'POST', url: '/pupil/login',
+      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: `pupil=${pupilId}&group=${groupId}&pin=${PIN}`,
+    });
+    expect(login.headers['hx-redirect']).toBeUndefined();
+    expect(login.body).toContain('class code first');
+  });
+
+  it('/pupil/pin will not reveal a name for a pupil outside the class code used (no roster enumeration)', async () => {
+    const { cookie, token } = await enterCode();
     // A real pupil id that is NOT enrolled in our scratch group: pick any pupil not in it.
     const outsider = await pool.query<{ id: number; name: string }>(
       `SELECT p.id, p.display_name name FROM pupils p
@@ -394,9 +431,7 @@ describe('pupil login + surface (integration)', () => {
     };
     await setPupilPin(otherPupilId, '2222');
     const post = async (pin: string) => {
-      const page = await app.inject({ method: 'GET', url: '/pupil' });
-      const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
-      const cookie = firstCookie(page.headers['set-cookie']);
+      const { cookie, token } = await enterCode(); // BUG-002: bind the class code before the PIN step
       return app.inject({
         method: 'POST', url: '/pupil/login',
         headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
@@ -411,31 +446,29 @@ describe('pupil login + surface (integration)', () => {
     resetRateLimiter();
   });
 
-  it('wrong-PIN, not-enrolled, and disabled all return the identical generic message (no oracle)', async () => {
+  it('wrong-PIN and disabled return the identical generic message (no oracle)', async () => {
     const { setPupilPin, setPupilCredentialEnabled, resetRateLimiter } = {
       ...(await import('../../src/repos/pupilCredentials')),
       ...(await import('../../src/auth/rateLimit')),
     };
     resetRateLimiter();
     await setPupilPin(pupilId, '3333');
-    const body = async (payload: string): Promise<string> => {
-      const page = await app.inject({ method: 'GET', url: '/pupil' });
-      const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
-      const cookie = firstCookie(page.headers['set-cookie']);
-      const r = await app.inject({ method: 'POST', url: '/pupil/login', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload });
+    // Both probes target the SAME in-class pupil through the bound class code, so only the credential
+    // STATE differs — the response must be byte-identical (an attacker can't tell a wrong PIN from a
+    // disabled account). (Under BUG-002 a wrong-GROUP probe is refused earlier with "enter your class
+    // code first", and /pupil/pin's own test covers not revealing an out-of-class name.)
+    const body = async (pin: string): Promise<string> => {
+      const { cookie, token } = await enterCode();
+      const r = await app.inject({ method: 'POST', url: '/pupil/login', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: `pupil=${pupilId}&group=${groupId}&pin=${pin}` });
       return r.body.replace(/x-csrf-token":"[^"]+"/, 'TOKEN').replace(/value="[^"]+"/g, 'V'); // strip per-request token
     };
-    const wrongPin = await body(`pupil=${pupilId}&group=${groupId}&pin=9999`);
-    // a group the pupil is not enrolled in
-    const otherGroup = await pool.query<{ id: number }>(`SELECT id FROM groups WHERE id <> $1 ORDER BY id LIMIT 1`, [groupId]);
-    const notEnrolled = await body(`pupil=${pupilId}&group=${otherGroup.rows[0]!.id}&pin=3333`);
+    const wrongPin = await body('9999');
     await setPupilCredentialEnabled(pupilId, false);
-    const disabled = await body(`pupil=${pupilId}&group=${groupId}&pin=3333`);
+    const disabled = await body('3333');
     await setPupilPin(pupilId, '4242'); // re-enable + restore the PIN used elsewhere
     resetRateLimiter();
     expect(wrongPin).toContain('check your PIN');
-    expect(notEnrolled).toBe(wrongPin); // structurally identical — no enumeration signal
-    expect(disabled).toBe(wrongPin);
+    expect(disabled).toBe(wrongPin); // disabled is indistinguishable from a wrong PIN — no enumeration signal
   });
 
   it('saveAnswer clears seen_by_teacher only when the value actually changes', async () => {

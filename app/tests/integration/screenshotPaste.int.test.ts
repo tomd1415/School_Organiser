@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { rm } from 'node:fs/promises';
+import { rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
@@ -42,7 +42,7 @@ afterAll(async () => {
   if (oc) {
     await pool.query(
       `DELETE FROM pupil_answers WHERE occurrence_course_id=$1 AND field_key = ANY($2) AND pupil_id = (SELECT id FROM pupils WHERE is_test LIMIT 1)`,
-      [oc, [KEY, 't8.r8.c8']],
+      [oc, [KEY, 't8.r8.c8', 't7.r7.c7']],
     );
   }
   if (storedPath) await rm(join(RESOURCE_STORE_PATH, storedPath), { force: true }).catch(() => {});
@@ -84,6 +84,36 @@ describe('pupil screenshot paste (integration)', () => {
     expect(trav.statusCode).toBe(400);
     const noauth = await app.inject({ method: 'GET', url: `/pupil-image?p=${encodeURIComponent(storedPath || 'pupil-work/1/1/x.png')}` });
     expect(noauth.statusCode).toBe(403);
+  });
+
+  it('replacing a screenshot with a different format unlinks the old file (BUG-029)', async () => {
+    const KEY2 = 't7.r7.c7';
+    const mk = (filename: string, mime: string, sig: number[]): { body: Buffer; contentType: string } => {
+      const boundary = '----wsfmt';
+      const body = Buffer.concat([
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${mime}\r\n\r\n`),
+        Buffer.from(sig),
+        Buffer.from(`\r\n--${boundary}--\r\n`),
+      ]);
+      return { body, contentType: `multipart/form-data; boundary=${boundary}` };
+    };
+    const post = async (img: { body: Buffer; contentType: string }) =>
+      app.inject({ method: 'POST', url: `/me/answer-image?oc=${oc}&key=${KEY2}`, headers: { cookie, 'x-csrf-token': token, 'content-type': img.contentType }, payload: img.body });
+    const valueNow = async () =>
+      (await pool.query<{ value: string }>(`SELECT value FROM pupil_answers WHERE occurrence_course_id=$1 AND field_key=$2`, [oc, KEY2])).rows[0]!.value.slice(4);
+
+    expect((await post(mk('a.png', 'image/png', [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]))).statusCode).toBe(200);
+    const pngRel = await valueNow();
+    expect(pngRel).toMatch(/\.png$/);
+    await expect(stat(join(RESOURCE_STORE_PATH, pngRel))).resolves.toBeTruthy(); // on disk
+
+    expect((await post(mk('a.jpg', 'image/jpeg', [0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]))).statusCode).toBe(200);
+    const jpgRel = await valueNow();
+    expect(jpgRel).toMatch(/\.jpg$/);
+    expect(jpgRel).not.toBe(pngRel);
+    await expect(stat(join(RESOURCE_STORE_PATH, jpgRel))).resolves.toBeTruthy(); // new one present
+    await expect(stat(join(RESOURCE_STORE_PATH, pngRel))).rejects.toThrow(); // old one unlinked — no orphan
+    await rm(join(RESOURCE_STORE_PATH, jpgRel), { force: true }).catch(() => {});
   });
 
   it('refuses a non-image upload (no SVG / scripts)', async () => {

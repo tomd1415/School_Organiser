@@ -67,7 +67,7 @@ export async function saveAnswer(args: {
   versionNo: number | null;
   fieldKey: string;
   value: string;
-}): Promise<void> {
+}): Promise<{ previousValue: string | null }> {
   // Keyed on the lesson instance, not the worksheet resource (survives a master↔adapted / re-version
   // flip). Only clear seen_by_teacher when the value actually CHANGED, so a pupil re-blurring an
   // unchanged field doesn't spuriously re-flag it as new to the teacher.
@@ -94,6 +94,9 @@ export async function saveAnswer(args: {
       await client.query(`DELETE FROM pupil_marks WHERE pupil_answer_id = $1`, [prev.rows[0].id]);
     }
     await client.query('COMMIT');
+    // BUG-029: hand the caller the value being superseded so it can unlink an old screenshot file whose
+    // path differs from the new one (e.g. a PNG replaced by a JPG → different extension → different path).
+    return { previousValue: prev.rows[0]?.value ?? null };
   } catch (e) {
     await client.query('ROLLBACK');
     throw e;

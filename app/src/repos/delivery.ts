@@ -35,7 +35,7 @@ export async function listSlotsForCourse(courseId: number): Promise<CourseSlot[]
      JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
      JOIN period_definitions p  ON p.id  = tl.period_definition_id
      LEFT JOIN groups g         ON g.id  = tl.group_id
-     WHERE gc.course_id = $1
+     WHERE gc.course_id = $1 AND gc.active
        AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      ORDER BY p.weekday, p.slot_order`,
     [courseId],
@@ -72,7 +72,7 @@ export async function listAllSlots(): Promise<SlotOption[]> {
      JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
      JOIN period_definitions p  ON p.id  = tl.period_definition_id
      LEFT JOIN groups g         ON g.id  = tl.group_id
-     WHERE tl.purpose = 'teaching'
+     WHERE tl.purpose = 'teaching' AND gc.active
        AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
      ORDER BY g.name, p.weekday, p.slot_order`,
   );

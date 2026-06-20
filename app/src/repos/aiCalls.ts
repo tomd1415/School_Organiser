@@ -36,6 +36,62 @@ export async function insertAiCall(r: AiCallRecord): Promise<void> {
   );
 }
 
+/**
+ * BUG-011/018: atomically check the monthly cap AND reserve this call's estimated cost in ONE
+ * transaction, serialised by an advisory lock — so two calls can't both read the same spend, both pass
+ * the check, and collectively overshoot. The reservation is a real 'reserved' ai_calls row carrying the
+ * redacted request + the estimate; because it's committed before the provider call, a later call's cap
+ * check sees it, and even if the post-call reconcile UPDATE fails the spend is still counted and the
+ * DPIA evidence is preserved (no silent undercount). Returns the new row id, or null if over the cap.
+ */
+export async function reserveAiCall(
+  r: Pick<AiCallRecord, 'feature' | 'provider' | 'model' | 'promptVersion' | 'requestRedacted'>,
+  capPence: number,
+  estimatePence: number,
+): Promise<number | null> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, ['ai-budget']);
+    const spentRow = await client.query<{ s: number }>(
+      `SELECT COALESCE(sum(cost_pence), 0)::float AS s FROM ai_calls WHERE created_at >= date_trunc('month', now())`,
+    );
+    const spent = spentRow.rows[0]?.s ?? 0;
+    // The cap is a hard ceiling: refuse if already at it, or if THIS call's estimate would cross it.
+    if (spent >= capPence || spent + estimatePence > capPence) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const ins = await client.query<{ id: number }>(
+      `INSERT INTO ai_calls
+         (feature, provider, model, prompt_version, request_redacted, response,
+          input_tokens, output_tokens, cost_pence, status, error)
+       VALUES ($1, $2, $3, $4, $5::jsonb, NULL, NULL, NULL, $6, 'reserved', NULL) RETURNING id`,
+      [r.feature, r.provider, r.model, r.promptVersion, JSON.stringify(r.requestRedacted ?? {}), estimatePence],
+    );
+    await client.query('COMMIT');
+    return ins.rows[0]!.id;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/** Reconcile a reserved call with its actual outcome (status / tokens / real cost / response / error),
+ *  replacing the estimate. Best-effort: if this UPDATE fails the reservation's estimate simply stands, so
+ *  the spend is still accounted for (BUG-018) rather than lost. */
+export async function reconcileAiCall(
+  id: number,
+  fields: { status: 'ok' | 'error'; response?: unknown; inputTokens?: number | null; outputTokens?: number | null; costPence?: number | null; error?: string | null },
+): Promise<void> {
+  await pool.query(
+    `UPDATE ai_calls SET status = $2, response = $3::jsonb, input_tokens = $4, output_tokens = $5, cost_pence = $6, error = $7 WHERE id = $1`,
+    [id, fields.status, fields.response == null ? null : JSON.stringify(fields.response), fields.inputTokens ?? null, fields.outputTokens ?? null, fields.costPence ?? null, fields.error ?? null],
+  );
+}
+
 /** Total spend this calendar month (pence) — drives the budget ceiling. */
 export async function monthSpendPence(): Promise<number> {
   const { rows } = await pool.query<{ s: number }>(

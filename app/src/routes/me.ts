@@ -16,7 +16,7 @@ import { renderMarkdown } from '../lib/markdown';
 import { sliceSlidesForLevel } from '../lib/slideDeck';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
-import { readStored, storeBuffer } from '../lib/resourceStore';
+import { readStored, removeStored, storeBuffer } from '../lib/resourceStore';
 import {
   getAnswers,
   getPupilLevel,
@@ -395,7 +395,14 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const rel = `pupil-work/${q.data.oc}/${acting.id}/${safeKey}.${ext}`;
     await storeBuffer(rel, buf);
     const ws = await worksheetForOccurrenceCourse(q.data.oc);
-    await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` });
+    const { previousValue } = await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` });
+    // BUG-029: a replacement in a different format lands at a different path (the key embeds the
+    // extension), so the old screenshot would linger indefinitely. Once the new answer is durable, unlink
+    // the superseded image if its path actually differs (a same-format replace overwrote it in place).
+    if (previousValue?.startsWith('img:')) {
+      const oldRel = previousValue.slice(4);
+      if (oldRel && oldRel !== rel) await removeStored(oldRel);
+    }
     const url = `/pupil-image?p=${encodeURIComponent(rel)}&t=${Date.now()}`; // cache-bust so a replacement shows
     return reply.type('text/html').send(`<img class="ws-shot" src="${url}" alt="your screenshot">`);
   });

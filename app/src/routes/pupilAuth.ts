@@ -13,6 +13,9 @@ import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 
 const DEVICE_COOKIE = 'pupil_device';
+// BUG-002: how long a class-code entry stays valid for the name/PIN steps that follow it. Generous — a
+// class signs in over a few minutes — but bounded so a stale session can't keep a group unlocked forever.
+const CODE_BIND_TTL_MS = 30 * 60_000;
 
 // The class a remembered device should resume into: the pupil's group whose lesson is on RIGHT NOW
 // (so a multi-class pupil lands in the actual lesson), else their primary enrolment. Keeps the device
@@ -189,6 +192,11 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     if (!b.success) return reply.type('text/html').send(stepError(csrf, 'Type your class code.'));
     const group = await resolveGroupByCode(b.data.code);
     if (!group) return reply.type('text/html').send(stepError(csrf, "That code didn't match a class. Check it and try again."));
+    // BUG-002: bind the code-resolved group to the session, so /pupil/pin and /pupil/login can refuse a
+    // posted group whose class code wasn't actually entered (the code, not just a guessable id, gates the
+    // roster + PIN attempts). The binding expires after a short TTL.
+    req.session.set('pupilCodeGroup', group.groupId);
+    req.session.set('pupilCodeAt', Date.now());
     const names = await listLoginNames(group.groupId);
     if (names.length === 0) {
       return reply.type('text/html').send(stepError(csrf, 'No logins are set up for this class yet — ask your teacher.'));
@@ -213,6 +221,12 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
     }
     const b = z.object({ pupil: z.coerce.number().int().positive(), group: z.coerce.number().int().positive() }).safeParse(req.body);
     if (!b.success) return reply.type('text/html').send(stepError(csrf, 'Something went wrong — start again.'));
+    // BUG-002: the posted group must be the one whose class code was just entered (bound to this session,
+    // not yet expired) — otherwise a caller could skip the code step and harvest any class's names.
+    const at = req.session.get('pupilCodeAt') ?? 0;
+    if (req.session.get('pupilCodeGroup') !== b.data.group || Date.now() - at > CODE_BIND_TTL_MS) {
+      return reply.type('text/html').send(stepError(csrf, 'Enter your class code first.'));
+    }
     // Only reveal a name for a pupil actually enrolled in the class whose code was used — without
     // this, any LAN host could iterate ids and harvest the whole school's display names.
     if (!(await pupilInGroup(b.data.pupil, b.data.group))) {
@@ -232,6 +246,12 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
       .object({ pupil: z.coerce.number().int().positive(), group: z.coerce.number().int().positive(), pin: z.string().min(1).max(20) })
       .safeParse(req.body);
     if (!b.success) return reply.type('text/html').send(stepError(csrf, 'Type your PIN.'));
+    // BUG-002: as in /pupil/pin — the PIN may only be tried against the class whose code is bound to this
+    // session, so the class code (not just a guessable pupil/group id) gates PIN attempts.
+    const at = req.session.get('pupilCodeAt') ?? 0;
+    if (req.session.get('pupilCodeGroup') !== b.data.group || Date.now() - at > CODE_BIND_TTL_MS) {
+      return reply.type('text/html').send(stepError(csrf, 'Enter your class code first.'));
+    }
     const name = (await getPupilName(b.data.pupil)) ?? 'you';
     const inGroup = await pupilInGroup(b.data.pupil, b.data.group);
     const r = inGroup ? await verifyPin(b.data.pupil, b.data.pin) : ({ ok: false, reason: 'wrong' } as const);

@@ -26,34 +26,35 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (32):** BUG-001, BUG-037 (Critical — redaction); BUG-003, BUG-004, BUG-005, BUG-006,
-BUG-007, BUG-008, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High — image-enumeration,
-image/folder/IMAP buffering, exception leakage, safety-gate, **marks-vs-edited-answer &
-incomplete-AI-batch, login-limit reset, first-run-identity race, atomic resource versioning &
-lock-aware unit placement**); BUG-015, BUG-016, BUG-017, BUG-019, BUG-020, BUG-021, BUG-022, BUG-024,
-BUG-026, BUG-028, BUG-030, BUG-031, BUG-046, BUG-047 (Medium — session revocation, pupil-work authz, DB
-invariants, course-doc cap, **mark provenance, calendar-aware print, DB-enforced scheme/recurring
-invariants, atomic planner cascades, complete scheme clone, atomic review apply & atomic resource
-creation**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1 (authorization), A2 (limits) and A4
-(assessment correctness) are complete; A3 (auth) has its two non-deployment fixes done — BUG-032/045
-await an operator go-ahead; A6 (transactional invariants) is nearly complete — the four query-only
-invariants (active-scheme, recurring-idempotency, migrator-serialisation, one-current-year) are all
-DB-enforced, plus atomic resource-version appends & creation, atomic lock-aware planner placement,
-complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025, 027.**
+**Fixed so far (38):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
+BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-040, BUG-041, BUG-042 (High —
+pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
+safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
+atomic resource versioning, lock-aware unit placement & **atomic monthly-AI-cap reservation**);
+BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023, BUG-024, BUG-026,
+BUG-028, BUG-029, BUG-030, BUG-031, BUG-046, BUG-047, BUG-048 (Medium — session revocation, pupil-work
+authz, DB invariants, mark provenance, calendar-aware print, DB-enforced scheme/recurring invariants,
+atomic planner cascades, complete scheme clone, atomic review apply, atomic resource creation, **AI
+audit-durability, group-course deactivation consistency, screenshot-replace cleanup & restart-safe
+review sweep**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A4 + most of A6 complete; A3 auth
+code-fixes done (BUG-032/045 deployment-config await an operator); A7 cost/audit done (011/018).
+Remaining 12: High 009/010 (backup-restore drill), 013 (HTMX client-JS), 039 (disposal narrative);
+Medium 025 (per-lesson recurrence cursor), 027 (email dedup txn), 032/045 (deployment), 033 (client-JS),
+043 (SAR export), 044 (disposal-delete retry), 049 (tar — needs clean rebuild).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
-| High | 18 | 12 | 6 |
-| Medium | 26 | 14 | 12 |
+| High | 18 | 14 | 4 |
+| Medium | 26 | 18 | 8 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **32** | **18** |
+| **Total** | **50** | **38** | **12** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
 - The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **70 test files, 327 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The integration-test suite passes against the local PostgreSQL service: **70 test files, 331 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -86,6 +87,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-002 — The class code is not bound to the pupil PIN flow
 
+- **Status:** ✅ Resolved 2026-06-20 — `/pupil/names` now binds the code-resolved group (+ a timestamp) to the session ([app/src/routes/pupilAuth.ts](app/src/routes/pupilAuth.ts)); `/pupil/pin` and `/pupil/login` refuse a posted group that isn't the session-bound one (or whose binding has expired, 30-min TTL) with "enter your class code first". So the class code — not a guessable pupil/group id — gates roster reveal and PIN attempts: skipping the code step is rejected before any name is shown or PIN checked. Integration test posts straight to /pupil/pin and /pupil/login with a valid (pupil, group) and asserts both are refused without the code; the wrong-PIN-vs-disabled oracle test still holds through the bound flow.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/routes/pupilAuth.ts:177-255`; `app/src/repos/pupilCredentials.ts:71-100`; `app/tests/integration/pupil.int.test.ts:124-190`
 - **Problem and trigger:** `/pupil/names` resolves a class code but stores no server-side proof of the selected group. `/pupil/pin` and `/pupil/login` trust posted `pupil` and `group` IDs and only check that the pupil is enrolled in that group. They can be called directly after obtaining a CSRF token, without ever submitting a valid class code.
@@ -182,6 +184,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-011 — The advertised monthly AI hard cap can be exceeded
 
+- **Status:** ✅ Resolved 2026-06-20 — every call now computes a **conservative estimate centrally** (full `max_tokens` of output + input sized from the redacted payload) and **atomically reserves** it against the cap before the provider call: `reserveAiCall` ([app/src/repos/aiCalls.ts](app/src/repos/aiCalls.ts)) sums the month's spend and inserts a `'reserved'` row under a `pg_advisory_xact_lock` in one transaction, so two concurrent calls can't both pass a pre-check and overshoot — the second sees the first's reservation and is refused. After the call, `reconcileAiCall` replaces the estimate with the actual cost (an errored, unbilled call is released to 0). Integration test proves a reservation counts toward spend immediately and a second same-size reservation over the cap is refused with no row written.
 - **Severity / confidence:** High / Confirmed
 - **Affected:** `app/src/llm/client.ts:41-52, 105-110, 141-149`; `app/src/services/reviewLesson.ts:71, 155`
 - **Problem and trigger:** The pre-call check includes estimated call cost only when the caller supplies `estimatedCostPence`. Only the lesson-review paths do so; every other AI feature passes an implicit zero. If current spend is below the cap, a call may start even when its actual cost will cross the cap. Concurrent calls can all pass the same non-reserving check.
@@ -313,6 +316,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-018 — AI audit-write failures silently undercount spend and remove DPIA evidence
 
+- **Status:** ✅ Resolved 2026-06-20 — pairs with BUG-011's reservation. The redacted request + estimated cost are now persisted in the `'reserved'` ai_calls row **before** the provider call, and the post-call write is a `reconcileAiCall` **UPDATE** of that existing row. So if the reconcile fails, the reservation stands: the spend is still counted (no silent undercount) and the redacted-request DPIA evidence is already on disk — rather than the old path where a failed post-call insert discarded both. The reconcile failure is logged, not thrown. *(Residual: a stale `'reserved'` row from a hard crash mid-call keeps its estimate counted until manually cleared — a periodic expiry sweep is the remaining hardening.)*
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/llm/client.ts:112-132, 183-195, 230-248`; `app/src/repos/aiCalls.ts:17-45`
 - **Problem and trigger:** After a successful billed provider call, `audit` catches and only logs any database insert failure. The successful result is returned without a durable `ai_calls` row. Monthly spend is calculated solely from those rows.
@@ -367,6 +371,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-023 — Deactivating a group’s course leaves it attached to timetable and occurrences
 
+- **Status:** ✅ Resolved 2026-06-20 — chose the "every consumer filters active" route (so re-activation simply flips the flag, losing no mapping). `findOrCreateOccurrence` now only materialises occurrence_courses for **active** group_courses ([app/src/repos/occurrence.ts](app/src/repos/occurrence.ts)), and the forward-planning slot lists `listSlotsForCourse` + `listAllSlots` filter `gc.active` ([app/src/repos/delivery.ts](app/src/repos/delivery.ts)) — so a deactivated class stops appearing in the curriculum map / planner and stops spawning new occurrences. Already-materialised **historic** occurrences are deliberately left (getOccurrenceCourses is unchanged), preserving the record. Integration test deactivates a class and asserts it leaves the slot lists, a newly-opened occurrence no longer carries it, and a pre-existing occurrence still does.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/repos/setup.ts:625-664`; `app/src/repos/occurrence.ts:30-50, 84-99`; `app/src/repos/delivery.ts:27-43, 124-136`
 - **Problem and trigger:** `setGroupCourse(..., false)` only sets `group_courses.active = false`. Existing `timetabled_lesson_courses` mappings remain, and occurrence/delivery queries do not filter `gc.active`.
@@ -430,6 +435,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-029 — Replacing a pupil screenshot with another format leaves the old image indefinitely
 
+- **Status:** ✅ Resolved 2026-06-20 — `saveAnswer` now returns the value it superseded ([app/src/repos/pupilWork.ts](app/src/repos/pupilWork.ts), it already `SELECT … FOR UPDATE`d the prior row for BUG-004), and `/me/answer-image` ([app/src/routes/me.ts](app/src/routes/me.ts)) unlinks the old `img:<path>` once the new answer is durable, when its path actually differs (a same-format replace overwrote in place; a PNG→JPG replace lands at a different extension/path and would otherwise orphan the old file forever). Integration test uploads a PNG then a JPEG for the same key and asserts the new file exists and the old one is gone. *(Pre-existing orphans from before this fix are out of scope — an orphan-store reconciliation sweep, BUG-044's territory, would reclaim those.)*
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/routes/me.ts:360-380`; `app/src/repos/pupils.ts:123-160`; `app/src/repos/pupilWork.ts:63-82`
 - **Problem and trigger:** Screenshot paths include the extension. Replacing `field.png` with `field.jpg` writes a new file and overwrites the single DB pointer, but never deletes the previous path. Pupil disposal only queries currently referenced `img:` values, so the old unreferenced image is no longer discoverable for deletion.
@@ -534,6 +540,7 @@ complete scheme cloning, and atomic review apply/dismiss; A6 remainder: 023, 025
 
 ### BUG-048 — The nightly review sweep records completion before work succeeds
 
+- **Status:** ✅ Resolved 2026-06-20 — the sweep still claims the day BEFORE spending (so a restart/overlapping tick can't double-spend), but now **releases the claim** (restores the prior `ai_review_sweep_last`) if `sweepReviews` throws ([app/src/server.ts](app/src/server.ts)), so the day isn't silently lost — a later tick in the 4–8am window retries. `sweepReviews` is per-lesson idempotent (a lesson with an open review is skipped, via the one-open-review index), so a retry tops up toward the daily cap rather than re-spending. *(Residual: a hard process crash mid-sweep — after the claim, before the catch runs — still loses that day; the full fix is a DB lease with `started`/`completed` + expiry, recorded as the remaining hardening for an off-by-default, £-capped feature.)*
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/src/server.ts:287-303`; `app/src/repos/settings.ts:17-22`; lesson-review sweep service called from the interval
 - **Problem and trigger:** The background interval checks the last-run date and writes today's date before invoking the review sweep. A crash or transient database/AI failure after that write causes later ticks to skip all remaining work for the day. The check and write are also not an atomic claim, so multiple processes can both run and spend concurrently.

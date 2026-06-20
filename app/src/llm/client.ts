@@ -15,7 +15,7 @@ import { ANTHROPIC_API_KEY, PRICE_PENCE_PER_MTOK, PROVIDER } from '../config/llm
 import { appConfig } from '../config/app';
 import { aiEnabled, getSetting, monthCapPence } from '../repos/settings';
 import { listRoster, type RosterEntry } from '../repos/pupils';
-import { insertAiCall, monthSpendPence, type AiCallRecord } from '../repos/aiCalls';
+import { insertAiCall, reconcileAiCall, reserveAiCall, type AiCallRecord } from '../repos/aiCalls';
 import {
   containsRosterName,
   expandTokens,
@@ -102,6 +102,15 @@ function estimateCostPence(model: string, inTok: number, outTok: number): number
   return Number(((inTok * p.input + outTok * p.output) / 1_000_000).toFixed(2));
 }
 
+// BUG-011: a CONSERVATIVE pre-call cost estimate, computed centrally (not left to each caller). Assume
+// the FULL max_tokens of output and size the input from the redacted payload (~3.5 chars/token is
+// generous). Reserving this before the call means a single pricey (Opus) call — or several at once —
+// can never push spend past the cap unnoticed. A caller's own declared estimate, if larger, still wins.
+function estimateRequestPence(model: string, systemText: string, userText: string, maxTokens: number, declared = 0): number {
+  const inTok = Math.ceil((systemText.length + userText.length) / 3.5);
+  return Math.max(estimateCostPence(model, inTok, maxTokens), declared);
+}
+
 // Pure cap test (Wave 5). The cap is a hard ceiling: refuse if we're already at it, OR if a caller's
 // declared estimate for THIS call would cross it. Without the estimate, behaviour is exactly as before
 // (block only once spend has reached the cap), so existing callers are unaffected.
@@ -142,12 +151,8 @@ async function prepare(req: LlmRequest): Promise<Prep> {
   const apiKey = await resolveApiKey();
   if (!apiKey) return { ok: false, status: 'unavailable', message: 'No API key configured.' };
   if (!(await aiEnabled())) return { ok: false, status: 'unavailable', message: 'AI is switched off in settings.' };
-
-  const [cap, spent] = await Promise.all([monthCapPence(), monthSpendPence()]);
-  if (overMonthlyCap(spent, cap, req.estimatedCostPence ?? 0)) {
-    await audit(req, { status: 'blocked', error: 'monthly cap reached' });
-    return { ok: false, status: 'blocked', message: `Monthly AI budget (£${Math.round(cap / 100)}) reached.` };
-  }
+  // The monthly-cap check now happens atomically AT RESERVATION time (see reserve()), not here — so a
+  // concurrent pair can't both pass a pre-check and overshoot.
 
   const roster = await listRoster();
   const kept = withholdSafeguarding(req.context);
@@ -163,10 +168,32 @@ async function prepare(req: LlmRequest): Promise<Prep> {
   return { ok: true, apiKey, roster, systemText, userText, requestRedacted: { system: systemText, user: userText } };
 }
 
+type Reserved = { ok: true; id: number } | { ok: false; status: LlmStatus; message: string };
+
+// BUG-011/018: reserve this call's estimated cost against the monthly cap (atomically, in the repo)
+// BEFORE the provider call. The reservation row persists the redacted request + the estimate, so the
+// spend counts the moment the call is in flight and survives a failed post-call reconcile. Over cap → a
+// 'blocked' audit row + a blocked result, exactly as the old pre-check returned.
+async function reserve(req: LlmRequest, prep: Extract<Prep, { ok: true }>, estimatePence: number): Promise<Reserved> {
+  const cap = await monthCapPence();
+  const id = await reserveAiCall(
+    { feature: req.feature, provider: PROVIDER, model: req.model, promptVersion: req.promptVersion ?? null, requestRedacted: prep.requestRedacted },
+    cap,
+    estimatePence,
+  );
+  if (id == null) {
+    await audit(req, { status: 'blocked', error: 'monthly cap reached' });
+    return { ok: false, status: 'blocked', message: `Monthly AI budget (£${Math.round(cap / 100)}) reached.` };
+  }
+  return { ok: true, id };
+}
+
 /** Free-text completion. Returns text with tokens re-expanded to names for display. */
 export async function callLLM(req: LlmRequest): Promise<LlmResult> {
   const p = await prepare(req);
   if (!p.ok) return { status: p.status, text: null, message: p.message };
+  const r = await reserve(req, p, estimateRequestPence(req.model, p.systemText, p.userText, req.maxTokens ?? 8000, req.estimatedCostPence ?? 0));
+  if (!r.ok) return { status: r.status, text: null, message: r.message };
   try {
     const res = await sdk(p.apiKey).messages.create({
       model: req.model,
@@ -180,18 +207,14 @@ export async function callLLM(req: LlmRequest): Promise<LlmResult> {
       .filter((b): b is Anthropic.TextBlock => b.type === 'text')
       .map((b) => b.text)
       .join('');
-    await audit(req, {
-      status: 'ok',
-      requestRedacted: p.requestRedacted,
-      response: { text: raw },
-      inputTokens: inTok,
-      outputTokens: outTok,
-      costPence: estimateCostPence(req.model, inTok, outTok),
-    });
+    await reconcileAiCall(r.id, { status: 'ok', response: { text: raw }, inputTokens: inTok, outputTokens: outTok, costPence: estimateCostPence(req.model, inTok, outTok) }).catch((err) =>
+      console.error('[ai audit] failed to reconcile ai_calls row:', (err as Error).message),
+    );
     return { status: 'ok', text: expandTokens(raw, p.roster) };
   } catch (err) {
     const msg = err instanceof Anthropic.APIError ? `${err.status ?? ''} ${err.message}`.trim() : (err as Error).message;
-    await audit(req, { status: 'error', requestRedacted: p.requestRedacted, error: msg });
+    // A failed call isn't billed → release the reservation (cost 0), keeping the redacted request + error.
+    await reconcileAiCall(r.id, { status: 'error', costPence: 0, error: msg }).catch(() => {});
     return { status: 'error', text: null, message: degradeMessage(msg) };
   }
 }
@@ -215,6 +238,8 @@ function degradeMessage(raw: string): string {
 export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>): Promise<LlmStructuredResult<T>> {
   const p = await prepare(req);
   if (!p.ok) return { status: p.status, data: null, message: p.message };
+  const r = await reserve(req, p, estimateRequestPence(req.model, p.systemText, p.userText, req.maxTokens ?? 8000, req.estimatedCostPence ?? 0));
+  if (!r.ok) return { status: r.status, data: null, message: r.message };
   try {
     const res = await sdk(p.apiKey).messages.parse({
       model: req.model,
@@ -227,15 +252,15 @@ export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>):
     const outTok = res.usage.output_tokens ?? 0;
     const cost = estimateCostPence(req.model, inTok, outTok);
     const parsed = res.parsed_output as T | null;
-    await audit(req, {
+    // A parsed result IS billed (cost stands); a null parse still consumed tokens, so keep that cost too.
+    await reconcileAiCall(r.id, {
       status: parsed ? 'ok' : 'error',
-      requestRedacted: p.requestRedacted,
       response: parsed ?? null,
       inputTokens: inTok,
       outputTokens: outTok,
       costPence: cost,
       error: parsed ? null : 'no parsed output',
-    });
+    }).catch((err) => console.error('[ai audit] failed to reconcile ai_calls row:', (err as Error).message));
     if (!parsed) return { status: 'error', data: null, message: 'The AI returned no usable result.' };
     // Re-expand tokens to names for display only. Walk the parsed object and expand each STRING value —
     // NOT via a JSON round-trip: a display name containing a JSON metachar (a quote, backslash) would
@@ -244,7 +269,7 @@ export async function callLLMStructured<T>(req: LlmRequest, schema: ZodType<T>):
     return { status: 'ok', data: display };
   } catch (err) {
     const msg = err instanceof Anthropic.APIError ? `${err.status ?? ''} ${err.message}`.trim() : (err as Error).message;
-    await audit(req, { status: 'error', requestRedacted: p.requestRedacted, error: msg });
+    await reconcileAiCall(r.id, { status: 'error', costPence: 0, error: msg }).catch(() => {}); // not billed → release
     return { status: 'error', data: null, message: degradeMessage(msg) };
   }
 }
