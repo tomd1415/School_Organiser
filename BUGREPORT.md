@@ -50,6 +50,331 @@ vitest — test-toolchain only, not shipped; production (`npm audit --omit=dev`)
 | Low | 4 | 4 | 0 |
 | **Total** | **50** | **50** | **0** |
 
+## Independent remediation verification — 20 June 2026
+
+This follow-up independently checked the remediation commit against the original trigger, impact, and
+acceptance criteria for all 50 findings. It supersedes the earlier **“all 50 findings fixed”** progress
+claim above: the automated suites are green, but several implementations cover only the normal path or
+leave the original crash, concurrency, privacy, or deployment condition intact.
+
+### Verification result
+
+| Result | Count | Finding IDs |
+|---|---:|---|
+| Verified against implementation and tests | 30 | BUG-001, BUG-002, BUG-004, BUG-005, BUG-006, BUG-008, BUG-009, BUG-011, BUG-014, BUG-015, BUG-016, BUG-018, BUG-019, BUG-020, BUG-022, BUG-024, BUG-026, BUG-031, BUG-034, BUG-035, BUG-036, BUG-038, BUG-039, BUG-040, BUG-041, BUG-042, BUG-044, BUG-046, BUG-049, BUG-050 |
+| Incomplete against the original acceptance criteria; reopen | 13 | BUG-007, BUG-010, BUG-012, BUG-013, BUG-021, BUG-023, BUG-025, BUG-027, BUG-030, BUG-033, BUG-037, BUG-047, BUG-048 |
+| Core fix works, but a significant related failure case remains | 5 | BUG-003, BUG-017, BUG-028, BUG-029, BUG-043 |
+| Corrected in source/configuration but not effective in the running deployment | 2 | BUG-032, BUG-045 |
+| **Total** | **50** | |
+
+“Verified” here means that the implemented path matches the original remediation criterion and is
+supported by an appropriate deterministic code path or regression test. It is not a claim that no
+future defect is possible. “Residual” means the original direct trigger has been closed, but the current
+mitigation still has a concrete security, consistency, filesystem, or data-completeness limitation.
+
+### Tests and checks performed
+
+- `npm run typecheck` passed.
+- Unit tests passed: **76 files, 536 tests**.
+- Integration tests passed against PostgreSQL on port 5434: **71 files, 335 tests**. The first attempt
+  was blocked by the execution sandbox (`connect EPERM`), not by an application or test failure; the
+  approved network-enabled run passed.
+- `npm audit --omit=dev` reported **0 vulnerabilities**.
+- `bash -n scripts/backup.sh scripts/restore.sh scripts/verify-backup.sh` passed.
+- A final `git diff --check` passed. The verification did not modify application source, database
+  migrations, dependencies, generated files, Docker state, or recovery artifacts.
+
+### Findings that must be reopened
+
+#### BUG-007 — Aggregate folder-upload memory remains larger than the advertised limit
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/routes/resources.ts:270-287`.
+- **Remaining problem:** Each part is fully materialised by `part.toBuffer()` before its size is added to
+  the shared total. If approximately 399 MB is already retained, a second part close to the per-part
+  400 MB cap can be allocated in full before the aggregate rejection, placing memory near 800 MB. The
+  nested-zip advertised-size check is improved, but the folder path still does not enforce the shared
+  remaining budget while streaming.
+- **Effect:** A large folder upload can still cause severe garbage-collection pressure or terminate the
+  Node process despite the stated 400 MB aggregate cap.
+- **Completion:** Stream each part to staging while counting against one shared remaining byte/file
+  budget, abort the part immediately on exhaustion, and delete staged content on rejection.
+- **Regression test:** Use injectable small limits and assert that a later part is stopped at the
+  remaining allowance rather than buffered to its own maximum.
+
+#### BUG-010 — Restore does not require a matched, verified database/resource recovery set
+
+- **Verification status:** Incomplete.
+- **Affected:** `scripts/restore.sh:64-75`; `scripts/verify-backup.sh`.
+- **Remaining problem:** `restore.sh` warns and continues with a database-only restore when matching
+  resources are absent. It does not require and validate the backup manifest/checksums before the
+  destructive database restore, and extracted resources are overlaid onto the existing store rather
+  than replacing it as one matched set.
+- **Effect:** The script can report a successful restore while database resource pointers are missing,
+  stale files from a different snapshot remain, or the database and file store represent different
+  points in time.
+- **Completion:** Require one verified manifest containing both artifacts; restore into temporary
+  database/resource destinations; validate them; then switch both into service together. Provide a
+  separate, explicitly named database-only emergency mode if operationally required.
+- **Regression test:** Automate a scratch restore covering missing resources, checksum mismatch,
+  stale destination files, corrupted archives, and successful matched recovery.
+
+#### BUG-012 — Pupil and TA exception semantics remain incomplete
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/routes/me.ts:208-213`; `app/src/routes/ta.ts:193-238`.
+- **Remaining problem:** Cancelled/free lessons are suppressed, but cover and room-change exceptions
+  continue through the normal rendering path without consistently substituting the adjusted staff or
+  room. The exception modes therefore do not have one shared interpretation across teacher, TA, and
+  pupil surfaces.
+- **Effect:** Pupils and TAs can be directed to the wrong room or shown the wrong staffing information.
+- **Completion:** Resolve a shared effective-lesson model before rendering, containing cancellation,
+  cover, replacement staff, and effective room.
+- **Regression test:** Matrix-test each exception type on teacher, pupil, TA, deep-link, today, and print
+  views, checking both visibility and displayed staff/room.
+
+#### BUG-013 — HTMX failures can still be treated as successful form submissions
+
+- **Verification status:** Not fixed for the original data-loss trigger.
+- **Affected:** `app/src/server.ts:113-131`; `app/src/lib/resourceView.ts:118,128`;
+  `app/src/routes/tasks.ts:50`; `app/src/routes/focus.ts:98`; `app/src/lib/notesView.ts:38`.
+- **Remaining problem:** The global error handler converts HTMX HTTP 500 responses to HTTP 200. HTMX
+  consequently sets `event.detail.successful`, and both unconditional and success-guarded
+  `hx-on::after-request` handlers can reset the submitted form after a server crash. The new client test
+  verifies that a warning remains visible, but does not verify preservation of field values.
+- **Effect:** A teacher can lose typed form content even though persistence failed.
+- **Completion:** Preserve a non-2xx status for failed writes and return an HTMX-compatible error
+  fragment/event without redefining failure as success. Reset forms only after an explicit confirmed
+  success response.
+- **Regression test:** Submit a populated form through a forced repository exception and assert the
+  response remains non-2xx, the error is visible, and every field retains its value.
+
+#### BUG-021 — Planner placement and swaps are not fully atomic under concurrency/failure
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/repos/delivery.ts:219-270`; `app/src/routes/map.ts:184`;
+  `app/src/routes/planner.ts:285-300`.
+- **Remaining problem:** `applyPlacements` materialises occurrences before the transaction and locks
+  only after the caller has read and calculated the proposed state. Concurrent requests can therefore
+  serialize their writes while still applying stale calculations. `moveBinding` performs a map swap as
+  two independent updates, and undo plan/lock restoration is also split across writes.
+- **Effect:** Concurrent planning can lose an update, while a mid-operation failure can leave a partial
+  swap or mismatched plan/lock state.
+- **Completion:** Read, lock, validate, materialise, and update all affected rows inside one transaction;
+  re-check a version or expected state after locking. Perform swaps and undo restoration in that same
+  commit boundary.
+- **Regression test:** Use two PostgreSQL connections and barriers to force stale calculations, plus
+  injected failure between swap/undo writes, and assert one complete valid outcome.
+
+#### BUG-023 — Deactivated courses can remain on pre-materialised future occurrences
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/repos/occurrence.ts:31-52`; `app/tests/integration/delivery.int.test.ts:155-178`.
+- **Remaining problem:** New occurrence-course rows are limited to active group courses, but existing
+  rows are retained without distinguishing historic occurrences from future occurrences. If a future
+  lesson was materialised before course deactivation, that inactive course remains attached. The
+  regression fixture labelled “historic” uses a future date and demonstrates that every already-created
+  occurrence is preserved.
+- **Effect:** Future pupil work, lesson screens, and planning can continue to expose a course that is no
+  longer active for the group.
+- **Completion:** Preserve genuinely historic delivery, but reconcile not-yet-delivered future
+  occurrence-course rows when membership changes, with an explicit policy for rows containing work.
+- **Regression test:** Materialise both past and future occurrences, deactivate the course, then assert
+  the past record remains and the untouched future association is removed or blocked.
+
+#### BUG-025 — Recurrence recovery still loses same-day slots after a crash
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/repos/recurringTasks.ts:105-110`.
+- **Remaining problem:** The durable cursor remains `recurring_tasks.last_generated`, a `DATE`. Within
+  one uninterrupted run the service enumerates multiple lesson slots, but after the first slot commits
+  the stored date advances. A crash before later slots means the next run resumes at end-of-day and
+  skips them permanently.
+- **Effect:** Tasks due for later lessons on the same day can silently never be generated.
+- **Completion:** Persist a compound cursor such as `(date, slot_order)` or represent each due instance
+  as an idempotent queued job whose unique key is committed with the generated task.
+- **Regression test:** Commit the first of two same-day slots, simulate process termination, restart,
+  and assert the second slot is generated exactly once.
+
+#### BUG-027 — Email claim and destination writes do not share one commit boundary
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/services/emailPoll.ts:134-166`; `app/src/repos/tasks.ts:45-61`.
+- **Remaining problem:** Claiming is atomic, but routing/creating the destination and marking the email
+  complete are separate autocommit operations. Task creation itself inserts intake, task, and update
+  records separately. A crash after destination creation but before completion leaves a stale claim;
+  reclaiming it creates another destination. Caught failures remove the claim immediately even if
+  earlier destination writes succeeded.
+- **Effect:** One email can create duplicate tasks or partial intake/task/update state.
+- **Completion:** Commit the destination and completion marker in one transaction, or use an outbox with
+  a database uniqueness key derived from mailbox/message identity and idempotent destination creation.
+- **Regression test:** Inject failure after each destination write and after destination completion,
+  then reclaim/retry and assert one complete destination only.
+
+#### BUG-030 — Pupil answer writes are not bound to the rendered worksheet schema/version
+
+- **Verification status:** Incomplete; the source records this as a follow-up.
+- **Affected:** `app/src/routes/me.ts:476-495`; pupil-work repository write path.
+- **Remaining problem:** The route validates session group, enrolment, date, and non-free exception, but
+  accepts any field key within the generic length limit and resolves the current worksheet at write
+  time. It does not prove that the key appeared in the rendered worksheet or that the pupil submitted
+  against the same resource version they viewed.
+- **Effect:** A crafted or stale request can create arbitrary answer fields or write an answer against a
+  newly changed worksheet, producing hidden/misattributed work.
+- **Completion:** Issue a signed worksheet capability containing occurrence-course ID, resource version,
+  and allowed field keys; validate it before every answer/image write.
+- **Regression test:** Reject an unknown field, a removed field, a stale version, and a capability copied
+  from another occurrence while accepting the current rendered form.
+
+#### BUG-033 — Unsaved-warning correlation collides between unrelated fields
+
+- **Verification status:** Incomplete; independently reproduced with JSDOM.
+- **Affected:** `app/public/app.js:113-146`.
+- **Remaining problem:** Operation identity falls back to `data-save-id || name || id`. Many unrelated
+  controls share names such as `value`, `text`, or `title`; a successful request from one can therefore
+  clear another control's warning. The `swallowedFailure` flag is also one global boolean, so overlapping
+  requests can associate a failure with the wrong request.
+- **Evidence:** A deterministic two-field JSDOM reproduction set a warning on one field and completed a
+  successful request for a different field with the same `name`; the first warning disappeared.
+- **Effect:** The interface can falsely state that unsaved work is safe after an unrelated request.
+- **Completion:** Track request objects/IDs in a map and correlate each response to the originating
+  element and mutation generation. Do not use common HTML names as global operation identifiers.
+- **Regression test:** Cover same-name controls, overlapping success/failure in both completion orders,
+  aborts, and a second edit while an earlier save is in flight.
+
+#### BUG-037 — The documented redaction policy does not meet the absolute privacy invariant
+
+- **Verification status:** Incomplete relative to the original “any partial roster name” criterion.
+- **Affected:** `app/src/services/redact.ts:77-103`; `app/tests/redact.test.ts:138-145`.
+- **Remaining problem:** Ambiguous common-word parts are deliberately excluded. For example, with a
+  pupil whose full name contains “Summer”, the bare first name can pass through. This is an explicit
+  false-positive trade-off, but it means the report's absolute no-name-egress acceptance criterion is
+  not satisfied. Structured preferred names, nicknames, initials, and aliases also remain absent.
+- **Effect:** A real pupil name can still be transmitted to the AI provider when used alone.
+- **Completion:** Decide and document the actual privacy rule. If zero name egress is mandatory, fail
+  closed on all structured aliases/name parts or require a teacher confirmation/redaction step for
+  ambiguous terms; do not describe an ambiguity allowlist as absolute prevention.
+- **Regression test:** Use the production roster policy to cover common-word names, preferred names,
+  nicknames, initials, multi-part surnames, collisions, and accent/punctuation variants.
+
+#### BUG-047 — Daily print applies cancellation but not effective cover/room details
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/routes/lesson.ts:1350-1359`; `app/src/repos/occurrence.ts:68-84`.
+- **Remaining problem:** Holiday/free/cancelled filtering and ghost-occurrence prevention are improved,
+  but cover and room-change lessons retain their original timetable staff/room in the print header.
+- **Effect:** A printed daily plan can direct staff to the wrong room or identify the wrong teacher.
+- **Completion:** Pass the shared effective exception result into `lessonPrintBlock` and render effective
+  cover/room fields without mutating the original timetable definition.
+- **Regression test:** Assert printed staff, room, visibility, and occurrence counts for every exception
+  mode, including whole-day and per-lesson combinations.
+
+#### BUG-048 — Review-sweep claim is neither crash-safe nor multi-process atomic
+
+- **Verification status:** Incomplete.
+- **Affected:** `app/src/server.ts:356-373`.
+- **Remaining problem:** The scheduler still performs a read-then-set claim. Two processes can both read
+  the old value before either sets it and both run the sweep. The catch handler restores the previous
+  value for ordinary exceptions, but process termination after setting the value bypasses that handler
+  and suppresses all later retries for the day.
+- **Effect:** Reviews can be duplicated with unnecessary AI cost or silently skipped for a day.
+- **Completion:** Use an atomic database lease/job record with owner, started/completed state, expiry,
+  per-item idempotency, and retry limits.
+- **Regression test:** Exercise two simultaneous claimers, crash after claim, lease expiry, partial item
+  completion, and a successful exactly-once terminal state.
+
+### Significant residual cases after otherwise effective fixes
+
+#### BUG-003 — Signed lesson-image URLs remain permanent bearer capabilities
+
+- The HMAC closes numeric enumeration, but the signature covers only the resource ID; it has no expiry
+  and is not bound to a session, role, pupil/TA, or occurrence (`app/src/lib/lessonImageSig.ts:9-23`). A
+  copied or logged signed URL can therefore be reused indefinitely by another limited-role session.
+- Bind signatures to a short expiry and authorization context, or re-check current occurrence access on
+  every request. Test expiry, logout/revocation, cross-role sharing, and occurrence closure.
+
+#### BUG-017 — Credential update and session revocation can partially commit
+
+- Normal revocation works, but PIN/credential updates and the session-epoch increment are separate
+  autocommit statements (`app/src/repos/pupilCredentials.ts:107-122`). A database failure between them
+  can change the credential while leaving existing sessions valid.
+- Put both writes in one transaction and inject failure between them in a regression test.
+
+#### BUG-028 — Equivalent resource creation paths remain non-atomic
+
+- The audited bulk importer now stages correctly, but several other paths still perform resource-row,
+  file, and version writes separately: `app/src/routes/schemes.ts:174-194`,
+  `app/src/routes/lesson.ts:603-625,1274-1283`, `app/src/services/sourceImages.ts:103-114`,
+  `app/src/services/lessonDocEdit.ts:29-52`, and `app/src/jobs/importResources.ts:22-35`.
+- Reuse one staged-file/transaction primitive on every creation and append path. Fault each boundary and
+  assert that neither orphan database rows nor orphan files remain.
+
+#### BUG-029 — Screenshot replacement lacks durable cleanup on failure
+
+- The new screenshot is stored, the database pointer is committed, and the old file is then directly
+  removed (`app/src/routes/me.ts:394-405`). A failed database save orphans the new file; a failed unlink
+  leaves the old one, without a tombstone/retry. Concurrent replacements can also race.
+- Stage the new file, update under a row lock, and enqueue old-file deletion transactionally using the
+  existing tombstone mechanism. Test database failure, unlink failure, crash, and concurrent replacement.
+
+#### BUG-043 — SAR export does not package pupil screenshot bytes
+
+- The expanded JSON covers the pupil-linked tables, but screenshot answers contain only an `img:` path;
+  the referenced file is not included (`app/src/repos/pupils.ts:235-269`). The resulting export is not a
+  complete portable copy of that pupil's submitted work.
+- Produce a manifest-backed archive containing the JSON and authorized screenshot files, with missing
+  file reporting and tests for text-only, image, missing-file, and mixed records.
+
+### Deployment verification: BUG-032 and BUG-045 are not yet effective
+
+The source configuration correctly binds the application and PostgreSQL debug ports to loopback
+(`app/docker-compose.yml:14-17,53-56`), configures proxy trust, and overwrites forwarded client IPs in
+Caddy (`app/Caddyfile:10-18`). However, inspection on 20 June 2026 found that the **currently running**
+containers still publish both ports on all IPv4 and IPv6 host interfaces. The current `app/.env` also
+lacks both `DB_PASSWORD` and `TRUST_PROXY` (values of all other settings were deliberately omitted).
+Therefore the two fixes are committed but are not protecting the live runtime.
+
+There is also an upgrade-path blocker: on an existing `.env`, `deploy/install.sh:51-58` adds
+`TRUST_PROXY=true` but assumes `DB_PASSWORD` was randomised by an earlier install. A legacy environment
+without `DB_PASSWORD` remains on the default database credential. The new production startup guard at
+`app/src/server.ts:381-385` will then refuse to start the recreated application container.
+
+Before deployment:
+
+1. Back up and verify the current database/resources.
+2. Generate and record a strong database credential without exposing it in shell history or logs.
+3. Change the PostgreSQL role password and add matching `DB_PASSWORD` plus `TRUST_PROXY=true` to
+   `app/.env` as one controlled maintenance operation.
+4. Recreate the database, application, and proxy services from the corrected Compose configuration.
+5. Verify host listeners are loopback-only for ports 5434 and 44360, test application startup through
+   Caddy, and confirm rate limiting distinguishes real clients while rejecting spoofed forwarding data.
+6. Perform the matched database/resource restore drill required by BUG-009/BUG-010.
+
+Do not simply restart the current stack before migrating the database credential: the startup guard can
+correctly make the application unavailable when it detects the legacy default.
+
+### Credential-handling incident during verification
+
+One read-only Compose diagnostic expanded local environment values into the private tool-call output,
+including a configured AI API credential. No credential value has been copied into this report or any
+repository file. If the tool transcript/log is retained, accessible to others, or may be shared, rotate
+that AI credential and review provider access logs. Future diagnostics should use commands that inspect
+only setting presence or redacted configuration rather than fully expanded Compose output.
+
+### Re-verification priority
+
+1. **Immediate:** rotate the exposed AI credential if transcript retention makes that necessary; safely
+   migrate/deploy BUG-032 and BUG-045; correct BUG-013 and the BUG-037 privacy-policy mismatch.
+2. **Consistency and duplicate prevention:** BUG-021, BUG-025, BUG-027, BUG-033, and BUG-048.
+3. **Recovery and data lifecycle:** BUG-010, BUG-028, BUG-029, and BUG-043, followed by a full restore
+   drill.
+4. **Authorization and lesson correctness:** BUG-003 residual, BUG-012, BUG-023, BUG-030, and BUG-047.
+5. **Resource bounds and session atomicity:** BUG-007 and BUG-017.
+
+All reopened and residual cases need regression tests for their stated failure condition. A green
+happy-path suite alone is not sufficient evidence for crash safety, concurrency, streaming allocation,
+proxy deployment, or complete personal-data recovery/export behavior.
+
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.

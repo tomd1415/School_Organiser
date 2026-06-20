@@ -123,11 +123,11 @@ describe('nav_daily configuration (unchanged machinery)', () => {
 });
 
 describe('client jump-map (unchanged)', () => {
-  it('the client jump map is exactly the old app.js NAV object', () => {
+  it('the client jump map is the old app.js NAV object plus Marking (a)', () => {
     const map: Record<string, string> = {};
     for (const i of navClientModel()) map[i.key] = i.href;
     expect(map).toEqual({
-      h: '/', t: '/timetable', f: '/focus', k: '/tasks', s: '/schemes', p: '/pupils',
+      h: '/', a: '/marking', t: '/timetable', f: '/focus', k: '/tasks', s: '/schemes', p: '/pupils',
       c: '/captured', e: '/events', r: '/resources', m: '/map', g: '/safeguarding',
     });
   });

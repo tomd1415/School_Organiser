@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dark teacher lesson companion prototype for School Organiser">
+  <title>Live lesson cockpit — Task-first dark prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body class="lesson-page">
+  <a class="skip-link" href="#main-content">Skip to lesson controls</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+  <header class="app-header">
+    <div class="header-main">
+      <a class="brand" href="index.html" aria-label="School Organiser, Now"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>School <strong>Organiser</strong></span></a>
+      <label class="command"><span aria-hidden="true">⌕</span><span class="sr-only">Search or run a command</span><input type="search" placeholder="Search or run a command"><kbd aria-hidden="true">Ctrl K</kbd></label>
+      <nav class="task-nav" aria-label="Primary tasks"><a href="index.html">Today</a><a href="lesson.html" aria-current="page">Teach</a><a href="plan.html">Plan</a><a href="marking.html">Assess <span class="nav-count">12</span></a><a href="#organise" data-demo-action="Organise area selected">Organise</a></nav>
+      <div class="header-actions"><button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button><button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button><button class="profile-button" type="button" data-demo-action="Account menu opened" aria-label="Open account menu">JD</button></div>
+    </div>
+  </header>
+
+  <main id="main-content" class="page">
+    <section class="live-bar" aria-labelledby="lesson-title">
+      <div><span class="badge live"><span class="dot" aria-hidden="true"></span> Live lesson</span><h1 id="lesson-title">Separating mixtures</h1><p>Year 8 Science · Lab 2 · 28 pupils · ends 11:10</p></div>
+      <div class="lesson-clock" aria-label="Current time">10:32</div>
+      <div class="lesson-actions"><a class="button primary" href="presentation.html">Open board screen</a><button class="button" type="button" data-demo-action="Lesson paused">Pause lesson</button><button class="button ghost" type="button" data-demo-action="Lesson options opened">More</button></div>
+    </section>
+
+    <div class="cockpit">
+      <div class="cockpit-column">
+        <section class="slides-card card" aria-labelledby="slides-title">
+          <div class="card-head"><div><p class="eyebrow">Board mirror</p><h2 id="slides-title">Slides</h2></div><span class="badge"><span data-slide-position>Slide 3 of 8</span></span></div>
+          <div class="slide-workspace">
+            <div class="slide-thumbs" aria-label="Slide thumbnails">
+              <button class="slide-thumb" type="button" aria-current="false" data-slide-thumb data-position="Slide 1 of 8" data-label="Welcome" data-title="Separating mixtures" data-points="Today we will separate useful materials|You will choose and explain a method"><span>1</span><strong>Separating mixtures</strong></button>
+              <button class="slide-thumb" type="button" aria-current="false" data-slide-thumb data-position="Slide 2 of 8" data-label="Do now" data-title="Which are mixtures?" data-points="Air|Salt water|Iron|Soil"><span>2</span><strong>Which are mixtures?</strong></button>
+              <button class="slide-thumb" type="button" aria-current="true" data-slide-thumb data-position="Slide 3 of 8" data-label="Teacher demonstration" data-title="Watch the filtration" data-points="What stays in the filter paper?|What passes through?|Name each product"><span>3</span><strong>Watch the filtration</strong></button>
+              <button class="slide-thumb" type="button" aria-current="false" data-slide-thumb data-position="Slide 4 of 8" data-label="Practical" data-title="Your investigation" data-points="Choose the correct equipment|Separate the mixture safely|Record both products"><span>4</span><strong>Your investigation</strong></button>
+              <button class="slide-thumb" type="button" aria-current="false" data-slide-thumb data-position="Slide 5 of 8" data-label="Check" data-title="Explain your choice" data-points="I chose… because…|This works because the particles…"><span>5</span><strong>Explain your choice</strong></button>
+            </div>
+            <div class="slide-preview" data-slide-preview aria-live="polite"><span class="slide-label" data-slide-label>Teacher demonstration</span><h2 data-slide-title>Watch the filtration</h2><ul data-slide-points><li>What stays in the filter paper?</li><li>What passes through?</li><li>Name each product.</li></ul></div>
+          </div>
+          <div class="slide-controls"><p>The board display contains no pupil names or private notes.</p><div><button class="button ghost small" type="button" data-demo-action="Previous slide selected">← Previous</button><button class="button small" type="button" data-demo-action="Next slide selected">Next →</button></div></div>
+          <section class="quick-note" aria-labelledby="slide-notes-title">
+            <div class="card-head"><div><p class="eyebrow">Private · slide 3</p><h3 id="slide-notes-title">Teacher notes for this slide</h3></div><span class="badge ai">Future feature</span></div>
+            <label><span class="sr-only">Private teacher notes for slide 3, Watch the filtration</span><textarea placeholder="Add prompts, explanations, questions to ask, or reminders for this slide…">Pause after pouring. Ask: “Where has the sand gone?” Check pupils use residue and filtrate correctly.</textarea></label>
+            <div class="quick-note-actions"><span class="muted">Visible only on the teacher screen. Notes will follow the selected slide.</span><button class="button small" type="button" disabled>Save slide note</button></div>
+          </section>
+        </section>
+
+      </div>
+
+      <div class="cockpit-column">
+        <section class="sequence-card card" aria-labelledby="sequence-title">
+          <div class="card-head"><div><p class="eyebrow">Lesson flow</p><h2 id="sequence-title">What comes next</h2></div><button class="button ghost small" type="button" data-demo-action="Stopping point recorded at teacher demonstration">Record stopping point</button></div>
+          <ol class="sequence"><li class="done"><span class="step" aria-hidden="true">✓</span><div><strong>Do now</strong><small>Mixtures check · finished 10:19</small></div><span class="badge good">Done</span></li><li class="current"><span class="step">2</span><div><strong>Teacher demonstration</strong><small>Filtration and evaporation · 4 min left</small></div><span class="badge ai">Current</span></li><li><span class="step">3</span><div><strong>Practical investigation</strong><small>Pairs · trays 1–14 · 24 minutes</small></div><button class="button small" type="button" data-start-work>Start work</button></li><li><span class="step">4</span><div><strong>Exit check</strong><small>Questions 4–6 · 8 minutes</small></div><span class="quiet">Later</span></li></ol>
+        </section>
+
+        <section class="notes-card card" aria-labelledby="notes-title">
+          <div class="card-head"><div><p class="eyebrow">Fast capture</p><h2 id="notes-title">Lesson notes</h2></div><span class="badge">Private to staff</span></div>
+          <div class="note-form">
+            <div class="note-types" aria-label="Note type"><button class="note-type" type="button" aria-pressed="true" data-note-type="Learning">Learning</button><button class="note-type" type="button" aria-pressed="false" data-note-type="Support">Support</button><button class="note-type" type="button" aria-pressed="false" data-note-type="Behaviour">Behaviour</button><button class="note-type" type="button" aria-pressed="false" data-note-type="Safeguarding">Safeguarding</button></div>
+            <label><span class="sr-only">Lesson note</span><textarea placeholder="Type what you noticed…"></textarea></label>
+            <div class="note-form-foot"><small data-note-hint>Saved to this lesson. Add pupil links only if needed.</small><button class="button primary small" type="button" data-save-note>Save note</button></div>
+          </div>
+          <ul class="recent-notes" data-recent-notes aria-label="Recent lesson notes"><li><span class="badge">Learning</span><span>Most pupils can name the residue; revisit filtrate.</span><time>10:25</time></li><li><span class="badge">Support</span><span>Aisha needs the labelled equipment diagram.</span><time>10:18</time></li></ul>
+        </section>
+
+        <section id="groups" class="groups-card card" aria-labelledby="groups-title">
+          <div class="card-head"><div><p class="eyebrow">Activity groups</p><h2 id="groups-title">Who gets which version</h2></div><button class="button small" type="button" data-edit-groups data-dialog-open="groups-dialog" data-open-message="Activity group editor opened">Edit groups</button></div>
+          <p class="group-state"><span class="badge live">Editable</span><span data-group-state>Independent work has not started · changes update pupil worksheets</span></p>
+          <div class="group-columns">
+            <section class="group support"><h3>Support <span><span data-group-count="support">6</span> pupils</span></h3><ul class="pupil-list"><li class="focus">Aisha K</li><li>Daniel R</li><li>Eva M</li><li>Hassan B</li><li>Ruby P</li><li>Sam T</li></ul></section>
+            <section class="group core"><h3>Core <span><span data-group-count="core">17</span> pupils</span></h3><ul class="pupil-list"><li>Alex M</li><li>Bethany C</li><li>Callum F</li><li>Daisy W</li><li>Ellis J</li><li>Frankie S</li><li>Grace L</li><li>+10</li></ul></section>
+            <section class="group extend"><h3>Extend <span><span data-group-count="extend">5</span> pupils</span></h3><ul class="pupil-list"><li>Imani D</li><li>Jacob N</li><li>Leah G</li><li>Max O</li><li>Zara H</li></ul></section>
+          </div>
+          <div class="group-footer"><p><strong class="muted">Focus:</strong> Aisha moved to Support after the starter.</p><button class="button ghost small" type="button" data-demo-action="Full pupil roster opened">Full roster</button></div>
+        </section>
+      </div>
+
+      <aside class="cockpit-column" aria-label="Live lesson tools">
+        <section class="support-card card" aria-labelledby="support-title"><div class="card-head"><div><p class="eyebrow">Check first</p><h2 id="support-title">Who may need you</h2></div><span class="badge warn">3</span></div><ul class="support-list"><li><strong>Aisha K · Support</strong><span>Not yet opened the equipment diagram.</span></li><li><strong>Daniel R · Support</strong><span>Starter answer suggests residue/filtrate confusion.</span></li><li><strong>Max O · Extend</strong><span>Finished starter early; extension is ready.</span></li></ul><button class="button small" type="button" data-demo-action="Live pupil progress opened">Open live progress</button></section>
+        <section class="timer-card card" aria-labelledby="timer-title"><div class="card-head"><div><p class="eyebrow">Class timer</p><h2 id="timer-title">Demonstration</h2></div><span class="badge live">Board visible</span></div><div class="timer"><strong>04:12</strong><span>remaining</span></div><div class="timer-buttons"><button class="button small" type="button" data-demo-action="Timer paused">Pause</button><button class="button small" type="button" data-demo-action="One minute added">+1 min</button><button class="button ghost small" type="button" data-demo-action="Timer reset">Reset</button></div></section>
+        <section class="support-card card" aria-labelledby="resources-title"><div class="card-head"><div><p class="eyebrow">At hand</p><h2 id="resources-title">Resources</h2></div></div><ul class="support-list"><li><strong>Practical instructions</strong><span>Teacher copy · PDF</span></li><li><strong>Support worksheet</strong><span>6 assigned · 6 opened</span></li><li><strong>Answers</strong><span>Teacher only</span></li></ul><button class="button ghost small" type="button" data-demo-action="All lesson resources opened">All resources</button></section>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="groups-dialog" aria-labelledby="group-dialog-title">
+    <header class="dialog-head"><div><p class="eyebrow">Before independent work</p><h2 id="group-dialog-title">Adjust activity groups</h2><p>Choose the worksheet version each pupil will receive. Names are fictional prototype data.</p></div><button class="dialog-close" type="button" data-dialog-close aria-label="Close group editor">×</button></header>
+    <div class="dialog-body"><div class="group-editor">
+      <div class="group-edit-row"><div><strong>Aisha Khan</strong><small>Starter: 1/3 · previous Support</small></div><select data-group-select aria-label="Group for Aisha Khan"><option value="support" selected>Support</option><option value="core">Core</option><option value="extend">Extend</option></select><span class="badge warn">Suggested: Support</span></div>
+      <div class="group-edit-row"><div><strong>Daniel Reed</strong><small>Starter: 1/3 · previous Core</small></div><select data-group-select aria-label="Group for Daniel Reed"><option value="support" selected>Support</option><option value="core">Core</option><option value="extend">Extend</option></select><span class="badge ai">Suggested move</span></div>
+      <div class="group-edit-row"><div><strong>Eva Morris</strong><small>Starter: 2/3 · previous Support</small></div><select data-group-select aria-label="Group for Eva Morris"><option value="support" selected>Support</option><option value="core">Core</option><option value="extend">Extend</option></select><span class="quiet">No change</span></div>
+      <div class="group-edit-row"><div><strong>Alex Morgan</strong><small>Starter: 3/3 · previous Core</small></div><select data-group-select aria-label="Group for Alex Morgan"><option value="support">Support</option><option value="core" selected>Core</option><option value="extend">Extend</option></select><span class="quiet">No change</span></div>
+      <div class="group-edit-row"><div><strong>Max Owen</strong><small>Starter: 3/3 · finished early</small></div><select data-group-select aria-label="Group for Max Owen"><option value="support">Support</option><option value="core">Core</option><option value="extend" selected>Extend</option></select><span class="badge ai">Suggested: Extend</span></div>
+    </div></div>
+    <footer class="dialog-foot"><span class="muted push-left">Changes remain editable until “Start work”.</span><button class="button ghost" type="button" data-dialog-close>Cancel</button><button class="button primary" type="button" data-save-groups>Save groups</button></footer>
+  </dialog>
+</body>
+</html>

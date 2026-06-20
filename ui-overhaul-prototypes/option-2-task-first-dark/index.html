@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dark task-first Now screen prototype for School Organiser">
+  <title>Now — Task-first dark prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+
+  <header class="app-header">
+    <div class="header-main">
+      <a class="brand" href="index.html" aria-label="School Organiser, Now">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>School <strong>Organiser</strong></span>
+      </a>
+      <label class="command"><span aria-hidden="true">⌕</span><span class="sr-only">Search or run a command</span><input type="search" placeholder="Search or run a command"><kbd aria-hidden="true">Ctrl K</kbd></label>
+      <nav class="task-nav" aria-label="Primary tasks">
+        <a href="index.html" aria-current="page">Today</a>
+        <a href="lesson.html">Teach</a>
+        <a href="plan.html">Plan</a>
+        <a href="marking.html">Assess <span class="nav-count">12</span></a>
+        <a href="#organise" data-demo-action="Organise area selected">Organise</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button>
+        <button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button>
+        <button class="profile-button" type="button" data-demo-action="Account menu opened" aria-label="Open account menu">JD</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="page">
+    <header class="page-head">
+      <div><p class="eyebrow">Friday 20 June · Week 7</p><h1>Now</h1><p>One clear place for what matters this minute.</p></div>
+      <div class="page-actions">
+        <button class="button ghost" type="button" data-dialog-open="quick-capture" data-open-message="Quick capture opened">Quick note</button>
+        <a class="button" href="plan.html">View the week</a>
+      </div>
+    </header>
+
+    <div class="now-grid">
+      <aside class="timeline card" aria-labelledby="today-title">
+        <div class="card-head"><div><p class="eyebrow">Timeline</p><h2 id="today-title">Your day</h2></div><span class="badge good">On track</span></div>
+        <ol>
+          <li class="done"><time datetime="2026-06-20T08:35">08:35</time><span class="node" aria-hidden="true"></span><div><span class="state">Finished</span><strong>Morning form</strong><small>Register completed</small></div></li>
+          <li class="current"><time datetime="2026-06-20T10:10">10:10</time><span class="node" aria-hidden="true"></span><div><span class="state">Now</span><strong>Year 8 Science</strong><small>Lab 2 · 38 minutes left</small></div></li>
+          <li class="next"><time datetime="2026-06-20T11:30">11:30</time><span class="node" aria-hidden="true"></span><div><span class="state">Next</span><strong>Year 10 Chemistry</strong><small>Print 6 support sheets</small></div></li>
+          <li><time datetime="2026-06-20T13:40">13:40</time><span class="node" aria-hidden="true"></span><div><strong>Year 9 Science</strong><small>Room 14 · ready</small></div></li>
+          <li><time datetime="2026-06-20T15:10">15:10</time><span class="node" aria-hidden="true"></span><div><strong>Department meeting</strong><small>Science office</small></div></li>
+        </ol>
+        <p class="timeline-foot"><a href="plan.html">Open full accessible agenda</a></p>
+      </aside>
+
+      <div class="now-main">
+        <section class="now-hero card" aria-labelledby="current-lesson-title">
+          <span class="badge live"><span class="dot" aria-hidden="true"></span> Teaching now</span>
+          <h2 id="current-lesson-title">Separating mixtures</h2>
+          <ul class="lesson-meta" aria-label="Current lesson details">
+            <li>Year 8 Science</li><li>10:10–11:10</li><li>Lab 2</li><li>28 pupils</li>
+          </ul>
+          <div class="hero-buttons">
+            <a class="button primary" href="lesson.html">Open lesson cockpit</a>
+            <a class="button" href="presentation.html">Open board screen</a>
+            <button class="button ghost" type="button" data-demo-action="Stopping point capture opened">Record stopping point</button>
+          </div>
+          <div class="progress-line"><strong>Teacher demonstration</strong><div class="progress-track" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="36"><span style="width:36%"></span></div><span>38 min left</span></div>
+        </section>
+
+        <div class="now-row">
+          <section class="action-card card" aria-labelledby="next-action-title">
+            <div class="card-head"><div><p class="eyebrow">Before 11:30</p><h3 id="next-action-title">Print six support sheets</h3></div><span class="badge warn">8 min</span></div>
+            <p>The adapted worksheet for Year 10 Chemistry is ready. Print only the Support version.</p>
+            <button class="button small" type="button" data-demo-action="Support worksheet print preview opened">Open print preview</button>
+          </section>
+          <section class="action-card card" aria-labelledby="lesson-pulse-title">
+            <div class="card-head"><div><p class="eyebrow">Lesson pulse</p><h3 id="lesson-pulse-title">Pupils are getting started</h3></div><span class="badge live">Live</span></div>
+            <p>22 of 28 have opened the worksheet. Three pupils in Support have not started yet.</p>
+            <a class="button small" href="lesson.html#groups">See pupils and groups</a>
+          </section>
+        </div>
+
+        <section class="quick-note card" aria-labelledby="now-note-title">
+          <div class="card-head"><div><p class="eyebrow">Capture without leaving Now</p><h2 id="now-note-title">What do you need to remember?</h2></div><span class="badge">Saved to inbox</span></div>
+          <label><span class="sr-only">Quick note</span><textarea placeholder="Type a note, follow-up or reminder…"></textarea></label>
+          <div class="quick-note-actions"><span class="muted">Press the button to route it later.</span><button class="button primary small" type="button" data-demo-action="Quick note saved to capture inbox">Save note</button></div>
+        </section>
+      </div>
+
+      <aside class="context-stack" aria-label="Items needing attention">
+        <section class="side-card card" aria-labelledby="needs-me-title">
+          <div class="card-head"><div><p class="eyebrow">Needs me</p><h2 id="needs-me-title">Three things</h2></div><span class="badge warn">3</span></div>
+          <ul class="needs-list">
+            <li><strong>Year 10 marking</strong><span>7 AI suggestions to confirm · 2 need a closer look</span><button class="button small" type="button" data-dialog-open="mark-dialog" data-open-message="Marking Alex Morgan">Open marking</button></li>
+            <li><strong>Year 8 practical</strong><span>Equipment tray 11 was noted as incomplete.</span><button class="button ghost small" type="button" data-demo-action="Equipment note opened">View note</button></li>
+            <li><strong>Tomorrow's cover</strong><span>Period 2 has moved from Lab 2 to Room 14.</span></li>
+          </ul>
+        </section>
+        <section class="side-card card" aria-labelledby="class-title">
+          <div class="card-head"><div><p class="eyebrow">Year 8 live</p><h2 id="class-title">Class progress</h2></div><a href="lesson.html">Open</a></div>
+          <div class="stat-grid"><div class="stat"><strong>22</strong><span>started</span></div><div class="stat"><strong>6</strong><span>not started</span></div><div class="stat"><strong>3</strong><span>support focus</span></div><div class="stat"><strong>1</strong><span>new note</span></div></div>
+        </section>
+        <section class="side-card card" aria-labelledby="quiet-title">
+          <p class="eyebrow">Everything else</p><h2 id="quiet-title">Out of the way</h2><p class="muted">No urgent safeguarding, attendance or cover alerts. Routine admin stays hidden until teaching finishes.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="quick-capture" aria-labelledby="capture-title">
+    <header class="dialog-head"><div><p class="eyebrow">Capture</p><h2 id="capture-title">Add a quick note</h2><p>Keep moving; organise it later.</p></div><button class="dialog-close" type="button" data-dialog-close aria-label="Close">×</button></header>
+    <div class="dialog-body"><label class="note-form"><span class="sr-only">Note</span><textarea autofocus rows="5" placeholder="What happened or what needs doing?"></textarea></label></div>
+    <footer class="dialog-foot"><button class="button ghost" type="button" data-dialog-close>Cancel</button><button class="button primary" type="button" data-demo-action="Quick note saved">Save to inbox</button></footer>
+  </dialog>
+
+  <dialog id="mark-dialog" class="mark-dialog" aria-labelledby="mark-title">
+    <header class="dialog-head"><div><p class="eyebrow">Year 10 Chemistry · Rates of reaction</p><h2 id="mark-title"><span data-pupil-name>Alex Morgan</span> <span class="badge">Core</span></h2><div class="mark-summary"><span data-pupil-position>Pupil 1 of 28</span><span class="badge warn">5/8 marks</span><span class="badge ai">2/4 checked</span></div></div><button class="dialog-close" type="button" data-dialog-close aria-label="Close marking">×</button></header>
+    <div class="dialog-body"><div class="mark-questions">
+      <article class="mark-question checked"><h3>Q1. What happens to the rate when temperature increases?</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 1 mark</span><p>The rate increases.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>It gets faster.</p></div><div class="mark-control"><div class="mark-buttons"><button class="mark-button correct" type="button" aria-pressed="true" data-mark-choice="Correct">✓</button><button class="mark-button incorrect" type="button" aria-pressed="false" data-mark-choice="Not yet">×</button></div><span class="badge good">Checked</span></div></div></article>
+      <article class="mark-question"><h3>Q2. Explain this using particles.</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 3 marks</span><p>Particles move faster, collide more often and more collisions have enough energy.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>They move faster so there are more collisions.</p></div><div class="mark-control"><div><input class="score-input" type="number" min="0" max="3" value="2" aria-label="Marks for question 2"> / 3</div><span class="badge ai">AI 82%</span></div></div></article>
+    </div><label class="mark-comment">Comment back to Alex<textarea placeholder="A short, kind line they will see">Good use of collision frequency. Add the energy idea next time.</textarea></label></div>
+    <footer class="dialog-foot"><button class="button ghost push-left" type="button" disabled>← Previous</button><button class="button" type="button" data-confirm-all>Confirm all</button><button class="button primary" type="button" data-next-pupil>Confirm &amp; next → Bethany</button><button class="button ghost" type="button" data-demo-action="Skipped to Bethany without confirming">Skip →</button></footer>
+  </dialog>
+</body>
+</html>

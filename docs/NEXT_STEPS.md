@@ -5,6 +5,33 @@ A living checklist of the follow-ups suggested while building the setup/deploy a
 [../CHANGELOG.md](../CHANGELOG.md); the longer-horizon idea backlog (Wave 6+) is in
 [FUTURE_WAVES.md](FUTURE_WAVES.md). Items are ticked here as they land.
 
+## ★ Feature request — "Stages" & strands (raised 2026-06-20)
+
+A new progression model to build. The teacher's words:
+
+> "Stages" are descriptions of skills and knowledge that the pupils are working towards. They need to
+> be ticked off when I have evidence that the pupils meet **all** the criteria for that stage. Each
+> stage has the same several **strands** as well.
+
+What this implies (to confirm with the teacher before building):
+
+- **Strands** — a small, fixed set of skill areas, the **same across every stage**. Defined once
+  (school- or course-wide). e.g. for Computing maybe *Algorithms · Programming · Data · Hardware ·
+  Online safety* (TBC by the teacher).
+- **Stages** — an ordered ladder (Stage 1 → N) the pupil climbs. Each stage names, **per strand**, the
+  criteria (skills/knowledge descriptors) the pupil must evidence.
+- Core grid is **Stage × Strand → descriptor(s)**; a stage is "achieved" for a pupil only when **every
+  strand's criteria for that stage** are evidenced and ticked.
+- **Per-pupil tracking** — the teacher ticks criteria off as evidence appears. A pupil's current stage
+  (per strand, and overall) rolls up from the ticks.
+- Likely surfaces: a stages editor (strands + per-stage descriptors), a per-pupil progression view, a
+  class heat-map. Consider links from the new **marking modal** ("this answer is evidence for Stage 2 ·
+  Programming") so marking and progression reinforce each other.
+
+Open questions for the teacher: are stages course-specific or whole-school? Is a stage all-or-nothing,
+or can strands advance independently (Stage 3 Programming but Stage 2 Data)? What counts as "evidence" —
+a manual tick, or auto-suggested from marks/levels? → capture answers, then write a PHASE plan.
+
 ## A. Get it live on the Proxmox box (operator actions)
 
 - [ ] **Deploy the new features** — in the container: `cd /opt/school-organiser && git pull && cd app

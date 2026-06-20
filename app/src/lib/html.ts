@@ -118,6 +118,9 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
       </form>
       <div id="note-modal-body" aria-live="polite"></div>
     </div>
+  </dialog>
+  <dialog id="mark-modal" class="mark-modal" hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'>
+    <div id="mark-modal-body" aria-live="polite"></div>
   </dialog>`
       : ''
   }

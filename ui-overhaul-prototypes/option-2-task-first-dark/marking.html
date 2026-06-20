@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dark marking queue and per-pupil dialog prototype for School Organiser">
+  <title>Assess — Task-first dark prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to marking queue</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+  <header class="app-header"><div class="header-main">
+    <a class="brand" href="index.html" aria-label="School Organiser, Now"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>School <strong>Organiser</strong></span></a>
+    <label class="command"><span aria-hidden="true">⌕</span><span class="sr-only">Search or run a command</span><input type="search" placeholder="Search or run a command"><kbd aria-hidden="true">Ctrl K</kbd></label>
+    <nav class="task-nav" aria-label="Primary tasks"><a href="index.html">Today</a><a href="lesson.html">Teach</a><a href="plan.html">Plan</a><a href="marking.html" aria-current="page">Assess <span class="nav-count">12</span></a><a href="#organise" data-demo-action="Organise area selected">Organise</a></nav>
+    <div class="header-actions"><button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button><button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button><button class="profile-button" type="button" data-demo-action="Account menu opened" aria-label="Open account menu">JD</button></div>
+  </div></header>
+
+  <main id="main-content" class="page">
+    <header class="page-head"><div><p class="eyebrow">Assess</p><h1>Marking</h1><p>Work through one pupil at a time. AI suggestions remain suggestions until you check them.</p></div><div class="page-actions"><button class="button ghost" type="button" data-demo-action="Marking settings opened">Marking settings</button><button class="button primary" type="button" data-dialog-open="mark-dialog" data-open-message="Marking Alex Morgan">Continue marking</button></div></header>
+
+    <section class="summary-grid" aria-label="Marking summary"><div class="summary-tile card"><strong>12</strong><span>lessons need attention</span></div><div class="summary-tile card"><strong>37</strong><span>AI suggestions to confirm</span></div><div class="summary-tile card"><strong>6</strong><span>answers need a closer look</span></div><div class="summary-tile card"><strong>4</strong><span>lessons fully checked today</span></div></section>
+
+    <div class="marking-layout">
+      <section class="lesson-queue card" aria-labelledby="queue-title">
+        <div class="sr-only" id="queue-title">Lessons with pupil work</div>
+        <div class="queue-head" aria-hidden="true"><span>Taught</span><span>Class</span><span>Lesson</span><span>Status</span><span>Action</span></div>
+        <article class="queue-row"><div><strong>Today</strong><small>09:00</small></div><div><strong>Year 10 Chemistry</strong><small>26 pupils with work</small></div><div><strong>Rates of reaction</strong><small>Most recent first</small></div><div class="queue-status"><span class="badge ai">7 to confirm</span><span class="badge warn">2 need a look</span></div><button class="button primary small" type="button" data-dialog-open="mark-dialog" data-open-message="Marking Alex Morgan">Mark</button></article>
+        <article class="queue-row"><div><strong>Yesterday</strong><small>13:40</small></div><div><strong>Year 8 Science</strong><small>28 pupils with work</small></div><div><strong>Particle model</strong><small>3 pupils unfinished</small></div><div class="queue-status"><span class="badge ai">12 to confirm</span><span class="badge">3 unmarked</span></div><button class="button small" type="button" data-dialog-open="mark-dialog" data-open-message="Year 8 marking opened">Mark</button></article>
+        <article class="queue-row"><div><strong>18 Jun</strong><small>11:30</small></div><div><strong>Year 9 Science</strong><small>29 pupils with work</small></div><div><strong>Energy transfers</strong><small>Review flagged answers first</small></div><div class="queue-status"><span class="badge warn">4 need a look</span><span class="badge ai">18 to confirm</span></div><button class="button small" type="button" data-dialog-open="mark-dialog" data-open-message="Year 9 marking opened">Mark</button></article>
+        <article class="queue-row done"><div><strong>17 Jun</strong><small>10:10</small></div><div><strong>Year 7 Science</strong><small>27 pupils with work</small></div><div><strong>Cells and microscopes</strong><small>Released to pupils</small></div><div class="queue-status"><span class="badge good">All checked</span></div><button class="button ghost small" type="button" data-dialog-open="mark-dialog" data-open-message="Checked marks opened">Review</button></article>
+      </section>
+
+      <aside class="filter-card card" aria-label="Marking filters and guidance">
+        <fieldset><legend>Show lessons</legend><label><input type="checkbox" checked> Needs my attention</label><label><input type="checkbox" checked> AI suggestions</label><label><input type="checkbox"> Fully checked</label><label><input type="checkbox"> Released to pupils</label></fieldset>
+        <hr><p class="eyebrow">Simple rule</p><p class="muted">Purple means suggested by AI. Green means a teacher has checked it. Amber always needs a closer look.</p>
+        <hr><button class="button ghost small" type="button" data-demo-action="Keyboard marking help opened">Keyboard shortcuts</button>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="mark-dialog" class="mark-dialog" aria-labelledby="mark-title">
+    <header class="dialog-head"><div><p class="eyebrow">Year 10 Chemistry · Rates of reaction · 20 June</p><h2 id="mark-title"><span data-pupil-name>Alex Morgan</span> <span class="badge">Core</span> <span class="badge good">Pupil finished</span></h2><div class="mark-summary"><span data-pupil-position>Pupil 1 of 28</span><span class="badge warn">5/8 marks</span><span class="badge ai" data-checked-count>2/4 checked</span></div></div><button class="dialog-close" type="button" data-dialog-close aria-label="Close marking">×</button></header>
+    <div class="dialog-body">
+      <div class="mark-questions">
+        <article class="mark-question checked"><h3>Q1. What happens to the rate when temperature increases?</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 1 mark</span><p>The rate increases.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>It gets faster.</p></div><div class="mark-control"><div class="mark-buttons" aria-label="Mark question 1"><button class="mark-button correct" type="button" aria-pressed="true" data-mark-choice="Correct">✓</button><button class="mark-button incorrect" type="button" aria-pressed="false" data-mark-choice="Not yet">×</button></div><span class="badge good">Checked</span></div></div></article>
+        <article class="mark-question"><h3>Q2. Explain the change using particles.</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 3 marks</span><p>Particles move faster, collide more often and more collisions have enough energy.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>They move faster so there are more collisions.</p></div><div class="mark-control"><div><label><span class="sr-only">Marks for question 2</span><input class="score-input" type="number" min="0" max="3" value="2"></label> / 3</div><span class="badge ai">AI 82%</span><small class="muted">Suggested: 2 marks</small></div></div></article>
+        <article class="mark-question"><h3>Q3. Give one way to measure the reaction rate.</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 1 mark</span><p>Measure gas volume, mass loss, or time for a visible change.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>See how much gas is made each minute.</p></div><div class="mark-control"><div class="mark-buttons" aria-label="Mark question 3"><button class="mark-button correct" type="button" aria-pressed="false" data-mark-choice="Correct">✓</button><button class="mark-button incorrect" type="button" aria-pressed="false" data-mark-choice="Not yet">×</button></div><span class="badge ai">AI 94%</span></div></div></article>
+        <article class="mark-question"><h3>Q4. Identify the anomaly and explain your choice.</h3><div class="mark-grid"><div class="answer-box model"><span>Model answer · 3 marks</span><p>Run 4 is anomalous because it does not follow the pattern and is far from the repeat values.</p></div><div class="answer-box pupil"><span>Alex's answer</span><p>Run 4 because it is different.</p></div><div class="mark-control"><div><label><span class="sr-only">Marks for question 4</span><input class="score-input" type="number" min="0" max="3" value="1"></label> / 3</div><span class="badge warn">Check evidence</span><small class="muted">AI could not verify the quoted evidence.</small></div></div></article>
+      </div>
+      <label class="mark-comment">Comment back to Alex<textarea placeholder="A short, kind line they will see">Good use of collision frequency. Add the energy idea next time.</textarea></label>
+    </div>
+    <footer class="dialog-foot"><button class="button ghost push-left" type="button" disabled>← Previous</button><button class="button" type="button" data-confirm-all>Confirm all</button><button class="button primary" type="button" data-next-pupil>Confirm &amp; next → Bethany</button><button class="button ghost" type="button" data-demo-action="Skipped to Bethany without confirming">Skip →</button></footer>
+  </dialog>
+</body>
+</html>

@@ -28,6 +28,7 @@ export interface NavItem {
 // Settings) are 'power' and fold into the Advanced section. /concepts (idea 1.1) was added here.
 export const NAV_MODEL: readonly NavItem[] = [
   { href: '/', label: 'Now', key: 'h', group: 'daily', tier: 'everyday' },
+  { href: '/marking', label: 'Marking', key: 'a', group: 'setup', tier: 'everyday' },
   { href: '/focus', label: 'Focus', key: 'f', group: 'daily', tier: 'everyday' },
   { href: '/timetable', label: 'Timetable', key: 't', group: 'daily', tier: 'everyday' },
   { href: '/oversee', label: 'Oversee', group: 'setup', tier: 'everyday' },

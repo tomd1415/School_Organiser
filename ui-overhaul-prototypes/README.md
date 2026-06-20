@@ -1,13 +1,14 @@
 # UI overhaul prototypes
 
-This directory contains two isolated, static design prototypes for the School Organiser. They do not import application code, connect to the database, make network requests, or change the existing application.
+This directory contains isolated, static design prototypes for the School Organiser. They do not import application code, connect to the database, make network requests, or change the existing application.
 
 ## Open the mockups
 
-Open either `index.html` directly in a browser:
+Open any `index.html` directly in a browser:
 
 - [Option 1 — Calm Command Centre](option-1-calm-command-centre/index.html)
 - [Option 2 — Task-First Daily Workspace](option-2-task-first-workspace/index.html)
+- [Option 2 dark — expanded teacher workspace](option-2-task-first-dark/index.html)
 
 The pages are responsive. Resize the browser to compare desktop, tablet, and mobile layouts. Their buttons demonstrate local visual interactions only.
 
@@ -22,8 +23,17 @@ ui-overhaul-prototypes/
 ├── option-1-calm-command-centre/
 │   ├── index.html
 │   └── styles.css
-└── option-2-task-first-workspace/
+├── option-2-task-first-workspace/
     ├── index.html
+    └── styles.css
+└── option-2-task-first-dark/
+    ├── README.md
+    ├── index.html
+    ├── lesson.html
+    ├── marking.html
+    ├── plan.html
+    ├── presentation.html
+    ├── prototype.js
     └── styles.css
 ```
 

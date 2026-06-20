@@ -49,6 +49,7 @@ import {
 } from '../repos/marking';
 import { deriveScheme, markAll, worksheetAndScheme, setSchemeReadyForOc, buildPupilProfile } from '../services/marking';
 import { guardMatch } from '../lib/markSafetyGate';
+import { markOpenAttrs } from './markModal';
 import { getProfile } from '../repos/pupilProfiles';
 import { revokeDevicesForGroup } from '../repos/pupilDevices';
 
@@ -170,7 +171,7 @@ async function buildGrid(oc: number, info: OcInfo, msg?: string): Promise<BuiltG
     .map((r) => {
       const m = totals[r.level];
       return `<tr id="pw-row-${oc}-${r.pupilId}">
-        <td><button type="button" class="link" hx-get="/lesson/oc/${oc}/pupil/${r.pupilId}/work" hx-target="#pw-readback-${oc}" hx-swap="innerHTML">${esc(r.displayName)}</button>${r.unseen > 0 ? ` <span class="pw-new" title="${r.unseen} new">●</span>` : ''}</td>
+        <td><button type="button" class="link pw-open" ${markOpenAttrs(`/lesson/oc/${oc}/pupil/${r.pupilId}/mark`)} title="open marking">${esc(r.displayName)}</button>${r.unseen > 0 ? ` <span class="pw-new" title="${r.unseen} new">●</span>` : ''}</td>
         <td>${levelChips(oc, r.pupilId, r.level)}</td>
         <td class="pw-prog">${m ? `${Math.min(r.filled, m)} / ${m}` : r.filled}</td>
         <td>${r.done ? '✓' : ''}</td>
@@ -191,6 +192,7 @@ async function buildGrid(oc: number, info: OcInfo, msg?: string): Promise<BuiltG
   const full = `<div class="pupil-work" id="pw-${oc}">
     ${live}
     <div class="pw-actions">
+      ${marking ? `<button type="button" class="btn-secondary pw-mark-open" ${markOpenAttrs(`/lesson/oc/${oc}/mark`)}>✎ Mark this class</button>` : ''}
       <button type="button" class="link" hx-post="/lesson/oc/${oc}/seen" hx-target="#pw-${oc}" hx-swap="outerHTML">mark all seen</button>
       <button type="button" class="link fu-ai" hx-post="/lesson/oc/${oc}/summarise" hx-target="#pw-summary-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">✨ Summarise the class's work (AI)</button>
       <button type="button" class="link" hx-post="/lesson/oc/${oc}/standing-digest" hx-target="#pw-summary-${oc}" hx-swap="innerHTML" title="this class's feedback across all its lessons → teaching context">📊 Feedback so far</button>

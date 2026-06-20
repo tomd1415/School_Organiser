@@ -24,6 +24,7 @@ import { renderTimerBanner } from './timer';
 import { getDayChecklist, type PrepItem } from '../repos/prep';
 import { marksEnabled } from '../auth/marksGate';
 import { marksBacklog, type MarksBacklogRow } from '../repos/marking';
+import { markOpenAttrs } from './markModal';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { resurfacing, type CapturedItem } from '../services/captured';
 import { listForResurfacing } from '../repos/captured';
@@ -273,7 +274,7 @@ function needsMeRows(marks: MarksBacklogRow[], bell: BellTask[], events: Upcomin
     if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
     if (r.unreleased) bits.push('ready to release');
     const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
-    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><a class="nm-text" href="/lesson?lesson=${r.lessonId}&date=${esc(r.date)}">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</a></li>` });
+    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><button type="button" class="nm-text nm-mark" ${markOpenAttrs(`/lesson/oc/${r.occurrenceCourseId}/mark`)} title="open marking">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</button></li>` });
   }
   for (const i of heads.filter((h) => !h.safeguarding).slice(0, 6)) {
     rows.push({ rank: 4, html: `<li class="nm-row"><span class="nm-tag">heads-up</span><span class="nm-text">${esc(i.body || '(captured note)')}${i.groupName ? ` <span class="muted">· ${esc(i.groupName)}</span>` : ''}</span></li>` });
@@ -292,7 +293,7 @@ function renderNeedsMe(marks: MarksBacklogRow[], bell: BellTask[], events: Upcom
   return `<div class="now-card now-needs">
     <p class="kicker">Needs me</p>
     <ul class="nm-list">${shown}${more}</ul>
-    <p class="nm-foot"><a href="/tasks">Tasks</a> · <a href="/events">Events</a> · <a href="/captured">Captured</a></p>
+    <p class="nm-foot"><a href="/marking">✎ Marking</a> · <a href="/tasks">Tasks</a> · <a href="/events">Events</a> · <a href="/captured">Captured</a></p>
   </div>`;
 }
 

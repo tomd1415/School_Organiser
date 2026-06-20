@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-contrast="standard" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dark task-first weekly planning prototype for School Organiser">
+  <title>Plan — Task-first dark prototype</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to week</a>
+  <div id="prototype-status" class="sr-only" role="status" aria-live="polite"></div>
+  <header class="app-header"><div class="header-main">
+    <a class="brand" href="index.html" aria-label="School Organiser, Now"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>School <strong>Organiser</strong></span></a>
+    <label class="command"><span aria-hidden="true">⌕</span><span class="sr-only">Search or run a command</span><input type="search" placeholder="Search or run a command"><kbd aria-hidden="true">Ctrl K</kbd></label>
+    <nav class="task-nav" aria-label="Primary tasks"><a href="index.html">Today</a><a href="lesson.html">Teach</a><a href="plan.html" aria-current="page">Plan</a><a href="marking.html">Assess <span class="nav-count">12</span></a><a href="#organise" data-demo-action="Organise area selected">Organise</a></nav>
+    <div class="header-actions"><button class="icon-button" type="button" data-density-toggle aria-pressed="false" aria-label="Toggle compact layout">↕</button><button class="icon-button" type="button" data-contrast-toggle aria-pressed="false" aria-label="Toggle high contrast">◐</button><button class="profile-button" type="button" data-demo-action="Account menu opened" aria-label="Open account menu">JD</button></div>
+  </div></header>
+
+  <main id="main-content" class="page">
+    <header class="page-head"><div><p class="eyebrow">Plan · Week 7</p><h1>16–20 June</h1><p>A simple readiness view: prepare what is missing without opening every lesson.</p></div><div class="page-actions"><button class="button ghost" type="button" data-demo-action="Previous week opened">← Previous</button><button class="button" type="button" data-demo-action="Current week opened">This week</button><button class="button ghost" type="button" data-demo-action="Next week opened">Next →</button><button class="button primary" type="button" data-demo-action="New lesson planner opened">Plan a lesson</button></div></header>
+
+    <section class="summary-grid" aria-label="Week readiness"><div class="summary-tile card"><strong>18</strong><span>lessons this week</span></div><div class="summary-tile card"><strong>15</strong><span>ready to teach</span></div><div class="summary-tile card"><strong>2</strong><span>need preparation</span></div><div class="summary-tile card"><strong>1</strong><span>room change</span></div></section>
+
+    <div class="week-grid" aria-label="Week agenda">
+      <section class="day-column card"><h2>Monday <span>16 June · complete</span></h2><article class="plan-lesson ready"><time>09:00</time><strong>Year 10 · Rates of reaction</strong><small>Ready · slides, Core worksheet, Support worksheet</small></article><article class="plan-lesson ready"><time>11:30</time><strong>Year 8 · Particle model</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>13:40</time><strong>Year 9 · Energy transfers</strong><small>Ready · taught</small></article></section>
+      <section class="day-column card"><h2>Tuesday <span>17 June · complete</span></h2><article class="plan-lesson ready"><time>09:00</time><strong>Year 7 · Cells</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>10:10</time><strong>Year 10 · Collision theory</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>13:40</time><strong>Year 8 · Diffusion</strong><small>Ready · taught</small></article></section>
+      <section class="day-column card"><h2>Wednesday <span>18 June · complete</span></h2><article class="plan-lesson ready"><time>09:00</time><strong>Year 9 · Power</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>11:30</time><strong>Year 7 · Microscopes</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>14:00</time><strong>Planning period</strong><small>One hour protected</small></article></section>
+      <section class="day-column card"><h2>Thursday <span>19 June · complete</span></h2><article class="plan-lesson ready"><time>09:00</time><strong>Year 10 · Required practical</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>10:10</time><strong>Year 8 · Solutions</strong><small>Ready · taught</small></article><article class="plan-lesson ready"><time>13:40</time><strong>Year 9 · Sankey diagrams</strong><small>Ready · taught</small></article></section>
+      <section class="day-column card"><h2>Friday <span>20 June · today</span></h2><article class="plan-lesson ready"><time>10:10 · now</time><strong>Year 8 · Separating mixtures</strong><small>Teaching · 22 pupils started</small></article><article class="plan-lesson attention"><time>11:30</time><strong>Year 10 · Catalysts</strong><small>Action: print six Support worksheets</small><button class="button small" type="button" data-demo-action="Catalysts lesson opened">Prepare</button></article><article class="plan-lesson attention"><time>13:40</time><strong>Year 9 · Efficiency</strong><small>Room change: Lab 2 → Room 14</small><button class="button ghost small" type="button" data-demo-action="Efficiency lesson opened">Open</button></article></section>
+    </div>
+  </main>
+</body>
+</html>
