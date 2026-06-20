@@ -32,29 +32,29 @@ BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040,
 safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
 atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & **disposal
 narrative removal**); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
-BUG-024, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046, BUG-047, BUG-048
-(Medium — session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware print,
-DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic review
-apply, atomic resource creation, AI audit-durability, group-course deactivation consistency,
-screenshot-replace cleanup, restart-safe review sweep, complete SAR export & **durable disposal-delete
-retry**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A4 + A5 + A7 + most of A6 complete; A3
-auth code-fixes done (BUG-032/045 deployment-config await an operator). Remaining 9: High 009/010
-(backup-restore drill), 013 (HTMX client-JS); Medium 025 (per-lesson recurrence cursor), 027 (email dedup
-txn), 032/045 (deployment), 033 (client-JS), 049 (tar — needs clean rebuild).**
+BUG-024, BUG-025, BUG-026, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046, BUG-047,
+BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance, calendar-aware
+print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme clone, atomic
+review apply, atomic resource creation, AI audit-durability, group-course deactivation consistency,
+screenshot-replace cleanup, restart-safe review sweep, complete SAR export, durable disposal-delete
+retry & **per-lesson recurrence cursor**); BUG-034, BUG-035, BUG-036, BUG-050 (Low). **Waves A1–A5 + A7
++ most of A6 complete; A3 auth code-fixes done (BUG-032/045 deployment-config await an operator).
+Remaining 8: High 009/010 (backup-restore drill), 013 (HTMX client-JS); Medium 027 (email dedup txn),
+032/045 (deployment), 033 (client-JS), 049 (tar — needs clean rebuild).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 15 | 3 |
-| Medium | 26 | 20 | 6 |
+| Medium | 26 | 21 | 5 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **41** | **9** |
+| **Total** | **50** | **42** | **8** |
 
 ## Testing and environment limitations
 
 - `npm run typecheck` passes on the audited working tree.
-- The unit-test suite passes: **75 test files, 528 tests** (508 at audit time; remediation has added regression coverage).
-- The integration-test suite passes against the local PostgreSQL service: **71 test files, 333 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
+- The unit-test suite passes: **75 test files, 529 tests** (508 at audit time; remediation has added regression coverage).
+- The integration-test suite passes against the local PostgreSQL service: **71 test files, 334 tests** (301 at audit time). The suite creates scoped fixtures and temporary resource-store content and performs its normal cleanup.
 - `npm audit --omit=dev` reports three high-severity vulnerabilities. The direct `pdfjs-dist` advisory is mitigated in the application by `isEvalSupported: false`; the remaining transitive install/build exposure is recorded as BUG-049.
 - Backup and restore shell scripts were inspected but not run because doing so would create and replace recovery artifacts and database state. Concurrency, crash, filesystem-failure, memory-exhaustion, proxy-network, and full disaster-recovery paths remain statically validated unless a finding states otherwise.
 - The existing tracked and untracked working-tree changes were treated as user-owned. This report is the only audit-created file.
@@ -394,6 +394,7 @@ txn), 032/045 (deployment), 033 (client-JS), 049 (tar — needs clean rebuild).*
 
 ### BUG-025 — `per_lesson` recurring tasks miss additional lessons on the same day
 
+- **Status:** ✅ Resolved 2026-06-20 — recurrence now tracks a cursor of **(date, slot start-minute)**, not just date. `nextLesson` ([app/src/services/recurrence.ts](app/src/services/recurrence.ts)) returns the next `(date, slot)` strictly after that cursor — on the cursor day only later slots, on later days the earliest — and the generator advances the cursor to each due slot, so a class taught twice in a day yields two due points. The per-occurrence dedup key gained a `:startMinute` suffix so same-day slots don't collapse to one ([migration 0053](app/migrations/0053_recurring_slot_key_time.sql) rewrites existing keys to match; the generator's guard was raised to 40 to cover several slots within the lead window). Pure test asserts a twice-on-Monday class produces both the AM and PM due points before next week; integration test confirms two same-date/different-time keys coexist. *(Residual: `last_generated` is still a date; on resume the cursor starts at end-of-cursor-day, so a run cut off mid-day by the guard could skip that day's remaining slot — not reachable at realistic lead times for a single teacher.)*
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/services/recurrence.ts:43-53`; `app/src/repos/recurringTasks.ts:100-121`
 - **Problem and trigger:** `nextLesson` advances by whole date and selects only the first group slot for a matching weekday. `last_generated` stores only a date. If a group has two lessons on one day, the second slot can never be returned.

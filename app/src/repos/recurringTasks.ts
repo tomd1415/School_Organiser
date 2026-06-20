@@ -4,7 +4,7 @@
 import { pool } from '../db/pool';
 import { addDays } from '../lib/time';
 import { LOADS, URGENCIES } from '../services/task';
-import { nextDueDate } from '../services/recurrence';
+import { END_OF_DAY, nextDueDate } from '../services/recurrence';
 import { getClockContext } from './clock';
 import { getGroupSlots } from './tasks';
 
@@ -103,15 +103,19 @@ export async function generateDueInstances(today: string): Promise<number> {
   try {
     for (const def of defs) {
       let after = def.lastGenerated ?? addDays(today, -1);
-      for (let guard = 0; guard < 12; guard++) {
-        const due = nextDueDate(def.pattern, after, recurCtx);
+      // BUG-025: the cursor is (date, slot-minute). It starts at END_OF_DAY so the cursor day itself is
+      // excluded (matching the date-based "next date after" semantics + skipping an already-swept day on
+      // resume); within a run it advances to each due slot, so a class's same-day slots are walked.
+      let afterStartMin = END_OF_DAY;
+      for (let guard = 0; guard < 40; guard++) {
+        const due = nextDueDate(def.pattern, after, afterStartMin, recurCtx);
         if (!due) break;
         if (daysFromToday(due.date, today) > def.leadDays) break; // not yet within lead time
-        // BUG-026: one task per definition per due date is now a DB guarantee (partial unique index on
-        // recurring_slot_key, migration 0050), so a concurrent sweep can't slip a duplicate past a
-        // WHERE NOT EXISTS check. Insert + cursor bump go in ONE transaction; ON CONFLICT DO NOTHING
-        // makes a re-run (or a crash before the cursor advanced) a harmless no-op. Count real inserts.
-        const slotKey = `${def.id}:${due.date}`;
+        // BUG-026/025: one task per definition per due SLOT (date + start-minute) is a DB guarantee
+        // (partial unique index on recurring_slot_key, migration 0050; the :startMin suffix added in
+        // 0053). Insert + cursor bump go in ONE transaction; ON CONFLICT DO NOTHING makes a re-run (or a
+        // crash before the cursor advanced) a harmless no-op. Count real inserts.
+        const slotKey = `${def.id}:${due.date}:${due.startMin}`;
         await client.query('BEGIN');
         const ins = await client.query(
           `INSERT INTO tasks (title, detail, urgency, estimate_min, cognitive_load, group_id, course_id, source, recurring_task_id, recurring_slot_key, due_at, status)
@@ -123,6 +127,7 @@ export async function generateDueInstances(today: string): Promise<number> {
         await client.query(`UPDATE recurring_tasks SET last_generated = $2::date WHERE id = $1`, [def.id, due.date]);
         await client.query('COMMIT');
         after = due.date;
+        afterStartMin = due.startMin; // advance within the day so the next slot of a twice-taught day is next
         if (ins.rowCount) created++;
       }
     }

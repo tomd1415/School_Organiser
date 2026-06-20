@@ -40,20 +40,31 @@ function nextMonthly(afterIso: string, dom: number): DuePoint {
   return { date: addDays(afterIso, 30), startMin: DEFAULT_START };
 }
 
-function nextLesson(afterIso: string, groupId: number, ctx: RecurCtx): DuePoint | null {
+// BUG-025: per_lesson recurs once PER LESSON, so a class taught twice in a day must yield two due
+// points. Return the next (date, slot) STRICTLY AFTER the cursor (afterIso, afterStartMin): on the
+// cursor day only slots later than afterStartMin count; on later days the earliest slot. The generator
+// advances the cursor to each returned point, so same-day slots are walked in order before moving on.
+function nextLesson(afterIso: string, afterStartMin: number, groupId: number, ctx: RecurCtx): DuePoint | null {
   const slots = ctx.groupSlots.get(groupId);
   if (!slots || slots.length === 0) return null;
-  for (let i = 1; i <= 60; i++) {
+  for (let i = 0; i <= 60; i++) {
     const d = addDays(afterIso, i);
     const wd = weekdayOf(d);
     if (!classifyDay(d, wd, ctx.terms).isSchoolDay) continue;
-    const slot = slots.filter((s) => s.weekday === wd).sort((a, b) => a.startMin - b.startMin)[0];
-    if (slot) return { date: d, startMin: slot.startMin };
+    const daySlots = slots.filter((s) => s.weekday === wd).sort((a, b) => a.startMin - b.startMin);
+    for (const slot of daySlots) {
+      if (i === 0 && slot.startMin <= afterStartMin) continue; // at/before the cursor on its own day
+      return { date: d, startMin: slot.startMin };
+    }
   }
   return null;
 }
 
-export function nextDueDate(pattern: string, afterIso: string, ctx: RecurCtx): DuePoint | null {
+// `afterStartMin` is only consulted by per_lesson (the date-based patterns recur at most once a day, so
+// they step strictly by date). Callers seeking the first due of a fresh cursor day pass END_OF_DAY.
+export const END_OF_DAY = 24 * 60;
+
+export function nextDueDate(pattern: string, afterIso: string, afterStartMin: number, ctx: RecurCtx): DuePoint | null {
   const weekly = /^weekly:([1-7])$/.exec(pattern);
   if (weekly && weekly[1]) return nextWeekday(afterIso, Number(weekly[1]), 1);
 
@@ -64,7 +75,7 @@ export function nextDueDate(pattern: string, afterIso: string, ctx: RecurCtx): D
   if (monthly && monthly[1]) return nextMonthly(afterIso, Math.min(28, Math.max(1, Number(monthly[1]))));
 
   const perLesson = /^per_lesson:(\d+)$/.exec(pattern);
-  if (perLesson && perLesson[1]) return nextLesson(afterIso, Number(perLesson[1]), ctx);
+  if (perLesson && perLesson[1]) return nextLesson(afterIso, afterStartMin, Number(perLesson[1]), ctx);
 
   return null;
 }

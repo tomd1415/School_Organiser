@@ -7,6 +7,15 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 15 (Wave A6 finish — per-lesson recurrence)
+
+- **🔁 A per-lesson task taught twice in a day now recurs twice (BUG-025, Medium).** `per_lesson` recurring
+  tasks stepped by *date* and picked one slot a day, so a class taught twice on the same day got a single
+  reminder. Recurrence now tracks a **(date, slot start-minute)** cursor: it returns the next `(date, slot)`
+  strictly after it — later slots on the cursor day, the earliest on later days — and the per-occurrence
+  dedup key gained a `:startMinute` suffix so same-day slots no longer collapse to one ([migration 0053](app/migrations/0053_recurring_slot_key_time.sql)
+  re-keys existing rows to match). Suite green: **529 unit / 334 integration; typecheck clean**.
+
 ### 2026-06-20 — Audit remediation, batch 14 (Wave A5 — pupil data-protection lifecycle)
 
 Make disposal and subject-access genuinely complete for the pupil-data lifecycle. Suite green:

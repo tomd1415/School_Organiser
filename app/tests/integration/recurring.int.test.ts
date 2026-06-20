@@ -55,6 +55,21 @@ describe('recurring tasks (integration — needs the dev DB up)', () => {
     ).rejects.toThrow(/duplicate key|unique/i);
   });
 
+  it('allows two occurrences on the same date at DIFFERENT slot times (BUG-025 — per_lesson twice a day)', async () => {
+    const id = await createRecurring();
+    defs.push(id);
+    // same definition, same date, two different start-minutes → distinct keys → both allowed
+    for (const min of [540, 840]) {
+      await pool.query(
+        `INSERT INTO tasks (title, source, recurring_task_id, recurring_slot_key, due_at, status)
+         VALUES ('twice-a-day', 'recurring', $1, $2, now(), 'inbox')`,
+        [id, `${id}:2026-10-02:${min}`],
+      );
+    }
+    const n = (await pool.query<{ n: number }>(`SELECT count(*)::int AS n FROM tasks WHERE recurring_task_id = $1`, [id])).rows[0]!.n;
+    expect(n).toBe(2); // the date-only key would have collapsed these to one
+  });
+
   it('does not generate for a paused definition', async () => {
     const id = await createRecurring();
     defs.push(id);

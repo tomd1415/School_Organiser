@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 41 of 50 fixed; Waves A1–A5 + A7 + most of A6 complete, A3 code-fixes done.** This is the
+> **Status (2026-06-20): in progress — 42 of 50 fixed; Waves A1–A6 (bar 027) + A7 complete, A3 code-fixes done.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -36,11 +36,12 @@
 > covers every pupil-linked table — tasks/events/levels/unit-signals/completions/device+credential metadata —
 > with secrets excluded and a documented safeguarding-exemption note), and **044** (disposal enqueues a
 > durable deletion tombstone in the txn; a boot+15-min sweep retries any screenshot unlink that failed or was
-> interrupted, so an erased pupil's image can't silently survive on disk). Suites green: 528 unit / 333
-> integration; typecheck clean. **Remaining 9:** **009/010** (backup-restore drill — operational), **013/033**
-> (HTMX client-JS — need the Wave-0 browser harness), **025** (per-lesson recurrence cursor), **027**
-> (email-dedup txn), **049** (tar — needs a clean dependency rebuild). **032 / 045** (deployment-config)
-> await the operator.
+> interrupted, so an erased pupil's image can't silently survive on disk). **A6 finish** — **025** (per_lesson
+> recurrence tracks a (date, slot-minute) cursor + slot-timed dedup key, so a class taught twice in a day
+> recurs twice). Suites green: 529 unit / 334 integration; typecheck clean. **Remaining 8:** **009/010**
+> (backup-restore drill — operational), **013/033** (HTMX client-JS — need the Wave-0 browser harness),
+> **027** (email-dedup txn — the one open A6 item), **049** (tar — needs a clean dependency rebuild).
+> **032 / 045** (deployment-config) await the operator.
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new
