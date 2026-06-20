@@ -21,7 +21,7 @@ the building.
 
 | Piece | What it is | Port |
 |---|---|---|
-| `app` | The School Organiser web app (Node/Fastify) | `44360` (direct/debug) |
+| `app` | The School Organiser web app (Node/Fastify) | `44360` (host-local debug only — bound to `127.0.0.1`) |
 | `db` | PostgreSQL 16 + pgvector | `5434` on the host (internal `5432`) |
 | `caddy` | HTTPS reverse proxy — the **front door** | `80` / `443` |
 | `gotenberg` | *Optional* Office→PDF preview helper | internal only |
@@ -153,8 +153,11 @@ upgrade — and:
 
 1. Installs **Docker Engine + Compose v2** if missing (and `openssl`, `age`).
 2. Generates **`app/.env`** *once* (preserved across re-runs) with a random `SESSION_KEY` and
-   `DB_PASSWORD`, your `SITE_ADDRESS`, and `COOKIE_SECURE=true`. It is `chmod 600` and must never be
-   committed.
+   `DB_PASSWORD`, your `SITE_ADDRESS`, `COOKIE_SECURE=true`, and `TRUST_PROXY=true` (the app sits behind
+   Caddy, which sets the real client IP in `X-Forwarded-For` — needed for the per-IP login/PIN rate
+   limits to work). It is `chmod 600` and must never be committed. **Postgres (5434) and the app's direct
+   port (44360) are published on `127.0.0.1` only** — the LAN reaches the app solely through Caddy on
+   80/443. The app **refuses to start in production if `DB_PASSWORD` is still the default `organiser`**.
 3. Creates the data and backup directories (`data/resources/`, `backups/`).
 4. Generates an **age** encryption keypair for backups and schedules a **nightly encrypted backup at
    02:30** via `/etc/cron.d/school-organiser-backup`.
@@ -325,7 +328,7 @@ rollback if anything surprises you, on top of the app-level encrypted backups.
 |---|---|
 | **Docker didn't start in the LXC** | The known Docker-in-LXC issue. `pct stop <CTID>; pct destroy <CTID>` and re-run `proxmox-lxc.sh` with the default (privileged: leave `UNPRIVILEGED` unset/`0`). If it still fails, use the VM (Path B). |
 | **Browser certificate warning** | Expected on a LAN with `tls internal`. Accept once, or install Caddy's root CA ([§7](#7-the-tls-certificate-lan)). |
-| **Managed/locked-down PC won't let you past the cert warning** | School Chrome/Edge policy (`SSLErrorOverrideAllowed=false`) hides "Proceed" and disables the `thisisunsafe` bypass. Best: have IT trust Caddy's root CA ([§7](#7-the-tls-certificate-lan)). No IT? Switch to plain HTTP — set `COOKIE_SECURE=false` in `app/.env`, use the Caddyfile `:80` block, then browse `http://<ip>/` (or the app's direct port `http://<ip>:44360/`). LAN-cleartext trade-off; see [§7](#7-the-tls-certificate-lan). |
+| **Managed/locked-down PC won't let you past the cert warning** | School Chrome/Edge policy (`SSLErrorOverrideAllowed=false`) hides "Proceed" and disables the `thisisunsafe` bypass. Best: have IT trust Caddy's root CA ([§7](#7-the-tls-certificate-lan)). No IT? Switch to plain HTTP — set `COOKIE_SECURE=false` in `app/.env`, use the Caddyfile `:80` block, then browse `http://<ip>/`. (The direct `:44360` port is now bound to `127.0.0.1`, so it's reachable only on the host itself, not from another device.) LAN-cleartext trade-off; see [§7](#7-the-tls-certificate-lan). |
 | **Compose v2 missing** | Install `docker-compose-plugin` (the installer needs `docker compose`, not the old `docker-compose`). |
 | **App can't reach the database** | `docker compose --profile proxy logs db` — the app waits for the db healthcheck; check `DB_PASSWORD` in `app/.env` matches. |
 | **Page loads on `:44360` but not `https://`** | The `caddy` service needs the `--profile proxy` flag; bring it up with `docker compose --profile proxy up -d`. |

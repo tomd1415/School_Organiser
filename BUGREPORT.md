@@ -26,30 +26,32 @@ The audit found **50 current issues**. The most urgent defects are pupil-name re
 Tracked against [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md). Each fix lands with a red-then-green
 regression test; suites stay green. Per-finding status is shown inline as **✅ Resolved**.
 
-**Fixed so far (41):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
+**Fixed so far (45):** BUG-001, BUG-037 (Critical — redaction); BUG-002, BUG-003, BUG-004, BUG-005,
 BUG-006, BUG-007, BUG-008, BUG-011, BUG-012, BUG-014, BUG-038, BUG-039, BUG-040, BUG-041, BUG-042 (High
 — pupil-PIN class-code binding, image-enumeration, image/folder/IMAP buffering, exception leakage,
 safety-gate, marks-vs-edited-answer & incomplete-AI-batch, login-limit reset, first-run-identity race,
-atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & **disposal
-narrative removal**); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
-BUG-024, BUG-025, BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-043, BUG-044, BUG-046,
-BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark provenance,
-calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades, complete scheme
-clone, atomic review apply, atomic resource creation, AI audit-durability, group-course deactivation
-consistency, screenshot-replace cleanup, restart-safe review sweep, complete SAR export, durable
-disposal-delete retry, per-lesson recurrence cursor & **email-dedup claim/recovery**); BUG-034, BUG-035,
-BUG-036, BUG-050 (Low). **Waves A1–A7 complete (every code finding in those waves fixed); only the
-operational/deployment + client-JS items remain. A3 auth code-fixes done; BUG-032/045 deployment-config
-await an operator. Remaining 7: High 009/010 (backup-restore drill — operational), 013 (HTMX client-JS);
-Medium 032/045 (deployment), 033 (client-JS), 049 (tar — needs a clean dependency rebuild).**
+atomic resource versioning, lock-aware unit placement, atomic monthly-AI-cap reservation & disposal
+narrative removal); BUG-015, BUG-016, BUG-017, BUG-018, BUG-019, BUG-020, BUG-021, BUG-022, BUG-023,
+BUG-024, BUG-025, BUG-026, BUG-027, BUG-028, BUG-029, BUG-030, BUG-031, BUG-032, BUG-043, BUG-044,
+BUG-045, BUG-046, BUG-047, BUG-048 (Medium — session revocation, pupil-work authz, DB invariants, mark
+provenance, calendar-aware print, DB-enforced scheme/recurring invariants, atomic planner cascades,
+complete scheme clone, atomic review apply, atomic resource creation, AI audit-durability, group-course
+deactivation consistency, screenshot-replace cleanup, restart-safe review sweep, **DB/app loopback
+binding + default-password guard**, complete SAR export, durable disposal-delete retry, **proxy-aware
+client-IP rate limiting**, per-lesson recurrence cursor & email-dedup claim/recovery); BUG-034, BUG-035,
+BUG-036, BUG-050 (Low). **Waves A1–A7 complete, plus the deployment-config hardening (032/045). Remaining
+5 are all NON-application-logic: High 009/010 (backup-restore drill — operational), 013 (HTMX client-JS);
+Medium 033 (client-JS), 049 (tar — needs a clean dependency rebuild). 032/045 are committed but take
+effect on the operator's next deploy (`docker compose --profile proxy up -d --force-recreate`; add
+`TRUST_PROXY=true` to an existing `.env`, or re-run `deploy/install.sh`).**
 
 | Severity | Total | Resolved | Remaining |
 |---|---:|---:|---:|
 | Critical | 2 | 2 | 0 |
 | High | 18 | 15 | 3 |
-| Medium | 26 | 22 | 4 |
+| Medium | 26 | 24 | 2 |
 | Low | 4 | 4 | 0 |
-| **Total** | **50** | **43** | **7** |
+| **Total** | **50** | **45** | **5** |
 
 ## Testing and environment limitations
 
@@ -472,6 +474,7 @@ Medium 032/045 (deployment), 033 (client-JS), 049 (tar — needs a clean depende
 
 ### BUG-032 — Production Compose exposes the database and direct app port on all host interfaces
 
+- **Status:** ✅ Resolved 2026-06-20 — `app/docker-compose.yml` now binds Postgres (`5434`) and the app's direct port (`44360`) to **`127.0.0.1` only**, so neither is reachable from another LAN host; host dev tools still use `localhost:5434`, and the LAN reaches the app solely through Caddy (80/443 → internal `app:44360`). The app also **refuses to start in production if `DATABASE_URL` still carries the default `organiser` password** ([app/src/server.ts](app/src/server.ts) `start()`), a guard against a forgotten `DB_PASSWORD` (the installer generates a random one). Security + deployment docs updated. **Operator action on an existing box:** recreate the containers so the new bindings take effect — `docker compose --profile proxy up -d --force-recreate` (existing installs already have a random `DB_PASSWORD`). *(A separate prod override removing the DB publication entirely is still possible; loopback binding achieves the same exposure goal from one file.)*
 - **Severity / confidence:** Medium / Credible risk
 - **Affected:** `app/docker-compose.yml:7-18, 34-60`; `docs/SECURITY_AND_PRIVACY.md:124-131`
 - **Problem and trigger:** Compose publishes `5434:5432` and `44360:44360`, which bind all interfaces by default. The latter bypasses Caddy TLS/IP controls; the former exposes PostgreSQL directly to the LAN and falls back to a known default password if production provisioning is incomplete.
@@ -514,6 +517,7 @@ Medium 032/045 (deployment), 033 (client-JS), 049 (tar — needs a clean depende
 
 ### BUG-045 — The production reverse proxy collapses client-IP rate limits to one address
 
+- **Status:** ✅ Resolved 2026-06-20 — Fastify is now built with `trustProxy` from a new `TRUST_PROXY` env ([app/src/config/app.ts](app/src/config/app.ts), [app/src/server.ts](app/src/server.ts)): empty in host dev (no proxy → trust the socket), `true` in production. The `Caddyfile` now **overwrites** `X-Forwarded-For` with the real client (`header_up X-Forwarded-For {http.request.remote.host}`), discarding any client-supplied value — so `req.ip` is the genuine device and the per-IP login/PIN/code brakes (BUG-040, pupilAuth) key on it, not all-collapsed-to-Caddy and not a spoofable header. The installer writes `TRUST_PROXY=true` on a fresh `.env` and idempotently adds it to an existing one on re-run. **Operator action on an existing box:** re-run `deploy/install.sh` (adds `TRUST_PROXY=true` to your `.env`) **or** add that line yourself, then recreate the proxy + app — `docker compose --profile proxy up -d --force-recreate`.
 - **Severity / confidence:** Medium / Confirmed
 - **Affected:** `app/src/server.ts:65-68`; `app/Caddyfile:10-14`; rate-limit consumers in `app/src/auth/routes.ts` and `app/src/routes/pupilAuth.ts`
 - **Problem and trigger:** Fastify is created without trusted-proxy handling, while the production Caddy service forwards requests to the app. Consequently `req.ip` is the Caddy container address for proxied clients, and all login, class-code, name, and PIN attempts share global proxy-IP buckets.

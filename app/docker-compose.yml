@@ -12,7 +12,9 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-organiser}
       POSTGRES_DB: organiser
     ports:
-      - "5434:5432"
+      # BUG-032: bind to LOOPBACK only. Host dev tools still reach it at localhost:5434, but no other LAN
+      # host can connect to Postgres directly. The full Docker stack uses the internal db:5432, not this.
+      - "127.0.0.1:5434:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -49,7 +51,9 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "44360:44360"
+      # BUG-032: loopback only — the LAN reaches the app through Caddy (80/443), which talks to it over
+      # the internal Docker network (app:44360). This stays a host-local debug port, not a LAN front door.
+      - "127.0.0.1:44360:44360"
     volumes:
       # Bind mount so the host (bulk-import, backups) and the app share one directory.
       - ../data/resources:/data/resources

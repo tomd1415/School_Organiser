@@ -13,6 +13,7 @@ import csrf from '@fastify/csrf-protection';
 import fastifyStatic from '@fastify/static';
 import multipart from '@fastify/multipart';
 import { appConfig } from './config/app';
+import { dbConfig } from './config/db';
 import { migrate } from './db/migrate';
 import { registerAuthRoutes } from './auth/routes';
 import { registerHealthRoutes } from './routes/health';
@@ -66,9 +67,19 @@ import { sweepReviews } from './services/reviewLesson';
 import { setNavDailyOverride, setExperienceMode } from './lib/nav';
 import { localParts } from './lib/time';
 
+// BUG-045: turn the TRUST_PROXY string into the value Fastify's trust-proxy expects — false (dev, no
+// proxy), true, a hop count, or a subnet/IP string. Behind Caddy (which replaces X-Forwarded-For with
+// the real client) this makes req.ip the actual client, so the per-IP login/PIN rate limits work.
+function trustProxyOption(v: string): boolean | number | string {
+  if (v === '' || v === 'false') return false;
+  if (v === 'true') return true;
+  const n = Number(v);
+  return Number.isInteger(n) && String(n) === v ? n : v; // hop count, else a subnet/IP literal
+}
+
 /** Build the Fastify instance with all plugins and routes, without listening. */
 export async function buildApp(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: appConfig.NODE_ENV !== 'test' });
+  const app = Fastify({ logger: appConfig.NODE_ENV !== 'test', trustProxy: trustProxyOption(appConfig.TRUST_PROXY) });
 
   await app.register(formbody);
   await app.register(cookie);
@@ -367,6 +378,12 @@ function scheduleReviewSweep(app: FastifyInstance): void {
 
 /** Production entrypoint: migrate, then listen. */
 export async function start(): Promise<void> {
+  // BUG-032: refuse to run in production on the built-in default DB password — a footgun if the operator
+  // forgot to set DB_PASSWORD (the installer generates a random one). Dev/test keep the default freely.
+  if (appConfig.NODE_ENV === 'production' && /:organiser@/.test(dbConfig.DATABASE_URL)) {
+    console.error('Refusing to start: DATABASE_URL still uses the default DB password "organiser". Set a strong DB_PASSWORD in app/.env (deploy/install.sh generates one) and restart.');
+    process.exit(1);
+  }
   await migrate();
   const app = await buildApp();
   // Prime the teacher-configurable daily-nav set (idea 6) + the Rail & Stage experience switch from

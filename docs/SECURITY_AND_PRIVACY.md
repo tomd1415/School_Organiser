@@ -136,6 +136,8 @@ redaction *and* withholding rules apply regardless of provider.
 | Pupil name leaking to a third-party AI | Structural redaction in the one LLM wrapper + audit. |
 | Backup tape/disk lost | Encrypted backups. |
 | Another LAN device reaching the app | Auth required; optional IP allow-list on Caddy. |
+| A LAN device reaching the **database** or the app's debug port directly | Compose publishes Postgres (5434) and the app (44360) on **127.0.0.1 only**; the LAN reaches the app solely through Caddy on 80/443 (internal Docker network to `app:44360`). Production **refuses to start on the default DB password**. *(BUG-032)* |
+| Per-IP login/PIN rate limits defeated behind the reverse proxy | Caddy **overwrites** `X-Forwarded-For` with the real client, and the app's `TRUST_PROXY=true` reads it — so the brakes key on the actual device, not all-collapsed-to-Caddy and not a client-spoofable header. *(BUG-045)* |
 | Limited-role user reaching another lesson's data | TA role scoped to resources/lessons in the current slot; named-TA views filtered to their own lessons. |
 | Malicious uploaded SVG running script in the app origin | SVGs served as downloads (`attachment` + `nosniff`), never inline. |
 | Pupil uploads a hostile file as a "screenshot" answer | Raster-only allow-list (png/jpg/webp/gif — **no SVG**), 12 MB cap, served `inline` + `nosniff`; path-scoped serve so a pupil reaches only their own. |

@@ -7,6 +7,24 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-20 — Audit remediation, batch 17 (deployment & network hardening)
+
+Config + a startup guard; **these take effect on your next production deploy** (see "Operator action").
+Suite green: **529 unit / 335 integration; typecheck clean**.
+
+- **🔒 Database + app aren't exposed to the LAN (BUG-032, Medium).** Compose published Postgres (`5434`) and
+  the app's direct port (`44360`) on **all** host interfaces; both are now bound to **`127.0.0.1` only**.
+  The LAN reaches the app solely through Caddy (80/443 → internal `app:44360`). The app also **refuses to
+  start in production if `DB_PASSWORD` is still the default** `organiser`.
+- **🌐 Per-IP rate limits work behind the proxy (BUG-045, Medium).** With no `trustProxy` the app saw every
+  request as coming from Caddy's container, collapsing the login/PIN/class-code brakes to one address.
+  Fastify now reads `TRUST_PROXY`, and the Caddyfile **overwrites** `X-Forwarded-For` with the real client
+  (discarding any client-supplied value) — so the brakes key on the actual device and can't be spoofed.
+
+**Operator action (existing install):** add `TRUST_PROXY=true` to `app/.env` (or re-run `deploy/install.sh`,
+which now adds it idempotently), then `docker compose --profile proxy up -d --force-recreate`. New installs
+get it automatically. **45 / 50 findings fixed.**
+
 ### 2026-06-20 — Audit remediation, batch 16 (Wave A6 finish — email-intake idempotency)
 
 - **📧 Email intake can't duplicate or lose a message (BUG-027, Medium).** Dedup was a check-then-mark with

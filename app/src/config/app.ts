@@ -14,6 +14,12 @@ const schema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // BUG-045: behind a reverse proxy (production Caddy), the real client IP is in X-Forwarded-For; without
+  // this every request looks like it comes from the proxy and the per-IP rate limits collapse to one
+  // address. Empty/'false' (dev, no proxy) = trust the socket address; 'true' or a hop count / subnet =
+  // read the forwarded IP. The Caddyfile OVERWRITES X-Forwarded-For with the real client, so 'true' is
+  // safe (a client-supplied header can't survive). Stays empty for host dev (`npm run dev`, no proxy).
+  TRUST_PROXY: z.string().default(''),
 });
 
 const parsed = schema.safeParse(process.env);

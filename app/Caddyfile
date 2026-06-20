@@ -10,7 +10,12 @@
 {$SITE_ADDRESS} {
 	encode gzip
 	tls internal
-	reverse_proxy app:44360
+	reverse_proxy app:44360 {
+		# BUG-045: overwrite X-Forwarded-For with the REAL client address, discarding anything the client
+		# sent — so the app's TRUST_PROXY reads a trustworthy client IP and the per-IP login/PIN rate
+		# limits key on the actual device, not all-collapsed-to-Caddy and not a spoofable header.
+		header_up X-Forwarded-For {http.request.remote.host}
+	}
 }
 
 # ── Plain-HTTP only (no TLS) ────────────────────────────────────────────────
@@ -18,5 +23,7 @@
 # COOKIE_SECURE=false in app/.env, and use this instead (then browse to http://SITE_ADDRESS/):
 # :80 {
 # 	encode gzip
-# 	reverse_proxy app:44360
+# 	reverse_proxy app:44360 {
+# 		header_up X-Forwarded-For {http.request.remote.host}
+# 	}
 # }

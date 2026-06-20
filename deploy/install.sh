@@ -40,6 +40,9 @@ SITE_ADDRESS=$SITE
 SESSION_KEY=$(openssl rand -hex 32)
 DB_PASSWORD=$(openssl rand -hex 16)
 COOKIE_SECURE=true
+# BUG-045: the app sits behind Caddy, which sets X-Forwarded-For to the real client. Trust it so the
+# per-IP login/PIN rate limits key on the actual device (not all-collapsed-to-the-proxy).
+TRUST_PROXY=true
 # Optional: the teacher's own Anthropic key enables the AI features (audited + £-capped per instance).
 # ANTHROPIC_API_KEY=
 EOF
@@ -47,6 +50,12 @@ EOF
   echo "→ generated $ENV  (random SESSION_KEY + DB password; SITE_ADDRESS=$SITE)"
 else
   echo "→ keeping existing $ENV (re-run = upgrade)"
+  # Idempotent upgrade: an existing .env (preserved across re-runs) predates TRUST_PROXY — add it so the
+  # per-IP rate limits work behind Caddy (BUG-045). The DB password was already randomised at first install.
+  if ! grep -q '^TRUST_PROXY=' "$ENV"; then
+    echo 'TRUST_PROXY=true' >> "$ENV"
+    echo "→ added TRUST_PROXY=true to $ENV (BUG-045 — real client IP behind the Caddy proxy)"
+  fi
 fi
 SITE="$(grep '^SITE_ADDRESS=' "$ENV" | cut -d= -f2-)"
 

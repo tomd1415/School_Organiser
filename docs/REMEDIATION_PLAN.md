@@ -1,6 +1,6 @@
 # Remediation & Completion Plan
 
-> **Status (2026-06-20): in progress — 43 of 50 fixed; Waves A1–A7 complete (all code findings); only deployment + client-JS items remain.** This is the
+> **Status (2026-06-20): in progress — 45 of 50 fixed; Waves A1–A7 + deployment hardening (032/045) complete; only the backup drill, tar rebuild + client-JS items remain.** This is the
 > fix-and-finish programme for the 50 findings in [../BUGREPORT.md](../BUGREPORT.md) (the 19 June 2026
 > audit) **plus** the still-outstanding features drawn from [FUTURE_WAVES.md](FUTURE_WAVES.md),
 > [PHASE_14_PLAN.md](PHASE_14_PLAN.md), [ROADMAP.md](ROADMAP.md) §7 and [NEXT_STEPS.md](NEXT_STEPS.md).
@@ -40,10 +40,15 @@
 > recurrence tracks a (date, slot-minute) cursor + slot-timed dedup key, so a class taught twice in a day
 > recurs twice) and **027** (email intake atomically CLAIMs each message — processing/complete state with a
 > 15-min stale-claim reclaim — so a concurrent/re-seen poll can't duplicate and a crashed claim isn't lost).
-> Suites green: 529 unit / 335 integration; typecheck clean. **Every code finding in Waves A1–A7 is now
-> fixed.** **Remaining 7:** **009/010** (backup-restore drill — operational), **013/033** (HTMX client-JS —
-> need the Wave-0 browser harness), **049** (tar — needs a clean dependency rebuild). **032 / 045**
-> (deployment-config) await the operator.
+> Suites green: 529 unit / 335 integration; typecheck clean. **Deployment hardening** — **032** (Compose binds
+> Postgres + the app's direct port to `127.0.0.1` only; production refuses to start on the default DB
+> password) and **045** (Fastify `trustProxy` from a `TRUST_PROXY` env + Caddy overwrites `X-Forwarded-For`
+> with the real client, so per-IP rate limits key on the device, not the proxy). These are committed but
+> take effect on the operator's **next deploy** (`docker compose --profile proxy up -d --force-recreate`;
+> add `TRUST_PROXY=true` to an existing `.env` or re-run `deploy/install.sh`). **Every code finding in Waves
+> A1–A7 is fixed.** **Remaining 5 (none are isolated application logic):** **009/010** (backup-restore
+> drill — operational), **013/033** (HTMX client-JS — need the Wave-0 browser harness), **049** (tar — needs
+> a clean dependency rebuild).
 
 **Part A** fixes the audited defects (Waves 0 + A1–A8). **Part B** lists the outstanding features and
 points at their existing plans. Do **Part A first** — privacy, correctness and recovery before new
