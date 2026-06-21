@@ -336,3 +336,85 @@ export function renderTeachingContext(courseId: number, text: string | null): st
     <span class="note-status" id="course-${courseId}-ctx-status"></span>
   </details>`;
 }
+
+export interface SchemesNextData {
+  courseId: number;
+  currentCourseName: string;
+  scheme: any;
+  courses: Array<{ id: number; name: string }>;
+  versions: Array<{ id: number; version: number; active: boolean }>;
+  treeHtml: string;
+  teachingCtxHtml: string;
+  allSchemesHtml: string;
+  convertPanelHtml: string;
+  csrf: string;
+}
+
+export function renderSchemesNext(data: SchemesNextData): string {
+  const {
+    courseId,
+    currentCourseName,
+    scheme,
+    courses,
+    versions,
+    treeHtml,
+    teachingCtxHtml,
+    allSchemesHtml,
+    convertPanelHtml,
+    csrf,
+  } = data;
+
+  const tab = (c: { id: number; name: string }) =>
+    `<a href="/schemes?course=${c.id}" class="chip${Number(c.id) === courseId ? ' active' : ''}">${esc(c.name)}</a>`;
+
+  const verLinks = versions
+    .map((v) => `<a href="/schemes?course=${courseId}&scheme=${v.id}" class="chip${scheme && v.id === scheme.id ? ' active' : ''}">v${v.version}${v.active ? '' : ' (draft)'}</a>`)
+    .join(' ');
+
+  return `
+    <section class="card schemes-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <h1>Schemes of work <a class="ped-link chip" href="/pedagogy" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a></h1>
+      <div class="task-chips" style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
+        ${courses.map(tab).join(' ')}
+      </div>
+      <p class="scheme-course">Course: <strong>${esc(currentCourseName)}</strong>
+        <button type="button" class="chip chip-btn" hx-post="/schemes/course/${courseId}/summary" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>
+      </p>
+      <div id="course-${courseId}-summary"></div>
+      ${teachingCtxHtml}
+      ${
+        scheme
+          ? `<p class="scheme-meta" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <strong>${esc(scheme.title)}</strong> · 
+              ${verLinks}
+              ${scheme.active ? '' : ` · <button type="button" class="chip chip-btn" hx-post="/schemes/${scheme.id}/activate" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make live</button>`}
+              · <button type="button" class="chip chip-btn" hx-post="/schemes/${scheme.id}/version">＋ new version</button>
+            </p>
+            ${renderSchemeControls(scheme, courses)}`
+          : ''
+      }
+      <p class="sch-spot"><button type="button" class="chip chip-btn" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
+        hx-post="/schemes/spot-check" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
+      <div id="spot-check-slot"></div>
+      ${treeHtml}
+      <h2 class="sch-divider">Add or import content</h2>
+      ${convertPanelHtml}
+      <details class="scheme-import">
+        <summary>Import a shared scheme (from a colleague's file)</summary>
+        <p class="muted">Paste a scheme JSON exported from another instance. It's added as a new scheme on <strong>${esc(currentCourseName)}</strong>.</p>
+        <form hx-post="/schemes/import" hx-target="#scheme-import-result" hx-swap="innerHTML">
+          <input type="hidden" name="course" value="${courseId}">
+          <textarea name="json" rows="5" placeholder='{"version":1,"schemeTitle":"…","units":[…]}' style="width:100%"></textarea>
+          <button type="submit" class="btn-secondary">Import scheme</button>
+        </form>
+        <div id="scheme-import-result"></div>
+      </details>
+      <h2 class="sch-divider">Reference &amp; admin</h2>
+      <details class="kit-avail" id="kit-avail">
+        <summary>🔧 Kit available</summary>
+        <div hx-get="/kit/panel" hx-trigger="toggle from:#kit-avail once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+      </details>
+      ${allSchemesHtml}
+    </section>
+  `;
+}

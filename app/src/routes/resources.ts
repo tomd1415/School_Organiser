@@ -265,27 +265,37 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const folderEntries: UploadEntry[] = [];
     let archiveBuf: Buffer | null = null;
     let total = 0;
+    // BUG-007: read each part against the SHARED REMAINING budget and abort the stream the moment it would
+    // exceed it — so a part is never fully buffered (up to the per-part cap) before the aggregate cap is
+    // consulted, which could otherwise push peak memory to ~2× the cap. Keeps total in-memory ≤ MAX_TOTAL.
+    const readPartUpTo = async (stream: NodeJS.ReadableStream, remaining: number): Promise<Buffer | 'over'> => {
+      const chunks: Buffer[] = [];
+      let n = 0;
+      for await (const chunk of stream as AsyncIterable<Buffer>) {
+        n += chunk.length;
+        if (n > remaining) {
+          (stream as { destroy?: () => void }).destroy?.();
+          return 'over';
+        }
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks);
+    };
     try {
       // preservePath: keep the webkitdirectory relative path in each part's filename (busboy strips it
       // by default) — it's how we reconstruct the unit/lesson folders. safeRel still defeats zip-slip.
-      // BUG-007: a per-part fileSize cap (busboy stops at the limit) + a running total bound memory, so a
-      // huge file or a many-file folder can't be buffered unbounded before the aggregate cap is consulted.
       for await (const part of req.parts({ preservePath: true, limits: { fileSize: MAX_TOTAL } })) {
         if (part.type !== 'file') continue;
-        let buf: Buffer;
-        try {
-          buf = await part.toBuffer();
-        } catch {
-          return fail('A file in that upload was too large.');
+        const partBuf = await readPartUpTo(part.file, MAX_TOTAL - total);
+        if (partBuf === 'over' || part.file.truncated) {
+          return fail('That upload is too large — import in smaller batches (about 400 MB total).');
         }
-        if (part.file.truncated) return fail('A file in that upload was too large.');
-        if (!buf.length) continue;
-        total += buf.length;
-        if (total > MAX_TOTAL) return fail('That upload is too large — import in smaller batches (about 400 MB total).');
+        if (!partBuf.length) continue;
+        total += partBuf.length;
         if (part.fieldname === 'archive') {
-          if ((part.filename || '').toLowerCase().endsWith('.zip')) archiveBuf = buf;
+          if ((part.filename || '').toLowerCase().endsWith('.zip')) archiveBuf = partBuf;
         } else {
-          folderEntries.push({ relPath: part.filename || '', buf });
+          folderEntries.push({ relPath: part.filename || '', buf: partBuf });
         }
       }
     } catch {
@@ -532,7 +542,8 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     // BUG-003: a limited role (pupil/TA) may only fetch an image the server signed into one of their
     // pages — never an arbitrary id. Teachers are unrestricted.
     const role = req.session.get('role');
-    if (isLimitedRole(role) && !verifyImageSig(id.data.id, (req.query as { s?: string }).s)) {
+    const sq = req.query as { s?: string; e?: string };
+    if (isLimitedRole(role) && !verifyImageSig(id.data.id, sq.s, sq.e != null ? Number(sq.e) : undefined, Date.now())) {
       return reply.code(404).send('Not found');
     }
     const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);

@@ -77,9 +77,12 @@ describe('TA access (integration)', () => {
       const unsigned = await app.inject({ method: 'GET', url: `/lesson-image/${id}`, headers: { cookie: taSession } });
       expect(unsigned.statusCode).toBe(404);
       // With the server signature (as it would be rendered into a page) → served.
-      const signed = await app.inject({ method: 'GET', url: `/lesson-image/${id}${imageSigQuery(id)}`, headers: { cookie: taSession } });
+      const signed = await app.inject({ method: 'GET', url: `/lesson-image/${id}${imageSigQuery(id, Date.now())}`, headers: { cookie: taSession } });
       expect(signed.statusCode).toBe(200);
       expect(String(signed.headers['content-type'])).toContain('image/png');
+      // BUG-003: an EXPIRED signature (as if the page were rendered ~13h ago) is rejected.
+      const stale = await app.inject({ method: 'GET', url: `/lesson-image/${id}${imageSigQuery(id, Date.now() - 13 * 60 * 60 * 1000)}`, headers: { cookie: taSession } });
+      expect(stale.statusCode).toBe(404);
     } finally {
       await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [id]);
       await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [id]);

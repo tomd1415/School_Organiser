@@ -90,7 +90,8 @@ import { reviewLessonMaster, reviewUnitMaster, spotCheckCurriculum, reviewScheme
 import { pastReviewItems } from '../llm/prompts/lessonReview';
 import { recentAppliedFindings } from '../repos/reviews';
 import { applyReview, dismissOpenReview, getOpenReviewForPlan, openReviewPlanIds } from '../repos/reviews';
-import { renderReview, renderClassCompare, renderConvertDup } from '../lib/schemeView';
+import { getUiShell } from '../lib/nav';
+import { renderReview, renderClassCompare, renderConvertDup, renderSchemesNext } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -230,39 +231,54 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           getClockContext(),
         ]);
         const today = localParts(new Date(), clockCtx.tz).isoDate;
-        body = `
-          <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
-            <h1>Schemes of work <a class="ped-link" href="/pedagogy" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a></h1>
-            <nav class="task-tabs">${courses.map(tab).join(' ')}</nav>
-            <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong>
-              <button type="button" class="link" hx-post="/schemes/course/${courseId}/summary" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>
-            </p>
-            <div id="course-${courseId}-summary"></div>
-            ${renderTeachingContext(courseId, teachingCtx)}
-            ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks}${scheme.active ? '' : ` · <button type="button" class="link" hx-post="/schemes/${scheme.id}/activate" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make this version live</button>`} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
-            <p class="sch-spot"><button type="button" class="link" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
-              hx-post="/schemes/spot-check" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
-            <div id="spot-check-slot"></div>
-            ${tree}
-            <h2 class="sch-divider">Add or import content</h2>
-            ${renderConvertPanel(courseId, courseSlots, today)}
-            <details class="scheme-import">
-              <summary>📥 Import a shared scheme (from a colleague's file)</summary>
-              <p class="muted">Paste a scheme JSON exported from another instance (the ⬇ share link below). It's added as a new scheme on <strong>${esc(current?.name ?? '')}</strong> — no pupil data, nothing sent anywhere.</p>
-              <form hx-post="/schemes/import" hx-target="#scheme-import-result" hx-swap="innerHTML">
-                <input type="hidden" name="course" value="${courseId}">
-                <textarea name="json" rows="5" placeholder='{"version":1,"schemeTitle":"…","units":[…]}' style="width:100%"></textarea>
-                <button type="submit" class="btn-secondary">Import scheme</button>
-              </form>
-              <div id="scheme-import-result"></div>
-            </details>
-            <h2 class="sch-divider">Reference &amp; admin</h2>
-            <details class="kit-avail" id="kit-avail">
-              <summary>🔧 Kit available</summary>
-              <div hx-get="/kit/panel" hx-trigger="toggle from:#kit-avail once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
-            </details>
-            ${renderAllSchemes(allSchemes, scheme?.id)}
-          </section>`;
+        if (getUiShell() === 'next') {
+          body = renderSchemesNext({
+            courseId,
+            currentCourseName: current?.name ?? '',
+            scheme,
+            courses,
+            versions,
+            treeHtml: tree,
+            teachingCtxHtml: renderTeachingContext(courseId, teachingCtx),
+            allSchemesHtml: renderAllSchemes(allSchemes, scheme?.id),
+            convertPanelHtml: renderConvertPanel(courseId, courseSlots, today),
+            csrf,
+          });
+        } else {
+          body = `
+            <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+              <h1>Schemes of work <a class="ped-link" href="/pedagogy" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a></h1>
+              <nav class="task-tabs">${courses.map(tab).join(' ')}</nav>
+              <p class="scheme-course">Course: <strong>${esc(current?.name ?? '')}</strong>
+                <button type="button" class="link" hx-post="/schemes/course/${courseId}/summary" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>
+              </p>
+              <div id="course-${courseId}-summary"></div>
+              ${renderTeachingContext(courseId, teachingCtx)}
+              ${scheme ? `<p class="scheme-meta"><strong>${esc(scheme.title)}</strong> · ${verLinks}${scheme.active ? '' : ` · <button type="button" class="link" hx-post="/schemes/${scheme.id}/activate" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make this version live</button>`} · <button type="button" class="link" hx-post="/schemes/${scheme.id}/version">＋ new version (draft)</button></p>${renderSchemeControls(scheme, courses)}` : ''}
+              <p class="sch-spot"><button type="button" class="link" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
+                hx-post="/schemes/spot-check" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
+              <div id="spot-check-slot"></div>
+              ${tree}
+              <h2 class="sch-divider">Add or import content</h2>
+              ${renderConvertPanel(courseId, courseSlots, today)}
+              <details class="scheme-import">
+                <summary>📥 Import a shared scheme (from a colleague's file)</summary>
+                <p class="muted">Paste a scheme JSON exported from another instance (the ⬇ share link below). It's added as a new scheme on <strong>${esc(current?.name ?? '')}</strong> — no pupil data, nothing sent anywhere.</p>
+                <form hx-post="/schemes/import" hx-target="#scheme-import-result" hx-swap="innerHTML">
+                  <input type="hidden" name="course" value="${courseId}">
+                  <textarea name="json" rows="5" placeholder='{"version":1,"schemeTitle":"…","units":[…]}' style="width:100%"></textarea>
+                  <button type="submit" class="btn-secondary">Import scheme</button>
+                </form>
+                <div id="scheme-import-result"></div>
+              </details>
+              <h2 class="sch-divider">Reference &amp; admin</h2>
+              <details class="kit-avail" id="kit-avail">
+                <summary>🔧 Kit available</summary>
+                <div hx-get="/kit/panel" hx-trigger="toggle from:#kit-avail once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
+              </details>
+              ${renderAllSchemes(allSchemes, scheme?.id)}
+            </section>`;
+        }
       }
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');

@@ -148,27 +148,33 @@ describe('calendar lay-down (5.4 — integration, needs the dev DB up)', () => {
     expect(n).toBeGreaterThanOrEqual(2); // confirms multi-lesson-per-week classes exist in the data
   });
 
-  it('deactivating a group_course drops it from forward slot lists but keeps historic occurrences (BUG-023)', async () => {
+  it('deactivating a group_course reconciles EMPTY future occurrences but keeps ones with work (BUG-023)', async () => {
     const gid = Number((await pool.query<{ group_id: number }>(`SELECT group_id FROM group_courses WHERE id = $1`, [groupCourseId])).rows[0]!.group_id);
-    const HIST = '2099-07-06';
-    const FUTURE = '2099-07-13';
-    // active → present in the course's slot list, and a materialised occurrence carries it (historic record)
+    const EMPTY_FUT = '2099-07-06'; // future + empty → reconciled away on deactivate
+    const WORK_FUT = '2099-07-13'; // future + a bound plan → kept (don't orphan work)
+    const NEW_FUT = '2099-07-20'; // opened AFTER deactivation → never gets the course
+    // active → present in the course's slot list, and materialised occurrences carry it
     expect((await listSlotsForCourse(courseId)).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(true);
-    const histOcc = await findOrCreateOccurrence(slotLessonId, HIST);
-    expect((await getOccurrenceCourses(histOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(true);
+    const emptyOcc = await findOrCreateOccurrence(slotLessonId, EMPTY_FUT);
+    const workOcc = await findOrCreateOccurrence(slotLessonId, WORK_FUT);
+    // give the WORK occurrence a bound plan so it counts as "has work" and must be preserved
+    const workOcId = Number((await getOccurrenceCourses(workOcc)).find((o) => Number(o.groupCourseId) === groupCourseId)!.occurrenceCourseId);
+    await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [workOcId, planIds[0]]);
     try {
       await setGroupCourse(gid, courseId, false);
       // forward-planning slot lists no longer surface the deactivated class
       expect((await listSlotsForCourse(courseId)).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(false);
       expect((await listAllSlots()).some((s) => Number(s.groupCourseId) === groupCourseId)).toBe(false);
-      // a NEW occurrence opened after deactivation does NOT revive it…
-      const futureOcc = await findOrCreateOccurrence(slotLessonId, FUTURE);
-      expect((await getOccurrenceCourses(futureOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(false);
-      // …but the historic occurrence_course (created while active) is preserved
-      expect((await getOccurrenceCourses(histOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(true);
+      // a NEW occurrence opened after deactivation does NOT get it
+      const newOcc = await findOrCreateOccurrence(slotLessonId, NEW_FUT);
+      expect((await getOccurrenceCourses(newOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(false);
+      // the EMPTY future occurrence is reconciled away…
+      expect((await getOccurrenceCourses(emptyOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(false);
+      // …but the future occurrence that already has a bound plan is KEPT
+      expect((await getOccurrenceCourses(workOcc)).some((o) => Number(o.groupCourseId) === groupCourseId)).toBe(true);
     } finally {
       await setGroupCourse(gid, courseId, true); // restore for the other tests + real data
-      await pool.query(`DELETE FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = ANY($2)`, [slotLessonId, [HIST, FUTURE]]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = ANY($2)`, [slotLessonId, [EMPTY_FUT, WORK_FUT, NEW_FUT]]);
     }
   });
 

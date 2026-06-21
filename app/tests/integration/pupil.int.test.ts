@@ -4,6 +4,8 @@ import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { setSetting, getSetting } from '../../src/repos/settings';
 import { resetRateLimiter } from '../../src/auth/rateLimit';
+import { addVersion, linkResourceToPlan } from '../../src/repos/resources';
+import { storeBuffer, checksum, relPathFor } from '../../src/lib/resourceStore';
 
 // Phase 8: pupil login (class code → name → PIN), the locked-down /me surface, answer autosave
 // with ownership checks, and the level/feedback machinery. All scratch rows are torn down; the
@@ -16,6 +18,7 @@ let occurrenceCourseId = 0;
 let pupilId = 0;
 let otherPupilId = 0;
 let resourceId = 0;
+let lessonPlanId = 0;
 const CODE = 'ZZTEST-99';
 const PIN = '4242';
 
@@ -74,6 +77,18 @@ beforeAll(async () => {
   );
   resourceId = Number(r.rows[0]!.id);
 
+  // BUG-030: bind a REAL worksheet (with a t1.r1.c2 field) to a lesson plan on this oc, so the answer
+  // route's field-key validation accepts a save to t1.r1.c2.
+  const schemeId = Number((await pool.query<{ id: number }>(`INSERT INTO schemes_of_work (course_id, title, version, active) VALUES ($1, 'ZZTEST scheme', 99, false) RETURNING id`, [courseId])).rows[0]!.id);
+  const unitId = Number((await pool.query<{ id: number }>(`INSERT INTO units (scheme_id, title, display_order) VALUES ($1, 'ZZTEST unit', 1) RETURNING id`, [schemeId])).rows[0]!.id);
+  lessonPlanId = Number((await pool.query<{ id: number }>(`INSERT INTO lesson_plans (unit_id, course_id, title, display_order, objectives, outline) VALUES ($1, $2, 'ZZTEST plan', 1, '', '') RETURNING id`, [unitId, courseId])).rows[0]!.id);
+  const wsBuf = Buffer.from('## Task\n\n| Question | Type your answer here |\n|----------|----------------------|\n| What is a list? | |\n', 'utf8');
+  const wsRel = relPathFor(resourceId, 1, 'ZZTEST worksheet.md');
+  await storeBuffer(wsRel, wsBuf);
+  await addVersion(resourceId, wsRel, wsBuf.byteLength, checksum(wsBuf), 'ai', 'test');
+  await linkResourceToPlan(resourceId, lessonPlanId);
+  await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, lessonPlanId]);
+
   // Set Ada a PIN via the repo (the admin path is covered separately).
   const { setPupilPin } = await import('../../src/repos/pupilCredentials');
   await setPupilPin(pupilId, PIN);
@@ -94,6 +109,12 @@ afterAll(async () => {
   await pool.query(`DELETE FROM enrolments WHERE group_id = $1`, [groupId]);
   await pool.query(`DELETE FROM group_courses WHERE id = $1`, [groupCourseId]);
   await pool.query(`DELETE FROM pupils WHERE id IN ($1, $2)`, [pupilId, otherPupilId]);
+  await pool.query(`DELETE FROM resource_links WHERE resource_id = $1`, [resourceId]);
+  await pool.query(`UPDATE resources SET current_version_id = NULL WHERE id = $1`, [resourceId]); // break circular FK
+  await pool.query(`DELETE FROM resource_versions WHERE resource_id = $1`, [resourceId]);
+  await pool.query(`DELETE FROM lesson_plans WHERE title = 'ZZTEST plan'`);
+  await pool.query(`DELETE FROM units WHERE title = 'ZZTEST unit'`);
+  await pool.query(`DELETE FROM schemes_of_work WHERE title = 'ZZTEST scheme'`);
   await pool.query(`DELETE FROM courses WHERE name = 'ZZTEST course'`);
   await pool.query(`DELETE FROM resources WHERE id = $1`, [resourceId]);
   await pool.query(`DELETE FROM groups WHERE id = $1`, [groupId]);
@@ -298,6 +319,15 @@ describe('pupil login + surface (integration)', () => {
       [pupilId, occurrenceCourseId],
     );
     expect(saved.rows[0]?.value).toBe('chlorophyll');
+    // BUG-030: a key that isn't a real field of the bound worksheet is rejected, not silently stored.
+    const cookie2 = firstCookie(ok.headers['set-cookie']) || cookie;
+    const bogus = await app.inject({
+      method: 'POST',
+      url: `/me/answer?oc=${occurrenceCourseId}&key=t9.r9.c9`,
+      headers: { cookie: cookie2, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
+      payload: 'value=junk',
+    });
+    expect(bogus.statusCode).toBe(400);
   });
 
   it('refuses an answer outside the pupil’s live lesson — other group OR historic date (BUG-030)', async () => {

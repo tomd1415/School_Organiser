@@ -112,7 +112,11 @@ describe('pupil screenshot paste (integration)', () => {
     expect(jpgRel).toMatch(/\.jpg$/);
     expect(jpgRel).not.toBe(pngRel);
     await expect(stat(join(RESOURCE_STORE_PATH, jpgRel))).resolves.toBeTruthy(); // new one present
-    await expect(stat(join(RESOURCE_STORE_PATH, pngRel))).rejects.toThrow(); // old one unlinked — no orphan
+    // BUG-029: the superseded file is now TOMBSTONED (durable) rather than unlinked inline — run the
+    // deletion sweep, then it's gone (no orphan).
+    const { processPendingDeletions } = await import('../../src/repos/fileDeletions');
+    await processPendingDeletions();
+    await expect(stat(join(RESOURCE_STORE_PATH, pngRel))).rejects.toThrow(); // old one removed — no orphan
     await rm(join(RESOURCE_STORE_PATH, jpgRel), { force: true }).catch(() => {});
   });
 

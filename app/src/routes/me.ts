@@ -4,19 +4,20 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { esc } from '../lib/html';
-import { pool } from '../db/pool';
+import { pool, withTransaction } from '../db/pool';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
 import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
-import { getLessonSlidesMarkdown, getLessonWorksheets, worksheetForKey } from '../services/worksheet';
+import { getLessonSlidesMarkdown, getLessonWorksheets } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { renderMarkdown } from '../lib/markdown';
 import { sliceSlidesForLevel, splitTeacherNotes } from '../lib/slideDeck';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
 import { readStored, removeStored, storeBuffer } from '../lib/resourceStore';
+import { enqueueFileDeletion } from '../repos/fileDeletions';
 import {
   getAnswers,
   getPupilLevel,
@@ -328,8 +329,12 @@ export function registerMeRoutes(app: FastifyInstance): void {
     if (!acting.isTest && !(await pupilMayWriteOc(pupilId, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) return reply.code(403).send('');
     const b = z.object({ value: z.string().max(8000).optional() }).safeParse(req.body);
     const value = (b.success && b.data.value) || '';
-    // Resolve the worksheet server-side for provenance — never trust a client-supplied resource id.
+    // Resolve + VALIDATE the field server-side (BUG-030) — never trust a client-supplied resource id, and
+    // reject a key that isn't a real field of the current worksheet. The test pupil (the teacher previewing)
+    // is exempt from the rejection, exactly like the access check above; provenance is still recorded when
+    // the key resolves.
     const ws = await worksheetForOccurrenceCourse(q.data.oc, q.data.key);
+    if (!acting.isTest && !ws) return reply.code(400).send('');
     await saveAnswer({
       pupilId,
       occurrenceCourseId: q.data.oc,
@@ -417,14 +422,29 @@ export function registerMeRoutes(app: FastifyInstance): void {
     const safeKey = q.data.key.replace(/[^a-z0-9._-]/gi, '_');
     const rel = `pupil-work/${q.data.oc}/${acting.id}/${safeKey}.${ext}`;
     await storeBuffer(rel, buf);
+    // BUG-030: validate the field key against the real worksheet before persisting (and remove the file we
+    // just staged if it isn't a real field). The test pupil (teacher preview) is exempt, like the access
+    // check. BUG-029: if the DB write then fails, remove the file too.
     const ws = await worksheetForOccurrenceCourse(q.data.oc, q.data.key);
-    const { previousValue } = await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` });
-    // BUG-029: a replacement in a different format lands at a different path (the key embeds the
-    // extension), so the old screenshot would linger indefinitely. Once the new answer is durable, unlink
-    // the superseded image if its path actually differs (a same-format replace overwrote it in place).
+    if (!acting.isTest && !ws) {
+      await removeStored(rel).catch(() => {});
+      return reply.code(400).type('text/html').send('<span class="ws-saved show">that field isn’t on this worksheet</span>');
+    }
+    let previousValue: string | null;
+    try {
+      ({ previousValue } = await saveAnswer({ pupilId: acting.id, occurrenceCourseId: q.data.oc, resourceId: ws?.resourceId ?? null, versionNo: ws?.versionNo ?? null, fieldKey: q.data.key, value: `img:${rel}` }));
+    } catch (e) {
+      await removeStored(rel).catch(() => {});
+      throw e;
+    }
+    // BUG-029: a replacement in a different format lands at a different path (the key embeds the extension),
+    // so the old screenshot must be cleaned up. TOMBSTONE it (durable — retried by the deletion sweep)
+    // rather than a fire-and-forget unlink that would silently orphan the file if it failed.
     if (previousValue?.startsWith('img:')) {
       const oldRel = previousValue.slice(4);
-      if (oldRel && oldRel !== rel) await removeStored(oldRel);
+      if (oldRel && oldRel !== rel) {
+        await withTransaction((db) => enqueueFileDeletion(db, oldRel, 'pupil screenshot replaced'));
+      }
     }
     const url = `/pupil-image?p=${encodeURIComponent(rel)}&t=${Date.now()}`; // cache-bust so a replacement shows
     return reply.type('text/html').send(`<img class="ws-shot" src="${url}" alt="your screenshot">`);
@@ -486,14 +506,25 @@ export function registerMeRoutes(app: FastifyInstance): void {
 /** Resolve the worksheet a saved field belongs to (for answer provenance), or null. With several
  * worksheets per lesson, the field key's `w{n}.` prefix selects which one. Metadata only — no file
  * read, since this runs on every autosave. */
-async function worksheetForOccurrenceCourse(occurrenceCourseId: number, key: string): Promise<{ resourceId: number; versionNo: number } | null> {
+async function worksheetForOccurrenceCourse(occurrenceCourseId: number, key: string): Promise<{ resourceId: number; versionNo: number; kind: string } | null> {
   const { rows } = await pool.query<{ groupCourseId: number; lessonPlanId: number | null }>(
     `SELECT group_course_id AS "groupCourseId", lesson_plan_id AS "lessonPlanId" FROM occurrence_courses WHERE id = $1`,
     [occurrenceCourseId],
   );
   const r = rows[0];
   if (!r || r.lessonPlanId == null) return null;
-  return worksheetForKey(Number(r.groupCourseId), Number(r.lessonPlanId), key);
+  // BUG-030: validate the field key against the ACTUAL rendered worksheet — not just its `w{n}.` prefix —
+  // so a crafted POST can neither create an arbitrary answer row nor write a field this version of the
+  // worksheet doesn't contain. Pick the worksheet by prefix, render it, require the key to be one of its
+  // fields, and return the field kind. (This now reads + renders the worksheet on save — acceptable on a
+  // single-teacher LAN; the integrity guarantee is worth the cost.)
+  const worksheets = await getLessonWorksheets(Number(r.groupCourseId), Number(r.lessonPlanId));
+  const m = key.match(/^w(\d+)\./);
+  const ws = worksheets.find((x) => x.index === (m ? Number(m[1]) : 0));
+  if (!ws) return null;
+  const field = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields.find((f) => f.key === key);
+  if (!field) return null;
+  return { resourceId: ws.resourceId, versionNo: ws.versionNo, kind: field.kind };
 }
 
 /** May this pupil WRITE to this occurrence-course right now? Only their SESSION group's lesson, dated

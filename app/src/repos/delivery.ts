@@ -1,7 +1,7 @@
 // Phase 5.4: SQL for laying a unit into a group's weekly slot. The slot→course mapping already
 // exists (timetabled_lesson_courses → group_courses); this binds a unit's lessons to the upcoming
 // dated occurrences of one slot, for one group_course.
-import { pool } from '../db/pool';
+import { pool, withTransaction } from '../db/pool';
 import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
 import type { Placement } from '../services/delivery'; // pure type only — the cascade maths lives in the service
 
@@ -265,8 +265,16 @@ export async function moveBinding(timetabledLessonId: number, groupCourseId: num
   const toOc = (await getOccurrenceCourses(toOccId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
   if (!toOc) return false;
   const displaced = toOc.lessonPlanId; // null when the target week was empty
-  await setOccurrenceCoursePlan(toOc.occurrenceCourseId, movingPlan);
-  await setOccurrenceCoursePlan(fromOc.occurrenceCourseId, displaced); // swap, or clear when empty
+  const toOcId = toOc.occurrenceCourseId;
+  const fromOcId = fromOc.occurrenceCourseId;
+  // BUG-021: the swap's two plan writes must be ONE atomic step — a crash between them would leave the
+  // moving plan in both weeks (or the source cleared with the target unset). Serialise per class with the
+  // same advisory lock applyPlacements uses, and write both inside that transaction.
+  await withTransaction(async (db) => {
+    await db.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`planner:${groupCourseId}`]);
+    await setOccurrenceCoursePlan(toOcId, movingPlan, db);
+    await setOccurrenceCoursePlan(fromOcId, displaced, db);
+  });
   return true;
 }
 

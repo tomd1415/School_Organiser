@@ -1,6 +1,6 @@
 // SQL for dated lesson occurrences. Occurrences are created lazily — the first
 // time a slot's detail is opened — and are idempotent on (timetabled_lesson, date).
-import { pool } from '../db/pool';
+import { pool, type Executor } from '../db/pool';
 import { materialiseOccurrencePrep } from './prep';
 import type { LastStop, NoteView, OccurrenceCourseRow, OccurrenceHeader } from '../services/occurrence';
 
@@ -102,8 +102,8 @@ export async function getOccurrenceCourses(occurrenceId: number): Promise<Occurr
   return rows;
 }
 
-export async function setOccurrenceCoursePlan(occurrenceCourseId: number, planId: number | null): Promise<void> {
-  await pool.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, planId]);
+export async function setOccurrenceCoursePlan(occurrenceCourseId: number, planId: number | null, db: Executor = pool): Promise<void> {
+  await db.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, planId]);
 }
 
 /** The in-lesson marker: which step we're on, also written as the textual stopping point so the

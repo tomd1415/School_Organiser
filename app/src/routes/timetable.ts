@@ -14,85 +14,14 @@ const TZ = 'Europe/London';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const Query = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), year: z.coerce.number().int().positive().optional() });
 
-/** Monday of the week containing `isoDate`; on the weekend, the upcoming Monday. */
-function mondayOf(isoDate: string): string {
-  const wd = weekdayOf(isoDate);
-  return wd >= 6 ? addDays(isoDate, 8 - wd) : addDays(isoDate, 1 - wd);
-}
-
-function fmtShort(iso: string): string {
-  return new Intl.DateTimeFormat('en-GB', { timeZone: TZ, day: 'numeric', month: 'short' }).format(
-    new Date(`${iso}T12:00:00Z`),
-  );
-}
-
-function purposeLabel(purpose: string): string {
-  switch (purpose) {
-    case 'free':
-      return 'Free';
-    case 'form':
-      return 'Form';
-    case 'club':
-      return 'Computing Club';
-    case 'open_room':
-      return 'Open room';
-    case 'duty':
-      return 'Duty';
-    case 'meeting':
-      return 'Meeting';
-    default:
-      return purpose;
-  }
-}
-
-// Why a day shows no teaching — used to label and grey the non-school columns (holiday / INSET / …).
-function dayKindLabel(kind: DayKind): string {
-  switch (kind) {
-    case 'holiday':
-      return 'Holiday';
-    case 'half_term':
-      return 'Half-term';
-    case 'inset':
-      return 'INSET';
-    case 'out_of_term':
-      return 'Out of term';
-    default:
-      return '';
-  }
-}
-
-// A small per-slot badge for today's dated exceptions: Free (trip/cancelled/off-timetable), Cover, or → room.
-function exBadge(ex: ExceptionEffect): string {
-  if (ex.mode === 'none') return '';
-  const cls = ex.mode === 'free' ? 'tt-ex-free' : ex.mode === 'cover' ? 'tt-ex-cover' : 'tt-ex-room';
-  const text = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'Cover' : ex.roomName ? `→ ${esc(ex.roomName)}` : 'Room';
-  const title = [ex.label, ex.detail].filter(Boolean).join(' — ');
-  return ` <span class="tt-ex ${cls}" title="${esc(title)}">${text}</span>`;
-}
-
-function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect): string {
-  const colour = l.courses[0]?.colour ?? '#94a3b8';
-  const flag = l.isSelf ? '' : '⚑ ';
-  const heading = l.groupName ? esc(l.groupName) : esc(purposeLabel(l.purpose));
-  const courses = l.courses.map((c) => esc(c.name)).join(' · ');
-  const exMark = exBadge(ex);
-  const inner = `<span class="tt-group">${flag}${heading}${exMark}</span>${courses ? `<span class="tt-course">${courses}</span>` : ''}`;
-  const style = `border-left-color:${esc(colour)}`;
-  // Teaching / free / form lessons open the lesson detail; clubs/duties are just shown.
-  if (l.purpose === 'teaching' || l.purpose === 'free' || l.purpose === 'form') {
-    return `<a class="tt-lesson tt-${esc(l.purpose)}" style="${style}" href="/lesson?lesson=${l.lessonId}&date=${esc(date)}">${inner}</a>`;
-  }
-  return `<span class="tt-lesson tt-${esc(l.purpose)}" style="${style}">${inner}</span>`;
-}
-
-function renderCell(cell: GridCell, date: string, isToday: boolean, exForLesson: (date: string, lessonId: number) => ExceptionEffect): string {
-  if (!cell.present) return `<td class="tt-blank${isToday ? ' tt-today' : ''}"></td>`; // this day has nothing at this time
-  const td = isToday ? '<td class="tt-today">' : '<td>';
-  if (cell.lessons.length === 0) {
-    return `${isToday ? '<td class="tt-empty tt-today">' : '<td class="tt-empty">'}<span class="tt-band">${esc(cell.periodLabel)}</span></td>`;
-  }
-  return `${td}${cell.lessons.map((l) => renderLesson(l, date, exForLesson(date, l.lessonId))).join('')}</td>`;
-}
+import { getUiShell } from '../lib/nav';
+import {
+  mondayOf,
+  fmtShort,
+  dayKindLabel,
+  renderCell,
+  renderTimetableNext,
+} from '../lib/timetableView';
 
 export function registerTimetableRoutes(app: FastifyInstance): void {
   app.get('/timetable', { preHandler: requireAuth }, async (req, reply) => {
@@ -172,6 +101,19 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       table = `<p class="muted">The timetable is unavailable — the database is not reachable. Try <code>./start.sh</code>.</p>`;
+    }
+
+    if (getUiShell() === 'next') {
+      const body = renderTimetableNext({
+        table,
+        yearLabel,
+        prev,
+        next,
+        yearQ,
+        explicitYear,
+        csrf: reply.generateCsrf(),
+      });
+      return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
     }
 
     const body = `

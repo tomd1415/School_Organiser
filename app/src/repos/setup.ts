@@ -667,6 +667,31 @@ export async function setGroupCourse(groupId: number, courseId: number, on: bool
       [groupId, courseId],
     );
   } else {
-    await pool.query(`UPDATE group_courses SET active = false WHERE group_id = $1 AND course_id = $2`, [groupId, courseId]);
+    // BUG-023: deactivating a course doesn't only stop NEW occurrences getting it — reconcile the
+    // already-scheduled FUTURE ones too. Drop the course from future-dated occurrences that are still
+    // EMPTY (no bound plan, no progress, no pupil/TA work), but KEEP it where work already exists, and
+    // never touch today's or historic (delivered) occurrences (teacher policy, 2026-06-21).
+    const { rows } = await pool.query<{ id: number }>(
+      `UPDATE group_courses SET active = false WHERE group_id = $1 AND course_id = $2 RETURNING id`,
+      [groupId, courseId],
+    );
+    const gcId = rows[0]?.id;
+    if (gcId != null) {
+      await pool.query(
+        `DELETE FROM occurrence_courses oc
+           USING lesson_occurrences lo
+          WHERE oc.occurrence_id = lo.id
+            AND oc.group_course_id = $1
+            AND lo.date > CURRENT_DATE
+            AND oc.lesson_plan_id IS NULL
+            AND oc.stopping_point IS NULL
+            AND COALESCE(oc.progress_step, 0) = 0
+            AND NOT EXISTS (SELECT 1 FROM pupil_answers pa WHERE pa.occurrence_course_id = oc.id)
+            AND NOT EXISTS (SELECT 1 FROM pupil_done pd WHERE pd.occurrence_course_id = oc.id)
+            AND NOT EXISTS (SELECT 1 FROM pupil_lesson_feedback pf WHERE pf.occurrence_course_id = oc.id)
+            AND NOT EXISTS (SELECT 1 FROM ta_feedback tf WHERE tf.occurrence_course_id = oc.id)`,
+        [gcId],
+      );
+    }
   }
 }

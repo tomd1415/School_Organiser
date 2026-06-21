@@ -2,7 +2,7 @@
 // from the names-only roster and only exist once the teacher has enabled pupil access (which is
 // gated on DPIA sign-off). PINs are scrypt-hashed like every other credential; a per-pupil
 // failed-count gives a durable lockout (the in-memory limiter guards the attempt *rate*).
-import { pool } from '../db/pool';
+import { pool, withTransaction } from '../db/pool';
 import { hashPassword, verifyPassword } from '../lib/passwords';
 
 export const PIN_LOCK_AT = 5;
@@ -105,21 +105,28 @@ export async function setGroupLoginCode(groupId: number, code: string | null): P
 }
 
 export async function setPupilPin(pupilId: number, pin: string): Promise<void> {
-  // Store the hash (for verification) AND the PIN value (so the teacher can print/read it).
-  await pool.query(
-    `INSERT INTO pupil_credentials (pupil_id, pin_hash, pin, enabled, failed_count, updated_at)
-     VALUES ($1, $2, $3, true, 0, now())
-     ON CONFLICT (pupil_id) DO UPDATE SET pin_hash = EXCLUDED.pin_hash, pin = EXCLUDED.pin, enabled = true, failed_count = 0, updated_at = now()`,
-    [pupilId, hashPassword(pin), pin],
-  );
-  // A PIN (re)set revokes any live session for the pupil (BUG-017); harmless on the initial set.
-  await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
+  // BUG-017: the credential write AND the session-epoch bump (which revokes any live session) must be
+  // atomic — a failure between them would change the PIN while leaving old sessions valid. One transaction.
+  await withTransaction(async (db) => {
+    // Store the hash (for verification) AND the PIN value (so the teacher can print/read it).
+    await db.query(
+      `INSERT INTO pupil_credentials (pupil_id, pin_hash, pin, enabled, failed_count, updated_at)
+       VALUES ($1, $2, $3, true, 0, now())
+       ON CONFLICT (pupil_id) DO UPDATE SET pin_hash = EXCLUDED.pin_hash, pin = EXCLUDED.pin, enabled = true, failed_count = 0, updated_at = now()`,
+      [pupilId, hashPassword(pin), pin],
+    );
+    // A PIN (re)set revokes any live session for the pupil (BUG-017); harmless on the initial set.
+    await db.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
+  });
 }
 
 export async function setPupilCredentialEnabled(pupilId: number, enabled: boolean): Promise<void> {
-  await pool.query(`UPDATE pupil_credentials SET enabled = $2, updated_at = now() WHERE pupil_id = $1`, [pupilId, enabled]);
-  // Disabling the credential revokes any live session for the pupil (BUG-017).
-  if (!enabled) await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
+  // BUG-017: credential change + session revocation share one commit boundary (see setPupilPin).
+  await withTransaction(async (db) => {
+    await db.query(`UPDATE pupil_credentials SET enabled = $2, updated_at = now() WHERE pupil_id = $1`, [pupilId, enabled]);
+    // Disabling the credential revokes any live session for the pupil (BUG-017).
+    if (!enabled) await db.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [pupilId]);
+  });
 }
 
 export async function unlockPupil(pupilId: number): Promise<void> {

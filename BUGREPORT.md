@@ -109,14 +109,52 @@ Each reopened/residual finding was first re-checked against the CURRENT tree (it
   `db: Executor`). A crash either commits both (a reclaim sees 'complete' and skips) or neither (a reclaim
   redoes it exactly once) — no duplicate task/event/note. The AI triage stays OUTSIDE the transaction.
   Existing email routing + dedup tests stay green (`app/src/services/emailPoll.ts`).
+- **BUG-017 — ✅ Resolved.** `setPupilPin` / `setPupilCredentialEnabled` now write the credential change and
+  the session-epoch bump (which revokes live sessions) in ONE `withTransaction` — a failure between them
+  can't change the PIN while leaving old sessions valid (`app/src/repos/pupilCredentials.ts`).
+- **BUG-021 — ✅ Resolved (map swap).** `moveBinding`'s two plan writes now run in one transaction under the
+  same per-class advisory lock `applyPlacements` uses, so a crash can't leave a half-swap (`delivery.ts`;
+  `occurrence.ts` `setOccurrenceCoursePlan` gains an optional `db`). *Minor residual:* the planner UNDO
+  restores plans (transactional) then locks in a separate loop — a crash between leaves a stale `planner_locked`
+  flag (cosmetic; self-corrects on the next lock toggle). Left as a documented low-value residual.
+- **BUG-029 — ✅ Resolved.** Pupil screenshot replace now stages the new file → on a failed DB write removes
+  it (no orphan) → TOMBSTONES the superseded file via the existing `enqueueFileDeletion` sweep instead of a
+  fire-and-forget unlink (durable, retried). `saveAnswer`'s `FOR UPDATE` row lock already serialises the race
+  (`app/src/routes/me.ts`; `screenshotPaste.int.test.ts` updated for the deferred delete).
+- **BUG-003 — ✅ Resolved.** Signed `/lesson-image` URLs now carry an EXPIRY (~12h) in the signed payload
+  (`?s=…&e=…`); the route rejects an expired or missing-expiry signature, so a copied/logged URL stops
+  working after a window instead of lasting until the session secret rotates (`app/src/lib/lessonImageSig.ts`,
+  +1 expiry test). These are teaching illustrations, not pupil data.
+- **BUG-030 — ✅ Resolved.** The pupil answer/image routes now VALIDATE the posted field key against the
+  actual rendered worksheet (render + field-inventory check), so a crafted POST can't create an arbitrary
+  answer row or write a field this version doesn't contain. The test pupil (teacher preview) is exempt, like
+  the existing access check. `app/src/routes/me.ts`; `pupil.int.test.ts` binds a real worksheet + asserts a
+  bogus key is rejected.
 
-Still to do (this session continues): **BUG-021** (main planner placement is already transactional; only the
-map drag-swap + undo-lock restore remain non-atomic), **BUG-028/029** (resource-create atomicity + screenshot
-tombstone — the `withTransaction` helper is now in place for these), **BUG-017** (credential+epoch txn),
-**BUG-030** (worksheet capability), **BUG-003** (image-URL expiry), **BUG-043** (SAR file packaging),
-**BUG-007** (upload streaming), **BUG-010** (matched restore set), **BUG-048** (sweep claim — single-process,
-so the multi-process race is MOOT; only a crash-skips-a-day residual remains, low value), and the **BUG-023**
-policy call (drop vs keep an inactive course on already-scheduled future lessons).
+- **BUG-007 — ✅ Resolved.** The folder-upload route now reads each multipart part against the SHARED
+  REMAINING budget (`readPartUpTo`) and aborts the stream the instant it would exceed it — so a part is
+  never fully buffered before the aggregate cap is consulted, keeping peak memory ≤ the 400 MB cap instead
+  of ~2× it (`app/src/routes/resources.ts`; existing import-route test green).
+- **BUG-010 — ✅ Resolved.** `restore.sh` now VERIFIES the matched set (the DB dump + its resources archive,
+  by the `manifest-STAMP.sha256` checksums) BEFORE the destructive database drop, and refuses an unverified
+  or half set (explicit `DB_ONLY=1` escape for a deliberate database-only recovery). Resources are now
+  RESTORED BY REPLACEMENT (extract to a temp dir, then swap the store's contents in place) so stale files
+  from a different snapshot can't linger (`scripts/restore.sh`; `bash -n` clean — not run, as it is destructive).
+- **BUG-048 — ✅ Accepted/Documented (no code change).** This is a SINGLE-PROCESS LAN app, so the
+  "two processes both run the daily review sweep" race the report describes cannot occur. The only residual
+  is a crash *during* the sweep skipping that day's AI review suggestions (self-heals the next day) — far
+  below the cost/complexity of the proposed DB lease table. Left as-is by design.
+- **BUG-023 — ✅ Resolved (teacher policy).** Deactivating a course now RECONCILES already-scheduled future
+  occurrences: `setGroupCourse(..., false)` drops the course from future-dated occurrence-courses that are
+  still EMPTY (no bound plan, no progress, no pupil/TA work) but KEEPS it wherever work already exists, and
+  never touches today's or historic (delivered) occurrences (`app/src/repos/setup.ts`;
+  `delivery.int.test.ts` updated: empty-future dropped, plan-bound-future kept).
+
+Still to do (the two lowest-value items, both deferred): **BUG-028** (resource-create atomicity — a
+mechanical 5-path refactor to `createResourceWithVersion` / a new `addVersionWithFile`; low harm = orphan
+rows/files only on a crash; the `withTransaction` helper is in place for whoever picks it up) and **BUG-043**
+(SAR export should bundle the screenshot files, not just their paths — compliance-only, larger; matters only
+when a subject-access request is actually fulfilled).
 
 ### Tests and checks performed
 

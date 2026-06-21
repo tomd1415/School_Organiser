@@ -223,7 +223,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     if (!isLimitedRole(role) || typeof payload !== 'string') return payload;
     const ct = reply.getHeader('content-type');
     if (typeof ct === 'string' && ct.includes('text/html') && payload.includes('/lesson-image/')) {
-      return signLessonImages(payload);
+      return signLessonImages(payload, Date.now());
     }
     return payload;
   });

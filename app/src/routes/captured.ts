@@ -13,6 +13,8 @@ import { guardMatch } from '../lib/markSafetyGate';
 import { CAPTURED_CATEGORISE_SYSTEM, CAPTURED_CATEGORISE_VERSION, capturedInstruction, capturedItems } from '../llm/prompts/capturedCategorise';
 import { capturedCategoriseSchema } from '../llm/schemas/capturedCategorise';
 
+import { getUiShell } from '../lib/nav';
+
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 export function registerCapturedRoutes(app: FastifyInstance): void {
@@ -30,6 +32,37 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Captured info is unavailable — the database is not reachable.</p>`;
+    }
+
+    if (getUiShell() === 'next') {
+      const chip = (c: string | undefined, label: string) =>
+        `<a href="/captured${c ? `?category=${c}` : ''}" class="chip${c === category ? ' active' : ''}">${label}</a>`;
+      const chips = [chip(undefined, 'All'), ...CAPTURED_CATEGORIES.map((c) => chip(c, CATEGORY_LABELS[c] ?? c))].join(' ');
+
+      const body = `
+        <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+          <div class="ld-notes-head">
+            <h1>Captured Inbox</h1>
+            ${renderNewCapturedButton()}
+          </div>
+          <p class="muted">Things you were told but can't action yet. Pick a category, set when it should resurface, or make it a task. ⚑ safeguarding stays out of AI.</p>
+          <div class="task-chips" style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
+            ${chips}
+          </div>
+          ${listHtml}
+          
+          <div class="captured-sticky-capture" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color, #eaeaea);">
+            <h3>Quick Capture</h3>
+            <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <input id="qc-input" type="text" name="body" placeholder="Something you were told..." autocomplete="off" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #ccc); font-family: inherit; font-size: 14px;">
+                <button type="submit" class="btn-primary">Capture</button>
+              </div>
+              <span id="qc-status" class="qc-status"></span>
+            </form>
+          </div>
+        </section>`;
+      return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf }));
     }
 
     const tab = (c: string | undefined, label: string) =>

@@ -29,6 +29,14 @@ still open; **572 unit / 344 integration tests green, typecheck clean.** Detail 
   (migration `0056`) so a crash between two same-day lessons no longer skips the later one; email intake now
   writes its destination + completion in one transaction (new `withTransaction` helper), so a crash can't
   leave a duplicate task.
+- **🔐 Atomicity & access hardening.** Pupil PIN reset + session revocation share one transaction (BUG-017);
+  the planner map drag-swap is atomic (BUG-021); a replaced pupil screenshot is durably tombstoned rather
+  than fire-and-forget unlinked (BUG-029); signed `/lesson-image` URLs now expire after ~12h (BUG-003); and
+  the pupil answer routes reject a POST whose field key isn't a real field of the rendered worksheet (BUG-030).
+- **🛟 Disaster-recovery & upload safety.** `restore.sh` now verifies the DB + resources as one checksummed
+  matched set *before* the destructive restore and replaces (not overlays) the file store (BUG-010); the
+  folder-upload route streams each part against the remaining budget so a large upload can't spike memory to
+  ~2× the 400 MB cap (BUG-007).
 
 ### 2026-06-20 — Teaching features, pedagogy, external resources + UI-overhaul handoff
 

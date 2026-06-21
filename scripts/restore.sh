@@ -33,6 +33,38 @@ case "$DUMP" in
     echo "Unrecognised dump suffix: $DUMP" >&2; exit 1 ;;
 esac
 
+# BUG-010: a backup is the DB + its resources as ONE matched set, recorded by a checksum manifest
+# (backup.sh writes manifest-STAMP.sha256 last, naming both artifacts + their sha256). Verify the WHOLE
+# set BEFORE the destructive database drop — so we never replace the live DB and only THEN discover the
+# matching resources are missing or corrupt, leaving the database and file-store at different points in time.
+verify_against_manifest() {
+  local artifact="$1" manifest="$2" base want got
+  base="$(basename "$artifact")"
+  want="$(awk -v f="$base" '$2==f{print $1}' "$manifest")"
+  [ -n "$want" ] || { echo "[restore] $base is not named in the manifest — wrong/foreign artifact" >&2; return 1; }
+  got="$(sha256sum "$artifact" | awk '{print $1}')"
+  [ "$want" = "$got" ] || { echo "[restore] checksum MISMATCH for $base (manifest ${want:0:12}…, file ${got:0:12}…)" >&2; return 1; }
+}
+
+DB_ONLY="${DB_ONLY:-0}"
+STAMP="$(basename "$DUMP" | sed -n 's/^db-\([0-9]\{8\}-[0-9]\{6\}\)\..*/\1/p')"
+[ -n "$STAMP" ] || { echo "[restore] can't derive the backup stamp from $(basename "$DUMP") — expected db-YYYYmmdd-HHMMSS.…" >&2; exit 1; }
+MANIFEST="$ROOT/backups/manifest-$STAMP.sha256"
+RES="$(ls "$ROOT/backups/resources-$STAMP.tar.gz"* 2>/dev/null | head -1 || true)"
+
+if [ "$DB_ONLY" = "1" ]; then
+  echo "[restore] ⚠ DB_ONLY=1 — restoring the database ONLY; the resource file-store is left untouched and may"
+  echo "[restore]   then be out of step with the DB. Use this only for a deliberate database-only recovery."
+  [ -f "$MANIFEST" ] && { verify_against_manifest "$DUMP" "$MANIFEST" || exit 1; }
+else
+  [ -f "$MANIFEST" ] || { echo "[restore] no manifest-$STAMP.sha256 beside $(basename "$DUMP") — refusing to restore an unverified/half set. (Set DB_ONLY=1 to force a database-only restore.)" >&2; exit 1; }
+  [ -n "$RES" ]      || { echo "[restore] manifest present but no resources-$STAMP archive — incomplete set, refusing. (DB_ONLY=1 to force.)" >&2; exit 1; }
+  echo "[restore] verifying the matched set $STAMP against its manifest…"
+  verify_against_manifest "$DUMP" "$MANIFEST" || exit 1
+  verify_against_manifest "$RES"  "$MANIFEST" || exit 1
+  echo "[restore] manifest OK — DB + resources checksums match; restoring both as one set."
+fi
+
 cd "$APP_DIR"
 
 # BUG-009: a plain pg_dump can't be loaded over a POPULATED database (objects already exist → errors, or
@@ -61,17 +93,21 @@ echo "[restore] loading $DUMP into the fresh 'organiser' database…"
 dec < "$DUMP" | gunzip -c | docker compose exec -T db psql -v ON_ERROR_STOP=1 -U organiser -d organiser >/dev/null
 echo "[restore] database restored."
 
-# Restore the MATCHING resource snapshot from the same set (same STAMP), so the DB and its files agree.
-STAMP="$(basename "$DUMP" | sed -n 's/^db-\([0-9]\{8\}-[0-9]\{6\}\)\..*/\1/p')"
-RES=""
-[ -n "$STAMP" ] && RES="$(ls "$ROOT/backups/resources-$STAMP.tar.gz"* 2>/dev/null | head -1 || true)"
-if [ -n "$RES" ]; then
-  echo "[restore] restoring matching resources $RES -> $ROOT/data/resources"
-  mkdir -p "$ROOT/data/resources"
-  dec < "$RES" | tar xz -C "$ROOT/data/resources"
+# Restore the MATCHING resource snapshot (verified above) as one set, REPLACING the store so stale files
+# from a different snapshot can't linger. Extract to a temp dir first (a bad archive then can't leave a
+# half-cleared store), then swap the live store's contents in place (keeps the bind-mounted directory).
+if [ "$DB_ONLY" = "1" ]; then
+  echo "[restore] DB_ONLY=1 — left $ROOT/data/resources untouched."
 else
-  echo "[restore] ⚠ no matching resources-$STAMP archive found — restore the resource snapshot manually, e.g.:"
-  echo "[restore]   (age -d -i \"\$BACKUP_AGE_IDENTITY\" < backups/resources-STAMP.tar.gz.age) | tar xz -C \"$ROOT/data/resources\""
+  RES_DIR="$ROOT/data/resources"
+  NEW_DIR="$ROOT/data/.resources-restore-$STAMP"
+  echo "[restore] restoring matching resources $RES -> $RES_DIR (replacing the store)"
+  rm -rf "$NEW_DIR"; mkdir -p "$NEW_DIR" "$RES_DIR"
+  dec < "$RES" | tar xz -C "$NEW_DIR"
+  find "$RES_DIR" -mindepth 1 -delete   # clear the live store (dotfiles too), keep the dir inode for the bind mount
+  cp -a "$NEW_DIR"/. "$RES_DIR"/        # copy the verified snapshot in
+  rm -rf "$NEW_DIR"
+  echo "[restore] resource store replaced from the matched snapshot $STAMP."
 fi
 
 echo "[restore] restarting the app (migrations run automatically on boot)…"

@@ -1,0 +1,424 @@
+import { esc } from './html';
+import { NowState, TermDate, classifyDay, termProgress } from '../services/clock';
+import { NowLesson } from '../repos/clock';
+import { OccurrenceCourseRow } from '../services/occurrence';
+import { LastStop } from '../services/occurrence';
+import { NoteItem, renderNotesList, renderNewNoteButton } from './notesView';
+import { ExceptionEffect, NO_EXCEPTION, describeException } from '../services/exceptions';
+import { BellTask, URGENCY_LABELS } from '../services/task';
+import { UpcomingEvent } from '../services/event';
+import { CapturedItem } from '../services/captured';
+import { LessonRow, PeriodRow } from '../services/timetable';
+import { MarksBacklogRow } from '../repos/marking';
+import { InterestItem } from '../services/currentInterests';
+import { PrepItem } from '../repos/prep';
+import { BriefItem } from '../services/brief';
+import { renderPrepList, renderPrepAdd } from './prepView';
+import { renderTimerBanner } from '../routes/timer';
+import { markOpenAttrs } from '../routes/markModal';
+import { addDays, toMinutes, weekdayOf } from './time';
+
+export interface NeedsRow {
+  rank: number; // 0 = safeguarding (always top), then overdue/urgent → routine
+  html: string;
+}
+
+export function purposeLabel(purpose: string): string {
+  const map: Record<string, string> = {
+    free: 'Free period',
+    form: 'Form',
+    club: 'Computing Club',
+    open_room: 'Open room',
+    duty: 'Duty',
+    meeting: 'Meeting',
+  };
+  return map[purpose] ?? 'Lesson';
+}
+
+export function lessonName(l: NowLesson | null): string {
+  if (!l) return '—';
+  return l.groupName ?? purposeLabel(l.purpose);
+}
+
+export function nowLabels(now: Date, tz: string): { dateLabel: string; clock: string } {
+  return {
+    dateLabel: new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(now),
+    clock: new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now),
+  };
+}
+
+export function nowSignature(state: NowState, current: NowLesson | null, next: NowLesson | null): string {
+  return [
+    state.isoDate,
+    state.isSchoolDay ? '1' : '0',
+    state.current?.slotOrder ?? '',
+    current?.lessonId ?? '',
+    next?.lessonId ?? '',
+    state.nextTeaching?.date ?? '',
+  ].join('|');
+}
+
+export function renderStrip(
+  state: NowState,
+  current: NowLesson | null,
+  next: NowLesson | null,
+  now: Date,
+  tz: string,
+  terms: TermDate[],
+  changed = false,
+  curEx: ExceptionEffect = NO_EXCEPTION,
+  nextEx: ExceptionEffect = NO_EXCEPTION
+): string {
+  const { dateLabel, clock } = nowLabels(now, tz);
+  const sig = nowSignature(state, current, next);
+  const tp = termProgress(state.isoDate, terms);
+  const weekBadge = tp ? ` · <span class="now-week" title="${esc(tp.name)}">wk ${tp.week}/${tp.weeksTotal}</span>` : '';
+
+  let nowLine: string;
+  if (!state.isSchoolDay) {
+    nowLine = `<strong>No school today</strong> <span class="muted">(${esc(state.dayKind.replace('_', ' '))})</span>`;
+  } else if (state.current) {
+    const mins = state.minutesRemaining;
+    const left = mins != null ? ` · <span class="now-mins">${mins} min left</span>` : '';
+    let who = current ? ` · ${esc(lessonName(current))}` : '';
+    if (curEx.mode === 'free') who = ` · <span class="now-ex-free">Free</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
+    else if (curEx.mode === 'cover') who = ` · <span class="now-ex-cover">On cover</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
+    else if (curEx.mode === 'room' && current) who = ` · ${esc(lessonName(current))} <span class="muted">→ ${esc(curEx.roomName ?? '')}</span>`;
+    nowLine = `<strong>NOW</strong> ${esc(state.current.label)}${who}${left}`;
+  } else {
+    nowLine = `<strong>Outside lesson time</strong>`;
+  }
+
+  let nextLine = '';
+  if (state.nextTeaching && next) {
+    const href = `/lesson?lesson=${next.lessonId}&date=${esc(state.nextTeaching.date)}`;
+    const what =
+      nextEx.mode === 'free' ? `<span class="now-ex-free">Free</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
+      : nextEx.mode === 'cover' ? `<span class="now-ex-cover">On cover</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
+      : esc(lessonName(next));
+    nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${what} <a href="${href}">open</a>`;
+  }
+
+  const poll = changed ? '' : ` data-bg-poll hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"`;
+  const notice = changed ? ` &nbsp;·&nbsp; <a class="now-changed" href="/">↻ the lesson has changed — refresh</a>` : '';
+  return `<div id="now-strip" class="now-strip"${poll}>
+    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}${notice}
+  </div>`;
+}
+
+export function renderCurrentCard(
+  current: NowLesson,
+  courses: OccurrenceCourseRow[],
+  lastStops: LastStop[],
+  notes: NoteItem[],
+  occurrenceId: number,
+  state: NowState,
+  ex: ExceptionEffect
+): string {
+  const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
+  const lastLines = courses
+    .map((c) => {
+      const ls = lastByGc.get(c.groupCourseId);
+      return ls
+        ? `<div class="now-resume"><span class="now-resume-k">Last time</span> ${current.courses.length > 1 ? `<strong>${esc(c.courseName)}</strong> → ` : ''}${esc(ls.stoppingPoint)} <span class="muted">(${esc(ls.date)})</span></div>`
+        : '';
+    })
+    .join('');
+  const courseList = current.courses.map((c) => esc(c.name)).join(' · ');
+  const meta = [courseList || (current.purpose === 'free' ? 'Free — protected work time' : ''), current.roomName ? esc(current.roomName) : '']
+    .filter(Boolean)
+    .join(' · ');
+  const listId = `notes-list-${occurrenceId}`;
+  const openHref = `/lesson?lesson=${current.lessonId}&date=${esc(state.isoDate)}`;
+
+  const exBanner = ex.mode !== 'none'
+    ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
+    : '';
+  const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
+  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(current.groupName ?? purposeLabel(current.purpose));
+  const wasLine = isFreeOrCover && current.groupName ? `<p class="muted now-ex-was">${ex.mode === 'free' ? 'was ' : 'instead of '}${esc(current.groupName)}</p>` : '';
+  return `<div class="now-card">
+    <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
+    ${exBanner}
+    <h1>${heading}</h1>
+    ${wasLine}
+    ${meta && !isFreeOrCover ? `<p class="ld-meta">${meta}</p>` : ''}
+    ${isFreeOrCover ? '' : lastLines}
+    <div class="now-notes">
+      <div class="ld-notes-head"><h2>Quick note</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: occurrenceId })}</div>
+      ${renderNotesList(listId, notes)}
+    </div>
+    <p><a href="${openHref}">Open lesson detail →</a></p>
+  </div>`;
+}
+
+export function fmtMin(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+export function renderNextCard(
+  next: NowLesson,
+  state: NowState,
+  courses: OccurrenceCourseRow[],
+  lastStops: LastStop[],
+  slot: { date: string; label: string; startMin: number },
+  ex: ExceptionEffect
+): string {
+  const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
+  const courseBlocks = courses
+    .map((c) => {
+      const ls = lastByGc.get(c.groupCourseId);
+      const plan = c.planTitle ? `<span class="next-plan">📋 ${esc(c.planTitle)}</span>` : '<span class="muted">no plan bound</span>';
+      const resume = ls ? `<div class="muted next-resume">resume → ${esc(ls.stoppingPoint)} <span class="next-when2">(${esc(ls.date)})</span></div>` : '';
+      return `<li><strong>${esc(c.courseName)}</strong> ${plan}${resume}</li>`;
+    })
+    .join('');
+  const sameDay = slot.date === state.isoDate;
+  const when = sameDay
+    ? `${fmtMin(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
+    : esc(slot.date);
+  const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
+  const openHref = `/lesson?lesson=${next.lessonId}&date=${esc(slot.date)}`;
+  const exBanner = ex.mode !== 'none'
+    ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
+    : '';
+  const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
+  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(next.groupName ?? purposeLabel(next.purpose));
+  return `<div class="now-card now-next">
+    <p class="kicker">Next · ${esc(slot.label)}</p>
+    ${exBanner}
+    <h2>${heading}</h2>
+    <p class="ld-meta">${when}${room}</p>
+    ${isFreeOrCover ? '' : courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
+    <p><a href="${openHref}">Open next lesson →</a></p>
+  </div>`;
+}
+
+export function renderDayList(
+  lessons: LessonRow[],
+  periods: PeriodRow[],
+  weekday: number,
+  afterMin: number | null,
+  date: string,
+  heading: string
+): string {
+  const startOf = new Map(periods.filter((p) => p.weekday === weekday).map((p) => [p.slotOrder, p.start]));
+  const rows = lessons
+    .filter((l) => l.weekday === weekday && l.isSelf && ['teaching', 'form', 'club'].includes(l.purpose))
+    .map((l) => ({ ...l, start: startOf.get(l.slotOrder) ?? '' }))
+    .filter((l) => l.start && (afterMin === null || toMinutes(l.start) > afterMin))
+    .sort((a, b) => a.slotOrder - b.slotOrder);
+  if (!rows.length) return '';
+  const items = rows
+    .map((l) => {
+      const courses = l.courses.map((c) => esc(c.name)).join(' · ');
+      return `<li><a href="/lesson?lesson=${l.lessonId}&date=${esc(date)}">
+        <span class="day-time">${esc(l.start)}</span>
+        <span class="day-group">${esc(l.groupName ?? purposeLabel(l.purpose))}</span>
+        ${courses ? `<span class="muted day-courses">${courses}</span>` : ''}
+      </a></li>`;
+    })
+    .join('');
+  return `<div class="now-card now-day">
+    <p class="kicker">${esc(heading)}</p>
+    <ul class="day-list">${items}</ul>
+  </div>`;
+}
+
+export function needsMeRows(marks: MarksBacklogRow[], bell: BellTask[], events: UpcomingEvent[], heads: CapturedItem[], today: string): NeedsRow[] {
+  const rows: NeedsRow[] = [];
+  for (const i of heads.filter((h) => h.safeguarding)) {
+    rows.push({ rank: 0, html: `<li class="nm-row nm-sg"><span class="nm-tag nm-tag-sg">⚑ safeguarding</span><span class="nm-text">${esc(i.body || '(flagged note)')}</span></li>` });
+  }
+  for (const t of bell) {
+    rows.push({
+      rank: 1,
+      html: `<li id="bell-${t.id}" class="nm-row"><button type="button" class="link nm-done" title="Mark done" aria-label="Mark done" hx-post="/tasks/${t.id}/done" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button><span class="nm-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span><span class="nm-text">${esc(t.title)}</span></li>`,
+    });
+  }
+  for (const e of dueSoon(events, today).slice(0, 6)) {
+    const d = e.date ? daysUntil(e.date, today) : 0;
+    const when = d < 0 ? `${-d}d overdue` : d === 0 ? 'today' : `in ${d}d`;
+    rows.push({ rank: d < 0 ? 1 : 3, html: `<li class="nm-row"><span class="nm-tag">event</span><span class="nm-text">${esc(e.title)} <span class="muted">· ${esc(when)}</span></span></li>` });
+  }
+  for (const r of marks) {
+    const bits: string[] = [];
+    if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
+    if (r.unreleased) bits.push('ready to release');
+    const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
+    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><button type="button" class="nm-text nm-mark" ${markOpenAttrs(`/lesson/oc/${r.occurrenceCourseId}/mark`)} title="open marking">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</button></li>` });
+  }
+  for (const i of heads.filter((h) => !h.safeguarding).slice(0, 6)) {
+    rows.push({ rank: 4, html: `<li class="nm-row"><span class="nm-tag">heads-up</span><span class="nm-text">${esc(i.body || '(captured note)')}${i.groupName ? ` <span class="muted">· ${esc(i.groupName)}</span>` : ''}</span></li>` });
+  }
+  return rows.sort((a, b) => a.rank - b.rank);
+}
+
+function dueSoon(events: UpcomingEvent[], today: string): UpcomingEvent[] {
+  return events.filter((e) => e.date && daysUntil(e.date, today) <= 7);
+}
+
+function daysUntil(d1: string, d2: string): number {
+  return Math.round((new Date(d1).getTime() - new Date(d2).getTime()) / (24 * 3600 * 1000));
+}
+
+export function renderNeedsMe(marks: MarksBacklogRow[], bell: BellTask[], events: UpcomingEvent[], heads: CapturedItem[], today: string): string {
+  const rows = needsMeRows(marks, bell, events, heads, today);
+  if (rows.length === 0) {
+    return `<div class="now-card now-needs"><p class="kicker">Needs me</p><p class="muted nm-clear">Nothing needs you before the bell. ✓</p></div>`;
+  }
+  const CAP = 6;
+  const shown = rows.slice(0, CAP).map((r) => r.html).join('');
+  const more = rows.length > CAP ? `<li class="nm-row nm-more muted">+ ${rows.length - CAP} more</li>` : '';
+  return `<div class="now-card now-needs">
+    <p class="kicker">Needs me</p>
+    <ul class="nm-list">${shown}${more}</ul>
+    <p class="nm-foot"><a href="/marking">✎ Marking</a> · <a href="/tasks">Tasks</a> · <a href="/events">Events</a> · <a href="/captured">Captured</a></p>
+  </div>`;
+}
+
+export function renderDayCard(part: 'start' | 'end', items: PrepItem[], date: string): string {
+  return `<details class="now-card now-daycard">
+    <summary>${part === 'start' ? 'Start-of-day checklist' : 'End-of-day checklist'}${items.length ? ` (${items.length})` : ''}</summary>
+    ${renderPrepList(items, '/day-checklist', 'day', `day-${part}`)}
+    ${renderPrepAdd('/day-checklist/add', { date, part }, `day-${part}`)}
+  </details>`;
+}
+
+export function renderMorningBrief(items: BriefItem[]): string {
+  if (items.length === 0) return '';
+  const rows = items
+    .map((i) => `<li class="brief-${i.level}">${i.icon} ${i.href ? `<a href="${i.href}">${esc(i.text)}</a>` : esc(i.text)}</li>`)
+    .join('');
+  return `<div class="now-card now-brief">
+    <p class="kicker">📋 Morning brief</p>
+    <ul class="brief-list">${rows}</ul>
+  </div>`;
+}
+
+export function renderCurrentInterests(items: InterestItem[]): string {
+  if (items.length === 0) return '';
+  const row = (i: InterestItem): string => {
+    const href = i.kind === 'task' ? '/tasks?view=interest' : '/captured';
+    return `<li class="${i.fresh ? 'ci-fresh' : 'ci-fading'}"><a href="${href}">${esc(i.label)}</a></li>`;
+  };
+  return `<div class="now-card ci-card">
+    <p class="kicker">⭐ Current interests</p>
+    <ul class="ci-list">${items.map(row).join('')}</ul>
+  </div>`;
+}
+
+export interface NowNextData {
+  state: NowState;
+  current: NowLesson | null;
+  next: NowLesson | null;
+  card: string;
+  nextCard: string;
+  dayList: string;
+  briefItems: BriefItem[];
+  marksWaiting: MarksBacklogRow[];
+  bell: BellTask[];
+  events: UpcomingEvent[];
+  heads: CapturedItem[];
+  interests: InterestItem[];
+  dayPart: 'start' | 'end';
+  dayItems: PrepItem[];
+  running: any;
+  showNudge: boolean;
+  exToday: number;
+  csrf: string;
+  now: Date;
+  ctx: { tz: string; terms: TermDate[] };
+  curEx: ExceptionEffect;
+  nextEx: ExceptionEffect;
+}
+
+export function renderNowNext(data: NowNextData): string {
+  const {
+    state,
+    current,
+    next,
+    card,
+    nextCard,
+    dayList,
+    briefItems,
+    marksWaiting,
+    bell,
+    events,
+    heads,
+    interests,
+    dayPart,
+    dayItems,
+    running,
+    showNudge,
+    exToday,
+    csrf,
+    now,
+    ctx,
+    curEx,
+    nextEx,
+  } = data;
+
+  const sig = nowSignature(state, current, next);
+
+  const nudgeHtml = showNudge
+    ? `<div class="exp-nudge" id="exp-nudge">
+        <span class="exp-nudge-text">✨ You've taught 20+ lessons — ready for the planning &amp; AI tools?</span>
+        <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
+          <input type="hidden" name="experience" value="power">
+          <button type="submit" class="btn-secondary">Turn on advanced tools</button>
+        </form>
+        <button type="button" class="link" hx-post="/settings/experience-nudge/dismiss" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
+      </div>`
+    : '';
+
+  const exceptionBanner = exToday
+    ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>`
+    : '';
+
+  const quickCaptureDock = `
+    <form class="quick-capture-dock" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+      <input id="qc-input" type="text" name="body" placeholder="Mind dump: type something to capture..." autocomplete="off">
+      <button type="submit" class="btn-primary">Capture</button>
+      <span id="qc-status"></span>
+    </form>
+  `;
+
+  return `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
+    ${renderTimerBanner(running)}
+    <!-- Hidden poll strip to preserve hx-get clock contract -->
+    <div id="now-strip" class="now-strip" style="display: none;" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"></div>
+
+    ${quickCaptureDock}
+    ${nudgeHtml}
+    ${exceptionBanner}
+
+    <div class="now-cols">
+      <div class="now-col now-col-now">
+        ${card}
+        ${dayList}
+      </div>
+      <div class="now-col now-col-next">
+        ${nextCard}
+        ${renderMorningBrief(briefItems)}
+        ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
+        ${renderCurrentInterests(interests)}
+        ${renderDayCard(dayPart, dayItems, state.isoDate)}
+      </div>
+    </div>
+  </section>`;
+}
+
+export function nextSchoolDayInfo(fromIso: string, terms: TermDate[], lessons: LessonRow[], tz: string): { label: string; teachingCount: number } | null {
+  for (let i = 1; i <= 14; i++) {
+    const d = addDays(fromIso, i);
+    const wd = weekdayOf(d);
+    if (!classifyDay(d, wd, terms).isSchoolDay) continue;
+    const teachingCount = lessons.filter((l) => l.weekday === wd && l.isSelf && (l.purpose === 'teaching' || l.purpose === 'form')).length;
+    const label = i === 1 ? 'Tomorrow' : new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(`${d}T12:00:00Z`));
+    return { label, teachingCount };
+  }
+  return null;
+}

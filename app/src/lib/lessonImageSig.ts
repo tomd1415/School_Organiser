@@ -6,27 +6,34 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { appConfig } from '../config/app';
 
-function sig(id: number): string {
-  return createHmac('sha256', appConfig.SESSION_KEY).update(`lesson-image:${id}`).digest('base64url').slice(0, 16);
+// BUG-003: a signed image URL also carries an EXPIRY, so a copied/logged URL stops working after a window
+// (≈ one school day) rather than lasting until the session secret rotates. The expiry is part of the signed
+// payload AND echoed in the URL (?s=<sig>&e=<exp>), so the route can re-derive and check it.
+const IMAGE_TTL_MS = 12 * 60 * 60 * 1000;
+
+function sig(id: number, exp: number): string {
+  return createHmac('sha256', appConfig.SESSION_KEY).update(`lesson-image:${id}:${exp}`).digest('base64url').slice(0, 16);
 }
 
-/** Verify a presented signature for an image id (constant-time compare). */
-export function verifyImageSig(id: number, presented: string | undefined): boolean {
+/** Verify a presented signature + expiry for an image id (constant-time compare; rejects an expired URL). */
+export function verifyImageSig(id: number, presented: string | undefined, exp: number | undefined, now: number): boolean {
   if (typeof presented !== 'string' || presented.length === 0) return false;
-  const expected = sig(id);
+  if (typeof exp !== 'number' || !Number.isFinite(exp) || exp < now) return false; // missing or expired
+  const expected = sig(id, exp);
   if (presented.length !== expected.length) return false;
   return timingSafeEqual(Buffer.from(presented), Buffer.from(expected));
 }
 
-/** The signed query suffix for an image id, e.g. "?s=abc123". */
-export function imageSigQuery(id: number): string {
-  return `?s=${sig(id)}`;
+/** The signed query suffix for an image id, valid for ~one school day, e.g. "?s=abc123&e=1700000000000". */
+export function imageSigQuery(id: number, now: number): string {
+  const exp = now + IMAGE_TTL_MS;
+  return `?s=${sig(id, exp)}&e=${exp}`;
 }
 
 /** Rewrite every UNSIGNED /lesson-image/<id> reference in HTML to its signed form — applied to the HTML
  *  the server sends a limited role, so their browser only ever requests images the server chose to show. */
-export function signLessonImages(html: string): string {
+export function signLessonImages(html: string, now: number): string {
   // (?![\d?]) — the digits can't backtrack to a shorter number, and an already-signed URL (…<id>?s=…)
   // isn't re-signed.
-  return html.replace(/\/lesson-image\/(\d+)(?![\d?])/g, (_m, n: string) => `/lesson-image/${n}${imageSigQuery(Number(n))}`);
+  return html.replace(/\/lesson-image\/(\d+)(?![\d?])/g, (_m, n: string) => `/lesson-image/${n}${imageSigQuery(Number(n), now)}`);
 }
