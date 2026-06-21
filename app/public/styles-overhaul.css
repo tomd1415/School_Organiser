@@ -1159,6 +1159,13 @@ body[data-shell="next"] .oc-block {
   margin-bottom: 16px;
 }
 
+body[data-shell="next"] .oc-block.oc-objectives,
+body[data-shell="next"] .adapt-view .oc-block:first-child {
+  background: var(--green-soft) !important;
+  border-color: var(--green) !important;
+  color: var(--text) !important;
+}
+
 body[data-shell="next"] .oc-label {
   display: block;
   font-size: 0.75rem;
@@ -2612,7 +2619,11 @@ body[data-shell="next"] .sg-text,
 body[data-shell="next"] .ped-card,
 body[data-shell="next"] .pin-key,
 body[data-shell="next"] .ws-parsons-line,
-body[data-shell="next"] .ws-parsons-btns button {
+body[data-shell="next"] .ws-parsons-btns button,
+body[data-shell="next"] .deck-slide,
+body[data-shell="next"] .cards-page,
+body[data-shell="next"] .qc-btn,
+body[data-shell="next"] .topbar-search {
   background: var(--surface) !important;
   border-color: var(--line) !important;
   color: var(--text) !important;
@@ -2624,8 +2635,11 @@ body[data-shell="next"] .ws-table th,
 body[data-shell="next"] .ws-answer-cell,
 body[data-shell="next"] .ws-choice-cell,
 body[data-shell="next"] .ws-match-slot,
+body[data-shell="next"] .ws-match-review .ws-match-slot,
 body[data-shell="next"] .ws-ed-card-heading,
-body[data-shell="next"] .ws-review .ws-answer.ws-empty {
+body[data-shell="next"] .ws-review .ws-answer.ws-empty,
+body[data-shell="next"] .pw-sheet-head,
+body[data-shell="next"] .mk-pill.mk-todo {
   background: var(--surface-2) !important;
   border-color: var(--line) !important;
   color: var(--text) !important;
@@ -2653,7 +2667,16 @@ body[data-shell="next"] .test-banner,
 body[data-shell="next"] .ws-cloze,
 body[data-shell="next"] .pslide-notes,
 body[data-shell="next"] .ws-ed-card-note,
-body[data-shell="next"] .ws-ed-card-qtable {
+body[data-shell="next"] .ws-ed-card-qtable,
+body[data-shell="next"] .imp-dup,
+body[data-shell="next"] .task-detail-prose .hl,
+body[data-shell="next"] .img-todo,
+body[data-shell="next"] .ws-doc blockquote,
+body[data-shell="next"] .a11y-btn.on,
+body[data-shell="next"] .speak-flash,
+body[data-shell="next"] .act-timer.act-done,
+body[data-shell="next"] .mk-pill.mk-warn,
+body[data-shell="next"] .mk-gate {
   background: var(--amber-soft) !important;
   border-color: var(--amber) !important;
   color: var(--text) !important;
@@ -2683,7 +2706,8 @@ body[data-shell="next"] .ws-review .ws-answer,
 body[data-shell="next"] .ws-progress-done,
 body[data-shell="next"] .ws-ed-card-image,
 body[data-shell="next"] .ws-ed-card-placeholder,
-body[data-shell="next"] .ws-ed-drop {
+body[data-shell="next"] .ws-ed-drop,
+body[data-shell="next"] .mk-pill.mk-done {
   background: var(--green-soft) !important;
   border-color: var(--green) !important;
   color: var(--text) !important;
@@ -2699,13 +2723,20 @@ body[data-shell="next"] .ws-match-slot.is-drop,
 body[data-shell="next"] .ws-progress,
 body[data-shell="next"] .sig-btn.on,
 body[data-shell="next"] .word-chip,
-body[data-shell="next"] .ws-ed-card-text {
+body[data-shell="next"] .ws-ed-card-text,
+body[data-shell="next"] .step-min,
+body[data-shell="next"] .face input:checked + span,
+body[data-shell="next"] .chip.on,
+body[data-shell="next"] .chip:has(input:checked),
+body[data-shell="next"] .lvl-chip.on,
+body[data-shell="next"] .deck-slide blockquote {
   background: var(--blue-soft) !important;
   border-color: var(--blue) !important;
   color: var(--text) !important;
 }
 
-body[data-shell="next"] .fact-who {
+body[data-shell="next"] .fact-who,
+body[data-shell="next"] .mk-pill.mk-confirm {
   background: var(--violet-soft) !important;
   border-color: var(--violet) !important;
   color: var(--text) !important;
@@ -2713,6 +2744,35 @@ body[data-shell="next"] .fact-who {
 
 body[data-shell="next"] .pupil-results .rc-fb {
   background: var(--surface-2) !important;
+  color: var(--amber) !important;
+}
+
+body[data-shell="next"] .ok,
+body[data-shell="next"] .note-status,
+body[data-shell="next"] .kit-import-ok,
+body[data-shell="next"] .now-strip .now-ex-free,
+body[data-shell="next"] .tt-ex-free,
+body[data-shell="next"] .obj-list li::marker,
+body[data-shell="next"] .ws-saved,
+body[data-shell="next"] .ws-paste-prompt,
+body[data-shell="next"] .ws-paste-help,
+body[data-shell="next"] .ws-choice-review .ws-choice-opt.chosen,
+body[data-shell="next"] .done-yes,
+body[data-shell="next"] .pin-ok,
+body[data-shell="next"] .pupil-remembered,
+body[data-shell="next"] .qc-status.saved,
+body[data-shell="next"] .pw-live-badge {
+  color: var(--green) !important;
+}
+
+body[data-shell="next"] .now-strip .now-ex-cover,
+body[data-shell="next"] .tt-ex-cover {
+  color: var(--blue) !important;
+}
+
+body[data-shell="next"] .pw-new-count,
+body[data-shell="next"] .pw-new,
+body[data-shell="next"] .ws-ed-ph {
   color: var(--amber) !important;
 }
 

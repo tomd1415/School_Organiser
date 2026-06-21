@@ -24,6 +24,12 @@ describe('next-shell dark theme compatibility', () => {
     expect(CSS).toContain('body[data-shell="next"] .ws-input');
   });
 
+  it('renders lesson objectives as a readable dark semantic surface', () => {
+    expect(CSS).toMatch(
+      /body\[data-shell="next"\] \.oc-block\.oc-objectives,[\s\S]{0,220}background: var\(--green-soft\) !important;[\s\S]{0,120}color: var\(--text\) !important;/,
+    );
+  });
+
   it.each(['email', 'number', 'date', 'time', 'datetime-local', 'url', 'tel'])(
     'themes %s controls',
     (type) => {
