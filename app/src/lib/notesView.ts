@@ -35,7 +35,7 @@ export function renderNoteItem(n: NoteItem): string {
       <button type="button" class="link danger" hx-post="/notes/${n.id}/delete" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">delete</button>
     </div>
     <ul class="followups" id="note-${n.id}-fu">${fus}</ul>
-    <form class="fu-form" hx-post="/notes/${n.id}/followups" hx-target="#note-${n.id}-fu" hx-swap="beforeend" hx-on::after-request="this.reset()">
+    <form class="fu-form" hx-post="/notes/${n.id}/followups" hx-target="#note-${n.id}-fu" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
       <input type="text" name="text" data-followup placeholder="+ follow-up" autocomplete="off">
     </form>
   </li>`;

@@ -112,7 +112,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
         <h1>Pupils (roster)</h1>
         <p class="muted">Names are stored <strong>locally only</strong>. Each gets a stable token
           (<code>PUPIL_1</code>…) — the only thing any AI feature ever sees in place of the name.${keyNote}</p>
-        <form class="pupil-add" hx-post="/pupils" hx-target="#pupil-list" hx-swap="afterbegin" hx-on::after-request="this.reset()">
+        <form class="pupil-add" hx-post="/pupils" hx-target="#pupil-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <input type="text" name="name" placeholder="Pupil name…" autocomplete="off" required>
           <button type="submit" class="btn-secondary">Add</button>
         </form>

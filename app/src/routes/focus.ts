@@ -95,7 +95,7 @@ async function buildInner(now: Date, modeOverride: FocusMode | null): Promise<{ 
       <p class="kicker">Do this now${window}</p>
       <h1>${esc(picked.title)}</h1>
       <ul class="followups" id="substeps-${picked.id}">${subList}</ul>
-      <form class="fu-form" hx-post="/focus/${picked.id}/breakdown" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-on::after-request="this.reset()">
+      <form class="fu-form" hx-post="/focus/${picked.id}/breakdown" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
         <input type="text" name="text" data-followup placeholder="+ break into a step" autocomplete="off">
       </form>
       <button type="button" class="link fu-ai" hx-post="/focus/${picked.id}/breakdown-ai" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-disabled-elt="this">✨ Break down with AI</button>

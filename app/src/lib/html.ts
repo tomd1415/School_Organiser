@@ -93,7 +93,7 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
     <div class="note-modal-card">
       <button type="button" class="note-modal-x" aria-label="Close" onclick="this.closest('dialog').close()">✕</button>
       <h2>Quick note</h2>
-      <form id="note-modal-form" hx-post="/note/route" hx-target="#note-modal-body" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+      <form id="note-modal-form" hx-post="/note/route" hx-target="#note-modal-body" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
         <textarea name="text" rows="4" placeholder="Jot anything — I'll work out where it goes…"></textarea>
         <label class="note-private"><input type="checkbox" name="private" value="on"> 🔒 keep private (safeguarding — don't send to AI)</label>
         <div class="note-modal-actions">
@@ -176,7 +176,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
         <button type="button" id="note-btn" class="qc-btn" title="Quick note — I'll work out where it goes (or press n)">📝 Note</button>
         <details class="quick-capture">
           <summary class="qc-btn" title="Jot something to deal with later">＋ Capture</summary>
-          <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+          <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
             <textarea name="body" rows="2" placeholder="Something you were told…" autocomplete="off"></textarea>
             <button type="submit" class="btn-secondary">Capture</button>
             <span id="qc-status"></span>
@@ -211,7 +211,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
     <div class="note-modal-card">
       <button type="button" class="note-modal-x" aria-label="Close" onclick="this.closest('dialog').close()">✕</button>
       <h2>Quick note</h2>
-      <form id="note-modal-form" hx-post="/note/route" hx-target="#note-modal-body" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+      <form id="note-modal-form" hx-post="/note/route" hx-target="#note-modal-body" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
         <textarea name="text" rows="4" placeholder="Jot anything — I'll work out where it goes…"></textarea>
         <label class="note-private"><input type="checkbox" name="private" value="on"> 🔒 keep private (safeguarding — don't send to AI)</label>
         <div class="note-modal-actions">

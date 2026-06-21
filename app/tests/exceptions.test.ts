@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { indexDayExceptions, exceptionForLesson, describeException } from '../src/services/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException, effectiveRoom, NO_EXCEPTION } from '../src/services/exceptions';
 import type { ExceptionRow } from '../src/repos/exceptions';
 
 const row = (over: Partial<ExceptionRow>): ExceptionRow => ({
@@ -45,5 +45,24 @@ describe('exception display helpers', () => {
     expect(describeException(row({ kind: 'cover', staffName: 'Mr X', note: '8B' }))).toMatchObject({ mode: 'cover', label: 'On cover', detail: 'covering for Mr X · 8B' });
     expect(describeException(row({ kind: 'room_change', roomName: 'U2' }))).toMatchObject({ mode: 'room', roomName: 'U2' });
     expect(describeException(null)).toMatchObject({ mode: 'none' });
+  });
+});
+
+// BUG-012 / BUG-047: the room a slot actually runs in once an exception applies — the TA view and the
+// daily print consume this so a cover/room change never sends anyone to the wrong place.
+describe('effectiveRoom — which room the lesson actually runs in', () => {
+  it('keeps the timetabled room when there is no exception (or a free/none effect)', () => {
+    expect(effectiveRoom(NO_EXCEPTION, 'U1')).toBe('U1');
+    expect(effectiveRoom(describeException(row({ kind: 'free' })), 'U1')).toBe('U1');
+    expect(effectiveRoom(NO_EXCEPTION, null)).toBeNull();
+  });
+
+  it('substitutes the new room on a room-change', () => {
+    expect(effectiveRoom(describeException(row({ kind: 'room_change', roomName: 'U2' })), 'U1')).toBe('U2');
+  });
+
+  it('uses a cover-named relocated room, but keeps the timetabled room if cover names none', () => {
+    expect(effectiveRoom(describeException(row({ kind: 'cover', staffName: 'Mr X', roomName: 'Hall' })), 'U1')).toBe('Hall');
+    expect(effectiveRoom(describeException(row({ kind: 'cover', staffName: 'Mr X' })), 'U1')).toBe('U1');
   });
 });

@@ -57,7 +57,7 @@ async function docsSection(courseId: number): Promise<string> {
   return `<div id="cov-docs">
     <h2>Official documents</h2>
     <p class="muted">Upload the spec, examiners' reports or past papers. The text is extracted and given to the AI when it authors schemes/lessons for this course. Open one to preview/edit — extraction can be rough.</p>
-    <form class="setup-add" hx-post="/coverage/doc/upload" hx-encoding="multipart/form-data" hx-target="#cov-docs" hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+    <form class="setup-add" hx-post="/coverage/doc/upload" hx-encoding="multipart/form-data" hx-target="#cov-docs" hx-swap="outerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
       <input type="hidden" name="course" value="${courseId}">
       <select name="role">${roleOpts}</select>
       <input type="text" name="title" placeholder="title… e.g. OCR J277 specification" required maxlength="200">

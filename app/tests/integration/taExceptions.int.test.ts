@@ -60,4 +60,40 @@ describe('TA view honours dated exceptions (integration — BUG-012)', () => {
       await pool.query(`DELETE FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2`, [lessonId, date]);
     }
   });
+
+  // BUG-012 (room substitution): a room_change must show the NEW room + a "Room change" badge, not the
+  // timetabled room — otherwise a TA is sent to the wrong place. cover/room do NOT suppress the lesson.
+  it('a room-change shows the new room and a "Room change" badge on the deep-link', async () => {
+    const slot = await pool.query<{ id: number; roomId: number | null }>(
+      `SELECT tl.id, tl.room_id AS "roomId" FROM timetabled_lessons tl
+         JOIN period_definitions p ON p.id = tl.period_definition_id
+        WHERE tl.purpose = 'teaching' AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+        ORDER BY tl.id LIMIT 1`,
+    );
+    const lessonId = slot.rows[0]!.id;
+    // a room that is NOT the lesson's timetabled room, so seeing its name in the output proves substitution
+    const room = await pool.query<{ id: number; name: string }>(
+      `SELECT id, name FROM rooms WHERE id IS DISTINCT FROM $1 ORDER BY id LIMIT 1`,
+      [slot.rows[0]!.roomId],
+    );
+    if (!room.rows[0]) return; // no alternative room seeded → nothing to prove here
+    const newRoom = room.rows[0];
+    const date = new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10);
+    const url = `/ta?lesson=${lessonId}&date=${date}`;
+    try {
+      await pool.query(
+        `INSERT INTO lesson_exceptions (date, timetabled_lesson_id, kind, room_id, note) VALUES ($1,$2,'room_change',$3,'ZZ test') ON CONFLICT DO NOTHING`,
+        [date, lessonId, newRoom.id],
+      );
+      const res = await app.inject({ method: 'GET', url, headers: { cookie: session } });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain('Preparing ahead'); // the lesson still runs (room-change doesn't suppress)
+      expect(res.body).toContain('Room change'); // the visible badge
+      expect(res.body).toContain(newRoom.name); // the EFFECTIVE room, not the timetabled one
+    } finally {
+      await pool.query(`DELETE FROM lesson_exceptions WHERE date = $1 AND timetabled_lesson_id = $2`, [date, lessonId]);
+      await pool.query(`DELETE FROM occurrence_courses WHERE occurrence_id IN (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2)`, [lessonId, date]);
+      await pool.query(`DELETE FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2`, [lessonId, date]);
+    }
+  });
 });

@@ -86,4 +86,32 @@ describe('app.js unsaved-work banner (jsdom harness — BUG-013 / BUG-033)', () 
     afterRequest(field('now-clock'), true, 'get'); // the 30s poll completes…
     expect(shown()).toBe(true); // …the failed save is still unsaved
   });
+
+  // BUG-033 collision: two fields that share a `name` (e.g. the three name="text" boxes on the lesson
+  // page) must each track their own save state — one's success must not clear the other's warning.
+  it('two fields sharing a name do NOT clear each other\'s warning (BUG-033)', () => {
+    const a = field('text');
+    const b = field('text'); // same name as A — pre-fix they shared the opKey "text"
+    afterRequest(a, false, 'post'); // A fails
+    expect(shown()).toBe(true);
+    afterRequest(b, true, 'post'); // a DIFFERENT same-named field saves OK…
+    expect(shown()).toBe(true); // …must NOT clear A's warning
+    afterRequest(a, true, 'post'); // A retried and saved
+    expect(shown()).toBe(false);
+  });
+
+  // BUG-013: forms gate their reset() on window.htmxSaved(event) — true ONLY for a genuine 2xx with no
+  // app:save-failed trigger (the server turns a real 500 into a 200 + that trigger, so detail.successful
+  // alone is not enough). Read straight off the xhr, so there is no race with the app:save-failed event.
+  it('window.htmxSaved is true only on a real success, false on 4xx and on a swallowed 500', () => {
+    const saved = (window as unknown as { htmxSaved: (e: unknown) => boolean }).htmxSaved;
+    const ev = (successful: boolean, trigger?: string) => ({
+      detail: { successful, xhr: { getResponseHeader: (h: string) => (h === 'HX-Trigger' ? trigger ?? null : null) } },
+    });
+    expect(saved(ev(true))).toBe(true); // clean success → safe to reset
+    expect(saved(ev(false))).toBe(false); // a real 4xx → keep the typed values
+    expect(saved(ev(true, 'app:save-failed'))).toBe(false); // a swallowed 500 → NOT really saved
+    expect(saved(ev(true, 'showToast'))).toBe(true); // an unrelated HX-Trigger doesn't block the reset
+    expect(saved(undefined)).toBe(false); // defensive: no detail → don't clear
+  });
 });

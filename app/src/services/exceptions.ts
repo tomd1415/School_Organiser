@@ -63,3 +63,13 @@ export function describeException(ex: ExceptionRow | null): ExceptionEffect {
       return NO_EXCEPTION;
   }
 }
+
+/** The room a slot actually runs in once any exception is applied: a room-change — or a cover that names
+ *  a relocated room — overrides the timetabled room; anything else keeps it. Pure, so it unit-tests
+ *  without a DB. The render surfaces (TA view, daily print) use this so cover/room never misdirect
+ *  (BUG-012 / BUG-047). Staff is deliberately NOT substituted — a cover row only records who is being
+ *  covered FOR, not the substitute's name, so we surface cover status rather than invent a teacher. */
+export function effectiveRoom(effect: ExceptionEffect, timetabledRoom: string | null | undefined): string | null {
+  if ((effect.mode === 'room' || effect.mode === 'cover') && effect.roomName) return effect.roomName;
+  return timetabledRoom ?? null;
+}

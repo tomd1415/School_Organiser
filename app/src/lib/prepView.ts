@@ -16,5 +16,5 @@ export function renderPrepAdd(action: string, hidden: Record<string, string | nu
   const fields = Object.entries(hidden)
     .map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(String(v))}">`)
     .join('');
-  return `<form class="prep-add" hx-post="${esc(action)}" hx-target="#${esc(listId)}" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful)this.reset()">${fields}<input type="text" name="text" placeholder="+ add an item" autocomplete="off" maxlength="200"></form>`;
+  return `<form class="prep-add" hx-post="${esc(action)}" hx-target="#${esc(listId)}" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">${fields}<input type="text" name="text" placeholder="+ add an item" autocomplete="off" maxlength="200"></form>`;
 }

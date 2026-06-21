@@ -166,7 +166,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         ${
           AI_KEY_ENV_MANAGED
             ? '<p class="muted">The API key is managed by <code>ANTHROPIC_API_KEY</code> in this instance\'s <code>.env</code>. Remove that variable to set the key here instead.</p>'
-            : `<form class="setup-add" hx-post="/settings/ai-key" hx-target="#ai-key-result" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
+            : `<form class="setup-add" hx-post="/settings/ai-key" hx-target="#ai-key-result" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
                 <input type="password" name="key" placeholder="${aiKeyFromSettings ? 'replace stored Anthropic API key' : 'paste your Anthropic API key (sk-ant-…)'}" autocomplete="off">
                 <button type="submit" class="btn-secondary">${aiKeyFromSettings ? 'Update key' : 'Save key'}</button>
                 ${aiKeyFromSettings ? '<button type="submit" class="link danger" name="clear" value="1" formnovalidate>remove key</button>' : ''}
@@ -221,7 +221,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           (safeguarding-flagged feedback stays out of AI). Linking a TA to their staff row adds a
           <strong>"my upcoming lessons"</strong> tab to their view.</p>
         <ul class="pupil-list" id="ta-accounts">${taAccounts.map((a) => renderTaAccount(a, staffRows)).join('') || '<li class="muted">No TA accounts yet.</li>'}</ul>
-        <form class="setup-add" hx-post="/settings/ta-account" hx-target="#ta-accounts" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful) this.reset()">
+        <form class="setup-add" hx-post="/settings/ta-account" hx-target="#ta-accounts" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <input name="name" placeholder="TA name" required maxlength="80">
           <select name="staff">
             <option value="">— staff link (optional) —</option>

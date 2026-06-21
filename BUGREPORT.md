@@ -72,6 +72,43 @@ supported by an appropriate deterministic code path or regression test. It is no
 future defect is possible. “Residual” means the original direct trigger has been closed, but the current
 mitigation still has a concrete security, consistency, filesystem, or data-completeness limitation.
 
+## Re-remediation — 21 June 2026 (in progress)
+
+Each reopened/residual finding was first re-checked against the CURRENT tree (it had moved on since the
+20 June snapshot), then fixed where still open. Tests after this batch: **572 unit / 343 integration green,
+typecheck clean.**
+
+- **BUG-037 — ✅ Resolved (policy changed).** Per the teacher's decision (fail closed on the absolute
+  "no pupil name ever reaches an AI service" rule), redaction now matches every distinctive part of a
+  multi-token roster name **including everyday-word names** ("Summer", "Mark", "Brown") — the earlier
+  utility-first allow-list (`AMBIGUOUS_PARTS`) is removed. Accepted cost: that ordinary word is tokenised
+  in AI context only on a roster that actually contains such a pupil. Single-token names are still caught
+  in full; a 1-char floor avoids redacting initials. `redactNames` and the egress assert share the path
+  (`app/src/services/redact.ts`); `app/tests/redact.test.ts` flips the old case + adds the multi-part case.
+- **BUG-012 + BUG-047 — ✅ Resolved (room) / refined (staff & pupil).** New pure `effectiveRoom()`
+  (`app/src/services/exceptions.ts`); the TA view (`ta.ts`) and the daily print (`lesson.ts`) now show the
+  EFFECTIVE room and a visible cover/room badge, so neither misdirects. Staff is deliberately NOT
+  substituted (a cover row records only who is covered FOR, not the substitute) — cover is surfaced as a
+  badge, not a fabricated name. **Accuracy note:** the pupil `/me` view shows no room/staff at all, so the
+  pupil side of BUG-012 was not a real defect; its free-suppression is correct. Tests: `exceptions.test.ts`
+  (+3 `effectiveRoom`), `taExceptions.int.test.ts` (+1 room-change renders the new room + badge).
+- **BUG-013 — ✅ Resolved.** `window.htmxSaved(event)` (`app/public/app.js`) reads the response's
+  `HX-Trigger` straight off the xhr, so a swallowed 500 (200 + `app:save-failed`, which makes
+  `event.detail.successful` true) no longer counts as success. Every `reset()` form is gated on it
+  (resourceView, tasks, pupils, notesView, focus, prepView, coverage, settingsPage, and the html.ts
+  note/quick-capture forms), so typed values survive a failed save. `app/tests/appjsUnsaved.test.ts` +1.
+- **BUG-033 — ✅ Resolved.** `opKey` now stamps each element its OWN key and no longer falls back to the
+  shared `name`/`id`, so the three `name="text"` boxes on the lesson page (and any same-name fields) can't
+  clear each other's "not saved" warning. `app/tests/appjsUnsaved.test.ts` +1 (same-name collision).
+
+Still to do (this session continues): **BUG-021** (residual map-swap + undo-lock atomicity), **BUG-025,
+BUG-027** (crash-safe recurrence cursor / email idempotency), **BUG-048** (sweep claim — single-process,
+so the multi-process race is moot; only the crash-skips-a-day residual), **BUG-028/029** (resource/file
+atomicity + tombstone), **BUG-017** (credential+epoch txn), **BUG-030** (worksheet capability), **BUG-003**
+(image-URL expiry), **BUG-043** (SAR file packaging), **BUG-007** (upload streaming), **BUG-010** (matched
+restore set), and the **BUG-023** policy call (drop vs keep an inactive course on already-scheduled future
+lessons).
+
 ### Tests and checks performed
 
 - `npm run typecheck` passed.

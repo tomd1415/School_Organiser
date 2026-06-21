@@ -10,7 +10,7 @@ import { classifyDay, resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
 import { findOrCreateOccurrence, getOccurrenceCourses, taMayAccessOccurrenceCourse } from '../repos/occurrence';
 import { listExceptionsBetween } from '../repos/exceptions';
-import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException, effectiveRoom, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { getEffectiveLesson } from '../repos/adaptations';
 import { listResourcesForPlan, listResourcesForAdaptation, type LinkedResource } from '../repos/resources';
 import { addTaFeedback, listTaFeedback } from '../repos/taFeedback';
@@ -65,7 +65,7 @@ async function lessonsAt(weekday: number, slotOrder: number): Promise<SlotLesson
   return rows;
 }
 
-async function renderLessonBlock(l: SlotLesson, date: string, csrf: string): Promise<string> {
+async function renderLessonBlock(l: SlotLesson, date: string, csrf: string, effect: ExceptionEffect = NO_EXCEPTION): Promise<string> {
   const occId = await findOrCreateOccurrence(l.lessonId, date);
   const sections = await getOccurrenceCourses(occId);
   const parts: string[] = [];
@@ -110,10 +110,18 @@ async function renderLessonBlock(l: SlotLesson, date: string, csrf: string): Pro
         </div>
       </section>`);
   }
+  const room = effectiveRoom(effect, l.roomName);
+  // Show the EFFECTIVE room (a room-change/cover may relocate the lesson) + a visible cover/room badge, so
+  // a TA is never sent to the wrong place (BUG-012). Staff stays the timetabled lead; the badge makes any
+  // cover explicit rather than fabricating a substitute's name we don't hold.
+  const exTag =
+    effect.mode === 'room' || effect.mode === 'cover'
+      ? ` · <span class="ld-ex ld-ex-${effect.mode}">${esc(effect.label)}${effect.detail ? ` (${esc(effect.detail)})` : ''}</span>`
+      : '';
   return `
     <div class="ta-lesson-head">
       <h1>${esc(l.groupName ?? 'Lesson')}</h1>
-      <p class="ld-meta">${esc(l.label)} · ${esc(l.start)}–${esc(l.end)}${l.roomName ? ` · ${esc(l.roomName)}` : ''}${l.isSelf ? '' : ` · led by ${esc(l.staffName)}`}</p>
+      <p class="ld-meta">${esc(l.label)} · ${esc(l.start)}–${esc(l.end)}${room ? ` · ${esc(room)}` : ''}${l.isSelf ? '' : ` · led by ${esc(l.staffName)}`}${exTag}</p>
     </div>
     ${parts.join('') || '<p class="muted">No courses attached to this lesson.</p>'}`;
 }
@@ -197,14 +205,15 @@ export function registerTaRoutes(app: FastifyInstance): void {
         // A shared-password TA (taStaffId 0) gets no "my lessons" tab and may NOT deep-link to an
         // arbitrary lesson by id — only named TAs (their own staff row) or the teacher peeking.
         const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
-        const exFree =
-          l && describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId)).mode === 'free';
+        const exEffect = l
+          ? describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId))
+          : NO_EXCEPTION;
         if (!l || !allowed) {
           body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
-        } else if (exFree) {
+        } else if (exEffect.mode === 'free') {
           body = `<section class="card">${tabs}<p class="muted">That lesson is off timetable / cancelled on ${esc(q.data.date)}.</p></section>`; // BUG-012
         } else {
-          const block = await renderLessonBlock(l, q.data.date, csrf);
+          const block = await renderLessonBlock(l, q.data.date, csrf, exEffect);
           body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
             <p class="ld-meta">Preparing ahead: <strong>${esc(q.data.date)}</strong></p>${block}</section>`;
         }
@@ -235,7 +244,7 @@ export function registerTaRoutes(app: FastifyInstance): void {
         const dx = indexDayExceptions(await listExceptionsBetween(chosen.date, chosen.date));
         const lessons = mine.filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free');
         const blocks: string[] = [];
-        for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf));
+        for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf, describeException(exceptionForLesson(dx, l.lessonId))));
         body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
           ${blocks.join('<hr>') || '<p class="muted">Nothing timetabled in this slot.</p>'}
         </section>`;

@@ -584,7 +584,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
         </div>
         <div class="header-right">
           <span id="monospace-date" class="monospace-date">${esc(dateLabel)}</span>
-          <span id="monospace-clock" class="monospace-clock">${esc(clockStr)}</span>
+          <span id="monospace-clock" class="monospace-clock" data-tz="${esc(ctx.tz)}">${esc(clockStr)}</span>
         </div>
       </header>`;
       return reply.type('text/html').send(html);

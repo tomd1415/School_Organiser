@@ -87,7 +87,7 @@ import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupI
 import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
-import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
+import { indexDayExceptions, exceptionForLesson, describeException, effectiveRoom, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { classifyDay } from '../services/clock';
 import { listRooms, listStaff } from '../repos/setup';
 import { renderPrepList, renderPrepAdd } from '../lib/prepView';
@@ -1391,7 +1391,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       // be materialised. cover / room-change still print (the lesson runs, just adjusted).
       .filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free')
       .sort((a, b) => (order.get(`${a.weekday}:${a.slotOrder}`) ?? 0) - (order.get(`${b.weekday}:${b.slotOrder}`) ?? 0));
-    const blocks = (await Promise.all(todays.map((l) => lessonPrintBlock(l.lessonId, date)))).filter(Boolean);
+    const blocks = (await Promise.all(todays.map((l) => lessonPrintBlock(l.lessonId, date, describeException(exceptionForLesson(dx, l.lessonId)))))).filter(Boolean);
     const body = blocks.length ? blocks.join('') : '<p>No lessons timetabled for this day.</p>';
     return reply.type('text/html').send(printPage(`Cover / briefing — ${date}`, body));
   });
@@ -1406,7 +1406,7 @@ function printPage(title: string, body: string): string {
 }
 
 /** One lesson rendered for print: each course section's effective plan, resources and last stop. */
-async function lessonPrintBlock(lessonId: number, date: string): Promise<string> {
+async function lessonPrintBlock(lessonId: number, date: string, effect: ExceptionEffect = NO_EXCEPTION): Promise<string> {
   const occId = await findOrCreateOccurrence(lessonId, date);
   const header = await getOccurrenceHeader(occId);
   if (!header) return '';
@@ -1433,6 +1433,11 @@ async function lessonPrintBlock(lessonId: number, date: string): Promise<string>
       </section>`;
     }),
   );
-  const when = `${header.periodLabel} ${header.start}–${header.end}${header.roomName ? ` · ${header.roomName}` : ''}`;
+  // Effective room + a plain-text cover/room note, so a printed plan never directs to the wrong room
+  // (BUG-047). `when` is esc()'d wholesale below, so this stays plain text.
+  const room = effectiveRoom(effect, header.roomName);
+  const exNote =
+    effect.mode === 'room' || effect.mode === 'cover' ? ` · ${effect.label}${effect.detail ? ` (${effect.detail})` : ''}` : '';
+  const when = `${header.periodLabel} ${header.start}–${header.end}${room ? ` · ${room}` : ''}${exNote}`;
   return `<article class="lp-lesson"><h1>${esc(header.groupName ?? purposeLabel(header.purpose))} <span class="lp-when">${esc(when)}</span></h1>${sections.join('')}</article>`;
 }

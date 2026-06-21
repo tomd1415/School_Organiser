@@ -135,14 +135,24 @@ describe('redact — the pupil-name boundary', () => {
     expect(containsRosterName('spoke to Jose', r)).toBe(true);
   });
 
-  // BUG-037 explicit policy: an ambiguous common-word name part is NOT matched alone (only the full
-  // name), so ordinary prose isn't over-redacted — but the full name and the egress assert still hold.
-  it('does not partial-match an ambiguous common-word name part, but still catches the full name', () => {
+  // BUG-037 — teacher policy (2026-06-21): FAIL CLOSED on roster common-words. A name part that is also
+  // an everyday word IS redacted when it's a real pupil's name, honouring "no pupil name ever reaches an
+  // AI service" — at the accepted cost of redacting that ordinary word too (only on a roster that has
+  // such a pupil). This deliberately flips the earlier utility-first allow-list behaviour.
+  it('fail-closed: redacts a common-word name part (Summer/Brown), even in ordinary prose', () => {
     const r = [{ id: 1, displayName: 'Summer Brown', aiToken: 'PUPIL_1', active: true }];
-    expect(redactNames('over the summer the leaves turn brown', r)).toBe('over the summer the leaves turn brown');
-    expect(containsRosterName('summer term planning', r)).toBe(false);
-    expect(redactNames('Summer Brown was present', r)).toBe('PUPIL_1 was present');
-    expect(containsRosterName('Summer Brown', r)).toBe(true);
+    expect(redactNames('over the summer the leaves turn brown', r)).toBe('over the PUPIL_1 the leaves turn PUPIL_1');
+    expect(containsRosterName('summer term planning', r)).toBe(true); // the bare part now trips the egress assert
+    expect(redactNames('Summer was present', r)).toBe('PUPIL_1 was present'); // the gap this closes
+    expect(containsRosterName('Summer', r)).toBe(true);
+  });
+
+  // BUG-037 fail-closed also covers a common-word FIRST name with a distinctive surname — the bare first
+  // name used to leak because only the surname carried the partial match.
+  it('fail-closed: catches the common-word first name of a multi-part name (Mark Taylor → "Mark")', () => {
+    const r = [{ id: 1, displayName: 'Mark Taylor', aiToken: 'PUPIL_1', active: true }];
+    expect(redactNames('Mark improved a lot this week', r)).toBe('PUPIL_1 improved a lot this week');
+    expect(containsRosterName('Mark improved', r)).toBe(true);
   });
 
   // BUG-037 collision: a shared first name must map to the right pupil, not be claimed by a longer name.

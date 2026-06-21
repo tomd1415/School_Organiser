@@ -74,29 +74,26 @@ function fold(s: string): string {
     .replace(new RegExp(APOS, 'gu'), '');
 }
 
-// Given/sur-name PARTS are matched on their own (so "Anna struggled" is caught from "Anna Lee"), EXCEPT
-// parts that are too short, or are everyday English words also used as names — matching those alone
-// would redact ordinary prose ("mark the work", "summer term", "leaves turn brown"). Explicit, reviewable
-// policy (BUG-037): for an ambiguous or single-token name only the FULL name is matched; the egress
-// assert still fails closed on the full name. Tune this set to your roster.
-const AMBIGUOUS_PARTS: ReadonlySet<string> = new Set([
-  'may', 'rose', 'grace', 'hope', 'faith', 'joy', 'summer', 'april', 'june', 'dawn', 'sky', 'ivy', 'lily',
-  'daisy', 'pearl', 'jade', 'holly', 'iris', 'art', 'will', 'mark', 'rich', 'frank', 'guy', 'grant',
-  'star', 'sunny', 'brown', 'white', 'green', 'black', 'gray', 'grey', 'wood', 'woods', 'field', 'fields',
-  'hill', 'lane', 'snow', 'winter', 'stone', 'bell', 'cook', 'fox', 'hall', 'king', 'park', 'reed',
-  'cross', 'bridge', 'day', 'long', 'young', 'little', 'small', 'bird', 'wolf', 'lamb', 'ward', 'noble',
-  'sharp', 'swift', 'the', 'and', 'for', 'our', 'new',
-]);
+// Each given/sur-name PART of a multi-token name is matched on its own too, so a first- or surname-only
+// reference is caught ("Anna struggled" from "Anna Lee"). POLICY (BUG-037, teacher decision 2026-06-21):
+// FAIL CLOSED — a part that is also an everyday English word ("Summer", "Mark", "Brown", "May") is STILL
+// matched, because the absolute rule is "no pupil name ever reaches an AI service". The cost is scoped
+// over-redaction: that ordinary word is tokenised in AI context ONLY on a roster that actually contains
+// such a pupil (a class with a "Summer" will see "summer term" → a token). We keep just two limits — a
+// length floor of 2 (never match a 1-char initial like the "J" in "Anna J Lee", which would redact every
+// "J"/"I"), and single-token names are left to the full-name pass (the part IS the whole name). To trade
+// some privacy back for fewer false positives, reintroduce a roster-tuned stop-list of folded words here.
 
-/** The distinct, distinctive name parts worth matching on their own (multi-token names only). */
+/** The distinct name parts worth matching on their own (multi-token names only). Fail-closed: common
+ *  words that are real roster names ARE included — see the policy note above. */
 function significantParts(name: string): string[] {
   const parts = name.trim().split(new RegExp(`(?:\\s|${HYPH})+`, 'u')).filter(Boolean);
-  if (parts.length < 2) return []; // single-token name → only the full name is matched
+  if (parts.length < 2) return []; // single-token name → already matched in full by fullPattern
   const seen = new Set<string>();
   const out: string[] = [];
   for (const p of parts) {
     const f = fold(p);
-    if (f.length < 3 || AMBIGUOUS_PARTS.has(f) || seen.has(f)) continue;
+    if (f.length < 2 || seen.has(f)) continue; // skip 1-char initials; keep everyday-word names (fail closed)
     seen.add(f);
     out.push(p);
   }

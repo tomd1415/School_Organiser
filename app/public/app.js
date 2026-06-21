@@ -130,11 +130,14 @@
     saveToast(n === 1 ? LOST : '⚠ ' + n + ' changes not saved — your text is still on screen. Check the connection and try again.');
   }
   // A stable per-element key so a RETRY of the same field clears its OWN failure and an unrelated request
-  // never does. Falls back to a stamped id when the element has no name/id of its own.
+  // never does. Each element gets its OWN stamped key (cached on the node) — we deliberately do NOT fall
+  // back to `name`/`id`, because several fields can share a name (e.g. three name="text" boxes on the
+  // lesson page) and a shared key let one field's success wipe another's "not saved" warning (BUG-033).
+  // A field that genuinely wants a shared/stable key across re-render can opt in with data-save-id.
   var opSeq = 0;
   function opKey(elt) {
     if (!elt || !elt.getAttribute) return null;
-    if (!elt.__saveKey) elt.__saveKey = elt.getAttribute('data-save-id') || elt.getAttribute('name') || elt.id || ('op-' + ++opSeq);
+    if (!elt.__saveKey) elt.__saveKey = elt.getAttribute('data-save-id') || ('op-' + ++opSeq);
     return elt.__saveKey;
   }
   function markUnsaved(elt) { var k = opKey(elt); if (k) unsavedOps[k] = true; refreshToast(); }
@@ -159,6 +162,22 @@
     if (isWrite(d)) markUnsaved(elt);                                             // a failed WRITE is unsaved work
     // a failed READ (a search, a background poll) is not "unsaved work" — leave the banner state alone.
   });
+
+  // A form's `hx-on::after-request="this.reset()"` would wipe typed text even when the save FAILED: the
+  // server turns a real 500 into a 200 + an `app:save-failed` HX-Trigger so HTMX can swap an error
+  // fragment, but that ALSO makes `event.detail.successful` true. So "did this really save?" must check
+  // BOTH a 2xx AND the absence of that trigger — read straight off the xhr, so there is no race with the
+  // app:save-failed event. Forms gate their reset on it: hx-on::after-request="if(window.htmxSaved(event))this.reset()" (BUG-013).
+  window.htmxSaved = function (e) {
+    try {
+      var d = e && e.detail;
+      if (!d || !d.successful) return false; // a real 4xx (validation / CSRF) — keep the typed values
+      var trig = d.xhr && d.xhr.getResponseHeader && d.xhr.getResponseHeader('HX-Trigger');
+      return !(trig && trig.indexOf('app:save-failed') !== -1); // a swallowed 500 → not really saved
+    } catch (_) {
+      return false; // if in doubt, don't clear the form
+    }
+  };
 
   // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a
   // page; `?` shows the cheat-sheet; Esc closes things. The principle is "nothing requires the mouse".
