@@ -20,24 +20,20 @@ class/id/`data-*`/event/route the UI relies on, add a dated bullet with a clear 
 
 ## 2026-06-21 — ATL feature + reopened-audit remediation
 
-### 🔴 Action needed in the next shell
+### 🟢 Completed in the next shell
 
-1. **ATL styles → add to `public/styles-overhaul.css`.** The new ATL (1–4 attitude-to-learning) picker is
-   already wired into the next-shell views (`markModalView.ts` calls `renderAtlPicker`; `markingView.ts` has
-   the `mk-atl` link), **but `styles-overhaul.css` has no `.atl*` rules**, so it renders unstyled. Copy the
-   block from `public/styles.css` (search `ATL (attitude to learning)`): `.atl`, `.atl-lbl`, `.atl-b`,
-   `.atl-1`…`.atl-4`, `.atl-b.on`, `.atl-list`, `.atl-row`, `.atl-name`, `.atl-grid`, `.mm-atl-link`, `.mk-atl`.
-   The standalone live grid (`GET /lesson/oc/:id/atl`) renders through `layout()`, so it shows in the next
-   shell too — same missing-CSS caveat.
+1. **ATL styles are present in `public/styles-overhaul.css`.** The new ATL (1–4 attitude-to-learning) picker
+   is wired into `markModalView.ts` and `markingView.ts`, and its `.atl*`, `.mm-atl-link`, and `.mk-atl`
+   rules are scoped to the next shell.
 
-2. **`window.htmxSaved(event)` → port it into `public/app-overhaul.js`.** BUG-013's fix added this helper to
-   `public/app.js` (classic) and switched forms to `hx-on::after-request="if(window.htmxSaved(event))this.reset()"`
-   — **including the shared note + quick-capture modal forms** that `src/lib/html.ts` renders in BOTH shells.
-   `app-overhaul.js` does **not** define `window.htmxSaved`, so in the next shell those forms evaluate
-   `undefined(event)` → it throws and the form never resets after a save. Port the function verbatim from
-   `app.js` (it reads the response's `HX-Trigger` off the xhr and returns `true` only for a genuine 2xx with
-   no `app:save-failed`). The server turns a real 500 into a 200 + an `app:save-failed` trigger, so
-   `event.detail.successful` alone is **not** a safe "did it save?" signal.
+2. **`window.htmxSaved(event)` is present in `public/app-overhaul.js`.** Shared note and quick-capture forms
+   therefore reset only after a genuine successful save, including the server's `app:save-failed` signal.
+
+3. **Dark-mode parity pass completed for incrementally migrated widgets.** `styles-overhaul.css` now defines
+   the legacy variable aliases used by next-shell views, supplies a next-shell high-contrast palette, themes
+   all standard textual/date inputs, and provides scoped dark surfaces for the remaining classic worksheet,
+   pupil, capture, search, pedagogy, safeguarding, and editor widgets. Print output is explicitly restored to
+   a light paper-safe palette. `tests/overhaulStyles.test.ts` guards the token bridge and scope.
 
 ### 🟢 Already mirrored by the UI dev (no action — just confirm full coverage)
 
@@ -45,8 +41,7 @@ class/id/`data-*`/event/route the UI relies on, add a dated bullet with a clear 
   confirm every other next-shell lesson/daily-print renderer also uses `effectiveRoom(effect, room)` and shows
   the cover/room **badge** instead of the raw timetabled room — otherwise a TA or cover teacher is directed to
   the wrong room. Helper: `effectiveRoom` in `src/services/exceptions.ts`.
-- **ATL view wiring.** `markModalView.ts` + `markingView.ts` already call `renderAtlPicker` / the `mk-atl`
-  link ✓ — only the CSS (item 1) is outstanding.
+- **ATL view wiring.** `markModalView.ts` + `markingView.ts` call `renderAtlPicker` / the `mk-atl` link ✓.
 
 ### ℹ️ Behaviour changes to be aware of (no UI change required — just don't fight them)
 

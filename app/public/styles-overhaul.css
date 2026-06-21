@@ -40,6 +40,55 @@
   --good: #83dfa2;
   --warn: #ffc06a;
   --rail: #0c111a;
+
+  /* Compatibility aliases used by migrated views and legacy widgets. */
+  --card-bg: var(--surface);
+  --bg-color: var(--bg-soft);
+  --text-color: var(--text);
+  --text-muted: var(--muted);
+  --border-color: var(--line);
+}
+
+/* The next shell is dark by default, so contrast mode must override it here. */
+:root[data-theme="contrast"]:has(body[data-shell="next"]) {
+  color-scheme: dark;
+  --bg: #000;
+  --bg-soft: #000;
+  --surface: #000;
+  --surface-2: #111;
+  --surface-3: #1f1f1f;
+  --line: #d7d7d7;
+  --line-strong: #fff;
+  --text: #fff;
+  --muted: #f2f2f2;
+  --quiet: #d7d7d7;
+  --violet: #d8d3ff;
+  --violet-soft: #211d4d;
+  --teal: #7dffed;
+  --teal-soft: #073d36;
+  --amber: #ffd783;
+  --amber-soft: #493000;
+  --red: #ffb0b8;
+  --red-soft: #4d1118;
+  --blue: #aad4ff;
+  --blue-soft: #082d52;
+  --green: #a7ffba;
+  --green-soft: #0b3d18;
+  --shadow: none;
+  --card: var(--surface);
+  --ink: var(--text);
+  --accent: var(--teal);
+  --accent-soft: var(--teal-soft);
+  --error: var(--red);
+  --danger: var(--red);
+  --good: var(--green);
+  --warn: var(--amber);
+  --rail: var(--bg);
+  --card-bg: var(--surface);
+  --bg-color: var(--bg-soft);
+  --text-color: var(--text);
+  --text-muted: var(--muted);
+  --border-color: var(--line);
 }
 
 body[data-shell="next"] {
@@ -51,6 +100,14 @@ body[data-shell="next"] {
   font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   min-height: 100vh;
   position: relative;
+}
+
+:root[data-theme="contrast"] body[data-shell="next"] {
+  background: var(--bg) !important;
+}
+
+:root[data-theme="contrast"] body[data-shell="next"]::before {
+  display: none;
 }
 
 body[data-shell="next"]::before {
@@ -466,11 +523,6 @@ body.focus-mode[data-shell="next"] .header-middle {
   margin-left: 0;
 }
 
-.chip.active .chip-count {
-  background: #fff;
-  color: #0070f3;
-}
-
 /* Quick Capture Dock (Now screen) */
 body[data-shell="next"] .quick-capture-dock {
   display: flex;
@@ -499,8 +551,8 @@ body[data-shell="next"] .quick-capture-dock button {
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
-  background: #0070f3;
-  color: #fff;
+  background: var(--teal);
+  color: var(--bg);
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
@@ -509,7 +561,7 @@ body[data-shell="next"] .quick-capture-dock button {
 }
 
 body[data-shell="next"] .quick-capture-dock button:hover {
-  background: #0051a2;
+  background: #7dffed;
 }
 
 body[data-shell="next"] .quick-capture-dock #qc-status {
@@ -525,11 +577,11 @@ body.pupil-body[data-shell="next"] .pupil-top {
   justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(17, 24, 36, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(59, 75, 98, 0.75);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.22);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -560,7 +612,7 @@ body.pupil-body[data-shell="next"] .pupil-remember {
 
 body.pupil-body[data-shell="next"] .pupil-remember:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--bg);
 }
 
 body.pupil-body[data-shell="next"] .pupil-logout {
@@ -579,18 +631,18 @@ body.pupil-body[data-shell="next"] .pupil-logout {
 }
 
 body.pupil-body[data-shell="next"] .pupil-logout:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fca5a5;
+  background: var(--red-soft);
+  color: var(--red);
+  border-color: var(--red);
 }
 
 body.pupil-body[data-shell="next"] .pupil-top.test-banner {
-  background: rgba(254, 243, 199, 0.85);
-  border-bottom: 1px solid #fde68a;
+  background: rgba(59, 44, 25, 0.94);
+  border-bottom: 1px solid var(--amber);
 }
 
 body.pupil-body[data-shell="next"] .test-banner .pupil-hi {
-  color: #92400e;
+  color: var(--amber);
 }
 
 /* Two-pane Workspace Layout on Next Gen */
@@ -889,8 +941,8 @@ body[data-shell="next"] .pupil-feedback .chip-row label.chip input[type="checkbo
 }
 
 body[data-shell="next"] .pupil-feedback .chip-row label.chip:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
+  background: var(--surface-3);
+  border-color: var(--line-strong);
 }
 
 body[data-shell="next"] .pupil-feedback .chip-row label.chip:has(input:checked),
@@ -930,8 +982,8 @@ body[data-shell="next"] .pupil-feedback textarea:focus {
 
 /* Pupil Results (Encouraging feedback card) */
 body[data-shell="next"] .pupil-results {
-  background: var(--accent-soft, #f0fdf4);
-  border: 1px solid #bbf7d0;
+  background: var(--green-soft);
+  border: 1px solid var(--green);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
@@ -941,7 +993,7 @@ body[data-shell="next"] .pupil-results h2 {
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 1.25rem;
-  color: #166534;
+  color: var(--green);
   font-weight: 700;
   display: flex;
   justify-content: space-between;
@@ -949,8 +1001,8 @@ body[data-shell="next"] .pupil-results h2 {
 }
 
 body[data-shell="next"] .pupil-results .rc-total {
-  background: #166534;
-  color: #fff;
+  background: var(--green);
+  color: var(--bg);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 13px;
@@ -958,11 +1010,11 @@ body[data-shell="next"] .pupil-results .rc-total {
 
 body[data-shell="next"] .pupil-results .rc-comment {
   font-size: 16px;
-  color: #14532d;
-  background: #fff;
+  color: var(--text);
+  background: var(--surface);
   padding: 12px 16px;
   border-radius: 12px;
-  border-left: 4px solid #16a34a;
+  border-left: 4px solid var(--green);
   margin: 12px 0 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
@@ -978,7 +1030,7 @@ body[data-shell="next"] .pupil-results .rc-list {
 
 body[data-shell="next"] .pupil-results .rc-item {
   padding: 12px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   display: flex;
@@ -987,21 +1039,21 @@ body[data-shell="next"] .pupil-results .rc-item {
 }
 
 body[data-shell="next"] .pupil-results .rc-ok {
-  color: #16a34a;
+  color: var(--green);
   font-weight: 900;
   font-size: 1.25rem;
   margin-right: 8px;
 }
 
 body[data-shell="next"] .pupil-results .rc-no {
-  color: #dc2626;
+  color: var(--red);
   font-weight: 900;
   font-size: 1.25rem;
   margin-right: 8px;
 }
 
 body[data-shell="next"] .pupil-results .rc-part {
-  color: #d97706;
+  color: var(--amber);
   font-weight: 900;
   font-size: 1.25rem;
   margin-right: 8px;
@@ -1009,19 +1061,19 @@ body[data-shell="next"] .pupil-results .rc-part {
 
 body[data-shell="next"] .pupil-results .rc-q {
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text);
 }
 
 body[data-shell="next"] .pupil-results .rc-score {
   font-weight: 700;
-  color: #4b5563;
+  color: var(--muted);
   align-self: flex-end;
 }
 
 body[data-shell="next"] .pupil-results .rc-fb {
   font-size: 14px;
-  color: #4b5563;
-  background: #f9fafb;
+  color: var(--amber);
+  background: var(--surface-2);
   padding: 8px 12px;
   border-radius: 8px;
   margin-top: 4px;
@@ -1319,6 +1371,13 @@ body[data-shell="next"] button.link {
 body[data-shell="next"] input[type="text"],
 body[data-shell="next"] input[type="search"],
 body[data-shell="next"] input[type="password"],
+body[data-shell="next"] input[type="email"],
+body[data-shell="next"] input[type="number"],
+body[data-shell="next"] input[type="date"],
+body[data-shell="next"] input[type="time"],
+body[data-shell="next"] input[type="datetime-local"],
+body[data-shell="next"] input[type="url"],
+body[data-shell="next"] input[type="tel"],
 body[data-shell="next"] select,
 body[data-shell="next"] textarea {
   background: var(--surface) !important;
@@ -1333,6 +1392,13 @@ body[data-shell="next"] textarea {
 body[data-shell="next"] input[type="text"]:focus,
 body[data-shell="next"] input[type="search"]:focus,
 body[data-shell="next"] input[type="password"]:focus,
+body[data-shell="next"] input[type="email"]:focus,
+body[data-shell="next"] input[type="number"]:focus,
+body[data-shell="next"] input[type="date"]:focus,
+body[data-shell="next"] input[type="time"]:focus,
+body[data-shell="next"] input[type="datetime-local"]:focus,
+body[data-shell="next"] input[type="url"]:focus,
+body[data-shell="next"] input[type="tel"]:focus,
 body[data-shell="next"] select:focus,
 body[data-shell="next"] textarea:focus {
   border-color: var(--violet) !important;
@@ -2525,4 +2591,197 @@ body[data-shell="next"] .present-position {
   color: #c4cddd !important;
   font-variant-numeric: tabular-nums !important;
   font-weight: bold !important;
+}
+
+/* Legacy-widget compatibility layer
+ *
+ * The next shell deliberately imports the classic stylesheet while routes are
+ * migrated incrementally. These scoped rules remove the remaining light-mode
+ * surfaces without changing the widgets' markup or interaction contracts.
+ */
+body[data-shell="next"] .search-panel,
+body[data-shell="next"] .quick-capture[open] .qc-form,
+body[data-shell="next"] .kbd-card,
+body[data-shell="next"] .md-edit-preview,
+body[data-shell="next"] .edit-slide,
+body[data-shell="next"] .ws-doc-preview,
+body[data-shell="next"] .ws-ed-preview,
+body[data-shell="next"] .ai-detail,
+body[data-shell="next"] .ai-detail pre,
+body[data-shell="next"] .sg-text,
+body[data-shell="next"] .ped-card,
+body[data-shell="next"] .pin-key,
+body[data-shell="next"] .ws-parsons-line,
+body[data-shell="next"] .ws-parsons-btns button {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .kbd-card kbd,
+body[data-shell="next"] .paste-help-steps kbd,
+body[data-shell="next"] .ws-table th,
+body[data-shell="next"] .ws-answer-cell,
+body[data-shell="next"] .ws-choice-cell,
+body[data-shell="next"] .ws-match-slot,
+body[data-shell="next"] .ws-ed-card-heading,
+body[data-shell="next"] .ws-review .ws-answer.ws-empty {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .ws-input,
+body[data-shell="next"] .ws-blank,
+body[data-shell="next"] .ws-ed-ta,
+body[data-shell="next"] .ws-ed-input,
+body[data-shell="next"] select.ws-ed-kind {
+  background: var(--bg-soft) !important;
+  border-color: var(--line-strong) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .timer-banner:not(:empty),
+body[data-shell="next"] .cov-drop-warn,
+body[data-shell="next"] .ex-banner,
+body[data-shell="next"] .ex-note,
+body[data-shell="next"] .now-exbanner,
+body[data-shell="next"] .edit-banner.edit-master,
+body[data-shell="next"] .fact-deadline,
+body[data-shell="next"] .fact-when,
+body[data-shell="next"] .test-banner,
+body[data-shell="next"] .ws-cloze,
+body[data-shell="next"] .pslide-notes,
+body[data-shell="next"] .ws-ed-card-note,
+body[data-shell="next"] .ws-ed-card-qtable {
+  background: var(--amber-soft) !important;
+  border-color: var(--amber) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .captured.sg,
+body[data-shell="next"] .nm-sg,
+body[data-shell="next"] .ex-banner.ex-cancelled,
+body[data-shell="next"] .ta-fb-list li.sg,
+body[data-shell="next"] .sg-item.sg-new {
+  background: var(--red-soft) !important;
+  border-color: var(--red) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .cc-master,
+body[data-shell="next"] .ex-banner.ex-free,
+body[data-shell="next"] .now-exbanner.now-ex-free,
+body[data-shell="next"] .edit-banner.edit-local,
+body[data-shell="next"] .fact-money,
+body[data-shell="next"] .ws-shot-cell,
+body[data-shell="next"] .ws-paste,
+body[data-shell="next"] .ws-match-tray,
+body[data-shell="next"] .ws-match-tile,
+body[data-shell="next"] .ws-auto,
+body[data-shell="next"] .ws-review .ws-answer,
+body[data-shell="next"] .ws-progress-done,
+body[data-shell="next"] .ws-ed-card-image,
+body[data-shell="next"] .ws-ed-card-placeholder,
+body[data-shell="next"] .ws-ed-drop {
+  background: var(--green-soft) !important;
+  border-color: var(--green) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .cal-insight,
+body[data-shell="next"] .ex-banner.ex-cover,
+body[data-shell="next"] .now-exbanner.now-ex-cover,
+body[data-shell="next"] .fact,
+body[data-shell="next"] .ws-instruction,
+body[data-shell="next"] .ws-chip,
+body[data-shell="next"] .ws-match-slot.is-drop,
+body[data-shell="next"] .ws-progress,
+body[data-shell="next"] .sig-btn.on,
+body[data-shell="next"] .word-chip,
+body[data-shell="next"] .ws-ed-card-text {
+  background: var(--blue-soft) !important;
+  border-color: var(--blue) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .fact-who {
+  background: var(--violet-soft) !important;
+  border-color: var(--violet) !important;
+  color: var(--text) !important;
+}
+
+body[data-shell="next"] .pupil-results .rc-fb {
+  background: var(--surface-2) !important;
+  color: var(--amber) !important;
+}
+
+body[data-shell="next"] .ws-choice-opt > label:hover,
+body[data-shell="next"] .pin-key:active {
+  background: var(--surface-3) !important;
+}
+
+body[data-shell="next"] .ws-choice-opt > label:has(input:checked),
+body[data-shell="next"] .ws-match-tile.is-picked {
+  background: var(--teal-soft) !important;
+  border-color: var(--teal) !important;
+  color: var(--text) !important;
+}
+
+@media (forced-colors: active) {
+  body[data-shell="next"] .card,
+  body[data-shell="next"] .phase-card,
+  body[data-shell="next"] section.card,
+  body[data-shell="next"] .now-card,
+  body[data-shell="next"] button,
+  body[data-shell="next"] input,
+  body[data-shell="next"] select,
+  body[data-shell="next"] textarea {
+    forced-color-adjust: auto;
+  }
+}
+
+@media print {
+  body[data-shell="next"],
+  body[data-shell="next"]::before {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body[data-shell="next"] .scaffolded-ribbon,
+  body[data-shell="next"] .dynamic-context-header,
+  body[data-shell="next"] .quick-capture,
+  body[data-shell="next"] .quick-capture-dock {
+    display: none !important;
+  }
+
+  body[data-shell="next"] .unified-console-wrapper,
+  body[data-shell="next"] .console-main-container,
+  body[data-shell="next"] main {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body[data-shell="next"] .card,
+  body[data-shell="next"] .phase-card,
+  body[data-shell="next"] section.card,
+  body[data-shell="next"] .now-card,
+  body[data-shell="next"] .pupil-card,
+  body[data-shell="next"] .ped-card,
+  body[data-shell="next"] .ws-doc-preview,
+  body[data-shell="next"] .ws-instruction {
+    background: #fff !important;
+    border-color: #777 !important;
+    box-shadow: none !important;
+    color: #000 !important;
+  }
+
+  body[data-shell="next"] .muted,
+  body[data-shell="next"] .subtle {
+    color: #333 !important;
+  }
 }
