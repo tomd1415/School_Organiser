@@ -1266,7 +1266,7 @@ body[data-shell="next"] .now-card h3 {
 
 body[data-shell="next"] .button,
 body[data-shell="next"] .btn,
-body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button) {
+body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button):not(.atl-b) {
   min-height: var(--target);
   display: inline-flex;
   gap: .5rem;
@@ -1286,7 +1286,7 @@ body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.no
 
 body[data-shell="next"] .button:hover,
 body[data-shell="next"] .btn:hover,
-body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button):hover {
+body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button):not(.atl-b):hover {
   background: var(--surface-3) !important;
   border-color: var(--text) !important;
 }
@@ -1725,7 +1725,7 @@ body[data-shell="next"] .atl-b.on { color: #fff !important; border-color: transp
 body[data-shell="next"] .atl-1.on { background: #dc2626 !important; }
 body[data-shell="next"] .atl-2.on { background: #f59e0b !important; }
 body[data-shell="next"] .atl-3.on { background: #65a30d !important; }
-body[data-shell="next"] .atl-4.on { background: #16a34a !important; }
+body[data-shell="next"] .atl-4.on { background: #0d9488 !important; }
 
 body[data-shell="next"] .atl-list { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-direction: column; gap: 2px; max-inline-size: 34rem; }
 body[data-shell="next"] .atl-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 6px 10px; border-radius: 8px; }

@@ -16,11 +16,12 @@ export const ATL_LABELS: Record<number, string> = { 1: 'Concern', 2: 'Inconsiste
 /** The shared 1–4 ATL picker for one pupil. Each button posts the score and swaps the picker back in, so
  *  it behaves the same inside the marking modal and the live class grid. `score` is the current value/null. */
 export function renderAtlPicker(oc: number, pid: number, score: number | null): string {
+  const scoreNum = score != null ? Number(score) : null;
   const btn = (n: number): string =>
-    `<button type="button" class="atl-b atl-${n}${score === n ? ' on' : ''}"`
+    `<button type="button" class="atl-b atl-${n}${scoreNum === n ? ' on' : ''}"`
     + ` hx-post="/lesson/oc/${oc}/pupil/${pid}/atl" hx-vals='{"score":"${n}"}' hx-target="closest .atl" hx-swap="outerHTML"`
-    + ` title="ATL ${n} — ${ATL_LABELS[n]}" aria-label="ATL ${n}: ${ATL_LABELS[n]}" aria-pressed="${score === n}">${n}</button>`;
-  return `<div class="atl${score ? ' atl-set' : ''}" data-atl-pid="${pid}"><span class="atl-lbl" title="Attitude to learning (1–4)">ATL</span>${[1, 2, 3, 4].map(btn).join('')}</div>`;
+    + ` title="ATL ${n} — ${ATL_LABELS[n]}" aria-label="ATL ${n}: ${ATL_LABELS[n]}" aria-pressed="${scoreNum === n}">${n}</button>`;
+  return `<div class="atl${scoreNum ? ' atl-set' : ''}" data-atl-pid="${pid}"><span class="atl-lbl" title="Attitude to learning (1–4)">ATL</span>${[1, 2, 3, 4].map(btn).join('')}</div>`;
 }
 
 async function ocClass(occurrenceCourseId: number): Promise<{ groupCourseId: number; occurrenceId: number } | null> {
