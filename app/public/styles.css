@@ -1,6 +1,6 @@
-@import url('/static/styles.css');
+@import url('/static/styles-base.css');
 
-:root:has(body[data-shell="next"]) {
+:root {
   color-scheme: dark;
   --bg: #080b12;
   --bg-soft: #0c111a;
@@ -460,6 +460,8 @@ body[data-shell="next"] main.cockpit-workspace {
 /* Page width constraints based on task type */
 body[data-shell="next"] main.cockpit-workspace > .welcome,
 body[data-shell="next"] main.cockpit-workspace > .pedagogy-container,
+body[data-shell="next"] main.cockpit-workspace > .pedagogy,
+body[data-shell="next"] main.cockpit-workspace > .notes,
 body[data-shell="next"] main.cockpit-workspace > .reading-width {
   max-width: 800px;
   margin: 0 auto;
@@ -470,6 +472,13 @@ body[data-shell="next"] main.cockpit-workspace > .setup,
 body[data-shell="next"] main.cockpit-workspace > .marking-list-card,
 body[data-shell="next"] main.cockpit-workspace > .ta-next-gen-card,
 body[data-shell="next"] main.cockpit-workspace > .safeguarding-overhaul,
+body[data-shell="next"] main.cockpit-workspace > .focus,
+body[data-shell="next"] main.cockpit-workspace > .planner,
+body[data-shell="next"] main.cockpit-workspace > .atl-grid,
+body[data-shell="next"] main.cockpit-workspace > .group-history,
+body[data-shell="next"] main.cockpit-workspace > .events,
+body[data-shell="next"] main.cockpit-workspace > .recurring,
+body[data-shell="next"] main.cockpit-workspace > .time-avail,
 body[data-shell="next"] main.cockpit-workspace > .working-width {
   max-width: 1180px;
   margin: 0 auto;
@@ -480,6 +489,7 @@ body[data-shell="next"] main.cockpit-workspace > .now-screen,
 body[data-shell="next"] main.cockpit-workspace > .overhaul-cockpit,
 body[data-shell="next"] main.cockpit-workspace > .tt-overhaul,
 body[data-shell="next"] main.cockpit-workspace > .schemes-overhaul,
+body[data-shell="next"] main.cockpit-workspace > .map,
 body[data-shell="next"] main.cockpit-workspace > .kit,
 body[data-shell="next"] main.cockpit-workspace > .workspace-width {
   max-width: 1540px;
@@ -1360,17 +1370,17 @@ body[data-shell="next"] .now-card h3 {
 
 body[data-shell="next"] .button,
 body[data-shell="next"] .btn,
-body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button):not(.atl-b) {
+body[data-shell="next"] button {
   min-height: var(--target);
   display: inline-flex;
   gap: .5rem;
   align-items: center;
   justify-content: center;
   padding: 0.55rem 1.1rem;
-  color: var(--text) !important;
-  background: var(--surface-2) !important;
-  border: 2px solid var(--line-strong) !important;
-  border-radius: 9px !important;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 2px solid var(--line-strong);
+  border-radius: 9px;
   text-decoration: none;
   font-weight: 800;
   cursor: pointer;
@@ -1380,9 +1390,9 @@ body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.no
 
 body[data-shell="next"] .button:hover,
 body[data-shell="next"] .btn:hover,
-body[data-shell="next"] button:not(.ribbon-link):not(.drawer-header-btn):not(.note-modal-x):not(.a11y-row button):not(.atl-b):hover {
-  background: var(--surface-3) !important;
-  border-color: var(--text) !important;
+body[data-shell="next"] button:hover {
+  background: var(--surface-3);
+  border-color: var(--text);
 }
 
 body[data-shell="next"] .button.primary,
@@ -1736,6 +1746,107 @@ body[data-shell="next"] .free-new input {
 }
 body[data-shell="next"] .free-back {
   margin-top: 1.25rem;
+}
+
+/* Club cell in the timetable + the editor's optional time-override inputs. */
+body[data-shell="next"] .tt-club {
+  background: var(--violet-soft, var(--surface-2)) !important;
+}
+body[data-shell="next"] .tt-ed-time {
+  width: 6.2rem;
+  font-size: 0.8rem;
+}
+
+/* Club session workspace (/club). */
+body[data-shell="next"] .club-page {
+  max-width: 46rem;
+}
+body[data-shell="next"] .club-head h1 {
+  margin: 0.2rem 0 0;
+}
+body[data-shell="next"] .club-record-label {
+  display: block;
+  margin: 1rem 0 0.4rem;
+  font-weight: 650;
+}
+body[data-shell="next"] .club-record {
+  display: block;
+  width: 100%;
+  min-height: 8rem;
+  margin-top: 0.4rem;
+  resize: vertical;
+}
+body[data-shell="next"] .club-history {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+}
+body[data-shell="next"] .club-history ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+body[data-shell="next"] .club-history li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+body[data-shell="next"] .club-history-rec {
+  white-space: pre-wrap;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+/* Per-class adaptation editor in the lesson cockpit (HTMX-loaded into the .adapt-card). */
+body[data-shell="next"] .adapt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+body[data-shell="next"] .adapt-badge.on {
+  color: var(--green);
+  font-weight: 650;
+}
+body[data-shell="next"] .adapt-badge.muted {
+  color: var(--muted);
+}
+body[data-shell="next"] .adapt-note {
+  color: var(--muted);
+  margin: 0.25rem 0;
+}
+body[data-shell="next"] .ld-adapt-tools,
+body[data-shell="next"] .adapt-edit {
+  margin-top: 0.5rem;
+}
+body[data-shell="next"] .ld-adapt-tools > summary,
+body[data-shell="next"] .adapt-edit > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+body[data-shell="next"] .adapt-l {
+  display: block;
+  margin: 0.4rem 0;
+}
+body[data-shell="next"] .adapt-l textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.2rem;
+}
+body[data-shell="next"] .adapt .fu-ai {
+  display: inline-block;
+  margin: 0.3rem 0.5rem 0 0;
+}
+body[data-shell="next"] .adapt .oc-block {
+  margin: 0.4rem 0;
+}
+body[data-shell="next"] .adapt .oc-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* Marking Modal Overrides under Next Shell */
@@ -3158,3 +3269,46 @@ body[data-shell="next"] .ws-match-tile.is-picked {
     color: #333 !important;
   }
 }
+
+/* Standalone presentation deck styles */
+body.deck {
+  margin: 0;
+  overflow: hidden;
+  background: #080b12;
+  color: #f3f7fc;
+  --ink: #f3f7fc;
+  --muted: #aab5c5;
+  --accent: #5de0d0;
+  --line: #3b4b62;
+}
+.deck-slide {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: clamp(2rem, 5vh, 5rem) clamp(2rem, 6vw, 7rem);
+  overflow: auto;
+  align-content: center;
+  background: radial-gradient(circle at 85% 18%, #26536a, transparent 30rem), linear-gradient(145deg, #151b36, #0b0f1b);
+  color: #f3f7fc;
+}
+.deck-slide.deck-current { display: grid; }
+.deck-slide > * { width: 100%; max-width: none; }
+.deck-slide h1 { font-size: clamp(2.8rem, 5vw, 6rem); margin: 1rem 0; color: #f3f7fc; }
+.deck-slide h2 { font-size: clamp(2.4rem, 4.2vw, 5rem); margin: 0.5rem 0 1.5rem; color: #f3f7fc; border-bottom: 4px solid var(--accent); padding-bottom: 0.5rem; }
+.deck-slide ul, .deck-slide ol { width: 100%; max-width: none; font-size: clamp(1.6rem, 2.5vw, 3.2rem); line-height: 1.55; padding-left: 1.5em; }
+.deck-slide li { margin: 0.5rem 0; }
+.deck-slide p { max-width: none; font-size: clamp(1.5rem, 2.4vw, 3rem); line-height: 1.5; }
+.deck-slide table { width: 100%; font-size: clamp(1.2rem, 1.8vw, 2.2rem); border-collapse: collapse; }
+.deck-slide th, .deck-slide td { border: 1px solid var(--line); padding: 0.5rem 0.8rem; }
+.deck-slide blockquote { border-left: 6px solid #76b7ff; background: #182f4a; color: #f3f7fc; margin: 1rem 0; padding: 0.7rem 1rem; font-size: clamp(1.4rem, 2vw, 2.5rem); font-weight: 600; }
+.deck-slide .md-visual { font-size: 7rem; margin: 0.2rem 0; text-align: center; }
+.deck-slide .md-img { max-width: 90%; max-height: 68vh; display: block; margin: 0.6rem auto; border-radius: 8px; }
+.deck-counter { position: fixed; bottom: 0.6rem; right: 0.9rem; color: #fff; font-size: 0.9rem; opacity: 0.7; z-index: 10; }
+.deck-exit { position: fixed; top: 0.5rem; right: 0.7rem; color: #fff; opacity: 0.6; text-decoration: none; font-size: 1.2rem; z-index: 10; }
+.deck-exit:hover { opacity: 1; }
+/* the document view shows visuals + images sensibly too */
+.md-doc .md-visual { font-size: 3rem; margin: 0.2rem 0; }
+.md-doc .md-img { max-width: 100%; border-radius: 8px; }
+

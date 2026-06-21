@@ -8,7 +8,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 // (the per-element unsaved key) regressed. This runs the SAME jsdom harness as appjsUnsaved.test.ts
 // against the overhaul bundle, so the contract is proven for both. (The overhaul bundle starts a clock
 // setInterval at load; we stub it so the timer doesn't leak across re-loads.)
-const APP_JS = readFileSync(join(__dirname, '..', 'public', 'app-overhaul.js'), 'utf8');
+const APP_JS = readFileSync(join(__dirname, '..', 'public', 'app.js'), 'utf8');
 const realSetInterval = globalThis.setInterval;
 
 function load(): void {

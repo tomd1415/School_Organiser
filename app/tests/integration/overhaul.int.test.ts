@@ -42,26 +42,8 @@ afterAll(async () => {
   await pool.end();
 });
 
-describe('UI Shell toggle and overhaul integration tests', () => {
-  it('toggles setting to next via POST /settings/ui-shell', async () => {
-    // Start with classic
-    await restore('ui_shell', 'classic');
-    setUiShell('classic');
-
-    const res = await app.inject({
-      method: 'POST',
-      url: '/settings/ui-shell',
-      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
-      payload: 'next=1'
-    });
-    expect(res.statusCode).toBe(200);
-
-    // Verify database setting is updated
-    expect(await getSetting('ui_shell')).toBe('next');
-
-    // Verify memory cache is updated
-    expect(getUiShell()).toBe('next');
-
+describe('UI Shell overhaul integration tests', () => {
+  it('renders next shell by default with overhauled styles and scripts', async () => {
     // Verify page renders next shell attributes
     const page = await app.inject({
       method: 'GET',
@@ -69,42 +51,11 @@ describe('UI Shell toggle and overhaul integration tests', () => {
       headers: { cookie }
     });
     expect(page.body).toContain('data-shell="next"');
-    expect(page.body).toContain('/static/styles-overhaul.css');
-    expect(page.body).toContain('/static/app-overhaul.js');
-  });
-
-  it('toggles setting back to classic via POST /settings/ui-shell', async () => {
-    // Start with next
-    await restore('ui_shell', 'next');
-    setUiShell('next');
-
-    const res = await app.inject({
-      method: 'POST',
-      url: '/settings/ui-shell',
-      headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
-      payload: 'next=0' // or empty or omit next
-    });
-    expect(res.statusCode).toBe(200);
-
-    // Verify database setting is updated
-    expect(await getSetting('ui_shell')).toBe('classic');
-
-    // Verify memory cache is updated
-    expect(getUiShell()).toBe('classic');
-
-    // Verify page renders classic shell attributes
-    const page = await app.inject({
-      method: 'GET',
-      url: '/',
-      headers: { cookie }
-    });
-    expect(page.body).toContain('data-shell="classic"');
-    expect(page.body).not.toContain('/static/styles-overhaul.css');
-    expect(page.body).not.toContain('/static/app-overhaul.js');
+    expect(page.body).toContain('/static/styles.css');
+    expect(page.body).toContain('/static/app.js');
   });
 
   it('opens a scheme lesson in the read-only live cockpit preview', async () => {
-    setUiShell('next');
     const plan = await pool.query<{ id: number }>(
       `SELECT lp.id FROM lesson_plans lp
        JOIN units u ON u.id = lp.unit_id

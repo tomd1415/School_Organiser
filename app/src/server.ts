@@ -52,6 +52,7 @@ import { registerMarkModalRoutes } from './routes/markModal';
 import { registerMarkingPageRoutes } from './routes/markingPage';
 import { registerAtlRoutes } from './routes/atl';
 import { registerFreeRoutes } from './routes/free';
+import { registerClubRoutes } from './routes/club';
 import { registerPedagogyRoutes } from './routes/pedagogyPage';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { registerSearchRoutes } from './routes/search';
@@ -267,6 +268,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerMarkingPageRoutes(app);
   registerAtlRoutes(app);
   registerFreeRoutes(app);
+  registerClubRoutes(app);
   registerPedagogyRoutes(app);
   registerSafeguardingRoutes(app);
   registerSearchRoutes(app);

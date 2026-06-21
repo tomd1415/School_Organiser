@@ -51,6 +51,10 @@ export interface ClockContext {
   periods: PeriodDefinition[];
   terms: TermDate[];
   tz: string;
+  // The teacher's fixed commitments (teaching/form/club/duty/meeting) with effective times. When
+  // present, the countdown targets the next of THESE; otherwise it falls back to the next teachable
+  // slot (the old behaviour). A club's per-lesson time override is already baked into startMin/endMin.
+  commitments?: PeriodDefinition[];
 }
 
 /** ISO date strings compare lexicographically, so range checks are plain string compares. */
@@ -104,14 +108,14 @@ function toSlotRef(p: PeriodDefinition, date: string): SlotRef {
   };
 }
 
-/** Earliest teachable period on `weekday`, optionally starting strictly after `afterMin`. */
-function firstTeachable(
-  periods: PeriodDefinition[],
+/** Earliest target period on `weekday`, optionally starting strictly after `afterMin`. */
+function firstTarget(
+  targets: PeriodDefinition[],
   weekday: number,
   afterMin: number | null,
 ): PeriodDefinition | null {
-  const candidates = periods
-    .filter((p) => p.weekday === weekday && p.teachable && (afterMin === null || p.startMin > afterMin))
+  const candidates = targets
+    .filter((p) => p.weekday === weekday && (afterMin === null || p.startMin > afterMin))
     .sort((a, b) => a.startMin - b.startMin);
   return candidates[0] ?? null;
 }
@@ -123,8 +127,11 @@ function findNextTeaching(
   isSchoolDayToday: boolean,
   ctx: ClockContext,
 ): SlotRef | null {
+  // Target the teacher's commitments when supplied (so form + clubs count, at their effective times);
+  // otherwise fall back to the next teachable slot.
+  const targets = ctx.commitments && ctx.commitments.length ? ctx.commitments : ctx.periods.filter((p) => p.teachable);
   if (isSchoolDayToday) {
-    const todayNext = firstTeachable(ctx.periods, weekday, minutes);
+    const todayNext = firstTarget(targets, weekday, minutes);
     if (todayNext) return toSlotRef(todayNext, isoDate);
   }
   // Scan forward — far enough to clear the longest holiday (Christmas/summer).
@@ -132,7 +139,7 @@ function findNextTeaching(
     const date = addDays(isoDate, i);
     const wd = weekdayOf(date);
     if (!classifyDay(date, wd, ctx.terms).isSchoolDay) continue;
-    const first = firstTeachable(ctx.periods, wd, null);
+    const first = firstTarget(targets, wd, null);
     if (first) return toSlotRef(first, date);
   }
   return null;

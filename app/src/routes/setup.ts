@@ -372,6 +372,8 @@ async function timetableTab(yearId: number): Promise<string> {
       <select title="group" name="value" hx-post="/setup/lesson/${l.id}" hx-vals='js:{"field":"group_id","value":event.target.value}' hx-trigger="change" hx-swap="none" hx-on::after-request="location.reload()">${groupOpts}</select>
       <select title="room" name="value" ${save(`/setup/lesson/${l.id}`, 'room_id', 'change')}>${roomOpts}</select>
       <select title="staff (TA lessons = ones I oversee)" name="value" ${save(`/setup/lesson/${l.id}`, 'staff_id', 'change')}>${staffOpts}</select>
+      <input type="time" class="tt-ed-time" title="start time — leave blank to use the slot's time; set it for a club inside break/lunch (e.g. 13:00)" name="value" value="${l.startTime ?? ''}" ${save(`/setup/lesson/${l.id}`, 'start_time', 'change')}>
+      <input type="time" class="tt-ed-time" title="end time — leave blank to use the slot's time" name="value" value="${l.endTime ?? ''}" ${save(`/setup/lesson/${l.id}`, 'end_time', 'change')}>
       <span class="note-status" id="tl-${l.id}-status"></span>
       ${l.occurrenceCount > 0
         ? `<span class="muted" title="has taught history — can't delete">🔒</span>`
@@ -392,7 +394,7 @@ async function timetableTab(yearId: number): Promise<string> {
           const ls = (byPeriod.get(Number(pd.id)) ?? []).map(lessonBlock).join('');
           return `<td class="tt-ed-cell"><div class="tt-ed-period">${esc(pd.label)} <span class="muted">${esc(pd.start)}</span></div>
             ${ls}
-            ${pd.teachable ? `<button type="button" class="link" hx-post="/setup/lesson/add?period=${pd.id}&year=${yearId}" hx-target="closest section" hx-swap="outerHTML">＋</button>` : ''}
+            <button type="button" class="link" title="${pd.teachable ? 'add a lesson' : 'add a club / activity for this slot'}" hx-post="/setup/lesson/add?period=${pd.id}&year=${yearId}" hx-target="closest section" hx-swap="outerHTML">＋</button>
           </td>`;
         })
         .join('');

@@ -81,9 +81,12 @@ export function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect, r
   const dots = l.isSelf && l.purpose === 'teaching' ? readinessDots(readiness) : '';
   const inner = `<span class="tt-group">${flag}${heading}${exMark}</span>${courses ? `<span class="tt-course">${courses}</span>` : ''}${dots}`;
   const style = `border-left-color:${esc(colour)}`;
-  // A free slot (permanent 'free' OR a dated free/cancelled exception) opens the free-period workspace,
-  // NOT the lesson interface; teaching/form open the lesson.
+  // A club opens its session-record screen; a free slot (permanent 'free' OR a dated free/cancelled
+  // exception) opens the free-period workspace; teaching/form open the lesson.
   const isFree = l.purpose === 'free' || ex.mode === 'free';
+  if (l.purpose === 'club') {
+    return `<a class="tt-lesson tt-club" style="${style}" href="/club?lesson=${l.lessonId}&date=${esc(date)}">${inner}</a>`;
+  }
   if (l.purpose === 'teaching' || l.purpose === 'free' || l.purpose === 'form') {
     const href = isFree ? `/free?lesson=${l.lessonId}&date=${esc(date)}` : `/lesson?lesson=${l.lessonId}&date=${esc(date)}`;
     return `<a class="tt-lesson tt-${esc(l.purpose)}${isFree ? ' tt-is-free' : ''}" style="${style}" href="${href}">${inner}</a>`;

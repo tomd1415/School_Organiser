@@ -12,7 +12,7 @@ export interface NowLesson {
   courses: Array<{ name: string; colour: string | null }>;
 }
 
-export async function getClockContext(): Promise<{ periods: PeriodDefinition[]; terms: TermDate[]; tz: string }> {
+export async function getClockContext(): Promise<{ periods: PeriodDefinition[]; terms: TermDate[]; tz: string; commitments: PeriodDefinition[] }> {
   const periodsRes = await pool.query<{
     weekday: number;
     slotOrder: number;
@@ -49,7 +49,32 @@ export async function getClockContext(): Promise<{ periods: PeriodDefinition[]; 
   const tzRes = await pool.query<{ value: string }>(`SELECT value FROM settings WHERE key = 'timezone'`);
   const tz = tzRes.rows[0]?.value ?? 'Europe/London';
 
-  return { periods, terms: termsRes.rows, tz };
+  // The teacher's own fixed commitments (teaching/form/club/duty/meeting) with EFFECTIVE times — a
+  // per-lesson start/end override (a club inside break/lunch) wins over the slot. The Now countdown
+  // targets the next of these, not just the next teachable slot, so form + clubs are counted.
+  const commitsRes = await pool.query<{ weekday: number; slotOrder: number; slotType: string; label: string; lessonIndex: number | null; start: string; end: string; teachable: boolean }>(
+    `SELECT p.weekday, p.slot_order AS "slotOrder", p.slot_type AS "slotType", p.label,
+            p.lesson_index AS "lessonIndex",
+            to_char(COALESCE(tl.start_time, p.start_time), 'HH24:MI') AS start,
+            to_char(COALESCE(tl.end_time,   p.end_time),   'HH24:MI') AS "end", p.teachable
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     JOIN staff s ON s.id = tl.staff_id AND s.is_self
+     WHERE tl.active AND tl.purpose IN ('teaching','form','club','duty','meeting')
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)`,
+  );
+  const commitments: PeriodDefinition[] = commitsRes.rows.map((p) => ({
+    weekday: p.weekday,
+    slotOrder: p.slotOrder,
+    slotType: p.slotType,
+    label: p.label,
+    lessonIndex: p.lessonIndex,
+    startMin: toMinutes(p.start),
+    endMin: toMinutes(p.end),
+    teachable: p.teachable,
+  }));
+
+  return { periods, terms: termsRes.rows, tz, commitments };
 }
 
 export async function getSelfLessonAt(weekday: number, slotOrder: number): Promise<NowLesson | null> {

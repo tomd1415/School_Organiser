@@ -24,23 +24,18 @@ function requireTa(req: { session: { get: (k: string) => unknown } }): boolean {
 }
 
 function taLayout(body: string, csrf: string): string {
-  const isNext = getUiShell() === 'next';
-  const stylesheet = isNext ? '/static/styles-overhaul.css' : '/static/styles.css';
-  const shellAttr = isNext ? ' data-shell="next"' : '';
-  const headerHtml = isNext
-    ? `<header class="topbar context-header">
+  const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+  const shellAttr = ' data-shell="next"';
+  const headerHtml = `<header class="topbar context-header">
         <div class="header-left"><span class="brand">School Organiser · TA view</span></div>
         <div class="header-right">
           <form class="inline" method="post" action="/logout"><input type="hidden" name="_csrf" value="${csrf}"><button type="submit" class="chip chip-btn">Log out</button></form>
         </div>
-       </header>`
-    : `<header class="topbar"><div class="bar-left"><span class="brand">School Organiser · TA view</span></div>
-        <form class="inline" method="post" action="/logout"><input type="hidden" name="_csrf" value="${csrf}"><button type="submit" class="link">Log out</button></form>
        </header>`;
 
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TA view · School Organiser</title><link rel="stylesheet" href="${stylesheet}"></head>
+<title>TA view · School Organiser</title>${cssHtml}</head>
 <body${shellAttr}>
   ${headerHtml}
   <main>${body}</main>

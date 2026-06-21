@@ -535,6 +535,17 @@ export function renderLessonCockpit(options: {
               ${renderLinkedResources(resByPlan.get(lp) ?? [])}
             </div>
           </section>
+
+          ${isPreview || !lp ? '' : `
+          <section class="adapt-card card" aria-labelledby="adapt-title">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">For this class</p>
+                <h2 id="adapt-title">Adapt this lesson</h2>
+              </div>
+            </div>
+            <div hx-get="/lesson/adapt/${groupCourseId}/${lp}" hx-trigger="load" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
+          </section>`}
         </aside>
       </div>
 

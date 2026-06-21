@@ -102,11 +102,11 @@ export type UiShell = 'classic' | 'next';
 let uiShell: UiShell = 'next';
 
 export function setUiShell(mode: UiShell | string | null): void {
-  uiShell = mode === 'classic' ? 'classic' : 'next'; // default 'next' unless explicitly set to classic
+  uiShell = 'next';
 }
 
 export function getUiShell(): UiShell {
-  return uiShell;
+  return 'next';
 }
 
 // Earned, opt-in unlock: once the teacher has taught enough lessons, offer (once, dismissibly) to
@@ -144,88 +144,65 @@ export function renderRail(
   dailyHrefs: readonly string[] = getNavDailyHrefs(),
   railFoot = '',
 ): string {
-  if (getUiShell() === 'next') {
-    const link = (href: string, icon: string, label: string, extraClass = '', extraSpan = '') => `
-      <a href="${href}" class="ribbon-link${extraClass}" title="${esc(label)}">
-        <span class="icon">${icon}</span>
-        <span class="lbl-txt">${esc(label)}</span>
-        ${extraSpan}
-      </a>`;
+  const link = (href: string, icon: string, label: string, extraClass = '', extraSpan = '') => `
+    <a href="${href}" class="ribbon-link${extraClass}" title="${esc(label)}">
+      <span class="icon">${icon}</span>
+      <span class="lbl-txt">${esc(label)}</span>
+      ${extraSpan}
+    </a>`;
 
-    return `<nav class="scaffolded-ribbon" id="scaffolded-ribbon" aria-label="Global navigation">
-      <!-- Brand Link at the top -->
-      <a href="/" class="ribbon-brand" title="School Organiser">
-        <span class="icon">🏫</span>
-        <span class="lbl-txt">School Organiser</span>
-      </a>
+  return `<nav class="scaffolded-ribbon" id="scaffolded-ribbon" aria-label="Global navigation">
+    <!-- Brand Link at the top -->
+    <a href="/" class="ribbon-brand" title="School Organiser">
+      <span class="icon">🏫</span>
+      <span class="lbl-txt">School Organiser</span>
+    </a>
 
-      <!-- Tier 1: Safety & Active Tracking -->
-      <div class="ribbon-tier tier-urgency">
-        <span class="tier-label">Tier 1: Safety</span>
-        ${link('/', '🌅', 'Now Screen')}
-        ${link('/safeguarding', '⚑', 'Safeguarding', ' sg-flag', '<span class="ribbon-indicator"></span>')}
-        ${link('/oversee', '🖥️', 'Oversee')}
+    <!-- Tier 1: Safety & Active Tracking -->
+    <div class="ribbon-tier tier-urgency">
+      <span class="tier-label">Tier 1: Safety</span>
+      ${link('/', '🌅', 'Now Screen')}
+      ${link('/safeguarding', '⚑', 'Safeguarding', ' sg-flag', '<span class="ribbon-indicator"></span>')}
+      ${link('/oversee', '🖥️', 'Oversee')}
+    </div>
+
+    <!-- Tier 2: Daily Operations -->
+    <div class="ribbon-tier tier-operations">
+      <span class="tier-label">Tier 2: Daily Ops</span>
+      ${link('/timetable', '📅', 'Timetable')}
+      ${link('/tasks', '📝', 'Checklists')}
+      ${link('/focus', '🎯', 'Focus')}
+      ${link('/marking', '🏆', 'Marking Queue')}
+      ${link('/captured', '📥', 'Mind Inbox')}
+      ${link('/events', '📣', 'Events')}
+      ${link('/notes', '📓', 'Notes')}
+      ${link('/coverage', '📊', 'Coverage')}
+      ${link('/map', '🗺️', 'Map')}
+      ${link('/planner', '🗓️', 'Planner')}
+      ${link('/resources', '🗂️', 'Resources')}
+    </div>
+
+    <!-- Tier 3: Collapsible Drawer (Long-term admin/planning) -->
+    <div class="ribbon-tier tier-admin collapsible-drawer" id="ribbon-drawer">
+      <button class="drawer-header-btn" type="button" id="ribbon-drawer-toggle">
+        <span class="icon">⚙️</span>
+        <span class="lbl-txt">Advanced Drawer</span>
+        <span class="drawer-arrow">▶</span>
+      </button>
+      <div class="drawer-links">
+        ${link('/schemes', '📚', 'Schemes')}
+        ${link('/concepts', '🧬', 'Concepts')}
+        ${link('/setup', '🔌', 'Setup')}
+        ${link('/kit', '🛒', 'Kit Carts')}
+        ${link('/settings', '🔧', 'Settings')}
+        ${link('/recurring', '🔁', 'Recurring')}
+        ${link('/time', '⏱️', 'Time')}
+        ${link('/pupils', '👥', 'Pupils')}
       </div>
+    </div>
 
-      <!-- Tier 2: Daily Operations -->
-      <div class="ribbon-tier tier-operations">
-        <span class="tier-label">Tier 2: Daily Ops</span>
-        ${link('/timetable', '📅', 'Timetable')}
-        ${link('/tasks', '📝', 'Checklists')}
-        ${link('/focus', '🎯', 'Focus')}
-        ${link('/marking', '🏆', 'Marking Queue')}
-        ${link('/captured', '📥', 'Mind Inbox')}
-        ${link('/events', '📣', 'Events')}
-        ${link('/notes', '📓', 'Notes')}
-        ${link('/coverage', '📊', 'Coverage')}
-        ${link('/map', '🗺️', 'Map')}
-        ${link('/planner', '🗓️', 'Planner')}
-        ${link('/resources', '🗂️', 'Resources')}
-      </div>
-
-      <!-- Tier 3: Collapsible Drawer (Long-term admin/planning) -->
-      <div class="ribbon-tier tier-admin collapsible-drawer" id="ribbon-drawer">
-        <button class="drawer-header-btn" type="button" id="ribbon-drawer-toggle">
-          <span class="icon">⚙️</span>
-          <span class="lbl-txt">Advanced Drawer</span>
-          <span class="drawer-arrow">▶</span>
-        </button>
-        <div class="drawer-links">
-          ${link('/schemes', '📚', 'Schemes')}
-          ${link('/concepts', '🧬', 'Concepts')}
-          ${link('/setup', '🔌', 'Setup')}
-          ${link('/kit', '🛒', 'Kit Carts')}
-          ${link('/settings', '🔧', 'Settings')}
-          ${link('/recurring', '🔁', 'Recurring')}
-          ${link('/time', '⏱️', 'Time')}
-          ${link('/pupils', '👥', 'Pupils')}
-        </div>
-      </div>
-
-      <!-- Tier 4: Bottom ribbon foot controls -->
-      ${railFoot}
-    </nav>`;
-  }
-
-  const daily = new Set((dailyHrefs.length ? dailyHrefs : DEFAULT_DAILY).filter((h) => h !== SAFEGUARDING_HREF));
-  const link = (i: NavItem) => `<a href="${i.href}">${i.label}</a>`;
-  const today = NAV_MODEL.filter((i) => daily.has(i.href));
-  const plan = NAV_MODEL.filter((i) => !daily.has(i.href) && i.tier !== 'power' && i.href !== SAFEGUARDING_HREF);
-  const advanced = NAV_MODEL.filter((i) => i.tier === 'power' && !daily.has(i.href) && i.href !== SAFEGUARDING_HREF);
-
-  const planSec = plan.length
-    ? `<details class="rail-sec rail-plan" open><summary>Plan</summary><div class="rail-links">${plan.map(link).join('')}</div></details>`
-    : '';
-  const advSec =
-    experience === 'power' && advanced.length
-      ? `<details class="rail-sec rail-adv" open><summary>Advanced</summary><div class="rail-links">${advanced.map(link).join('')}</div></details>`
-      : '';
-
-  return `<nav class="rail" aria-label="Main navigation">
-    <div class="rail-sec rail-today"><span class="rail-h">Today</span><div class="rail-links">${today.map(link).join('')}</div></div>
-    <a class="rail-link rail-sg" href="${SAFEGUARDING_HREF}">⚑ Safeguarding</a>
-    ${planSec}
-    ${advSec}
+    <!-- Tier 4: Bottom ribbon foot controls -->
+    ${railFoot}
   </nav>`;
 }
 

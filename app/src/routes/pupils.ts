@@ -15,6 +15,7 @@ import {
   type PupilLoginRow,
 } from '../repos/pupilCredentials';
 import { revokeAllDevices } from '../repos/pupilDevices';
+import { getUiShell } from '../lib/nav';
 import { createNote } from '../repos/notes';
 import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
@@ -377,9 +378,11 @@ export function registerPupilRoutes(app: FastifyInstance): void {
         </div>`,
       )
       .join('');
+    const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+    const bodyAttr = 'class="cards-page" data-shell="next"';
     const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Login cards · ${esc(g.groupName)}</title>
-      <link rel="stylesheet" href="/static/styles.css"></head>
-      <body class="cards-page"><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(g.groupName)} — login cards</div>
+      ${cssHtml}</head>
+      <body ${bodyAttr}><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(g.groupName)} — login cards</div>
       <div class="login-cards">${cards || '<p>No pupils have a PIN yet — set PINs first.</p>'}</div></body></html>`;
     return reply.type('text/html').send(html);
   });

@@ -571,6 +571,8 @@ export interface EditorLesson {
   isSelf: boolean;
   courseIds: number[]; // course ids via timetabled_lesson_courses → group_courses
   occurrenceCount: number;
+  startTime: string | null; // HH:MM override (a club that doesn't fill its slot); null = use the slot
+  endTime: string | null;
 }
 
 export async function listEditorLessons(yearId: number): Promise<EditorLesson[]> {
@@ -581,7 +583,8 @@ export async function listEditorLessons(yearId: number): Promise<EditorLesson[]>
             COALESCE((SELECT json_agg(gc.course_id) FROM timetabled_lesson_courses tlc
                       JOIN group_courses gc ON gc.id = tlc.group_course_id
                       WHERE tlc.timetabled_lesson_id = tl.id), '[]') AS "courseIds",
-            (SELECT count(*)::int FROM lesson_occurrences o WHERE o.timetabled_lesson_id = tl.id) AS "occurrenceCount"
+            (SELECT count(*)::int FROM lesson_occurrences o WHERE o.timetabled_lesson_id = tl.id) AS "occurrenceCount",
+            to_char(tl.start_time,'HH24:MI') AS "startTime", to_char(tl.end_time,'HH24:MI') AS "endTime"
      FROM timetabled_lessons tl
      JOIN period_definitions p ON p.id = tl.period_definition_id
      JOIN staff s ON s.id = tl.staff_id
@@ -594,9 +597,12 @@ export async function listEditorLessons(yearId: number): Promise<EditorLesson[]>
 }
 
 export async function createLessonOnPeriod(periodId: number): Promise<number> {
+  // A new entry on a non-teachable slot (break/lunch/after-school) defaults to a club; a teachable
+  // slot defaults to a teaching lesson. The teacher can change the purpose either way.
   const { rows } = await pool.query<{ id: number }>(
     `INSERT INTO timetabled_lessons (period_definition_id, purpose, staff_id)
-     VALUES ($1, 'teaching', (SELECT id FROM staff WHERE is_self)) RETURNING id`,
+     VALUES ($1, (SELECT CASE WHEN teachable THEN 'teaching' ELSE 'club' END FROM period_definitions WHERE id = $1),
+             (SELECT id FROM staff WHERE is_self)) RETURNING id`,
     [periodId],
   );
   return rows[0]!.id;
@@ -608,6 +614,13 @@ export async function updateLessonField(id: number, field: string, value: string
   if (field === 'purpose') {
     if (!value || !LESSON_PURPOSES.includes(value)) return false;
     await pool.query(`UPDATE timetabled_lessons SET purpose = $2 WHERE id = $1`, [id, value]);
+    return true;
+  }
+  // Per-lesson time override (HH:MM); empty clears it back to the slot's time.
+  if (field === 'start_time' || field === 'end_time') {
+    const v = value && value.trim() !== '' ? value.trim() : null;
+    if (v !== null && !/^\d{2}:\d{2}$/.test(v)) return false;
+    await pool.query(`UPDATE timetabled_lessons SET ${field} = $2 WHERE id = $1`, [id, v]);
     return true;
   }
   const col = ({ group_id: 'group_id', room_id: 'room_id', staff_id: 'staff_id' } as Record<string, string>)[field];

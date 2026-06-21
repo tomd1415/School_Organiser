@@ -1097,6 +1097,17 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(renderAdaptation(p.data.gc, p.data.lp, eff, undefined, true));
   });
 
+  // The live-lesson cockpit HTMX-loads the per-class adaptation block from here (it was lost when the
+  // lesson detail moved to the next-shell cockpit). Read-only GET so it hydrates without a write.
+  app.get('/lesson/adapt/:gc/:lp', { preHandler: requireAuth }, async (req, reply) => {
+    const p = AdaptParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const master = await getLessonPlan(p.data.lp);
+    if (!master) return reply.code(404).send('');
+    const eff = await getEffectiveLesson(p.data.gc, p.data.lp, { objectives: master.objectives, outline: master.outline });
+    return reply.type('text/html').send(renderAdaptation(p.data.gc, p.data.lp, eff));
+  });
+
   // This group's change log for a lesson (lazy-loaded when the log is opened).
   app.get('/lesson/adapt/:gc/:lp/history', { preHandler: requireAuth }, async (req, reply) => {
     const p = AdaptParams.safeParse(req.params);
@@ -1646,9 +1657,11 @@ export function registerLessonRoutes(app: FastifyInstance): void {
 
 /** A standalone printable page (cards-page chrome, like the answer pack). */
 function printPage(title: string, body: string): string {
+  const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+  const bodyAttr = 'class="cards-page" data-shell="next"';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)} · School Organiser</title>
-    <link rel="stylesheet" href="/static/styles.css"></head>
-    <body class="cards-page"><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(title)}</div>
+    ${cssHtml}</head>
+    <body ${bodyAttr}><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(title)}</div>
     <div class="lesson-print">${body}</div></body></html>`;
 }
 

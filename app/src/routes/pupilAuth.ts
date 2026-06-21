@@ -79,9 +79,8 @@ const PASTE_HELP = `<div id="paste-help" class="paste-help" role="dialog" aria-m
 </div>`;
 
 export function pupilLayout(body: string, csrf: string): string {
-  const isNext = getUiShell() === 'next';
-  const stylesheet = isNext ? '/static/styles-overhaul.css' : '/static/styles.css';
-  const shellAttr = isNext ? ' data-shell="next"' : '';
+  const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+  const shellAttr = ' data-shell="next"';
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My work · School Organiser</title>
@@ -91,7 +90,7 @@ export function pupilLayout(body: string, csrf: string): string {
   ['textscale','font','contrast','motion','speak','theme'].forEach(function (k) { var v = s.getItem('a11y.' + k); if (v) d.setAttribute('data-' + k, v); });
 } catch (e) {} })();
 </script>
-<link rel="stylesheet" href="${stylesheet}"></head>
+${cssHtml}</head>
 <body class="pupil-body"${shellAttr}>
   ${A11Y_BAR}
   <main class="pupil-main" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>${body}</main>

@@ -22,7 +22,7 @@ export function registerEventRoutes(app: FastifyInstance): void {
       listHtml = `<p class="muted">Events are unavailable — the database is not reachable.</p>`;
     }
     const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <section class="card events" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="ld-notes-head"><h1>What's coming</h1>${renderNewEventButton()}</div>
         <p class="muted">Parents' evenings, deadlines, exams, INSET, trips — and contact you owe. "Blocks work" removes the overlapping work window.</p>
         ${listHtml}

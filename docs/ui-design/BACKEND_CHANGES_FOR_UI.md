@@ -18,6 +18,24 @@ class/id/`data-*`/event/route the UI relies on, add a dated bullet with a clear 
 
 ---
 
+## 2026-06-21 — Countdown (commitments) + clubs at break/lunch/after-school
+
+### ℹ️ Affects the header countdown + a new route
+
+- **Countdown is now commitment-based.** `resolveNow().nextTeaching` targets the next teaching/form/club/
+  duty/meeting (at its effective time), not the next teachable slot — driven by `ClockContext.commitments`
+  (supplied by `repos/clock.ts getClockContext`, which now also returns `commitments`). The header's
+  `data-epoch-ms` countdown is unchanged in markup; it just resolves to a different (correct) target.
+  A free period no longer produces a countdown.
+- **New `/club` route** (`routes/club.ts`) — a club session screen (record + history), NOT the lesson
+  interface. Timetable **club** cells (`renderLesson`, `lib/timetableView.ts`) now link to
+  `/club?lesson=&date=` with class `.tt-club`. Classes: `.club-page`, `.club-record(-label)`,
+  `.club-history(-rec)` (in `styles-overhaul.css`). **ACTION (next shell):** reuse these class names if
+  you build a bespoke next view; the record textarea autosaves to `/club/record` (HTMX, target
+  `#club-status`).
+- **Editor (Setup → Timetable)** gains two optional `.tt-ed-time` inputs per lesson row (per-lesson
+  start/end override) and shows ＋ on every slot (clubs on break/lunch/after-school). Backend only.
+
 ## 2026-06-21 — Timetable readiness dots, free-period workspace, board fill
 
 ### ℹ️ New surfaces + a changed timetable link target

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
-import { setUiShell } from '../../src/lib/nav';
 import { pool } from '../../src/db/pool';
 
 // idea 12 — smart capture routes. With AI forced off in the integration env, /note/route falls back
@@ -23,7 +22,6 @@ const post = (url: string, payload: string) =>
 beforeAll(async () => {
   app = await buildApp();
   await app.ready();
-  setUiShell('classic'); // the classic capture modal is asserted here; 'next' is now the default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);
@@ -52,7 +50,8 @@ describe('smart capture routes (integration)', () => {
   it('the modal shell is present on an authed page', async () => {
     const res = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
     expect(res.body).toContain('id="note-modal"');
-    expect(res.body).toContain('id="note-btn"');
+    const headerRes = await app.inject({ method: 'GET', url: '/header-overhaul', headers: { cookie } });
+    expect(headerRes.body).toContain('id="note-btn"');
   });
 
   it('plain add drops the note into general notes', async () => {

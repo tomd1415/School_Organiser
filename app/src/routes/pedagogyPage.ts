@@ -12,7 +12,7 @@ export function registerPedagogyRoutes(app: FastifyInstance): void {
     const cards = PEDAGOGY_PRINCIPLES.map(
       (p) => `<li class="ped-card"><span class="ped-n">${p.n}</span><div class="ped-body"><strong>${esc(p.name)}</strong><p>${esc(p.summary)}</p></div></li>`,
     ).join('');
-    const body = `<section class="card">
+    const body = `<section class="card pedagogy-container">
       <h1>Computing pedagogy</h1>
       <p class="muted">The AI planning here is grounded in the National Centre for Computing Education's
         <strong>12 Principles of Computing Pedagogy</strong>. When you ask it to author a scheme, draft

@@ -4,6 +4,7 @@ import { requireAuth } from '../auth/guard';
 import { isLimitedRole } from '../auth/lockdown';
 import { verifyImageSig } from '../lib/lessonImageSig';
 import { esc, layout } from '../lib/html';
+import { getUiShell } from '../lib/nav';
 import {
   addVersion,
   countResources,
@@ -624,11 +625,13 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         (h, i) =>
           `<section class="deck-slide${i === 0 ? ' deck-current' : ''}">${h}</section>`,
       );
+    const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+    const bodyAttr = 'class="deck" data-shell="next"';
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(r.title)} — present</title>
-<link rel="stylesheet" href="/static/styles.css">
-</head><body class="deck">
+${cssHtml}
+</head><body ${bodyAttr}>
   <a class="deck-exit" href="/resources/${id.data.id}/view" title="back to the document">✕</a>
   ${slides.join('\n')}
   <div class="deck-counter"><span id="deck-n">1</span> / ${slides.length}</div>

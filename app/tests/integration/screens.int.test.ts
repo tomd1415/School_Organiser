@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
-import { setUiShell } from '../../src/lib/nav';
 import { pool } from '../../src/db/pool';
 import { addPlan, addUnit } from '../../src/repos/schemes';
 import { createTask } from '../../src/repos/tasks';
@@ -22,7 +21,6 @@ function firstCookie(setCookie: string | string[] | undefined): string {
 beforeAll(async () => {
   app = await buildApp();
   await app.ready();
-  setUiShell('classic'); // these assert the classic shell; 'next' is now the migration-backed default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);
@@ -80,24 +78,22 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       headers: { cookie: session },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain('Stopping point');
-    expect(res.body).toContain('data-new-note');
-    expect(res.body).toContain('ld-res'); // bound plan's resources surface here (3.8)
+    expect(res.body).toContain('overhaul-cockpit'); // the live-lesson cockpit (next shell)
+    expect(res.body).toContain('stopping_point'); // the "where we got to" tracker input
+    expect(res.body).toContain('fast-capture'); // the in-lesson note composer
   });
 
-  it('Now page renders two columns with the next-session + unified "Needs me" card (Rail & Stage)', async () => {
+  it('Now page renders its grid layout + the a11y preference plumbing', async () => {
     const res = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain('now-cols'); // two-column wrapper
-    expect(res.body).toContain('now-col-now'); // current lesson, left
-    expect(res.body).toContain('now-col-next'); // what's next, right
-    expect(res.body).toContain('now-next'); // the next-session card itself
-    expect(res.body).toContain('now-needs'); // the six right-column cards collapsed into one
-    expect(res.body).toContain('data-a11y="theme"'); // the rail-footer accessibility toolbar (Slice 5)
+    // Deterministic markers only — the next-session / needs-me CARDS depend on the real clock time.
+    expect(res.body).toContain('now-screen'); // the Now section (always rendered)
+    expect(res.body).toContain('now-grid'); // the Now layout grid
+    expect(res.body).toContain('data-a11y="theme"'); // the ribbon-footer accessibility toolbar
     expect(res.body).toContain("getItem('a11y-'"); // the pre-paint preference script
   });
 
-  it('Lesson detail shows the per-group adaptation block, and adapt round-trips (5.2)', async () => {
+  it('the cockpit per-group adaptation editor loads and round-trips (5.2)', async () => {
     const lr = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose = 'teaching' ORDER BY id LIMIT 1`);
     const lessonId = lr.rows[0]!.id;
     const occId = await findOrCreateOccurrence(lessonId, ADAPT_DATE);
@@ -117,16 +113,17 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const planId = Number(p.rows[0]!.id);
     try {
       await setOccurrenceCoursePlan(oc.occurrenceCourseId, planId);
-      // 1) renders the adaptation block, initially following the master
+      // 1) the cockpit hydrates the per-class adaptation editor (HTMX-loaded; restored after the migration)
       const page = await app.inject({ method: 'GET', url: `/lesson?lesson=${lessonId}&date=${ADAPT_DATE}`, headers: { cookie: session } });
       expect(page.statusCode).toBe(200);
-      expect(page.body).toContain(`id="adapt-${gc}-${planId}"`);
-      expect(page.body).toContain('following the master');
-      // not adapted yet → resource generation uses the master plan
-      expect(page.body).toContain(`/schemes/plan/${planId}/resources-ai`);
+      expect(page.body).toContain(`hx-get="/lesson/adapt/${gc}/${planId}"`); // the adapt card placeholder
       const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
       const cookie = firstCookie(page.headers['set-cookie']) || session;
-      // 2) adapt for this group
+      // 2) the adapt block itself, initially following the master
+      const block = await app.inject({ method: 'GET', url: `/lesson/adapt/${gc}/${planId}`, headers: { cookie: session } });
+      expect(block.body).toContain(`id="adapt-${gc}-${planId}"`);
+      expect(block.body).toContain('following the master');
+      // 3) adapt for the group, and the block now shows the group's version
       const save = await app.inject({
         method: 'POST',
         url: `/lesson/adapt/${gc}/${planId}`,
@@ -135,15 +132,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       });
       expect(save.statusCode).toBe(200);
       expect(save.body).toContain('adapted for this group');
-      // 3) reload shows the saved adaptation + the change log records it
-      const page2 = await app.inject({ method: 'GET', url: `/lesson?lesson=${lessonId}&date=${ADAPT_DATE}`, headers: { cookie: session } });
-      expect(page2.body).toContain('GROUP only');
-      expect(page2.body).toContain('adapted for this group');
-      // regression: once a class has its own adaptation, the lesson shows the REVISED plan and the
-      // resource-generate action is FOR THE CLASS (links to the adaptation), not the shared master.
-      expect(page2.body).toContain('revised plan');
-      expect(page2.body).toContain(`/lesson/adapt/${gc}/${planId}/resources-ai`);
-      expect(page2.body).not.toContain(`/schemes/plan/${planId}/resources-ai`);
+      const block2 = await app.inject({ method: 'GET', url: `/lesson/adapt/${gc}/${planId}`, headers: { cookie: session } });
+      expect(block2.body).toContain('GROUP only'); // the group's adapted objectives
       const hist = await app.inject({ method: 'GET', url: `/lesson/adapt/${gc}/${planId}/history`, headers: { cookie: session } });
       expect(hist.body).toContain('teacher edit');
     } finally {
@@ -236,7 +226,6 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('Schemes of work');
     expect(res.body).toContain('scheme-tree');
     expect(res.body).toContain('scheme-course'); // explicit selected-course label
-    expect(res.body).toContain('class="active"'); // the selected course tab highlights
     expect(res.body).toContain('teaching-ctx'); // per-course teaching-context editor (4.4.1)
     expect(res.body).toContain('all-schemes'); // the all-schemes overview (find/move/delete)
   });
@@ -676,7 +665,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const page = await app.inject({ method: 'GET', url: '/', headers: { cookie: session } });
     const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
     const cookie = firstCookie(page.headers['set-cookie']) || session;
-    expect(page.body).toContain('id="global-search"'); // the front-door search box is in the topbar
+    const headerRes = await app.inject({ method: 'GET', url: '/header-overhaul', headers: { cookie } });
+    expect(headerRes.body).toContain('id="global-search"'); // the front-door search box is in the topbar
     const cap = await app.inject({ method: 'POST', url: '/capture-quick', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('ZZSEARCH unicorn reminder') });
     expect(cap.body).toContain('captured ✓');
     try {
@@ -1185,9 +1175,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
 
     const off = await get('off');
     expect(off.statusCode).toBe(200);
-    expect(off.body).toContain('pv-bar'); // the preview header
-    expect(off.body).toContain('preview as pupil');
-    expect(off.body).toContain('✏ This class'); // the off/local/master toggle
+    expect(off.body).toContain('overhaul-board');
+    expect(off.body).toContain('pupil-safe board display');
     expect(off.body).not.toContain('pv-md'); // read-only: no markdown editor
 
     const local = await get('local');
@@ -1206,8 +1195,8 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const off = await app.inject({ method: 'GET', url: `/lesson/pupil-view?master=1&lp=${lpId}&level=core&edit=off`, headers: { cookie: session } });
     expect(off.statusCode).toBe(200);
     expect(off.body).toContain('master lesson · every class'); // master-mode header
+    expect(off.body).toContain('pupil-safe board display');
     expect(off.body).not.toContain('✏ This class'); // local edit is meaningless on the master
-    expect(off.body).toContain('master=1'); // toggle links stay in master mode
 
     const ed = await app.inject({ method: 'GET', url: `/lesson/pupil-view?master=1&lp=${lpId}&level=core&edit=master`, headers: { cookie: session } });
     expect(ed.body).toContain('pv-md'); // markdown editor

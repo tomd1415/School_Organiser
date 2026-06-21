@@ -30,7 +30,7 @@ export function registerRecurringRoutes(app: FastifyInstance): void {
       listHtml = `<p class="muted">Recurring tasks are unavailable — the database is not reachable.</p>`;
     }
     const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <section class="card recurring" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="ld-notes-head"><h1>Recurring tasks</h1>${renderNewRecurringButton()}</div>
         <p class="muted">Weekly admin and per-lesson jobs (e.g. "assign to Teams" before every 9X lesson). Instances auto-appear in your inbox ahead of their due date. <a href="/tasks">← back to Tasks</a></p>
         ${listHtml}

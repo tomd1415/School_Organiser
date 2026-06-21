@@ -101,7 +101,7 @@ export function registerNoteRoutes(app: FastifyInstance): void {
       listHtml = `<p class="muted">Notes are unavailable — the database is not reachable.</p>`;
     }
     const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <section class="card notes" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="ld-notes-head"><h1>Notes</h1>${renderNewNoteButton('notes-list-general', { kind: 'general' })}</div>
         <p class="muted">General notes and the knowledge base. Notes made during a lesson live on that lesson's page and feed the per-class AI feedback loop.</p>
         ${listHtml}

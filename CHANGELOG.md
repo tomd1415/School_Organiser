@@ -7,6 +7,39 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — Classic UI retired (finish) + cockpit adaptation editor restored
+
+Following the move to a single dark shell (`getUiShell()` is now always `next`; the `styles-overhaul.css`
+/ `app-overhaul.js` bundles were merged into `styles.css` / `app.js`), the leftover test + feature gaps
+were closed. **Typecheck clean; 614 unit + 353 integration tests pass.**
+
+- **Tests aligned to next-only.** The classic-shell integration tests (`nav`, `screens`, `noteCapture`)
+  were unpinned from `setUiShell('classic')` (now a no-op) and rewritten to assert the ribbon / cockpit /
+  next-shell markup. Obsolete classic-rail tests (configurable "Today" pins, experience-gated "Advanced")
+  were dropped — the fixed ribbon doesn't replicate them.
+- **Cockpit adaptation editor restored (was lost in the migration).** The live-lesson cockpit had no
+  per-class "Adapt this lesson" editor after the lesson detail moved to the next shell. It's back as an
+  HTMX-loaded card (new read-only `GET /lesson/adapt/:gc/:lp` hydrates the existing block; edit / AI /
+  reset / change-log all work). Styled for the dark shell.
+
+**Typecheck clean; 626 unit + 354 integration tests pass.**
+
+- **⏱️ Countdown to your next commitment.** The top-left countdown targeted the next *teachable slot*
+  (so it skipped form/clubs and counted even a free period). It now counts down to the next **teaching,
+  form, club, duty or meeting** at its **effective time** — a per-lesson time override (a club inside a
+  longer slot) is honoured. A free period no longer triggers it. (`clock.ts` gains optional
+  `commitments`; `repos/clock.ts` supplies them.)
+- **🎟️ Clubs at break, lunch and after-school.** You can now add a club to ANY slot in Setup →
+  Timetable (the ＋ is no longer limited to teachable slots; on a non-teachable slot a new entry
+  defaults to a **club**). Two optional **time inputs** per entry override the slot's time — leave blank
+  for a breaktime club (fills the whole break), set e.g. **13:00–13:30** for a lunchtime club inside a
+  longer lunch (`timetabled_lessons.start_time/end_time`, migration `0060`). The "category" of a club is
+  simply the slot it sits in.
+- **📒 Club session records.** A club opens a dedicated **`/club`** screen (not the lesson interface):
+  a free-text record of what happened — "where everyone got up to" — plus the recent **session history**
+  for continuity across weeks (`club_sessions`, migration `0060`; `routes/club.ts`). Club cells in the
+  timetable now link here.
+
 ### 2026-06-21 — Timetable readiness dots, free-period workspace, full-screen board
 
 Three teacher-requested timetable/board features. **Typecheck clean; 623 unit + 352 integration tests

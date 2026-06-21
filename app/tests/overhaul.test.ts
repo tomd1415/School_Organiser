@@ -4,16 +4,13 @@ import { calculateCountdown, tzDateToEpoch } from '../src/lib/time';
 import { getUiShell, setUiShell } from '../src/lib/nav';
 
 describe('ui_shell flag (UI overhaul seam)', () => {
-  it('defaults to next; only an explicit "classic" selects the retired shell (BUG-054)', () => {
+  it('always returns next as the classic shell is retired', () => {
     setUiShell(null);
-    expect(getUiShell()).toBe('next'); // the product default
+    expect(getUiShell()).toBe('next');
     setUiShell('classic');
-    expect(getUiShell()).toBe('classic');
+    expect(getUiShell()).toBe('next');
     setUiShell('next');
     expect(getUiShell()).toBe('next');
-    setUiShell('anything-else');
-    expect(getUiShell()).toBe('next'); // anything but 'classic' = next
-    setUiShell('next'); // leave at the default for following tests
   });
 });
 

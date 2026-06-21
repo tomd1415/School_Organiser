@@ -148,15 +148,6 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           <span class="note-status" id="nav-status"></span>
         </form>
 
-        <h2>UI preview <span class="muted">(experimental)</span></h2>
-        <p class="muted">The new task-first workspace is being built behind a flag. <strong>Off</strong>
-          (default) shows the current design; <strong>on</strong> previews the redesign as it lands.
-          Nothing changes until the new shell is built — this just flips <code>data-shell</code>. Reload after saving.</p>
-        <form class="setup-add" hx-post="/settings/ui-shell" hx-target="#shell-status" hx-swap="innerHTML">
-          <label><input type="checkbox" name="next" value="1"${getUiShell() === 'next' ? ' checked' : ''}> Preview the new UI</label>
-          <button type="submit" class="btn-secondary">Save</button>
-          <span class="note-status" id="shell-status"></span>
-        </form>
 
         <h2>Password</h2>
         ${
@@ -386,12 +377,6 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
 
   // UI-overhaul shell selector (classic | next). Same write-through pattern as experience; default
   // classic. See docs/ui-design/WORKING_MODEL.md — the new shell is built behind this flag.
-  app.post('/settings/ui-shell', guard, async (req, reply) => {
-    const next = (req.body as { next?: unknown })?.next === '1';
-    await setSetting('ui_shell', next ? 'next' : 'classic');
-    setUiShell(next ? 'next' : 'classic');
-    return reply.type('text/html').send(`<span class="ok">Saved — ${next ? 'previewing the new UI' : 'classic UI'}. Reload to apply.</span>`);
-  });
 
   // Dismiss the earned-unlock nudge (once; never shown again). Separate from turning power on, so
   // "not now" is a real, remembered choice.

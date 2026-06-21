@@ -87,7 +87,7 @@ export function registerTimeRoutes(app: FastifyInstance): void {
       ? `<nav class="tt-weeknav"><a href="/time?date=${esc(addDays(date, -1))}">◀</a><a href="/time">today</a><a href="/time?date=${esc(addDays(date, 1))}">▶</a></nav>`
       : '';
     const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <section class="card time-avail" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="ld-notes-head"><h1>Time${date ? ` · ${esc(date)}` : ''}</h1>${nav}</div>
         <h2>Work windows</h2>
         <p class="muted">Free periods + before/after school, minus break, lunch, clubs, meetings and a 10-min buffer.</p>

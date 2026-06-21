@@ -96,7 +96,7 @@ export function registerGroupHistoryRoutes(app: FastifyInstance): void {
         }),
       );
 
-      const body = `<section class="card">
+      const body = `<section class="card group-history">
         <h1>Class history — ${esc(chain[chain.length - 1]!.name)}</h1>
         <p class="muted">The same class across the years (${chain.map((c) => esc(c.name)).join(' → ')}). The record stays with each year; the knowledge travels with the class.</p>
         ${sections.join('')}

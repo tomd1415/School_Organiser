@@ -25,6 +25,7 @@ import { getGroupTeachingContext, setGroupTeachingContext } from '../repos/adapt
 import { getLessonWorksheetMeta } from '../services/worksheet';
 import { pupilAccessEnabled } from './pupilAuth';
 import { marksEnabled } from '../auth/marksGate';
+import { getUiShell } from '../lib/nav';
 import { callLLM } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
 import { CLASS_WORK_SYSTEM, CLASS_WORK_VERSION, CLASS_WORK_INSTRUCTION, classWorkItems } from '../llm/prompts/classWork';
@@ -641,9 +642,11 @@ async function renderAnswerPack(oc: number): Promise<string> {
         <div class="muted">${n} pupil${n === 1 ? '' : 's'} answered</div></div>`;
     })
     .join('');
+  const cssHtml = '<link rel="stylesheet" href="/static/styles.css">';
+  const bodyAttr = 'class="cards-page" data-shell="next"';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Answer pack · ${esc(ws.title)}</title>
-    <link rel="stylesheet" href="/static/styles.css"></head>
-    <body class="cards-page"><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(ws.title)} — answer pack</div>
+    ${cssHtml}</head>
+    <body ${bodyAttr}><div class="cards-toolbar"><button onclick="window.print()">🖨 Print</button> ${esc(ws.title)} — answer pack</div>
     <div class="answer-pack">${cards || '<p>No questions.</p>'}</div></body></html>`;
 }
 

@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { getSetting } from '../../src/repos/settings';
-import { setNavDailyOverride, setExperienceMode, setUiShell } from '../../src/lib/nav';
+import { setNavDailyOverride, setExperienceMode } from '../../src/lib/nav';
 
 // idea 6 + Rail & Stage: saving a daily set pins items into the rail's "Today" group AND the very next
 // page render reflects it via the write-through value, with no reboot; the experience switch reveals
@@ -26,7 +26,6 @@ beforeAll(async () => {
   savedNudge = await getSetting('experience_nudge_dismissed');
   app = await buildApp();
   await app.ready();
-  setUiShell('classic'); // these assert the classic Rail & Stage nav; 'next' is now the default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);
@@ -70,23 +69,18 @@ describe('configurable nav (integration)', () => {
     expect(JSON.parse((await getSetting('nav_daily')) ?? '[]')).toEqual(['/', '/schemes']);
   });
 
-  it('the next page render pins the new set into the rail Today group with no reboot', async () => {
+  it('the home page renders the ribbon nav with the core links + the keyboard map', async () => {
     const res = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
-    expect(res.body).toContain('class="rail"');
-    expect(res.body).toContain('<a href="/">Now</a>');
-    expect(res.body).toContain('<a href="/schemes">Schemes</a>'); // pinned into Today
-    expect(res.body).toContain('class="rail-link rail-sg" href="/safeguarding"'); // always pinned
+    expect(res.body).toContain('class="scaffolded-ribbon"'); // the fixed ribbon (replaces the configurable rail)
+    expect(res.body).toContain('href="/safeguarding"'); // always present
+    expect(res.body).toContain('href="/schemes"');
     expect(res.body).toContain('window.__NAV__='); // the keyboard map is emitted for app.js
   });
 
-  it('an empty submission falls back to the default daily set (Today is never empty)', async () => {
+  it('an empty daily submission persists as an empty set', async () => {
     const res = await saveNav('');
     expect(res.statusCode).toBe(200);
     expect(JSON.parse((await getSetting('nav_daily')) ?? '[]')).toEqual([]);
-    const home = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
-    for (const h of ['/', '/focus', '/timetable', '/tasks', '/captured']) {
-      expect(home.body).toContain(`<a href="${h}">`); // the default five back in Today
-    }
   });
 });
 
@@ -99,14 +93,12 @@ describe('experience switch (integration)', () => {
     expect(res.body).not.toContain('<a href="/setup">'); // a power page, hidden in everyday
   });
 
-  it('flipping to power reveals the Advanced section + its pages on the next render', async () => {
+  it('flipping to power persists the experience + stamps it on the body', async () => {
     const res = await setExp('power');
     expect(res.statusCode).toBe(200);
     const home = await app.inject({ method: 'GET', url: '/', headers: { cookie } });
     expect(home.body).toContain('data-experience="power"');
-    expect(home.body).toContain('rail-adv');
-    expect(home.body).toContain('<a href="/setup">');
-    expect(home.body).toContain('<a href="/settings">');
+    expect(home.body).toContain('href="/setup"'); // the ribbon drawer always carries the admin pages
   });
 
   it('rejects a bogus experience value', async () => {

@@ -126,3 +126,31 @@ describe('ClockService — non-school days', () => {
     expect(s.nextTeaching?.date).toBe('2027-05-04');
   });
 });
+
+describe('ClockService — commitment-based countdown (form + clubs)', () => {
+  // The teacher's own Wednesday commitments: morning form (08:50) and a lunchtime club at a custom
+  // 13:00–13:30 inside the longer lunch slot. When supplied, the countdown targets THESE, at their
+  // effective times — so form + clubs count, not just teachable lesson slots.
+  const commitments: PeriodDefinition[] = [
+    { weekday: 3, slotOrder: 2, slotType: 'form_am', label: 'Morning form', lessonIndex: null, startMin: 530, endMin: 550, teachable: false },
+    { weekday: 3, slotOrder: 20, slotType: 'lunch', label: 'Chess club', lessonIndex: null, startMin: 780, endMin: 810, teachable: false },
+  ];
+  const cctx: ClockContext = { periods, terms, tz: TZ, commitments };
+  const cnow = (iso: string) => resolveNow(new Date(iso), cctx);
+
+  it('counts down to form time (a non-teachable slot) when it is the next commitment', () => {
+    const s = cnow('2026-09-09T07:00:00+01:00');
+    expect(s.nextTeaching?.label).toBe('Morning form'); // not Lesson 1
+    expect(s.nextTeaching?.startMin).toBe(530);
+  });
+
+  it('counts down to a lunchtime club at its custom 13:00 start, not a lesson slot', () => {
+    const s = cnow('2026-09-09T12:00:00+01:00');
+    expect(s.nextTeaching?.label).toBe('Chess club');
+    expect(s.nextTeaching?.startMin).toBe(780); // 13:00 override, inside the lunch slot
+  });
+
+  it('without commitments, still falls back to the next teachable slot (unchanged)', () => {
+    expect(now('2026-09-09T07:00:00+01:00').nextTeaching?.lessonIndex).toBe(1);
+  });
+});

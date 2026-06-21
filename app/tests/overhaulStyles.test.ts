@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const CSS = readFileSync(join(__dirname, '..', 'public', 'styles-overhaul.css'), 'utf8');
-const CLASSIC_CSS = readFileSync(join(__dirname, '..', 'public', 'styles.css'), 'utf8');
+const CSS = readFileSync(join(__dirname, '..', 'public', 'styles.css'), 'utf8');
+const CLASSIC_CSS = CSS;
 
 describe('next-shell dark theme compatibility', () => {
   it('defines the aliases used by incrementally migrated views', () => {

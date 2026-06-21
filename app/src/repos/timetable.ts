@@ -41,7 +41,8 @@ export interface LessonSlot {
 export async function getLessonSlot(lessonId: number): Promise<LessonSlot | null> {
   const { rows } = await pool.query<LessonSlot>(
     `SELECT tl.id AS "lessonId", tl.purpose, p.label, p.weekday,
-            to_char(p.start_time, 'HH24:MI') AS start, to_char(p.end_time, 'HH24:MI') AS "end",
+            to_char(COALESCE(tl.start_time, p.start_time), 'HH24:MI') AS start,
+            to_char(COALESCE(tl.end_time, p.end_time), 'HH24:MI') AS "end",
             g.name AS "groupName"
      FROM timetabled_lessons tl
      JOIN period_definitions p ON p.id = tl.period_definition_id

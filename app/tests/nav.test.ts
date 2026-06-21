@@ -39,45 +39,22 @@ describe('nav model (single source of truth)', () => {
   });
 });
 
-describe('renderRail (Rail & Stage)', () => {
-  beforeEach(() => setUiShell('classic')); // these assert the CLASSIC rail; 'next' is now the default
-  it('everyday: Today = the leaner five, a pinned Safeguarding link, a Plan section, NO Advanced', () => {
+describe('renderRail (Scaffolded Ribbon)', () => {
+  it('renders the overhauled ribbon scaffold and all operational/admin links', () => {
     const html = renderRail('everyday');
-    expect(html).toContain('class="rail"');
-    for (const h of DEFAULT_DAILY) expect(html).toContain(`<a href="${h}">`);
-    expect(html).toContain('<span class="rail-h">Today</span>');
-    expect(html).toContain('class="rail-link rail-sg" href="/safeguarding"');
-    expect(html).toContain('<details class="rail-sec rail-plan"');
-    expect(html).toContain('<a href="/schemes">Schemes</a>'); // a Plan item
-    // Advanced is hidden in everyday mode — neither the section nor its pages render.
-    expect(html).not.toContain('rail-adv');
-    for (const h of ADVANCED) expect(html).not.toContain(`<a href="${h}">`);
+    expect(html).toContain('class="scaffolded-ribbon"');
+    expect(html).toContain('href="/"');
+    expect(html).toContain('href="/safeguarding"');
+    expect(html).toContain('href="/timetable"');
+    expect(html).toContain('href="/focus"');
+    expect(html).toContain('href="/marking"');
+    expect(html).toContain('href="/settings"');
   });
 
-  it('power: the Advanced section appears with the expert-setup pages', () => {
-    const html = renderRail('power');
-    expect(html).toContain('<details class="rail-sec rail-adv"');
-    for (const h of ADVANCED) expect(html).toContain(`<a href="${h}">`);
-  });
-
-  it('Safeguarding is pinned exactly once and never duplicated into Today/Plan', () => {
-    const html = renderRail('power');
-    expect(html.match(/href="\/safeguarding"/g)).toHaveLength(1);
-  });
-
-  it('the configurable daily set pins items into Today, ahead of the Plan section', () => {
-    setNavDailyOverride(['/', '/schemes']);
-    const html = renderRail('everyday');
-    const schemes = html.indexOf('>Schemes<');
-    const planSummary = html.indexOf('<summary>Plan</summary>');
-    expect(schemes).toBeGreaterThan(-1);
-    expect(planSummary).toBeGreaterThan(-1);
-    expect(schemes).toBeLessThan(planSummary); // pinned Schemes sits in Today, before Plan
-  });
-
-  it('pinning all links puts every page in Today (the rail still renders them all)', () => {
-    const html = renderRail('power', ALL_HREFS);
-    for (const h of ALL_HREFS) expect(html).toContain(`href="${h}"`);
+  it('embeds custom bottom controls/railFoot', () => {
+    const foot = '<div class="custom-foot">Foot Content</div>';
+    const html = renderRail('everyday', undefined, foot);
+    expect(html).toContain(foot);
   });
 });
 
@@ -92,14 +69,6 @@ describe('experience switch (write-through)', () => {
     expect(getExperienceMode()).toBe('everyday'); // anything but 'power' = everyday
     setExperienceMode(null);
     expect(getExperienceMode()).toBe('everyday');
-  });
-
-  it('renderRail defaults its experience arg from the write-through value', () => {
-    setUiShell('classic'); // the experience gate (rail-adv) is a classic-rail feature
-    setExperienceMode('power');
-    expect(renderRail()).toContain('rail-adv');
-    setExperienceMode('everyday');
-    expect(renderRail()).not.toContain('rail-adv');
   });
 });
 
@@ -153,22 +122,18 @@ describe('client jump-map (unchanged)', () => {
 });
 
 describe('ui_shell flag (UI overhaul seam)', () => {
-  afterEach(() => setUiShell('next')); // reset to the default shell (BUG-054)
-
-  it('defaults to next; only an explicit "classic" selects the retired shell', () => {
+  it('always returns next as the classic shell is retired', () => {
     setUiShell(null);
-    expect(getUiShell()).toBe('next'); // the product default
+    expect(getUiShell()).toBe('next');
     setUiShell('classic');
-    expect(getUiShell()).toBe('classic');
+    expect(getUiShell()).toBe('next');
     setUiShell('next');
     expect(getUiShell()).toBe('next');
-    setUiShell('anything-else');
-    expect(getUiShell()).toBe('next'); // anything but 'classic' = next
   });
 
-  it('layout() reflects the shell as data-shell on <body> (the seam for the new shell)', () => {
+  it('layout() always reflects the shell as data-shell="next" on <body>', () => {
     setUiShell('classic');
-    expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="classic"');
+    expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="next"');
     setUiShell('next');
     expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="next"');
   });

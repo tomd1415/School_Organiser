@@ -145,15 +145,6 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         <span class="note-status" id="nav-status"></span>
       </form>
 
-      <h2>UI preview <span class="muted">(experimental)</span></h2>
-      <p class="muted">The new task-first workspace is being built behind a flag. <strong>Off</strong>
-        (default) shows the current design; <strong>on</strong> previews the redesign as it lands.
-        Nothing changes until the new shell is built — this just flips <code>data-shell</code>. Reload after saving.</p>
-      <form class="setup-add" hx-post="/settings/ui-shell" hx-target="#shell-status" hx-swap="innerHTML">
-        <label><input type="checkbox" name="next" value="1"${getUiShell() === 'next' ? ' checked' : ''}> Preview the new UI</label>
-        <button type="submit" class="btn-secondary">Save</button>
-        <span class="note-status" id="shell-status"></span>
-      </form>
 
       <h2>Password</h2>
       ${
