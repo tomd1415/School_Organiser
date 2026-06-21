@@ -198,6 +198,9 @@ export function registerNowRoutes(app: FastifyInstance): void {
           ctx,
           curEx,
           nextEx,
+          allLessons,
+          periods,
+          captured,
         });
         return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
       }

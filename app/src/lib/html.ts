@@ -89,7 +89,7 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
   <script>(function(){try{var d=document.documentElement,s=window.localStorage;var m={theme:'data-theme',fontsize:'data-fontsize',font:'data-font'};for(var k in m){var v=s.getItem('a11y-'+k);if(v)d.setAttribute(m[k],v);}}catch(e){}})();</script>
   <link rel="stylesheet" href="/static/styles-overhaul.css">
 </head>
-<body data-experience="${esc(exp)}" data-shell="next">
+<body data-experience="${esc(exp)}" data-shell="next" data-orientation="landscape">
   <script>(function(){try{if(window.localStorage.getItem('focus-mode')==='true')document.body.classList.add('focus-mode');}catch(e){}})();</script>
   <div class="unified-console-wrapper${authed ? '' : ' console-bare'}">
     ${authed ? renderRail(exp, undefined, railFootNext) : ''}
@@ -204,7 +204,7 @@ export function layout({ title, body, authed = false, csrfToken }: LayoutOptions
   <script>(function(){try{var d=document.documentElement,s=window.localStorage;var m={theme:'data-theme',fontsize:'data-fontsize',font:'data-font'};for(var k in m){var v=s.getItem('a11y-'+k);if(v)d.setAttribute(m[k],v);}}catch(e){}})();</script>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body data-experience="${esc(exp)}" data-shell="${esc(shell)}">
+<body data-experience="${esc(exp)}" data-shell="${esc(shell)}" data-orientation="landscape">
   <div class="app${authed ? '' : ' app-bare'}">
     <aside class="rail-wrap">
       <a class="brand" href="/">School Organiser</a>

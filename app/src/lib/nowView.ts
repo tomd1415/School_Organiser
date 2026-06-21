@@ -333,6 +333,172 @@ export interface NowNextData {
   ctx: { tz: string; terms: TermDate[] };
   curEx: ExceptionEffect;
   nextEx: ExceptionEffect;
+  allLessons?: LessonRow[];
+  periods?: PeriodRow[];
+  captured?: CapturedItem[];
+}
+
+export function renderTimelineCard(
+  lessons: LessonRow[] | undefined,
+  periods: PeriodRow[] | undefined,
+  state: NowState,
+  now: Date,
+  tz: string
+): string {
+  if (!periods || !lessons) return '';
+  
+  // Filter target periods and sort by slotOrder/start time
+  let targetWeekday = state.weekday;
+  let targetLabel = "Today's Timetable";
+  let isFuture = !state.isSchoolDay;
+
+  let todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.slotOrder - b.slotOrder);
+  if (!todayPeriods.length) {
+    // If today is a weekend/holiday and has no periods, default to the next teaching day's weekday
+    if (state.nextTeaching) {
+      targetWeekday = state.nextTeaching.weekday;
+      const d = state.nextTeaching.date;
+      const formattedDate = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric' }).format(new Date(`${d}T12:00:00Z`));
+      targetLabel = `Timetable: ${formattedDate}`;
+      isFuture = true;
+    } else {
+      // Fallback to Monday
+      targetWeekday = 1;
+      targetLabel = "Monday's Timetable";
+      isFuture = true;
+    }
+    todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.slotOrder - b.slotOrder);
+  }
+  if (!todayPeriods.length) return '';
+  
+  const todayLessons = lessons.filter(l => l.weekday === targetWeekday && l.isSelf);
+  const lessonBySlot = new Map<number, LessonRow>();
+  for (const l of todayLessons) {
+    lessonBySlot.set(l.slotOrder, l);
+  }
+
+  const currentMinutes = isFuture ? -1 : state.minutes;
+
+  const slotHtmls = todayPeriods.map(p => {
+    const l = lessonBySlot.get(p.slotOrder);
+    
+    // Start and end minutes for checking active/done status
+    const startMin = toMinutes(p.start);
+    const endMin = toMinutes(p.end);
+    
+    let statusClass = '';
+    let stateLabel = '';
+    
+    if (currentMinutes >= endMin) {
+      statusClass = 'done';
+      stateLabel = 'done';
+    } else if (currentMinutes >= startMin && currentMinutes < endMin) {
+      statusClass = 'active current';
+      stateLabel = 'active';
+    } else {
+      statusClass = 'next';
+      stateLabel = 'next';
+    }
+
+    const title = l ? (l.groupName ?? purposeLabel(l.purpose)) : purposeLabel(p.slotType);
+    let detail = p.label;
+    if (l && l.courses && l.courses.length > 0) {
+      detail += ` · ${l.courses.map(c => c.name).join(', ')}`;
+    }
+    
+    return `
+      <li class="timeline-slot ${statusClass}">
+        <time>${p.start}</time>
+        <span class="node"></span>
+        <div class="slot-details">
+          <strong>${esc(title)}</strong>
+          <small>${esc(detail)}</small>
+          <span class="state">${stateLabel}</span>
+        </div>
+      </li>
+    `;
+  }).join('');
+
+  return `
+    <section class="card agenda-card">
+      <div class="card-head">
+        <h2>${esc(targetLabel)}</h2>
+        <span class="badge good">${todayPeriods.length} slots</span>
+      </div>
+      <div class="agenda-timeline">
+        <ol class="timeline-list">
+          ${slotHtmls}
+        </ol>
+      </div>
+    </section>
+  `;
+}
+
+export function renderInboxQueueCard(captured: CapturedItem[] | undefined, csrf: string): string {
+  if (!captured) return '';
+  const activeItems = captured.filter(c => !c.archived);
+  const count = activeItems.length;
+
+  const listHtml = activeItems.slice(0, 5).map(item => {
+    const badgeText = item.category ? (item.category.charAt(0).toUpperCase() + item.category.slice(1)) : 'Note';
+    let badgeClass = '';
+    if (item.category === 'safeguarding') badgeClass = 'red';
+    else if (item.category === 'task') badgeClass = 'warn';
+    else if (item.category === 'supply') badgeClass = 'ai';
+    
+    return `
+      <div class="inbox-item-row" id="inbox-item-${item.id}">
+        <div class="inbox-item-meta">
+          <span class="badge ${badgeClass}">${esc(badgeText)}</span>
+        </div>
+        <p class="inbox-item-text">${esc(item.body || '(captured note)')}</p>
+        <div class="inbox-item-actions" hx-headers='{"x-csrf-token":"${csrf}"}'>
+          <button class="button small ghost" type="button" 
+            hx-post="/captured/${item.id}/to-task" 
+            hx-target="#inbox-item-${item.id}" 
+            hx-swap="outerHTML">✓ Task</button>
+          <button class="button small ghost" type="button" 
+            hx-post="/captured/${item.id}/flag/archived" 
+            hx-target="#inbox-item-${item.id}" 
+            hx-swap="outerHTML">Archive</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const countBadge = count > 5 ? `<span class="badge warn" id="inbox-count-badge">${count} items (+${count - 5} more)</span>` : `<span class="badge warn" id="inbox-count-badge">${count} items</span>`;
+
+  return `
+    <section class="card inbox-queue-card">
+      <div class="card-head">
+        <h2>Inbox Queue</h2>
+        ${countBadge}
+      </div>
+      <div class="inbox-list" id="inbox-items-container">
+        ${listHtml || '<p class="muted">Inbox is empty</p>'}
+      </div>
+    </section>
+  `;
+}
+
+export function renderMindDumpCard(csrf: string): string {
+  return `
+    <section class="card capture-dock-card">
+      <div class="card-head">
+        <div>
+          <p class="eyebrow-accent">🧠 Mind Dump</p>
+          <h2>Capture thought</h2>
+        </div>
+      </div>
+      <form class="capture-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        <div class="textarea-wrapper">
+          <textarea name="body" placeholder="Jot down notes (e.g. 'Order green whiteboard markers' or 'Daniel Reed did great iteration today')..."></textarea>
+        </div>
+        <button class="button primary submit-inbox-btn" type="submit">📥 Capture to Inbox</button>
+        <span id="qc-status"></span>
+      </form>
+    </section>
+  `;
 }
 
 export function renderNowNext(data: NowNextData): string {
@@ -359,6 +525,9 @@ export function renderNowNext(data: NowNextData): string {
     ctx,
     curEx,
     nextEx,
+    allLessons,
+    periods,
+    captured,
   } = data;
 
   const sig = nowSignature(state, current, next);
@@ -378,34 +547,34 @@ export function renderNowNext(data: NowNextData): string {
     ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>`
     : '';
 
-  const quickCaptureDock = `
-    <form class="quick-capture-dock" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
-      <input id="qc-input" type="text" name="body" placeholder="Mind dump: type something to capture..." autocomplete="off">
-      <button type="submit" class="btn-primary">Capture</button>
-      <span id="qc-status"></span>
-    </form>
-  `;
-
   return `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
     ${renderTimerBanner(running)}
     <!-- Hidden poll strip to preserve hx-get clock contract -->
     <div id="now-strip" class="now-strip" style="display: none;" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"></div>
 
-    ${quickCaptureDock}
     ${nudgeHtml}
     ${exceptionBanner}
 
-    <div class="now-cols">
-      <div class="now-col now-col-now">
+    <div class="now-grid">
+      <!-- COLUMN 1: Contextual Action Cards -->
+      <div class="now-col-left">
         ${card}
         ${dayList}
+        ${renderDayCard(dayPart, dayItems, state.isoDate)}
       </div>
-      <div class="now-col now-col-next">
-        ${nextCard}
+
+      <!-- COLUMN 2: Today's Agenda -->
+      <div class="now-col-middle">
+        ${renderTimelineCard(allLessons, periods, state, now, ctx.tz)}
+      </div>
+
+      <!-- COLUMN 3: Mind Clearing Capture & Processing -->
+      <div class="now-col-right">
+        ${renderMindDumpCard(csrf)}
+        ${renderInboxQueueCard(captured, csrf)}
         ${renderMorningBrief(briefItems)}
         ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
         ${renderCurrentInterests(interests)}
-        ${renderDayCard(dayPart, dayItems, state.isoDate)}
       </div>
     </div>
   </section>`;

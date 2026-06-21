@@ -199,6 +199,18 @@
   }
   document.body.addEventListener('htmx:afterRequest', requestDone);
 
+  // BUG-013 Form reset verification helper
+  window.htmxSaved = function (e) {
+    try {
+      var d = e && e.detail;
+      if (!d || !d.successful) return false;
+      var trig = d.xhr && d.xhr.getResponseHeader && d.xhr.getResponseHeader('HX-Trigger');
+      return !(trig && trig.indexOf('app:save-failed') !== -1);
+    } catch (_) {
+      return false;
+    }
+  };
+
   // Autosave validation & toast notifications
   function saveToast(msg) {
     var t = document.getElementById('hx-toast');

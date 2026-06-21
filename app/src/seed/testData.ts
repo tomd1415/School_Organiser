@@ -463,6 +463,7 @@ async function main(): Promise<void> {
   await setSetting('auth_password_hash', hashPassword(LOGIN_PASSWORD));
   await setSetting('setup_complete', 'true');
   await setSetting('school_name', 'Test Academy (sandbox)');
+  await setSetting('ui_shell', 'next'); // the sandbox previews the new UI shell — test the redesign on realistic data
 
   // a few sample pupil logins to print
   const samples = (await pool.query<{ name: string; pin: string; code: string }>(
