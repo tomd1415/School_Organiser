@@ -1,5 +1,6 @@
+import AdmZip from 'adm-zip';
 import { pool } from '../db/pool';
-import { removeStored } from '../lib/resourceStore';
+import { readStored, removeStored } from '../lib/resourceStore';
 import { clearFileDeletion, enqueueFileDeletion } from './fileDeletions';
 
 export interface RosterEntry {
@@ -258,6 +259,7 @@ export async function exportPupilRecord(id: number): Promise<Record<string, unkn
                      JOIN courses c ON c.id = gc.course_id LEFT JOIN groups gr ON gr.id = gc.group_id WHERE pl.pupil_id = $1`),
     unitSignal: await q(`SELECT u.title AS unit, s.signal, s.updated_at AS "updatedAt" FROM pupil_unit_signal s JOIN units u ON u.id = s.unit_id WHERE s.pupil_id = $1`),
     completed: await q(`SELECT occurrence_course_id AS "occurrenceCourseId", done_at AS "doneAt" FROM pupil_done WHERE pupil_id = $1 ORDER BY done_at`),
+    atl: await q(`SELECT occurrence_course_id AS "occurrenceCourseId", score, updated_at AS "updatedAt" FROM pupil_atl WHERE pupil_id = $1 ORDER BY occurrence_course_id`),
     // Devices: the cookie SECRET (token_hash) is never exported — only the non-secret metadata.
     devices: await q(`SELECT label, last_used_at AS "lastUsedAt", expires_at AS "expiresAt", created_at AS "createdAt" FROM pupil_devices WHERE pupil_id = $1 ORDER BY created_at`),
     // Login credential: existence + state only — the PIN hash is a secret and is never disclosed.
@@ -267,4 +269,42 @@ export async function exportPupilRecord(id: number): Promise<Record<string, unkn
     // case-by-case, not dumped here. (Documented exclusion, per the SAR completeness review.)
     safeguardingNote: 'Safeguarding records (if any) are held separately and are not included in this automated export — request via the Designated Safeguarding Lead; release is assessed under the DPA 2018 safeguarding exemption.',
   };
+}
+
+/**
+ * BUG-043: the SAR export as a complete, PORTABLE ZIP — the JSON record PLUS every screenshot the pupil
+ * submitted (the DB holds only an `img:` pointer; the files live on the resource volume), with a manifest
+ * listing what was packaged and any file that couldn't be read. Path-guarded exactly like the disposal
+ * sweep (must sit under `pupil-work/`, no `..`). Returns null if the pupil doesn't exist.
+ */
+export async function exportPupilArchive(id: number): Promise<{ zip: Buffer; screenshots: number; missing: string[] } | null> {
+  const record = await exportPupilRecord(id);
+  if (!record) return null;
+  const zip = new AdmZip();
+  zip.addFile('pupil-record.json', Buffer.from(JSON.stringify(record, null, 2), 'utf8'));
+
+  const imgPaths = (await pool.query<{ value: string }>(
+    `SELECT value FROM pupil_answers WHERE pupil_id = $1 AND value LIKE 'img:%'`, [id],
+  )).rows.map((r) => r.value.slice(4)).filter((p) => p.startsWith('pupil-work/') && !p.includes('..'));
+
+  const missing: string[] = [];
+  const files: Array<{ path: string; bytes?: number; missing?: boolean }> = [];
+  let screenshots = 0;
+  for (const rel of imgPaths) {
+    const inZip = `screenshots/${rel.replace(/^pupil-work\//, '')}`;
+    try {
+      const buf = await readStored(rel);
+      zip.addFile(inZip, buf);
+      files.push({ path: inZip, bytes: buf.length });
+      screenshots += 1;
+    } catch {
+      missing.push(rel);
+      files.push({ path: rel, missing: true });
+    }
+  }
+  zip.addFile(
+    'manifest.json',
+    Buffer.from(JSON.stringify({ exportedAt: (record as { exportedAt?: string }).exportedAt ?? null, screenshotsIncluded: screenshots, screenshotsMissing: missing, files }, null, 2), 'utf8'),
+  );
+  return { zip: zip.toBuffer(), screenshots, missing };
 }

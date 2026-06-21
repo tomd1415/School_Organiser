@@ -19,38 +19,7 @@ import { invalidateMarksGate } from '../auth/marksGate';
 import { AI_KEY_ENV_MANAGED } from '../llm/client';
 import { NAV_MODEL, getNavDailyHrefs, setNavDailyOverride, sanitiseDaily, setExperienceMode, setUiShell, getUiShell } from '../lib/nav';
 
-function renderTaAccount(a: TaAccount, staff: { id: number; name: string }[]): string {
-  const staffName = a.staffId != null ? (staff.find((s) => s.id === a.staffId)?.name ?? null) : null;
-  return `<li class="pupil${a.active ? '' : ' inactive'}" id="ta-acct-${a.id}">
-    <span class="pupil-name">${esc(a.name)}</span>
-    ${staffName ? `<span class="muted">↔ ${esc(staffName)}</span>` : '<span class="muted">no staff link</span>'}
-    <button type="button" class="link" hx-post="/settings/ta-account/${a.id}/active" hx-vals='{"active":"${a.active ? 'false' : 'true'}"}' hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">${a.active ? 'disable' : 'enable'}</button>
-    <button type="button" class="link" hx-post="/settings/ta-account/${a.id}/password" hx-prompt="New password for ${esc(a.name)} (8+ characters)" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">reset password</button>
-    <button type="button" class="link danger" hx-post="/settings/ta-account/${a.id}/delete" hx-confirm="Delete ${esc(a.name)}'s login?" hx-target="#ta-acct-${a.id}" hx-swap="outerHTML">✕</button>
-  </li>`;
-}
-
-// idea 5 — the per-feature model picker. Each feature defaults to its role model; the teacher can
-// override individually. Only priced models are offered so cost estimates and the cap stay accurate.
-function renderFeatureModelPicker(overrides: Record<string, string>): string {
-  const rows = AI_FEATURES.map((f) => {
-    const sel = overrides[f.key] ?? '';
-    const opts = [`<option value=""${sel === '' ? ' selected' : ''}>Default — ${f.role} model</option>`]
-      .concat(MODEL_OPTIONS.map((m) => `<option value="${m.id}"${sel === m.id ? ' selected' : ''}>${esc(m.label)}</option>`))
-      .join('');
-    return `<label class="adapt-l">${esc(f.label)}${f.note ? ` <span class="muted">(${esc(f.note)})</span>` : ''}
-      <select hx-post="/settings/ai" hx-vals='js:{"key":"ai_model_feature_${f.key}","value":event.target.value}' hx-trigger="change" hx-swap="none">${opts}</select></label>`;
-  }).join('');
-  return `<details class="ai-feature-models">
-    <summary>Per-feature models (advanced)</summary>
-    <p class="muted">Every feature uses its role model above by default. Override one if you want it
-      cheaper or stronger — e.g. dial a feature down to Haiku, or push scheme authoring to Opus. Only
-      models we have pricing for are listed, so the spend cap stays accurate. Tiers: <strong>Opus</strong>
-      strongest/priciest · <strong>Sonnet</strong> balanced · <strong>Haiku</strong> fastest/cheapest.</p>
-    ${rows}
-    <span class="note-status" id="ai-feat-status"></span>
-  </details>`;
-}
+import { renderTaAccount, renderFeatureModelPicker } from '../lib/settingsView';
 
 export function registerSettingsRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
@@ -111,6 +80,54 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
         · <a href="/settings/ai-log">view the call log</a></p>`;
       const navDailySet = new Set(getNavDailyHrefs());
       const featureModelPicker = renderFeatureModelPicker(await getFeatureModelOverrides());
+
+      if (getUiShell() === 'next') {
+        const { renderSettingsPage: renderSettingsPageNext } = await import('../lib/settingsView');
+        body = renderSettingsPageNext({
+          csrf,
+          envManaged,
+          school,
+          aiEnabled,
+          cap,
+          mPlan,
+          mDesign,
+          mCheap,
+          emHost,
+          emPort,
+          emUser,
+          emPass: !!emPass,
+          emFolder,
+          emTls,
+          emOn,
+          emMins,
+          emLast,
+          aiKeySet,
+          aiKeyFromSettings,
+          AI_KEY_ENV_MANAGED,
+          stylePrefs,
+          featurePrefs,
+          reviewOn,
+          reviewSweep,
+          pupilOn,
+          pupilIdle,
+          dpiaAck,
+          taLegacy,
+          taAccounts,
+          staffRows,
+          marksOn,
+          marksAck,
+          teacherIdle,
+          backupVerified,
+          health,
+          spendNote,
+          navDailySet,
+          NAV_MODEL,
+          getUiShell,
+          featureModelPickerHtml: featureModelPicker,
+        });
+        return reply.type('text/html').send(layout({ title: 'Settings', body, authed: true, csrfToken: csrf }));
+      }
+
       body = `
       <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Settings</h1>

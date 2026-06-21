@@ -451,4 +451,137 @@
         .catch(function () {});
     });
   })();
+
+  // --- Overhaul: Slide Deck Navigation ---
+  function showSlide(index) {
+    var thumbs = document.querySelectorAll('[data-slide-thumb]');
+    var slides = document.querySelectorAll('.pslide');
+    var notes = document.querySelectorAll('.pslide-note-item');
+    var positionEls = document.querySelectorAll('[data-slide-position]');
+    var eyebrow = document.getElementById('slide-notes-eyebrow');
+
+    if (slides.length === 0) return;
+    if (index < 0) index = 0;
+    if (index >= slides.length) index = slides.length - 1;
+
+    // Update slides
+    slides.forEach(function (s) {
+      if (parseInt(s.getAttribute('data-slide'), 10) === index) {
+        s.classList.add('on');
+      } else {
+        s.classList.remove('on');
+      }
+    });
+
+    // Update thumbs if present
+    if (thumbs.length > 0) {
+      thumbs.forEach(function (t) {
+        var idx = parseInt(t.getAttribute('data-index'), 10);
+        if (idx === index) {
+          t.setAttribute('aria-current', 'true');
+          // Update position text from thumb attribute
+          var pos = t.getAttribute('data-position');
+          positionEls.forEach(function (el) { el.textContent = pos; });
+        } else {
+          t.setAttribute('aria-current', 'false');
+        }
+      });
+    } else {
+      // No thumbs (board view)
+      positionEls.forEach(function (el) {
+        el.textContent = 'Slide ' + (index + 1) + ' of ' + slides.length;
+      });
+    }
+
+    // Update notes if present
+    notes.forEach(function (n) {
+      if (parseInt(n.getAttribute('data-slide'), 10) === index) {
+        n.classList.add('on');
+      } else {
+        n.classList.remove('on');
+      }
+    });
+
+    // Update notes eyebrow if present
+    if (eyebrow) {
+      eyebrow.textContent = 'Private · slide ' + (index + 1);
+    }
+  }
+
+  function getActiveSlideIndex() {
+    var activeSlide = document.querySelector('.pslide.on');
+    if (!activeSlide) return 0;
+    return parseInt(activeSlide.getAttribute('data-slide'), 10) || 0;
+  }
+
+  document.addEventListener('click', function (e) {
+    var thumb = e.target.closest('[data-slide-thumb]');
+    if (thumb) {
+      var index = parseInt(thumb.getAttribute('data-index'), 10);
+      showSlide(index);
+      return;
+    }
+
+    var prevBtn = e.target.closest('#slide-prev-btn');
+    if (prevBtn) {
+      showSlide(getActiveSlideIndex() - 1);
+      return;
+    }
+
+    var nextBtn = e.target.closest('#slide-next-btn');
+    if (nextBtn) {
+      showSlide(getActiveSlideIndex() + 1);
+      return;
+    }
+  });
+
+  // --- Overhaul: Text-To-Speech (TTS) Slide Narration ---
+  var currentUtterance = null;
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.ws-speak');
+    if (btn) {
+      var text = btn.getAttribute('data-speak-text') || '';
+      if (!text) return;
+
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        // If we clicked the button to stop the current speech, just return
+        if (currentUtterance && currentUtterance.text === text) {
+          currentUtterance = null;
+          return;
+        }
+      }
+
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = 'en-GB';
+      window.speechSynthesis.speak(currentUtterance);
+    }
+  });
+
+  // --- Overhaul: Start Work / Group Lock Simulation ---
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('#start-work-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Work locked';
+
+      // Disable the edit groups button
+      var editBtn = document.getElementById('edit-groups-btn');
+      if (editBtn) editBtn.disabled = true;
+
+      // Update the group-state badge and text
+      var groupStateWrap = document.querySelector('.group-state');
+      if (groupStateWrap) {
+        var badge = groupStateWrap.querySelector('.badge');
+        if (badge) {
+          badge.className = 'badge danger';
+          badge.textContent = 'Locked';
+        }
+        var stateText = groupStateWrap.querySelector('[data-group-state]');
+        if (stateText) {
+          stateText.textContent = 'Independent work in progress · changes locked';
+        }
+      }
+    }
+  });
 })();

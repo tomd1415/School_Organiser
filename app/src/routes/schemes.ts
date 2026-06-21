@@ -39,7 +39,9 @@ import {
 } from '../repos/schemes';
 import {
   addVersion,
+  addVersionWithFile,
   createResource,
+  createResourceWithVersion,
   getImportedPaths,
   linkResourceToPlan,
   linkResourceToUnit,
@@ -181,16 +183,13 @@ async function generateResourcesForPlan(planId: number, useMaterials = true): Pr
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);
     if (match) {
-      const vNo = (await listVersions(match.resourceId)).length + 1;
-      const rel = relPathFor(match.resourceId, vNo, filename);
-      await storeBuffer(rel, buf);
-      await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-regenerated');
+      await addVersionWithFile(match.resourceId, { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-regenerated' }); // BUG-028
       updated++;
     } else {
-      const id = await createResource(filename, RES_KIND_STORE[kind] ?? 'document', 'text/markdown', 'ai_generated');
-      const rel = relPathFor(id, 1, filename);
-      await storeBuffer(rel, buf);
-      await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated');
+      const id = await createResourceWithVersion(
+        { title: filename, kind: RES_KIND_STORE[kind] ?? 'document', mimeType: 'text/markdown', source: 'ai_generated' },
+        { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-generated' },
+      ); // BUG-028: atomic row+version+file
       await linkResourceToPlan(id, planId);
       created++;
     }

@@ -1730,3 +1730,24 @@ html[data-textscale="3"] { font-size: 142%; }
 .pslide-notes-body p, .pslide-notes-body ul { margin: 0.2rem 0; }
 .present-card .pupil-slides { max-width: 62rem; margin: 0 auto; }
 .present-card .pslide-notes { text-align: left; }
+
+/* ATL (attitude to learning) 1–4 picker — shared by the marking modal + the live class grid (routes/atl.ts) */
+.atl { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+.atl-lbl { font-size: 0.72rem; font-weight: 700; color: var(--muted, #64748b); letter-spacing: 0.04em; margin-right: 2px; }
+.atl-b {
+  inline-size: 1.9rem; block-size: 1.9rem; border: 1.5px solid var(--border, #cbd5e1);
+  border-radius: 6px; background: var(--card, #fff); font-weight: 700; font-size: 0.95rem;
+  cursor: pointer; line-height: 1; padding: 0; transition: background-color .08s, color .08s, border-color .08s;
+}
+.atl-b:hover { border-color: currentColor; }
+.atl-1 { color: #b91c1c; } .atl-2 { color: #b45309; } .atl-3 { color: #4d7c0f; } .atl-4 { color: #15803d; }
+.atl-b.on { color: #fff; border-color: transparent; }
+.atl-1.on { background: #dc2626; } .atl-2.on { background: #f59e0b; } .atl-3.on { background: #65a30d; } .atl-4.on { background: #16a34a; }
+
+/* the live whole-class ATL grid (/lesson/oc/:id/atl) */
+.atl-list { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-direction: column; gap: 2px; max-inline-size: 34rem; }
+.atl-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 6px 10px; border-radius: 8px; }
+.atl-row:nth-child(odd) { background: var(--surface-2, #f8fafc); }
+.atl-name { font-weight: 600; }
+.atl-grid .atl-b { inline-size: 2.3rem; block-size: 2.3rem; font-size: 1.05rem; } /* bigger taps for live use */
+.mm-atl-link, .mk-atl { font-size: 0.8rem; white-space: nowrap; }

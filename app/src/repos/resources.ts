@@ -132,6 +132,45 @@ export async function createResourceWithVersion(
   }
 }
 
+/**
+ * BUG-028: append a new version to an EXISTING resource, ATOMICALLY — mirror of createResourceWithVersion
+ * but for an append. The version row, the current-version pointer and the staged file all succeed or roll
+ * back together (the file is staged inside the transaction's success path; a throw rolls the rows back and
+ * unlinks the file), so no path leaves an orphan version row or an orphan file. Returns the new version id.
+ */
+export async function addVersionWithFile(
+  resourceId: number,
+  file: { filename: string; buf: Buffer; checksum: string; author: 'teacher' | 'ai'; changeNote: string | null },
+): Promise<number> {
+  const client = await pool.connect();
+  let rel: string | null = null;
+  try {
+    await client.query('BEGIN');
+    await client.query(`SELECT id FROM resources WHERE id = $1 FOR UPDATE`, [resourceId]);
+    const next = await client.query<{ n: number }>(
+      `SELECT COALESCE(max(version_no) + 1, 1) AS n FROM resource_versions WHERE resource_id = $1`,
+      [resourceId],
+    );
+    const vNo = next.rows[0]!.n;
+    rel = relPathFor(resourceId, vNo, file.filename);
+    const v = await client.query<{ id: number }>(
+      `INSERT INTO resource_versions (resource_id, version_no, storage_path, byte_size, checksum, author, change_note)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [resourceId, vNo, rel, file.buf.length, file.checksum, file.author, file.changeNote],
+    );
+    await client.query(`UPDATE resources SET current_version_id = $2 WHERE id = $1`, [resourceId, v.rows[0]!.id]);
+    await storeBuffer(rel, file.buf); // stage the bytes last; a throw here rolls the rows back below
+    await client.query('COMMIT');
+    return v.rows[0]!.id;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    if (rel) await removeStored(rel).catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export async function getResource(id: number): Promise<ResourceRow | null> {
   const { rows } = await pool.query<ResourceRow>(
     `SELECT ${RES_COLS} FROM resources r LEFT JOIN resource_versions v ON v.id = r.current_version_id WHERE r.id = $1`,

@@ -3,7 +3,8 @@ import { rm } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
 import { absPath, storeBuffer } from '../../src/lib/resourceStore';
-import { createPupil, disposePupil, exportPupilRecord, listDisposals, listRoster } from '../../src/repos/pupils';
+import { createPupil, disposePupil, exportPupilRecord, exportPupilArchive, listDisposals, listRoster } from '../../src/repos/pupils';
+import AdmZip from 'adm-zip';
 
 // Phase 10.2 — pupil erasure / anonymisation + SAR export against the dev DB. The critical property:
 // a naive DELETE FROM pupils throws on the Phase-2 RESTRICT FKs (enrolments/notes/tasks/events/
@@ -113,6 +114,21 @@ describe('Phase 10.2 — pupil erasure / anonymisation + SAR (integration)', () 
     expect(blob).not.toMatch(/scrypt:/); // no credential / device hash
     expect(blob).not.toContain('pin_hash');
     expect(blob).not.toContain('token_hash');
+  });
+
+  it('SAR export ZIP bundles the JSON record + the pupil\'s screenshot files + a manifest (BUG-043)', async () => {
+    const archive = await exportPupilArchive(eraseId);
+    expect(archive).not.toBeNull();
+    const zip = new AdmZip(archive!.zip);
+    const names = zip.getEntries().map((e) => e.entryName);
+    expect(names).toContain('pupil-record.json'); // the full JSON record…
+    expect(names).toContain('manifest.json');
+    expect(archive!.screenshots).toBeGreaterThanOrEqual(1); // …and the seeded screenshot file(s)
+    const shot = zip.getEntries().find((e) => e.entryName.startsWith('screenshots/'));
+    expect(shot?.getData().length).toBeGreaterThan(0); // the actual image bytes are in the archive
+    const manifest = JSON.parse(zip.getEntry('manifest.json')!.getData().toString('utf8'));
+    expect(manifest.screenshotsIncluded).toBe(archive!.screenshots);
+    expect(manifest.screenshotsMissing).toEqual([]); // nothing missing — the seeded file was readable
   });
 
   it('erase removes the pupil + all CASCADE data, deletes RESTRICT rows, DELETES & redacts narrative, and audits', async () => {

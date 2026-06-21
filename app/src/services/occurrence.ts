@@ -46,6 +46,8 @@ export interface NoteView {
   stoppingPoint: string | null;
   time: string;
   courseId: number | null;
+  category?: string | null;
+  safeguarding?: boolean;
 }
 
 export interface CourseSection {

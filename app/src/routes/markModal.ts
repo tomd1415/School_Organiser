@@ -16,6 +16,10 @@ import { marksEnabled } from '../auth/marksGate';
 import {
   getScheme, marksForPupil, overrideMark, writeMark, confirmMarksForPupil, getComment, type PupilMarkRow,
 } from '../repos/marking';
+import { getPupilAtl } from '../repos/atl';
+import { renderAtlPicker } from './atl';
+import { getUiShell } from '../lib/nav';
+import { renderMarkModal } from '../lib/markModalView';
 
 interface OcInfo {
   occurrenceId: number;
@@ -86,11 +90,12 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
   if (!info || info.lessonPlanId == null) return null;
   if (!(await pupilCanAccessOc(pid, oc))) return null;
 
-  const [header, worksheets, roster, level] = await Promise.all([
+  const [header, worksheets, roster, level, atlScore] = await Promise.all([
     getOccurrenceHeader(info.occurrenceId),
     getLessonWorksheets(info.groupCourseId, info.lessonPlanId),
     pupilWorkRows(oc, info.groupCourseId),
     getPupilLevel(pid, info.groupCourseId),
+    getPupilAtl(pid, oc),
   ]);
   const idx = roster.findIndex((r) => r.pupilId === pid);
   const me = roster[idx];
@@ -183,6 +188,24 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
     : '';
 
   const comment = marking ? await getComment(pid, oc) : '';
+
+  if (getUiShell() === 'next') {
+    return renderMarkModal({
+      oc,
+      pid,
+      marking,
+      wsIndex,
+      header,
+      worksheets,
+      roster,
+      level,
+      atlScore,
+      ansRows,
+      marks,
+      comment,
+      scheme,
+    });
+  }
   const scoreState = total === 0 ? '' : awarded >= total ? 'mm-full' : awarded <= 0 ? 'mm-zero' : 'mm-part';
   const className = header?.groupName ?? info.courseName;
   const dateStr = header?.date ?? '';
@@ -213,7 +236,7 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
   return `<div class="mm">
     <header class="mm-head">
       <div class="mm-htop">
-        <div class="mm-who"><span class="mm-name">${esc(me.displayName)}</span> <span class="mm-lvl mm-lvl-${level}" title="differentiation level">${level}</span>${me.done ? ' <span class="mm-done" title="pupil marked themselves done">✓ done</span>' : ''}</div>
+        <div class="mm-who"><span class="mm-name">${esc(me.displayName)}</span> <span class="mm-lvl mm-lvl-${level}" title="differentiation level">${level}</span>${me.done ? ' <span class="mm-done" title="pupil marked themselves done">✓ done</span>' : ''}${renderAtlPicker(oc, pid, atlScore)}</div>
         <button type="button" class="mm-x" onclick="this.closest('dialog').close()" aria-label="Close">✕</button>
       </div>
       <div class="mm-sub">${esc(className)} · ${esc(ws.title)}${dateStr ? ` · ${esc(dateStr)}` : ''}</div>
@@ -221,6 +244,7 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
         <span class="mm-pos">Pupil ${idx + 1} of ${roster.length}</span>
         ${marking ? `<span class="mm-score-tot ${scoreState}">${awarded}/${total}</span> <span class="mm-checked">${checked}/${markable} checked</span>` : ''}
         ${roster.length > 1 ? '<span class="mm-kbd" title="use the arrow keys to move through the class">← →</span>' : ''}
+        <a class="mm-atl-link" href="/lesson/oc/${oc}/atl" title="open the whole-class ATL grid (for live use during the lesson)">ATL grid →</a>
       </div>
       ${wsTabs}
     </header>

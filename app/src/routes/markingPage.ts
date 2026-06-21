@@ -8,6 +8,8 @@ import { layout } from '../lib/html';
 import { pool } from '../db/pool';
 import { marksEnabled } from '../auth/marksGate';
 import { markOpenAttrs } from './markModal';
+import { getUiShell } from '../lib/nav';
+import { renderMarkingPage } from '../lib/markingView';
 
 interface Row {
   oc: number;
@@ -62,7 +64,7 @@ function rowHtml(r: Row): string {
     <td>${r.lessonTitle ? esc(r.lessonTitle) : '<span class="muted">—</span>'}</td>
     <td class="mk-num">${r.pupilsWithWork}</td>
     <td class="mk-status">${status}</td>
-    <td><button type="button" class="btn-secondary mk-mark" ${markOpenAttrs(`/lesson/oc/${r.oc}/mark`)}>✎ Mark</button></td>
+    <td><button type="button" class="btn-secondary mk-mark" ${markOpenAttrs(`/lesson/oc/${r.oc}/mark`)}>✎ Mark</button> <a class="link mk-atl" href="/lesson/oc/${r.oc}/atl" title="whole-class attitude-to-learning grid">ATL</a></td>
   </tr>`;
 }
 
@@ -76,6 +78,11 @@ export function registerMarkingPageRoutes(app: FastifyInstance): void {
     const gateNote = on
       ? ''
       : `<p class="mk-gate">Auto-marking is currently <strong>off</strong>. You can still open a lesson to see pupil answers beside the model answers — turn marking on in <a href="/settings">Settings → Auto-marking</a> to record marks.</p>`;
+
+    if (getUiShell() === 'next') {
+      const body = renderMarkingPage({ rows, toDo, gateNote, csrf });
+      return reply.type('text/html').send(layout({ title: 'Marking', body, authed: true, csrfToken: csrf }));
+    }
 
     const body = `<section class="card">
       <h1>Marking</h1>

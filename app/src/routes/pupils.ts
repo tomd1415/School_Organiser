@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { createPupil, listPupils, setPupilActive, disposePupil, listDisposals, exportPupilRecord, type RosterEntry } from '../repos/pupils';
+import { createPupil, listPupils, setPupilActive, disposePupil, listDisposals, exportPupilArchive, type RosterEntry } from '../repos/pupils';
 import { aiKeyConfigured } from '../llm/client';
 import { getSetting } from '../repos/settings';
 import {
@@ -211,16 +211,17 @@ export function registerPupilRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(renderDisposals(await listDisposals()).replace('<div id="disposal-log">', '<div id="disposal-log" hx-swap-oob="true">'));
   });
 
-  // 10.2: per-pupil SAR export — one child's full record as JSON (names shown: their own data).
+  // 10.2 / BUG-043: per-pupil SAR export — a complete, PORTABLE ZIP: the full JSON record PLUS every
+  // screenshot the pupil submitted, with a manifest of what's included / missing (names shown: own data).
   app.get('/pupils/:id/export', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
-    const record = await exportPupilRecord(id.data.id);
-    if (!record) return reply.code(404).type('text/html').send('<p class="muted">No such pupil.</p>');
+    const archive = await exportPupilArchive(id.data.id);
+    if (!archive) return reply.code(404).type('text/html').send('<p class="muted">No such pupil.</p>');
     return reply
-      .type('application/json')
-      .header('content-disposition', `attachment; filename="pupil-${id.data.id}-record.json"`)
-      .send(JSON.stringify(record, null, 2));
+      .type('application/zip')
+      .header('content-disposition', `attachment; filename="pupil-${id.data.id}-record.zip"`)
+      .send(archive.zip);
   });
 
   // ── 10.24: the per-pupil page — running notes, marks history, per-unit traffic-light. Teacher-only;

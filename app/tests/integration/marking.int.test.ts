@@ -48,6 +48,7 @@ beforeAll(async () => {
   savedMarks = await getSetting('pupil_marks_enabled');
   await setSetting('pupil_access_enabled', 'true');
   await setSetting('pupil_marks_enabled', 'true');
+  invalidateMarksGate();
   await purge();
   const yearId = Number((await pool.query<{ id: number }>(`SELECT id FROM academic_years WHERE is_current`)).rows[0]!.id);
   const courseId = Number((await pool.query<{ id: number }>(`INSERT INTO courses (name) VALUES ('ZZM course') RETURNING id`)).rows[0]!.id);
@@ -82,6 +83,7 @@ afterAll(async () => {
   await purge();
   if (savedAccess === null) await pool.query(`DELETE FROM settings WHERE key='pupil_access_enabled'`); else await setSetting('pupil_access_enabled', savedAccess);
   if (savedMarks === null) await pool.query(`DELETE FROM settings WHERE key='pupil_marks_enabled'`); else await setSetting('pupil_marks_enabled', savedMarks);
+  invalidateMarksGate();
   await pool.end();
 });
 

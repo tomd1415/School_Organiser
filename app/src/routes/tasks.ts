@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
+import { getUiShell } from '../lib/nav';
 import { calibrationHeadline, calibrationInsight, gatherCalibration } from '../services/estimateCalibration';
 import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
@@ -23,8 +24,11 @@ export function registerTaskRoutes(app: FastifyInstance): void {
 
     let listHtml: string;
     let banner = renderTimerBanner(null);
+    let tasks: any[] = [];
+    let groups: any[] = [];
+    let running: any = null;
     try {
-      const [tasks, groups, running] = await Promise.all([
+      [tasks, groups, running] = await Promise.all([
         view === 'interest' ? listInterestTasks() : listTasks(view),
         listGroups(),
         getRunningTimer(),
@@ -34,6 +38,18 @@ export function registerTaskRoutes(app: FastifyInstance): void {
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
+    }
+
+    if (getUiShell() === 'next') {
+      const { renderTasksPage } = await import('../lib/tasksView');
+      const body = renderTasksPage({
+        view,
+        csrf,
+        tasks,
+        groups,
+        bannerHtml: banner,
+      });
+      return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
     }
 
     const tab = (v: string, label: string) =>

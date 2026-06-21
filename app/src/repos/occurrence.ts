@@ -136,7 +136,7 @@ export async function getOccurrenceNotes(occurrenceId: number): Promise<NoteView
   const { rows } = await pool.query<NoteView>(
     `SELECT id, body, stopping_point AS "stoppingPoint",
             to_char(created_at AT TIME ZONE 'Europe/London', 'HH24:MI') AS time,
-            course_id AS "courseId"
+            course_id AS "courseId", category, safeguarding
      FROM notes
      WHERE occurrence_id = $1
      ORDER BY created_at`,

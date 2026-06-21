@@ -5,7 +5,9 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
+import { getUiShell } from '../lib/nav';
 import { renderSavedStatus } from '../lib/notesView';
+import { renderKitPage as renderKitPageNext } from '../lib/kitView';
 import {
   createEquipment,
   listEquipment,
@@ -61,6 +63,9 @@ function groupByCategory(rows: EquipmentRow[]): Map<string, EquipmentRow[]> {
 }
 
 function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchived: boolean, csrf: string, importStatus = ''): string {
+  if (getUiShell() === 'next') {
+    return renderKitPageNext({ rows, today, q, showArchived, csrf, importStatus });
+  }
   const needle = q.trim().toLowerCase();
   const filtered = needle
     ? rows.filter((r) => [r.name, r.category, r.location, r.notes, r.tags].some((f) => f && f.toLowerCase().includes(needle)))

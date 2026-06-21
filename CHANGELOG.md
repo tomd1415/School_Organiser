@@ -7,6 +7,15 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — ATL (attitude to learning) scores
+
+- **🎯 ATL scores (1–4) per pupil per lesson.** A new `pupil_atl` table (migration `0057`) + a shared 1–4
+  picker. Set it two ways: inline in the **marking modal** (beside each pupil's work) and via a new **live
+  whole-class grid** at `/lesson/oc/:id/atl` (linked from the marking modal and the /marking page) for fast
+  entry *during* the lesson. Colour-coded 1 (concern) → 4 (excellent); saved instantly; re-scoring updates
+  in place; out-of-range values rejected. (`repos/atl.ts`, `routes/atl.ts`; `atl.int.test.ts`.) Note: the
+  classic shell carries the wiring — the in-progress "next" shell view files will need the same additions.
+
 ### 2026-06-21 — Reopened-audit bug fixes (privacy, cover/room, data-loss, crash-safety)
 
 A 20 June independent verification reopened ~18 of the 50 audit findings (the automated suites were green
@@ -37,6 +46,11 @@ still open; **572 unit / 344 integration tests green, typecheck clean.** Detail 
   matched set *before* the destructive restore and replaces (not overlays) the file store (BUG-010); the
   folder-upload route streams each part against the remaining budget so a large upload can't spike memory to
   ~2× the 400 MB cap (BUG-007).
+- **🗃 Resource & export integrity.** Every resource create/append now writes its row, version and file in
+  one transaction via shared atomic primitives, so a crash can't orphan rows or files (BUG-028); and the
+  per-pupil SAR export is now a complete ZIP — the JSON record + the pupil's screenshot files + a manifest,
+  not just `img:` pointers (BUG-043). **All 18 reopened audit findings are now addressed** (17 fixed, BUG-048
+  documented as moot on single-process).
 
 ### 2026-06-20 — Teaching features, pedagogy, external resources + UI-overhaul handoff
 

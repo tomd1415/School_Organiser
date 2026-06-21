@@ -7,31 +7,8 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { listSafeguardingItems, setSafeguardingStatus, getSafeguardingItem, type SafeguardingItem, type SgSource } from '../repos/safeguarding';
 
-const SOURCE_LABEL: Record<SgSource, string> = { answer: 'pupil answer', captured: 'captured note', ta_feedback: 'TA feedback' };
-const STATUSES = ['recorded', 'actioned', 'referred'] as const;
-const STATUS_LABEL: Record<string, string> = { new: 'new', recorded: 'recorded', actioned: 'actioned', referred: 'referred to DSL' };
-
-function rowId(i: SafeguardingItem): string {
-  return `sg-${i.sourceType}-${i.sourceId}`;
-}
-
-function renderItem(i: SafeguardingItem): string {
-  const sel = (s: string): string => STATUSES.map((v) => `<option value="${v}"${v === s ? ' selected' : ''}>${esc(STATUS_LABEL[v]!)}</option>`).join('');
-  return `<li class="sg-item sg-${i.status}" id="${rowId(i)}">
-    <div class="sg-meta">
-      <span class="sg-status sg-badge-${i.status}">${esc(STATUS_LABEL[i.status] ?? i.status)}</span>
-      <span class="sg-src">${esc(SOURCE_LABEL[i.sourceType])}</span>
-      ${i.who ? `<span class="sg-who">${esc(i.who)}</span>` : ''}
-      <span class="muted">${esc(i.at)}</span>
-    </div>
-    <div class="sg-text">${esc(i.text)}</div>
-    <form class="sg-action" hx-post="/safeguarding/${i.sourceType}/${i.sourceId}" hx-target="#${rowId(i)}" hx-swap="outerHTML">
-      <select name="status">${sel(i.status === 'new' ? 'recorded' : i.status)}</select>
-      <input type="text" name="note" maxlength="500" placeholder="what was done (e.g. spoke to DSL, logged on CPOMS)" value="${esc(i.actionNote)}">
-      <button type="submit" class="btn-secondary">Record</button>
-    </form>
-  </li>`;
-}
+import { getUiShell } from '../lib/nav';
+import { renderItem, renderSafeguardingPage, STATUSES } from '../lib/safeguardingView';
 
 export function registerSafeguardingRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
@@ -42,6 +19,12 @@ export function registerSafeguardingRoutes(app: FastifyInstance): void {
     try {
       const items = await listSafeguardingItems();
       const open = items.filter((i) => i.status === 'new').length;
+
+      if (getUiShell() === 'next') {
+        body = renderSafeguardingPage({ csrf, items, open });
+        return reply.type('text/html').send(layout({ title: 'Safeguarding', body, authed: true, csrfToken: csrf }));
+      }
+
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Safeguarding register ${open > 0 ? `<span class="sg-count">${open} new</span>` : ''}</h1>
         <p class="muted">Everything the system has flagged — pupil answers withheld from the AI, and

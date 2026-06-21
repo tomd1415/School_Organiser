@@ -1,7 +1,8 @@
 import { esc } from './html';
 import { CourseSection, LessonDetail, OccurrenceHeader } from '../services/occurrence';
 import { NoteItem, FollowupItem } from './notesView';
-import { PrepItem, renderPrepList, renderPrepAdd } from './prepView';
+import { renderPrepList, renderPrepAdd } from './prepView';
+import { PrepItem } from '../repos/prep';
 import { LinkedResource } from '../repos/resources';
 import { TaFeedbackRow } from '../repos/taFeedback';
 import { EffectiveLesson } from '../repos/adaptations';
@@ -262,8 +263,8 @@ export function renderLessonCockpit(options: {
       .map((step, i) => {
         const state = progress == null ? '' : i < progress ? 'done' : i === progress ? 'current' : '';
         const marker = progress != null && i < progress ? '✓' : String(i + 1);
-        const badge = i === progress ? '<span class="badge ai">Current</span>' : i < progress ? '<span class="badge good">Done</span>' : '';
-        const isCurrent = i === progress;
+        const badge = progress !== null && i === progress ? '<span class="badge ai">Current</span>' : progress !== null && i < progress ? '<span class="badge good">Done</span>' : '';
+        const isCurrent = progress !== null && i === progress;
         const startWorkBtn = (isCurrent && step.toLowerCase().includes('practical') || step.toLowerCase().includes('investigation') || step.toLowerCase().includes('work'))
           ? `<button class="button small" type="button" id="start-work-btn" data-oc="${oc}">Start work</button>`
           : '';

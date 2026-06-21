@@ -6,6 +6,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
+import { getUiShell } from '../lib/nav';
 import { renderSavedStatus } from '../lib/notesView';
 import { weekdayName } from '../services/delivery';
 import {
@@ -410,6 +411,42 @@ export function registerSetupRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
 
   async function renderSetup(tab: Tab, yearId: number, csrf: string, notice = ''): Promise<string> {
+    if (getUiShell() === 'next') {
+      const [years, terms, periods, rooms, staff, courses, groups, pupils, lessons] = await Promise.all([
+        listYears(),
+        listTerms(yearId),
+        listPeriods(yearId),
+        listRooms(),
+        listStaff(),
+        listAllCourses(),
+        listGroups(yearId, true),
+        listPupils(),
+        listEditorLessons(yearId),
+      ]);
+      const enrolmentsByGroup = new Map<number, any[]>();
+      await Promise.all(groups.map(async (g) => {
+        const enrolled = await listEnrolled(g.id);
+        enrolmentsByGroup.set(g.id, enrolled);
+      }));
+      const { renderSetupPage } = await import('../lib/setupView');
+      return renderSetupPage({
+        tab: tab as any,
+        yearId,
+        csrf,
+        notice,
+        years,
+        terms,
+        periods,
+        rooms,
+        staff,
+        courses,
+        groups,
+        pupils,
+        lessons,
+        enrolmentsByGroup,
+      });
+    }
+
     const years = await listYears();
     const tabs = TABS.map((t) => `<a href="/setup?tab=${t}&year=${yearId}"${t === tab ? ' class="active"' : ''}>${TAB_LABELS[t]}</a>`).join(' ');
     const yearScoped = tab === 'year' || tab === 'day' || tab === 'groups' || tab === 'timetable';

@@ -76,6 +76,7 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
   <link rel="stylesheet" href="/static/styles-overhaul.css">
 </head>
 <body data-experience="${esc(exp)}" data-shell="next">
+  <script>(function(){try{if(window.localStorage.getItem('focus-mode')==='true')document.body.classList.add('focus-mode');}catch(e){}})();</script>
   <div class="app${authed ? '' : ' app-bare'}">
     <aside class="rail-wrap">
       <a class="brand" href="/">School Organiser</a>

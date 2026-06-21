@@ -5,8 +5,7 @@
 // app-hosted (/resources/:id/view) image URLs — so an embedded reference actually renders.
 import { extractOfficeImages, canHaveImages } from '../lib/officeImages';
 import {
-  addVersion,
-  createResource,
+  createResourceWithVersion,
   getCurrentVersion,
   getResource,
   linkResourceToPlan,
@@ -106,10 +105,10 @@ export async function ensureSourceImagesForPlan(planId: number): Promise<SourceI
       seenTitles.add(title);
       let id = existingByTitle.get(title);
       if (id == null) {
-        id = await createResource(title, 'image', img.mime, 'imported');
-        const rel = relPathFor(id, 1, title);
-        await storeBuffer(rel, img.bytes);
-        await addVersion(id, rel, img.bytes.length, img.sha, 'teacher', `image from source: ${r.title}`);
+        id = await createResourceWithVersion(
+          { title, kind: 'image', mimeType: img.mime, source: 'imported' },
+          { filename: title, buf: img.bytes, checksum: img.sha, author: 'teacher', changeNote: `image from source: ${r.title}` },
+        ); // BUG-028: atomic row+version+file
         await linkResourceToPlan(id, planId);
       }
       out.push({ id, label: img.name, url: `/lesson-image/${id}` }); // pupil/TA-accessible (see /lesson-image)

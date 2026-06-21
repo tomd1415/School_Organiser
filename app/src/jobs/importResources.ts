@@ -11,8 +11,8 @@ import { mkdtemp, readFile, readdir, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { pool } from '../db/pool';
-import { addVersion, createResource, findResourceByChecksum } from '../repos/resources';
-import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
+import { createResourceWithVersion, findResourceByChecksum } from '../repos/resources';
+import { checksum } from '../lib/resourceStore';
 import { kindFromFilename, mimeFromFilename, safeFilename } from '../services/resource';
 
 const SKIP = new Set(['Thumbs.db', '__MACOSX', '.mounttest']);
@@ -28,10 +28,12 @@ async function importFile(path: string, sourceRel: string): Promise<void> {
     return;
   }
   const filename = safeFilename(basename(path));
-  const id = await createResource(filename, kindFromFilename(filename), mimeFromFilename(filename), 'imported');
-  const rel = relPathFor(id, 1, filename);
-  await storeBuffer(rel, buf);
-  await addVersion(id, rel, buf.length, sum, 'teacher', `imported from ${sourceRel}`);
+  // BUG-028: resource row + version + file in one transaction (an atomic create), so a crash mid-import
+  // can't leave an orphan resource row or an orphan file.
+  await createResourceWithVersion(
+    { title: filename, kind: kindFromFilename(filename), mimeType: mimeFromFilename(filename), source: 'imported' },
+    { filename, buf, checksum: sum, author: 'teacher', changeNote: `imported from ${sourceRel}` },
+  );
   stats.imported++;
 }
 

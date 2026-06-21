@@ -25,7 +25,9 @@ import { adaptLessonForClass, adaptSchemeForClass, maybeAutoAdaptScheme } from '
 import { runClassIntake, applyClassIntake } from '../services/classIntake';
 import {
   addVersion,
+  addVersionWithFile,
   createResource,
+  createResourceWithVersion,
   getCurrentVersion,
   linkResourceToAdaptation,
   listResourcesForAdaptation,
@@ -82,6 +84,9 @@ import { renderWorksheet, findImagePlaceholders, type Level } from '../lib/works
 import { getLessonWorksheet, getLessonSlidesMarkdown } from '../services/worksheet';
 import { renderSlideDeck } from './me';
 import { pupilLayout } from './pupilAuth';
+import { getUiShell } from '../lib/nav';
+import { pupilWorkRows, setPupilLevel, type PupilWorkRow } from '../repos/pupilWork';
+import { renderLessonCockpit, renderBoardNext, renderRecentNotesList, renderActivityGroupsContent, type CockpitNote } from '../lib/lessonView';
 import { saveLessonDocMarkdown } from '../services/lessonDocEdit';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
@@ -610,17 +615,14 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
     const buf = Buffer.from(r.content, 'utf8');
     const match = existing.find((e) => e.title === filename);
     if (match) {
-      const vNo = (await listVersions(match.resourceId)).length + 1;
-      const rel = relPathFor(match.resourceId, vNo, filename);
-      await storeBuffer(rel, buf);
-      await addVersion(match.resourceId, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class (regenerated)');
+      await addVersionWithFile(match.resourceId, { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-adapted for class (regenerated)' }); // BUG-028
       updated++;
     } else {
       const storeKind = kind === 'slides' ? 'slides' : kind === 'ta_notes' ? 'ta_notes' : kind === 'answers' || kind === 'document' ? 'document' : 'worksheet';
-      const id = await createResource(filename, storeKind, 'text/markdown', 'ai_generated');
-      const rel = relPathFor(id, 1, filename);
-      await storeBuffer(rel, buf);
-      await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-adapted for class');
+      const id = await createResourceWithVersion(
+        { title: filename, kind: storeKind, mimeType: 'text/markdown', source: 'ai_generated' },
+        { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-adapted for class' },
+      ); // BUG-028: atomic row+version+file
       await linkResourceToAdaptation(id, adaptation.id);
       created++;
     }
@@ -709,6 +711,44 @@ export function registerLessonRoutes(app: FastifyInstance): void {
 
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
+
+      if (getUiShell() === 'next') {
+        const slidesByPlan = new Map<number, string | null>();
+        await Promise.all(
+          detail.sections
+            .filter((s) => s.lessonPlanId != null)
+            .map(async (s) => {
+              const md = await getLessonSlidesMarkdown(s.groupCourseId, s.lessonPlanId as number);
+              slidesByPlan.set(s.lessonPlanId as number, md);
+            })
+        );
+
+        const pupilWorkByOc = new Map<number, PupilWorkRow[]>();
+        await Promise.all(
+          detail.sections.map(async (s) => {
+            const rows = await pupilWorkRows(s.occurrenceCourseId, s.groupCourseId);
+            pupilWorkByOc.set(s.occurrenceCourseId, rows);
+          })
+        );
+
+        const body = renderLessonCockpit({
+          detail,
+          notes: noteItems,
+          prep,
+          plansByCourse,
+          resByPlan,
+          matByPlan,
+          effByKey,
+          adaptedResByKey,
+          taFbByOc,
+          exceptionsHtml,
+          csrf,
+          slidesByPlan,
+          pupilWorkByOc,
+        });
+        return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf }));
+      }
+
       return reply
         .type('text/html')
         .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, matByPlan, effByKey, adaptedResByKey, taFbByOc, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
@@ -792,6 +832,19 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       getPlanRow(lp),
     ]);
     const className = isMaster ? 'master lesson · every class' : (info?.groupName ?? 'class');
+
+    if (getUiShell() === 'next' && edit === 'off') {
+      const page = renderBoardNext({
+        master: master || { title: 'Lesson' },
+        className,
+        slidesMd,
+        level,
+        lp,
+        gcKey,
+      });
+      return reply.type('text/html').send(pupilLayout(page, csrf));
+    }
+
     const scopeQ = isMaster ? `master=1` : `gc=${gc}`;
     const href = (l: string, e: string): string => `/lesson/pupil-view?${scopeQ}&amp;lp=${lp}&amp;level=${l}&amp;edit=${e}`;
     const lvlTab = (l: Level, label: string): string => `<a class="ws-tab${l === level ? ' is-on' : ''}" href="${href(l, edit)}">${label}</a>`;
@@ -1311,10 +1364,10 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const base = safeFilename((d.filename || `cover-${src.className}-${src.date}`).replace(/\.(md|markdown|txt)$/i, ''));
     const filename = `${base || 'cover'}.md`;
     const buf = Buffer.from(d.content, 'utf8');
-    const id = await createResource(title, 'document', 'text/markdown', 'ai_generated');
-    const rel = relPathFor(id, 1, filename);
-    await storeBuffer(rel, buf);
-    await addVersion(id, rel, buf.length, checksum(buf), 'ai', 'AI-generated cover work');
+    const id = await createResourceWithVersion(
+      { title, kind: 'document', mimeType: 'text/markdown', source: 'ai_generated' },
+      { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-generated cover work' },
+    ); // BUG-028: atomic row+version+file
     return reply
       .type('text/html')
       .send(`<p class="cover-done">📋 Cover work ready: <a href="/resources/${id}/edit">${esc(title)}</a> — edit or print it on Resources.</p>`);
@@ -1394,6 +1447,86 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const blocks = (await Promise.all(todays.map((l) => lessonPrintBlock(l.lessonId, date, describeException(exceptionForLesson(dx, l.lessonId)))))).filter(Boolean);
     const body = blocks.length ? blocks.join('') : '<p>No lessons timetabled for this day.</p>';
     return reply.type('text/html').send(printPage(`Cover / briefing — ${date}`, body));
+  });
+
+  async function getGroupCourseIdOf(occurrenceCourseId: number): Promise<number | null> {
+    const { pool } = await import('../db/pool');
+    const { rows } = await pool.query<{ g: number }>(`SELECT group_course_id AS g FROM occurrence_courses WHERE id = $1`, [occurrenceCourseId]);
+    return rows[0]?.g ?? null;
+  }
+
+  app.post('/lesson/oc/:id/fast-capture', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const params = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const body = z.object({
+      body: z.string().trim().max(20000),
+      category: z.enum(['Learning', 'Support', 'Behaviour', 'Safeguarding'])
+    }).safeParse(req.body);
+    if (!params.success || !body.success) return reply.code(400).send('');
+
+    const { pool } = await import('../db/pool');
+    const ocResult = await pool.query<{ occurrenceId: number; courseId: number }>(
+      `SELECT oc.occurrence_id AS "occurrenceId", gc.course_id AS "courseId"
+       FROM occurrence_courses oc
+       JOIN group_courses gc ON gc.id = oc.group_course_id
+       WHERE oc.id = $1`,
+      [params.data.id]
+    );
+    const ocRow = ocResult.rows[0];
+    if (!ocRow) return reply.code(404).send('');
+
+    const isSafeguarding = body.data.category === 'Safeguarding';
+    const noteCategory = body.data.category === 'Learning' ? null : body.data.category.toLowerCase();
+
+    // Insert the note
+    await pool.query(
+      `INSERT INTO notes (kind, body, occurrence_id, course_id, category, safeguarding)
+       VALUES ('lesson', $1, $2, $3, $4, $5)`,
+      [body.data.body, ocRow.occurrenceId, ocRow.courseId, noteCategory, isSafeguarding]
+    );
+
+    // Refresh and render the notes list
+    const noteRows = await getOccurrenceNotes(ocRow.occurrenceId);
+    const followups = await getFollowupsForOccurrence(ocRow.occurrenceId);
+
+    const fuByNote = new Map<number, FollowupItem[]>();
+    for (const f of followups) {
+      const arr = fuByNote.get(f.noteId) ?? [];
+      arr.push({ id: f.id, text: f.text, done: f.done });
+      fuByNote.set(f.noteId, arr);
+    }
+    const cockpitNotes: CockpitNote[] = noteRows.map((n) => ({
+      id: n.id,
+      body: n.body,
+      time: n.time,
+      category: (n as any).category ?? null,
+      safeguarding: (n as any).safeguarding ?? false,
+      followups: fuByNote.get(n.id) ?? [],
+    }));
+
+    return reply.type('text/html').send(renderRecentNotesList(cockpitNotes));
+  });
+
+  app.post('/lesson/oc/:id/save-groups', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const params = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!params.success) return reply.code(400).send('');
+
+    const groupCourseId = await getGroupCourseIdOf(params.data.id);
+    if (!groupCourseId) return reply.code(404).send('');
+
+    const bodyDict = req.body as Record<string, string>;
+    for (const [key, val] of Object.entries(bodyDict)) {
+      if (key.startsWith('level_')) {
+        const pupilIdStr = key.replace('level_', '');
+        const pupilId = parseInt(pupilIdStr, 10);
+        if (Number.isFinite(pupilId) && (val === 'support' || val === 'core' || val === 'challenge')) {
+          await setPupilLevel(pupilId, groupCourseId, val);
+        }
+      }
+    }
+
+    const rows = await pupilWorkRows(params.data.id, groupCourseId);
+    const locked = false;
+    return reply.type('text/html').send(renderActivityGroupsContent(params.data.id, rows, locked));
   });
 }
 

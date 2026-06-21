@@ -6,16 +6,15 @@
 // Pure resource plumbing over the existing store — no AI.
 import { getAdaptation, upsertAdaptation } from '../repos/adaptations';
 import {
-  addVersion,
-  createResource,
+  addVersionWithFile,
+  createResourceWithVersion,
   linkResourceToAdaptation,
   linkResourceToPlan,
   listResourcesForAdaptation,
   listResourcesForPlan,
-  listVersions,
   type LinkedResource,
 } from '../repos/resources';
-import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
+import { checksum } from '../lib/resourceStore';
 import { getPlanRow } from '../repos/schemes';
 import { safeFilename } from './resource';
 
@@ -27,17 +26,19 @@ const STORE_KIND: Record<DocKind, string> = { slides: 'slides', worksheet: 'work
 const isMdDoc = (kind: DocKind) => (r: LinkedResource): boolean => r.kind === kind && /\.(md|markdown)$/i.test(r.title);
 
 async function writeVersion(resourceId: number, title: string, buf: Buffer, note: string): Promise<void> {
-  const vNo = (await listVersions(resourceId)).length + 1;
-  const rel = relPathFor(resourceId, vNo, title);
-  await storeBuffer(rel, buf);
-  await addVersion(resourceId, rel, buf.length, checksum(buf), 'teacher', note);
+  // BUG-028: file + version row + current-version pointer in ONE transaction (no orphan on a crash).
+  await addVersionWithFile(resourceId, { filename: title, buf, checksum: checksum(buf), author: 'teacher', changeNote: note });
 }
 
-async function createDoc(kind: DocKind, lp: number, suffix: string): Promise<number> {
+// BUG-028: create the resource AND its first version in one transaction (atomic) — the first version's
+// content is the doc the caller is saving, so there is no separate "create then version" gap to crash in.
+async function createDoc(kind: DocKind, lp: number, suffix: string, versionFilename: string, buf: Buffer, note: string): Promise<number> {
   const plan = await getPlanRow(lp);
-  const filename = `${safeFilename(plan?.title ?? 'lesson').replace(/\.md$/i, '') || 'lesson'} — ${kind}${suffix}.md`;
-  const id = await createResource(filename, STORE_KIND[kind], 'text/markdown', 'ai_generated');
-  return id;
+  const title = `${safeFilename(plan?.title ?? 'lesson').replace(/\.md$/i, '') || 'lesson'} — ${kind}${suffix}.md`;
+  return createResourceWithVersion(
+    { title, kind: STORE_KIND[kind], mimeType: 'text/markdown', source: 'ai_generated' },
+    { filename: versionFilename, buf, checksum: checksum(buf), author: 'teacher', changeNote: note },
+  );
 }
 
 export async function saveLessonDocMarkdown(gc: number, lp: number, kind: DocKind, scope: EditScope, markdown: string): Promise<{ ok: boolean; adapted: boolean }> {
@@ -47,8 +48,7 @@ export async function saveLessonDocMarkdown(gc: number, lp: number, kind: DocKin
     const existing = (await listResourcesForPlan(lp)).find(isMdDoc(kind));
     if (existing) await writeVersion(existing.resourceId, existing.title, buf, 'edited in pupil preview');
     else {
-      const id = await createDoc(kind, lp, '');
-      await writeVersion(id, `${kind}.md`, buf, 'created in pupil preview');
+      const id = await createDoc(kind, lp, '', `${kind}.md`, buf, 'created in pupil preview');
       await linkResourceToPlan(id, lp);
     }
     return { ok: true, adapted: false };
@@ -63,8 +63,7 @@ export async function saveLessonDocMarkdown(gc: number, lp: number, kind: DocKin
   const existing = (await listResourcesForAdaptation(adaptationId)).find(isMdDoc(kind));
   if (existing) await writeVersion(existing.resourceId, existing.title, buf, 'edited for this class in pupil preview');
   else {
-    const id = await createDoc(kind, lp, ' (class)');
-    await writeVersion(id, `${kind} (class).md`, buf, 'created for this class in pupil preview');
+    const id = await createDoc(kind, lp, ' (class)', `${kind} (class).md`, buf, 'created for this class in pupil preview');
     await linkResourceToAdaptation(id, adaptationId);
   }
   return { ok: true, adapted: true };

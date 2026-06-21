@@ -150,11 +150,21 @@ Each reopened/residual finding was first re-checked against the CURRENT tree (it
   never touches today's or historic (delivered) occurrences (`app/src/repos/setup.ts`;
   `delivery.int.test.ts` updated: empty-future dropped, plan-bound-future kept).
 
-Still to do (the two lowest-value items, both deferred): **BUG-028** (resource-create atomicity — a
-mechanical 5-path refactor to `createResourceWithVersion` / a new `addVersionWithFile`; low harm = orphan
-rows/files only on a crash; the `withTransaction` helper is in place for whoever picks it up) and **BUG-043**
-(SAR export should bundle the screenshot files, not just their paths — compliance-only, larger; matters only
-when a subject-access request is actually fulfilled).
+- **BUG-028 — ✅ Resolved.** Added an atomic `addVersionWithFile` (mirror of `createResourceWithVersion`)
+  and refactored ALL five remaining split-write paths — bulk import (`jobs/importResources.ts`), source-image
+  extraction (`services/sourceImages.ts`), pupil-preview doc edits (`services/lessonDocEdit.ts`), scheme
+  resource generation (`routes/schemes.ts`) and lesson adaptation + cover-work generation (`routes/lesson.ts`)
+  — so every resource create AND append now writes the row, version and file in ONE transaction (no orphan
+  row/file on a crash). 21 resource-lifecycle integration tests stay green.
+- **BUG-043 — ✅ Resolved.** The SAR export is now a complete, portable **ZIP** (`exportPupilArchive`):
+  `pupil-record.json` (the full record — now also including the new ATL scores) **plus every screenshot the
+  pupil submitted** (the DB held only `img:` pointers), under `screenshots/…`, with a `manifest.json` listing
+  what was packaged and any unreadable file. Path-guarded like the disposal sweep. The `/pupils/:id/export`
+  route serves the zip; `disposals.int.test.ts` gains a bundling test.
+
+**Re-remediation complete: all 18 reopened/residual findings are addressed** — 17 fixed (each with a
+regression test) and 1 (BUG-048) accepted-and-documented as moot on this single-process deployment. The two
+deploy-only items (BUG-032/045) remain OPERATOR actions (recreate the stack + set `DB_PASSWORD`/`TRUST_PROXY`).
 
 ### Tests and checks performed
 
