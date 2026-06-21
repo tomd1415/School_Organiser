@@ -11,6 +11,10 @@ truth = `public/app.js`, `public/pupil.js`, `lib/html.ts`, `lib/worksheetForm.ts
 > attribute**, **event name**, **swap-target id**, **state class** and **OOB span** below, or update the
 > JS in the same change.
 
+📋 **Backend changes you need to pick up** — new features and behaviour shifts since the handoff that the
+"next" shell must mirror (e.g. ATL, `window.htmxSaved`, cover/room effective-room) — are logged in
+[BACKEND_CHANGES_FOR_UI.md](BACKEND_CHANGES_FOR_UI.md). Check it before each merge.
+
 ## 1. Element ids the JS finds by id (must exist, keep the id)
 
 | id | Owner | Purpose |

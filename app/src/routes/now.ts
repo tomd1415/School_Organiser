@@ -274,14 +274,32 @@ export function registerNowRoutes(app: FastifyInstance): void {
         const currentLesson = await getSelfLessonAt(state.current.weekday, state.current.slotOrder);
         const currentLabel = currentLesson ? (currentLesson.groupName ?? purposeLabel(currentLesson.purpose)) : 'Lesson';
         const currentEndEpochMs = tzDateToEpoch(state.isoDate, state.current.endMin, ctx.tz);
-        leftAnchorHtml = `<span class="header-current-lesson">Now: <strong>${esc(currentLabel)}</strong> (${esc(state.current.label)}) <span data-epoch-ms="${currentEndEpochMs}">ends...</span></span>`;
+        const dotColor = 'var(--green)';
+        leftAnchorHtml = `
+          <div class="context-scaffold-anchor">
+            <span class="live-dot" id="scaffold-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
+            <span class="scaffold-meta" id="scaffold-meta">Now: ${esc(state.current.label)}</span>
+            <strong class="scaffold-title" id="scaffold-title">${esc(currentLabel)} (ends <span data-epoch-ms="${currentEndEpochMs}">...</span>)</strong>
+          </div>`;
       } else if (state.nextTeaching) {
         const next = await getSelfLessonAt(state.nextTeaching.weekday, state.nextTeaching.slotOrder);
         const nextLabel = next ? (next.groupName ?? purposeLabel(next.purpose)) : 'Lesson';
         const nextEpochMs = tzDateToEpoch(state.nextTeaching.date, state.nextTeaching.startMin, ctx.tz);
-        leftAnchorHtml = `<span class="header-next-lesson">Next: <strong>${esc(nextLabel)}</strong> (${esc(state.nextTeaching.label)}) <span data-epoch-ms="${nextEpochMs}">starts...</span></span>`;
+        const dotColor = 'var(--amber)';
+        leftAnchorHtml = `
+          <div class="context-scaffold-anchor">
+            <span class="live-dot" id="scaffold-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
+            <span class="scaffold-meta" id="scaffold-meta">Next: ${esc(state.nextTeaching.label)}</span>
+            <strong class="scaffold-title" id="scaffold-title">${esc(nextLabel)} (starts <span data-epoch-ms="${nextEpochMs}">...</span>)</strong>
+          </div>`;
       } else {
-        leftAnchorHtml = `<span class="header-next-lesson">No more lessons today</span>`;
+        const dotColor = 'var(--blue)';
+        leftAnchorHtml = `
+          <div class="context-scaffold-anchor">
+            <span class="live-dot" id="scaffold-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
+            <span class="scaffold-meta" id="scaffold-meta">Done</span>
+            <strong class="scaffold-title" id="scaffold-title">No more lessons today</strong>
+          </div>`;
       }
 
       const [bellAll, groupSlots] = await Promise.all([
@@ -300,7 +318,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const { dateLabel } = nowLabels(now, ctx.tz);
       const clockStr = new Intl.DateTimeFormat('en-GB', { timeZone: ctx.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(now);
 
-      const html = `<header id="context-header" class="context-header">
+      const html = `<header id="context-header" class="dynamic-context-header">
         <div class="header-left">
           ${leftAnchorHtml}
         </div>
@@ -315,9 +333,9 @@ export function registerNowRoutes(app: FastifyInstance): void {
           <a href="/marking" class="chip">Marking: <span class="chip-count">${markingCount}</span></a>
           <button type="button" id="focus-mode-btn" class="chip chip-btn" title="Toggle Focus Mode">🎯 Focus Mode</button>
         </div>
-        <div class="header-right">
-          <span id="monospace-date" class="monospace-date">${esc(dateLabel)}</span>
-          <span id="monospace-clock" class="monospace-clock" data-tz="${esc(ctx.tz)}">${esc(clockStr)}</span>
+        <div class="header-clock-section">
+          <span id="monospace-clock" class="clock-display" data-tz="${esc(ctx.tz)}">${esc(clockStr)}</span>
+          <span id="monospace-date" class="date-display">${esc(dateLabel)}</span>
         </div>
       </header>`;
       return reply.type('text/html').send(html);

@@ -41,16 +41,17 @@
     }
   });
 
-  // --- Overhaul: Edge-hover Navigation Rail ---
-  var railWrap = document.querySelector('.rail-wrap');
-  if (railWrap) {
-    railWrap.addEventListener('mouseenter', function () {
-      railWrap.classList.add('expanded');
-    });
-    railWrap.addEventListener('mouseleave', function () {
-      railWrap.classList.remove('expanded');
-    });
-  }
+  // --- Overhaul: Collapsible Navigation Ribbon & Advanced Drawer ---
+  document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('#ribbon-drawer-toggle');
+    if (toggle) {
+      var drawer = document.getElementById('ribbon-drawer');
+      if (drawer) {
+        e.stopPropagation();
+        drawer.classList.toggle('open');
+      }
+    }
+  });
 
   // --- Overhaul: Monospace Clock and Event Countdown ---
   function tickClock() {

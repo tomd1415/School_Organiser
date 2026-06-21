@@ -24,23 +24,37 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
   const exp = getExperienceMode();
   const shell = getUiShell();
   const csrfHdr = authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : '';
-  const logout =
+  
+  const logoutNext =
     authed && csrfToken
       ? `<form method="post" action="/logout" class="inline">
            <input type="hidden" name="_csrf" value="${esc(csrfToken)}">
-           <button class="link">Log out</button>
+           <button class="ribbon-link logout-btn" title="Log out">
+             <span class="icon">🚪</span>
+             <span class="lbl-txt">Log out</span>
+           </button>
          </form>`
       : '';
-  const railFoot =
+
+  const railFootNext =
     authed && csrfToken
-      ? `<div class="rail-foot"${csrfHdr}>
+      ? `<div class="ribbon-tier tier-foot"${csrfHdr}>
           <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
             <input type="hidden" name="experience" value="${exp === 'power' ? 'everyday' : 'power'}">
-            <button type="submit" class="link rail-exp" title="${exp === 'power' ? 'Hide the advanced tools again' : 'Reveal planning, authoring and admin tools'}">${exp === 'power' ? '◧ Advanced tools: on' : '▸ Show advanced tools'}</button>
+            <button type="submit" class="ribbon-link rail-exp" title="${exp === 'power' ? 'Hide the advanced tools again' : 'Reveal planning, authoring and admin tools'}">
+              <span class="icon">${exp === 'power' ? '◧' : '▸'}</span>
+              <span class="lbl-txt">${exp === 'power' ? 'Advanced tools: on' : 'Show advanced tools'}</span>
+            </button>
           </form>
-          <a class="rail-link rail-gear" href="/settings">⚙ Settings</a>
+          <a class="ribbon-link rail-gear" href="/settings" title="Settings">
+            <span class="icon">⚙️</span>
+            <span class="lbl-txt">Settings</span>
+          </a>
           <details class="a11y">
-            <summary>Aa · accessibility</summary>
+            <summary class="ribbon-link" title="Accessibility preferences">
+              <span class="icon">Aa</span>
+              <span class="lbl-txt">Accessibility</span>
+            </summary>
             <div class="a11y-panel">
               <div class="a11y-row" data-a11y="fontsize">
                 <span>Text size</span>
@@ -60,7 +74,7 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
               </div>
             </div>
           </details>
-          ${logout}
+          ${logoutNext}
         </div>`
       : '';
 
@@ -77,15 +91,11 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
 </head>
 <body data-experience="${esc(exp)}" data-shell="next">
   <script>(function(){try{if(window.localStorage.getItem('focus-mode')==='true')document.body.classList.add('focus-mode');}catch(e){}})();</script>
-  <div class="app${authed ? '' : ' app-bare'}">
-    <aside class="rail-wrap">
-      <a class="brand" href="/">School Organiser</a>
-      ${authed ? renderRail(exp) : ''}
-      ${railFoot}
-    </aside>
-    <div class="stage">
+  <div class="unified-console-wrapper${authed ? '' : ' console-bare'}">
+    ${authed ? renderRail(exp, undefined, railFootNext) : ''}
+    <div class="console-main-container">
       ${headerBlock}
-      <main>${body}</main>
+      <main id="main-content" class="cockpit-workspace">${body}</main>
     </div>
   </div>
   ${
