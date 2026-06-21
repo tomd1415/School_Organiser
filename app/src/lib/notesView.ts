@@ -14,6 +14,8 @@ export interface NoteItem {
   body: string;
   time: string;
   followups: FollowupItem[];
+  category?: string | null; // BUG-051: lesson-note category + safeguarding flag, preserved so the cockpit
+  safeguarding?: boolean; //   badge survives a reload (was dropped in the mapping, defaulting to Learning)
   rev?: string; // 10.10: optimistic-concurrency token; when present, autosave guards against clobber
 }
 

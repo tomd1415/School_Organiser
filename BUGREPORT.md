@@ -1056,3 +1056,208 @@ proxy deployment, or complete personal-data recovery/export behavior.
 6. **User-facing reliability and deployment hardening:** BUG-013, BUG-032 through BUG-036, and BUG-050.
 
 Before fixes are merged, add a small set of reusable test harnesses: concurrent PostgreSQL barriers, injected repository/filesystem failures, bounded-stream and multipart/archive/IMAP size probes, proxy-aware authentication tests, HTMX browser tests, exhaustive pupil-data fixtures, and an automated scratch restore of a matched database/resource backup set.
+
+---
+
+## Follow-up UI, correctness and performance audit — 2026-06-21
+
+This follow-up was performed against commit `12c1c9c` (`Fixed AI call returning only 2 slides at a time`). No application files, database state, dependencies or configuration were changed during the audit. TypeScript passed and all 605 unit tests passed. PostgreSQL was unavailable on `127.0.0.1:5434`, so the integration suite could not be run. Unless stated otherwise, the findings below are deterministic code-path findings rather than speculative style concerns.
+
+### BUG-051 — Safeguarding lesson notes disappear from the safeguarding workflow after capture
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/routes/lesson.ts:746-764, 1560-1599`; `app/src/lib/lessonView.ts:57-75, 265-271, 441-447`; `app/src/repos/safeguarding.ts:20-29`
+- **Cause:** Fast Capture correctly inserts a lesson note with `safeguarding=true`, but the safeguarding register only selects safeguarding notes whose `kind = 'captured'`. Fast Capture uses `kind = 'lesson'`, so these records never enter the register. Separately, the normal lesson GET maps `NoteView` into `NoteItem` without preserving `category` or `safeguarding`; `renderLessonCockpit` then reads the missing properties through `as any` and defaults them to `null`/`false`.
+- **Effect:** Immediately after submission the returned fragment shows the note as Safeguarding, but after a page reload it is presented as an ordinary Learning note. It also never appears in the central safeguarding queue or its unreviewed count, so a teacher can miss the record-of-handling workflow. The stored flag still protects this note from the current lesson-adaptation AI path, so this finding does **not** indicate confirmed AI disclosure.
+- **Evidence / reproduction:** Open a live lesson, capture a note using the Safeguarding category, verify the immediate red Safeguarding badge, then reload the lesson and open `/safeguarding`. The lesson list loses the badge/category and the central register query excludes the row because it is not `kind='captured'`.
+- **Possible solutions:** Preserve `category` and `safeguarding` in the shared note view type and mapping. Extend the safeguarding source union to include flagged lesson notes (either as a distinct `lesson_note` source type with a migration, or under a carefully documented existing note source type). Avoid `as any` at this privacy boundary.
+- **Regression test / notes:** Integration-test capture → immediate fragment → full reload → safeguarding queue/open count → actioning the item. Also assert that flagged lesson notes remain excluded from every LLM context.
+
+### BUG-052 — The new lesson cockpit silently drops every course after the first in a split lesson
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/src/lib/lessonView.ts:186-191, 238-255, 278-340, 464-530`; `app/src/routes/lesson.ts:466-515, 765-834`; split-course support in `app/src/services/occurrence.ts`
+- **Cause:** The route correctly builds data maps for every `detail.sections` entry, but `renderLessonCockpit` selects `detail.sections[0]` for the occurrence-course, group-course, lesson plan, lesson flow, slides, resources, activity groups and live-work endpoint. It never iterates or provides a selector for the remaining sections. The classic renderer does iterate all sections.
+- **Effect:** A split lesson in the new UI shows only one course/class slice. Plans, adapted resources, slides, pupil groups, TA feedback and live pupil progress belonging to later sections are unavailable or misleadingly absent even though the backend loaded them.
+- **Evidence / reproduction:** Open a timetable lesson containing two `occurrence_courses` while `ui_shell=next`. Compare it with the classic render path or inspect the occurrence: only the first section's `oc`, `groupCourseId` and `lessonPlanId` appear in the cockpit URLs and content.
+- **Possible solutions:** Render a clear course tab/section switcher and scope every cockpit panel to the selected section, or render a safe combined view where appropriate. Key slide data by `groupCourseId:lessonPlanId`, not only plan ID, because two classes can have different adaptations of one plan.
+- **Regression test / notes:** Add a pure renderer test and an integration test with at least two courses, different plans/adaptations, different pupil rosters and separate pupil-work endpoints. Assert both are reachable without falling back to the classic shell.
+
+### BUG-053 — The overhaul script regressed the per-field unsaved-work safeguard
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** High / Confirmed
+- **Affected:** `app/public/app-overhaul.js:232-260`; corrected implementation in `app/public/app.js:123-165`; `app/tests/appjsUnsaved.test.ts`
+- **Cause:** `app-overhaul.js` builds an operation key from `data-save-id || name || id`. Many unrelated autosave controls share names such as `value`, `body` or `text`. The classic script was already corrected to stamp a unique key per element unless the element explicitly opts into a shared `data-save-id`, but that correction was not carried into the duplicated overhaul implementation.
+- **Effect:** If one new-UI field fails to save and another same-named field subsequently saves, the successful request can clear the first field's persistent “not saved” warning. The failed text may remain visible only until navigation or refresh, giving the teacher false reassurance and creating a data-loss risk.
+- **Evidence / reproduction:** In the new UI, fail a write from one `name='value'` kit field, then successfully save a different `name='value'` field. Both resolve to the same operation key, so the second completion deletes the first outstanding warning.
+- **Possible solutions:** Apply the classic per-element key implementation to the overhaul script immediately. Preferably stop maintaining two copies: extract the shared HTMX/save/keyboard/modal code into one script and layer only new-shell behaviour separately.
+- **Regression test / notes:** Run the complete `appjsUnsaved` behavioural suite against both client bundles, including two same-name fields, concurrent failures, unrelated reads and swallowed server failures.
+
+### BUG-054 — The retired classic UI remains reachable, remains the default, and is still a new-UI dependency
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/lib/nav.ts:94-108, 141-225`; `app/src/lib/html.ts:20-241`; `app/src/server.ts:398-409`; `app/src/routes/settingsPage.ts:155-158, 389-394`; `app/public/styles-overhaul.css:1`; sixteen route modules containing `getUiShell() === 'next'`
+- **Cause:** The temporary rollout flag was never retired. Its in-memory fallback is `classic`, no migration establishes `next` for a fresh production database, Settings can still switch back, `layout()` still contains both complete shells, and many routes retain both renderer paths. The overhaul stylesheet begins with `@import url('/static/styles.css')`, so the old CSS cannot currently be removed even when the next shell is active.
+- **Effect:** A fresh/restored installation without an existing `ui_shell` setting launches the old interface. Users can switch back into it, old and new behaviour can continue to drift, and every new-shell page depends on and downloads the classic stylesheet. This contradicts the stated new-UI-only product state.
+- **Evidence / reproduction:** Delete or omit only the `ui_shell` setting in a scratch database, restart, and inspect `getUiShell()`/the rendered assets. The shell becomes classic. With `next`, inspect the CSS request chain and observe the classic stylesheet import.
+- **Possible solutions:** Make `next` the migration-backed default, remove the settings toggle and classic branch after a short release checkpoint, then move the still-needed shared component rules into a deliberately named base stylesheet before deleting classic-only rules/assets.
+- **Regression test / notes:** Test a brand-new database, an upgraded database and a restored database. Assert every authenticated route uses only new-shell assets and that no route-level renderer depends on classic mode.
+
+### BUG-055 — Restore is broken for archived items on the redesigned Kit page
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/lib/kitView.ts:11-34`; route `POST /kit/:id/restore` in `app/src/routes/kit.ts`
+- **Cause:** The new renderer outputs the literal URL `hx-post="/kit/:id/restore"` rather than interpolating `e.id`. The duplicated classic `renderRow` implementation uses the correct `/kit/${e.id}/restore` URL.
+- **Effect:** Clicking Restore on an archived row loaded by the new page sends `id=':id'`; route validation rejects it with HTTP 400 and the equipment remains archived. A row later produced by the classic duplicate renderer can behave differently, making the failure state-dependent.
+- **Evidence / reproduction:** Open `/kit?archived=1` under the next shell and inspect/click an archived row's Restore control. Its request URL contains the literal placeholder.
+- **Possible solutions:** Interpolate the ID and remove the duplicate row renderers so initial page rows and HTMX replacement rows share one implementation.
+- **Regression test / notes:** Render an inactive equipment row and assert the exact URL, then integration-test archive → show archived → restore entirely under the next shell.
+
+### BUG-056 — The new navigation has drifted from its model and cannot mark the active page
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/lib/nav.ts:29-52, 141-205`; `app/public/app-overhaul.js:360-377`; `app/public/styles-overhaul.css:230-242`
+- **Cause:** The next ribbon is a second hard-coded navigation list instead of rendering `NAV_MODEL`; it omits `/focus`. The copied active-page script still queries `.rail a[href], .rail-foot a[href]`, whereas new links are inside `.scaffolded-ribbon` and use `.ribbon-link`.
+- **Effect:** The Focus task page has no visible ribbon destination, despite existing in the model and keyboard map. No new ribbon link receives the active style or `aria-current='page'`, weakening orientation for sighted and screen-reader users.
+- **Evidence / reproduction:** Compare `NAV_MODEL` with the links returned by the next `renderRail`: `/focus` is the only missing model route. Open any non-home page in the new shell and inspect its ribbon link; none has `active` or `aria-current`.
+- **Possible solutions:** Generate both shells, shortcuts and accessibility labels from one navigation model. Update active-link detection for the actual ribbon or render `aria-current` server-side from the request path.
+- **Regression test / notes:** Assert every intended model destination appears exactly once and that representative nested URLs select the longest matching ribbon link.
+
+### BUG-057 — New-shell accessibility controls are inaccessible without pointer hover
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/public/styles-overhaul.css:132-251, 385-425`; accessibility markup in `app/src/lib/html.ts:48-76`
+- **Cause:** Ribbon expansion and label visibility are tied only to `.scaffolded-ribbon:hover`. More seriously, `.scaffolded-ribbon:not(:hover) details.a11y .a11y-panel { display: none !important; }` hides the open accessibility panel unless a pointing device remains over the rail. There is no equivalent `:focus-within` behaviour.
+- **Effect:** A keyboard user can focus and open the Accessibility summary but cannot reach the text-size, contrast or font buttons because their container remains `display:none`. Touch and switch-device behaviour is also unreliable.
+- **Evidence / reproduction:** Navigate to the ribbon with Tab without moving the pointer, activate Accessibility, and continue tabbing. Its controls are absent from layout and focus order.
+- **Possible solutions:** Expand on `:focus-within` as well as hover; keep `details[open]` content visible; test a persistent/click-to-expand mode for touch; preserve visible focus indicators and reduced-motion behaviour.
+- **Regression test / notes:** Add Playwright keyboard-only and touch-emulation checks for every ribbon item, the advanced drawer, logout and all accessibility controls.
+
+### BUG-058 — “Start work” group locking is cosmetic, and bulk group saving lacks integrity checks
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/public/app-overhaul.js:573-601`; `app/src/lib/lessonView.ts:245-323, 464-475`; `app/src/routes/lesson.ts:1603-1623`; safer individual route in `app/src/routes/pupilWork.ts:260-269`
+- **Cause:** Start Work only disables buttons and changes labels in the current browser DOM. No lock state is persisted or enforced by the server; the save response always renders `locked=false`. The bulk endpoint also trusts every submitted `level_<pupilId>`, performs no `pupilCanAccessOc`/enrolment check, executes one sequential upsert per pupil and does not wrap the batch in a transaction.
+- **Effect:** Refreshing, opening another tab or constructing a direct request bypasses the apparent lock. A crafted request can create a pupil-level association for a pupil outside that class, and a database failure mid-batch can leave only part of the class updated while the UI reports a generic failure.
+- **Evidence / reproduction:** Click Start Work and reload; Edit Groups returns. Submit a valid but non-enrolled pupil ID as `level_<id>` to the bulk route; unlike the individual level route, no membership predicate is checked before `setPupilLevel`.
+- **Possible solutions:** Either remove the lock wording and present Start Work as an explicitly local convenience, or persist a server-enforced occurrence-course work state. Validate every submitted pupil against the occurrence roster and perform a single transactional bulk upsert after validating the complete payload.
+- **Regression test / notes:** Cover refresh/two tabs, direct posts after lock, out-of-class pupils, duplicate/missing pupils, and an injected failure halfway through the batch proving all-or-nothing behaviour.
+
+### BUG-059 — Every new-shell page adds a query-heavy secondary header request
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed code path; performance impact is workload-dependent
+- **Affected:** `app/src/lib/nav.ts:230-238`; `app/src/routes/now.ts:268-349`; `app/src/repos/clock.ts:15-52`; `app/src/repos/tasks.ts:213-229, 297-306`; `app/src/repos/marking.ts:310-335`
+- **Cause:** The next shell emits a loading header with `hx-get='/header-overhaul'` on every full page. That endpoint normally performs three clock-context queries, a current/next lesson query, all-open-task and group-slot queries, and—when marking is enabled—a settings lookup/cache refresh plus the 21-day marking backlog query. It is rendered after the main response rather than sharing already-loaded page context or a short-lived aggregate cache.
+- **Effect:** Navigation incurs another HTTP round trip and typically six to eight database queries before the header settles. On an old server, slow disk or busy PostgreSQL, this increases latency and connection-pool pressure on every page, including pages that already queried clock/task data.
+- **Evidence / reproduction:** Instrument `pool.query`, load any authenticated next-shell page once, and count queries made solely by `/header-overhaul`. The header also visibly starts as “Loading...” until the request completes.
+- **Possible solutions:** Render stable header structure with the page, cache slowly changing clock/timetable metadata, query counts directly rather than loading whole collections, and refresh only genuinely live counters at an appropriate interval. Consider combining the required aggregates into one repository call.
+- **Regression test / notes:** Add a query-count budget and latency benchmark for a typical page with marking on/off and a large open-task/mark history.
+
+### BUG-060 — The live lesson page repeats expensive pupil and resource work
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed code path; performance impact is workload-dependent
+- **Affected:** `app/src/routes/lesson.ts:737-834`; `app/src/lib/lessonView.ts:524-529`; `app/src/repos/pupilWork.ts:149-174`; `app/src/services/worksheet.ts:115-128`; `app/src/repos/occurrence.ts:30-58`
+- **Cause:** Initial cockpit rendering loads `pupilWorkRows` for each section, then immediately emits an HTMX `load` request for `/lesson/oc/:id/pupil-work`, which loads the grid data again. `pupilWorkRows` itself uses several correlated subqueries per roster pupil. Plans, materials, adaptations, resources, feedback and slides are separately fetched per plan/section, and slide resolution performs additional adaptation/resource/version queries. Opening an already-existing teacher lesson also runs occurrence, course and preparation upserts rather than trying the read-only occurrence lookup first.
+- **Effect:** A normal lesson open creates a burst of redundant database work and some filesystem reads. Larger classes, split lessons and multiple resources amplify this, increasing time-to-interactive and contention on low-powered servers.
+- **Evidence / reproduction:** Trace queries while opening one populated lesson. The same occurrence-course pupil roll-up is executed for the activity groups and again for the load-triggered live panel; an existing occurrence still receives idempotent write queries.
+- **Possible solutions:** Reuse one pupil-work result for initial activity groups and grid HTML, or defer both to one endpoint. Replace correlated subqueries with joined/aggregated CTEs and appropriate composite indexes. Batch plan/section fetches, cache resource metadata within the request, and use `findOccurrence() ?? findOrCreateOccurrence()` on the read-hot path.
+- **Regression test / notes:** Establish query-count and response-time budgets for 30 pupils, multiple worksheets and a two-course split lesson; verify subsequent live polling performs only the minimum delta/signature work.
+
+### BUG-061 — The lesson cockpit and asynchronous header emit duplicate element IDs
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Medium / Confirmed
+- **Affected:** `app/src/lib/lessonView.ts:343-356`; `app/src/routes/now.ts:325-342`; `app/public/app-overhaul.js:56-81`
+- **Cause:** Both the dynamic global header and lesson live bar emit `id='monospace-clock'` and `id='focus-mode-btn'`. The clock updater uses `document.getElementById('monospace-clock')`, which can address only one of the duplicate elements after HTMX inserts the header. The lesson copy also hard-codes `Europe/London` while the header uses the configured timezone.
+- **Effect:** The DOM is invalid, assistive technology and ID-based selectors have ambiguous targets, and one displayed lesson clock can stop receiving updates after the header loads. If the configured timezone differs, the two clocks can disagree.
+- **Evidence / reproduction:** Load a live lesson under the next shell, wait for `/header-overhaul`, and inspect the DOM: each ID occurs twice. Observe which clock `getElementById` updates.
+- **Possible solutions:** Give each control a unique ID and use class/data-attribute selection to update all intended clocks, or remove the duplicate lesson controls and rely on the global header. Supply the configured timezone consistently.
+- **Regression test / notes:** Validate rendered pages for unique IDs before and after HTMX swaps and test clock updates with a non-London configured timezone.
+
+### BUG-062 — New pages carry avoidable legacy asset, caching and continuous-rendering cost
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Low / Credible performance risk
+- **Affected:** `app/public/styles.css` (130,630 bytes); `app/public/styles-overhaul.css` (82,695 bytes and imports the former); `app/public/app.js`; `app/public/app-overhaul.js`; `app/src/server.ts:110-113`; `app/public/styles-overhaul.css:132-151, 330-340, 570-585`; `app/public/app-overhaul.js:56-113`
+- **Cause:** The next stylesheet imports all classic CSS, producing about 213 KB raw / 41 KB gzip across two CSS responses and a 4,751-line cascade. Static serving does not set a positive `maxAge`, so assets are revalidated. The next client bundle duplicates most classic behaviour and runs two permanent one-second intervals; the clock path creates new `Intl.DateTimeFormat` instances repeatedly and the countdown path scans the DOM each second. The flex ribbon animates its width, causing main-layout reflow, while several persistent surfaces use backdrop blur.
+- **Effect:** These costs are modest on a modern workstation but conflict with the target of old servers and clients: extra requests/revalidation, longer CSS parsing and cascade work, continuous main-thread wake-ups, layout during ribbon hover and GPU/compositing pressure. The duplicated bundles also allow fixes to land in one UI only, as BUG-053 and BUG-056 demonstrate.
+- **Evidence / reproduction:** Inspect the CSS request chain and file sizes; profile an idle next-shell page and repeated ribbon expansion on a low-end/throttled client. The one-second intervals remain active for the full page lifetime.
+- **Possible solutions:** Extract a small shared token/component base, delete classic-only rules after migration, bundle/minify fingerprinted assets with long immutable caching, cache `Intl.DateTimeFormat` objects/elements, pause timers when hidden or unnecessary, and animate an overlay/transform rather than flex width. Keep effects behind reduced-motion/performance-friendly fallbacks.
+- **Regression test / notes:** Add asset-size/request budgets and a throttled browser performance smoke test covering initial load, idle CPU, navigation, lesson cockpit and ribbon interaction.
+
+### BUG-063 — New-shell client behaviour lacks parity tests despite maintaining a forked script
+
+- **Date found:** 2026-06-21
+- **Severity / confidence:** Low / Confirmed test gap
+- **Affected:** `app/tests/appjsUnsaved.test.ts`; `app/tests/integration/overhaul.int.test.ts`; `app/public/app.js`; `app/public/app-overhaul.js`
+- **Cause:** Behavioural client tests load the classic `app.js`; overhaul integration tests mainly prove that the alternative asset URL is present or absent. They do not execute the overhaul bundle against the shared save, modal, navigation, accessibility and HTMX contracts.
+- **Effect:** Functional regressions in the exclusive UI can pass all 605 unit tests. The unsaved-operation-key and active-navigation regressions above are direct examples of duplicated client logic drifting without detection.
+- **Evidence / reproduction:** Run the unit suite—everything passes—then inspect `app-overhaul.js` against the expectations encoded by `appjsUnsaved.test.ts`; the operation-key implementation violates the same-name-field test's invariant.
+- **Possible solutions:** Parameterise shared client-contract tests over both bundles as an immediate guard, then eliminate the fork and retain focused tests only for genuine overhaul-only behaviour.
+- **Regression test / notes:** Cover unsaved writes, concurrent HTMX requests, note/marking dialogs, keyboard jumps, active navigation, accessibility controls, focus mode, slide navigation and dynamic-header swaps in a real browser harness.
+
+## 2026-06-21 remediation order
+
+1. **Safeguarding visibility:** BUG-051.
+2. **Data-loss and lesson correctness:** BUG-052 and BUG-053.
+3. **Broken or misleading teacher controls:** BUG-055 through BUG-058 and BUG-061.
+4. **Retire the classic implementation safely:** BUG-054 and BUG-063, preserving shared contracts before deletion.
+5. **Low-powered deployment work:** BUG-059, BUG-060 and BUG-062, with measured query/asset/browser budgets rather than cosmetic optimisation alone.
+
+## 2026-06-21 remediation — status (fixed in this pass)
+
+Worked in the report's own order. **Typecheck clean; 615 unit + 349 integration tests pass.**
+
+- **BUG-051 — FIXED.** The safeguarding register's note stream now matches every `safeguarding` note
+  regardless of `kind` (`repos/safeguarding.ts`), so live-lesson Fast Capture notes appear and count.
+  `category`/`safeguarding` are plumbed through `NoteItem` (`notesView.ts`, the lesson GET mapping and
+  the Fast Capture response), and both `(n as any)` reads at that privacy boundary are removed.
+- **BUG-052 — FIXED.** `renderLessonCockpit` selects the active section by an `oc` query param and
+  renders a course/class **tab bar** for split lessons; every panel is scoped to the selected section.
+  Slides are re-keyed by `groupCourseId:lessonPlanId` so two classes adapting one plan don't collide.
+  New pure-renderer tests in `tests/lessonPreview.test.ts`.
+- **BUG-053 — FIXED.** `app-overhaul.js` now stamps a unique per-element save key (the corrected
+  `app.js` logic, no `name`/`id` fallback). Guarded by a new parity test (see BUG-063).
+- **BUG-054 — FIXED (default flip; full classic deletion deferred per this report).** `next` is now the
+  product default (`nav.ts`; migration `0058` backfills `ui_shell='next'`), so a fresh/restored DB
+  launches the new UI. The classic branch + Settings toggle are intentionally **kept for the migration
+  checkpoint** (the report says remove them *after* a checkpoint); shared component rules still load via
+  the overhaul's `@import`. Deleting classic assets/branches is the documented next step.
+- **BUG-055 — FIXED.** Kit restore interpolates `${e.id}` (`kitView.ts`).
+- **BUG-056 — FIXED.** The ribbon now includes `/focus`, and the active-page script targets
+  `.scaffolded-ribbon a.ribbon-link` (and reveals the drawer when its page is active), so the current
+  page gets `.active`/`aria-current`.
+- **BUG-057 — FIXED.** Ribbon expansion and the accessibility panel now respond to `:focus-within` as
+  well as `:hover`, so keyboard users can open and reach the text-size/contrast/font controls.
+- **BUG-058 — FIXED.** The bulk `save-groups` route validates the whole payload, rejects an invalid
+  level, confirms **every** pupil is on the occurrence-course roster (`pupilCanAccessOc`), and applies
+  the batch in **one transaction** (`setPupilLevel` gained an `Executor` param). The "Start work" lock
+  is documented as a client-side convenience (a server-enforced work-state is a separate feature).
+- **BUG-061 — FIXED.** Clocks/focus toggles use classes/`data-` attributes instead of duplicate ids;
+  `tickClock` updates *every* clock from one page timezone, so the lesson clock no longer freezes.
+- **BUG-062 — PARTIAL.** Client cost addressed: `Intl.DateTimeFormat` instances are cached, the two
+  1-second intervals are merged into one, and it **pauses while the tab is hidden**. *Deferred* (needs
+  a build step to be safe): fingerprinted+minified bundles with long-immutable caching and extracting a
+  shared token/component base — a naïve static `maxAge` without fingerprinting would serve stale JS/CSS
+  after a deploy. Ribbon width→transform also deferred (UI-owned).
+- **BUG-063 — FIXED.** `tests/overhaulUnsaved.test.ts` runs the unsaved-work contract against
+  `app-overhaul.js` in jsdom — including the exact same-name-field scenario BUG-053 regressed on.
+- **BUG-060 — PARTIAL.** Read-hot win done: opening a lesson tries `findOccurrence()` before
+  `findOrCreateOccurrence()`, so an existing lesson skips the idempotent upserts. *Deferred* (needs
+  query profiling + composite indexes to do safely): collapsing the correlated subqueries in
+  `pupilWorkRows` into joined CTEs and reusing one pupil-work result for the activity-groups card and
+  the load-triggered grid.
+- **BUG-059 — DEFERRED.** The `/header-overhaul` aggregate runs off the critical path (after the main
+  page) and its counts aren't a simple `count(*)` (the task count needs the before-next-bell windowing).
+  Doing it well means caching slowly-changing clock/timetable metadata and a combined aggregate query —
+  worth its own measured pass rather than a risky blind rewrite.

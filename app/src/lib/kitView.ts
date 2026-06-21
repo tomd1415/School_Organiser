@@ -28,7 +28,7 @@ function renderRow(e: EquipmentRow, today: string): string {
       <span class="note-status" id="kit-${e.id}-status"></span>
       ${e.active
         ? `<button type="button" class="link danger" hx-post="/kit/${e.id}/archive" hx-target="#kit-${e.id}" hx-swap="outerHTML" hx-confirm="Archive ${esc(e.name)}? It stays in the records but leaves the planning list.">archive</button>`
-        : `<button type="button" class="link" hx-post="/kit/:id/restore" hx-target="#kit-${e.id}" hx-swap="outerHTML">restore</button>`}
+        : `<button type="button" class="link" hx-post="/kit/${e.id}/restore" hx-target="#kit-${e.id}" hx-swap="outerHTML">restore</button>`}
     </td>
   </tr>`;
 }

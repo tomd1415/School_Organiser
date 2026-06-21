@@ -92,16 +92,17 @@ export function getExperienceMode(): Experience {
 }
 
 // ── UI overhaul shell selector ──────────────────────────────────────────────────────────────────
-// 'classic' = the current Rail & Stage shell; 'next' = the new task-first workspace, built behind this
-// flag (docs/ui-design/WORKING_MODEL.md). Same write-through in-memory machinery as experienceMode:
-// layout() reads it synchronously (it can't await a DB read), server.ts primes it at boot from the
-// `ui_shell` setting, and Settings updates it. Defaults to 'classic' so there is NO change until the
-// new shell exists and the flag is flipped — a redesign can therefore merge to main and stay dark.
+// 'next' = the new task-first dark workspace, now the PRODUCT DEFAULT; 'classic' = the retired Rail &
+// Stage shell, kept behind the flag only for a short migration checkpoint (BUG-054). Same write-through
+// in-memory machinery as experienceMode: layout() reads it synchronously (it can't await a DB read),
+// server.ts primes it at boot from the `ui_shell` setting (migration 0058 backfills 'next'), and
+// Settings can still switch it. Defaults to 'next' so a fresh/restored database launches the new UI
+// rather than the old one.
 export type UiShell = 'classic' | 'next';
-let uiShell: UiShell = 'classic';
+let uiShell: UiShell = 'next';
 
 export function setUiShell(mode: UiShell | string | null): void {
-  uiShell = mode === 'next' ? 'next' : 'classic';
+  uiShell = mode === 'classic' ? 'classic' : 'next'; // default 'next' unless explicitly set to classic
 }
 
 export function getUiShell(): UiShell {
@@ -171,6 +172,7 @@ export function renderRail(
         <span class="tier-label">Tier 2: Daily Ops</span>
         ${link('/timetable', '📅', 'Timetable')}
         ${link('/tasks', '📝', 'Checklists')}
+        ${link('/focus', '🎯', 'Focus')}
         ${link('/marking', '🏆', 'Marking Queue')}
         ${link('/captured', '📥', 'Mind Inbox')}
         ${link('/events', '📣', 'Events')}

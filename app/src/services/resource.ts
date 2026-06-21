@@ -1,8 +1,6 @@
 // ResourceService — pure helpers: classify a file, make a safe name, validate a
 // link target, and decide how to preview. The store I/O is in lib/resourceStore.ts.
 
-export const RESOURCE_KINDS = ['document', 'slides', 'worksheet', 'quiz', 'image', 'link', 'note'] as const;
-
 const EXT_KIND: Record<string, string> = {
   pptx: 'slides', ppt: 'slides', odp: 'slides', key: 'slides',
   docx: 'document', doc: 'document', odt: 'document', rtf: 'document', txt: 'document', md: 'document', pdf: 'document',

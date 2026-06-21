@@ -101,11 +101,6 @@ export async function getPupilSessionState(id: number): Promise<{ active: boolea
   return rows[0] ?? null;
 }
 
-/** Invalidate every live session for a pupil (a PIN reset / disable bumps it). */
-export async function bumpPupilEpoch(id: number): Promise<void> {
-  await pool.query(`UPDATE pupils SET session_epoch = session_epoch + 1 WHERE id = $1`, [id]);
-}
-
 // ── 10.2: erasure / anonymisation — "a deliberate, audited retention action" (DATA_MODEL, DPIA §7).
 // Two modes, both transactional and audited into pupil_disposals (which records the kept ai_token +
 // counts, never the removed name):

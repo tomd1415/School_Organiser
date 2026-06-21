@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
+import { setUiShell } from '../../src/lib/nav';
 import { pool } from '../../src/db/pool';
 
 // idea 12 — smart capture routes. With AI forced off in the integration env, /note/route falls back
@@ -22,6 +23,7 @@ const post = (url: string, payload: string) =>
 beforeAll(async () => {
   app = await buildApp();
   await app.ready();
+  setUiShell('classic'); // the classic capture modal is asserted here; 'next' is now the default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);

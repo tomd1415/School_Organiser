@@ -4,6 +4,7 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import {
   findOrCreateOccurrence,
+  findOccurrence,
   getLastStoppingPoints,
   getOccurrenceCourses,
   getOccurrenceHeader,
@@ -86,7 +87,7 @@ import { getLessonWorksheet, getLessonSlidesMarkdown } from '../services/workshe
 import { renderSlideDeck } from './me';
 import { pupilLayout } from './pupilAuth';
 import { getUiShell } from '../lib/nav';
-import { pupilWorkRows, setPupilLevel, type PupilWorkRow } from '../repos/pupilWork';
+import { pupilWorkRows, setPupilLevel, pupilCanAccessOc, type PupilWorkRow } from '../repos/pupilWork';
 import { renderLessonCockpit, renderBoardNext, renderRecentNotesList, renderActivityGroupsContent, type CockpitNote } from '../lib/lessonView';
 import { saveLessonDocMarkdown } from '../services/lessonDocEdit';
 import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
@@ -105,6 +106,7 @@ const TZ = 'Europe/London';
 const Query = z.object({
   lesson: z.coerce.number().int().positive(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  oc: z.coerce.number().int().positive().optional(), // BUG-052: which split-lesson section to show
 });
 const PreviewQuery = z.object({ plan: z.coerce.number().int().positive() });
 
@@ -718,7 +720,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       taFbByOc: new Map(),
       exceptionsHtml: '',
       csrf,
-      slidesByPlan: new Map([[plan.id, slidesMd]]),
+      slidesByKey: new Map([[`0:${plan.id}`, slidesMd]]), // preview section is groupCourseId 0
       pupilWorkByOc: new Map(),
       preview: { backHref },
     });
@@ -734,7 +736,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const { lesson, date } = parsed.data;
 
     try {
-      const occurrenceId = await findOrCreateOccurrence(lesson, date);
+      // BUG-060: opening a lesson is read-hot — try the read-only lookup first and only run the
+      // occurrence/course/prep upserts when the occurrence genuinely doesn't exist yet.
+      const occurrenceId = (await findOccurrence(lesson, date)) ?? (await findOrCreateOccurrence(lesson, date));
       const header = await getOccurrenceHeader(occurrenceId);
       if (!header) {
         const e = errorPage(reply, 404, 'That lesson no longer exists.');
@@ -759,6 +763,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         body: n.body,
         time: n.time,
         followups: fuByNote.get(n.id) ?? [],
+        category: n.category ?? null, // BUG-051: keep the category + safeguarding flag through the
+        safeguarding: n.safeguarding ?? false, //  mapping so the cockpit badge is correct after reload
       }));
 
       const detail = buildLessonDetail(header, courses, lastStops);
@@ -806,13 +812,15 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const title = header.groupName ?? purposeLabel(header.purpose);
 
       if (getUiShell() === 'next') {
-        const slidesByPlan = new Map<number, string | null>();
+        // BUG-052: key by groupCourseId:lessonPlanId — two classes adapting the same plan have distinct
+        // decks, so keying by plan alone made later sections overwrite the first's slides.
+        const slidesByKey = new Map<string, string | null>();
         await Promise.all(
           detail.sections
             .filter((s) => s.lessonPlanId != null)
             .map(async (s) => {
               const md = await getLessonSlidesMarkdown(s.groupCourseId, s.lessonPlanId as number);
-              slidesByPlan.set(s.lessonPlanId as number, md);
+              slidesByKey.set(`${s.groupCourseId}:${s.lessonPlanId}`, md);
             })
         );
 
@@ -836,8 +844,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           taFbByOc,
           exceptionsHtml,
           csrf,
-          slidesByPlan,
+          slidesByKey,
           pupilWorkByOc,
+          selectedOc: parsed.data.oc, // BUG-052: render the section the tab bar selected (default first)
         });
         return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf }));
       }
@@ -1591,8 +1600,8 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       id: n.id,
       body: n.body,
       time: n.time,
-      category: (n as any).category ?? null,
-      safeguarding: (n as any).safeguarding ?? false,
+      category: n.category ?? null,
+      safeguarding: n.safeguarding ?? false,
       followups: fuByNote.get(n.id) ?? [],
     }));
 
@@ -1603,23 +1612,35 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const params = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!params.success) return reply.code(400).send('');
 
-    const groupCourseId = await getGroupCourseIdOf(params.data.id);
+    const ocId = params.data.id;
+    const groupCourseId = await getGroupCourseIdOf(ocId);
     if (!groupCourseId) return reply.code(404).send('');
 
-    const bodyDict = req.body as Record<string, string>;
+    // BUG-058: validate the WHOLE payload before touching the DB. Parse every `level_<pupilId>` field,
+    // reject an invalid level outright, and confirm each pupil is actually on THIS occurrence-course's
+    // roster (the per-pupil route's pupilCanAccessOc guard, which the bulk route was missing) so a
+    // crafted request can't create a pupil-level row for a pupil outside the class.
+    const bodyDict = (req.body ?? {}) as Record<string, string>;
+    const updates: Array<{ pupilId: number; level: Level }> = [];
     for (const [key, val] of Object.entries(bodyDict)) {
-      if (key.startsWith('level_')) {
-        const pupilIdStr = key.replace('level_', '');
-        const pupilId = parseInt(pupilIdStr, 10);
-        if (Number.isFinite(pupilId) && (val === 'support' || val === 'core' || val === 'challenge')) {
-          await setPupilLevel(pupilId, groupCourseId, val);
-        }
-      }
+      if (!key.startsWith('level_')) continue;
+      const pupilId = parseInt(key.slice('level_'.length), 10);
+      if (!Number.isFinite(pupilId)) continue;
+      if (val !== 'support' && val !== 'core' && val !== 'challenge') return reply.code(400).send('');
+      updates.push({ pupilId, level: val });
     }
+    const access = await Promise.all(updates.map((u) => pupilCanAccessOc(u.pupilId, ocId)));
+    if (access.some((ok) => !ok)) return reply.code(403).send('');
 
-    const rows = await pupilWorkRows(params.data.id, groupCourseId);
-    const locked = false;
-    return reply.type('text/html').send(renderActivityGroupsContent(params.data.id, rows, locked));
+    // One transaction: all-or-nothing, so a mid-batch DB failure can't leave half the class re-levelled.
+    const { withTransaction } = await import('../db/pool');
+    await withTransaction(async (db) => {
+      for (const u of updates) await setPupilLevel(u.pupilId, groupCourseId, u.level, db);
+    });
+
+    const rows = await pupilWorkRows(ocId, groupCourseId);
+    const locked = false; // the "Start work" lock is a client-side convenience only (resets on reload)
+    return reply.type('text/html').send(renderActivityGroupsContent(ocId, rows, locked));
   });
 }
 

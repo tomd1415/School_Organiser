@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
 import { getSetting } from '../../src/repos/settings';
-import { setNavDailyOverride, setExperienceMode } from '../../src/lib/nav';
+import { setNavDailyOverride, setExperienceMode, setUiShell } from '../../src/lib/nav';
 
 // idea 6 + Rail & Stage: saving a daily set pins items into the rail's "Today" group AND the very next
 // page render reflects it via the write-through value, with no reboot; the experience switch reveals
@@ -26,6 +26,7 @@ beforeAll(async () => {
   savedNudge = await getSetting('experience_nudge_dismissed');
   app = await buildApp();
   await app.ready();
+  setUiShell('classic'); // these assert the classic Rail & Stage nav; 'next' is now the default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);

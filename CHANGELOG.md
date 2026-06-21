@@ -7,6 +7,34 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — Follow-up audit remediation (BUG-051 → BUG-063) + new UI is now the default
+
+A 13-bug follow-up audit (see [BUGREPORT.md](BUGREPORT.md)) was worked in priority order. **Typecheck
+clean; 615 unit + 349 integration tests pass.**
+
+- **🛡️ Safeguarding (BUG-051).** Live-lesson Fast Capture notes flagged *Safeguarding* now reach the
+  central register + its unreviewed count (the register matched only `kind='captured'`), and the
+  Safeguarding badge survives a reload in the lesson cockpit (the category/flag were dropped in a
+  mapping and read through `as any` at the privacy boundary — both removed).
+- **🧑‍🏫 Split lessons (BUG-052).** The new lesson cockpit showed only the first course of a split
+  lesson; it now has a **course/class tab switcher** and scopes every panel (plans, slides, groups,
+  live work) to the selected section. Slides are keyed per class so shared-plan adaptations don't clash.
+- **💾 Data-loss safeguards (BUG-053/BUG-063).** The new-UI script regressed the per-field "not saved"
+  key (same-named fields could clear each other's warning); ported the corrected per-element key from
+  `app.js` and added a parity test running the contract against **both** client bundles.
+- **🔒 Group save integrity (BUG-058).** The bulk "save groups" route now validates the whole payload,
+  rejects pupils outside the class roster, and writes the batch in one transaction.
+- **🎛️ New UI is the default (BUG-054).** `ui_shell` now defaults to **next** (migration `0058` backfills
+  it), so a fresh/restored install launches the dark workspace. Classic stays behind the flag for a
+  short migration checkpoint.
+- **♿ / 🧭 New-shell polish.** Kit *restore* link fixed (BUG-055); the ribbon includes Focus and marks
+  the active page (BUG-056); accessibility controls open via keyboard `:focus-within` (BUG-057);
+  duplicate clock/focus ids removed so the lesson clock no longer freezes, with cached time formatters,
+  a single paused-when-hidden interval (BUG-061 + BUG-062 client cost).
+- **⚡ Performance (BUG-060, partial).** Opening a lesson now uses a read-only occurrence lookup before
+  the create-path upserts. The query-level optimisations (CTEs/indexes), the `/header-overhaul` cost
+  (BUG-059) and fingerprinted-asset caching (BUG-062) are scoped as measured follow-ups in BUGREPORT.
+
 ### 2026-06-21 — Lesson slide decks now generate complete (dedicated plain-text call)
 
 - **🖼️ Full differentiated decks, every time.** Generated lesson/adapted decks were arriving as a 2–3 slide

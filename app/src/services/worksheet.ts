@@ -98,17 +98,6 @@ export async function getLessonWorksheets(groupCourseId: number, lessonPlanId: n
   return out;
 }
 
-/** The worksheet (resource/version) a field key belongs to, by its `w{n}.` prefix — answer provenance
- *  when several worksheets share a lesson. Falls back to the first. Metadata only. */
-export async function worksheetForKey(groupCourseId: number, lessonPlanId: number, key: string): Promise<{ resourceId: number; versionNo: number } | null> {
-  const metas = await lessonWorksheetMetas(groupCourseId, lessonPlanId);
-  if (!metas.length) return null;
-  const m = key.match(/^w(\d+)\./);
-  const idx = m ? Number(m[1]) : 0;
-  const hit = metas.find((x) => x.index === idx) ?? metas[0]!;
-  return { resourceId: hit.resourceId, versionNo: hit.versionNo };
-}
-
 /** The AI-generated MARKDOWN slide deck for a lesson (class copy preferred, else master) — for the
  * pupil's slide pane. Filters to a `.md` slides resource so an uploaded source `.pptx` (also stored
  * with kind='slides') is never mistaken for a renderable deck. Null if none. */

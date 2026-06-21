@@ -40,25 +40,9 @@ export async function resumeDevice(secret: string): Promise<number | null> {
   return d.pupilId;
 }
 
-export interface DeviceRow {
-  id: number;
-  label: string;
-  lastUsedAt: string | null;
-}
-export async function listDevices(pupilId: number): Promise<DeviceRow[]> {
-  const { rows } = await pool.query<DeviceRow>(
-    `SELECT id, label, to_char(last_used_at AT TIME ZONE 'Europe/London', 'YYYY-MM-DD HH24:MI') AS "lastUsedAt"
-     FROM pupil_devices WHERE pupil_id = $1 AND expires_at > now() ORDER BY last_used_at DESC NULLS LAST`,
-    [pupilId],
-  );
-  return rows;
-}
 export async function deviceCount(pupilId: number): Promise<number> {
   const { rows } = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM pupil_devices WHERE pupil_id = $1 AND expires_at > now()`, [pupilId]);
   return rows[0]?.n ?? 0;
-}
-export async function revokeDevice(id: number, pupilId: number): Promise<void> {
-  await pool.query(`DELETE FROM pupil_devices WHERE id = $1 AND pupil_id = $2`, [id, pupilId]);
 }
 /** Revoke every device for a pupil — called on account disable / PIN reset / archive (cascade). */
 export async function revokeAllDevices(pupilId: number): Promise<void> {

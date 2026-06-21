@@ -21,12 +21,6 @@ export async function clearFileDeletion(id: number): Promise<void> {
   await pool.query(`DELETE FROM pending_file_deletions WHERE id = $1`, [id]);
 }
 
-/** How many deletions are still outstanding — surfaced for ops visibility. */
-export async function pendingDeletionCount(): Promise<number> {
-  const { rows } = await pool.query<{ n: number }>(`SELECT count(*)::int AS n FROM pending_file_deletions`);
-  return rows[0]?.n ?? 0;
-}
-
 /**
  * Retry outstanding file deletions, idempotently: `removeStored` is a no-op on an already-gone file, so
  * a tombstone clears whether the unlink just happened or the file was already absent. A genuine fs error

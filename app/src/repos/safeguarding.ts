@@ -18,13 +18,17 @@ export interface SafeguardingItem {
 }
 
 // The three flagged streams, unioned, with the review-status overlay (no row ⇒ 'new'/unreviewed).
+// The 'captured' note stream covers EVERY safeguarding-flagged note regardless of kind — the mind-inbox
+// ('captured'), live-lesson Fast Capture ('lesson') and general notes all set the same flag, and a
+// flagged note of any kind is a concern to track (BUG-051: lesson Fast Capture notes were silently
+// excluded). Note ids are unique across kinds, so the (source_type, source_id) review overlay is safe.
 const SOURCES = `
   SELECT 'answer'::text AS source_type, a.id AS source_id, a.value AS body, p.display_name AS who, m.updated_at AS at
     FROM pupil_marks m JOIN pupil_answers a ON a.id = m.pupil_answer_id JOIN pupils p ON p.id = a.pupil_id
    WHERE m.disclosure
   UNION ALL
   SELECT 'captured', n.id, n.body, NULL, n.created_at
-    FROM notes n WHERE n.kind = 'captured' AND n.safeguarding
+    FROM notes n WHERE n.safeguarding
   UNION ALL
   SELECT 'ta_feedback', t.id, NULLIF(btrim(t.pupils_text || E'\\n' || t.lesson_text, E'\\n'), ''), NULL, t.created_at
     FROM ta_feedback t WHERE t.safeguarding`;

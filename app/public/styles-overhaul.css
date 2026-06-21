@@ -147,7 +147,8 @@ body[data-shell="next"] .scaffolded-ribbon {
   position: sticky;
   top: 0;
 }
-body[data-shell="next"] .scaffolded-ribbon:hover {
+body[data-shell="next"] .scaffolded-ribbon:hover,
+body[data-shell="next"] .scaffolded-ribbon:focus-within { /* BUG-057: expand for keyboard users too */
   width: 200px;
 }
 
@@ -250,7 +251,8 @@ body[data-shell="next"] .ribbon-link .lbl-txt {
   transition: opacity 0.15s ease;
   white-space: nowrap;
 }
-body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-link .lbl-txt {
+body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-link .lbl-txt,
+body[data-shell="next"] .scaffolded-ribbon:focus-within .ribbon-link .lbl-txt {
   opacity: 1;
 }
 
@@ -394,7 +396,9 @@ body[data-shell="next"] details.a11y .a11y-panel {
   margin-top: 0.25rem;
   font-size: 0.75rem;
 }
-body[data-shell="next"] .scaffolded-ribbon:not(:hover) details.a11y .a11y-panel {
+/* BUG-057: keep the open accessibility panel reachable by keyboard — hide it only when the ribbon is
+   neither hovered NOR focused (so a Tab into the ribbon reveals the text-size/contrast/font controls). */
+body[data-shell="next"] .scaffolded-ribbon:not(:hover):not(:focus-within) details.a11y .a11y-panel {
   display: none !important;
 }
 
@@ -1949,6 +1953,32 @@ body[data-shell="next"] .lesson-clock {
 body[data-shell="next"] .lesson-actions {
   display: flex;
   gap: 0.5rem;
+}
+/* BUG-052: split-lesson course/class switcher above the cockpit. */
+body[data-shell="next"] .cockpit-course-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+body[data-shell="next"] .course-tab {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--line);
+  border-bottom: 3px solid var(--tab-colour, var(--line-strong));
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+body[data-shell="next"] .course-tab:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+body[data-shell="next"] .course-tab.active {
+  color: var(--text);
+  background: var(--surface-3);
+  border-color: var(--line-strong);
 }
 body[data-shell="next"] .cockpit {
   display: grid;

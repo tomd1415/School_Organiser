@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
+import { setUiShell } from '../../src/lib/nav';
 import { pool } from '../../src/db/pool';
 import { addPlan, addUnit } from '../../src/repos/schemes';
 import { createTask } from '../../src/repos/tasks';
@@ -21,6 +22,7 @@ function firstCookie(setCookie: string | string[] | undefined): string {
 beforeAll(async () => {
   app = await buildApp();
   await app.ready();
+  setUiShell('classic'); // these assert the classic shell; 'next' is now the migration-backed default (BUG-054)
   const page = await app.inject({ method: 'GET', url: '/login' });
   const token = /name="_csrf" value="([^"]+)"/.exec(page.body)?.[1] ?? '';
   const pre = firstCookie(page.headers['set-cookie']);

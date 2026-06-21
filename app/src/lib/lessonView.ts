@@ -160,10 +160,11 @@ export function renderLessonCockpit(options: {
   taFbByOc: Map<number, TaFeedbackRow[]>;
   exceptionsHtml: string;
   csrf: string;
-  slidesByPlan: Map<number, string | null>;
-  pupilWorkByOc: Map<number, PupilWorkRow[]>;
+  slidesByKey: Map<string, string | null>; // BUG-052: keyed `${groupCourseId}:${lessonPlanId}` so two
+  pupilWorkByOc: Map<number, PupilWorkRow[]>; //  classes adapting one plan don't collide on slides
   lockedStateMap?: Map<number, boolean>; // track client-simulated group lock state
   preview?: { backHref: string }; // read-only scheme preview: never expose occurrence write controls
+  selectedOc?: number; // BUG-052: which split-lesson section (occurrence-course) to show; default first
 }): string {
   const {
     detail,
@@ -177,17 +178,21 @@ export function renderLessonCockpit(options: {
     taFbByOc,
     exceptionsHtml,
     csrf,
-    slidesByPlan,
+    slidesByKey,
     pupilWorkByOc,
     lockedStateMap = new Map(),
     preview,
+    selectedOc,
   } = options;
   const isPreview = preview != null;
 
   const h = detail.header;
-  const oc = detail.sections[0]?.occurrenceCourseId ?? 0;
-  const groupCourseId = detail.sections[0]?.groupCourseId ?? 0;
-  const lp = detail.sections[0]?.lessonPlanId ?? 0;
+  // BUG-052: a split lesson carries one section per course/class. Show the one the `oc` query param
+  // selects (default the first); a tab bar switches between them, and every panel below is scoped to it.
+  const activeSection = detail.sections.find((s) => s.occurrenceCourseId === selectedOc) ?? detail.sections[0];
+  const oc = activeSection?.occurrenceCourseId ?? 0;
+  const groupCourseId = activeSection?.groupCourseId ?? 0;
+  const lp = activeSection?.lessonPlanId ?? 0;
   const currentLevel = 'core'; // default preview level
 
   const heading = h.groupName ? esc(h.groupName) : esc(h.purpose);
@@ -197,7 +202,7 @@ export function renderLessonCockpit(options: {
     .join(' · ');
 
   // Fetch slide deck if available
-  const slidesMd = lp ? slidesByPlan.get(lp) : null;
+  const slidesMd = lp ? slidesByKey.get(`${groupCourseId}:${lp}`) : null;
   let slideThumbsHtml = '';
   let slidePreviewsHtml = '';
   let slideNotesHtml = '';
@@ -235,7 +240,6 @@ export function renderLessonCockpit(options: {
 
   // Column 2: sequence card outline
   let sequenceListHtml = '';
-  const activeSection = detail.sections[0];
   if (activeSection && activeSection.planOutline) {
     const steps = activeSection.planOutline.split('\n').map((s) => s.trim()).filter(Boolean);
     const progress = activeSection.progressStep ?? null;
@@ -267,8 +271,8 @@ export function renderLessonCockpit(options: {
     id: n.id,
     body: n.body,
     time: n.time,
-    category: (n as any).category ?? null,
-    safeguarding: (n as any).safeguarding ?? false,
+    category: n.category ?? null,
+    safeguarding: n.safeguarding ?? false,
     followups: n.followups,
   }));
   const recentNotesHtml = renderRecentNotesList(cockpitNotes);
@@ -340,6 +344,17 @@ export function renderLessonCockpit(options: {
     ? `/lesson/pupil-view?master=1&amp;lp=${lp}&amp;level=${currentLevel}`
     : `/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}`;
 
+  // BUG-052: split-lesson course/class switcher (only when there's more than one section). Plain links
+  // reload the cockpit scoped to the chosen occurrence-course; preview is single-section so shows none.
+  const sectionTabs = detail.sections.length > 1
+    ? `<nav class="cockpit-course-tabs" aria-label="Classes in this lesson">${detail.sections
+        .map((s) => {
+          const on = s.occurrenceCourseId === oc;
+          return `<a class="course-tab${on ? ' active' : ''}"${on ? ' aria-current="page"' : ''} href="/lesson?lesson=${h.lessonId}&amp;date=${esc(h.date)}&amp;oc=${s.occurrenceCourseId}"${s.colour ? ` style="--tab-colour:${esc(s.colour)}"` : ''}>${esc(s.courseName || 'Class')}</a>`;
+        })
+        .join('')}</nav>`
+    : '';
+
   return `
     <div class="ld overhaul-cockpit" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <section class="live-bar" aria-labelledby="lesson-title">
@@ -348,13 +363,15 @@ export function renderLessonCockpit(options: {
           <h1 id="lesson-title">${esc(heading)}</h1>
           <p>${esc(meta)}${isPreview ? ' · No lesson occurrence or pupil record is created' : ` · ${pupilWorkRows.length} pupils`}</p>
         </div>
-        <div class="lesson-clock" id="monospace-clock" data-tz="Europe/London">—:—</div>
+        <div class="lesson-clock" data-clock>—:—</div>
         <div class="lesson-actions">
           ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
           <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
-          <button class="button" type="button" id="focus-mode-btn">Focus Mode</button>
+          <button class="button focus-mode-toggle" type="button">Focus Mode</button>
         </div>
       </section>
+
+      ${sectionTabs}
 
       ${exceptionsHtml}
 

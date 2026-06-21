@@ -334,11 +334,11 @@ export function registerNowRoutes(app: FastifyInstance): void {
           <button type="button" id="note-btn" class="chip chip-btn" title="Quick note (or press n)">📝 Note</button>
           <a href="/tasks" class="chip">Tasks: <span class="chip-count">${tasksCount}</span></a>
           <a href="/marking" class="chip">Marking: <span class="chip-count">${markingCount}</span></a>
-          <button type="button" id="focus-mode-btn" class="chip chip-btn" title="Toggle Focus Mode">🎯 Focus Mode</button>
+          <button type="button" id="focus-mode-btn" class="chip chip-btn focus-mode-toggle" title="Toggle Focus Mode">🎯 Focus Mode</button>
         </div>
         <div class="header-clock-section">
-          <span id="monospace-clock" class="clock-display" data-tz="${esc(ctx.tz)}">${esc(clockStr)}</span>
-          <span id="monospace-date" class="date-display">${esc(dateLabel)}</span>
+          <span id="monospace-clock" class="clock-display" data-clock data-tz="${esc(ctx.tz)}">${esc(clockStr)}</span>
+          <span id="monospace-date" class="date-display" data-clock-date>${esc(dateLabel)}</span>
         </div>
       </header>`;
       return reply.type('text/html').send(html);

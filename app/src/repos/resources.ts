@@ -50,11 +50,6 @@ export async function createResource(title: string, kind: string, mimeType: stri
   return id;
 }
 
-/** Bulk import: record the unit + year group on a resource (read from the unit's Word description). */
-export async function setResourceUnit(id: number, unit: string | null, yearGroup: string | null): Promise<void> {
-  await pool.query(`UPDATE resources SET unit = $2, year_group = $3 WHERE id = $1`, [id, unit || null, yearGroup || null]);
-}
-
 /** Append a version (version_no = max+1) and make it current — atomically. BUG-008: the insert and the
  *  current-pointer update run in ONE transaction, and the resource row is locked `FOR UPDATE` first so
  *  two concurrent appends serialise. Without the lock both read the same max(version_no), and one loses
@@ -177,15 +172,6 @@ export async function getResource(id: number): Promise<ResourceRow | null> {
     [id],
   );
   return rows[0] ?? null;
-}
-
-export async function listResources(limit = 200): Promise<ResourceRow[]> {
-  const { rows } = await pool.query<ResourceRow>(
-    `SELECT ${RES_COLS} FROM resources r LEFT JOIN resource_versions v ON v.id = r.current_version_id
-     WHERE r.active ORDER BY r.id DESC LIMIT $1`,
-    [limit],
-  );
-  return rows;
 }
 
 export interface ResourceQuery {
@@ -458,11 +444,3 @@ export async function linkResourceToUnit(resourceId: number, unitId: number): Pr
   );
 }
 
-export async function listResourcesForCourse(courseId: number): Promise<LinkedResource[]> {
-  const { rows } = await pool.query<LinkedResource>(
-    `SELECT r.id AS "resourceId", r.title, r.kind, r.source FROM resource_links rl
-     JOIN resources r ON r.id = rl.resource_id WHERE rl.course_id = $1 AND r.active ORDER BY r.title`,
-    [courseId],
-  );
-  return rows;
-}

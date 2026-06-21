@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import {
   NAV_MODEL,
   renderRail,
@@ -24,6 +24,7 @@ const ADVANCED = ['/recurring', '/time', '/pupils', '/concepts', '/kit', '/setup
 afterEach(() => {
   setNavDailyOverride(null);
   setExperienceMode('everyday');
+  setUiShell('next'); // reset to the default shell (BUG-054) so classic-rail tests don't leak the flag
 });
 
 describe('nav model (single source of truth)', () => {
@@ -39,6 +40,7 @@ describe('nav model (single source of truth)', () => {
 });
 
 describe('renderRail (Rail & Stage)', () => {
+  beforeEach(() => setUiShell('classic')); // these assert the CLASSIC rail; 'next' is now the default
   it('everyday: Today = the leaner five, a pinned Safeguarding link, a Plan section, NO Advanced', () => {
     const html = renderRail('everyday');
     expect(html).toContain('class="rail"');
@@ -93,6 +95,7 @@ describe('experience switch (write-through)', () => {
   });
 
   it('renderRail defaults its experience arg from the write-through value', () => {
+    setUiShell('classic'); // the experience gate (rail-adv) is a classic-rail feature
     setExperienceMode('power');
     expect(renderRail()).toContain('rail-adv');
     setExperienceMode('everyday');
@@ -150,16 +153,17 @@ describe('client jump-map (unchanged)', () => {
 });
 
 describe('ui_shell flag (UI overhaul seam)', () => {
-  afterEach(() => setUiShell('classic')); // never leak the flag into other tests
+  afterEach(() => setUiShell('next')); // reset to the default shell (BUG-054)
 
-  it('defaults to classic and only "next" turns it on', () => {
+  it('defaults to next; only an explicit "classic" selects the retired shell', () => {
+    setUiShell(null);
+    expect(getUiShell()).toBe('next'); // the product default
+    setUiShell('classic');
     expect(getUiShell()).toBe('classic');
     setUiShell('next');
     expect(getUiShell()).toBe('next');
     setUiShell('anything-else');
-    expect(getUiShell()).toBe('classic');
-    setUiShell(null);
-    expect(getUiShell()).toBe('classic');
+    expect(getUiShell()).toBe('next'); // anything but 'classic' = next
   });
 
   it('layout() reflects the shell as data-shell on <body> (the seam for the new shell)', () => {

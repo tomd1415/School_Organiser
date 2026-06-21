@@ -1,7 +1,7 @@
 // Phase 8.4–8.7: the work itself. Answers (per field, version-pinned), self-declared Done,
 // per-course differentiation levels, and the pupil's lesson feedback. Everything keyed so the
 // teacher's review aligns with exactly the slice the pupil saw.
-import { pool } from '../db/pool';
+import { pool, type Executor } from '../db/pool';
 
 export type Level = 'support' | 'core' | 'challenge';
 
@@ -29,20 +29,12 @@ export async function getPupilLevel(pupilId: number, groupCourseId: number): Pro
   return rows[0]?.level ?? 'core';
 }
 
-export async function setPupilLevel(pupilId: number, groupCourseId: number, level: Level): Promise<void> {
-  await pool.query(
+export async function setPupilLevel(pupilId: number, groupCourseId: number, level: Level, db: Executor = pool): Promise<void> {
+  await db.query(
     `INSERT INTO pupil_levels (pupil_id, group_course_id, level, updated_at) VALUES ($1, $2, $3, now())
      ON CONFLICT (pupil_id, group_course_id) DO UPDATE SET level = EXCLUDED.level, updated_at = now()`,
     [pupilId, groupCourseId, level],
   );
-}
-
-export async function levelsForGroupCourse(groupCourseId: number): Promise<Map<number, Level>> {
-  const { rows } = await pool.query<{ pupilId: number; level: Level }>(
-    `SELECT pupil_id AS "pupilId", level FROM pupil_levels WHERE group_course_id = $1`,
-    [groupCourseId],
-  );
-  return new Map(rows.map((r) => [r.pupilId, r.level]));
 }
 
 // ── answers ────────────────────────────────────────────────────────────────────────────────────

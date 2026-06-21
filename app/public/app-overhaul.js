@@ -33,9 +33,10 @@
     applyFocusMode(savedFocus);
   } catch (e) {}
 
-  // Event delegation for dynamically loaded Focus Mode button
+  // Event delegation for dynamically loaded Focus Mode button(s). BUG-061: the global header and the
+  // lesson live-bar both render a focus toggle — match by class so neither needs a (duplicate) id.
   document.addEventListener('click', function (e) {
-    var btn = e.target.closest('#focus-mode-btn');
+    var btn = e.target.closest('.focus-mode-toggle');
     if (btn) {
       toggleFocusMode();
     }
@@ -53,68 +54,63 @@
     }
   });
 
-  // --- Overhaul: Monospace Clock and Event Countdown ---
-  function tickClock() {
-    var clockEl = document.getElementById('monospace-clock');
-    if (!clockEl) return;
-    var tz = clockEl.getAttribute('data-tz') || 'Europe/London';
-    var now = new Date();
-    var clockStr = new Intl.DateTimeFormat('en-GB', {
-      timeZone: tz,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hourCycle: 'h23'
-    }).format(now);
-    clockEl.textContent = clockStr;
-
-    var dateEl = document.getElementById('monospace-date');
-    if (dateEl) {
-      var dateStr = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz,
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short'
-      }).format(now);
-      dateEl.textContent = dateStr;
+  // --- Overhaul: clocks & countdowns ---
+  // BUG-061: update EVERY clock (the global header AND the lesson live-bar), not just getElementById's
+  // first match — duplicate ids meant one clock froze after the header swapped in. All clocks share ONE
+  // timezone (the configured tz the server stamps on the header clock) so they can't disagree.
+  // BUG-062: cache the Intl.DateTimeFormat instances instead of rebuilding them every second, run one
+  // interval rather than two, and pause entirely while the tab is hidden.
+  var fmtCache = {};
+  function fmt(kind, tz) {
+    var key = kind + '|' + tz;
+    if (!fmtCache[key]) {
+      fmtCache[key] = kind === 'date'
+        ? new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' })
+        : new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
     }
+    return fmtCache[key];
+  }
+  function pageTz() {
+    var header = document.getElementById('monospace-clock');
+    return (header && header.getAttribute('data-tz')) || 'Europe/London';
+  }
+  function tickClock() {
+    var clocks = document.querySelectorAll('[data-clock]');
+    var dates = document.querySelectorAll('[data-clock-date]');
+    if (!clocks.length && !dates.length) return;
+    var tz = pageTz();
+    var now = new Date();
+    if (clocks.length) { var t = fmt('clock', tz).format(now); clocks.forEach(function (el) { el.textContent = t; }); }
+    if (dates.length) { var d = fmt('date', tz).format(now); dates.forEach(function (el) { el.textContent = d; }); }
   }
 
   function tickCountdowns() {
     var elements = document.querySelectorAll('[data-epoch-ms]');
+    if (!elements.length) return;
     var now = Date.now();
     elements.forEach(function (el) {
       var epoch = parseInt(el.getAttribute('data-epoch-ms'), 10);
       if (isNaN(epoch)) return;
       var diff = epoch - now;
-      if (diff <= 0) {
-        el.textContent = 'started';
-      } else {
-        var totalSec = Math.floor(diff / 1000);
-        var mins = Math.floor(totalSec / 60);
-        var secs = totalSec % 60;
-        if (mins === 0) {
-          el.textContent = 'starts in ' + secs + 's';
-        } else if (secs === 0) {
-          el.textContent = 'starts in ' + mins + ' mins';
-        } else {
-          el.textContent = 'starts in ' + mins + 'm ' + secs + 's';
-        }
-      }
+      if (diff <= 0) { el.textContent = 'started'; return; }
+      var totalSec = Math.floor(diff / 1000);
+      var mins = Math.floor(totalSec / 60);
+      var secs = totalSec % 60;
+      el.textContent = mins === 0 ? 'starts in ' + secs + 's' : secs === 0 ? 'starts in ' + mins + ' mins' : 'starts in ' + mins + 'm ' + secs + 's';
     });
   }
 
-  // Run immediately and every second
-  tickClock();
-  tickCountdowns();
-  setInterval(tickClock, 1000);
-  setInterval(tickCountdowns, 1000);
+  function tick() { tickClock(); tickCountdowns(); }
+
+  // One interval, paused while the tab is hidden (BUG-062).
+  var clockTimer = null;
+  function startClock() { if (!clockTimer) { tick(); clockTimer = setInterval(tick, 1000); } }
+  function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stopClock(); else startClock(); });
+  startClock();
 
   // Re-run ticks when HTMX swaps content (e.g. loads the header)
-  document.body.addEventListener('htmx:afterSwap', function () {
-    tickClock();
-    tickCountdowns();
-  });
+  document.body.addEventListener('htmx:afterSwap', tick);
 
   // --- Classic app.js functionality preserved below ---
 
@@ -239,10 +235,14 @@
     saveToast(n === 1 ? LOST : '⚠ ' + n + ' changes not saved — your text is still on screen. Check the connection and try again.');
   }
 
+  // BUG-053/BUG-033: a stable per-element key so a RETRY of the same field clears its OWN failure and an
+  // unrelated request never does. Each element gets its OWN stamped key — we deliberately do NOT fall back
+  // to name/id, because several fields share a name (e.g. the name="value" kit fields) and a shared key
+  // let one field's success wipe another's "not saved" warning. Opt into a shared key with data-save-id.
   var opSeq = 0;
   function opKey(elt) {
     if (!elt || !elt.getAttribute) return null;
-    if (!elt.__saveKey) elt.__saveKey = elt.getAttribute('data-save-id') || elt.getAttribute('name') || elt.id || ('op-' + ++opSeq);
+    if (!elt.__saveKey) elt.__saveKey = elt.getAttribute('data-save-id') || ('op-' + ++opSeq);
     return elt.__saveKey;
   }
   function markUnsaved(elt) { var k = opKey(elt); if (k) unsavedOps[k] = true; refreshToast(); }
@@ -357,13 +357,15 @@
     }
   })();
 
-  // Active page indicator inside the left rail
+  // Active page indicator (BUG-056: the next shell uses the .ribbon-link scaffolded ribbon, not the
+  // classic .rail — query both, and skip the brand link so "/" matches the Now link, not the logo).
   (function () {
     var path = location.pathname;
     var best = null;
-    var links = document.querySelectorAll('.rail a[href], .rail-foot a[href]');
+    var links = document.querySelectorAll('.scaffolded-ribbon a.ribbon-link[href], .rail a[href], .rail-foot a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href');
+      if (!href || href.charAt(0) !== '/') continue;
       var match = href === '/' ? path === '/' : path === href || path.indexOf(href + '/') === 0;
       if (match && (!best || href.length > best.getAttribute('href').length)) best = links[i];
     }
@@ -372,6 +374,8 @@
       best.setAttribute('aria-current', 'page');
       var det = best.closest('.rail-sec');
       if (det && det.tagName === 'DETAILS') { det.open = true; var sum = det.querySelector('summary'); if (sum) sum.classList.add('active-within'); }
+      var drawer = best.closest('#ribbon-drawer'); // reveal the advanced drawer when its page is active
+      if (drawer) drawer.classList.add('open');
     }
   })();
 

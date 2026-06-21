@@ -48,7 +48,7 @@ function renderPreview(): string {
     taFbByOc: new Map(),
     exceptionsHtml: '',
     csrf: 'test-token',
-    slidesByPlan: new Map([[42, '## Explain **carries**\n\nUse `place value` carefully.\n\n- Add from the **right**\n\n> Remember: 1 + 1 = 10\n\n> 🧑‍🏫 Model slowly']]),
+    slidesByKey: new Map([['0:42', '## Explain **carries**\n\nUse `place value` carefully.\n\n- Add from the **right**\n\n> Remember: 1 + 1 = 10\n\n> 🧑‍🏫 Model slowly']]),
     pupilWorkByOc: new Map(),
     preview: { backHref: '/schemes?course=4&scheme=7' },
   });
@@ -83,6 +83,51 @@ describe('read-only live lesson preview', () => {
     expect(html).not.toContain('/lesson/oc/0/');
     expect(html).not.toContain('/occurrence-course/0/');
     expect(html).not.toContain('groups-dialog');
+  });
+});
+
+describe('split-lesson section switcher (BUG-052)', () => {
+  const split: LessonDetail = {
+    header: { ...detail.header, lessonId: 9, date: '2026-06-22', occurrenceId: 5, status: 'live', purpose: 'lesson', groupName: 'Split slot' },
+    sections: [
+      { ...detail.sections[0]!, occurrenceCourseId: 11, groupCourseId: 21, courseName: 'Computing', lessonPlanId: 42, planOutline: 'CS starter\nCS independent work' },
+      { ...detail.sections[0]!, occurrenceCourseId: 12, groupCourseId: 22, courseName: 'Engineering', lessonPlanId: 43, planOutline: 'Eng starter\nEng build task' },
+    ],
+  };
+  const base = {
+    notes: [], prep: [], plansByCourse: new Map(), resByPlan: new Map(), matByPlan: new Map(),
+    effByKey: new Map(), adaptedResByKey: new Map(), taFbByOc: new Map(), exceptionsHtml: '', csrf: 't',
+    slidesByKey: new Map([['21:42', '## CS deck slide'], ['22:43', '## Eng deck slide']]),
+    pupilWorkByOc: new Map(),
+  };
+
+  it('renders a course tab per section linking to each occurrence-course', () => {
+    const html = renderLessonCockpit({ detail: split, ...base });
+    expect(html).toContain('cockpit-course-tabs');
+    expect(html).toContain('Computing');
+    expect(html).toContain('Engineering');
+    expect(html).toContain('oc=11');
+    expect(html).toContain('oc=12');
+  });
+
+  it('defaults to the first section', () => {
+    const html = renderLessonCockpit({ detail: split, ...base });
+    expect(html).toContain('CS deck slide'); // section 1 slides (keyed 21:42)
+    expect(html).toContain('CS independent work'); // section 1 outline
+    expect(html).not.toContain('Eng build task'); // section 2 hidden
+  });
+
+  it('shows the section the oc param selects, with its tab active and the right deck', () => {
+    const html = renderLessonCockpit({ detail: split, ...base, selectedOc: 12 });
+    expect(html).toContain('Eng deck slide'); // section 2 slides (keyed 22:43 — no collision with 42)
+    expect(html).toContain('Eng build task');
+    expect(html).not.toContain('CS independent work');
+    expect(html).toContain('class="course-tab active" aria-current="page" href="/lesson?lesson=9&amp;date=2026-06-22&amp;oc=12"');
+  });
+
+  it('falls back to the first section when oc is unknown', () => {
+    const html = renderLessonCockpit({ detail: split, ...base, selectedOc: 999 });
+    expect(html).toContain('CS independent work');
   });
 });
 

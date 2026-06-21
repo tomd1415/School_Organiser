@@ -4,9 +4,6 @@
 // these defaults at runtime; these constants are only the fallback.
 export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY ?? '';
 
-/** True when a key is configured. Routes use this to show "AI is unavailable" cleanly. */
-export const HAS_API_KEY = ANTHROPIC_API_KEY.length > 0;
-
 export const PROVIDER = 'anthropic';
 
 // Default models per workload (ARCHITECTURE §"LLM client"). Settings rows
