@@ -57,21 +57,24 @@
     slides.forEach(function (s, i) { if (s.classList.contains('on')) idx = i; });
     var next = Math.max(0, Math.min(slides.length - 1, idx + dir));
     slides.forEach(function (s, i) { s.classList.toggle('on', i === next); });
-    var n = deck.querySelector('.pslide-n'); if (n) n.textContent = String(next + 1);
-    var prev = deck.querySelector('.pslide-prev'); if (prev) prev.disabled = next === 0;
-    var nx = deck.querySelector('.pslide-next'); if (nx) nx.disabled = next === slides.length - 1;
+    var n = deck.querySelector('.pslide-n') || document.querySelector('.present-position .pslide-n');
+    if (n) n.textContent = String(next + 1);
+    var prev = deck.querySelector('.pslide-prev') || document.querySelector('#slide-prev-btn');
+    if (prev) prev.disabled = next === 0;
+    var nx = deck.querySelector('.pslide-next') || document.querySelector('#slide-next-btn');
+    if (nx) nx.disabled = next === slides.length - 1;
   }
   if (main) {
     main.addEventListener('click', function (e) {
       var prev = e.target.closest('.pslide-prev');
       var nx = e.target.closest('.pslide-next');
       if (!prev && !nx) return;
-      var deck = e.target.closest('.pupil-slides');
+      var deck = e.target.closest('.pupil-slides') || document.querySelector('.pupil-slides');
       if (deck) deckGo(deck, prev ? -1 : 1);
     });
     document.querySelectorAll('.pupil-slides').forEach(function (deck) {
-      var p = deck.querySelector('.pslide-prev'); if (p) p.disabled = true;
-      var slides = deck.querySelectorAll('.pslide'), nx = deck.querySelector('.pslide-next');
+      var p = deck.querySelector('.pslide-prev') || document.querySelector('#slide-prev-btn'); if (p) p.disabled = true;
+      var slides = deck.querySelectorAll('.pslide'), nx = deck.querySelector('.pslide-next') || document.querySelector('#slide-next-btn');
       if (nx && slides.length <= 1) nx.disabled = true;
     });
     // ── A3 narrow-screen pane toggle: tap "Slides" / "My worksheet" to switch the visible pane (the

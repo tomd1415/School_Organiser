@@ -634,10 +634,10 @@ export function renderBoardNext(options: {
 
       <footer class="present-foot">
         <div class="present-controls">
-          <button class="button ghost" type="button" id="slide-prev-btn">← Previous</button>
-          <button class="button" type="button" id="slide-next-btn">Next →</button>
+          <button class="button ghost pslide-prev" type="button" id="slide-prev-btn">← Previous</button>
+          <button class="button pslide-next" type="button" id="slide-next-btn">Next →</button>
         </div>
-        <span class="present-position"><span data-slide-position>Slide 1 of ${totalSlides}</span></span>
+        <span class="present-position">Slide <b class="pslide-n">1</b> of ${totalSlides}</span>
         <div class="present-controls">
           <span class="badge live" data-timer><span data-timer-display>—:—</span></span>
           <button class="button ghost" type="button" id="fullscreen-btn" onclick="if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();}">Full screen</button>
