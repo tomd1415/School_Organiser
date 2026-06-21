@@ -299,3 +299,720 @@ body[data-shell="next"] .quick-capture-dock #qc-status {
   color: var(--text-muted, #666);
 }
 
+/* --- Stage 8: Pupil Workspace & TA Surface Overhauls --- */
+
+/* Pupil Topbar Glassmorphism & Layout */
+body.pupil-body[data-shell="next"] .pupil-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 24px;
+  border-radius: 0;
+}
+
+body.pupil-body[data-shell="next"] .pupil-hi {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+body.pupil-body[data-shell="next"] .pupil-remember {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+body.pupil-body[data-shell="next"] .pupil-remember:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+body.pupil-body[data-shell="next"] .pupil-logout {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+body.pupil-body[data-shell="next"] .pupil-logout:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+body.pupil-body[data-shell="next"] .pupil-top.test-banner {
+  background: rgba(254, 243, 199, 0.85);
+  border-bottom: 1px solid #fde68a;
+}
+
+body.pupil-body[data-shell="next"] .test-banner .pupil-hi {
+  color: #92400e;
+}
+
+/* Two-pane Workspace Layout on Next Gen */
+body[data-shell="next"] .pupil-twopane {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+  align-items: start;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+body[data-shell="next"] .pupil-pane {
+  min-width: 0;
+}
+
+body[data-shell="next"] .pupil-pane-slides {
+  position: sticky;
+  top: 88px;
+}
+
+body[data-shell="next"] .pupil-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  margin-bottom: 24px;
+}
+
+/* Slide Deck Styling */
+body[data-shell="next"] .pupil-slides {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-shell="next"] .pslide-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--accent-soft, #f3f4f6);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+body[data-shell="next"] .pslide-title {
+  font-weight: 700;
+  color: var(--accent, #0070f3);
+  font-size: 15px;
+}
+
+body[data-shell="next"] .pslide-count {
+  color: var(--text-muted, #6b7280);
+  font-weight: 600;
+}
+
+body[data-shell="next"] .pslide-content-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+body[data-shell="next"] .pslide-speak-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-color, #1f2937);
+  transition: all 0.2s ease;
+}
+
+body[data-shell="next"] .pslide-speak-btn:hover {
+  background: var(--accent-soft, #f3f4f6);
+  border-color: var(--accent, #0070f3);
+  transform: translateY(-1px);
+}
+
+body[data-shell="next"] .pslide-stage {
+  padding: 24px;
+  min-height: 320px;
+  background: var(--card-bg, #ffffff);
+}
+
+body[data-shell="next"] .pslide-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, #ffffff);
+}
+
+body[data-shell="next"] .pslide-nav button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 22px;
+}
+
+/* MCQ Option Styling */
+body[data-shell="next"] .ws-choice-opt > label {
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-color, #1f2937);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body[data-shell="next"] .ws-choice-opt > label:hover {
+  border-color: var(--accent, #0070f3);
+  background: var(--accent-soft, #f3f4f6);
+  transform: translateY(-1px);
+}
+
+body[data-shell="next"] .ws-choice-opt:has(input:checked) > label {
+  border-color: var(--accent, #0070f3);
+  background: var(--accent-soft, #eef2ff);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Easy-read and Workspace Tab controls */
+body[data-shell="next"] .ws-tab,
+body[data-shell="next"] .pane-tab {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-color, #4b5563);
+}
+
+body[data-shell="next"] .ws-tab:hover,
+body[data-shell="next"] .pane-tab:hover {
+  background: var(--accent-soft, #f3f4f6);
+  color: var(--text-color, #1f2937);
+}
+
+body[data-shell="next"] .ws-tab.is-on,
+body[data-shell="next"] .pane-tab.is-on {
+  background: var(--accent, #0070f3);
+  color: #fff;
+  border-color: var(--accent, #0070f3);
+}
+
+/* Pupil Done checklist block */
+body[data-shell="next"] .pupil-done {
+  margin: 24px 0;
+  text-align: center;
+}
+
+body[data-shell="next"] .pupil-done .done-yes {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+body[data-shell="next"] .pupil-done .done-btn {
+  min-height: 48px;
+  min-width: 160px;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #16a34a;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  transition: all 0.2s;
+  border: none;
+}
+
+body[data-shell="next"] .pupil-done .done-btn:hover {
+  background: #15803d;
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Pupil feedback form & emojis (minimum 44px touch targets) */
+body[data-shell="next"] .pupil-feedback {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+body[data-shell="next"] .pupil-feedback h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+body[data-shell="next"] .pupil-feedback .face-row {
+  display: flex;
+  justify-content: space-around;
+  max-width: 320px;
+  margin: 16px auto 24px;
+  gap: 12px;
+}
+
+body[data-shell="next"] .face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 2rem;
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--card-bg, #ffffff);
+  border: 2px solid var(--border-color, #e5e7eb);
+  transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+
+body[data-shell="next"] .face input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+body[data-shell="next"] .face:hover {
+  transform: scale(1.15);
+  background: var(--accent-soft, #f3f4f6);
+  border-color: var(--accent, #0070f3);
+}
+
+body[data-shell="next"] .face:has(input:checked) {
+  background: var(--accent-soft, #eef2ff);
+  border-color: var(--accent, #0070f3);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+  transform: scale(1.2);
+}
+
+body[data-shell="next"] .pupil-feedback .fb-q {
+  font-weight: 700;
+  font-size: 15px;
+  margin: 16px 0 8px;
+  color: var(--text-color, #374151);
+}
+
+body[data-shell="next"] .pupil-feedback .chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+body[data-shell="next"] .pupil-feedback .chip-row label.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  background: var(--card-bg, #f3f4f6);
+  color: var(--text-color, #374151);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border: 2px solid var(--border-color, #e5e7eb);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+body[data-shell="next"] .pupil-feedback .chip-row label.chip input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+body[data-shell="next"] .pupil-feedback .chip-row label.chip:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+body[data-shell="next"] .pupil-feedback .chip-row label.chip:has(input:checked),
+body[data-shell="next"] .pupil-feedback .chip-row label.chip.active {
+  background: var(--accent, #0070f3);
+  border-color: var(--accent, #0070f3);
+  color: #fff !important;
+}
+
+body[data-shell="next"] .pupil-feedback .fb-comment {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 20px;
+  gap: 8px;
+}
+
+body[data-shell="next"] .pupil-feedback textarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--bg-color, #ffffff);
+  color: var(--text-color, #1f2937);
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+body[data-shell="next"] .pupil-feedback textarea:focus {
+  border-color: var(--accent, #0070f3);
+  outline: none;
+}
+
+/* Pupil Results (Encouraging feedback card) */
+body[data-shell="next"] .pupil-results {
+  background: var(--accent-soft, #f0fdf4);
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+body[data-shell="next"] .pupil-results h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+  color: #166534;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body[data-shell="next"] .pupil-results .rc-total {
+  background: #166534;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+body[data-shell="next"] .pupil-results .rc-comment {
+  font-size: 16px;
+  color: #14532d;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border-left: 4px solid #16a34a;
+  margin: 12px 0 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+body[data-shell="next"] .pupil-results .rc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+body[data-shell="next"] .pupil-results .rc-item {
+  padding: 12px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body[data-shell="next"] .pupil-results .rc-ok {
+  color: #16a34a;
+  font-weight: 900;
+  font-size: 1.25rem;
+  margin-right: 8px;
+}
+
+body[data-shell="next"] .pupil-results .rc-no {
+  color: #dc2626;
+  font-weight: 900;
+  font-size: 1.25rem;
+  margin-right: 8px;
+}
+
+body[data-shell="next"] .pupil-results .rc-part {
+  color: #d97706;
+  font-weight: 900;
+  font-size: 1.25rem;
+  margin-right: 8px;
+}
+
+body[data-shell="next"] .pupil-results .rc-q {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+body[data-shell="next"] .pupil-results .rc-score {
+  font-weight: 700;
+  color: #4b5563;
+  align-self: flex-end;
+}
+
+body[data-shell="next"] .pupil-results .rc-fb {
+  font-size: 14px;
+  color: #4b5563;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+/* TA Surface Next-Gen Styles */
+body[data-shell="next"] .ta-next-gen-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+}
+
+body[data-shell="next"] .ta-next-gen-card .task-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  padding-bottom: 8px;
+}
+
+body[data-shell="next"] .ta-next-gen-card .task-tabs a {
+  text-decoration: none;
+  color: var(--text-muted, #6b7280);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+body[data-shell="next"] .ta-next-gen-card .task-tabs a:hover {
+  color: var(--text-color, #1f2937);
+  background: var(--accent-soft, #f3f4f6);
+}
+
+body[data-shell="next"] .ta-next-gen-card .task-tabs a.active {
+  color: var(--accent, #0070f3);
+  background: var(--accent-soft, #eef2ff);
+  font-weight: 700;
+}
+
+body[data-shell="next"] .ta-lesson-head {
+  margin-bottom: 24px;
+}
+
+body[data-shell="next"] .ta-lesson-head h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+body[data-shell="next"] .ld-course {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-left: 6px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+body[data-shell="next"] .ld-course h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+body[data-shell="next"] .ta-plan-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+body[data-shell="next"] .oc-block {
+  margin-bottom: 16px;
+}
+
+body[data-shell="next"] .oc-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #6b7280);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+body[data-shell="next"] .ta-fb {
+  background: var(--accent-soft, #f9fafb);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px dashed var(--border-color, #e5e7eb);
+}
+
+body[data-shell="next"] .ta-fb textarea {
+  width: 100%;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--bg-color, #ffffff);
+  color: var(--text-color, #1f2937);
+  margin-top: 6px;
+  min-height: 80px;
+  resize: vertical;
+}
+
+body[data-shell="next"] .ta-sg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-muted, #4b5563);
+  margin: 14px 0;
+  cursor: pointer;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+body[data-shell="next"] .ta-sg input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+body[data-shell="next"] .ta-fb button[type="submit"] {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* Dark Mode Theme overrides for Pupil/TA workspace elements */
+[data-theme="dark"] body.pupil-body[data-shell="next"] .pupil-top {
+  background: rgba(27, 30, 44, 0.8);
+  border-bottom: 1px solid rgba(43, 48, 70, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] body.pupil-body[data-shell="next"] .pupil-top.test-banner {
+  background: rgba(45, 34, 18, 0.85);
+  border-bottom: 1px solid #78350f;
+}
+
+[data-theme="dark"] body.pupil-body[data-shell="next"] .test-banner .pupil-hi {
+  color: #f59e0b;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results h2 {
+  color: #86efac;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results .rc-comment {
+  background: #1b1e2c;
+  color: #bbf7d0;
+  border-left-color: #22c55e;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results .rc-item {
+  background: #1b1e2c;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results .rc-q {
+  color: #eef0f7;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results .rc-score {
+  color: #9aa3bd;
+}
+
+[data-theme="dark"] body[data-shell="next"] .pupil-results .rc-fb {
+  color: #caa92e;
+  background: #232838;
+}
+
+[data-theme="dark"] body[data-shell="next"] .ta-fb {
+  background: #232838;
+}
+
+[data-theme="dark"] body[data-shell="next"] .ta-fb textarea {
+  background: #1b1e2c;
+  color: #eef0f7;
+  border-color: #2b3046;
+}
+
+/* Dyslexia / Easy Read font overrides */
+[data-font="dyslexic"] body[data-shell="next"] {
+  --font-ui: "OpenDyslexic", "Atkinson Hyperlegible", system-ui, sans-serif !important;
+}
+
+

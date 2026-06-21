@@ -16,19 +16,33 @@ import { listResourcesForPlan, listResourcesForAdaptation, type LinkedResource }
 import { addTaFeedback, listTaFeedback } from '../repos/taFeedback';
 import { formatObjectives, formatOutline } from '../lib/formatLesson';
 import { pool } from '../db/pool';
+import { getUiShell } from '../lib/nav';
+import { renderTaPage, renderLessonBlock as renderLessonBlockOverhaul, renderMyLessonsList, SectionDetails } from '../lib/taView';
 
 function requireTa(req: { session: { get: (k: string) => unknown } }): boolean {
   return req.session.get('authed') === true; // role gating is the global hook; teachers may peek too
 }
 
 function taLayout(body: string, csrf: string): string {
+  const isNext = getUiShell() === 'next';
+  const stylesheet = isNext ? '/static/styles-overhaul.css' : '/static/styles.css';
+  const shellAttr = isNext ? ' data-shell="next"' : '';
+  const headerHtml = isNext
+    ? `<header class="topbar context-header">
+        <div class="header-left"><span class="brand">School Organiser · TA view</span></div>
+        <div class="header-right">
+          <form class="inline" method="post" action="/logout"><input type="hidden" name="_csrf" value="${csrf}"><button type="submit" class="chip chip-btn">Log out</button></form>
+        </div>
+       </header>`
+    : `<header class="topbar"><div class="bar-left"><span class="brand">School Organiser · TA view</span></div>
+        <form class="inline" method="post" action="/logout"><input type="hidden" name="_csrf" value="${csrf}"><button type="submit" class="link">Log out</button></form>
+       </header>`;
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TA view · School Organiser</title><link rel="stylesheet" href="/static/styles.css"></head>
-<body>
-  <header class="topbar"><div class="bar-left"><span class="brand">School Organiser · TA view</span></div>
-    <form class="inline" method="post" action="/logout"><input type="hidden" name="_csrf" value="${csrf}"><button type="submit" class="link">Log out</button></form>
-  </header>
+<title>TA view · School Organiser</title><link rel="stylesheet" href="${stylesheet}"></head>
+<body${shellAttr}>
+  ${headerHtml}
   <main>${body}</main>
   <script src="/static/htmx.min.js"></script>
 </body></html>`;
@@ -174,6 +188,76 @@ async function renderMyLessons(staffId: number, fromIso: string, terms: Paramete
     <p class="muted">Open one to read its plan and resources ahead of time.</p>`;
 }
 
+async function buildNextGenLessonBlock(l: SlotLesson, date: string, csrf: string, effect: ExceptionEffect): Promise<string> {
+  const occId = await findOrCreateOccurrence(l.lessonId, date);
+  const sections = await getOccurrenceCourses(occId);
+  const sectionDetails: SectionDetails[] = [];
+  for (const s of sections) {
+    let eff = { adapted: false, objectives: null as string | null, outline: null as string | null, adaptationId: null as number | null };
+    let resources: LinkedResource[] = [];
+    if (s.lessonPlanId != null) {
+      const effLesson = await getEffectiveLesson(s.groupCourseId, s.lessonPlanId, { objectives: s.planObjectives, outline: s.planOutline });
+      eff = {
+        adapted: effLesson.adapted,
+        objectives: effLesson.objectives,
+        outline: effLesson.outline,
+        adaptationId: effLesson.adaptationId,
+      };
+      resources = [
+        ...(await listResourcesForPlan(s.lessonPlanId)),
+        ...(effLesson.adaptationId != null ? await listResourcesForAdaptation(effLesson.adaptationId) : []),
+      ];
+    }
+    const existingFeedback = await listTaFeedback(s.occurrenceCourseId);
+    sectionDetails.push({
+      occurrenceCourseId: Number(s.occurrenceCourseId),
+      groupCourseId: Number(s.groupCourseId),
+      lessonPlanId: s.lessonPlanId,
+      planTitle: s.planTitle,
+      courseName: s.courseName,
+      colour: s.colour,
+      eff,
+      resources,
+      existingFeedback: existingFeedback.map(f => ({
+        createdAt: f.createdAt,
+        pupilsText: f.pupilsText,
+        lessonText: f.lessonText,
+      })),
+    });
+  }
+  return renderLessonBlockOverhaul(l, date, csrf, effect, sectionDetails);
+}
+
+async function buildNextGenMyLessons(staffId: number, fromIso: string, terms: Parameters<typeof classifyDay>[2], taName: string | null): Promise<string> {
+  const { rows } = await pool.query<{ lessonId: number; weekday: number; label: string; start: string; groupName: string | null }>(
+    `SELECT tl.id AS "lessonId", p.weekday, p.label, to_char(p.start_time,'HH24:MI') AS start, g.name AS "groupName"
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     LEFT JOIN groups g ON g.id = tl.group_id
+     WHERE tl.staff_id = $1 AND tl.purpose IN ('teaching', 'form')
+       AND p.academic_year_id = (SELECT id FROM academic_years WHERE is_current)
+     ORDER BY p.weekday, p.slot_order`,
+    [staffId],
+  );
+  const items: Array<{ lessonId: number; iso: string; isToday: boolean; label: string; start: string; groupName: string | null }> = [];
+  for (let d = 0; d < 14 && items.length < 12; d++) {
+    const iso = addDaysIso(fromIso, d);
+    const dow = new Date(`${iso}T12:00:00Z`).getUTCDay() === 0 ? 7 : new Date(`${iso}T12:00:00Z`).getUTCDay();
+    if (!classifyDay(iso, dow, terms).isSchoolDay) continue;
+    for (const r of rows.filter((x) => x.weekday === dow)) {
+      items.push({
+        lessonId: r.lessonId,
+        iso,
+        isToday: d === 0,
+        label: r.label,
+        start: r.start,
+        groupName: r.groupName,
+      });
+    }
+  }
+  return renderMyLessonsList(items, taName);
+}
+
 export function registerTaRoutes(app: FastifyInstance): void {
   app.get('/ta', async (req, reply) => {
     if (!requireTa(req)) return reply.redirect('/login');
@@ -192,62 +276,104 @@ export function registerTaRoutes(app: FastifyInstance): void {
     try {
       const ctx = await getClockContext();
       const state = resolveNow(new Date(), ctx);
-      const tabs = `<nav class="task-tabs">
-        <a href="/ta"${which === 'now' ? ' class="active"' : ''}>This lesson</a>
-        <a href="/ta?which=next"${which === 'next' ? ' class="active"' : ''}>Next lesson (if you're early)</a>
-        ${taStaffId > 0 ? `<a href="/ta?which=mine"${which === 'mine' ? ' class="active"' : ''}>My lessons</a>` : ''}
-      </nav>`;
 
-      // A specific upcoming lesson, opened from "my lessons" (read-only, ±31 days sanity bound).
-      if (q.success && q.data.lesson != null && q.data.date) {
-        const l = await lessonById(q.data.lesson);
-        const dayDiff = Math.abs((Date.parse(q.data.date) - Date.parse(state.isoDate)) / 86400000);
-        // A shared-password TA (taStaffId 0) gets no "my lessons" tab and may NOT deep-link to an
-        // arbitrary lesson by id — only named TAs (their own staff row) or the teacher peeking.
-        const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
-        const exEffect = l
-          ? describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId))
-          : NO_EXCEPTION;
-        if (!l || !allowed) {
-          body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
-        } else if (exEffect.mode === 'free') {
-          body = `<section class="card">${tabs}<p class="muted">That lesson is off timetable / cancelled on ${esc(q.data.date)}.</p></section>`; // BUG-012
+      if (getUiShell() === 'next') {
+        let bodyHtml = '';
+        if (q.success && q.data.lesson != null && q.data.date) {
+          const l = await lessonById(q.data.lesson);
+          const dayDiff = Math.abs((Date.parse(q.data.date) - Date.parse(state.isoDate)) / 86400000);
+          const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
+          const exEffect = l
+            ? describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId))
+            : NO_EXCEPTION;
+          if (!l || !allowed) {
+            bodyHtml = `<p class="muted">That lesson isn't available.</p>`;
+          } else if (exEffect.mode === 'free') {
+            bodyHtml = `<p class="muted">That lesson is off timetable / cancelled on ${esc(q.data.date)}.</p>`;
+          } else {
+            const block = await buildNextGenLessonBlock(l, q.data.date, csrf, exEffect);
+            bodyHtml = `<p class="ld-meta">Preparing ahead: <strong>${esc(q.data.date)}</strong></p>${block}`;
+          }
+        } else if (which === 'mine' && taStaffId > 0) {
+          bodyHtml = await buildNextGenMyLessons(taStaffId, state.isoDate, ctx.terms, taName ?? null);
         } else {
-          const block = await renderLessonBlock(l, q.data.date, csrf, exEffect);
-          body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
-            <p class="ld-meta">Preparing ahead: <strong>${esc(q.data.date)}</strong></p>${block}</section>`;
+          let chosen: { weekday: number; slotOrder: number; date: string } | null = null;
+          if (which === 'now' && state.isSchoolDay && state.current && state.current.slotType === 'lesson') {
+            chosen = { weekday: state.weekday, slotOrder: state.current.slotOrder, date: state.isoDate };
+          } else if (state.nextTeaching && state.nextTeaching.date === state.isoDate) {
+            chosen = { weekday: state.nextTeaching.weekday, slotOrder: state.nextTeaching.slotOrder, date: state.nextTeaching.date };
+          }
+          if (!chosen) {
+            bodyHtml = `<h1>No lesson ${which === 'now' ? 'right now' : 'coming up today'}</h1>
+              <p class="muted">${state.isSchoolDay ? 'Check back at lesson time.' : 'No school today.'}</p>`;
+          } else {
+            const slotLessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
+            const mine = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
+            const dx = indexDayExceptions(await listExceptionsBetween(chosen.date, chosen.date));
+            const lessons = mine.filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free');
+            const blocks: string[] = [];
+            for (const l of lessons) {
+              blocks.push(await buildNextGenLessonBlock(l, chosen.date, csrf, describeException(exceptionForLesson(dx, l.lessonId))));
+            }
+            bodyHtml = blocks.join('<hr>') || '<p class="muted">Nothing timetabled in this slot.</p>';
+          }
         }
-        return reply.type('text/html').send(taLayout(body, csrf));
-      }
-
-      if (which === 'mine' && taStaffId > 0) {
-        body = `<section class="card ta">${tabs}${await renderMyLessons(taStaffId, state.isoDate, ctx.terms)}
-          ${typeof taName === 'string' && taName ? `<p class="muted">Signed in as ${esc(taName)}.</p>` : ''}</section>`;
-        return reply.type('text/html').send(taLayout(body, csrf));
-      }
-      let chosen: { weekday: number; slotOrder: number; date: string } | null = null;
-      if (which === 'now' && state.isSchoolDay && state.current && state.current.slotType === 'lesson') {
-        chosen = { weekday: state.weekday, slotOrder: state.current.slotOrder, date: state.isoDate };
-      } else if (state.nextTeaching && state.nextTeaching.date === state.isoDate) {
-        chosen = { weekday: state.nextTeaching.weekday, slotOrder: state.nextTeaching.slotOrder, date: state.nextTeaching.date };
-      }
-      if (!chosen) {
-        body = `<section class="card">${tabs}<h1>No lesson ${which === 'now' ? 'right now' : 'coming up today'}</h1>
-          <p class="muted">${state.isSchoolDay ? 'Check back at lesson time.' : 'No school today.'}</p></section>`;
+        body = renderTaPage({
+          which,
+          taName: taName ?? null,
+          taStaffId,
+          csrf,
+          bodyHtml,
+        });
       } else {
-        // A NAMED TA (their own staff row) sees only their own lesson in the slot — not every lesson
-        // running that period. Shared-account TAs (taStaffId 0) and the teacher peeking still see all.
-        const slotLessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
-        const mine = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
-        // BUG-012: drop cancelled / free / whole-day off-timetable lessons before rendering — they must
-        // not show OR materialise an occurrence for the TA. cover / room-change still run.
-        const dx = indexDayExceptions(await listExceptionsBetween(chosen.date, chosen.date));
-        const lessons = mine.filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free');
-        const blocks: string[] = [];
-        for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf, describeException(exceptionForLesson(dx, l.lessonId))));
-        body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
-          ${blocks.join('<hr>') || '<p class="muted">Nothing timetabled in this slot.</p>'}
-        </section>`;
+        const tabs = `<nav class="task-tabs">
+          <a href="/ta"${which === 'now' ? ' class="active"' : ''}>This lesson</a>
+          <a href="/ta?which=next"${which === 'next' ? ' class="active"' : ''}>Next lesson (if you're early)</a>
+          ${taStaffId > 0 ? `<a href="/ta?which=mine"${which === 'mine' ? ' class="active"' : ''}>My lessons</a>` : ''}
+        </nav>`;
+
+        // A specific upcoming lesson, opened from "my lessons" (read-only, ±31 days sanity bound).
+        if (q.success && q.data.lesson != null && q.data.date) {
+          const l = await lessonById(q.data.lesson);
+          const dayDiff = Math.abs((Date.parse(q.data.date) - Date.parse(state.isoDate)) / 86400000);
+          const allowed = l && dayDiff <= 31 && (l.staffId === taStaffId || req.session.get('role') === 'teacher');
+          const exEffect = l
+            ? describeException(exceptionForLesson(indexDayExceptions(await listExceptionsBetween(q.data.date, q.data.date)), l.lessonId))
+            : NO_EXCEPTION;
+          if (!l || !allowed) {
+            body = `<section class="card">${tabs}<p class="muted">That lesson isn't available.</p></section>`;
+          } else if (exEffect.mode === 'free') {
+            body = `<section class="card">${tabs}<p class="muted">That lesson is off timetable / cancelled on ${esc(q.data.date)}.</p></section>`;
+          } else {
+            const block = await renderLessonBlock(l, q.data.date, csrf, exEffect);
+            body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
+              <p class="ld-meta">Preparing ahead: <strong>${esc(q.data.date)}</strong></p>${block}</section>`;
+          }
+        } else if (which === 'mine' && taStaffId > 0) {
+          body = `<section class="card ta">${tabs}${await renderMyLessons(taStaffId, state.isoDate, ctx.terms)}
+            ${typeof taName === 'string' && taName ? `<p class="muted">Signed in as ${esc(taName)}.</p>` : ''}</section>`;
+        } else {
+          let chosen: { weekday: number; slotOrder: number; date: string } | null = null;
+          if (which === 'now' && state.isSchoolDay && state.current && state.current.slotType === 'lesson') {
+            chosen = { weekday: state.weekday, slotOrder: state.current.slotOrder, date: state.isoDate };
+          } else if (state.nextTeaching && state.nextTeaching.date === state.isoDate) {
+            chosen = { weekday: state.nextTeaching.weekday, slotOrder: state.nextTeaching.slotOrder, date: state.nextTeaching.date };
+          }
+          if (!chosen) {
+            body = `<section class="card">${tabs}<h1>No lesson ${which === 'now' ? 'right now' : 'coming up today'}</h1>
+              <p class="muted">${state.isSchoolDay ? 'Check back at lesson time.' : 'No school today.'}</p></section>`;
+          } else {
+            const slotLessons = await lessonsAt(chosen.weekday, chosen.slotOrder);
+            const mine = taStaffId > 0 ? slotLessons.filter((l) => l.staffId === taStaffId) : slotLessons;
+            const dx = indexDayExceptions(await listExceptionsBetween(chosen.date, chosen.date));
+            const lessons = mine.filter((l) => describeException(exceptionForLesson(dx, l.lessonId)).mode !== 'free');
+            const blocks: string[] = [];
+            for (const l of lessons) blocks.push(await renderLessonBlock(l, chosen.date, csrf, describeException(exceptionForLesson(dx, l.lessonId))));
+            body = `<section class="card ta" hx-headers='{"x-csrf-token":"${csrf}"}'>${tabs}
+              ${blocks.join('<hr>') || '<p class="muted">Nothing timetabled in this slot.</p>'}
+            </section>`;
+          }
+        }
       }
     } catch (err) {
       app.log.error({ err }, 'TA view failed');

@@ -34,6 +34,8 @@ import { pupilLessonResults, type PupilResults } from '../services/marking';
 import { onPupilDone } from '../services/markingQueue';
 import { devicesEnabledForGroup, rememberDevice, newDeviceSecret } from '../repos/pupilDevices';
 import { appConfig } from '../config/app';
+import { getUiShell } from '../lib/nav';
+import { renderMePage, buildOccurrenceBlock } from '../lib/meView';
 
 const DEVICE_COOKIE = 'pupil_device';
 
@@ -251,64 +253,102 @@ export function registerMeRoutes(app: FastifyInstance): void {
         // write + row lock on every pupil GET once the lesson has been opened once).
         const occId = (await findOccurrence(lesson.lessonId, lesson.date)) ?? (await findOrCreateOccurrence(lesson.lessonId, lesson.date));
         const sections = await getOccurrenceCourses(occId);
-        const blocks = await Promise.all(
-          sections.map(async (s) => {
-            const oc = Number(s.occurrenceCourseId);
-            let inner = '';
-            if (s.lessonPlanId != null) {
-              // ALL worksheets for this lesson (a lesson may have several) + slides, resolved together.
-              const [worksheets, slidesMd] = await Promise.all([
-                getLessonWorksheets(Number(s.groupCourseId), Number(s.lessonPlanId)),
-                getLessonSlidesMarkdown(Number(s.groupCourseId), Number(s.lessonPlanId)),
-              ]);
-              if (worksheets.length) {
-                // independent per-section reads — run them together, not one after another
-                const [level, values, done, fb] = await Promise.all([
-                  isTest ? Promise.resolve(testLevel) : getPupilLevel(pupilId, Number(s.groupCourseId)),
-                  getAnswers(pupilId, oc),
-                  isDone(pupilId, oc),
-                  getPupilFeedback(pupilId, oc),
+        let blocks: string[];
+        if (getUiShell() === 'next') {
+          const marksOn = await marksEnabled();
+          blocks = await Promise.all(
+            sections.map((s) =>
+              buildOccurrenceBlock(
+                s,
+                pupilId,
+                isTest,
+                testLevel,
+                name,
+                todayLabel,
+                marksOn,
+                () => getPupilLevel(pupilId, Number(s.groupCourseId)),
+                (oc) => getAnswers(pupilId, oc),
+                (oc) => isDone(pupilId, oc),
+                (oc) => getPupilFeedback(pupilId, oc),
+                (gc, lp) => getLessonWorksheets(gc, lp),
+                (gc, lp) => getLessonSlidesMarkdown(gc, lp),
+                (oc) => pupilLessonResults(pupilId, oc)
+              )
+            )
+          );
+          body = renderMePage({
+            acting,
+            name,
+            csrf,
+            testLevel,
+            todayLabel,
+            canRemember,
+            remember,
+            levelBtns,
+            head,
+            lesson,
+            blocks,
+          });
+        } else {
+          blocks = await Promise.all(
+            sections.map(async (s) => {
+              const oc = Number(s.occurrenceCourseId);
+              let inner = '';
+              if (s.lessonPlanId != null) {
+                // ALL worksheets for this lesson (a lesson may have several) + slides, resolved together.
+                const [worksheets, slidesMd] = await Promise.all([
+                  getLessonWorksheets(Number(s.groupCourseId), Number(s.lessonPlanId)),
+                  getLessonSlidesMarkdown(Number(s.groupCourseId), Number(s.lessonPlanId)),
                 ]);
-                // Each worksheet renders with its own keyPrefix so two sheets never share a field key.
-                // Online the name/date are auto-filled (the pupil never types them) — pass who + today.
-                const renderOne = (w: (typeof worksheets)[number]): string =>
-                  `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
-                let wsHtml: string;
-                if (worksheets.length === 1) {
-                  wsHtml = renderOne(worksheets[0]!);
-                } else {
-                  // Several worksheets → tabs (pupil.js switches panels). First tab is shown.
-                  const tabLabel = (w: (typeof worksheets)[number], i: number): string => esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`);
-                  const tabs = worksheets.map((w, i) => `<button type="button" class="ws-tab${i === 0 ? ' is-on' : ''}" role="tab" aria-selected="${i === 0}" data-ws-tab="${i}">${tabLabel(w, i)}</button>`).join('');
-                  const panels = worksheets.map((w, i) => `<div class="ws-panel${i === 0 ? ' is-on' : ''}" data-ws-panel="${i}">${renderOne(w)}</div>`).join('');
-                  wsHtml = `<div class="ws-tabs" role="tablist" aria-label="Worksheets">${tabs}</div>${panels}`;
+                if (worksheets.length) {
+                  // independent per-section reads — run them together, not one after another
+                  const [level, values, done, fb] = await Promise.all([
+                    isTest ? Promise.resolve(testLevel) : getPupilLevel(pupilId, Number(s.groupCourseId)),
+                    getAnswers(pupilId, oc),
+                    isDone(pupilId, oc),
+                    getPupilFeedback(pupilId, oc),
+                  ]);
+                  // Each worksheet renders with its own keyPrefix so two sheets never share a field key.
+                  // Online the name/date are auto-filled (the pupil never types them) — pass who + today.
+                  const renderOne = (w: (typeof worksheets)[number]): string =>
+                    `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
+                  let wsHtml: string;
+                  if (worksheets.length === 1) {
+                    wsHtml = renderOne(worksheets[0]!);
+                  } else {
+                    // Several worksheets → tabs (pupil.js switches panels). First tab is shown.
+                    const tabLabel = (w: (typeof worksheets)[number], i: number): string => esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`);
+                    const tabs = worksheets.map((w, i) => `<button type="button" class="ws-tab${i === 0 ? ' is-on' : ''}" role="tab" aria-selected="${i === 0}" data-ws-tab="${i}">${tabLabel(w, i)}</button>`).join('');
+                    const panels = worksheets.map((w, i) => `<div class="ws-panel${i === 0 ? ' is-on' : ''}" data-ws-panel="${i}">${renderOne(w)}</div>`).join('');
+                    wsHtml = `<div class="ws-tabs" role="tablist" aria-label="Worksheets">${tabs}</div>${panels}`;
+                  }
+                  const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
+                  // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
+                  const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p>${wsHtml}${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
+                  // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
+                  // follow the board while you work. No slides bound → the worksheet uses the full width.
+                  const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
+                  // On a phone/narrow screen the panes stack, so a sticky Slides/Worksheet toggle keeps
+                  // the pupil's own work one tap away (default = Worksheet; the board shows the slides too).
+                  // pupil.js flips data-pane; on a wide screen the toggle is hidden and both panes show.
+                  inner = deck
+                    ? `<div class="pupil-twopane" data-pane="work">
+                         <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
+                           <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
+                           <button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 My worksheet</button>
+                         </div>
+                         <div class="pupil-pane pupil-pane-slides">${deck}</div>
+                         <div class="pupil-pane pupil-pane-work">${work}</div>
+                       </div>`
+                    : work;
                 }
-                const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
-                // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
-                const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p>${wsHtml}${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
-                // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
-                // follow the board while you work. No slides bound → the worksheet uses the full width.
-                const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
-                // On a phone/narrow screen the panes stack, so a sticky Slides/Worksheet toggle keeps
-                // the pupil's own work one tap away (default = Worksheet; the board shows the slides too).
-                // pupil.js flips data-pane; on a wide screen the toggle is hidden and both panes show.
-                inner = deck
-                  ? `<div class="pupil-twopane" data-pane="work">
-                       <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
-                         <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
-                         <button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 My worksheet</button>
-                       </div>
-                       <div class="pupil-pane pupil-pane-slides">${deck}</div>
-                       <div class="pupil-pane pupil-pane-work">${work}</div>
-                     </div>`
-                  : work;
               }
-            }
-            if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
-            return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`;
-          }),
-        );
-        body = `${head}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
+              if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
+              return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`;
+            }),
+          );
+          body = `${head}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
+        }
       }
     } catch (err) {
       app.log.error({ err }, 'pupil /me failed');
