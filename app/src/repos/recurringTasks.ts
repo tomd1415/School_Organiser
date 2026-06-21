@@ -21,13 +21,14 @@ export interface RecurringDef {
   leadDays: number;
   active: boolean;
   lastGenerated: string | null;
+  lastGeneratedMin: number;
 }
 
 const PATTERN_RE = /^(weekly:[1-7]|every_weeks:\d+:[1-7]|monthly:\d{1,2}|per_lesson:\d+)$/;
 
 const SELECT = `SELECT id, title, detail, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
                        group_id AS "groupId", course_id AS "courseId", pattern, lead_days AS "leadDays", active,
-                       to_char(last_generated, 'YYYY-MM-DD') AS "lastGenerated"
+                       to_char(last_generated, 'YYYY-MM-DD') AS "lastGenerated", last_generated_min AS "lastGeneratedMin"
                 FROM recurring_tasks`;
 
 export async function createRecurring(): Promise<number> {
@@ -103,10 +104,13 @@ export async function generateDueInstances(today: string): Promise<number> {
   try {
     for (const def of defs) {
       let after = def.lastGenerated ?? addDays(today, -1);
-      // BUG-025: the cursor is (date, slot-minute). It starts at END_OF_DAY so the cursor day itself is
-      // excluded (matching the date-based "next date after" semantics + skipping an already-swept day on
-      // resume); within a run it advances to each due slot, so a class's same-day slots are walked.
-      let afterStartMin = END_OF_DAY;
+      // BUG-025: the cursor is (date, slot-minute) and BOTH are now persisted (last_generated +
+      // last_generated_min). On resume we start from the persisted minute, NOT END_OF_DAY — so a crash
+      // between two same-day per_lesson slots resumes mid-day and the later slot is still generated
+      // (date-only resume silently skipped it forever). Existing rows default last_generated_min to
+      // END_OF_DAY, so their "resume after the whole day" behaviour is unchanged. Within a run the cursor
+      // advances to each due slot in order; date-based patterns ignore the minute (they step by date).
+      let afterStartMin = def.lastGeneratedMin;
       for (let guard = 0; guard < 40; guard++) {
         const due = nextDueDate(def.pattern, after, afterStartMin, recurCtx);
         if (!due) break;
@@ -124,7 +128,7 @@ export async function generateDueInstances(today: string): Promise<number> {
            ON CONFLICT (recurring_slot_key) WHERE recurring_slot_key IS NOT NULL DO NOTHING`,
           [def.title, def.detail, def.urgency, def.estimateMin, def.cognitiveLoad, def.groupId, def.courseId, def.id, slotKey, due.date, due.startMin],
         );
-        await client.query(`UPDATE recurring_tasks SET last_generated = $2::date WHERE id = $1`, [def.id, due.date]);
+        await client.query(`UPDATE recurring_tasks SET last_generated = $2::date, last_generated_min = $3 WHERE id = $1`, [def.id, due.date, due.startMin]);
         await client.query('COMMIT');
         after = due.date;
         afterStartMin = due.startMin; // advance within the day so the next slot of a twice-taught day is next

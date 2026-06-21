@@ -7,6 +7,29 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — Reopened-audit bug fixes (privacy, cover/room, data-loss, crash-safety)
+
+A 20 June independent verification reopened ~18 of the 50 audit findings (the automated suites were green
+but several fixes covered only the happy path). Each was re-checked against the live tree, then fixed where
+still open; **572 unit / 344 integration tests green, typecheck clean.** Detail + remaining items in
+[BUGREPORT.md](BUGREPORT.md).
+
+- **🔒 Privacy fail-closed (BUG-037).** Pupil-name redaction now matches every distinctive part of a
+  multi-token roster name **including everyday-word names** ("Summer", "Mark", "Brown"), honouring the
+  absolute "no pupil name ever reaches an AI service" rule. Trade-off (teacher-chosen): that ordinary word
+  is tokenised in AI context only on a roster that actually contains such a pupil. The earlier utility-first
+  allow-list is removed; the redactor and the fail-closed egress assert share the path.
+- **🚪 Cover/room shows the right place (BUG-012 / BUG-047).** The TA view and the daily print now render the
+  **effective room** under a room-change/cover plus a visible cover/room badge — no more directing a TA or a
+  cover teacher to the timetabled (wrong) room. Staff is surfaced as a status, never a fabricated substitute.
+- **💾 Typed work survives a failed save (BUG-013 / BUG-033).** Forms only `reset()` on a genuine success
+  (`window.htmxSaved` reads the response header, so a swallowed-500 no longer clears the form), and the
+  "not saved" warning now tracks each field independently (no shared-`name` collision).
+- **🔁 Crash-safe background jobs (BUG-025 / BUG-027).** Recurring tasks persist a slot-minute cursor
+  (migration `0056`) so a crash between two same-day lessons no longer skips the later one; email intake now
+  writes its destination + completion in one transaction (new `withTransaction` helper), so a crash can't
+  leave a duplicate task.
+
 ### 2026-06-20 — Teaching features, pedagogy, external resources + UI-overhaul handoff
 
 - **🖊 Per-pupil marking modal.** Replaced the bottom-of-page read-back with a one-screen modal

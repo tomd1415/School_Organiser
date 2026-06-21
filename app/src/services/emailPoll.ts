@@ -6,6 +6,7 @@ import { pollMailbox, type ImapConfig } from '../lib/imapClient';
 import { parseMime, type ParsedMime } from '../lib/mime';
 import { createHash } from 'node:crypto';
 import { createTaskFromEmail, listGroups, recordEmailIntake, setTaskTriage, claimEmail, completeEmail, releaseEmail } from '../repos/tasks';
+import { pool, withTransaction, type Executor } from '../db/pool';
 import { createEventFromIntake } from '../repos/events';
 import { fileCaptured } from '../repos/captured';
 import { createNote, updateNoteBody } from '../repos/notes';
@@ -78,6 +79,7 @@ export async function routeTriagedEmail(
   m: ParsedMime,
   raw: string,
   groups: Array<{ id: number; name: string }>,
+  db: Executor = pool,
 ): Promise<EmailRoute> {
   const groupId = t.groupName ? (groups.find((g) => g.name.toLowerCase() === t.groupName!.toLowerCase())?.id ?? null) : null;
   const provenance = `${t.reason}${m.from ? ` · from ${m.from}` : ''}`;
@@ -91,8 +93,8 @@ export async function routeTriagedEmail(
       title: t.title,
       date: dateOk,
       detail: detailText,
-    });
-    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    }, db);
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw, db);
     return 'event';
   }
   if (t.route === 'awareness') {
@@ -101,22 +103,23 @@ export async function routeTriagedEmail(
       category: t.category ?? null,
       groupId: groupId == null ? null : Number(groupId),
       safeguarding: t.safeguarding,
-    });
-    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    }, db);
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw, db);
     return 'awareness';
   }
   if (t.route === 'note') {
-    const { id } = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) });
-    await updateNoteBody(id, `${t.title}\n${detailText}`);
-    await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
+    const { id } = await createNote({ kind: 'general', groupId: groupId == null ? null : Number(groupId) }, db);
+    await updateNoteBody(id, `${t.title}\n${detailText}`, undefined, db);
+    await recordEmailIntake({ from: m.from, subject: m.subject }, raw, db);
     return 'note';
   }
   // default: task
   const taskId = await createTaskFromEmail(
     { title: t.title, detail: detailText, from: m.from, subject: m.subject },
     raw,
+    db,
   );
-  await setTaskTriage(taskId, t.urgency ?? null, groupId == null ? null : Number(groupId));
+  await setTaskTriage(taskId, t.urgency ?? null, groupId == null ? null : Number(groupId), db);
   return 'task';
 }
 
@@ -139,28 +142,41 @@ export async function pollEmailOnce(): Promise<EmailPollResult> {
       try {
         // 10.5: screen for safeguarding BEFORE any AI egress. A trip is filed locally, flagged, and
         // NEVER sent to the AI (it's withheld everywhere downstream by the safeguarding flag).
+        // BUG-027: the destination write(s) AND completeEmail run in ONE transaction, so a crash either
+        // commits both (→ a later reclaim sees 'complete' and skips) or neither (→ a reclaim redoes it
+        // exactly once). The AI triage stays OUTSIDE the transaction — never hold one open across a model call.
         if (screenEmailForSafeguarding(m.subject, m.text)) {
-          await fileCaptured({
-            body: `⚠ Possible safeguarding content — screened on intake, NOT sent to AI.\nSubject: ${m.subject ?? '(none)'}${m.from ? `\nFrom: ${m.from}` : ''}\n\n${m.text.slice(0, 5000)}`,
-            category: 'safeguarding',
-            groupId: null,
-            safeguarding: true,
+          await withTransaction(async (db) => {
+            await fileCaptured({
+              body: `⚠ Possible safeguarding content — screened on intake, NOT sent to AI.\nSubject: ${m.subject ?? '(none)'}${m.from ? `\nFrom: ${m.from}` : ''}\n\n${m.text.slice(0, 5000)}`,
+              category: 'safeguarding',
+              groupId: null,
+              safeguarding: true,
+            }, db);
+            await recordEmailIntake({ from: m.from, subject: m.subject }, raw, db);
+            await completeEmail(dedupKey, db);
           });
-          await recordEmailIntake({ from: m.from, subject: m.subject }, raw);
           counts.awareness++;
         } else {
-          const triage = await triageEmail(m, groups.map((g) => g.name));
+          const triage = await triageEmail(m, groups.map((g) => g.name)); // AI — deliberately OUTSIDE the txn
           if (triage) {
-            counts[await routeTriagedEmail(triage, m, raw, groups)]++;
+            const route = await withTransaction(async (db) => {
+              const r = await routeTriagedEmail(triage, m, raw, groups, db);
+              await completeEmail(dedupKey, db);
+              return r;
+            });
+            counts[route]++;
           } else {
             // AI unavailable → never block intake: plain task, exactly as v1 behaved
             const title = (m.subject ?? m.text.split('\n')[0] ?? 'Email task').trim().slice(0, 200) || 'Email task';
             const detail = [m.from ? `From: ${m.from}` : '', m.text.slice(0, 5000)].filter(Boolean).join('\n');
-            await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw);
+            await withTransaction(async (db) => {
+              await createTaskFromEmail({ title, detail, from: m.from, subject: m.subject }, raw, db);
+              await completeEmail(dedupKey, db);
+            });
             counts.task++;
           }
         }
-        await completeEmail(dedupKey); // imported OK — the dedup is now permanent
       } catch (err) {
         await releaseEmail(dedupKey).catch(() => {}); // failed mid-process → release for a prompt retry
         throw err; // let pollMailbox leave it UNSEEN + count it failed

@@ -75,8 +75,7 @@ mitigation still has a concrete security, consistency, filesystem, or data-compl
 ## Re-remediation — 21 June 2026 (in progress)
 
 Each reopened/residual finding was first re-checked against the CURRENT tree (it had moved on since the
-20 June snapshot), then fixed where still open. Tests after this batch: **572 unit / 343 integration green,
-typecheck clean.**
+20 June snapshot), then fixed where still open. Tests now: **572 unit / 344 integration green, typecheck clean.**
 
 - **BUG-037 — ✅ Resolved (policy changed).** Per the teacher's decision (fail closed on the absolute
   "no pupil name ever reaches an AI service" rule), redaction now matches every distinctive part of a
@@ -100,14 +99,24 @@ typecheck clean.**
 - **BUG-033 — ✅ Resolved.** `opKey` now stamps each element its OWN key and no longer falls back to the
   shared `name`/`id`, so the three `name="text"` boxes on the lesson page (and any same-name fields) can't
   clear each other's "not saved" warning. `app/tests/appjsUnsaved.test.ts` +1 (same-name collision).
+- **BUG-025 — ✅ Resolved.** The recurring-task generator now persists the slot-MINUTE cursor
+  (`last_generated_min`, migration `0056`), not just the date — so a crash between two same-day per_lesson
+  slots resumes mid-day instead of skipping the later slot forever. Existing rows default to END_OF_DAY, so
+  their behaviour is unchanged. New integration test `recurringResume.int.test.ts` proves resume against a
+  real twice-on-Friday class (`app/src/repos/recurringTasks.ts`).
+- **BUG-027 — ✅ Resolved.** New `withTransaction()` helper (`app/src/db/pool.ts`); each email's destination
+  write(s) AND its `completeEmail` marker now run in ONE transaction (the destination repos take an optional
+  `db: Executor`). A crash either commits both (a reclaim sees 'complete' and skips) or neither (a reclaim
+  redoes it exactly once) — no duplicate task/event/note. The AI triage stays OUTSIDE the transaction.
+  Existing email routing + dedup tests stay green (`app/src/services/emailPoll.ts`).
 
-Still to do (this session continues): **BUG-021** (residual map-swap + undo-lock atomicity), **BUG-025,
-BUG-027** (crash-safe recurrence cursor / email idempotency), **BUG-048** (sweep claim — single-process,
-so the multi-process race is moot; only the crash-skips-a-day residual), **BUG-028/029** (resource/file
-atomicity + tombstone), **BUG-017** (credential+epoch txn), **BUG-030** (worksheet capability), **BUG-003**
-(image-URL expiry), **BUG-043** (SAR file packaging), **BUG-007** (upload streaming), **BUG-010** (matched
-restore set), and the **BUG-023** policy call (drop vs keep an inactive course on already-scheduled future
-lessons).
+Still to do (this session continues): **BUG-021** (main planner placement is already transactional; only the
+map drag-swap + undo-lock restore remain non-atomic), **BUG-028/029** (resource-create atomicity + screenshot
+tombstone — the `withTransaction` helper is now in place for these), **BUG-017** (credential+epoch txn),
+**BUG-030** (worksheet capability), **BUG-003** (image-URL expiry), **BUG-043** (SAR file packaging),
+**BUG-007** (upload streaming), **BUG-010** (matched restore set), **BUG-048** (sweep claim — single-process,
+so the multi-process race is MOOT; only a crash-skips-a-day residual remains, low value), and the **BUG-023**
+policy call (drop vs keep an inactive course on already-scheduled future lessons).
 
 ### Tests and checks performed
 

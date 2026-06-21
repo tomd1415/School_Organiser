@@ -80,7 +80,10 @@ Implemented structurally, not by discipline:
    it substitutes every known pupil name in the payload with that pupil's token. Matching is
    **Unicode-aware and whitespace-robust** — a name is matched across any run of spaces, tabs,
    non-breaking spaces or a line break that falls mid-name, so an odd space cannot smuggle a name
-   through (2026-06-15 review).
+   through (2026-06-15 review). It also catches a **first- or surname-only** reference and is
+   **fail-closed on everyday-word names**: a pupil named "Summer" or "Mark" is redacted even though
+   that word also appears in ordinary prose — the absolute rule holds, at the cost of occasionally
+   tokenising that common word in AI context for a roster that contains such a pupil (BUG-037, 2026-06-21).
 3. The `ai_calls` audit table stores **only the redacted request**, so the record itself
    proves no name left the building.
 4. Responses that reference a token are re-expanded to the name **for display only**, in the

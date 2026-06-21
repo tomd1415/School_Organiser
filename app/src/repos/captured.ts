@@ -1,5 +1,5 @@
 // SQL for captured info — notes with kind='captured'.
-import { pool } from '../db/pool';
+import { pool, type Executor } from '../db/pool';
 import { CAPTURED_CATEGORIES, type CapturedItem } from '../services/captured';
 
 const SELECT = `SELECT n.id, n.body, n.category,
@@ -16,8 +16,8 @@ export async function createCaptured(body: string): Promise<number> {
 }
 
 /** Email triage files awareness items here, fully categorised. */
-export async function fileCaptured(input: { body: string; category: string | null; groupId: number | null; safeguarding: boolean }): Promise<number> {
-  const { rows } = await pool.query<{ id: number }>(
+export async function fileCaptured(input: { body: string; category: string | null; groupId: number | null; safeguarding: boolean }, db: Executor = pool): Promise<number> {
+  const { rows } = await db.query<{ id: number }>(
     `INSERT INTO notes (kind, body, category, group_id, safeguarding) VALUES ('captured', $1, $2, $3, $4) RETURNING id`,
     [input.body, input.category, input.groupId, input.safeguarding],
   );

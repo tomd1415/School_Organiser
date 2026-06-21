@@ -1,6 +1,6 @@
 // SQL for tasks. Thin functions over pg; the field whitelist keeps the dynamic
 // UPDATE injection-safe and enum-checked.
-import { pool } from '../db/pool';
+import { pool, type Executor } from '../db/pool';
 import { toMinutes } from '../lib/time';
 import { LOADS, URGENCIES, statusesFor, type BellTask, type GroupSlot, type TaskView } from '../services/task';
 
@@ -42,22 +42,22 @@ export interface ParsedEmailInput {
 }
 
 /** Store the pasted email and create a linked draft task (source='email'). */
-export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: string): Promise<number> {
-  const intake = await pool.query<{ id: number }>(
+export async function createTaskFromEmail(parsed: ParsedEmailInput, rawBody: string, db: Executor = pool): Promise<number> {
+  const intake = await db.query<{ id: number }>(
     `INSERT INTO email_intake (from_addr, subject, body, received_at, processed) VALUES ($1, $2, $3, now(), true) RETURNING id`,
     [parsed.from, parsed.subject, rawBody],
   );
   const intakeId = intake.rows[0]?.id;
   if (intakeId === undefined) throw new Error('failed to store email');
 
-  const task = await pool.query<{ id: number }>(
+  const task = await db.query<{ id: number }>(
     `INSERT INTO tasks (title, detail, source, email_intake_id) VALUES ($1, $2, 'email', $3) RETURNING id`,
     [parsed.title, parsed.detail || null, intakeId],
   );
   const taskId = task.rows[0]?.id;
   if (taskId === undefined) throw new Error('failed to create task from email');
 
-  await pool.query(`UPDATE email_intake SET created_task_id = $2 WHERE id = $1`, [intakeId, taskId]);
+  await db.query(`UPDATE email_intake SET created_task_id = $2 WHERE id = $1`, [intakeId, taskId]);
   return taskId;
 }
 
@@ -92,8 +92,8 @@ export async function claimEmail(dedupKey: string): Promise<boolean> {
 }
 
 /** Mark a claimed email fully processed — the dedup is now permanent. */
-export async function completeEmail(dedupKey: string): Promise<void> {
-  await pool.query(`UPDATE processed_emails SET state = 'complete', processed_at = now() WHERE dedup_key = $1`, [dedupKey]);
+export async function completeEmail(dedupKey: string, db: Executor = pool): Promise<void> {
+  await db.query(`UPDATE processed_emails SET state = 'complete', processed_at = now() WHERE dedup_key = $1`, [dedupKey]);
 }
 
 /** Release a claim whose processing FAILED, so the next poll retries promptly rather than waiting out the
@@ -103,8 +103,8 @@ export async function releaseEmail(dedupKey: string): Promise<void> {
 }
 
 /** Record an email in the intake log without a task (triage filed it elsewhere). */
-export async function recordEmailIntake(parsed: { from: string | null; subject: string | null }, rawBody: string): Promise<number> {
-  const { rows } = await pool.query<{ id: number }>(
+export async function recordEmailIntake(parsed: { from: string | null; subject: string | null }, rawBody: string, db: Executor = pool): Promise<number> {
+  const { rows } = await db.query<{ id: number }>(
     `INSERT INTO email_intake (from_addr, subject, body, received_at, processed) VALUES ($1, $2, $3, now(), true) RETURNING id`,
     [parsed.from, parsed.subject, rawBody],
   );
@@ -112,8 +112,8 @@ export async function recordEmailIntake(parsed: { from: string | null; subject: 
 }
 
 /** Triage refinements on an email-created task. */
-export async function setTaskTriage(taskId: number, urgency: string | null, groupId: number | null): Promise<void> {
-  await pool.query(
+export async function setTaskTriage(taskId: number, urgency: string | null, groupId: number | null, db: Executor = pool): Promise<void> {
+  await db.query(
     `UPDATE tasks SET urgency = COALESCE($2, urgency), group_id = COALESCE($3, group_id) WHERE id = $1`,
     [taskId, urgency, groupId],
   );

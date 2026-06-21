@@ -1,5 +1,5 @@
 // SQL for notes, follow-ups and the per-course stopping point.
-import { pool } from '../db/pool';
+import { pool, type Executor } from '../db/pool';
 import type { FollowupItem } from '../lib/notesView';
 
 export interface NewNoteInput {
@@ -14,8 +14,8 @@ export interface NewNoteInput {
 // write and read so the client can echo back exactly what it last saw (microsecond precision).
 const REV = `to_char(updated_at, 'YYYY-MM-DD"T"HH24:MI:SS.US')`;
 
-export async function createNote(input: NewNoteInput): Promise<{ id: number; rev: string }> {
-  const { rows } = await pool.query<{ id: number; rev: string }>(
+export async function createNote(input: NewNoteInput, db: Executor = pool): Promise<{ id: number; rev: string }> {
+  const { rows } = await db.query<{ id: number; rev: string }>(
     `INSERT INTO notes (kind, body, occurrence_id, course_id, group_id, pupil_id)
      VALUES ($1, '', $2, $3, $4, $5) RETURNING id, ${REV} AS rev`,
     [input.kind, input.occurrenceId ?? null, input.courseId ?? null, input.groupId ?? null, input.pupilId ?? null],
@@ -29,10 +29,10 @@ export async function createNote(input: NewNoteInput): Promise<{ id: number; rev
  *  the client loaded it — a stale tab can't silently clobber a newer edit. Returns the NEW rev on
  *  success so the client advances its token. Without `expectedRev`, the plain last-write-wins update
  *  (used by surfaces that haven't adopted the guard yet). */
-export async function updateNoteBody(id: number, body: string, expectedRev?: string): Promise<{ ok: boolean; rev: string | null }> {
+export async function updateNoteBody(id: number, body: string, expectedRev?: string, db: Executor = pool): Promise<{ ok: boolean; rev: string | null }> {
   const guard = expectedRev != null ? ` AND ${REV} = $3` : '';
   const params = expectedRev != null ? [id, body, expectedRev] : [id, body];
-  const { rows } = await pool.query<{ rev: string }>(
+  const { rows } = await db.query<{ rev: string }>(
     `UPDATE notes SET body = $2, updated_at = now() WHERE id = $1${guard} RETURNING ${REV} AS rev`,
     params,
   );
