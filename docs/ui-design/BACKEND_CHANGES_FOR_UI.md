@@ -18,6 +18,26 @@ class/id/`data-*`/event/route the UI relies on, add a dated bullet with a clear 
 
 ---
 
+## 2026-06-21 — Timetable readiness dots, free-period workspace, board fill
+
+### ℹ️ New surfaces + a changed timetable link target
+
+- **Timetable cells route by state.** `renderLesson` (`lib/timetableView.ts`) now sends a **free** slot
+  (permanent `purpose='free'` OR a dated free/cancelled exception) to **`/free?lesson=&date=`**, not
+  `/lesson?...`. Teaching/form still open `/lesson`. New `.tt-is-free` class on those anchors.
+- **Readiness dots** render inside teaching cells: `<span class="tt-dots"><span class="tt-dot tt-dot-red|tt-dot-purple|tt-dot-blue">`.
+  CSS is in `styles-overhaul.css` (scoped to `body[data-shell="next"]`), purple has a reduced-motion-aware
+  flash. Only on the teacher's OWN teaching lessons. Data: `services/lessonReadiness.ts`.
+- **New `/free` route** (`routes/free.ts`) — a dedicated free-period screen (NOT the lesson interface):
+  period header + a Tasks panel scoped to the `(date, slot)` pair (`period_tasks`, migration `0059`).
+  Classes used: `.free-page`, `.free-state`, `.free-tasks`, `.free-task(.done)`, `.free-add`, `.free-new`,
+  `.free-pick-list`. **ACTION (next shell):** these render via `layout()` so they inherit the shell; if
+  you build a bespoke next view for `/free`, reuse these class names + the `#free-tasks` HTMX target.
+- **"Make free" action** added to the lesson cockpit live-bar (`lib/lessonView.ts`) —
+  `hx-post="/free/mark"` with `{lesson, date}`; the server replies `HX-Redirect` to `/free`.
+- **Board fill (board screen).** `.presentation .pslide.on` / `.slide-content` now flex-fill the screen
+  (removed the `max-height:62vh` letterbox). No markup change — `renderBoardNext` is unchanged.
+
 ## 2026-06-21 — Lesson slide decks now generate complete + differentiated
 
 ### ℹ️ Behaviour change — no render-contract change, just richer decks

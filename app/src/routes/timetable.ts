@@ -7,6 +7,7 @@ import { getPeriodDefinitions, getTimetabledLessons, getTermDatesAll } from '../
 import { listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
 import { describeException, type ExceptionEffect } from '../services/exceptions';
 import { buildWeekGrid, type GridCell, type GridLesson } from '../services/timetable';
+import { weekReadiness, type LessonReadiness } from '../services/lessonReadiness';
 import { classifyDay, type DayKind } from '../services/clock';
 import { listYears } from '../repos/setup';
 
@@ -69,6 +70,9 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
       const dayEx = new Set(wholeDayByDate.keys());
       const exForLesson = (d: string, lessonId: number): ExceptionEffect =>
         describeException(wholeDayByDate.get(d) ?? byDateLesson.get(`${d}:${lessonId}`) ?? null);
+      // Per-date readiness dots (best-effort: a failure here must never blank the timetable).
+      const readiness = await weekReadiness(weekDates).catch(() => new Map<string, LessonReadiness>());
+      const readinessFor = (d: string, lessonId: number): LessonReadiness | undefined => readiness.get(`${d}:${lessonId}`);
       const grid = buildWeekGrid(periods, lessons);
       const head = `<tr><th class="tt-corner"></th>${weekDates
         .map((d, i) => {
@@ -85,7 +89,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
             .map((cell, i) => {
               const d = weekDates[i] ?? today;
               if (!dayInfo[i]!.isSchoolDay) return `<td class="tt-off${d === today ? ' tt-today' : ''}"></td>`; // holiday/INSET/etc.
-              return renderCell(cell, d, d === today, exForLesson);
+              return renderCell(cell, d, d === today, exForLesson, readinessFor);
             })
             .join('');
           const h = Math.max(22, row.minutes); // scale row height to the period's duration (≈1px/min)
@@ -127,7 +131,7 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
           </nav>${explicitYear ? ' <a class="tt-exit-preview muted" href="/timetable">exit preview →</a>' : ''}
         </div>
         ${table}
-        <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
+        <p class="tt-legend"><span class="tt-dot tt-dot-red"></span> no scheme · <span class="tt-dot tt-dot-purple"></span> plan to develop · <span class="tt-dot tt-dot-blue"></span> resource to edit · <span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
       </section>`;
     return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
   });

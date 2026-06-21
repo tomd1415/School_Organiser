@@ -27,6 +27,31 @@ export async function getPeriodDefinitions(yearId?: number): Promise<PeriodRow[]
   return rows;
 }
 
+export interface LessonSlot {
+  lessonId: number;
+  purpose: string;
+  label: string;
+  start: string;
+  end: string;
+  weekday: number;
+  groupName: string | null;
+}
+
+/** One timetabled slot's period info — for the free-period screen, which has no occurrence to read. */
+export async function getLessonSlot(lessonId: number): Promise<LessonSlot | null> {
+  const { rows } = await pool.query<LessonSlot>(
+    `SELECT tl.id AS "lessonId", tl.purpose, p.label, p.weekday,
+            to_char(p.start_time, 'HH24:MI') AS start, to_char(p.end_time, 'HH24:MI') AS "end",
+            g.name AS "groupName"
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     LEFT JOIN groups g ON g.id = tl.group_id
+     WHERE tl.id = $1`,
+    [lessonId],
+  );
+  return rows[0] ?? null;
+}
+
 export async function getTimetabledLessons(yearId?: number): Promise<LessonRow[]> {
   const { rows } = await pool.query<LessonRow>(
     `SELECT tl.id        AS "lessonId",

@@ -1,5 +1,6 @@
 import { esc } from './html';
 import { ExceptionEffect } from '../services/exceptions';
+import type { LessonReadiness } from '../services/lessonReadiness';
 import { GridCell, GridLesson } from '../services/timetable';
 import { DayKind } from '../services/clock';
 import { addDays, weekdayOf } from './time';
@@ -60,27 +61,49 @@ export function exBadge(ex: ExceptionEffect): string {
   return ` <span class="tt-ex ${cls}" title="${esc(title)}">${text}</span>`;
 }
 
-export function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect): string {
+/** Readiness status dots for a teaching cell (a lesson can raise more than one). */
+export function readinessDots(r: LessonReadiness | undefined): string {
+  if (!r) return '';
+  const dots =
+    (r.noScheme ? '<span class="tt-dot tt-dot-red" title="No scheme of work for this course"></span>' : '') +
+    (r.noPlan ? '<span class="tt-dot tt-dot-purple" title="No fully-developed lesson plan for this date yet"></span>' : '') +
+    (r.needsEdit ? '<span class="tt-dot tt-dot-blue" title="A resource needs editing (e.g. an image to add)"></span>' : '');
+  return dots ? `<span class="tt-dots">${dots}</span>` : '';
+}
+
+export function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect, readiness?: LessonReadiness): string {
   const colour = l.courses[0]?.colour ?? '#94a3b8';
   const flag = l.isSelf ? '' : '⚑ ';
   const heading = l.groupName ? esc(l.groupName) : esc(purposeLabel(l.purpose));
   const courses = l.courses.map((c) => esc(c.name)).join(' · ');
   const exMark = exBadge(ex);
-  const inner = `<span class="tt-group">${flag}${heading}${exMark}</span>${courses ? `<span class="tt-course">${courses}</span>` : ''}`;
+  // Readiness dots only for the teacher's OWN teaching lessons (you don't prep an overseen class).
+  const dots = l.isSelf && l.purpose === 'teaching' ? readinessDots(readiness) : '';
+  const inner = `<span class="tt-group">${flag}${heading}${exMark}</span>${courses ? `<span class="tt-course">${courses}</span>` : ''}${dots}`;
   const style = `border-left-color:${esc(colour)}`;
+  // A free slot (permanent 'free' OR a dated free/cancelled exception) opens the free-period workspace,
+  // NOT the lesson interface; teaching/form open the lesson.
+  const isFree = l.purpose === 'free' || ex.mode === 'free';
   if (l.purpose === 'teaching' || l.purpose === 'free' || l.purpose === 'form') {
-    return `<a class="tt-lesson tt-${esc(l.purpose)}" style="${style}" href="/lesson?lesson=${l.lessonId}&date=${esc(date)}">${inner}</a>`;
+    const href = isFree ? `/free?lesson=${l.lessonId}&date=${esc(date)}` : `/lesson?lesson=${l.lessonId}&date=${esc(date)}`;
+    return `<a class="tt-lesson tt-${esc(l.purpose)}${isFree ? ' tt-is-free' : ''}" style="${style}" href="${href}">${inner}</a>`;
   }
   return `<span class="tt-lesson tt-${esc(l.purpose)}" style="${style}">${inner}</span>`;
 }
 
-export function renderCell(cell: GridCell, date: string, isToday: boolean, exForLesson: (date: string, lessonId: number) => ExceptionEffect): string {
+export function renderCell(
+  cell: GridCell,
+  date: string,
+  isToday: boolean,
+  exForLesson: (date: string, lessonId: number) => ExceptionEffect,
+  readinessFor: (date: string, lessonId: number) => LessonReadiness | undefined = () => undefined,
+): string {
   if (!cell.present) return `<td class="tt-blank${isToday ? ' tt-today' : ''}"></td>`;
   const td = isToday ? '<td class="tt-today">' : '<td>';
   if (cell.lessons.length === 0) {
     return `${isToday ? '<td class="tt-empty tt-today">' : '<td class="tt-empty">'}<span class="tt-band">${esc(cell.periodLabel)}</span></td>`;
   }
-  return `${td}${cell.lessons.map((l) => renderLesson(l, date, exForLesson(date, l.lessonId))).join('')}</td>`;
+  return `${td}${cell.lessons.map((l) => renderLesson(l, date, exForLesson(date, l.lessonId), readinessFor(date, l.lessonId))).join('')}</td>`;
 }
 
 export interface TimetableNextData {
@@ -108,7 +131,7 @@ export function renderTimetableNext(data: TimetableNextData): string {
       <div class="tt-grid-container">
         ${table}
       </div>
-      <p class="tt-legend"><span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
+      <p class="tt-legend"><span class="tt-dot tt-dot-red"></span> no scheme · <span class="tt-dot tt-dot-purple"></span> plan to develop · <span class="tt-dot tt-dot-blue"></span> resource to edit · <span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
     </section>
   `;
 }

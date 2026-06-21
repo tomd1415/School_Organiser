@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — Timetable readiness dots, free-period workspace, full-screen board
+
+Three teacher-requested timetable/board features. **Typecheck clean; 623 unit + 352 integration tests
+pass.**
+
+- **🟣🔵🔴 Lesson readiness dots.** Each of the teacher's own teaching cells now shows status dots for
+  THAT date: a gently-flashing **🟣 purple** dot when no fully-developed plan is bound (no plan, or one
+  missing objectives/outline), a **🔵 light-blue** dot when a bound resource still has an image
+  placeholder to fill, and a **🔴 red** dot when the course has no scheme of work. Computed for the week
+  on show (`services/lessonReadiness.ts`) from cheap aggregates plus a bounded scan of the week's bound
+  resources; best-effort so it never blanks the timetable. Legend updated.
+- **🗓️ Free-period workspace.** A free slot (permanent `purpose='free'` or a dated free/cancelled
+  exception) now opens a dedicated `/free` screen instead of the lesson interface. There you earmark
+  tasks from the main Tasks list to do in that period — assign existing ones, add new ones, tick them
+  off — all scoped to the (date, slot) pair (`period_tasks`, migration `0059`). You can flip a freed
+  slot back to teaching from there. **Marking free is now reliable from more places:** a "Make free"
+  action on the live-lesson cockpit, plus the existing lesson-screen exception. (`routes/free.ts`,
+  `repos/periodTasks.ts`.)
+- **🖥️ Projector board fills the screen.** "Open board screen" slides were boxed at `max-height:62vh`
+  and centred (a letterboxed ~4:3 look); the slide stage now flex-fills the full monitor, content
+  centred within it (`styles-overhaul.css`).
+
 ### 2026-06-21 — Follow-up audit remediation (BUG-051 → BUG-063) + new UI is now the default
 
 A 13-bug follow-up audit (see [BUGREPORT.md](BUGREPORT.md)) was worked in priority order. **Typecheck

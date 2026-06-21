@@ -368,6 +368,7 @@ export function renderLessonCockpit(options: {
           ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
           <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
           <button class="button focus-mode-toggle" type="button">Focus Mode</button>
+          ${isPreview ? '' : `<button class="button ghost" type="button" title="No class this period? Mark it free and assign yourself tasks" hx-post="/free/mark" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>Make free</button>`}
         </div>
       </section>
 

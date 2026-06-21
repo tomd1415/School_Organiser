@@ -457,6 +457,37 @@ body[data-shell="next"] main.cockpit-workspace {
   width: 100%;
 }
 
+/* Page width constraints based on task type */
+body[data-shell="next"] main.cockpit-workspace > .welcome,
+body[data-shell="next"] main.cockpit-workspace > .pedagogy-container,
+body[data-shell="next"] main.cockpit-workspace > .reading-width {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+body[data-shell="next"] main.cockpit-workspace > .setup,
+body[data-shell="next"] main.cockpit-workspace > .marking-list-card,
+body[data-shell="next"] main.cockpit-workspace > .ta-next-gen-card,
+body[data-shell="next"] main.cockpit-workspace > .safeguarding-overhaul,
+body[data-shell="next"] main.cockpit-workspace > .working-width {
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+body[data-shell="next"] main.cockpit-workspace > .now-screen,
+body[data-shell="next"] main.cockpit-workspace > .overhaul-cockpit,
+body[data-shell="next"] main.cockpit-workspace > .tt-overhaul,
+body[data-shell="next"] main.cockpit-workspace > .schemes-overhaul,
+body[data-shell="next"] main.cockpit-workspace > .kit,
+body[data-shell="next"] main.cockpit-workspace > .workspace-width {
+  max-width: 1540px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+
 /* Overhauled chips */
 body[data-shell="next"] .chip {
   display: inline-flex;
@@ -1610,6 +1641,103 @@ body[data-shell="next"] .tt-today {
   outline-color: var(--violet) !important;
 }
 
+/* Lesson readiness status dots (top-right of a teaching cell). */
+body[data-shell="next"] .tt-lesson {
+  position: relative;
+}
+body[data-shell="next"] .tt-dots {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  gap: 3px;
+  pointer-events: none;
+}
+body[data-shell="next"] .tt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+body[data-shell="next"] .tt-dot-red {
+  background: var(--red);
+}
+body[data-shell="next"] .tt-dot-blue {
+  background: var(--blue);
+}
+body[data-shell="next"] .tt-dot-purple {
+  background: var(--violet);
+  animation: tt-dot-flash 1.8s ease-in-out infinite;
+}
+@keyframes tt-dot-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-shell="next"] .tt-dot-purple { animation: none; }
+}
+
+/* Free-period workspace (/free). */
+body[data-shell="next"] .free-page {
+  max-width: 46rem;
+}
+body[data-shell="next"] .free-head h1 {
+  margin: 0.2rem 0 0;
+}
+body[data-shell="next"] .free-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 8px);
+}
+body[data-shell="next"] .free-state p {
+  margin: 0;
+}
+body[data-shell="next"] .free-tasks-list,
+body[data-shell="next"] .free-pick-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+body[data-shell="next"] .free-task {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+}
+body[data-shell="next"] .free-task label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  cursor: pointer;
+}
+body[data-shell="next"] .free-task.done .free-task-title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+body[data-shell="next"] .free-pick-list li {
+  padding: 0.2rem 0;
+}
+body[data-shell="next"] .free-new {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+body[data-shell="next"] .free-new input {
+  flex: 1;
+}
+body[data-shell="next"] .free-back {
+  margin-top: 1.25rem;
+}
+
 /* Marking Modal Overrides under Next Shell */
 body[data-shell="next"] .mm-head {
   background: linear-gradient(180deg, var(--surface), var(--bg-soft)) !important;
@@ -1815,10 +1943,10 @@ body[data-shell="next"] .mm-atl-link, body[data-shell="next"] .mk-atl { font-siz
 body[data-shell="next"] .agenda-timeline { padding: 0.5rem 0; }
 body[data-shell="next"] .timeline-list { margin: 0.8rem 0 0; padding: 0; list-style: none; }
 body[data-shell="next"] .timeline-slot { position: relative; display: grid; grid-template-columns: 3.2rem 0.7rem 1fr; gap: 0.8rem; min-height: 64px; align-items: start; padding: 0.6rem 0; }
-body[data-shell="next"] .timeline-slot:not(:last-child)::after { content: ""; position: absolute; top: 1.5rem; bottom: -1rem; left: 3.52rem; width: 1.5px; background: var(--line); }
+body[data-shell="next"] .timeline-slot:not(:last-child)::after { content: ""; position: absolute; top: 1.5rem; bottom: -1rem; left: 4.34rem; width: 1.5px; background: var(--line); }
 body[data-shell="next"] .timeline-slot time { padding-top: .16rem; color: var(--muted); font-size: 0.78rem; font-weight: 750; text-align: right; font-family: monospace; }
 body[data-shell="next"] .timeline-slot .node { z-index: 1; width: 0.68rem; height: 0.68rem; margin-top: 0.3rem; background: var(--surface); border: 2px solid var(--quiet); border-radius: 50%; }
-body[data-shell="next"] .timeline-slot.active { margin: 0 -0.45rem; padding-inline: 0.45rem; background: var(--violet-soft); border-radius: 10px; }
+body[data-shell="next"] .timeline-slot.active { margin-left: -0.7rem; padding-left: 0.55rem; background: var(--violet-soft); border-radius: 8px; border-left: 3px solid var(--violet) !important; }
 body[data-shell="next"] .timeline-slot.active .node { background: var(--violet); border-color: var(--violet); box-shadow: 0 0 0 4px rgba(154,143,255,.15); }
 body[data-shell="next"] .timeline-slot.done .node { background: var(--teal); border-color: var(--teal); }
 body[data-shell="next"] .timeline-slot.next .node { border-color: var(--amber); }
@@ -2140,6 +2268,20 @@ body[data-shell="next"] .slide-controls p {
 body[data-shell="next"] .slide-controls div {
   display: flex;
   gap: 0.45rem;
+}
+
+/* Slide visibility within cockpit slide card workspace */
+body[data-shell="next"] .slide-preview .pslide {
+  display: none;
+}
+body[data-shell="next"] .slide-preview .pslide.on {
+  display: block;
+}
+body[data-shell="next"] .slide-notes-container .pslide-note-item {
+  display: none;
+}
+body[data-shell="next"] .slide-notes-container .pslide-note-item.on {
+  display: block;
 }
 
 /* Quick notes section inside slides card */
@@ -2633,6 +2775,10 @@ body[data-shell="next"] .presentation .pslide-stage {
   width: 100% !important;
   max-width: none !important;
   min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important; /* fill the full board height, not a centred box */
+  display: flex !important;
+  flex-direction: column !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -2644,10 +2790,11 @@ body[data-shell="next"] .presentation .pslide {
 body[data-shell="next"] .presentation .pslide.on {
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   width: 100% !important;
   max-width: none !important;
-  min-height: 100% !important;
+  flex: 1 1 auto !important; /* the slide fills the whole board (monitor ratio), not a 4:3 box */
+  min-height: 0 !important;
 }
 body[data-shell="next"] .presentation .pslide .eyebrow {
   font-size: clamp(1rem, 1.8vw, 1.4rem) !important;
@@ -2678,7 +2825,12 @@ body[data-shell="next"] .presentation .pslide p {
 body[data-shell="next"] .presentation .slide-content {
   width: 100%;
   max-width: none;
-  max-height: 62vh;
+  flex: 1 1 auto; /* grow to fill the board; content stays vertically centred within it */
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   overflow: auto;
 }
 body[data-shell="next"] .presentation .pslide ol {
