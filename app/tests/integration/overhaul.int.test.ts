@@ -102,4 +102,28 @@ describe('UI Shell toggle and overhaul integration tests', () => {
     expect(page.body).not.toContain('/static/styles-overhaul.css');
     expect(page.body).not.toContain('/static/app-overhaul.js');
   });
+
+  it('opens a scheme lesson in the read-only live cockpit preview', async () => {
+    setUiShell('next');
+    const plan = await pool.query<{ id: number }>(
+      `SELECT lp.id FROM lesson_plans lp
+       JOIN units u ON u.id = lp.unit_id
+       JOIN schemes_of_work s ON s.id = u.scheme_id
+       ORDER BY lp.id LIMIT 1`,
+    );
+    const id = plan.rows[0]?.id;
+    expect(id).toBeTruthy();
+
+    const page = await app.inject({
+      method: 'GET',
+      url: `/lesson/preview?plan=${id}`,
+      headers: { cookie },
+    });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('Lesson preview · not live');
+    expect(page.body).toContain('No lesson occurrence or pupil record is created');
+    expect(page.body).toContain(`/lesson/pupil-view?master=1&amp;lp=${id}`);
+    expect(page.body).not.toContain('/lesson/oc/0/');
+    expect(page.body).not.toContain('/occurrence-course/0/');
+  });
 });

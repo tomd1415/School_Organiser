@@ -44,4 +44,10 @@ describe('renderPlan — Schemes card reuses the pupil preview (13.2)', () => {
     expect(html).toContain('rel="noopener"');
     expect(html).not.toContain('gc='); // master lesson has no class context
   });
+
+  it('offers a read-only live lesson preview in a new tab', () => {
+    expect(html).toContain('/lesson/preview?plan=42');
+    expect(html).toContain('Preview live lesson');
+    expect(html).toContain('without creating a lesson occurrence');
+  });
 });

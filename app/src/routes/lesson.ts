@@ -11,7 +11,7 @@ import {
   setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../repos/occurrence';
-import { getLessonPlan, getPlanRow, listCoursePlans, updatePlanField, getActiveScheme } from '../repos/schemes';
+import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
 import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
@@ -38,6 +38,7 @@ import {
 import { checksum, readStored, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, tidyResourceSet } from '../llm/schemas/lessonResources';
+import { generateLessonDeck, applyDedicatedDeck } from '../services/slideGen';
 import { ADAPT_RESOURCES_SYSTEM, ADAPT_RESOURCES_VERSION, adaptResourceItems, adaptResourcesInstruction } from '../llm/prompts/adaptResources';
 import { lessonMaterialItems, examStyleItems } from '../llm/prompts/lessonResources';
 import { lessonMaterialsForPlan, materialCandidatesForPlan, readUseMaterials } from '../services/lessonMaterials';
@@ -105,6 +106,7 @@ const Query = z.object({
   lesson: z.coerce.number().int().positive(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
+const PreviewQuery = z.object({ plan: z.coerce.number().int().positive() });
 
 function purposeLabel(purpose: string): string {
   const map: Record<string, string> = {
@@ -566,6 +568,21 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
   const examProfile = await examProfileForCourse(info.courseId, new Date(), gc).catch(
     () => ({ stage: 'foundational', weighting: 'none', monthsToExam: null, label: '' }) as const,
   );
+  // One context array, shared by the four-doc call and the dedicated deck call below.
+  const contextItems = [
+    ...standing,
+    ...concepts,
+    ...access,
+    ...groupContextItems(courseCtx, groupCtx),
+    ...abilityItem(ability),
+    ...equipmentItem(equipment),
+    ...lessonMaterialItems(materials.text),
+    ...examStyleItems(examProfile),
+    ...adaptResourceItems(
+      { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
+      masterDocs,
+    ),
+  ];
   const callOnce = () =>
     callLLMStructured(
       {
@@ -573,32 +590,25 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
         model: modelChoice,
         promptVersion: ADAPT_RESOURCES_VERSION,
         system: ADAPT_RESOURCES_SYSTEM,
-        context: [
-          ...standing,
-          ...concepts,
-          ...access,
-          ...groupContextItems(courseCtx, groupCtx),
-          ...abilityItem(ability),
-          ...equipmentItem(equipment),
-          ...lessonMaterialItems(materials.text),
-          ...examStyleItems(examProfile),
-          ...adaptResourceItems(
-            { planTitle: master.title, courseName: info.courseName, groupName: info.groupName, objectives: eff.objectives, outline: eff.outline, adaptationNote: eff.adaptationNote },
-            masterDocs,
-          ),
-        ],
+        context: contextItems,
         instruction: adaptResourcesInstruction(info.groupName),
-        maxTokens: 32000, // generous: a full adapted set incl. a multi-slide deck must never truncate
+        maxTokens: 32000, // generous: the worksheet/TA-notes/answers set must never truncate (the deck is a separate call)
       },
       lessonResourcesSchema,
     );
-  let result = await callOnce();
+  // Adapt the slide deck in its OWN call: the four-doc call reliably under-invests in the deck (a
+  // 2–3 slide stub — the "only the first couple of slides" bug). Run both at once (no added wall-time),
+  // then override the four-doc call's stub deck with the full adapted one.
+  const [result, deck] = await Promise.all([
+    callOnce(),
+    generateLessonDeck({ model: modelChoice, context: contextItems, mode: 'adapt' }).catch(() => null),
+  ]);
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
-  let tidy = tidyResourceSet(result.data.resources);
+  let tidy = applyDedicatedDeck(tidyResourceSet(result.data.resources), deck, master.title);
   if (tidy.missing.length) {
     const second = await callOnce();
     if (second.status === 'ok' && second.data) {
-      const retry = tidyResourceSet(second.data.resources);
+      const retry = applyDedicatedDeck(tidyResourceSet(second.data.resources), deck, master.title);
       if (retry.missing.length < tidy.missing.length) tidy = retry;
     }
   }
@@ -632,6 +642,89 @@ async function generateAdaptedResources(gc: number, lp: number, useMaterials = t
 }
 
 export function registerLessonRoutes(app: FastifyInstance): void {
+  app.get('/lesson/preview', { preHandler: requireAuth }, async (req, reply) => {
+    const parsed = PreviewQuery.safeParse(req.query);
+    if (!parsed.success) {
+      return reply.code(400).type('text/html').send(layout({
+        title: 'Lesson preview',
+        body: '<section class="card"><h1>Lesson preview</h1><p>That lesson reference looks wrong.</p><p><a href="/schemes">← Schemes</a></p></section>',
+        authed: true,
+        csrfToken: reply.generateCsrf(),
+      }));
+    }
+
+    const planId = parsed.data.plan;
+    const [plan, context, schemeId] = await Promise.all([
+      getPlanRow(planId),
+      getPlanContext(planId),
+      schemeIdForPlan(planId),
+    ]);
+    if (!plan || !context) {
+      return reply.code(404).type('text/html').send(layout({
+        title: 'Lesson preview',
+        body: '<section class="card"><h1>Lesson preview</h1><p>That lesson no longer exists.</p><p><a href="/schemes">← Schemes</a></p></section>',
+        authed: true,
+        csrfToken: reply.generateCsrf(),
+      }));
+    }
+
+    const [resources, slidesMd] = await Promise.all([
+      listResourcesForPlan(planId),
+      getLessonSlidesMarkdown(0, planId),
+    ]);
+    const detail: LessonDetail = {
+      header: {
+        occurrenceId: 0,
+        lessonId: 0,
+        date: '',
+        status: 'preview',
+        purpose: 'preview',
+        periodLabel: context.courseName,
+        lessonIndex: null,
+        start: '',
+        end: '',
+        groupName: plan.title,
+        isSelf: true,
+        staffName: 'Preview',
+        roomName: context.unitTitle,
+      },
+      sections: [{
+        occurrenceCourseId: 0,
+        groupCourseId: 0,
+        courseId: context.courseId,
+        courseName: context.courseName,
+        colour: null,
+        stoppingPoint: null,
+        progressStep: null,
+        lastStop: null,
+        lessonPlanId: plan.id,
+        planTitle: plan.title,
+        planObjectives: plan.objectives,
+        planOutline: plan.outline,
+        planKitNeeded: plan.kitNeeded,
+      }],
+    };
+    const backHref = `/schemes?course=${context.courseId}${schemeId == null ? '' : `&scheme=${schemeId}`}`;
+    const csrf = reply.generateCsrf();
+    const body = renderLessonCockpit({
+      detail,
+      notes: [],
+      prep: [],
+      plansByCourse: new Map(),
+      resByPlan: new Map([[plan.id, resources]]),
+      matByPlan: new Map(),
+      effByKey: new Map(),
+      adaptedResByKey: new Map(),
+      taFbByOc: new Map(),
+      exceptionsHtml: '',
+      csrf,
+      slidesByPlan: new Map([[plan.id, slidesMd]]),
+      pupilWorkByOc: new Map(),
+      preview: { backHref },
+    });
+    return reply.type('text/html').send(layout({ title: `${plan.title} · preview`, body, authed: true, csrfToken: csrf }));
+  });
+
   app.get('/lesson', { preHandler: requireAuth }, async (req, reply) => {
     const parsed = Query.safeParse(req.query);
     if (!parsed.success) {

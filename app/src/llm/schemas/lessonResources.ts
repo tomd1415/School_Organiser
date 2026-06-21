@@ -25,6 +25,12 @@ export const lessonResourcesSchema = z.object({
 
 export type LessonResources = z.infer<typeof lessonResourcesSchema>;
 
+// NB: the slide deck is NOT one of these four documents. It is generated separately as a PLAIN-TEXT
+// completion (services/slideGen.ts → generateLessonDeck) and overrides whatever deck this four-doc call
+// returns. Reason: the four-doc call reliably under-invests in the deck (a 2–3 slide stub — the "only
+// the first couple of slides" bug), and forcing the deck into a single JSON string field makes it WORSE
+// (a 1-slide stub, structured-output brevity bias). Free-text generation returns the whole deck.
+
 /** Models occasionally stray from the four kinds ("support worksheet", "answer key"…) — a strict
  * enum then fails the WHOLE response, so we accept any string and normalise here instead. */
 export function normaliseResourceKind(kind: string): 'slides' | 'worksheet' | 'support' | 'answers' | 'ta_notes' | 'document' {

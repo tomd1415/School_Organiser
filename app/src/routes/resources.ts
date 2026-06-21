@@ -20,6 +20,7 @@ import { checksum, readStored, relPathFor, withStagedFile } from '../lib/resourc
 import { kindFromFilename, mimeFromFilename, previewKind, safeFilename } from '../services/resource';
 import { renderGenerateForm, renderResourceItem, renderResourceListPaged, renderSearchBar, renderUploadForm } from '../lib/resourceView';
 import { renderMarkdown } from '../lib/markdown';
+import { splitTeacherNotes } from '../lib/slideDeck';
 import { renderWorksheet, sliceWorksheetMarkdown, type Level } from '../lib/worksheetForm';
 import { parseBlocks, serialiseBlocks, blocksSchema } from '../lib/worksheetBlocks';
 import { markdownToDocx } from '../lib/docx';
@@ -61,9 +62,16 @@ async function taResourceDenied(
 function renderSlidesPreview(text: string): string {
   const parts = text.replace(/\r\n/g, '\n').split(/\n(?=## )/);
   const cards = parts
-    .map((p) => renderMarkdown(p))
-    .filter((h) => h.trim() !== '')
-    .map((h) => `<section class="edit-slide">${h}</section>`)
+    .map((p) => {
+      const { clean, notes } = splitTeacherNotes(p);
+      const slide = renderMarkdown(clean);
+      if (!slide.trim()) return '';
+      const notesPanel = notes
+        ? `<aside class="pslide-notes" aria-label="Private teaching notes"><span class="pslide-notes-h">🧑‍🏫 Teaching notes <span class="muted">— teacher screen only</span></span><div class="pslide-notes-body">${renderMarkdown(notes)}</div></aside>`
+        : '';
+      return `<section class="edit-slide">${slide}${notesPanel}</section>`;
+    })
+    .filter(Boolean)
     .join('');
   return `<div class="edit-slides">${cards || '<p class="muted">Start a slide with a <code>## heading</code>.</p>'}</div>`;
 }
@@ -591,8 +599,9 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       .send(docx);
   });
 
-  // Presentation mode: a generated slides document, one slide at a time, full screen.
-  // ←/→ (or space / click) to move, N toggles the teacher "Say:" notes, F fullscreen, Esc exits.
+  // Pupil-safe presentation mode: one slide at a time, full screen. Teacher notes are removed from
+  // the response entirely (not merely hidden with CSS); they belong on the lesson presenter/cockpit.
+  // ←/→ (or space / click) moves, F toggles fullscreen, Esc exits.
   app.get('/resources/:id/present', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
@@ -609,11 +618,11 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     // split on `## ` slide headings; anything before the first heading is the title slide
     const parts = text.replace(/\r\n/g, '\n').split(/\n(?=## )/);
     const slides = parts
-      .map((p) => renderMarkdown(p))
+      .map((p) => renderMarkdown(splitTeacherNotes(p).clean))
       .filter((h) => h.trim() !== '')
       .map(
         (h, i) =>
-          `<section class="deck-slide${i === 0 ? ' deck-current' : ''}">${h.replace(/<p><em>Say:<\/em>/g, '<p class="deck-note"><em>Say:</em>')}</section>`,
+          `<section class="deck-slide${i === 0 ? ' deck-current' : ''}">${h}</section>`,
       );
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -635,7 +644,6 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(n + 1); }
         else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(n - 1); }
-        else if (e.key.toLowerCase() === 'n') document.body.classList.toggle('deck-show-notes');
         else if (e.key.toLowerCase() === 'f') {
           if (document.fullscreenElement) document.exitFullscreen();
           else document.documentElement.requestFullscreen();

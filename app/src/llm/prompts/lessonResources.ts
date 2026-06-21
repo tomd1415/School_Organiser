@@ -77,6 +77,67 @@ export const LESSON_RESOURCES_SYSTEM =
   'of text; give 🟢 Support shorter chunks and more scaffolding. Plain UK English; never reference or ' +
   'describe an individual pupil.' + PEDAGOGY_GUIDANCE;
 
+// ── Dedicated slide-deck generation ────────────────────────────────────────────────────────────
+// The deck is generated in its OWN call (services/slideGen.ts), NOT as one of the four documents.
+// Measured cause of the "only the first couple of slides" bug: in the four-doc call the model finishes
+// naturally (stop_reason=end_turn) having used <20% of the token budget, yet emits a 2-slide stub with
+// no level sections — it spends its effort on the worksheet/answers and treats the deck as an
+// afterthought. A focused, deck-only prompt with nothing to compete with fixes that reliably.
+// Generated as a PLAIN-TEXT completion (callLLM), NOT structured output: forcing the deck into a single
+// JSON string field triggers the model's structured-output brevity bias — it emits a 1-slide stub and
+// stops (measured: 115 output tokens, end_turn). The identical prompt as free text returns the whole
+// 20+ slide differentiated deck. So the deck is Markdown returned directly; the four-doc call still
+// owns the worksheet/ta_notes/answers.
+export const LESSON_SLIDES_VERSION = 'lesson_slides@1';
+
+export const LESSON_SLIDES_SYSTEM =
+  'You are an experienced UK secondary SEND Computing teacher building the COMPLETE teaching slide deck ' +
+  'for ONE lesson, as Markdown. This deck is what is on the board for the WHOLE lesson — not a summary ' +
+  'and not just a starter — so it must carry the lesson from the starter through the main teaching to ' +
+  'the plenary. PRODUCE THE ENTIRE DECK IN ONE GO.\n' +
+  'STRUCTURE: one `## ` heading per slide (slides are depth-2). Put the shared whole-class slides FIRST, ' +
+  'then a `# 🟢 Support` depth-1 divider followed by the Support slides, then `# 🟡 Core` and the Core ' +
+  'slides, then `# 🔴 Challenge` and the Challenge slides. A pupil follows the shared slides plus ONLY ' +
+  'their level’s slides, so EVERY level section must be present and finished. Level dividers are ' +
+  'depth-1 `# `; never use `# ` for a slide (it would be read as a divider).\n' +
+  'DIFFERENTIATION IS THE DEFAULT: 🟢 Support, 🟡 Core and 🔴 Challenge all meet the SAME objectives — ' +
+  'Core at the class ability midpoint (where one is given), Support one step below, Challenge one step ' +
+  'above; the SAME concepts at every level, with simpler wording / smaller steps for Support and more ' +
+  'depth for Challenge.\n' +
+  'COVERAGE: follow the lesson outline step by step. A real lesson deck is substantial — typically 6–10 ' +
+  'shared slides spanning the starter, the main teaching and the plenary, then 2–4 slides per level ' +
+  '(usually 14–24 slides in all). NEVER stop after two or three slides.\n' +
+  'EACH SLIDE: the `## ` heading, then a single large supporting emoji on its own line, then ≤4 short ' +
+  'large-print bullets, an optional `> key idea: …` callout (this one IS shown to pupils), and — on ' +
+  'EVERY slide — a PRIVATE teacher-notes block written as a blockquote whose FIRST line begins with ' +
+  '🧑‍🏫 (e.g. "> 🧑‍🏫 Drop in that the first webcam watched a coffee pot…"). Those notes show ONLY on the ' +
+  'teacher’s presenter screen — NEVER on the board or to pupils — so make them useful to a confident ' +
+  'subject expert: a teaching TIP or analogy for the trickiest idea, a surprising FACT to throw in, a ' +
+  'HINT for what pupils find hard, and a quick ENGAGEMENT idea (a question to pose, a turn-to-your-' +
+  'partner, a 30-second demo). Do NOT write a word-for-word "say this" script and do NOT explain the ' +
+  'subject content to the teacher; keep each slide’s notes to ≤4 short lines. EVERYTHING outside that ' +
+  '🧑‍🏫 blockquote is shown to the class — put no teacher talk anywhere else.\n' +
+  'Where a visual would clearly help a step but you have no source image, add a captioned placeholder on ' +
+  'its OWN line — `> 🖼️ [show: <what the picture should show>]` — and NEVER invent an image URL. ' +
+  'USABILITY IS PARAMOUNT: write for the pupil’s reading age, short sentences, everyday words, gloss any ' +
+  'technical term the first time, never a wall of text; give 🟢 Support shorter chunks. Plain UK ' +
+  'English; never reference or describe an individual pupil.' + PEDAGOGY_GUIDANCE;
+
+export const LESSON_SLIDES_INSTRUCTION =
+  'Generate the COMPLETE differentiated slide deck for this lesson now — the shared slides, then the ' +
+  '`# 🟢 Support`, `# 🟡 Core` and `# 🔴 Challenge` sections, every section present and finished, every ' +
+  'slide carrying its private `> 🧑‍🏫` teacher-notes blockquote. Output ONLY the deck as Markdown — ' +
+  'start with the first `## ` slide heading; no preamble, no commentary, and do NOT wrap the whole deck ' +
+  'in a code fence.';
+
+export const LESSON_SLIDES_ADAPT_INSTRUCTION =
+  'Produce this class’s version of the COMPLETE differentiated slide deck now. Where a master deck is ' +
+  'given, adapt it to this class’s adapted outline — keep its coverage and voice, apply the class’s ' +
+  'changes (shorter/chunked steps, recaps, more scaffolding) rather than rewriting from scratch. Output ' +
+  'the WHOLE deck (shared + `# 🟢 Support` + `# 🟡 Core` + `# 🔴 Challenge`, every section finished, ' +
+  'every slide carrying its private `> 🧑‍🏫` teacher-notes blockquote) ONLY as Markdown — start with the ' +
+  'first `## ` slide heading; no preamble and no outer code fence.';
+
 export function lessonResourceItems(ctx: {
   courseName: string;
   unitTitle: string | null;

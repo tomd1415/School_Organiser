@@ -54,14 +54,40 @@ export function sliceSlidesForLevel(md: string, level: SlideLevel): string[] {
 }
 
 // ── Per-slide teacher notes (private — NEVER shown to pupils / the board) ───────────────────────
-// Teacher notes are authored as a blockquote whose first line is marked 🧑‍🏫, e.g.
-//   > 🧑‍🏫 Drop in the fact that the first webcam watched a coffee pot…
-// The legacy `*Say:*` talking-points line (which used to leak onto the pupil/board slides) is treated
-// as a teacher note too, so old decks are cleaned automatically. A `> key idea` callout (no 🧑‍🏫)
-// stays — it's pupil-facing.
-const TEACHER_QUOTE = /^\s*>\s*🧑‍🏫/; // a teacher-notes blockquote (marked first line)
+// THE SAFETY BOUNDARY. Teacher talk must never reach the board. The prompt asks the model to mark notes
+// as a `> 🧑‍🏫 …` blockquote, but in practice the model very often reverts to a `*Say:* …` talking-points
+// line (and sometimes `Teacher:` / `Presenter notes:`), so we detect EVERY common form — and we err on
+// the side of stripping. A `> key idea` callout (no teacher marker) is the ONE blockquote kept: it's
+// pupil-facing. This is the single source of truth — every slide render (board, pupil, presenter, the
+// next-shell views) MUST route through it; do not re-implement the test (it has leaked before).
+//
+// A teacher-talk LINE: `Say:` / `Teacher('s) note(s):` / `Note to teacher:` / `Presenter('s) notes:`,
+// optionally wrapped in * or _ emphasis. A `[:：]` colon is required, so ordinary prose ("Say hello to a
+// partner", no colon) is left for pupils.
+const TEACHER_LINE = /^\s*[*_]*\s*(?:say|teacher['’]?s?(?:\s+notes?)?|teaching\s+notes?|notes?\s+(?:for|to)\s+(?:the\s+)?teacher|presenter['’]?s?(?:\s+notes?)?|speaker\s+notes?)\s*[*_]*\s*[:：][*_]*\s*/iu;
+// A standalone notes heading owns the rest of this slide (until another slide heading). This catches
+// Markdown such as `### Teacher notes` followed by bullets, rather than leaking those bullets.
+const TEACHER_SECTION = /^\s*(?:#{1,6}\s*)?[*_]*\s*(?:teacher['’]?s?\s+notes?|teaching\s+notes?|presenter['’]?s?\s+notes?|speaker\s+notes?)\s*[*_]*\s*:?[*_]*\s*$/iu;
+const TEACHER_EMOJI_LINE = /^\s*(?:🧑‍🏫|👩‍🏫|👨‍🏫)\s*/u;
+// LLM-authored decks use this as an unresolved production instruction. It is for the teacher/editor,
+// never slide content: showing "[show: ...]" on the board looks exactly like a leaked presenter note.
+const VISUAL_DIRECTIVE = /^\s*>\s*🖼️?\s*\[show:\s*([^\]]+)\]\s*$/iu;
+// A teacher-note BLOCKQUOTE: first line carries a teacher emoji (🧑‍🏫/👩‍🏫/👨‍🏫 or a bare 🏫) or a
+// `teacher`/`say`/`presenter` marker. The whole contiguous `>` block is then teacher-only.
+const TEACHER_QUOTE = /^\s*>\s*(?:🧑‍🏫|👩‍🏫|👨‍🏫|🏫|\**\s*(?:say|teacher|presenter)\b)/iu;
 const QUOTE_LINE = /^\s*>/;
-const SAY_LINE = /^\s*[*_]+\s*say\s*[:：][*_]*\s*/i; // legacy "*Say:* …" talking-points line (eats the markers)
+// Strip the leading `>` + any teacher marker/emoji from a quoted note line, leaving the note text.
+const QUOTE_PREFIX = /^\s*>\s?(?:\**\s*(?:🧑‍🏫|👩‍🏫|👨‍🏫|🏫)\s*)?(?:\**\s*(?:say|teacher['’]?s?(?:\s+notes?)?|teaching\s+notes?|presenter['’]?s?(?:\s+notes?)?|speaker\s+notes?)\s*[:：]?\s*)?/iu;
+
+function tidyNoteLine(line: string): string {
+  return line
+    .replace(/^\s*>\s?/, '')
+    .replace(/^\s*[-*+]\s+/, '')
+    .replace(TEACHER_LINE, '')
+    .replace(TEACHER_EMOJI_LINE, '')
+    .replace(/[*_]+\s*$/, '')
+    .trim();
+}
 
 /** Split one slide's Markdown into the pupil-visible part and the (private) teacher notes. The clean
  *  part NEVER contains teacher notes; that's the safety boundary the pupil/board render relies on. */
@@ -72,14 +98,51 @@ export function splitTeacherNotes(md: string): { clean: string; notes: string } 
   let i = 0;
   while (i < lines.length) {
     const l = lines[i]!;
-    if (SAY_LINE.test(l)) {
-      notes.push(l.replace(SAY_LINE, '').replace(/[*_]+\s*$/, '').trim()); // keep the talking point as a note (old decks)
+    const visual = l.match(VISUAL_DIRECTIVE);
+    if (visual) {
+      notes.push(`Visual to add: ${visual[1]!.trim()}`);
       i += 1;
+      continue;
+    }
+    if (TEACHER_SECTION.test(l)) {
+      i += 1;
+      while (i < lines.length && !/^##\s/.test(lines[i]!)) {
+        notes.push(tidyNoteLine(lines[i]!));
+        i += 1;
+      }
+      continue;
+    }
+    if (TEACHER_LINE.test(l)) {
+      const note = l.replace(TEACHER_LINE, '').replace(/[*_]+\s*$/, '').trim();
+      notes.push(note); // keep the talking point as a note
+      // `Teacher notes:` on its own introduces a multi-line note section.
+      if (!note) {
+        i += 1;
+        while (i < lines.length && !/^##\s/.test(lines[i]!)) {
+          notes.push(tidyNoteLine(lines[i]!));
+          i += 1;
+        }
+        continue;
+      }
+      i += 1;
+      while (i < lines.length && lines[i]!.trim() !== '' && !/^##\s/.test(lines[i]!)) {
+        notes.push(tidyNoteLine(lines[i]!));
+        i += 1;
+      }
+      continue;
+    }
+    if (TEACHER_EMOJI_LINE.test(l)) {
+      notes.push(l.replace(TEACHER_EMOJI_LINE, '').trim());
+      i += 1;
+      while (i < lines.length && lines[i]!.trim() !== '' && !/^##\s/.test(lines[i]!)) {
+        notes.push(tidyNoteLine(lines[i]!));
+        i += 1;
+      }
       continue;
     }
     if (TEACHER_QUOTE.test(l)) {
       while (i < lines.length && QUOTE_LINE.test(lines[i]!)) {
-        notes.push(lines[i]!.replace(/^\s*>\s?/, '').replace(/^🧑‍🏫\s*/, '').trim()); // the whole contiguous block is teacher-only
+        notes.push(lines[i]!.replace(QUOTE_PREFIX, '').trim()); // the whole contiguous block is teacher-only
         i += 1;
       }
       continue;

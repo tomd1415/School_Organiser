@@ -6,10 +6,11 @@ import { PrepItem } from '../repos/prep';
 import { LinkedResource } from '../repos/resources';
 import { TaFeedbackRow } from '../repos/taFeedback';
 import { EffectiveLesson } from '../repos/adaptations';
-import { renderSlideDeck } from '../routes/me';
 import { renderLinkedResources } from './resourceView';
 import { Level } from './worksheetForm';
 import { PupilWorkRow } from '../repos/pupilWork';
+import { renderMarkdown } from './markdown';
+import { sliceSlidesForLevel, splitTeacherNotes } from './slideDeck';
 
 // Custom interface for notes in the cockpit
 export interface CockpitNote {
@@ -40,10 +41,10 @@ export function getSpeakText(markdown: string): string {
 function parseSlideInfo(slideMd: string, index: number): { heading: string; points: string } {
   const lines = slideMd.split('\n');
   const headingLine = lines.find((l) => l.startsWith('## '));
-  const heading = headingLine ? headingLine.replace('## ', '').trim() : `Slide ${index + 1}`;
+  const heading = headingLine ? getSpeakText(headingLine.replace('## ', '').trim()) : `Slide ${index + 1}`;
   const points = lines
     .filter((l) => l.trim().startsWith('- ') || l.trim().startsWith('* '))
-    .map((l) => l.replace(/^[-*]\s+/, '').trim())
+    .map((l) => getSpeakText(l.replace(/^[-*]\s+/, '').trim()))
     .join('|');
   return { heading, points };
 }
@@ -162,6 +163,7 @@ export function renderLessonCockpit(options: {
   slidesByPlan: Map<number, string | null>;
   pupilWorkByOc: Map<number, PupilWorkRow[]>;
   lockedStateMap?: Map<number, boolean>; // track client-simulated group lock state
+  preview?: { backHref: string }; // read-only scheme preview: never expose occurrence write controls
 }): string {
   const {
     detail,
@@ -178,7 +180,9 @@ export function renderLessonCockpit(options: {
     slidesByPlan,
     pupilWorkByOc,
     lockedStateMap = new Map(),
+    preview,
   } = options;
+  const isPreview = preview != null;
 
   const h = detail.header;
   const oc = detail.sections[0]?.occurrenceCourseId ?? 0;
@@ -200,34 +204,11 @@ export function renderLessonCockpit(options: {
   let totalSlides = 0;
 
   if (slidesMd) {
-    const lines = slidesMd.replace(/\r\n/g, '\n').split('\n');
-    const slides: string[] = [];
-    let slide: string[] = [];
-    for (const line of lines) {
-      if (/^##\s/.test(line)) {
-        if (slide.length) slides.push(slide.join('\n').trim());
-        slide = [line];
-      } else {
-        slide.push(line);
-      }
-    }
-    if (slide.length) slides.push(slide.join('\n').trim());
+    const slides = sliceSlidesForLevel(slidesMd, currentLevel);
     totalSlides = slides.length;
 
     slides.forEach((s, i) => {
-      // Clean and extract notes
-      const cleanLines: string[] = [];
-      const noteLines: string[] = [];
-      const slines = s.split('\n');
-      for (const sl of slines) {
-        if (/^\s*>\s*🧑‍🏫/.test(sl) || /^\s*>\s?/.test(sl)) {
-          noteLines.push(sl.replace(/^\s*>\s?/, '').replace(/^🧑‍🏫\s*/, '').trim());
-        } else {
-          cleanLines.push(sl);
-        }
-      }
-      const clean = cleanLines.join('\n').trim();
-      const slideNote = noteLines.join('\n').trim();
+      const { clean, notes: slideNote } = splitTeacherNotes(s);
 
       const { heading, points } = parseSlideInfo(clean, i);
       const current = i === 0 ? 'aria-current="true"' : 'aria-current="false"';
@@ -239,9 +220,9 @@ export function renderLessonCockpit(options: {
       const speakBtn = `<button type="button" class="ws-speak pslide-speak" data-speak-text="${esc(speakText)}" title="Read slide aloud">🔊 Listen</button>`;
 
       slidePreviewsHtml += `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">
-        <span class="slide-label">${esc(heading)}</span>
+        <span class="slide-label">Slide ${i + 1}</span>
         ${speakBtn}
-        <div class="slide-content">${esc(clean)}</div>
+        <div class="slide-content md-doc">${renderMarkdown(clean)}</div>
       </div>`;
 
       slideNotesHtml += `<div class="pslide-note-item${i === 0 ? ' on' : ''}" data-slide="${i}">
@@ -265,7 +246,7 @@ export function renderLessonCockpit(options: {
         const marker = progress != null && i < progress ? '✓' : String(i + 1);
         const badge = progress !== null && i === progress ? '<span class="badge ai">Current</span>' : progress !== null && i < progress ? '<span class="badge good">Done</span>' : '';
         const isCurrent = progress !== null && i === progress;
-        const startWorkBtn = (isCurrent && step.toLowerCase().includes('practical') || step.toLowerCase().includes('investigation') || step.toLowerCase().includes('work'))
+        const startWorkBtn = !isPreview && isCurrent && (step.toLowerCase().includes('practical') || step.toLowerCase().includes('investigation') || step.toLowerCase().includes('work'))
           ? `<button class="button small" type="button" id="start-work-btn" data-oc="${oc}">Start work</button>`
           : '';
 
@@ -295,10 +276,14 @@ export function renderLessonCockpit(options: {
   // Activity groups counts
   const pupilWorkRows = pupilWorkByOc.get(oc) ?? [];
   const groupsLocked = lockedStateMap.get(oc) ?? false;
-  const activityGroupsHtml = renderActivityGroupsContent(oc, pupilWorkRows, groupsLocked);
+  const activityGroupsHtml = isPreview
+    ? `<div class="lesson-preview-placeholder"><strong>Class groups appear when the lesson is live.</strong><span>Support, Core and Extend membership is class-specific and is not changed by this preview.</span></div>`
+    : renderActivityGroupsContent(oc, pupilWorkRows, groupsLocked);
 
   // Column 3: Live tools
-  const needsAttentionHtml = renderPupilsNeedingAttention(pupilWorkRows);
+  const needsAttentionHtml = isPreview
+    ? `<div class="lesson-preview-placeholder"><strong>Live pupil signals appear here.</strong><span>Needs-attention prompts are calculated from the class's work during the lesson.</span></div>`
+    : renderPupilsNeedingAttention(pupilWorkRows);
 
   // Group course edit dialog
   let groupEditRows = '';
@@ -316,7 +301,7 @@ export function renderLessonCockpit(options: {
     `;
   }
 
-  const groupEditDialog = `
+  const groupEditDialog = isPreview ? '' : `
     <dialog id="groups-dialog" aria-labelledby="group-dialog-title">
       <form hx-post="/lesson/oc/${oc}/save-groups" hx-target="#groups-card-content" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.closest('dialog').close()">
         <header class="dialog-head">
@@ -342,7 +327,7 @@ export function renderLessonCockpit(options: {
   `;
 
   // Hidden original element for binding OOB swaps from legacy routes
-  const hiddenOriginalSwapElements = `
+  const hiddenOriginalSwapElements = isPreview ? '' : `
     <div style="display: none;">
       <div id="oc-${oc}-plan"></div>
       <div id="trk-${oc}"></div>
@@ -351,17 +336,22 @@ export function renderLessonCockpit(options: {
     </div>
   `;
 
+  const boardHref = isPreview
+    ? `/lesson/pupil-view?master=1&amp;lp=${lp}&amp;level=${currentLevel}`
+    : `/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}`;
+
   return `
     <div class="ld overhaul-cockpit" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <section class="live-bar" aria-labelledby="lesson-title">
         <div>
-          <span class="badge live"><span class="dot" aria-hidden="true"></span> Live lesson</span>
+          <span class="badge ${isPreview ? 'ai' : 'live'}"><span class="dot" aria-hidden="true"></span> ${isPreview ? 'Lesson preview · not live' : 'Live lesson'}</span>
           <h1 id="lesson-title">${esc(heading)}</h1>
-          <p>${esc(meta)} · ${pupilWorkRows.length} pupils</p>
+          <p>${esc(meta)}${isPreview ? ' · No lesson occurrence or pupil record is created' : ` · ${pupilWorkRows.length} pupils`}</p>
         </div>
         <div class="lesson-clock" id="monospace-clock" data-tz="Europe/London">—:—</div>
         <div class="lesson-actions">
-          <a class="button primary" href="/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener">Open board screen</a>
+          ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
+          <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
           <button class="button" type="button" id="focus-mode-btn">Focus Mode</button>
         </div>
       </section>
@@ -422,10 +412,12 @@ export function renderLessonCockpit(options: {
                 <h2 id="sequence-title">What comes next</h2>
               </div>
               <div>
-                <!-- Keep stopping point input to satisfy hx-post changed trigger -->
-                <input class="stop-input" name="stopping_point" value="${esc(activeSection?.stoppingPoint ?? '')}" placeholder="where we got to…"
-                  hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none" style="display:none;">
-                <button class="button ghost small" type="button" id="stopping-point-trigger-btn">Record stopping point</button>
+                ${isPreview
+                  ? '<span class="badge ai">Read-only preview</span>'
+                  : `<!-- Keep stopping point input to satisfy hx-post changed trigger -->
+                    <input class="stop-input" name="stopping_point" value="${esc(activeSection?.stoppingPoint ?? '')}" placeholder="where we got to…"
+                      hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none" style="display:none;">
+                    <button class="button ghost small" type="button" id="stopping-point-trigger-btn">Record stopping point</button>`}
               </div>
             </div>
             <ol class="sequence">
@@ -442,7 +434,9 @@ export function renderLessonCockpit(options: {
               </div>
               <span class="badge">Private to staff</span>
             </div>
-            <div class="note-form">
+            ${isPreview
+              ? `<div class="lesson-preview-placeholder"><strong>Fast capture is disabled in preview.</strong><span>When this is a real lesson, notes are saved against its occurrence and shown here.</span></div>`
+              : `<div class="note-form">
               <!-- Fast capture categories -->
               <form hx-post="/lesson/oc/${oc}/fast-capture" hx-target="#recent-notes-list" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
                 <div class="note-types" aria-label="Note type">
@@ -462,9 +456,7 @@ export function renderLessonCockpit(options: {
                 </div>
               </form>
             </div>
-            <div id="recent-notes-list">
-              ${recentNotesHtml}
-            </div>
+            <div id="recent-notes-list">${recentNotesHtml}</div>`}
           </section>
 
           <!-- Activity Groups -->
@@ -474,7 +466,7 @@ export function renderLessonCockpit(options: {
                 <p class="eyebrow">Activity groups</p>
                 <h2 id="groups-title">Who gets which version</h2>
               </div>
-              <button class="button small" type="button" id="edit-groups-btn" onclick="document.getElementById('groups-dialog').showModal()">Edit groups</button>
+              ${isPreview ? '<span class="badge ai">Class-specific</span>' : '<button class="button small" type="button" id="edit-groups-btn" onclick="document.getElementById(\'groups-dialog\').showModal()">Edit groups</button>'}
             </div>
             <div id="groups-card-content">
               ${activityGroupsHtml}
@@ -492,7 +484,7 @@ export function renderLessonCockpit(options: {
               </div>
             </div>
             ${needsAttentionHtml}
-            <button class="button small" type="button" onclick="document.getElementById('pw-live-section').scrollIntoView({behavior: 'smooth'})">Open live progress</button>
+            ${isPreview ? '' : '<button class="button small" type="button" onclick="document.getElementById(\'pw-live-section\').scrollIntoView({behavior: \'smooth\'})">Open live progress</button>'}
           </section>
 
           <section class="timer-card card" aria-labelledby="timer-title">
@@ -501,7 +493,7 @@ export function renderLessonCockpit(options: {
                 <p class="eyebrow">Class timer</p>
                 <h2 id="timer-title">Demonstration</h2>
               </div>
-              <span class="badge live">Board visible</span>
+              <span class="badge ${isPreview ? 'ai' : 'live'}">${isPreview ? 'Runs locally' : 'Board visible'}</span>
             </div>
             <div class="timer-wrap" data-timer>
               <div class="timer"><strong data-timer-display>—:—</strong><span>remaining</span></div>
@@ -530,7 +522,10 @@ export function renderLessonCockpit(options: {
 
       <!-- Live Pupil Work grid embedded below for full access -->
       <section class="card" id="pw-live-section">
-        <div class="pupil-work-panel" hx-get="/lesson/oc/${oc}/pupil-work" hx-trigger="load" hx-swap="innerHTML"></div>
+        ${isPreview
+          ? `<div class="card-head"><div><p class="eyebrow">Live pupil work</p><h2>Progress and marking</h2></div><span class="badge ai">Available when live</span></div>
+             <div class="lesson-preview-placeholder"><strong>No pupil data is loaded in preview.</strong><span>The live lesson shows saves, completion, feedback and marking controls here.</span></div>`
+          : `<div class="pupil-work-panel" hx-get="/lesson/oc/${oc}/pupil-work" hx-trigger="load" hx-swap="innerHTML"></div>`}
       </section>
 
       ${groupEditDialog}
@@ -556,57 +551,26 @@ export function renderBoardNext(options: {
   let totalSlides = 0;
 
   if (slidesMd) {
-    const lines = slidesMd.replace(/\r\n/g, '\n').split('\n');
-    const slides: string[] = [];
-    let slide: string[] = [];
-    for (const line of lines) {
-      if (/^##\s/.test(line)) {
-        if (slide.length) slides.push(slide.join('\n').trim());
-        slide = [line];
-      } else {
-        slide.push(line);
-      }
-    }
-    if (slide.length) slides.push(slide.join('\n').trim());
+    const slides = sliceSlidesForLevel(slidesMd, level);
     totalSlides = slides.length;
 
     slides.forEach((s, i) => {
-      // Strip private notes
-      const cleanLines: string[] = [];
-      const slines = s.split('\n');
-      for (const sl of slines) {
-        if (!/^\s*>\s*🧑‍🏫/.test(sl) && !/^\s*>\s?/.test(sl)) {
-          cleanLines.push(sl);
-        }
-      }
-      const clean = cleanLines.join('\n').trim();
+      const { clean } = splitTeacherNotes(s);
       const speakText = getSpeakText(clean);
       const speakBtn = `<button type="button" class="ws-speak pslide-speak" data-speak-text="${esc(speakText)}" title="Read slide aloud">🔊 Listen</button>`;
 
-      const headingLine = clean.split('\n').find((l) => l.startsWith('## '));
-      const heading = headingLine ? headingLine.replace('## ', '').trim() : `Slide ${i + 1}`;
+      const { heading } = parseSlideInfo(clean, i);
 
-      // Convert clean markdown headers/lists to simple safe HTML
-      const contentHtml = clean
-        .replace(/^##\s+(.*)$/m, '') // remove headings since it's shown in pv-bar/eyebrow
-        .split('\n')
-        .map((line) => {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-            return `<li>${esc(trimmed.slice(2))}</li>`;
-          }
-          if (trimmed) {
-            return `<p>${esc(trimmed)}</p>`;
-          }
-          return '';
-        })
-        .join('');
+      // The heading is shown as the board eyebrow; render the remaining Markdown with the same
+      // safe renderer used by pupil slides and resource previews.
+      const contentMd = clean.replace(/^##\s+.*(?:\n|$)/, '').trim();
+      const contentHtml = renderMarkdown(contentMd);
 
       slideListHtml += `
         <div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">
           <p class="eyebrow">${esc(heading)}</p>
           ${speakBtn}
-          <ul>${contentHtml}</ul>
+          <div class="slide-content md-doc">${contentHtml}</div>
         </div>
       `;
     });

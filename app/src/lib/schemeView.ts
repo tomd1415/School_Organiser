@@ -139,7 +139,10 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
         <label>Duration (min) <input type="number" name="duration_min" min="0" value="${p.durationMin ?? ''}" ${save('input changed delay:600ms, blur')}></label>
         <label>🔧 Kit needed <input type="text" name="kit_needed" value="${esc(p.kitNeeded ?? '')}" placeholder="e.g. 16× micro:bit, batteries, USB leads" ${save('input changed delay:600ms, blur')}></label>
       </details>
-      <p class="pv-open"><a class="link" href="/lesson/pupil-view?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="Open this master lesson exactly as a pupil sees it, in a new tab — with an edit toggle to tweak the master slides/worksheet for every class">👁 Open as pupil (new tab) ↗</a></p>
+      <div class="plan-preview-actions">
+        <a class="button small" href="/lesson/preview?plan=${p.id}" target="_blank" rel="noopener" title="Open a read-only preview of the live teacher cockpit without creating a lesson occurrence">▶ Preview live lesson ↗</a>
+        <a class="link" href="/lesson/pupil-view?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="Open this master lesson exactly as a pupil sees it, in a new tab — with an edit toggle to tweak the master slides/worksheet for every class">👁 Open as pupil ↗</a>
+      </div>
       <div class="plan-res-head">Resources</div>
       <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="${opts.open ? 'load' : `toggle from:#plan-${p.id}-detail once`}" hx-target="this" hx-swap="innerHTML">
         <span class="muted">resources load when opened…</span>

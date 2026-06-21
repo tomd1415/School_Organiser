@@ -2054,11 +2054,46 @@ body[data-shell="next"] .slide-preview h2 {
   font-weight: 900;
   line-height: 1.15;
 }
-body[data-shell="next"] .slide-preview ul {
+body[data-shell="next"] .slide-preview .slide-content {
+  width: 100%;
+  min-width: 0;
+  max-height: 340px;
+  overflow: auto;
+}
+body[data-shell="next"] .slide-preview .slide-content > :first-child {
+  margin-top: 0;
+}
+body[data-shell="next"] .slide-preview ul,
+body[data-shell="next"] .slide-preview ol {
   margin: 1.2rem 0 0;
   padding-left: 1.25rem;
   color: #dce5f2;
   line-height: 1.6;
+}
+body[data-shell="next"] .slide-preview blockquote {
+  margin: 1rem 0;
+  padding: 0.65rem 0.9rem;
+  background: var(--blue-soft);
+  border-left: 4px solid var(--blue);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text);
+}
+body[data-shell="next"] .slide-preview blockquote p {
+  margin: 0;
+}
+body[data-shell="next"] .slide-preview table {
+  width: 100%;
+  border-collapse: collapse;
+}
+body[data-shell="next"] .slide-preview th,
+body[data-shell="next"] .slide-preview td {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line-strong);
+}
+body[data-shell="next"] .slide-preview pre,
+body[data-shell="next"] .slide-preview code {
+  background: var(--bg-soft);
+  color: var(--text);
 }
 body[data-shell="next"] .slide-controls {
   display: flex;
@@ -2497,7 +2532,29 @@ body[data-shell="next"] .pl-now {
 }
 
 /* Presentation & Projector Board Overrides */
+body[data-shell="next"]:has(.overhaul-board) {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg) !important;
+}
+body[data-shell="next"]:has(.overhaul-board) .a11y-bar,
+body[data-shell="next"]:has(.overhaul-board) .paste-help {
+  display: none !important;
+}
+body[data-shell="next"] .pupil-main:has(> .overhaul-board) {
+  width: 100vw;
+  height: 100vh;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
 body[data-shell="next"] .presentation {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
   min-height: 100vh !important;
   display: grid !important;
   grid-template-rows: auto 1fr auto !important;
@@ -2531,16 +2588,21 @@ body[data-shell="next"] .present-head p {
   font-size: 0.78rem !important;
 }
 body[data-shell="next"] .present-slide {
-  width: min(88vw, 1200px) !important;
-  max-width: 1200px !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   margin: auto !important;
-  padding: clamp(2rem, 7vw, 7rem) !important;
+  padding: clamp(1.5rem, 4vw, 4rem) !important;
 }
 body[data-shell="next"] .presentation .pupil-slides,
 body[data-shell="next"] .presentation .pslide-stage {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -2552,6 +2614,10 @@ body[data-shell="next"] .presentation .pslide {
 body[data-shell="next"] .presentation .pslide.on {
   display: flex !important;
   flex-direction: column !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100% !important;
 }
 body[data-shell="next"] .presentation .pslide .eyebrow {
   font-size: clamp(1rem, 1.8vw, 1.4rem) !important;
@@ -2562,7 +2628,8 @@ body[data-shell="next"] .presentation .pslide .eyebrow {
   margin-bottom: 1.5rem !important;
 }
 body[data-shell="next"] .presentation .pslide ul {
-  max-width: 48ch !important;
+  width: 100% !important;
+  max-width: none !important;
   margin: 0 !important;
   padding-left: 1.2em !important;
   font-size: clamp(1.5rem, 2.5vw, 2.5rem) !important;
@@ -2577,6 +2644,48 @@ body[data-shell="next"] .presentation .pslide p {
   line-height: 1.65 !important;
   color: #dce5f2 !important;
   margin: 0 0 1.5rem !important;
+}
+body[data-shell="next"] .presentation .slide-content {
+  width: 100%;
+  max-width: none;
+  max-height: 62vh;
+  overflow: auto;
+}
+body[data-shell="next"] .presentation .pslide ol {
+  width: 100% !important;
+  max-width: none !important;
+  padding-left: 1.2em !important;
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem) !important;
+  line-height: 1.65 !important;
+  color: #dce5f2 !important;
+}
+body[data-shell="next"] .presentation .pslide blockquote {
+  margin: 0 0 1.5rem;
+  padding: 0.7rem 1rem;
+  background: var(--blue-soft);
+  border-left: 6px solid var(--blue);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+body[data-shell="next"] .presentation .pslide blockquote p {
+  margin: 0 !important;
+}
+body[data-shell="next"] .presentation .pslide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+}
+body[data-shell="next"] .presentation .pslide th,
+body[data-shell="next"] .presentation .pslide td {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line-strong);
+}
+body[data-shell="next"] .presentation .pslide pre {
+  overflow: auto;
+  padding: 1rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-size: clamp(1rem, 1.7vw, 1.6rem);
 }
 body[data-shell="next"] .presentation .pslide-speak {
   align-self: flex-start !important;
@@ -2774,6 +2883,28 @@ body[data-shell="next"] .pw-new-count,
 body[data-shell="next"] .pw-new,
 body[data-shell="next"] .ws-ed-ph {
   color: var(--amber) !important;
+}
+
+body[data-shell="next"] .plan-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.9rem 0;
+}
+
+body[data-shell="next"] .lesson-preview-placeholder {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  background: var(--violet-soft);
+  border: 1px dashed var(--violet);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+body[data-shell="next"] .lesson-preview-placeholder span {
+  color: var(--muted);
 }
 
 body[data-shell="next"] .ws-choice-opt > label:hover,

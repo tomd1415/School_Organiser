@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-21 — Lesson slide decks now generate complete (dedicated plain-text call)
+
+- **🖼️ Full differentiated decks, every time.** Generated lesson/adapted decks were arriving as a 2–3 slide
+  stub — "only the first couple of slides". Root cause (measured with a diagnostic smoke, not guessed): the
+  deck was one of four documents in a single **structured-output** call, and forcing a whole deck into one
+  JSON string field triggers the model's brevity bias — it finished *naturally* (`stop_reason=end_turn`)
+  using **<20% of the token budget** and emitted 1–2 slides (a slides-only schema was even worse: 1 slide,
+  115 tokens). So it was never truncation/`max_tokens`. The deck is now generated in its **own plain-text
+  call** (`services/slideGen.ts` → `generateLessonDeck`, via `callLLM`), run **in parallel** with the
+  four-doc call and overriding its slides; the worksheet/TA-notes/answers still come from the four-doc call
+  (so no added wall-time, and a transient deck-call failure falls back to the four-doc deck). The identical
+  prompt as free text returns the whole 20+ slide deck with all three `# 🟢/🟡/🔴` level sections. The deck
+  call inherits the same redaction / safeguarding-withholding / audit as every other AI call.
+  (`prompts/lessonResources.ts` `LESSON_SLIDES_*`; new `slideGen.test.ts`; verified end-to-end: a fresh
+  23-slide deck, all three levels, rendered clean at every level with **zero** teacher-note leak.)
+- **🔒 Teacher notes never reach the board (hardened, Part B of the same report).** The per-slide private
+  notes the model actually emits (`*Say:*`, `Teacher:` / `Presenter notes:`, `### Teacher notes` sections,
+  🧑‍🏫 lines and blockquotes) are all stripped by the single shared `splitTeacherNotes`
+  (`lib/slideDeck.ts`), and **every** render path — classic board/presenter, pupil `/me`, the next-shell
+  `lessonView.ts` / `meView.ts`, and the resources preview — routes through it (a `> key idea` callout and a
+  bare 🏫 decoration stay; only teacher talk is removed). (`slideTeacherNotes.test.ts`, 8 tests.)
+
 ### 2026-06-21 — ATL (attitude to learning) scores
 
 - **🎯 ATL scores (1–4) per pupil per lesson.** A new `pupil_atl` table (migration `0057`) + a shared 1–4

@@ -55,6 +55,7 @@ import {
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
 import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
+import { generateLessonDeck, applyDedicatedDeck } from '../services/slideGen';
 import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems, examStyleItems } from '../llm/prompts/lessonResources';
 import { examProfileForCourse } from '../services/examProfile';
 import { ensureSourceImagesForPlan } from '../services/sourceImages';
@@ -119,28 +120,6 @@ async function generateResourcesForPlan(planId: number, useMaterials = true): Pr
   if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
     return { ok: false, message: 'Write or ✨draft the objectives/outline first — resources are generated from them.' };
   }
-  const callOnce = () =>
-    callLLMStructured(
-      {
-        feature: 'lesson_resources',
-        model: modelChoice,
-        promptVersion: LESSON_RESOURCES_VERSION,
-        system: LESSON_RESOURCES_SYSTEM,
-        context: [
-          ...standing,
-          ...concepts,
-          ...teachingContextItems(ctx.teachingContext),
-          ...equipmentItem(equipment),
-          ...lessonImageItems(images),
-          ...lessonMaterialItems(materials.text),
-          ...examStyleItems(examProfile),
-          ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
-        ],
-        instruction: LESSON_RESOURCES_INSTRUCTION,
-        maxTokens: 32000, // generous: four full docs incl. a multi-slide deck must never truncate (cost scales with actual use, not the cap)
-      },
-      lessonResourcesSchema,
-    );
   const standing = await standingPrefItems();
   const concepts = await conceptItemsFor(ctx.courseId);
   const modelChoice = await modelForFeature('lesson_resources', 'plan');
@@ -159,14 +138,44 @@ async function generateResourcesForPlan(planId: number, useMaterials = true): Pr
   const examProfile = await examProfileForCourse(ctx.courseId, new Date()).catch(
     () => ({ stage: 'foundational', weighting: 'none', monthsToExam: null, label: '' }) as const,
   );
-  let result = await callOnce();
+  // One context array, shared by the four-doc call and the dedicated deck call below.
+  const contextItems = [
+    ...standing,
+    ...concepts,
+    ...teachingContextItems(ctx.teachingContext),
+    ...equipmentItem(equipment),
+    ...lessonImageItems(images),
+    ...lessonMaterialItems(materials.text),
+    ...examStyleItems(examProfile),
+    ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
+  ];
+  const callOnce = () =>
+    callLLMStructured(
+      {
+        feature: 'lesson_resources',
+        model: modelChoice,
+        promptVersion: LESSON_RESOURCES_VERSION,
+        system: LESSON_RESOURCES_SYSTEM,
+        context: contextItems,
+        instruction: LESSON_RESOURCES_INSTRUCTION,
+        maxTokens: 32000, // generous: the worksheet/TA-notes/answers set must never truncate (the deck is a separate call)
+      },
+      lessonResourcesSchema,
+    );
+  // The slide deck is generated in its OWN call: the four-doc call reliably under-invests in the deck
+  // (a 2–3 slide stub — the "only the first couple of slides" bug). Run both at once so the dedicated
+  // deck adds no wall-time, then override the four-doc call's stub deck with the full one.
+  const [result, deck] = await Promise.all([
+    callOnce(),
+    generateLessonDeck({ model: modelChoice, context: contextItems, mode: 'generate' }).catch(() => null),
+  ]);
   if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
-  let tidy = tidyResourceSet(result.data.resources);
+  let tidy = applyDedicatedDeck(tidyResourceSet(result.data.resources), deck, ctx.planTitle);
   if (tidy.missing.length) {
     // the model occasionally burns its budget on one document — one retry usually completes the set
     const second = await callOnce();
     if (second.status === 'ok' && second.data) {
-      const retry = tidyResourceSet(second.data.resources);
+      const retry = applyDedicatedDeck(tidyResourceSet(second.data.resources), deck, ctx.planTitle);
       if (retry.missing.length < tidy.missing.length) tidy = retry;
     }
   }

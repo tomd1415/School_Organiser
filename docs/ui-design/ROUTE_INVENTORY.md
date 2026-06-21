@@ -74,6 +74,7 @@ context is in [DEVELOPER_INPUTS_RESPONSE.md §2](DEVELOPER_INPUTS_RESPONSE.md); 
 | kit | POST | `/kit/:id/checked` | auth+csrf | action |
 | kit | GET | `/kit/panel` | auth | fragment |
 | lesson | GET | `/lesson` | auth | page |
+| lesson | GET | `/lesson/preview?plan=:id` | auth | read-only page (scheme → live cockpit preview; creates no occurrence) |
 | lesson | POST | `/occurrence-course/:id/plan` | auth+csrf | action |
 | lesson | GET | `/occurrence-course/:id/edit` | auth | fragment |
 | lesson | GET | `/lesson/pupil-view` | auth | page |

@@ -18,6 +18,24 @@ class/id/`data-*`/event/route the UI relies on, add a dated bullet with a clear 
 
 ---
 
+## 2026-06-21 — Lesson slide decks now generate complete + differentiated
+
+### ℹ️ Behaviour change — no render-contract change, just richer decks
+
+- **Decks are now reliably full + levelled.** Generated/adapted slide decks used to often arrive as a 2–3
+  slide stub; they're now generated in a dedicated plain-text call (`services/slideGen.ts`) and reliably
+  contain the **whole lesson with all three `# 🟢 Support` / `# 🟡 Core` / `# 🔴 Challenge` level sections**
+  (typically 20+ slides). **The render contract is unchanged** — still Markdown, one `##` heading per slide,
+  depth-1 `#` level dividers (`# 🟢 Support` / `# 🟡 Core` / `# 🔴 Challenge`), and a per-slide private
+  teacher-notes blockquote whose first line starts with 🧑‍🏫. So the next shell needs no change to consume them; the level switcher and board will simply now
+  always have content for each level.
+- **ACTION (confirm only, no change expected):** the next-shell board/presenter render must keep routing
+  **every** slide through `splitTeacherNotes` (`lib/slideDeck.ts`) before display — `lessonView.ts` already
+  does at the board (≈L211) and presenter (≈L558) paths, and `meView.ts` for the pupil view. That is the one
+  safety boundary that keeps the `> 🧑‍🏫` private notes (and the legacy `*Say:*` / `Teacher:` forms) off the
+  projector. A `> key idea` callout and a bare 🏫 decoration are pupil-facing and intentionally kept. Don't
+  re-implement note-splitting inline — this leaked once before precisely because a view did.
+
 ## 2026-06-21 — ATL feature + reopened-audit remediation
 
 ### 🟢 Completed in the next shell
