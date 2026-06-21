@@ -73,6 +73,9 @@ export async function getClockContext(): Promise<{ periods: PeriodDefinition[]; 
     endMin: toMinutes(p.end),
     teachable: p.teachable,
   }));
+  // Briefing is a structural slot everyone attends (not a 'lesson'), so it's a countdown target too —
+  // the timer counts down to morning briefing the same way it does to form, a club or a lesson.
+  commitments.push(...periods.filter((p) => p.slotType === 'briefing'));
 
   return { periods, terms: termsRes.rows, tz, commitments };
 }

@@ -1,3 +1,8 @@
+/* Base widget structure (cards, tables, the timetable grid, inputs, buttons) the next shell builds on —
+   recovered from the classic stylesheet the overhaul used to @import. The dark :root + the
+   body[data-shell="next"] rules below override its light theme; without this the timetable/cards lose
+   their structure. */
+@import url('/static/styles-base-widgets.css');
 @import url('/static/styles-base.css');
 
 :root {
@@ -2386,6 +2391,16 @@ body[data-shell="next"] .slide-preview .pslide {
   display: none;
 }
 body[data-shell="next"] .slide-preview .pslide.on {
+  display: block;
+}
+/* Presenter (/lesson/present) and pupil board (.pupil-slides) decks show ONE slide at a time too.
+   Scoped here so the behaviour no longer leans on the recovered classic base stylesheet — the bundle
+   merge that dropped that base is precisely what made these decks render every slide stacked at once,
+   so Prev/Next appeared to do nothing and the deck never filled. Mirrors the cockpit/board toggles. */
+body[data-shell="next"] .pupil-slides .pslide {
+  display: none;
+}
+body[data-shell="next"] .pupil-slides .pslide.on {
   display: block;
 }
 body[data-shell="next"] .slide-notes-container .pslide-note-item {
