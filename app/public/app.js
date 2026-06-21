@@ -1,13 +1,120 @@
-// Small progressive enhancements. HTMX does the network work; this adds the
-// keyboard-fast bits the spec asks for.
+// Overhaul UI Shell Javascript
+// Extends classic app.js progressive enhancements with overhaul features:
+// - Edge-hover navigation rail expansion
+// - Client-side timezone-aware clock ticking
+// - Absolute time-compared event countdowns
+// - Focus Mode persistence and state switching
+
 (function () {
   function isTyping(el) {
-    // SELECT included so the two-stroke `g` jump doesn't hijack keyboard navigation of a focused dropdown.
     return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
   }
 
-  // idea 12 — `n` (and the 📝 Note button) open the smart-capture modal anywhere: type a note and
-  // the AI works out where it goes. Falls back to the notes page if the dialog isn't supported/present.
+  // --- Overhaul: Focus Mode Toggling and Persistence ---
+  function applyFocusMode(enabled) {
+    if (enabled) {
+      document.body.classList.add('focus-mode');
+    } else {
+      document.body.classList.remove('focus-mode');
+    }
+  }
+
+  function toggleFocusMode() {
+    var enabled = !document.body.classList.contains('focus-mode');
+    applyFocusMode(enabled);
+    try {
+      localStorage.setItem('focus-mode', enabled ? 'true' : 'false');
+    } catch (e) {}
+  }
+
+  // Apply saved focus mode immediately on script load (so it's pre-rendered)
+  try {
+    var savedFocus = localStorage.getItem('focus-mode') === 'true';
+    applyFocusMode(savedFocus);
+  } catch (e) {}
+
+  // Event delegation for dynamically loaded Focus Mode button(s). BUG-061: the global header and the
+  // lesson live-bar both render a focus toggle — match by class so neither needs a (duplicate) id.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.focus-mode-toggle');
+    if (btn) {
+      toggleFocusMode();
+    }
+  });
+
+  // --- Overhaul: Collapsible Navigation Ribbon & Advanced Drawer ---
+  document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('#ribbon-drawer-toggle');
+    if (toggle) {
+      var drawer = document.getElementById('ribbon-drawer');
+      if (drawer) {
+        e.stopPropagation();
+        drawer.classList.toggle('open');
+      }
+    }
+  });
+
+  // --- Overhaul: clocks & countdowns ---
+  // BUG-061: update EVERY clock (the global header AND the lesson live-bar), not just getElementById's
+  // first match — duplicate ids meant one clock froze after the header swapped in. All clocks share ONE
+  // timezone (the configured tz the server stamps on the header clock) so they can't disagree.
+  // BUG-062: cache the Intl.DateTimeFormat instances instead of rebuilding them every second, run one
+  // interval rather than two, and pause entirely while the tab is hidden.
+  var fmtCache = {};
+  function fmt(kind, tz) {
+    var key = kind + '|' + tz;
+    if (!fmtCache[key]) {
+      fmtCache[key] = kind === 'date'
+        ? new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' })
+        : new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+    }
+    return fmtCache[key];
+  }
+  function pageTz() {
+    var header = document.getElementById('monospace-clock');
+    return (header && header.getAttribute('data-tz')) || 'Europe/London';
+  }
+  function tickClock() {
+    var clocks = document.querySelectorAll('[data-clock]');
+    var dates = document.querySelectorAll('[data-clock-date]');
+    if (!clocks.length && !dates.length) return;
+    var tz = pageTz();
+    var now = new Date();
+    if (clocks.length) { var t = fmt('clock', tz).format(now); clocks.forEach(function (el) { el.textContent = t; }); }
+    if (dates.length) { var d = fmt('date', tz).format(now); dates.forEach(function (el) { el.textContent = d; }); }
+  }
+
+  function tickCountdowns() {
+    var elements = document.querySelectorAll('[data-epoch-ms]');
+    if (!elements.length) return;
+    var now = Date.now();
+    elements.forEach(function (el) {
+      var epoch = parseInt(el.getAttribute('data-epoch-ms'), 10);
+      if (isNaN(epoch)) return;
+      var diff = epoch - now;
+      if (diff <= 0) { el.textContent = 'started'; return; }
+      var totalSec = Math.floor(diff / 1000);
+      var mins = Math.floor(totalSec / 60);
+      var secs = totalSec % 60;
+      el.textContent = mins === 0 ? 'starts in ' + secs + 's' : secs === 0 ? 'starts in ' + mins + ' mins' : 'starts in ' + mins + 'm ' + secs + 's';
+    });
+  }
+
+  function tick() { tickClock(); tickCountdowns(); }
+
+  // One interval, paused while the tab is hidden (BUG-062).
+  var clockTimer = null;
+  function startClock() { if (!clockTimer) { tick(); clockTimer = setInterval(tick, 1000); } }
+  function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stopClock(); else startClock(); });
+  startClock();
+
+  // Re-run ticks when HTMX swaps content (e.g. loads the header)
+  document.body.addEventListener('htmx:afterSwap', tick);
+
+  // --- Classic app.js functionality preserved below ---
+
+  // Note Modal Composer
   function openNoteModal() {
     var d = document.getElementById('note-modal');
     if (!d || typeof d.showModal !== 'function') {
@@ -22,8 +129,13 @@
     var ta = d.querySelector('textarea[name="text"]');
     if (ta) ta.focus();
   }
-  var noteBtn = document.getElementById('note-btn');
-  if (noteBtn) noteBtn.addEventListener('click', openNoteModal);
+
+  // Handle note button from both static elements and dynamic header delegation
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('#note-btn');
+    if (btn) openNoteModal();
+  });
+
   document.addEventListener('keydown', function (e) {
     if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey && !isTyping(document.activeElement)) {
       e.preventDefault();
@@ -31,8 +143,7 @@
     }
   });
 
-  // Marking modal: ← / → walk the class roster (prev / skip-next), unless you're typing a mark or a
-  // comment. Esc already closes a native <dialog>. The buttons carry the network action; we just click.
+  // Marking modal navigation via arrow keys
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
@@ -42,8 +153,7 @@
     if (btn && !btn.disabled) { e.preventDefault(); btn.click(); }
   });
 
-  // When a new note is appended to a notes list, focus its textarea so you can
-  // type immediately.
+  // Auto-focus note content after swap
   document.body.addEventListener('htmx:afterSwap', function (e) {
     if (e.target && e.target.classList && e.target.classList.contains('notes-list')) {
       var areas = e.target.querySelectorAll('textarea, input[type="text"]');
@@ -52,9 +162,7 @@
     }
   });
 
-  // Setup's structural edits (＋ period, ＋ lesson, model day, …) re-render the whole <section> via
-  // hx-swap=outerHTML, which can jump the scroll to the bottom. Preserve the scroll position across
-  // those swaps so you stay on the period/row you were editing.
+  // Setup scroll preservation
   (function () {
     var savedY = null;
     document.body.addEventListener('htmx:beforeSwap', function (e) {
@@ -66,10 +174,7 @@
     });
   })();
 
-  // Visible feedback for slow requests (AI calls can take 20–60s): htmx already adds
-  // .htmx-request to the busy element (button spinner via CSS); this adds a page-top activity
-  // bar whenever anything has been in flight longer than a moment, so even a swapped-away
-  // button leaves visible evidence that work is happening.
+  // Slow requests indicator
   var inflight = 0;
   var busyTimer = null;
   document.body.addEventListener('htmx:beforeRequest', function () {
@@ -88,21 +193,21 @@
       document.body.classList.remove('hx-busy');
     }
   }
-  // Decrement on ONE terminal event only. htmx fires `htmx:afterRequest` for every finished request —
-  // success, error, timeout AND abort — so listening to `htmx:sendAbort` as well double-counted an
-  // aborted request and could clear the busy bar while another request was still in flight (BUG-034).
   document.body.addEventListener('htmx:afterRequest', requestDone);
 
-  // 10.8 / BUG-013 / BUG-033 — never lose work silently, and never LIE about whether it saved. Autosaves
-  // use hx-swap="none", so a failed save would otherwise show nothing; we surface a persistent banner and
-  // the typed text stays on screen (hx-swap="none" doesn't touch the field). Two subtleties the old code
-  // got wrong:
-  //   • A server crash on a background autosave is swallowed into a 200 fragment, so HTMX sees SUCCESS and
-  //     used to clear the banner the route had just raised. The route fires an `app:save-failed` HX-Trigger,
-  //     and we now treat the matching "successful" request as the failure it really was (BUG-013).
-  //   • An UNRELATED success (another field, a 30s background poll) must NOT wipe the warning while a save
-  //     is still unsaved. We track unsaved work PER OPERATION and clear only when that same operation later
-  //     succeeds — the banner counts how many fields are outstanding (BUG-033).
+  // BUG-013 Form reset verification helper
+  window.htmxSaved = function (e) {
+    try {
+      var d = e && e.detail;
+      if (!d || !d.successful) return false;
+      var trig = d.xhr && d.xhr.getResponseHeader && d.xhr.getResponseHeader('HX-Trigger');
+      return !(trig && trig.indexOf('app:save-failed') !== -1);
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // Autosave validation & toast notifications
   function saveToast(msg) {
     var t = document.getElementById('hx-toast');
     if (!t) {
@@ -120,8 +225,8 @@
     if (t) t.classList.remove('show');
   }
   var LOST = '⚠ Not saved — your text is still on screen. Check the connection and try again.';
-  var unsavedOps = {};          // opKey -> true, one entry per field/operation still unsaved
-  var swallowedFailure = false; // set by app:save-failed (a 200 that was really a server error)
+  var unsavedOps = {};
+  var swallowedFailure = false;
 
   function refreshToast() {
     var n = 0, k;
@@ -129,11 +234,11 @@
     if (n === 0) { clearToast(); return; }
     saveToast(n === 1 ? LOST : '⚠ ' + n + ' changes not saved — your text is still on screen. Check the connection and try again.');
   }
-  // A stable per-element key so a RETRY of the same field clears its OWN failure and an unrelated request
-  // never does. Each element gets its OWN stamped key (cached on the node) — we deliberately do NOT fall
-  // back to `name`/`id`, because several fields can share a name (e.g. three name="text" boxes on the
-  // lesson page) and a shared key let one field's success wipe another's "not saved" warning (BUG-033).
-  // A field that genuinely wants a shared/stable key across re-render can opt in with data-save-id.
+
+  // BUG-053/BUG-033: a stable per-element key so a RETRY of the same field clears its OWN failure and an
+  // unrelated request never does. Each element gets its OWN stamped key — we deliberately do NOT fall back
+  // to name/id, because several fields share a name (e.g. the name="value" kit fields) and a shared key
+  // let one field's success wipe another's "not saved" warning. Opt into a shared key with data-save-id.
   var opSeq = 0;
   function opKey(elt) {
     if (!elt || !elt.getAttribute) return null;
@@ -147,42 +252,17 @@
     return v === 'post' || v === 'put' || v === 'patch' || v === 'delete';
   }
 
-  // The route swallowed a server crash into a 200 fragment — flag it so the MATCHING afterRequest treats
-  // the "successful" 2xx as the failure it really was.
   document.body.addEventListener('app:save-failed', function () { swallowedFailure = true; });
 
-  // ONE terminal handler decides saved-vs-failed. htmx:afterRequest fires for success, error, timeout AND
-  // abort, so it's the single source of truth (no separate sendError/responseError/timeout listeners that
-  // raced the clear).
   document.body.addEventListener('htmx:afterRequest', function (e) {
     var d = e.detail || {};
     var elt = d.elt || e.target;
-    if (swallowedFailure) { swallowedFailure = false; markUnsaved(elt); return; } // 200 that was really an error
-    if (d.successful) { markSaved(elt); return; }                                 // a genuine success clears its op
-    if (isWrite(d)) markUnsaved(elt);                                             // a failed WRITE is unsaved work
-    // a failed READ (a search, a background poll) is not "unsaved work" — leave the banner state alone.
+    if (swallowedFailure) { swallowedFailure = false; markUnsaved(elt); return; }
+    if (d.successful) { markSaved(elt); return; }
+    if (isWrite(d)) markUnsaved(elt);
   });
 
-  // A form's `hx-on::after-request="this.reset()"` would wipe typed text even when the save FAILED: the
-  // server turns a real 500 into a 200 + an `app:save-failed` HX-Trigger so HTMX can swap an error
-  // fragment, but that ALSO makes `event.detail.successful` true. So "did this really save?" must check
-  // BOTH a 2xx AND the absence of that trigger — read straight off the xhr, so there is no race with the
-  // app:save-failed event. Forms gate their reset on it: hx-on::after-request="if(window.htmxSaved(event))this.reset()" (BUG-013).
-  window.htmxSaved = function (e) {
-    try {
-      var d = e && e.detail;
-      if (!d || !d.successful) return false; // a real 4xx (validation / CSRF) — keep the typed values
-      var trig = d.xhr && d.xhr.getResponseHeader && d.xhr.getResponseHeader('HX-Trigger');
-      return !(trig && trig.indexOf('app:save-failed') !== -1); // a swallowed 500 → not really saved
-    } catch (_) {
-      return false; // if in doubt, don't clear the form
-    }
-  };
-
-  // 10.21 — keyboard-fast navigation: `/` or Ctrl/⌘-K jumps to search; `g` then a letter jumps to a
-  // page; `?` shows the cheat-sheet; Esc closes things. The principle is "nothing requires the mouse".
-  // The jump map + cheat-sheet both derive from window.__NAV__ (emitted by the server from
-  // src/lib/nav.ts) so the keyboard shortcuts can never drift from the rendered nav.
+  // Command palette & jump keys navigation
   var NAV_ITEMS = Array.isArray(window.__NAV__) ? window.__NAV__ : [];
   var NAV = {};
   NAV_ITEMS.forEach(function (i) { if (i && i.key) NAV[i.key] = i.href; });
@@ -216,15 +296,12 @@
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); focusSearch(); return; }
     if (e.key === '?') { e.preventDefault(); toggleCheat(); return; }
     if (e.key === 'Escape') { closeCheat(); closeSearch(); return; }
-    // Resolve a pending `g` FIRST, so `g g` (→ Safeguarding) works — otherwise the second g just
-    // re-armed the prefix and the jump never fired.
     if (pendingG) { pendingG = false; clearTimeout(gTimer); var dest = NAV[e.key]; if (dest) { e.preventDefault(); location.href = dest; } return; }
     if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) { pendingG = true; clearTimeout(gTimer); gTimer = setTimeout(function () { pendingG = false; }, 1200); return; }
   });
-  // Click outside the search box closes its dropdown.
   document.addEventListener('click', function (e) { if (!e.target.closest('.search-box')) closeSearch(); });
 
-  // Command palette: arrow-key + Enter navigation through the live "go to … / results" dropdown.
+  // Command palette search lists navigation
   (function () {
     function results() {
       var nodes = document.querySelectorAll('#search-results .search-hit');
@@ -247,8 +324,7 @@
     document.body.addEventListener('htmx:afterSwap', function (e) { if (e.target && e.target.id === 'search-results') clearActive(results()); });
   })();
 
-  // a11y toolbar: text-size / contrast / font preferences, persisted in localStorage and applied as
-  // <html data-*> (the pre-paint script in <head> applies them on first load so there's no flash).
+  // Accessibility Toolbar
   (function () {
     var ATTR = { fontsize: 'data-fontsize', theme: 'data-theme', font: 'data-font' };
     function mark(kind) {
@@ -281,16 +357,15 @@
     }
   })();
 
-  // Mark the current page in the left rail (a Today link, or one inside a Plan/Advanced section).
-  // Longest matching href wins so e.g. /settings beats / for /settings/ai-log.
+  // Active page indicator (BUG-056: the next shell uses the .ribbon-link scaffolded ribbon, not the
+  // classic .rail — query both, and skip the brand link so "/" matches the Now link, not the logo).
   (function () {
     var path = location.pathname;
     var best = null;
-    // Include the rail footer (the ⚙ Settings gear) so power pages hidden from the everyday rail still
-    // light up their footer entry.
-    var links = document.querySelectorAll('.rail a[href], .rail-foot a[href]');
+    var links = document.querySelectorAll('.scaffolded-ribbon a.ribbon-link[href], .rail a[href], .rail-foot a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href');
+      if (!href || href.charAt(0) !== '/') continue;
       var match = href === '/' ? path === '/' : path === href || path.indexOf(href + '/') === 0;
       if (match && (!best || href.length > best.getAttribute('href').length)) best = links[i];
     }
@@ -299,11 +374,12 @@
       best.setAttribute('aria-current', 'page');
       var det = best.closest('.rail-sec');
       if (det && det.tagName === 'DETAILS') { det.open = true; var sum = det.querySelector('summary'); if (sum) sum.classList.add('active-within'); }
+      var drawer = best.closest('#ribbon-drawer'); // reveal the advanced drawer when its page is active
+      if (drawer) drawer.classList.add('open');
     }
   })();
 
-  // 10.25 — activity/starter countdown timer (Spec 5.16). Pure client-side; set N minutes, it counts
-  // down on the lesson page and can go full-screen on the board; a gentle flash at zero.
+  // Pacing/Starter countdown timer
   (function () {
     var bar = document.querySelector('[data-timer]');
     if (!bar) return;
@@ -353,8 +429,7 @@
     });
   })();
 
-  // C3 curriculum-map drag-to-shift: pick up a future lesson row and drop it on another week to move
-  // it (the two swap, or it fills an empty week). History rows aren't draggable; the server re-checks.
+  // Curriculum Map Drag and Drop
   (function () {
     var table = document.querySelector('.map-table[data-map-slot]');
     if (!table) return;
@@ -393,4 +468,137 @@
         .catch(function () {});
     });
   })();
+
+  // --- Overhaul: Slide Deck Navigation ---
+  function showSlide(index) {
+    var thumbs = document.querySelectorAll('[data-slide-thumb]');
+    var slides = document.querySelectorAll('.pslide');
+    var notes = document.querySelectorAll('.pslide-note-item');
+    var positionEls = document.querySelectorAll('[data-slide-position]');
+    var eyebrow = document.getElementById('slide-notes-eyebrow');
+
+    if (slides.length === 0) return;
+    if (index < 0) index = 0;
+    if (index >= slides.length) index = slides.length - 1;
+
+    // Update slides
+    slides.forEach(function (s) {
+      if (parseInt(s.getAttribute('data-slide'), 10) === index) {
+        s.classList.add('on');
+      } else {
+        s.classList.remove('on');
+      }
+    });
+
+    // Update thumbs if present
+    if (thumbs.length > 0) {
+      thumbs.forEach(function (t) {
+        var idx = parseInt(t.getAttribute('data-index'), 10);
+        if (idx === index) {
+          t.setAttribute('aria-current', 'true');
+          // Update position text from thumb attribute
+          var pos = t.getAttribute('data-position');
+          positionEls.forEach(function (el) { el.textContent = pos; });
+        } else {
+          t.setAttribute('aria-current', 'false');
+        }
+      });
+    } else {
+      // No thumbs (board view)
+      positionEls.forEach(function (el) {
+        el.textContent = 'Slide ' + (index + 1) + ' of ' + slides.length;
+      });
+    }
+
+    // Update notes if present
+    notes.forEach(function (n) {
+      if (parseInt(n.getAttribute('data-slide'), 10) === index) {
+        n.classList.add('on');
+      } else {
+        n.classList.remove('on');
+      }
+    });
+
+    // Update notes eyebrow if present
+    if (eyebrow) {
+      eyebrow.textContent = 'Private · slide ' + (index + 1);
+    }
+  }
+
+  function getActiveSlideIndex() {
+    var activeSlide = document.querySelector('.pslide.on');
+    if (!activeSlide) return 0;
+    return parseInt(activeSlide.getAttribute('data-slide'), 10) || 0;
+  }
+
+  document.addEventListener('click', function (e) {
+    var thumb = e.target.closest('[data-slide-thumb]');
+    if (thumb) {
+      var index = parseInt(thumb.getAttribute('data-index'), 10);
+      showSlide(index);
+      return;
+    }
+
+    var prevBtn = e.target.closest('#slide-prev-btn');
+    if (prevBtn) {
+      showSlide(getActiveSlideIndex() - 1);
+      return;
+    }
+
+    var nextBtn = e.target.closest('#slide-next-btn');
+    if (nextBtn) {
+      showSlide(getActiveSlideIndex() + 1);
+      return;
+    }
+  });
+
+  // --- Overhaul: Text-To-Speech (TTS) Slide Narration ---
+  var currentUtterance = null;
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.ws-speak');
+    if (btn) {
+      var text = btn.getAttribute('data-speak-text') || '';
+      if (!text) return;
+
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        // If we clicked the button to stop the current speech, just return
+        if (currentUtterance && currentUtterance.text === text) {
+          currentUtterance = null;
+          return;
+        }
+      }
+
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = 'en-GB';
+      window.speechSynthesis.speak(currentUtterance);
+    }
+  });
+
+  // --- Overhaul: Start Work / Group Lock Simulation ---
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('#start-work-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Work locked';
+
+      // Disable the edit groups button
+      var editBtn = document.getElementById('edit-groups-btn');
+      if (editBtn) editBtn.disabled = true;
+
+      // Update the group-state badge and text
+      var groupStateWrap = document.querySelector('.group-state');
+      if (groupStateWrap) {
+        var badge = groupStateWrap.querySelector('.badge');
+        if (badge) {
+          badge.className = 'badge danger';
+          badge.textContent = 'Locked';
+        }
+        var stateText = groupStateWrap.querySelector('[data-group-state]');
+        if (stateText) {
+          stateText.textContent = 'Independent work in progress · changes locked';
+        }
+      }
+    }
+  });
 })();
