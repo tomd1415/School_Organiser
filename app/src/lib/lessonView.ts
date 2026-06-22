@@ -419,6 +419,7 @@ export function renderLessonCockpit(options: {
         <div class="lesson-actions">
           ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
           <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
+          ${lp ? `<a class="button ghost" href="/lesson/pupil-preview?${isPreview ? 'master=1' : `gc=${groupCourseId}`}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener" title="See the slides AND the worksheet a pupil works in (read-only preview)">👁 As pupil</a>` : ''}
           ${lp ? `<a class="button ghost" href="/lesson/present?${isPreview ? 'master=1' : `gc=${groupCourseId}`}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener" title="Your slides WITH private teaching notes — shown only on your screen, never on the board">🧑‍🏫 Presenter</a>` : ''}
           <a class="button ghost" href="/lesson/print?lesson=${h.lessonId}&amp;date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable lesson plan">🖨 Plan</a>
           ${isPreview ? '' : `<a class="button ghost" href="/today/print?date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable cover / briefing sheet for today">🖨 Cover</a>`}

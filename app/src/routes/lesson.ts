@@ -812,6 +812,54 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(pupilLayout(page, csrf));
   });
 
+  // "Preview as pupil" — what a pupil actually WORKS in: the slides + the WORKSHEET two-pane (the same
+  // layout as /me), read-only so no answers are saved and no occurrence is created. Fixes the schemes
+  // "open as pupil" which used to land on the slides-only board. Works for a master plan (no gc) or a
+  // class copy (gc=…); a level switcher shows each ability's sheet.
+  app.get('/lesson/pupil-preview', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({
+        gc: z.coerce.number().int().positive().optional(),
+        lp: z.coerce.number().int().positive(),
+        level: z.enum(['support', 'core', 'challenge']).default('core'),
+      })
+      .safeParse(req.query);
+    if (!q.success) return reply.code(400).type('text/html').send('<p>Bad request.</p>');
+    const { gc, lp, level } = q.data;
+    const gcKey = gc ?? 0; // 0 → master copy
+    const isMaster = gc == null;
+    const csrf = reply.generateCsrf();
+    const [ws, slidesMd, master] = await Promise.all([
+      getLessonWorksheet(gcKey, lp),
+      getLessonSlidesMarkdown(gcKey, lp),
+      getPlanRow(lp),
+    ]);
+    const scopeQ = isMaster ? 'master=1' : `gc=${gc}`;
+    const lvl = (l: Level, label: string): string =>
+      `<a class="ws-tab${l === level ? ' is-on' : ''}" href="/lesson/pupil-preview?${scopeQ}&amp;lp=${lp}&amp;level=${l}">${label}</a>`;
+    const deck = slidesMd ? renderSlideDeck(slidesMd, `preview-${gcKey}-${lp}`, level) : '';
+    const wsHtml = ws
+      ? `<div class="ws-doc">${renderWorksheet(ws.markdown, { mode: 'preview', level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`
+      : '<p class="pupil-note">No worksheet for this lesson yet — generate or upload one, then preview.</p>';
+    const header = `<div class="pv-bar">
+        <div><strong>${esc(master?.title ?? 'Lesson')}</strong> <span class="muted">${isMaster ? 'master lesson' : 'this class'} · 👁 preview as a pupil — answers are NOT saved</span></div>
+        <div class="pv-levels">${lvl('support', '🟢')}${lvl('core', '🟡')}${lvl('challenge', '🔴')}</div>
+        <div><a class="link" href="/lesson/pupil-view?${scopeQ}&amp;lp=${lp}&amp;level=${level}" target="_blank" rel="noopener" title="The clean projector board (slides only)">🖥 Board (slides) ↗</a></div>
+      </div>`;
+    const body = deck
+      ? `<section class="pupil-card pv-card">${header}
+          <div class="pupil-twopane" data-pane="work">
+            <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
+              <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
+              <button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 Worksheet</button>
+            </div>
+            <div class="pupil-pane pupil-pane-slides">${deck}</div>
+            <div class="pupil-pane pupil-pane-work">${wsHtml}</div>
+          </div></section>`
+      : `<section class="pupil-card pv-card">${header}${wsHtml}</section>`;
+    return reply.type('text/html').send(pupilLayout(body, csrf));
+  });
+
   // Presenter view — the slides on the TEACHER's own screen WITH the per-slide teaching notes. The board
   // (/lesson/pupil-view) stays clean; this route is requireAuth so notes never reach a pupil.
   app.get('/lesson/present', { preHandler: requireAuth }, async (req, reply) => {

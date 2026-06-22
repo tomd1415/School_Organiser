@@ -141,7 +141,8 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
       </details>
       <div class="plan-preview-actions">
         <a class="button small" href="/lesson/preview?plan=${p.id}" target="_blank" rel="noopener" title="Open a read-only preview of the live teacher cockpit without creating a lesson occurrence">▶ Preview live lesson ↗</a>
-        <a class="link" href="/lesson/pupil-view?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="Open this master lesson exactly as a pupil sees it, in a new tab — with an edit toggle to tweak the master slides/worksheet for every class">👁 Open as pupil ↗</a>
+        <a class="link" href="/lesson/pupil-preview?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="See exactly what a pupil works in — the slides AND the worksheet they fill in (read-only preview; nothing is saved). Switch ability level in the preview.">👁 Preview as pupil (worksheet) ↗</a>
+        <a class="link" href="/lesson/pupil-view?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="The clean projector board for this master lesson — slides only">🖥 Board (slides) ↗</a>
       </div>
       <div class="plan-res-head">Resources</div>
       <div class="plan-res-slot" hx-get="/schemes/plan/${p.id}/resources" hx-trigger="${opts.open ? 'load' : `toggle from:#plan-${p.id}-detail once`}" hx-target="this" hx-swap="innerHTML">
