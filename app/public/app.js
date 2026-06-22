@@ -353,7 +353,7 @@
           if (b) apply(kind, b.getAttribute('data-val'));
         });
         mark(kind);
-      })(row);
+      })(rows[i]);
     }
   })();
 
