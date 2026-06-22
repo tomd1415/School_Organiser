@@ -576,6 +576,23 @@
     }
   });
 
+  // --- Lesson-flow tracker: tapping a step records "we're up to here" (the hx-post saves it server-side
+  // via /occurrence-course/:id/progress); reflect the new current/done state in the list at once. ---
+  document.addEventListener('click', function (e) {
+    var mark = e.target.closest('.seq-mark');
+    if (!mark) return;
+    var step = parseInt(mark.getAttribute('data-step'), 10);
+    var list = mark.closest('.sequence');
+    if (!list || isNaN(step)) return;
+    list.querySelectorAll('li[data-step]').forEach(function (li) {
+      var i = parseInt(li.getAttribute('data-step'), 10);
+      var m = li.querySelector('.seq-mark');
+      li.classList.toggle('done', i < step);
+      li.classList.toggle('current', i === step);
+      if (m) m.textContent = i < step ? '✓' : i === step ? '▶' : String(i + 1);
+    });
+  });
+
   // --- Overhaul: Text-To-Speech (TTS) Slide Narration ---
   var currentUtterance = null;
   document.addEventListener('click', function (e) {

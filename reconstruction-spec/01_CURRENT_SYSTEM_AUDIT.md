@@ -4,12 +4,11 @@
 
 The current workspace was inspected across application source, migrations, public assets, tests, deployment scripts, operational scripts, phase plans, audits, UX handoffs, and the active Git diff. Existing files were not modified. The documentation in this directory is the only new content.
 
-Validation performed against the current workspace:
+Validation was run twice because application files changed concurrently during the documentation pass:
 
-- `npm run typecheck`: passed.
-- `npm test`: **86 files, 617 tests passed**.
-- `npm run test:integration -- --reporter=dot`: **79 files, 356 tests passed**.
-- Total validated automated checks: **973**.
+- Initial snapshot: `npm run typecheck` passed; **617/617 unit** and **356/356 integration** tests passed.
+- Final workspace: `npm run typecheck` passed; **356/356 integration** tests passed; the unit run has **613 passed and 4 failed**.
+- The four current failures are all in `tests/lessonPreview.test.ts`. They followed the later change from raw outline lines to `outlineSteps()` in `lessonView.ts`; the preview fixtures no longer render the expected “Independent work”/class-specific outline strings. This documentation task did not alter or repair that concurrent application work.
 
 Repository scale at audit time:
 
@@ -20,7 +19,7 @@ Repository scale at audit time:
 - About 56,000 lines across source, assets, tests, and migrations.
 - 86 unit-test files and 79 integration-test files.
 
-The working tree was already dirty before this documentation work. Active changes include live slide synchronisation, pupil offline answer buffering/keep-alive, level-correct marking-modal rendering, and associated tests/migration. Those changes passed the complete test suite and are treated as current behaviour.
+The working tree was already dirty before this documentation work. Live slide synchronisation, pupil offline answer buffering/keep-alive, level-correct marking-modal rendering, and associated tests/migration were committed during the audit as `204a9d0`. Later lesson-flow tracker changes remain uncommitted and account for the four final unit-test failures above. They are treated as current workspace behaviour but not as a green release baseline.
 
 ## 2. What the application is
 
@@ -156,4 +155,3 @@ When evidence conflicts, use this order:
 7. older project/phase documents.
 
 During the actual rebuild, this pack becomes canonical only after the owner reviews its open decisions and approves any deliberate behavioural changes.
-

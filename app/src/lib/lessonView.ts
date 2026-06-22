@@ -7,6 +7,7 @@ import { LinkedResource } from '../repos/resources';
 import { TaFeedbackRow } from '../repos/taFeedback';
 import { EffectiveLesson } from '../repos/adaptations';
 import { renderLinkedResources } from './resourceView';
+import { outlineSteps, formatOutline } from './formatLesson';
 import { Level } from './worksheetForm';
 import { PupilWorkRow } from '../repos/pupilWork';
 import { renderMarkdown } from './markdown';
@@ -241,26 +242,38 @@ export function renderLessonCockpit(options: {
   // Column 2: sequence card outline
   let sequenceListHtml = '';
   if (activeSection && activeSection.planOutline) {
-    const steps = activeSection.planOutline.split('\n').map((s) => s.trim()).filter(Boolean);
+    // Parse with outlineSteps() (the same parser /progress + the pacing AI use) so the cockpit's step
+    // indices line up with the stored progress_step — a raw \n split kept prose/heading lines and drifted.
+    const steps = outlineSteps(activeSection.planOutline);
     const progress = activeSection.progressStep ?? null;
 
-    sequenceListHtml = steps
+    sequenceListHtml = !steps.length
+      // A free-text outline with no numbered/bulleted steps: show it formatted but not tap-trackable
+      // (same as the classic tracker). The teacher records position via the stopping-point box instead.
+      ? `<li class="seq-freetext">${formatOutline(activeSection.planOutline)}</li>`
+      : steps
       .map((step, i) => {
         const state = progress == null ? '' : i < progress ? 'done' : i === progress ? 'current' : '';
-        const marker = progress != null && i < progress ? '✓' : String(i + 1);
-        const badge = progress !== null && i === progress ? '<span class="badge ai">Current</span>' : progress !== null && i < progress ? '<span class="badge good">Done</span>' : '';
+        const marker = progress != null && i < progress ? '✓' : progress != null && i === progress ? '▶' : String(i + 1);
         const isCurrent = progress !== null && i === progress;
         const startWorkBtn = !isPreview && isCurrent && (step.toLowerCase().includes('practical') || step.toLowerCase().includes('investigation') || step.toLowerCase().includes('work'))
           ? `<button class="button small" type="button" id="start-work-btn" data-oc="${oc}">Start work</button>`
           : '';
+        // Tap a step to record "we're up to here" — persists progress_step + the textual stopping point
+        // via the live /progress route (which also feeds the resume line + pacing nudges). Read-only in preview.
+        const stepLabel = `step ${i + 1} — ${step.slice(0, 150)}`;
+        const markEl = isPreview
+          ? `<span class="step">${marker}</span>`
+          : `<button type="button" class="step seq-mark" data-step="${i}" aria-label="Mark step ${i + 1} as the one we're on"
+               hx-post="/occurrence-course/${oc}/progress" hx-vals='${esc(JSON.stringify({ step: i, label: stepLabel }))}' hx-swap="none"
+               title="Tap to mark: we're up to here">${marker}</button>`;
 
-        return `<li class="${state}">
-          <span class="step">${marker}</span>
+        return `<li class="${state}" data-step="${i}">
+          ${markEl}
           <div>
             <strong>${esc(step)}</strong>
             ${startWorkBtn}
           </div>
-          ${badge}
         </li>`;
       })
       .join('');
@@ -276,6 +289,28 @@ export function renderLessonCockpit(options: {
     followups: n.followups,
   }));
   const recentNotesHtml = renderRecentNotesList(cockpitNotes);
+
+  // "Before the bell" prep checklist — the cockpit is passed `prep` but never rendered it.
+  const prepCard = isPreview
+    ? ''
+    : `<section class="prep-card card" aria-labelledby="prep-title">
+        <div class="card-head"><div><p class="eyebrow">Before the bell</p><h2 id="prep-title">Prep checklist</h2></div></div>
+        ${renderPrepList(prep, '/prep', 'prep', `prep-${h.occurrenceId}`)}
+        ${renderPrepAdd('/prep/add', { occurrence: h.occurrenceId }, `prep-${h.occurrenceId}`)}
+      </section>`;
+
+  // TA feedback the room logged for this class — the cockpit is passed `taFbByOc` but never rendered it.
+  const taFb = taFbByOc.get(oc) ?? [];
+  const taFbCard = isPreview
+    ? ''
+    : `<section class="ta-fb-card card" aria-labelledby="tafb-title">
+        <div class="card-head"><div><p class="eyebrow">From the room</p><h2 id="tafb-title">TA feedback</h2></div>${taFb.some((f) => f.safeguarding) ? '<span class="badge danger">⚑ flag</span>' : ''}</div>
+        ${taFb.length
+          ? `<ul class="ta-fb-list">${taFb
+              .map((f) => `<li${f.safeguarding ? ' class="sg"' : ''}>${f.safeguarding ? '🛡 <strong>safeguarding flag</strong> · ' : ''}<span class="muted">${esc(f.createdAt)}</span>${f.pupilsText ? `<div><strong>Pupils:</strong> ${esc(f.pupilsText)}</div>` : ''}${f.lessonText ? `<div><strong>Lesson:</strong> ${esc(f.lessonText)}</div>` : ''}</li>`)
+              .join('')}</ul>`
+          : '<p class="muted">No TA feedback logged for this class yet.</p>'}
+      </section>`;
 
   // Activity groups counts
   const pupilWorkRows = pupilWorkByOc.get(oc) ?? [];
@@ -367,6 +402,9 @@ export function renderLessonCockpit(options: {
         <div class="lesson-actions">
           ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
           <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
+          ${lp ? `<a class="button ghost" href="/lesson/present?${isPreview ? 'master=1' : `gc=${groupCourseId}`}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener" title="Your slides WITH private teaching notes — shown only on your screen, never on the board">🧑‍🏫 Presenter</a>` : ''}
+          <a class="button ghost" href="/lesson/print?lesson=${h.lessonId}&amp;date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable lesson plan">🖨 Plan</a>
+          ${isPreview ? '' : `<a class="button ghost" href="/today/print?date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable cover / briefing sheet for today">🖨 Cover</a>`}
           <button class="button focus-mode-toggle" type="button">Focus Mode</button>
           ${isPreview ? '' : `<button class="button ghost" type="button" title="No class this period? Mark it free and assign yourself tasks" hx-post="/free/mark" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>Make free</button>`}
         </div>
@@ -433,16 +471,19 @@ export function renderLessonCockpit(options: {
               <div>
                 ${isPreview
                   ? '<span class="badge ai">Read-only preview</span>'
-                  : `<!-- Keep stopping point input to satisfy hx-post changed trigger -->
-                    <input class="stop-input" name="stopping_point" value="${esc(activeSection?.stoppingPoint ?? '')}" placeholder="where we got to…"
-                      hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none" style="display:none;">
-                    <button class="button ghost small" type="button" id="stopping-point-trigger-btn">Record stopping point</button>`}
+                  : `<label class="stop-label" title="Tap a step on the left, or type where you got to — saved automatically for next time">
+                      <span class="sr-only">Stopping point</span>
+                      <input class="stop-input" name="stopping_point" value="${esc(activeSection?.stoppingPoint ?? '')}" placeholder="✎ where we got to…"
+                        hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
+                    </label>`}
               </div>
             </div>
             <ol class="sequence">
               ${sequenceListHtml || '<li class="muted">No outline set for this plan.</li>'}
             </ol>
           </section>
+
+          ${prepCard}
 
           <!-- Fast capture notes -->
           <section class="notes-card card" aria-labelledby="notes-title">
@@ -505,6 +546,8 @@ export function renderLessonCockpit(options: {
             ${needsAttentionHtml}
             ${isPreview ? '' : '<button class="button small" type="button" onclick="document.getElementById(\'pw-live-section\').scrollIntoView({behavior: \'smooth\'})">Open live progress</button>'}
           </section>
+
+          ${taFbCard}
 
           <section class="timer-card card" aria-labelledby="timer-title">
             <div class="card-head">
