@@ -107,6 +107,32 @@ body[data-shell="next"] {
   position: relative;
 }
 
+/* The recovered classic base ships a LIGHT pupil theme on .pupil-body (--bg:#f4f3fb; --card:#fff;
+   --ink:#232634; --accent: indigo; …). The board hides the body behind a fixed dark .presentation,
+   but the presenter (/lesson/present) and the pupil pages show the body directly — so those light
+   tokens bleed: the area around the dark slide deck renders white, and the pupil chrome (.pupil-logout
+   etc., which all read var(--card)/var(--ink)/var(--accent)) flips to a light palette the overhaul
+   never intended. The next shell is dark-only, so take these tokens back from the dark :root with
+   `inherit` — which also keeps the high-contrast theme working, since it redefines them on :root and
+   `inherit` follows whatever :root currently resolves to (#000 in contrast, the dark palette otherwise). */
+body.pupil-body[data-shell="next"] {
+  --bg: inherit;
+  --card: inherit;
+  --ink: inherit;
+  --muted: inherit;
+  --accent: inherit;
+  --accent-soft: inherit;
+  --line: inherit;
+}
+
+/* Presenter (/lesson/present): the slide deck sits in a centred card, so the body backdrop shows as
+   gutters on both sides. Paint those gutters with the deck's own surface colour (--card-bg) instead
+   of the app's layered backdrop, so the "sides" read as the same colour as the slide — one seamless
+   dark canvas to project. Scoped via :has(.present-card) so the pupil pages keep the normal backdrop. */
+body.pupil-body[data-shell="next"]:has(.present-card) {
+  background: var(--card-bg) !important;
+}
+
 :root[data-theme="contrast"] body[data-shell="next"] {
   background: var(--bg) !important;
 }
@@ -2842,6 +2868,8 @@ body[data-shell="next"]:has(.overhaul-board) .paste-help {
 }
 body[data-shell="next"] .pupil-main:has(> .overhaul-board) {
   width: 100vw;
+  max-width: none !important; /* the board <main> holds .md-doc slides; without this the classic
+                                 `main:has(.md-doc){max-width:50rem}` reading cap squeezes it to ~820px */
   height: 100vh;
   margin: 0 !important;
   padding: 0 !important;
@@ -2852,6 +2880,8 @@ body[data-shell="next"] .presentation {
   inset: 0 !important;
   z-index: 2000 !important;
   width: 100vw !important;
+  max-width: none !important; /* same: .presentation is a <main> containing .md-doc, so the 50rem
+                                 reading cap would otherwise pin it to a centred box with white sides */
   height: 100vh !important;
   min-height: 100vh !important;
   display: grid !important;

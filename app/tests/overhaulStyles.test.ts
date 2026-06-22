@@ -32,7 +32,9 @@ describe('next-shell dark theme compatibility', () => {
   });
 
   it('lets the redesigned board own the full viewport', () => {
-    expect(CSS).toMatch(/body\[data-shell="next"\] \.presentation \{[\s\S]{0,260}position: fixed !important;[\s\S]{0,260}width: 100vw !important;[\s\S]{0,120}height: 100vh !important;/);
+    // Full-viewport ownership needs max-width:none too — the board <main> holds .md-doc slides, and the
+    // classic `main:has(.md-doc){max-width:50rem}` reading cap would otherwise pin it to ~820px with gutters.
+    expect(CSS).toMatch(/body\[data-shell="next"\] \.presentation \{[\s\S]{0,300}position: fixed !important;[\s\S]{0,400}width: 100vw !important;[\s\S]{0,400}max-width: none !important;[\s\S]{0,400}height: 100vh !important;/);
     expect(CSS).toMatch(/body\[data-shell="next"\] \.present-slide \{[\s\S]{0,180}width: 100% !important;[\s\S]{0,100}max-width: none !important;/);
   });
 
