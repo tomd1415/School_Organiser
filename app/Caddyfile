@@ -7,6 +7,15 @@
 # root CA on the teacher's devices (see DEPLOYMENT.md). If SITE_ADDRESS is a REAL, internet-
 # resolvable hostname and the box can reach Let's Encrypt, delete the `tls internal` line for a
 # publicly-trusted cert instead.
+#
+# `default_sni` is essential when SITE_ADDRESS is a bare IP: clients can't put an IP literal in the
+# TLS SNI field (RFC 6066), so browsers/curl connect with no SNI and Caddy can't pick a certificate —
+# it aborts the handshake with a "tls internal error" alert (ERR_SSL_PROTOCOL_ERROR in the browser).
+# Setting a default SNI tells Caddy which cert to serve when none is requested. Harmless for hostnames.
+{
+	default_sni {$SITE_ADDRESS}
+}
+
 {$SITE_ADDRESS} {
 	encode gzip
 	tls internal

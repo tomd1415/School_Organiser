@@ -332,6 +332,7 @@ rollback if anything surprises you, on top of the app-level encrypted backups.
 | **Compose v2 missing** | Install `docker-compose-plugin` (the installer needs `docker compose`, not the old `docker-compose`). |
 | **App can't reach the database** | `docker compose --profile proxy logs db` — the app waits for the db healthcheck; check `DB_PASSWORD` in `app/.env` matches. |
 | **Page loads on `:44360` but not `https://`** | The `caddy` service needs the `--profile proxy` flag; bring it up with `docker compose --profile proxy up -d`. |
+| **`ERR_SSL_PROTOCOL_ERROR` / `tls internal error` on a bare-IP `SITE_ADDRESS`** | Clients can't send an IP in the TLS SNI field, so Caddy can't pick a cert and aborts the handshake. The Caddyfile sets `default_sni {$SITE_ADDRESS}` to fix this — make sure your deployed `app/Caddyfile` has that global block (older deploys won't), then `docker compose --profile proxy restart caddy`. Better long-term: give the box a hostname and set `SITE_ADDRESS` to it. |
 | **AI features disabled** | Add `ANTHROPIC_API_KEY` to `app/.env` (then restart) or paste it in Settings → AI. |
 
 ---

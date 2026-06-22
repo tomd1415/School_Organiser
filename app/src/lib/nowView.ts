@@ -209,7 +209,9 @@ export function renderDayList(
     .filter((l) => l.weekday === weekday && l.isSelf && ['teaching', 'form', 'club'].includes(l.purpose))
     .map((l) => ({ ...l, start: startOf.get(l.slotOrder) ?? '' }))
     .filter((l) => l.start && (afterMin === null || toMinutes(l.start) > afterMin))
-    .sort((a, b) => a.slotOrder - b.slotOrder);
+    // Order by clock time, not slot_order — slot_order isn't reliably chronological (same fix as the
+    // timetable grid, see services/timetable.ts buildWeekGrid). "HH:MM" sorts lexically = chronologically.
+    .sort((a, b) => a.start.localeCompare(b.start));
   if (!rows.length) return '';
   const items = rows
     .map((l) => {
@@ -352,7 +354,7 @@ export function renderTimelineCard(
   let targetLabel = "Today's Timetable";
   let isFuture = !state.isSchoolDay;
 
-  let todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.slotOrder - b.slotOrder);
+  let todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.start.localeCompare(b.start));
   if (!todayPeriods.length) {
     // If today is a weekend/holiday and has no periods, default to the next teaching day's weekday
     if (state.nextTeaching) {
@@ -367,7 +369,7 @@ export function renderTimelineCard(
       targetLabel = "Monday's Timetable";
       isFuture = true;
     }
-    todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.slotOrder - b.slotOrder);
+    todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.start.localeCompare(b.start));
   }
   if (!todayPeriods.length) return '';
   
