@@ -2,11 +2,10 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { getUiShell } from '../lib/nav';
 import { calibrationHeadline, calibrationInsight, gatherCalibration } from '../services/estimateCalibration';
 import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
-import { renderNewTaskButton, renderTaskItem, renderTaskList } from '../lib/taskView';
+import { renderTaskItem, renderTaskList } from '../lib/taskView';
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
@@ -40,8 +39,7 @@ export function registerTaskRoutes(app: FastifyInstance): void {
       listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
     }
 
-    if (getUiShell() === 'next') {
-      const { renderTasksPage } = await import('../lib/tasksView');
+    const { renderTasksPage } = await import('../lib/tasksView');
       const body = renderTasksPage({
         view,
         csrf,
@@ -50,23 +48,6 @@ export function registerTaskRoutes(app: FastifyInstance): void {
         bannerHtml: banner,
       });
       return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
-    }
-
-    const tab = (v: string, label: string) =>
-      `<a href="/tasks?view=${v}"${v === view ? ' class="active"' : ''}>${label}</a>`;
-    const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
-        ${banner}
-        <div class="ld-notes-head"><h1>Tasks</h1><span>${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') + ' ' : ''}<a class="link" href="/recurring">Recurring →</a></span></div>
-        <nav class="task-tabs">${tab('inbox', 'Inbox')} ${tab('open', 'Open')} ${tab('done', 'Done')} ${tab('interest', '⭐ Interest')}</nav>
-        <details class="task-calibrate" id="task-calibrate">
-          <summary>📊 Calibrate my time estimates</summary>
-          <div hx-get="/tasks/calibrate" hx-trigger="toggle from:#task-calibrate once" hx-target="this" hx-swap="innerHTML"><span class="muted">analysing your timed tasks…</span></div>
-        </details>
-        ${view === 'inbox' ? `<details class="paste-box"><summary>Paste an email</summary><form hx-post="/tasks/paste" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()"><textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea><div><button type="submit" class="btn-secondary">Make task</button></div></form></details>` : ''}
-        ${listHtml}
-      </section>`;
-    return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
   });
 
   // D1: calibrate the teacher's time estimates from their timed history (deterministic headline +

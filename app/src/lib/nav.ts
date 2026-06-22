@@ -8,6 +8,8 @@
 // `group` is latent in Wave-0 slice 1 (renderNav renders every item inline, unchanged behaviour);
 // slice 2 (idea 6) uses it + a `nav_daily` setting to fold 'setup' links into a menu.
 
+import { esc } from './esc';
+
 export type NavGroup = 'daily' | 'setup';
 // Rail & Stage redesign — `tier` gates the rail's "Advanced" section: 'power' items appear only when
 // the teacher has turned advanced tools on (the `experience` switch). 'everyday' items always show.
@@ -91,24 +93,6 @@ export function getExperienceMode(): Experience {
   return experienceMode;
 }
 
-// ── UI overhaul shell selector ──────────────────────────────────────────────────────────────────
-// 'next' = the new task-first dark workspace, now the PRODUCT DEFAULT; 'classic' = the retired Rail &
-// Stage shell, kept behind the flag only for a short migration checkpoint (BUG-054). Same write-through
-// in-memory machinery as experienceMode: layout() reads it synchronously (it can't await a DB read),
-// server.ts primes it at boot from the `ui_shell` setting (migration 0058 backfills 'next'), and
-// Settings can still switch it. Defaults to 'next' so a fresh/restored database launches the new UI
-// rather than the old one.
-export type UiShell = 'classic' | 'next';
-let uiShell: UiShell = 'next';
-
-export function setUiShell(mode: UiShell | string | null): void {
-  uiShell = 'next';
-}
-
-export function getUiShell(): UiShell {
-  return 'next';
-}
-
 // Earned, opt-in unlock: once the teacher has taught enough lessons, offer (once, dismissibly) to
 // reveal the advanced tools — never auto-promote, never nag. Pure so it's unit-testable.
 export const EXPERIENCE_NUDGE_AT = 20;
@@ -127,17 +111,6 @@ const SAFEGUARDING_HREF = '/safeguarding';
  * Active-state is applied client-side by app.js (it reads window.__NAV__ + the path), so this stays
  * a pure, path-free render — exactly like the old top bar.
  */
-const ENTITIES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-function esc(value: unknown): string {
-  return String(value).replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
-}
 
 export function renderRail(
   experience: Experience = getExperienceMode(),

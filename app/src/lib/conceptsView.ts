@@ -26,27 +26,6 @@ export function renderRow(c: ConceptRow, courses: { id: number; name: string }[]
   </tr>`;
 }
 
-export function renderPage(rows: ConceptRow[], courses: { id: number; name: string }[], csrf: string): string {
-  const head = `<tr><th>Concept</th><th>How to teach it</th><th>Course</th><th>Tags</th><th></th></tr>`;
-  const table = rows.length
-    ? `<div class="table-scroll"><table class="kit-table"><thead>${head}</thead><tbody>${rows.map((c) => renderRow(c, courses)).join('')}</tbody></table></div>`
-    : `<p class="muted">No teaching concepts yet — add the first one below. They're woven into generated lessons where they fit.</p>`;
-  return `
-    <section class="card kit" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      <h1>Teaching concepts</h1>
-      <p class="muted">Cohort-level teaching ideas, analogies and "always do this" approaches. They're given to
-        the AI for every lesson/scheme generation and woven in <em>where they fit</em>, without lengthening the
-        lesson. Scope each to one course or leave it global. <strong>Never name an individual pupil</strong> —
-        keep these about the class/topic. Archive (don't delete) ones you stop using.</p>
-      ${table}
-      <form class="kit-add" hx-post="/concepts/add" hx-target="closest section" hx-swap="outerHTML">
-        <input type="text" name="title" placeholder="new concept… e.g. CPU as a busy office" required maxlength="300">
-        <select name="course">${courseOptions(courses, null)}</select>
-        <button type="submit" class="btn-secondary">＋ add</button>
-      </form>
-    </section>`;
-}
-
 export interface ConceptsNextData {
   rows: ConceptRow[];
   courses: { id: number; name: string }[];

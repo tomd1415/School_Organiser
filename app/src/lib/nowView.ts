@@ -16,7 +16,7 @@ import { BriefItem } from '../services/brief';
 import { renderPrepList, renderPrepAdd } from './prepView';
 import { renderTimerBanner } from '../routes/timer';
 import { markOpenAttrs } from '../routes/markModal';
-import { addDays, toMinutes, weekdayOf } from './time';
+import { addDays, toMinutes, weekdayOf, fromMinutes } from './time';
 
 export interface NeedsRow {
   rank: number; // 0 = safeguarding (always top), then overdue/urgent → routine
@@ -152,12 +152,6 @@ export function renderCurrentCard(
   </div>`;
 }
 
-export function fmtMin(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
 export function renderNextCard(
   next: NowLesson,
   state: NowState,
@@ -177,7 +171,7 @@ export function renderNextCard(
     .join('');
   const sameDay = slot.date === state.isoDate;
   const when = sameDay
-    ? `${fmtMin(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
+    ? `${fromMinutes(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
     : esc(slot.date);
   const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
   const openHref = `/lesson?lesson=${next.lessonId}&date=${esc(slot.date)}`;

@@ -2,11 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/server';
 import { pool } from '../../src/db/pool';
-import { getSetting } from '../../src/repos/settings';
-import { getUiShell, setUiShell } from '../../src/lib/nav';
 
 let app: FastifyInstance;
-let savedUiShell: string | null = null;
 let cookie = '';
 let token = '';
 
@@ -16,7 +13,6 @@ function firstCookie(setCookie: string | string[] | undefined): string {
 }
 
 beforeAll(async () => {
-  savedUiShell = await getSetting('ui_shell').catch(() => null);
   app = await buildApp();
   await app.ready();
   const page = await app.inject({ method: 'GET', url: '/login' });
@@ -30,14 +26,7 @@ beforeAll(async () => {
   cookie = firstCookie(res.headers['set-cookie']) || pre;
 });
 
-async function restore(key: string, value: string | null): Promise<void> {
-  if (value === null) await pool.query(`DELETE FROM settings WHERE key = $1`, [key]);
-  else await pool.query(`INSERT INTO settings (key, value, updated_at) VALUES ($1, $2, now()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [key, value]);
-}
-
 afterAll(async () => {
-  await restore('ui_shell', savedUiShell);
-  setUiShell(savedUiShell || 'classic');
   await app.close();
   await pool.end();
 });

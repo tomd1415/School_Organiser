@@ -65,11 +65,6 @@ export function renderResourceItem(r: ResourceRow): string {
   </li>`;
 }
 
-export function renderResourceList(rows: ResourceRow[]): string {
-  const items = rows.length ? rows.map(renderResourceItem).join('') : '';
-  return `<ul class="res-list" id="resources-list">${items}</ul>`;
-}
-
 // Search box + kind filter. Submits q + kind via hx-get on every keystroke (debounced)
 // and on filter change, swapping just the #res-list partial.
 export function renderSearchBar(kinds: string[], q: string, kind: string): string {

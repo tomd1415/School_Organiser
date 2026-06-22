@@ -15,7 +15,6 @@ const TZ = 'Europe/London';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const Query = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), year: z.coerce.number().int().positive().optional() });
 
-import { getUiShell } from '../lib/nav';
 import {
   mondayOf,
   fmtShort,
@@ -107,32 +106,15 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
       table = `<p class="muted">The timetable is unavailable — the database is not reachable. Try <code>./start.sh</code>.</p>`;
     }
 
-    if (getUiShell() === 'next') {
-      const body = renderTimetableNext({
-        table,
-        yearLabel,
-        prev,
-        next,
-        yearQ,
-        explicitYear,
-        csrf: reply.generateCsrf(),
-      });
-      return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
-    }
-
-    const body = `
-      <section class="tt">
-        <div class="tt-head">
-          <h1>Timetable${yearLabel}</h1>
-          <nav class="tt-weeknav">
-            <a href="/timetable?date=${esc(prev)}${yearQ}">◀ Prev</a>
-            <a href="/timetable">This week</a>
-            <a href="/timetable?date=${esc(next)}${yearQ}">Next ▶</a>
-          </nav>${explicitYear ? ' <a class="tt-exit-preview muted" href="/timetable">exit preview →</a>' : ''}
-        </div>
-        ${table}
-        <p class="tt-legend"><span class="tt-dot tt-dot-red"></span> no scheme · <span class="tt-dot tt-dot-purple"></span> plan to develop · <span class="tt-dot tt-dot-blue"></span> resource to edit · <span class="tt-key tt-free"></span> Free (protected) · <span class="tt-key tt-oversee">⚑</span> Lesson I oversee · <span class="tt-ex-free">Free</span>/<span class="tt-ex-cover">Cover</span> = dated exception · <span class="tt-daykind">Holiday</span> = no teaching · colour = course</p>
-      </section>`;
+    const body = renderTimetableNext({
+      table,
+      yearLabel,
+      prev,
+      next,
+      yearQ,
+      explicitYear,
+      csrf: reply.generateCsrf(),
+    });
     return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
   });
 }

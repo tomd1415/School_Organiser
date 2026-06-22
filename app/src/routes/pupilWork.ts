@@ -25,7 +25,6 @@ import { getGroupTeachingContext, setGroupTeachingContext } from '../repos/adapt
 import { getLessonWorksheetMeta } from '../services/worksheet';
 import { pupilAccessEnabled } from './pupilAuth';
 import { marksEnabled } from '../auth/marksGate';
-import { getUiShell } from '../lib/nav';
 import { callLLM } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
 import { CLASS_WORK_SYSTEM, CLASS_WORK_VERSION, CLASS_WORK_INSTRUCTION, classWorkItems } from '../llm/prompts/classWork';

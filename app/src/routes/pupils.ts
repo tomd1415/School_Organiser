@@ -15,7 +15,6 @@ import {
   type PupilLoginRow,
 } from '../repos/pupilCredentials';
 import { revokeAllDevices } from '../repos/pupilDevices';
-import { getUiShell } from '../lib/nav';
 import { createNote } from '../repos/notes';
 import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';

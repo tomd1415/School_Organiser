@@ -5,7 +5,6 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { getUiShell } from '../lib/nav';
 import { renderSavedStatus } from '../lib/notesView';
 import { renderKitPage as renderKitPageNext } from '../lib/kitView';
 import {
@@ -21,7 +20,6 @@ import { localParts, addDays } from '../lib/time';
 import { importKit } from '../services/kitImport';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
-const CATEGORIES = ['physical-computing', 'robotics', 'computers', 'peripherals', 'av', 'consumables', 'other'];
 
 function staleBefore(today: string): string {
   return addDays(today, -91); // ~a term ago
@@ -52,61 +50,8 @@ function renderRow(e: EquipmentRow, today: string): string {
   </tr>`;
 }
 
-function groupByCategory(rows: EquipmentRow[]): Map<string, EquipmentRow[]> {
-  const m = new Map<string, EquipmentRow[]>();
-  for (const r of rows) {
-    const arr = m.get(r.category) ?? [];
-    arr.push(r);
-    m.set(r.category, arr);
-  }
-  return m;
-}
-
 function renderKitPage(rows: EquipmentRow[], today: string, q: string, showArchived: boolean, csrf: string, importStatus = ''): string {
-  if (getUiShell() === 'next') {
-    return renderKitPageNext({ rows, today, q, showArchived, csrf, importStatus });
-  }
-  const needle = q.trim().toLowerCase();
-  const filtered = needle
-    ? rows.filter((r) => [r.name, r.category, r.location, r.notes, r.tags].some((f) => f && f.toLowerCase().includes(needle)))
-    : rows;
-  const groups = [...groupByCategory(filtered).entries()];
-  const head = `<tr><th>Item</th><th title="how many we own">Own</th><th title="how many currently work">Work</th><th>Location</th><th>Notes</th><th>Tags</th><th>Checked</th><th></th></tr>`;
-  const tables = groups.length
-    ? groups
-        .map(
-          ([cat, items]) => `<h2 class="kit-cat">${esc(cat)}</h2>
-          <div class="table-scroll"><table class="kit-table"><thead>${head}</thead><tbody>${items.map((e) => renderRow(e, today)).join('')}</tbody></table></div>`,
-        )
-        .join('')
-    : `<p class="muted">${needle ? 'Nothing matches the filter.' : 'No kit recorded yet — add the first item below.'}</p>`;
-  const catOpts = CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join('');
-  return `
-    <section class="card kit" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      <h1>Kit — classroom equipment</h1>
-      <p class="muted">Referred to while planning, and given to the AI for every planning feature —
-        practical work is planned within what's listed here. Archive (don't delete) anything that leaves the room.</p>
-      <form method="get" action="/kit" class="kit-filter">
-        <input type="search" name="q" value="${esc(q)}" placeholder="filter… name, notes, tags">
-        <label><input type="checkbox" name="archived" value="1"${showArchived ? ' checked' : ''} onchange="this.form.submit()"> show archived</label>
-        <noscript><button type="submit">Go</button></noscript>
-      </form>
-      ${tables}
-      <form class="kit-add" hx-post="/kit/add" hx-target="closest section" hx-swap="outerHTML">
-        <input type="text" name="name" placeholder="new item… e.g. micro:bit v2" required maxlength="200">
-        <select name="category">${catOpts}</select>
-        <button type="submit" class="btn-secondary">＋ add</button>
-      </form>
-      <details class="kit-import"${importStatus ? ' open' : ''}>
-        <summary>📥 Import kit from a CSV (spreadsheet stock-take)</summary>
-        <form hx-post="/kit/import" hx-target="closest section" hx-swap="outerHTML">
-          <p class="muted">Paste a CSV with a <strong>name</strong> column (optionally category, total, working, location, notes, tags). Existing items are matched by name and updated — re-importing never duplicates.</p>
-          <textarea name="csv" rows="5" placeholder="name,category,total,working,location&#10;micro:bit v2,physical-computing,16,14,cupboard B"></textarea>
-          <button type="submit" class="btn-secondary">Import</button>
-        </form>
-        ${importStatus}
-      </details>
-    </section>`;
+  return renderKitPageNext({ rows, today, q, showArchived, csrf, importStatus });
 }
 
 export function registerKitRoutes(app: FastifyInstance): void {

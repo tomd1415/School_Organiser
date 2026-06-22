@@ -11,7 +11,6 @@ import { marksEnabled } from '../auth/marksGate';
 import { resumeDevice, pupilPrimaryGroup, pupilGroupInSlot, devicesEnabledForGroup } from '../repos/pupilDevices';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
-import { getUiShell } from '../lib/nav';
 
 const DEVICE_COOKIE = 'pupil_device';
 // BUG-002: how long a class-code entry stays valid for the name/PIN steps that follow it. Generous — a

@@ -4,7 +4,6 @@ import { requireAuth } from '../auth/guard';
 import { isLimitedRole } from '../auth/lockdown';
 import { verifyImageSig } from '../lib/lessonImageSig';
 import { esc, layout } from '../lib/html';
-import { getUiShell } from '../lib/nav';
 import {
   addVersion,
   countResources,

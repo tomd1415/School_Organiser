@@ -72,7 +72,6 @@ export interface SettingsPageOptions {
   spendNote: string;
   navDailySet: Set<string>;
   NAV_MODEL: readonly any[];
-  getUiShell: () => string;
   featureModelPickerHtml: string;
 }
 
@@ -116,7 +115,6 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
     spendNote,
     navDailySet,
     NAV_MODEL,
-    getUiShell,
     featureModelPickerHtml,
   } = options;
 

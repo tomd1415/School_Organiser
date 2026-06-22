@@ -12,10 +12,8 @@ import { listCourses } from '../repos/schemes';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
-import { getUiShell } from '../lib/nav';
 import {
   renderRow,
-  renderPage,
   renderConceptsNext,
 } from '../lib/conceptsView';
 
@@ -27,11 +25,7 @@ export function registerConceptRoutes(app: FastifyInstance): void {
     let body: string;
     try {
       const [rows, courses] = await Promise.all([listConcepts(true), listCourses()]);
-      if (getUiShell() === 'next') {
-        body = renderConceptsNext({ rows, courses, csrf });
-      } else {
-        body = renderPage(rows, courses, csrf);
-      }
+      body = renderConceptsNext({ rows, courses, csrf });
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>Teaching concepts</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
@@ -46,10 +40,7 @@ export function registerConceptRoutes(app: FastifyInstance): void {
     await createConcept(b.data.title, Number.isFinite(courseId) ? courseId : null);
     const [rows, courses] = await Promise.all([listConcepts(true), listCourses()]);
     const csrf = reply.generateCsrf();
-    if (getUiShell() === 'next') {
-      return reply.type('text/html').send(renderConceptsNext({ rows, courses, csrf, selectedCourseId: courseId }));
-    }
-    return reply.type('text/html').send(renderPage(rows, courses, csrf));
+    return reply.type('text/html').send(renderConceptsNext({ rows, courses, csrf, selectedCourseId: courseId }));
   });
 
   app.post('/concepts/:id', guard, async (req, reply) => {

@@ -30,23 +30,15 @@ import {
 import { pupilLayout, pupilAccessEnabled } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
 import { marksEnabled } from '../auth/marksGate';
-import { pupilLessonResults, type PupilResults } from '../services/marking';
+import { pupilLessonResults } from '../services/marking';
 import { onPupilDone } from '../services/markingQueue';
 import { devicesEnabledForGroup, rememberDevice, newDeviceSecret } from '../repos/pupilDevices';
 import { appConfig } from '../config/app';
-import { getUiShell } from '../lib/nav';
 import { renderMePage, buildOccurrenceBlock } from '../lib/meView';
 
 const DEVICE_COOKIE = 'pupil_device';
 
 export const ACTIVITY_CHIPS = ['practical', 'typing', 'cards', 'video', 'drawing', 'talking', 'worksheet', 'quiz', 'games', 'reading'];
-const FACES = [
-  { v: 1, e: '🙁' },
-  { v: 2, e: '😐' },
-  { v: 3, e: '🙂' },
-  { v: 4, e: '😀' },
-];
-
 function requirePupil(req: FastifyRequest, reply: FastifyReply): number | null {
   if (req.session.get('role') !== 'pupil') {
     void reply.redirect('/pupil');
@@ -90,51 +82,6 @@ async function groupLessonAt(groupId: number, weekday: number, slotOrder: number
     [groupId, weekday, slotOrder],
   );
   return rows[0]?.id ?? null;
-}
-
-function chipRow(group: 'liked' | 'disliked', selected: Set<string>): string {
-  return ACTIVITY_CHIPS.map(
-    (c) =>
-      `<label class="chip${selected.has(c) ? ' on' : ''}"><input type="checkbox" name="${group}" value="${c}"${selected.has(c) ? ' checked' : ''}> ${esc(c)}</label>`,
-  ).join('');
-}
-
-function feedbackWidget(oc: number, fb: { rating: number | null; liked: string; disliked: string; comment: string } | null): string {
-  const liked = new Set((fb?.liked ?? '').split(',').map((s) => s.trim()).filter(Boolean));
-  const disliked = new Set((fb?.disliked ?? '').split(',').map((s) => s.trim()).filter(Boolean));
-  return `<form class="pupil-feedback" id="fb-${oc}" hx-post="/me/feedback?oc=${oc}" hx-trigger="change delay:400ms" hx-swap="none">
-    <h3>How was this lesson?</h3>
-    <div class="face-row">
-      ${FACES.map((f) => `<label class="face"><input type="radio" name="rating" value="${f.v}"${fb?.rating === f.v ? ' checked' : ''}> <span>${f.e}</span></label>`).join('')}
-    </div>
-    <p class="fb-q">What did you enjoy?</p><div class="chip-row">${chipRow('liked', liked)}</div>
-    <p class="fb-q">What didn't you like?</p><div class="chip-row">${chipRow('disliked', disliked)}</div>
-    <label class="fb-comment">Anything else? <textarea name="comment" rows="2" maxlength="500" placeholder="(optional)">${esc(fb?.comment ?? '')}</textarea></label>
-    <span class="note-status" id="fb-${oc}-status"></span>
-  </form>`;
-}
-
-// 9.5 — a pupil's released results: a kind comment, then big ✓/✗/◐ per answer with a "try this"
-// line. Ticks-only by default (no scores) — two-stars-and-a-wish, never any class comparison.
-function resultsCard(r: PupilResults): string {
-  // No mark for a zero-weight / non-markable point (t === 0) — a "✗" there reads as "wrong" when there
-  // was nothing to get. ✓ full marks · ✗ scored zero of >0 · ◐ partial.
-  const mark = (a: number, t: number): string =>
-    t <= 0 ? '' : a >= t ? '<span class="rc-ok">✓</span>' : a <= 0 ? '<span class="rc-no">✗</span>' : '<span class="rc-part">◐</span>';
-  const items = r.items
-    .map((i) => {
-      // Always give a kind line — never a bare ✗. Use the teacher/AI feedback if present, else a
-      // gentle default so a wrong answer still reads as encouragement, not just a red cross.
-      const fb = i.feedback || (i.awarded <= 0 && i.total > 0 ? 'Have another look at this one next time — you can do it.' : '');
-      return `<li class="rc-item">${mark(i.awarded, i.total)} <span class="rc-q">${esc(i.label)}</span>${r.showScores ? ` <span class="rc-score">${i.awarded}/${i.total}</span>` : ''}
-        ${fb ? `<div class="rc-fb">${esc(fb)}</div>` : ''}</li>`;
-    })
-    .join('');
-  return `<section class="pupil-results">
-    <h2>Your feedback ${r.showScores ? `<span class="rc-total">${r.awarded}/${r.total}</span>` : ''}</h2>
-    ${r.comment ? `<p class="rc-comment">💬 ${esc(r.comment)}</p>` : ''}
-    <ul class="rc-list">${items}</ul>
-  </section>`;
 }
 
 // The pupil's slide deck (left pane) — their ability's slides, one shown at a time, Prev/Next driven
@@ -254,7 +201,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
         const occId = (await findOccurrence(lesson.lessonId, lesson.date)) ?? (await findOrCreateOccurrence(lesson.lessonId, lesson.date));
         const sections = await getOccurrenceCourses(occId);
         let blocks: string[];
-        if (getUiShell() === 'next') {
+        {
           const marksOn = await marksEnabled();
           blocks = await Promise.all(
             sections.map((s) =>
@@ -289,65 +236,6 @@ export function registerMeRoutes(app: FastifyInstance): void {
             lesson,
             blocks,
           });
-        } else {
-          blocks = await Promise.all(
-            sections.map(async (s) => {
-              const oc = Number(s.occurrenceCourseId);
-              let inner = '';
-              if (s.lessonPlanId != null) {
-                // ALL worksheets for this lesson (a lesson may have several) + slides, resolved together.
-                const [worksheets, slidesMd] = await Promise.all([
-                  getLessonWorksheets(Number(s.groupCourseId), Number(s.lessonPlanId)),
-                  getLessonSlidesMarkdown(Number(s.groupCourseId), Number(s.lessonPlanId)),
-                ]);
-                if (worksheets.length) {
-                  // independent per-section reads — run them together, not one after another
-                  const [level, values, done, fb] = await Promise.all([
-                    isTest ? Promise.resolve(testLevel) : getPupilLevel(pupilId, Number(s.groupCourseId)),
-                    getAnswers(pupilId, oc),
-                    isDone(pupilId, oc),
-                    getPupilFeedback(pupilId, oc),
-                  ]);
-                  // Each worksheet renders with its own keyPrefix so two sheets never share a field key.
-                  // Online the name/date are auto-filled (the pupil never types them) — pass who + today.
-                  const renderOne = (w: (typeof worksheets)[number]): string =>
-                    `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
-                  let wsHtml: string;
-                  if (worksheets.length === 1) {
-                    wsHtml = renderOne(worksheets[0]!);
-                  } else {
-                    // Several worksheets → tabs (pupil.js switches panels). First tab is shown.
-                    const tabLabel = (w: (typeof worksheets)[number], i: number): string => esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`);
-                    const tabs = worksheets.map((w, i) => `<button type="button" class="ws-tab${i === 0 ? ' is-on' : ''}" role="tab" aria-selected="${i === 0}" data-ws-tab="${i}">${tabLabel(w, i)}</button>`).join('');
-                    const panels = worksheets.map((w, i) => `<div class="ws-panel${i === 0 ? ' is-on' : ''}" data-ws-panel="${i}">${renderOne(w)}</div>`).join('');
-                    wsHtml = `<div class="ws-tabs" role="tablist" aria-label="Worksheets">${tabs}</div>${panels}`;
-                  }
-                  const results = (await marksEnabled()) ? await pupilLessonResults(pupilId, oc) : null;
-                  // 10.13: an encouraging "X of Y done" chip, filled + kept current client-side (pupil.js).
-                  const work = `${results ? resultsCard(results) : ''}<p class="ws-progress" aria-live="polite"></p>${wsHtml}${doneBlock(oc, done)}${feedbackWidget(oc, fb)}`;
-                  // Two-pane: the pupil's ability-matched slides on the left, the worksheet on the right —
-                  // follow the board while you work. No slides bound → the worksheet uses the full width.
-                  const deck = slidesMd ? renderSlideDeck(slidesMd, String(oc), level) : '';
-                  // On a phone/narrow screen the panes stack, so a sticky Slides/Worksheet toggle keeps
-                  // the pupil's own work one tap away (default = Worksheet; the board shows the slides too).
-                  // pupil.js flips data-pane; on a wide screen the toggle is hidden and both panes show.
-                  inner = deck
-                    ? `<div class="pupil-twopane" data-pane="work">
-                         <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
-                           <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
-                           <button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 My worksheet</button>
-                         </div>
-                         <div class="pupil-pane pupil-pane-slides">${deck}</div>
-                         <div class="pupil-pane pupil-pane-work">${work}</div>
-                       </div>`
-                    : work;
-                }
-              }
-              if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
-              return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`;
-            }),
-          );
-          body = `${head}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
         }
       }
     } catch (err) {

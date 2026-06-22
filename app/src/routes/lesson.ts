@@ -86,18 +86,16 @@ import { renderWorksheet, findImagePlaceholders, type Level } from '../lib/works
 import { getLessonWorksheet, getLessonSlidesMarkdown } from '../services/worksheet';
 import { renderSlideDeck } from './me';
 import { pupilLayout } from './pupilAuth';
-import { getUiShell } from '../lib/nav';
 import { pupilWorkRows, setPupilLevel, pupilCanAccessOc, type PupilWorkRow } from '../repos/pupilWork';
 import { renderLessonCockpit, renderBoardNext, renderRecentNotesList, renderActivityGroupsContent, type CockpitNote } from '../lib/lessonView';
 import { saveLessonDocMarkdown } from '../services/lessonDocEdit';
-import { renderNewNoteButton, renderNotesList, renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
+import { renderSavedStatus, type FollowupItem, type NoteItem } from '../lib/notesView';
 import { listOccurrencePrep, addOccurrencePrep, type PrepItem } from '../repos/prep';
 import { listTaFeedback, type TaFeedbackRow } from '../repos/taFeedback';
 import { addException, deleteException, listExceptionsFor, listExceptionsBetween, type ExceptionRow } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException, effectiveRoom, NO_EXCEPTION, type ExceptionEffect } from '../services/exceptions';
 import { classifyDay } from '../services/clock';
 import { listRooms, listStaff } from '../repos/setup';
-import { renderPrepList, renderPrepAdd } from '../lib/prepView';
 import { getTimetabledLessons, getPeriodDefinitions, getTermDatesAll } from '../repos/timetable';
 import { localParts, weekdayOf } from '../lib/time';
 import { formatObjectives, formatOutline, outlineSteps } from '../lib/formatLesson';
@@ -307,18 +305,6 @@ function renderOutlineTracker(oc: number, outline: string | null, progress: numb
   return wrap(`<span class="oc-label">Outline${editing ? '' : ' — tap where you are'}</span><ol class="trk-list">${rows}</ol>`, 'trk oc-block');
 }
 
-function renderTaFeedback(rows: TaFeedbackRow[]): string {
-  if (!rows.length) return '';
-  const items = rows
-    .map(
-      (f) => `<li${f.safeguarding ? ' class="sg"' : ''}>${f.safeguarding ? '🛡 <strong>safeguarding flag</strong> · ' : ''}<span class="muted">${esc(f.createdAt)}</span>
-        ${f.pupilsText ? `<div><strong>Pupils:</strong> ${esc(f.pupilsText)}</div>` : ''}
-        ${f.lessonText ? `<div><strong>Lesson:</strong> ${esc(f.lessonText)}</div>` : ''}</li>`,
-    )
-    .join('');
-  return `<div class="oc-block ta-fb-teacher"><span class="oc-label">TA feedback</span><ul class="ta-fb-list">${items}</ul></div>`;
-}
-
 const LEVEL_LABEL: Record<Level, string> = { support: '🟢 Support', core: '🟡 Core', challenge: '🔴 Challenge' };
 
 /** The teacher's "preview as pupil" fragment: the worksheet sliced to one level, rendered inert
@@ -354,88 +340,6 @@ function materialsConsent(titles: string[]): string {
     </label><input type="hidden" name="use_materials" value="0">`;
 }
 
-function renderSection(
-  s: CourseSection,
-  plans: Array<{ id: number; title: string }>,
-  resources: LinkedResource[],
-  adaptedRes: LinkedResource[],
-  taFb: TaFeedbackRow[],
-  eff: EffectiveLesson | undefined,
-  slot: { lessonId: number; date: string },
-  materialTitles: string[],
-): string {
-  const colour = s.colour ?? '#94a3b8';
-  const oc = s.occurrenceCourseId;
-  const power = getExperienceMode() === 'power';
-  const slotKey = `${slot.lessonId}:${s.groupCourseId}`;
-  const planOpts =
-    `<option value=""${s.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>` +
-    plans.map((p) => `<option value="${p.id}"${p.id === s.lessonPlanId ? ' selected' : ''}>${esc(p.title)}</option>`).join('');
-  const last = s.lastStop
-    ? `<p class="ld-last">Last time → stopped at <strong>${esc(s.lastStop.stoppingPoint)}</strong> <span class="muted">(${esc(s.lastStop.date)})</span></p>`
-    : '';
-  return `
-    <section class="ld-course" style="border-left-color:${esc(colour)}">
-      <h2>${esc(s.courseName)}</h2>
-      <label class="stop-label">Plan
-        <select name="lesson_plan_id" hx-post="/occurrence-course/${oc}/plan" hx-trigger="change" hx-swap="none">${planOpts}</select>
-        <a class="link" href="/schemes?course=${s.courseId}">edit →</a>
-        <span class="note-status" id="oc-${oc}-plan-status"></span>
-      </label>
-      ${renderLessonEdit(oc, s, eff ?? null, null, 'off')}
-      ${s.lessonPlanId != null && eff ? renderAdaptation(s.groupCourseId, s.lessonPlanId, eff) : ''}
-      ${renderResourcesBlock(oc, s, eff?.adapted ?? false, resources, adaptedRes, materialTitles)}
-      ${
-        s.lessonPlanId != null
-          ? `<p class="pv-open"><a class="link" href="/lesson/pupil-view?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Open this lesson exactly as the pupil sees it, in a new tab — with an edit toggle to tweak the slides/worksheet for this class or the master">👁 Open as pupil (new tab) ↗</a>
-            <a class="link" href="/lesson/present?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" target="_blank" rel="noopener" title="Presenter view for your own screen — the slides WITH your private teaching notes. The board (Open as pupil) never shows them.">🧑‍🏫 Presenter (your notes) ↗</a></p>
-      <details class="ws-preview" id="ws-prev-d-${oc}">
-        <summary>quick peek — each ability level inline</summary>
-        <div class="ws-preview-tabs" role="tablist">
-          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=support" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
-          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
-          <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=challenge" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🔴 Challenge</button>
-        </div>
-        <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
-      </details>
-      <form class="test-pupil-launch" hx-post="/test-pupil/open" hx-swap="none" title="Open this lesson as a test pupil — the real worksheet, autosave and Done, at any level (no time limit)">
-        <input type="hidden" name="lesson" value="${slot.lessonId}">
-        <input type="hidden" name="date" value="${esc(slot.date)}">
-        🧪 Test as pupil
-        <select name="level" aria-label="level"><option value="support">🟢 Support</option><option value="core" selected>🟡 Core</option><option value="challenge">🔴 Challenge</option></select>
-        <button type="submit" class="link">open →</button>
-      </form>`
-          : ''
-      }
-      ${s.lessonPlanId != null ? `<div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${s.groupCourseId}&amp;lp=${s.lessonPlanId}" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
-      ${s.lessonPlanId != null ? `<div class="ld-review" hx-get="/lesson/plan/${s.lessonPlanId}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>` : ''}
-      <div class="ld-recall-slot" hx-get="/lesson/oc/${oc}/spaced-recall" hx-trigger="load" hx-swap="innerHTML"></div>
-      ${s.lessonPlanId != null ? `<div class="ld-cover"><button type="button" class="link" title="Generate self-contained cover work + answers for a cover teacher (AI)" hx-post="/lesson/oc/${oc}/cover-pack" hx-target="#cover-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">📋 Generate cover work (AI)</button><span id="cover-${oc}"></span></div>` : ''}
-      ${last}
-      <label class="stop-label">Stopping point
-        <input class="stop-input" name="stopping_point" value="${esc(s.stoppingPoint ?? '')}" placeholder="where we got to…"
-          hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
-        <span class="note-status" id="oc-${oc}-status"></span>
-      </label>
-      ${renderTaFeedback(taFb)}
-      <div class="pupil-work-panel" hx-get="/lesson/oc/${oc}/pupil-work" hx-trigger="load" hx-swap="innerHTML"></div>
-      <p class="ld-slot-links">
-        <a class="link" href="/map?slot=${slotKey}">📅 term map for this class →</a>
-        ${s.lessonPlanId != null ? `<button type="button" class="link" hx-post="/map/shift" hx-vals='{"slot":"${slotKey}","date":"${esc(slot.date)}"}'
-          hx-confirm="Didn't finish? This lesson repeats at the next ${esc(s.courseName)} slot and everything after shifts back one school week (holidays skipped)."
-          title="repeat this lesson next week and shift the rest">↻ continue next week</button>` : ''}
-      </p>
-      ${
-        power
-          ? `<details class="group-ctx advanced" id="group-ctx-${s.groupCourseId}">
-        <summary>this class's teaching context</summary>
-        <div hx-get="/lesson/group-context/${s.groupCourseId}" hx-trigger="toggle from:#group-ctx-${s.groupCourseId} once" hx-target="this" hx-swap="innerHTML"><span class="muted">…</span></div>
-      </details>`
-          : ''
-      }
-    </section>`;
-}
-
 const EX_LABEL: Record<string, string> = { cancelled: 'Cancelled', free: 'Free (class away)', room_change: 'Room change', cover: 'Cover', off_timetable: 'Off-timetable day' };
 
 function renderExceptions(ex: ExceptionRow[], lessonId: number, date: string, rooms: Array<{ id: number; name: string }>, staff: Array<{ id: number; name: string }>): string {
@@ -463,70 +367,6 @@ function renderExceptions(ex: ExceptionRow[], lessonId: number, date: string, ro
         <button type="submit" class="btn-secondary">add</button>
       </form>
     </details>`;
-}
-
-function renderDetail(
-  detail: LessonDetail,
-  notes: NoteItem[],
-  prep: PrepItem[],
-  plansByCourse: Map<number, Array<{ id: number; title: string }>>,
-  resByPlan: Map<number, LinkedResource[]>,
-  matByPlan: Map<number, string[]>,
-  effByKey: Map<string, EffectiveLesson>,
-  adaptedResByKey: Map<string, LinkedResource[]>,
-  taFbByOc: Map<number, TaFeedbackRow[]>,
-  exceptionsHtml: string,
-  csrf: string,
-): string {
-  const h = detail.header;
-  const heading = h.groupName ? esc(h.groupName) : esc(purposeLabel(h.purpose));
-  const flag = h.isSelf ? '' : '⚑ ';
-  const meta = [fmtLong(h.date), h.periodLabel, h.start && h.end ? `${h.start}–${h.end}` : '', h.roomName ?? '']
-    .filter(Boolean)
-    .map((x) => esc(x))
-    .join(' · ');
-
-  const sections =
-    detail.sections.length > 0
-      ? detail.sections
-          .map((s) =>
-            renderSection(
-              s,
-              plansByCourse.get(s.courseId) ?? [],
-              (s.lessonPlanId != null && resByPlan.get(s.lessonPlanId)) || [],
-              adaptedResByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) ?? [],
-              taFbByOc.get(s.occurrenceCourseId) ?? [],
-              s.lessonPlanId != null ? effByKey.get(`${s.groupCourseId}:${s.lessonPlanId}`) : undefined,
-              { lessonId: h.lessonId, date: h.date },
-              (s.lessonPlanId != null && matByPlan.get(s.lessonPlanId)) || [],
-            ),
-          )
-          .join('')
-      : `<p class="muted">${h.purpose === 'free' ? 'Free period — protected work time.' : 'No courses attached to this slot.'}</p>`;
-
-  const listId = `notes-list-${h.occurrenceId}`;
-  return `
-    <section class="ld" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      <p class="kicker">${flag}${h.isSelf ? 'Lesson' : 'Lesson I oversee'}</p>
-      <h1>${heading}</h1>
-      <p class="ld-meta">${meta} · <a class="link" href="/lesson/print?lesson=${h.lessonId}&date=${esc(h.date)}" target="_blank" rel="noopener">🖨 print plan</a> · <a class="link" href="/today/print?date=${esc(h.date)}" target="_blank" rel="noopener">🖨 today / cover</a></p>
-      <div class="act-timer" data-timer>
-        <span class="act-timer-display" data-timer-display>—:—</span>
-        <button type="button" class="link" data-timer-set="5">5m</button>
-        <button type="button" class="link" data-timer-set="10">10m</button>
-        <button type="button" class="link" data-timer-set="15">15m</button>
-        <button type="button" class="link" data-timer-stop>stop</button>
-        <button type="button" class="link" data-timer-full title="show big on the board">⛶</button>
-      </div>
-      ${exceptionsHtml}
-      ${sections}
-      <section class="ld-notesblock"><h2>Before the bell</h2>${renderPrepList(prep, '/prep', 'prep', `prep-${detail.header.occurrenceId}`)}${renderPrepAdd('/prep/add', { occurrence: detail.header.occurrenceId }, `prep-${detail.header.occurrenceId}`)}</section>
-      <section class="ld-notesblock">
-        <div class="ld-notes-head"><h2>Notes</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: h.occurrenceId })}</div>
-        ${renderNotesList(listId, notes)}
-      </section>
-      <p><a href="/timetable">← Timetable</a></p>
-    </section>`;
 }
 
 
@@ -811,7 +651,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       const csrf = reply.generateCsrf();
       const title = header.groupName ?? purposeLabel(header.purpose);
 
-      if (getUiShell() === 'next') {
+      {
         // BUG-052: key by groupCourseId:lessonPlanId — two classes adapting the same plan have distinct
         // decks, so keying by plan alone made later sections overwrite the first's slides.
         const slidesByKey = new Map<string, string | null>();
@@ -850,10 +690,6 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         });
         return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf }));
       }
-
-      return reply
-        .type('text/html')
-        .send(layout({ title, body: renderDetail(detail, noteItems, prep, plansByCourse, resByPlan, matByPlan, effByKey, adaptedResByKey, taFbByOc, exceptionsHtml, csrf), authed: true, csrfToken: csrf }));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="card"><h1>Lesson</h1><p class="muted">Lesson detail is unavailable — the database is not reachable.</p><p><a href="/timetable">← Timetable</a></p></section>`;
@@ -935,7 +771,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     ]);
     const className = isMaster ? 'master lesson · every class' : (info?.groupName ?? 'class');
 
-    if (getUiShell() === 'next' && edit === 'off') {
+    if (edit === 'off') {
       const page = renderBoardNext({
         master: master || { title: 'Lesson' },
         className,
@@ -959,29 +795,17 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         <div class="pv-levels">${lvlTab('support', '🟢')}${lvlTab('core', '🟡')}${lvlTab('challenge', '🔴')}</div>
         <div class="edit-toggle">${editTabs}</div>
       </div>`;
-    let bodyContent: string;
-    if (edit === 'off') {
-      const deck = slidesMd ? renderSlideDeck(slidesMd, `pv-${gcKey}-${lp}`, level) : '';
-      const wsHtml = ws ? renderWorksheet(ws.markdown, { mode: 'preview', level }).html : '<p class="pupil-note">No worksheet for this lesson yet — generate one, or switch to ✏ edit.</p>';
-      bodyContent = deck
-        ? `<div class="pupil-twopane" data-pane="work">
-            <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet"><button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button><button type="button" class="pane-tab is-on" role="tab" data-pane-btn="work" aria-selected="true">📝 Worksheet</button></div>
-            <div class="pupil-pane pupil-pane-slides">${deck}</div>
-            <div class="pupil-pane pupil-pane-work">${wsHtml}</div>
-          </div>`
-        : `<div class="pupil-pane pupil-pane-work">${wsHtml}</div>`;
-    } else {
-      const banner =
-        edit === 'local'
-          ? `<p class="edit-banner edit-local">✏ Editing <strong>${esc(className)}’s</strong> copy — saved for this class only; the master and other classes are unchanged.</p>`
-          : `<p class="edit-banner edit-master">✏ Editing the <strong>master</strong> — saved for <strong>every</strong> class using this lesson.</p>`;
-      const editor = (kind: 'slides' | 'worksheet', label: string, md: string): string =>
-        `<details class="pv-edit" open><summary>${label} — markdown</summary>
-          <textarea class="pv-md" name="markdown" rows="18" spellcheck="false"
-            hx-post="/lesson/pupil-view/save?${scopeQ}&amp;lp=${lp}&amp;kind=${kind}&amp;scope=${edit}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(md)}</textarea>
-          <span class="ws-saved" id="pv-${kind}-status" aria-live="polite"></span></details>`;
-      bodyContent = banner + editor('slides', '📊 Slides', slidesMd ?? '') + editor('worksheet', '📝 Worksheet', ws?.markdown ?? '');
-    }
+    // `edit` is 'local' | 'master' here — the 'off' (clean board) case returned via renderBoardNext above.
+    const banner =
+      edit === 'local'
+        ? `<p class="edit-banner edit-local">✏ Editing <strong>${esc(className)}’s</strong> copy — saved for this class only; the master and other classes are unchanged.</p>`
+        : `<p class="edit-banner edit-master">✏ Editing the <strong>master</strong> — saved for <strong>every</strong> class using this lesson.</p>`;
+    const editor = (kind: 'slides' | 'worksheet', label: string, md: string): string =>
+      `<details class="pv-edit" open><summary>${label} — markdown</summary>
+        <textarea class="pv-md" name="markdown" rows="18" spellcheck="false"
+          hx-post="/lesson/pupil-view/save?${scopeQ}&amp;lp=${lp}&amp;kind=${kind}&amp;scope=${edit}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(md)}</textarea>
+        <span class="ws-saved" id="pv-${kind}-status" aria-live="polite"></span></details>`;
+    const bodyContent = banner + editor('slides', '📊 Slides', slidesMd ?? '') + editor('worksheet', '📝 Worksheet', ws?.markdown ?? '');
     const page = `<section class="pupil-card pv-card" hx-headers='{"x-csrf-token":"${csrf}"}'>${header}${bodyContent}</section>`;
     return reply.type('text/html').send(pupilLayout(page, csrf));
   });

@@ -1,17 +1,8 @@
-import { renderRail, navClientJson, getExperienceMode, getUiShell, renderHeader } from './nav';
+import { renderRail, navClientJson, getExperienceMode, renderHeader } from './nav';
+import { esc } from './esc';
 
-const ENTITIES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-/** Escape a value for safe interpolation into HTML. */
-export function esc(value: unknown): string {
-  return String(value).replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
-}
+// Re-exported so the many `import { esc } from '../lib/html'` call sites keep working.
+export { esc };
 
 interface LayoutOptions {
   title: string;
@@ -22,7 +13,6 @@ interface LayoutOptions {
 
 export function nextShell({ title, body, authed = false, csrfToken }: LayoutOptions): string {
   const exp = getExperienceMode();
-  const shell = getUiShell();
   const csrfHdr = authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : '';
   
   const logoutNext =

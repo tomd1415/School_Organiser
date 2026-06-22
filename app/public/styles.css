@@ -3049,9 +3049,11 @@ body[data-shell="next"] .present-position {
 
 /* Legacy-widget compatibility layer
  *
- * The next shell deliberately imports the classic stylesheet while routes are
- * migrated incrementally. These scoped rules remove the remaining light-mode
- * surfaces without changing the widgets' markup or interaction contracts.
+ * styles.css unconditionally @imports the recovered classic widget stylesheet
+ * (styles-base-widgets.css) for its structural rules; this layer is load-bearing, not a
+ * temporary migration crutch. These scoped rules repaint the remaining light-mode surfaces
+ * dark without changing the widgets' markup. The durable fix is to tokenise the base sheet
+ * so the dark :root reaches it directly — see docs/LEGACY_REMOVAL_PLAN_2026-06-22.md (Phase 1b).
  */
 body[data-shell="next"] .search-panel,
 body[data-shell="next"] .quick-capture[open] .qc-form,
@@ -3068,7 +3070,6 @@ body[data-shell="next"] .pin-key,
 body[data-shell="next"] .ws-parsons-line,
 body[data-shell="next"] .ws-parsons-btns button,
 body[data-shell="next"] .deck-slide,
-body[data-shell="next"] .cards-page,
 body[data-shell="next"] .qc-btn,
 body[data-shell="next"] .topbar-search {
   background: var(--surface) !important;
@@ -3096,7 +3097,9 @@ body[data-shell="next"] .ws-input,
 body[data-shell="next"] .ws-blank,
 body[data-shell="next"] .ws-ed-ta,
 body[data-shell="next"] .ws-ed-input,
-body[data-shell="next"] select.ws-ed-kind {
+body[data-shell="next"] select.ws-ed-kind,
+body[data-shell="next"] .task-controls select,
+body[data-shell="next"] .task-controls input {
   background: var(--bg-soft) !important;
   border-color: var(--line-strong) !important;
   color: var(--text) !important;
@@ -3356,4 +3359,26 @@ body.deck {
 /* the document view shows visuals + images sensibly too */
 .md-doc .md-visual { font-size: 3rem; margin: 0.2rem 0; }
 .md-doc .md-img { max-width: 100%; border-radius: 8px; }
+
+/* Standalone print pages (login cards, answer packs, cover sheets). `.cards-page` sits on the
+   <body> itself, so the descendant override in the compat layer above never matched it — the classic
+   `.cards-page{background:#fff}` won and the dark-theme text tokens (--muted/--line) rendered
+   light-grey-on-white (unreadable). Match `body.deck`: dark on screen, black-on-white for print. */
+body.cards-page {
+  background: var(--bg);
+  color: var(--text);
+}
+@media print {
+  body.cards-page {
+    background: #fff;
+    color: #000;
+    --ink: #000;
+    --text: #000;
+    --muted: #444;
+    --quiet: #555;
+    --line: #000;
+    --card: #fff;
+    --surface: #fff;
+  }
+}
 

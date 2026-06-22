@@ -2,25 +2,14 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { addDays, localParts, weekdayOf } from '../lib/time';
+import { addDays, localParts } from '../lib/time';
 import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import { buildOverseenWeek, type OverseenLesson } from '../services/timetable';
+import { fmtShort, mondayOf } from '../lib/timetableView';
 
 const TZ = 'Europe/London';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const Query = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
-
-/** Monday of the week containing `isoDate`; on the weekend, the upcoming Monday. */
-function mondayOf(isoDate: string): string {
-  const wd = weekdayOf(isoDate);
-  return wd >= 6 ? addDays(isoDate, 8 - wd) : addDays(isoDate, 1 - wd);
-}
-
-function fmtShort(iso: string): string {
-  return new Intl.DateTimeFormat('en-GB', { timeZone: TZ, day: 'numeric', month: 'short' }).format(
-    new Date(`${iso}T12:00:00Z`),
-  );
-}
 
 function renderLesson(l: OverseenLesson, date: string): string {
   const colour = l.courses[0]?.colour ?? '#94a3b8';

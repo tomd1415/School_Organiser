@@ -11,8 +11,6 @@ import {
   getExperienceMode,
   shouldShowExperienceNudge,
   EXPERIENCE_NUDGE_AT,
-  setUiShell,
-  getUiShell,
 } from '../src/lib/nav';
 import { layout } from '../src/lib/html';
 
@@ -24,7 +22,6 @@ const ADVANCED = ['/recurring', '/time', '/pupils', '/concepts', '/kit', '/setup
 afterEach(() => {
   setNavDailyOverride(null);
   setExperienceMode('everyday');
-  setUiShell('next'); // reset to the default shell (BUG-054) so classic-rail tests don't leak the flag
 });
 
 describe('nav model (single source of truth)', () => {
@@ -121,20 +118,8 @@ describe('client jump-map (unchanged)', () => {
   });
 });
 
-describe('ui_shell flag (UI overhaul seam)', () => {
-  it('always returns next as the classic shell is retired', () => {
-    setUiShell(null);
-    expect(getUiShell()).toBe('next');
-    setUiShell('classic');
-    expect(getUiShell()).toBe('next');
-    setUiShell('next');
-    expect(getUiShell()).toBe('next');
-  });
-
-  it('layout() always reflects the shell as data-shell="next" on <body>', () => {
-    setUiShell('classic');
-    expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="next"');
-    setUiShell('next');
+describe('shell chrome (single dark shell)', () => {
+  it('layout() always renders data-shell="next" on <body>', () => {
     expect(layout({ title: 't', body: '<p>x</p>' })).toContain('data-shell="next"');
   });
 });

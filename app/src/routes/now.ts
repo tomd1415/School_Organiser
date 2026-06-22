@@ -11,7 +11,7 @@ import {
   getOccurrenceNotes,
 } from '../repos/occurrence';
 import { getSetting } from '../repos/settings';
-import { getExperienceMode, shouldShowExperienceNudge, EXPERIENCE_NUDGE_AT, getUiShell } from '../lib/nav';
+import { getExperienceMode, shouldShowExperienceNudge } from '../lib/nav';
 import { getFollowupsForOccurrence } from '../repos/notes';
 import type { LastStop, OccurrenceCourseRow } from '../services/occurrence';
 import { beforeNextBell, type BellTask } from '../services/task';
@@ -19,7 +19,6 @@ import { getGroupSlots, listBellTasks } from '../repos/tasks';
 import type { UpcomingEvent } from '../services/event';
 import { listUpcoming } from '../repos/events';
 import { getRunningTimer } from '../repos/timeEntries';
-import { renderTimerBanner } from './timer';
 import { getDayChecklist } from '../repos/prep';
 import { marksEnabled } from '../auth/marksGate';
 import { marksBacklog } from '../repos/marking';
@@ -38,10 +37,6 @@ import {
   renderStrip,
   renderCurrentCard,
   renderNextCard,
-  renderNeedsMe,
-  renderDayCard,
-  renderMorningBrief,
-  renderCurrentInterests,
   renderDayList,
   purposeLabel,
   lessonName,
@@ -174,7 +169,6 @@ export function registerNowRoutes(app: FastifyInstance): void {
         openReviews: await openReviewCount(),
       });
 
-      if (getUiShell() === 'next') {
         const body = renderNowNext({
           state,
           current,
@@ -203,40 +197,6 @@ export function registerNowRoutes(app: FastifyInstance): void {
           captured,
         });
         return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
-      }
-
-      const body = `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
-        ${renderTimerBanner(running)}
-        ${renderStrip(state, current, next, now, ctx.tz, ctx.terms, false, curEx, nextEx)}
-        ${
-          showNudge
-            ? `<div class="exp-nudge" id="exp-nudge">
-                <span class="exp-nudge-text">✨ You've taught ${EXPERIENCE_NUDGE_AT}+ lessons — ready for the planning &amp; AI tools?</span>
-                <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
-                  <input type="hidden" name="experience" value="power">
-                  <button type="submit" class="btn-secondary">Turn on advanced tools</button>
-                </form>
-                <button type="button" class="link" hx-post="/settings/experience-nudge/dismiss" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
-              </div>`
-            : ''
-        }
-        ${exToday ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>` : ''}
-        <div class="now-cols">
-          <div class="now-col now-col-now">
-            <p class="now-focus"><a href="/focus">🎯 Focus — one thing now →</a></p>
-            ${card}
-            ${dayList}
-          </div>
-          <div class="now-col now-col-next">
-            ${nextCard}
-            ${renderMorningBrief(briefItems)}
-            ${renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate)}
-            ${renderCurrentInterests(interests)}
-            ${renderDayCard(dayPart, dayItems, state.isoDate)}
-          </div>
-        </div>
-      </section>`;
-      return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="now"><p class="kicker">Now</p><h1>Now</h1><p class="muted">The database is not reachable — start the stack with <code>./start.sh</code>.</p></section>`;

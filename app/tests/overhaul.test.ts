@@ -1,18 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { FocusModeManager } from '../src/lib/focusMode';
 import { calculateCountdown, tzDateToEpoch } from '../src/lib/time';
-import { getUiShell, setUiShell } from '../src/lib/nav';
-
-describe('ui_shell flag (UI overhaul seam)', () => {
-  it('always returns next as the classic shell is retired', () => {
-    setUiShell(null);
-    expect(getUiShell()).toBe('next');
-    setUiShell('classic');
-    expect(getUiShell()).toBe('next');
-    setUiShell('next');
-    expect(getUiShell()).toBe('next');
-  });
-});
 
 describe('FocusModeManager unit tests', () => {
   it('initializes with focus-mode class if storage has true', () => {

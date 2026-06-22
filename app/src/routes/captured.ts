@@ -13,8 +13,6 @@ import { guardMatch } from '../lib/markSafetyGate';
 import { CAPTURED_CATEGORISE_SYSTEM, CAPTURED_CATEGORISE_VERSION, capturedInstruction, capturedItems } from '../llm/prompts/capturedCategorise';
 import { capturedCategoriseSchema } from '../llm/schemas/capturedCategorise';
 
-import { getUiShell } from '../lib/nav';
-
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 export function registerCapturedRoutes(app: FastifyInstance): void {
@@ -34,8 +32,7 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
       listHtml = `<p class="muted">Captured info is unavailable — the database is not reachable.</p>`;
     }
 
-    if (getUiShell() === 'next') {
-      const chip = (c: string | undefined, label: string) =>
+    const chip = (c: string | undefined, label: string) =>
         `<a href="/captured${c ? `?category=${c}` : ''}" class="chip${c === category ? ' active' : ''}">${label}</a>`;
       const chips = [chip(undefined, 'All'), ...CAPTURED_CATEGORIES.map((c) => chip(c, CATEGORY_LABELS[c] ?? c))].join(' ');
 
@@ -63,19 +60,6 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
           </div>
         </section>`;
       return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf }));
-    }
-
-    const tab = (c: string | undefined, label: string) =>
-      `<a href="/captured${c ? `?category=${c}` : ''}"${c === category ? ' class="active"' : ''}>${label}</a>`;
-    const tabs = [tab(undefined, 'All'), ...CAPTURED_CATEGORIES.map((c) => tab(c, CATEGORY_LABELS[c] ?? c))].join(' ');
-    const body = `
-      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
-        <div class="ld-notes-head"><h1>Captured</h1>${renderNewCapturedButton()}</div>
-        <p class="muted">Things you were told but can't action yet. Pick a category, set when it should resurface, or make it a task. ⚑ safeguarding stays out of AI (Phase 4).</p>
-        <nav class="task-tabs">${tabs}</nav>
-        ${listHtml}
-      </section>`;
-    return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf }));
   });
 
   // 10.20 — capture from ANYWHERE: the topbar quick-capture box writes straight to the store, so a

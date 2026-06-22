@@ -35,3 +35,6 @@ data/resources/
 # pupil-data-sensitive old_lesson_plan folder, so keep them local.
 data/reconcile-report/
 instances/
+
+# Redirected test output (scratch — never commit)
+app/test_out.txt
