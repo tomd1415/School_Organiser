@@ -38,3 +38,9 @@ instances/
 
 # Redirected test output (scratch — never commit)
 app/test_out.txt
+
+# Playwright E2E (browser artifacts + saved auth state)
+app/e2e/.auth/
+app/test-results/
+app/playwright-report/
+app/blob-report/
