@@ -1,6 +1,6 @@
 import { esc } from './html';
 import { CourseSection, LessonDetail, OccurrenceHeader } from '../services/occurrence';
-import { NoteItem, FollowupItem } from './notesView';
+import { NoteItem, FollowupItem, renderFollowup } from './notesView';
 import { renderPrepList, renderPrepAdd } from './prepView';
 import { PrepItem } from '../repos/prep';
 import { LinkedResource } from '../repos/resources';
@@ -67,10 +67,18 @@ export function renderRecentNotesList(notes: CockpitNote[]): string {
         ? 'badge behaviour'
         : 'badge';
       const label = n.safeguarding ? 'Safeguarding' : n.category ? n.category.charAt(0).toUpperCase() + n.category.slice(1) : 'Learning';
-      return `<li>
-        <span class="${badgeClass}">${esc(label)}</span>
-        <span>${esc(n.body || '(empty note)')}</span>
-        <time>${esc(n.time)}</time>
+      const fus = (n.followups ?? []).map(renderFollowup).join('');
+      return `<li id="note-${n.id}" class="recent-note">
+        <div class="recent-note-head">
+          <span class="${badgeClass}">${esc(label)}</span>
+          <span class="recent-note-body">${esc(n.body || '(empty note)')}</span>
+          <time>${esc(n.time)}</time>
+          <button type="button" class="link danger recent-note-del" title="Delete this note" aria-label="Delete note" hx-post="/notes/${n.id}/delete" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">✕</button>
+        </div>
+        <ul class="fu-list" id="note-${n.id}-fus">${fus}</ul>
+        <form class="fu-add" hx-post="/notes/${n.id}/followups" hx-target="#note-${n.id}-fus" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+          <input type="text" name="text" placeholder="add a follow-up…" maxlength="2000" aria-label="Add a follow-up to this note">
+        </form>
       </li>`;
     })
     .join('');
@@ -239,18 +247,27 @@ export function renderLessonCockpit(options: {
     });
   }
 
-  // Column 2: sequence card outline
+  // Column 2: sequence card outline. Show the EFFECTIVE lesson for this class — the adapted objectives/
+  // outline where the class has an adaptation, else the master (matches the classic View mode).
+  const eff = effByKey.get(`${groupCourseId}:${lp}`);
+  const effObjectives = (eff?.adapted ? eff.objectives : null) ?? activeSection?.planObjectives ?? null;
+  const effOutline = (eff?.adapted ? eff.outline : null) ?? activeSection?.planOutline ?? null;
+  const objectivesHtml = effObjectives
+    ? `<div class="ld-objectives"><span class="eyebrow">Objectives${eff?.adapted ? ' · adapted for this class' : ''}</span>${formatOutline(effObjectives)}</div>`
+    : '';
+  const kitHtml = activeSection?.planKitNeeded ? `<p class="ld-kit">🔧 Kit: ${esc(activeSection.planKitNeeded)}</p>` : '';
+
   let sequenceListHtml = '';
-  if (activeSection && activeSection.planOutline) {
+  if (activeSection && effOutline) {
     // Parse with outlineSteps() (the same parser /progress + the pacing AI use) so the cockpit's step
     // indices line up with the stored progress_step — a raw \n split kept prose/heading lines and drifted.
-    const steps = outlineSteps(activeSection.planOutline);
+    const steps = outlineSteps(effOutline);
     const progress = activeSection.progressStep ?? null;
 
     sequenceListHtml = !steps.length
       // A free-text outline with no numbered/bulleted steps: show it formatted but not tap-trackable
       // (same as the classic tracker). The teacher records position via the stopping-point box instead.
-      ? `<li class="seq-freetext">${formatOutline(activeSection.planOutline)}</li>`
+      ? `<li class="seq-freetext">${formatOutline(effOutline)}</li>`
       : steps
       .map((step, i) => {
         const state = progress == null ? '' : i < progress ? 'done' : i === progress ? 'current' : '';
@@ -412,6 +429,19 @@ export function renderLessonCockpit(options: {
 
       ${sectionTabs}
 
+      ${isPreview
+        ? ''
+        : `<div class="cockpit-planbar">
+            <label class="stop-label">Lesson plan
+              <select name="lesson_plan_id" hx-post="/occurrence-course/${oc}/plan" hx-trigger="change" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()" title="Bind or change the lesson plan for this class (changes the slides, outline and worksheet)">
+                <option value=""${activeSection?.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>
+                ${(plansByCourse.get(groupCourseId) ?? []).map((p) => `<option value="${p.id}"${p.id === activeSection?.lessonPlanId ? ' selected' : ''}>${esc(p.title)}</option>`).join('')}
+              </select>
+              <a class="link" href="/schemes?course=${activeSection?.courseId ?? ''}">edit on Schemes →</a>
+            </label>
+            ${activeSection?.lastStop ? `<p class="ld-last">Last time → stopped at <strong>${esc(activeSection.lastStop.stoppingPoint)}</strong> <span class="muted">(${esc(activeSection.lastStop.date)})</span></p>` : ''}
+          </div>`}
+
       ${exceptionsHtml}
 
       <div class="cockpit">
@@ -478,6 +508,8 @@ export function renderLessonCockpit(options: {
                     </label>`}
               </div>
             </div>
+            ${objectivesHtml}
+            ${kitHtml}
             <ol class="sequence">
               ${sequenceListHtml || '<li class="muted">No outline set for this plan.</li>'}
             </ol>
@@ -589,6 +621,44 @@ export function renderLessonCockpit(options: {
               </div>
             </div>
             <div hx-get="/lesson/adapt/${groupCourseId}/${lp}" hx-trigger="load" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
+          </section>`}
+
+          ${isPreview || !lp ? '' : `
+          <section class="plan-tools-card card" aria-labelledby="plan-tools-title">
+            <div class="card-head"><div><p class="eyebrow">Prep &amp; checks</p><h2 id="plan-tools-title">Plan tools</h2></div></div>
+
+            <details class="ws-preview" id="ws-prev-d-${oc}">
+              <summary>👁 Quick peek — each ability level</summary>
+              <div class="ws-preview-tabs" role="tablist">
+                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=support" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
+                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
+                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=challenge" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🔴 Challenge</button>
+              </div>
+              <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
+            </details>
+
+            <form class="test-pupil-launch" hx-post="/test-pupil/open" hx-swap="none" title="Open this lesson as a test pupil — the real worksheet, autosave and Done, at any level (no time limit)">
+              <input type="hidden" name="lesson" value="${h.lessonId}">
+              <input type="hidden" name="date" value="${esc(h.date)}">
+              🧪 Test as pupil
+              <select name="level" aria-label="level"><option value="support">🟢 Support</option><option value="core" selected>🟡 Core</option><option value="challenge">🔴 Challenge</option></select>
+              <button type="submit" class="link">open →</button>
+            </form>
+
+            <div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${groupCourseId}&amp;lp=${lp}" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-review" hx-get="/lesson/plan/${lp}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-recall-slot" hx-get="/lesson/oc/${oc}/spaced-recall" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-cover"><button type="button" class="link" title="Generate self-contained cover work + answers for a cover teacher (AI)" hx-post="/lesson/oc/${oc}/cover-pack" hx-target="#cover-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">📋 Generate cover work (AI)</button><span id="cover-${oc}"></span></div>
+
+            <details class="group-ctx-tool">
+              <summary>🧭 Teaching context for this class</summary>
+              <div hx-get="/lesson/group-context/${groupCourseId}" hx-trigger="toggle once" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
+            </details>
+
+            <p class="ld-slot-links">
+              <a class="link" href="/map?slot=${h.lessonId}:${groupCourseId}">📅 term map for this class →</a>
+              <button type="button" class="link" hx-post="/map/shift" hx-vals='${esc(JSON.stringify({ slot: `${h.lessonId}:${groupCourseId}`, date: h.date }))}' hx-confirm="Didn't finish? This lesson repeats at the next ${esc(activeSection?.courseName ?? 'class')} slot and everything after shifts back one school week (holidays skipped)." title="repeat this lesson next week and shift the rest">↻ continue next week</button>
+            </p>
           </section>`}
         </aside>
       </div>
