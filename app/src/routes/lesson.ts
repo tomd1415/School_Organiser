@@ -12,6 +12,8 @@ import {
   setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../repos/occurrence';
+import { setSlide, setSlidesLocked } from '../repos/slideSync';
+import { broadcast as broadcastSlide } from '../services/slideSync';
 import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
 import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
@@ -84,7 +86,7 @@ import { buildLessonDetail, type CourseSection, type LessonDetail } from '../ser
 import { renderLinkedResources } from '../lib/resourceView';
 import { renderWorksheet, findImagePlaceholders, type Level } from '../lib/worksheetForm';
 import { getLessonWorksheet, getLessonSlidesMarkdown } from '../services/worksheet';
-import { renderSlideDeck } from './me';
+import { renderSlideDeck } from '../lib/meView';
 import { pupilLayout } from './pupilAuth';
 import { pupilWorkRows, setPupilLevel, pupilCanAccessOc, type PupilWorkRow } from '../repos/pupilWork';
 import { renderLessonCockpit, renderBoardNext, renderRecentNotesList, renderActivityGroupsContent, type CockpitNote } from '../lib/lessonView';
@@ -873,6 +875,28 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply
       .type('text/html')
       .send(renderOutlineTracker(params.data.id, outline, body.data.step) + renderSavedStatus(`oc-${params.data.id}-status`));
+  });
+
+  // Live slide sync (13.x): the cockpit POSTs its current slide index on every Prev/Next; persist it (so a
+  // reload / late-joining pupil lands right) and fan it out to the class's pupil devices over SSE.
+  app.post('/lesson/oc/:id/slide', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ index: z.coerce.number().int().min(0).max(500) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await setSlide(p.data.id, b.data.index);
+    broadcastSlide(p.data.id, 'slide', { index: b.data.index });
+    return reply.code(204).send();
+  });
+
+  // Lock pins the pupils' decks to the teacher's slide; unlock lets them roam their own deck again.
+  app.post('/lesson/oc/:id/slide-lock', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ locked: z.enum(['1', '0']) }).safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const locked = b.data.locked === '1';
+    await setSlidesLocked(p.data.id, locked);
+    broadcastSlide(p.data.id, 'lock', { locked });
+    return reply.code(204).send();
   });
 
   async function poolOccurrenceOf(occurrenceCourseId: number): Promise<number | null> {

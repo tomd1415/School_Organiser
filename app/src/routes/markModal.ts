@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc } from '../lib/html';
 import { pool } from '../db/pool';
-import { renderWorksheet } from '../lib/worksheetForm';
 import { getLessonWorksheets } from '../services/worksheet';
 import { getOccurrenceHeader } from '../repos/occurrence';
 import { pupilWorkRows, getAnswers, getPupilLevel, pupilCanAccessOc } from '../repos/pupilWork';
@@ -35,8 +34,6 @@ async function ocInfo(occurrenceCourseId: number): Promise<OcInfo | null> {
   );
   return rows[0] ?? null;
 }
-
-const firstNameOf = (full: string): string => full.split(/\s+/)[0] ?? full;
 
 /** Read a worksheet index (`ws`) from a query/body, default 0. */
 function wsOf(src: unknown): number {
@@ -69,9 +66,6 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
   const idx = roster.findIndex((r) => r.pupilId === pid);
   const me = roster[idx];
   if (!me) return null;
-  const prev = idx > 0 ? roster[idx - 1] : null;
-  const next = idx >= 0 && idx < roster.length - 1 ? roster[idx + 1] : null;
-  const first = firstNameOf(me.displayName);
   const wi = Math.max(0, Math.min(wsIndex, worksheets.length - 1));
   const ws = worksheets[wi];
 
@@ -81,30 +75,16 @@ async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0
       <p class="muted mm-empty">No worksheet is bound to this lesson, so there's nothing to mark.</p></div>`;
   }
 
-  // questions in document order; the scheme supplies model answers + per-question marks. Parson's
-  // (parsons) carry their own model order in the field; code is open text shown monospaced. Render
-  // with this worksheet's key prefix so the keys match the stored answers.
-  const fields = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields;
-  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons');
-  const checks = fields.filter((f) => f.kind === 'check');
+  // The scheme supplies model answers + per-question marks. renderMarkModal re-derives the per-pupil
+  // question rows itself (sliced to the pupil's level), so buildModal only fetches the data it threads in.
   const scheme = await getScheme(ws.resourceId, ws.versionNo);
-  // scheme point keys are stored unprefixed (per the worksheet's own resource) → prefix to match.
-  const pointByKey = new Map((scheme?.points ?? []).map((p) => [ws.keyPrefix + p.fieldKey, p]));
-  // when there are several worksheets, a picker switches between them (same pupil).
-  const wsTabs = worksheets.length > 1
-    ? `<div class="mm-wstabs" role="tablist" aria-label="Worksheets">${worksheets
-        .map((w, i) => `<button type="button" class="ws-tab${i === wi ? ' is-on' : ''}" role="tab" aria-selected="${i === wi}" hx-get="/lesson/oc/${oc}/pupil/${pid}/mark?ws=${i}" hx-target="#mark-modal-body" hx-swap="innerHTML">${esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`)}</button>`)
-        .join('')}</div>`
-    : '';
 
   // pupil answers (with ids, so we can mark even an as-yet-unmarked answer) + their marks
   const ansRows = (await pool.query<{ id: number; field_key: string; value: string }>(
     `SELECT id, field_key, value FROM pupil_answers WHERE pupil_id = $1 AND occurrence_course_id = $2`,
     [pid, oc],
   )).rows;
-  const ansByKey = new Map(ansRows.map((r) => [r.field_key, r]));
   const marks = marking ? await marksForPupil(pid, oc) : [];
-  const markByKey = new Map(marks.map((m) => [m.fieldKey, m]));
 
   const comment = marking ? await getComment(pid, oc) : '';
 

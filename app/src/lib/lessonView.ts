@@ -379,7 +379,7 @@ export function renderLessonCockpit(options: {
       <div class="cockpit">
         <!-- Column 1: Slides & mirror -->
         <div class="cockpit-column">
-          <section class="slides-card card" aria-labelledby="slides-title">
+          <section class="slides-card card" aria-labelledby="slides-title" data-oc="${oc}" data-csrf="${esc(csrf)}">
             <div class="card-head">
               <div>
                 <p class="eyebrow">Board mirror</p>
@@ -396,8 +396,9 @@ export function renderLessonCockpit(options: {
               </div>
             </div>
             <div class="slide-controls">
-              <p>The board display contains no pupil names or private notes.</p>
+              <p>The board display contains no pupil names or private notes. Moving slides here moves every pupil's screen too.</p>
               <div>
+                <button class="button ghost small" type="button" id="slide-lock-btn" data-locked="false" aria-pressed="false" title="Lock pupils to the slide you're on (they can't skip ahead) — tap again to let them roam">🔓 Pupils can roam</button>
                 <button class="button ghost small" type="button" id="slide-prev-btn">← Previous</button>
                 <button class="button small" type="button" id="slide-next-btn">Next →</button>
               </div>

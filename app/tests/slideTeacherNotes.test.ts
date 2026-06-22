@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { splitTeacherNotes, stripTeacherNotes } from '../src/lib/slideDeck';
-import { renderSlideDeck } from '../src/routes/me';
+import { renderSlideDeck } from '../src/lib/meView';
 
 // Per-slide teacher notes are PRIVATE. The non-negotiable: they never reach the pupil surface or the
 // projector board. These tests guard that boundary (the old `*Say:*` line leaked onto pupil slides).

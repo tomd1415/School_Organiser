@@ -64,18 +64,51 @@
     var nx = deck.querySelector('.pslide-next') || document.querySelector('#slide-next-btn');
     if (nx) nx.disabled = next === slides.length - 1;
   }
+  // Jump a deck to an absolute slide index (used by the live teacher feed).
+  function deckShow(deck, idx) {
+    var slides = deck.querySelectorAll('.pslide');
+    if (!slides.length) return;
+    idx = Math.max(0, Math.min(slides.length - 1, idx));
+    slides.forEach(function (s, i) { s.classList.toggle('on', i === idx); });
+    var n = deck.querySelector('.pslide-n') || document.querySelector('.present-position .pslide-n');
+    if (n) n.textContent = String(idx + 1);
+  }
+  // Reflect the teacher's lock: hide the pupil's own Prev/Next and follow only the teacher.
+  function setDeckLocked(deck, locked) {
+    deck.setAttribute('data-locked', locked ? 'true' : 'false');
+    var prev = deck.querySelector('.pslide-prev'), nx = deck.querySelector('.pslide-next');
+    if (prev) prev.disabled = !!locked;
+    if (nx) nx.disabled = !!locked;
+    var hint = deck.querySelector('.pslide-hint');
+    if (hint) hint.textContent = locked ? '🔒 Following your teacher' : 'Follow along on the board';
+  }
   if (main) {
     main.addEventListener('click', function (e) {
       var prev = e.target.closest('.pslide-prev');
       var nx = e.target.closest('.pslide-next');
       if (!prev && !nx) return;
       var deck = e.target.closest('.pupil-slides') || document.querySelector('.pupil-slides');
-      if (deck) deckGo(deck, prev ? -1 : 1);
+      if (deck && deck.getAttribute('data-locked') !== 'true') deckGo(deck, prev ? -1 : 1); // teacher lock blocks roaming
     });
     document.querySelectorAll('.pupil-slides').forEach(function (deck) {
       var p = deck.querySelector('.pslide-prev') || document.querySelector('#slide-prev-btn'); if (p) p.disabled = true;
       var slides = deck.querySelectorAll('.pslide'), nx = deck.querySelector('.pslide-next') || document.querySelector('#slide-next-btn');
       if (nx && slides.length <= 1) nx.disabled = true;
+    });
+    // Live slide sync: a pupil deck's data-deck is its occurrence-course id — subscribe to the teacher's
+    // feed so their cockpit navigation moves this deck, and obey a lock. SSE; degrades to local nav if
+    // EventSource is unavailable or the connection drops (the deck still works on its own buttons).
+    document.querySelectorAll('.pupil-slides[data-deck]').forEach(function (deck) {
+      var oc = deck.getAttribute('data-deck');
+      if (!oc || !/^\d+$/.test(oc) || typeof EventSource === 'undefined') return;
+      var es = new EventSource('/me/slide-stream?oc=' + encodeURIComponent(oc));
+      es.addEventListener('slide', function (ev) {
+        try { var d = JSON.parse(ev.data); if (typeof d.index === 'number') deckShow(deck, d.index); } catch (e) {}
+      });
+      es.addEventListener('lock', function (ev) {
+        try { setDeckLocked(deck, !!JSON.parse(ev.data).locked); } catch (e) {}
+      });
+      window.addEventListener('beforeunload', function () { try { es.close(); } catch (e) {} });
     });
     // ── A3 narrow-screen pane toggle: tap "Slides" / "My worksheet" to switch the visible pane (the
     // two-pane CSS only acts on data-pane below 960px; on a wide screen both panes show regardless).
@@ -283,6 +316,104 @@
     if (span) { span.textContent = 'could not save — try again'; span.classList.add('show'); }
   });
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // ── 10.8b Offline-safe answer buffer + activity keep-alive ─────────────────────────────────────
+  // A flaky network or an idle-timeout bounce must NEVER silently lose typed work. We write-through
+  // every typed answer to localStorage the instant it changes (before a save can fail or bounce us to
+  // /pupil); on a failed save we keep it and retry (backoff + on 'online'); on reload we restore any
+  // answer the server never confirmed. A keep-alive ping — fired ONLY while the pupil is genuinely
+  // interacting — refreshes the session so an actively-working pupil isn't idled out mid-worksheet (an
+  // unattended machine sends no pings, so the DPIA idle-out still fires). The server stays the source of
+  // truth; this just closes the silent-loss gap. Covers the typed text widgets (the "I was typing and
+  // lost it" case); image/matching/parsons saves keep their existing failure toast.
+  if (main) (function () {
+    var BUF = 'so.pw.';          // so.pw.<save-url> -> {v:value, t:savedAttemptTime}
+    var pending = {};            // save-url -> value not yet confirmed by the server
+    var MAX_AGE = 24 * 3600 * 1000;
+    var lastActivity = 0, lastPing = 0;
+
+    function isAnswer(u) { return typeof u === 'string' && u.indexOf('/me/answer?') !== -1; }
+    function bufKey(u) { return BUF + u; }
+    function writeBuf(u, v) { try { localStorage.setItem(bufKey(u), JSON.stringify({ v: v, t: Date.now() })); } catch (e) {} }
+    function dropBuf(u) { try { localStorage.removeItem(bufKey(u)); } catch (e) {} }
+    function readBuf(u) { try { var s = localStorage.getItem(bufKey(u)); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+    function pendingCount() { return Object.keys(pending).length; }
+
+    // Capture the latest typed value as it changes — before the debounced save fires, so even a save
+    // that never reaches the server (network drop / idle bounce) leaves the work safe on this device.
+    function capture(target) {
+      var hx = target && target.closest && target.closest('[hx-post]');
+      if (!hx) return;
+      var url = hx.getAttribute('hx-post');
+      if (!isAnswer(url)) return;
+      var v;
+      if (target.tagName === 'INPUT' && (target.type === 'radio' || target.type === 'checkbox')) v = target.checked ? (target.value || 'on') : '';
+      else if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') v = target.value;
+      else return;
+      writeBuf(url, v); pending[url] = v;
+    }
+    document.addEventListener('input', function (e) { lastActivity = Date.now(); capture(e.target); }, true);
+    document.addEventListener('change', function (e) { lastActivity = Date.now(); capture(e.target); }, true);
+
+    // Resolve the buffer when htmx reports the save's outcome.
+    document.body.addEventListener('htmx:afterRequest', function (e) {
+      var url = e.detail && e.detail.requestConfig && e.detail.requestConfig.path;
+      if (!isAnswer(url)) return;
+      if (e.detail.successful) { dropBuf(url); delete pending[url]; if (!pendingCount()) clearToast(); }
+      else { scheduleRetry(4000); } // the existing failure toast already fired; we keep + retry
+    });
+
+    // Re-send buffered saves (same csrf header as the page) with backoff and on reconnect.
+    var retryT = null;
+    function scheduleRetry(delay) { if (retryT) return; retryT = setTimeout(function () { retryT = null; drain(); }, delay || 4000); }
+    function drain() {
+      Object.keys(pending).forEach(function (url) {
+        var v = pending[url];
+        fetch(url, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'x-csrf-token': csrfToken(), 'content-type': 'application/x-www-form-urlencoded', 'hx-request': 'true' },
+          body: 'value=' + encodeURIComponent(v == null ? '' : v),
+        }).then(function (r) {
+          if (r.status === 401 || (r.headers.get('HX-Redirect') || '').indexOf('/pupil') !== -1) {
+            toast('Please log in again — your work is saved on this device.'); return; // keep buffer for after re-login
+          }
+          if (r.ok) { dropBuf(url); delete pending[url]; if (!pendingCount()) clearToast(); }
+          else { scheduleRetry(8000); }
+        }).catch(function () { toast('Offline — your work is saved on this device and will send when you reconnect.'); scheduleRetry(8000); });
+      });
+    }
+    window.addEventListener('online', function () { drain(); });
+
+    // On load, restore any typed answer the server never confirmed (covers an idle bounce / reload).
+    function restore() {
+      var cutoff = Date.now() - MAX_AGE;
+      main.querySelectorAll('[hx-post]').forEach(function (hx) {
+        var url = hx.getAttribute('hx-post');
+        if (!isAnswer(url)) return;
+        var b = readBuf(url);
+        if (!b || !b.v) { if (b) dropBuf(url); return; }
+        if (b.t && b.t < cutoff) { dropBuf(url); return; } // don't linger on a shared machine
+        if (!(hx.tagName === 'TEXTAREA' || (hx.tagName === 'INPUT' && (hx.type === 'text' || hx.type === '')))) return; // text only
+        if (hx.value === b.v) { dropBuf(url); return; }                 // server already has it
+        if (hx.value && hx.value.trim() !== '') { dropBuf(url); return; } // server has a different value — trust it
+        hx.value = b.v; pending[url] = b.v;                              // server lost it — bring it back
+      });
+      if (pendingCount()) { toast('Restoring your saved work…'); drain(); }
+    }
+    if (document.readyState !== 'loading') restore(); else document.addEventListener('DOMContentLoaded', restore);
+
+    // keep-alive: only while genuinely interacting AND the tab is visible (so an unattended machine still
+    // idles out per the DPIA control); at most one ping per 4 min.
+    ['keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(function (ev) {
+      document.addEventListener(ev, function () { lastActivity = Date.now(); }, { passive: true });
+    });
+    setInterval(function () {
+      var now = Date.now();
+      if (document.visibilityState !== 'visible' || now - lastActivity > 5 * 60000 || now - lastPing < 4 * 60000) return;
+      lastPing = now;
+      fetch('/me/ping', { credentials: 'same-origin' }).catch(function () {});
+    }, 60000);
+  })();
 
   // ── 💡 Paste-help modal + practice box (how to screenshot & paste — SEND-friendly) ─────────────
   var pasteHelp = document.getElementById('paste-help');

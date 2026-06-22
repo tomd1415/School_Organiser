@@ -70,7 +70,19 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
       <p class="muted mm-empty">No worksheet is bound to this lesson, so there's nothing to mark.</p></div>`;
   }
 
-  const fields = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields;
+  const ansByKey = new Map(ansRows.map((r) => [r.field_key, r]));
+  const markByKey = new Map(marks.map((m) => [m.fieldKey, m]));
+  // Enumerate exactly the questions THIS pupil saw: the shared blocks + their own differentiation level.
+  // Listing every level's questions (the previous behaviour) showed far more rows than the pupil was given
+  // and rendered every other-level question as a permanent "— left blank —" (BUG: marking didn't match the
+  // pupil's work). field_keys carry no level, so we slice by re-rendering at the pupil's level. The union
+  // with answered/marked keys keeps a pupil's saved rows visible even if they were re-levelled after working.
+  const shownKeys = new Set(
+    renderWorksheet(ws.markdown, { mode: 'review', level, keyPrefix: ws.keyPrefix }).fields.map((f) => f.key),
+  );
+  const fields = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields.filter(
+    (f) => shownKeys.has(f.key) || ansByKey.has(f.key) || markByKey.has(f.key),
+  );
   const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons');
   const checks = fields.filter((f) => f.kind === 'check');
   const pointByKey = new Map<string, any>((scheme?.points ?? []).map((p: any) => [ws.keyPrefix + p.fieldKey, p]));
@@ -80,9 +92,6 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
         .map((w, i) => `<button type="button" class="ws-tab${i === wi ? ' is-on' : ''}" role="tab" aria-selected="${i === wi}" hx-get="/lesson/oc/${oc}/pupil/${pid}/mark?ws=${i}" hx-target="#mark-modal-body" hx-swap="innerHTML">${esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`)}</button>`)
         .join('')}</div>`
     : '';
-
-  const ansByKey = new Map(ansRows.map((r) => [r.field_key, r]));
-  const markByKey = new Map(marks.map((m) => [m.fieldKey, m]));
 
   let awarded = 0, total = 0, checked = 0, markable = 0;
   const rowsHtml = questions

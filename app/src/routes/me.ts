@@ -12,8 +12,6 @@ import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
 import { getLessonSlidesMarkdown, getLessonWorksheets } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
-import { renderMarkdown } from '../lib/markdown';
-import { sliceSlidesForLevel, splitTeacherNotes } from '../lib/slideDeck';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
 import { readStored, removeStored, storeBuffer } from '../lib/resourceStore';
@@ -27,6 +25,8 @@ import {
   getPupilFeedback,
   upsertPupilFeedback,
 } from '../repos/pupilWork';
+import { getSlideState } from '../repos/slideSync';
+import { subscribe, sseFrame } from '../services/slideSync';
 import { pupilLayout, pupilAccessEnabled } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
 import { marksEnabled } from '../auth/marksGate';
@@ -82,34 +82,6 @@ async function groupLessonAt(groupId: number, weekday: number, slotOrder: number
     [groupId, weekday, slotOrder],
   );
   return rows[0]?.id ?? null;
-}
-
-// The pupil's slide deck (left pane) — their ability's slides, one shown at a time, Prev/Next driven
-// by pupil.js. The pupil follows the lesson on the board with a simplified deck matching their level.
-// `audience` defaults to 'pupil' — which STRIPS every per-slide teacher note, so the pupil surface AND
-// the projector board never show them (the safety boundary). Only 'teacher' (the presenter view) renders
-// the notes, in a clearly-labelled side panel.
-export function renderSlideDeck(md: string, deckId: string, level: Level, audience: 'pupil' | 'teacher' = 'pupil'): string {
-  const slides = sliceSlidesForLevel(md, level);
-  if (slides.length === 0) return '';
-  const html = slides
-    .map((s, i) => {
-      const { clean, notes } = splitTeacherNotes(s);
-      const notesPanel = audience === 'teacher' && notes
-        ? `<aside class="pslide-notes" aria-label="Teaching notes — not shown to pupils"><span class="pslide-notes-h">🧑‍🏫 Teaching notes <span class="muted">— only you see these</span></span><div class="pslide-notes-body">${renderMarkdown(notes)}</div></aside>`
-        : '';
-      return `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">${renderMarkdown(clean)}${notesPanel}</div>`;
-    })
-    .join('');
-  return `<section class="pupil-slides${audience === 'teacher' ? ' teacher-present' : ''}" data-deck="${esc(deckId)}" aria-label="Lesson slides">
-    <div class="pslide-head"><span class="pslide-title">📊 Slides</span><span class="pslide-count">Slide <b class="pslide-n">1</b> / ${slides.length}</span></div>
-    <div class="pslide-stage">${html}</div>
-    <div class="pslide-nav">
-      <button type="button" class="btn-soft pslide-prev" aria-label="Previous slide">◀ Back</button>
-      <span class="muted pslide-hint">Follow along on the board</span>
-      <button type="button" class="btn-soft pslide-next" aria-label="Next slide">Next ▶</button>
-    </div>
-  </section>`;
 }
 
 function doneBlock(oc: number, done: boolean): string {
@@ -273,6 +245,44 @@ export function registerMeRoutes(app: FastifyInstance): void {
     });
     // OOB tick so the field that just saved reassures the pupil their answer was kept.
     return reply.type('text/html').send(savedTick(q.data.key));
+  });
+
+  // 10.8: a keep-alive the pupil surface pings ONLY while the pupil is genuinely interacting (pupil.js
+  // gates it on real input). It's a normal non-poll request, so the onRequest hook refreshes lastSeen —
+  // an actively-working pupil isn't idled out mid-worksheet. An UNATTENDED machine sends no pings, so the
+  // DPIA R3 idle-out still fires exactly as before. No DB work; never AI-bound.
+  app.get('/me/ping', async (req, reply) => {
+    if (!actingPupil(req)) return reply.code(401).send('');
+    return reply.code(204).send();
+  });
+
+  // Live slide sync: a pupil device subscribes here so the teacher's cockpit slide navigation moves the
+  // pupil's deck, and a lock pins it to the teacher's slide. Server-Sent Events (one long-lived GET); the
+  // cockpit publishes via POST /lesson/oc/:id/slide{,-lock}. Scoped to the pupil's own lesson exactly like
+  // /me/answer. No pupil data crosses the wire — only a slide index + a lock flag.
+  app.get('/me/slide-stream', async (req, reply) => {
+    const acting = actingPupil(req);
+    if (!acting) return reply.code(401).send('');
+    const q = z.object({ oc: z.coerce.number().int().positive() }).safeParse(req.query);
+    if (!q.success) return reply.code(400).send('');
+    if (!acting.isTest && !(await pupilMayWriteOc(acting.id, Number(req.session.get('pupilGroupId') ?? 0), q.data.oc))) {
+      return reply.code(403).send('');
+    }
+    reply.hijack(); // take over the socket — Fastify won't send its own reply
+    const res = reply.raw;
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no', // Caddy/nginx: stream immediately, don't buffer
+    });
+    // Send the current state at once so a reload / late joiner lands on the teacher's slide.
+    const st = await getSlideState(q.data.oc);
+    res.write(sseFrame('slide', { index: st.currentSlide }));
+    res.write(sseFrame('lock', { locked: st.slidesLocked }));
+    const unsub = subscribe(q.data.oc, { write: (f) => res.write(f) });
+    const keepAlive = setInterval(() => { try { res.write(': keep-alive\n\n'); } catch { /* closed */ } }, 25000);
+    req.raw.on('close', () => { clearInterval(keepAlive); unsub(); });
   });
 
   app.post('/me/done', { preHandler: app.csrfProtection }, async (req, reply) => {

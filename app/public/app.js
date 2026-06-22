@@ -531,23 +531,47 @@
     return parseInt(activeSlide.getAttribute('data-slide'), 10) || 0;
   }
 
+  // --- Live slide sync (cockpit → pupil devices): publish the teacher's slide + lock state ---
+  function slidesCard() { return document.querySelector('.slides-card[data-oc]'); }
+  function publishSlide(path, body) {
+    var c = slidesCard();
+    if (!c || !c.getAttribute('data-oc')) return;
+    fetch('/lesson/oc/' + c.getAttribute('data-oc') + path, {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'x-csrf-token': c.getAttribute('data-csrf') || '', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body,
+    }).catch(function () {});
+  }
+
   document.addEventListener('click', function (e) {
     var thumb = e.target.closest('[data-slide-thumb]');
     if (thumb) {
-      var index = parseInt(thumb.getAttribute('data-index'), 10);
-      showSlide(index);
+      showSlide(parseInt(thumb.getAttribute('data-index'), 10));
+      publishSlide('/slide', 'index=' + getActiveSlideIndex());
       return;
     }
 
     var prevBtn = e.target.closest('#slide-prev-btn');
     if (prevBtn) {
       showSlide(getActiveSlideIndex() - 1);
+      publishSlide('/slide', 'index=' + getActiveSlideIndex());
       return;
     }
 
     var nextBtn = e.target.closest('#slide-next-btn');
     if (nextBtn) {
       showSlide(getActiveSlideIndex() + 1);
+      publishSlide('/slide', 'index=' + getActiveSlideIndex());
+      return;
+    }
+
+    var lockBtn = e.target.closest('#slide-lock-btn');
+    if (lockBtn) {
+      var locked = lockBtn.getAttribute('data-locked') !== 'true';
+      lockBtn.setAttribute('data-locked', locked ? 'true' : 'false');
+      lockBtn.setAttribute('aria-pressed', locked ? 'true' : 'false');
+      lockBtn.textContent = locked ? '🔒 Pupils locked to your slide' : '🔓 Pupils can roam';
+      publishSlide('/slide-lock', 'locked=' + (locked ? '1' : '0'));
       return;
     }
   });
