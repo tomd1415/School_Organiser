@@ -7,6 +7,8 @@ import {
   findOrCreateOccurrence,
   getOccurrenceCourses,
   occurrenceCourseIsTest,
+  seedTestOccurrencePlans,
+  setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../../src/repos/occurrence';
 import { saveAnswer } from '../../src/repos/pupilWork';
@@ -116,6 +118,25 @@ describe('Test Lab isolation', () => {
     // real + test occurrence both exist on DATE for this slot/class; the guard must show only ONE (the real)
     expect(datesIn(await slotSchedule(lessonId, gcId, '2099-01-01', '2099-12-31'))).toBe(1);
     expect(datesIn(await classSchedule(gcId, '2099-01-01', '2099-12-31'))).toBe(1);
+  });
+
+  it('the sandbox inherits the REAL lesson\'s bound plan (so "Test this lesson" opens its real content)', async () => {
+    const planId = Number((await pool.query<{ id: number }>(`SELECT id FROM lesson_plans ORDER BY id LIMIT 1`)).rows[0]!.id);
+    const realOc = ocFor(await getOccurrenceCourses(await findOrCreateOccurrence(lessonId, DATE, false)), gcId);
+    await setOccurrenceCoursePlan(realOc, planId); // the real lesson has this plan bound
+
+    const testOc = ocFor(await getOccurrenceCourses(await findOrCreateOccurrence(lessonId, DATE, true)), gcId);
+    await setOccurrenceCoursePlan(testOc, null); // fresh sandbox section: unbound
+    await seedTestOccurrencePlans(lessonId, DATE);
+    const planOf = async (oc: number) =>
+      (await pool.query<{ p: number | null }>(`SELECT lesson_plan_id p FROM occurrence_courses WHERE id = $1`, [oc])).rows[0]!.p;
+    expect(Number(await planOf(testOc))).toBe(planId); // sandbox now mirrors the real plan
+
+    // …but a plan the teacher picked IN the sandbox is preserved (seed only fills unbound sections)
+    const otherPlan = Number((await pool.query<{ id: number }>(`SELECT id FROM lesson_plans WHERE id <> $1 ORDER BY id LIMIT 1`, [planId])).rows[0]?.id ?? planId);
+    await setOccurrenceCoursePlan(testOc, otherPlan);
+    await seedTestOccurrencePlans(lessonId, DATE);
+    expect(Number(await planOf(testOc))).toBe(otherPlan);
   });
 
   it('wipeTestOccurrences() removes the test run (incl. its notes) and leaves the real one intact', async () => {

@@ -5,6 +5,7 @@ import { esc, layout } from '../lib/html';
 import {
   findOrCreateOccurrence,
   findOccurrence,
+  seedTestOccurrencePlans,
   getLastStoppingPoints,
   getOccurrenceCourses,
   getOccurrenceHeader,
@@ -584,6 +585,9 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       // BUG-060: opening a lesson is read-hot — try the read-only lookup first and only run the
       // occurrence/course/prep upserts when the occurrence genuinely doesn't exist yet.
       const occurrenceId = (await findOccurrence(lesson, date, isLab)) ?? (await findOrCreateOccurrence(lesson, date, isLab));
+      // Test Lab: mirror the REAL lesson's bound plan(s) into the sandbox so it opens with the actual
+      // slides/worksheet to test (not an empty cockpit). Idempotent + keeps any plan picked in the sandbox.
+      if (isLab) await seedTestOccurrencePlans(lesson, date);
       const header = await getOccurrenceHeader(occurrenceId);
       if (!header) {
         const e = errorPage(reply, 404, 'That lesson no longer exists.');
@@ -899,14 +903,17 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       : '<span class="muted">No active test runs.</span>';
     const body = `<section class="card">
       <h1>🧪 Test Lab</h1>
-      <p class="muted">Pick a lesson and date to open its <strong>sandboxed</strong> teacher cockpit — at any date, no waiting for the
-        timetable slot. In the cockpit, use <strong>🧪 Test as pupil</strong> to open the fillable pupil view in a new tab and drive
-        the lesson live (slides sync + lock, write answers, mark) side by side. Everything is isolated: <strong>nothing here
-        touches real classes' marking, planner or history</strong>, and you can wipe it all with Reset. If a slot has no plan bound,
-        pick one in the cockpit's plan selector first (slides + worksheet come from the plan).</p>
+      <p class="muted"><strong>Easiest way in:</strong> open the lesson you want to test (from the timetable or Now screen) and click
+        <strong>🧪 Test this lesson</strong> in its cockpit — it jumps straight here for that exact lesson.</p>
+      <p class="muted">Or pick a <strong>class</strong> below and a <strong>date</strong>: that opens a <strong>sandbox copy</strong> of whatever
+        lesson is planned for that class on that date — slides + worksheet and all — where you can run it as teacher, open
+        <strong>🧪 Test as pupil</strong> in a new tab, write answers and mark. Everything is isolated: <strong>nothing here touches real
+        classes' marking, planner or history</strong>, and you can wipe it all with Reset. The list below is your weekly timetable
+        (every class · time); the date sets which day's planned lesson you test (a day with nothing planned opens empty —
+        bind a plan in the cockpit, or pick a day you've planned).</p>
       <div class="kit-filter" style="display:flex;align-items:end;gap:1rem;flex-wrap:wrap;">
         <form method="get" action="/test-lab">
-          <label>Date <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
+          <label>Date to test <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
           <noscript><button type="submit">Go</button></noscript>
         </form>
         ${resetBtn}

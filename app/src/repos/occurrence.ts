@@ -81,6 +81,27 @@ export async function findOccurrence(lessonId: number, date: string, isTest = fa
   return rows[0]?.id ?? null;
 }
 
+/** Test Lab: seed a sandbox occurrence's plan bindings from the REAL occurrence of the same slot+date, so
+ *  opening a lesson in the Test Lab mirrors what's actually bound (its slides/worksheet) instead of an
+ *  empty cockpit. Only fills sections the teacher hasn't already bound IN the sandbox (idempotent). It
+ *  copies the plan REFERENCE only — reading a shared plan mutates nothing; the test work stays isolated. */
+export async function seedTestOccurrencePlans(lessonId: number, date: string): Promise<void> {
+  await pool.query(
+    `UPDATE occurrence_courses toc
+     SET lesson_plan_id = roc.lesson_plan_id
+     FROM occurrence_courses roc
+     JOIN lesson_occurrences ro  ON ro.id = roc.occurrence_id
+     JOIN lesson_occurrences tlo ON tlo.timetabled_lesson_id = ro.timetabled_lesson_id
+                                AND tlo.date = ro.date AND tlo.is_test
+     WHERE toc.occurrence_id = tlo.id
+       AND ro.timetabled_lesson_id = $1 AND ro.date = $2::date AND NOT ro.is_test
+       AND roc.group_course_id = toc.group_course_id
+       AND toc.lesson_plan_id IS NULL
+       AND roc.lesson_plan_id IS NOT NULL`,
+    [lessonId, date],
+  );
+}
+
 export async function getOccurrenceHeader(occurrenceId: number): Promise<OccurrenceHeader | null> {
   const { rows } = await pool.query<OccurrenceHeader>(
     `SELECT o.id AS "occurrenceId", tl.id AS "lessonId",
