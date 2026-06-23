@@ -92,6 +92,16 @@ describe('lesson cockpit feature parity (restored affordances)', () => {
     expect(labHtml).toContain('/test-pupil/open'); // the sandbox cockpit does
     expect(labHtml).toContain('test-lab-banner'); // and shows the persistent sandbox banner
   });
+  it('a real cockpit offers "Test this lesson" (jump to the sandbox); the sandbox itself does not', () => {
+    expect(html).toContain('🧪 Test this lesson');
+    expect(html).toMatch(/href="\/lesson\?lesson=\d+&amp;date=[^"]+&amp;lab=1"/); // jumps to the same lesson, sandboxed
+    const labHtml = renderLessonCockpit({
+      detail, notes: [] as any, prep: [], plansByCourse: new Map(), resByPlan: new Map(), matByPlan: new Map(),
+      effByKey: new Map(), adaptedResByKey: new Map(), taFbByOc: new Map(), exceptionsHtml: '', csrf: 't',
+      slidesByKey: new Map(), pupilWorkByOc: new Map(), lab: true,
+    });
+    expect(labHtml).not.toContain('Test this lesson'); // already in the sandbox — no self-link
+  });
   it('notes are manageable (delete + add follow-up)', () => {
     expect(html).toContain('/notes/5/delete');
     expect(html).toContain('/notes/5/followups');
