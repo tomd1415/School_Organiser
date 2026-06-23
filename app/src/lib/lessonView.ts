@@ -12,6 +12,7 @@ import { Level } from './worksheetForm';
 import { PupilWorkRow } from '../repos/pupilWork';
 import { renderMarkdown } from './markdown';
 import { sliceSlidesForLevel, splitTeacherNotes } from './slideDeck';
+import { renderPslide } from './meView'; // ONE per-slide renderer shared by cockpit, board + pupil decks
 
 // Custom interface for notes in the cockpit
 export interface CockpitNote {
@@ -233,14 +234,8 @@ export function renderLessonCockpit(options: {
         <span>${i + 1}</span><strong>${esc(heading)}</strong>
       </button>`;
 
-      const speakText = getSpeakText(clean);
-      const speakBtn = `<button type="button" class="ws-speak pslide-speak" data-speak-text="${esc(speakText)}" title="Read slide aloud">🔊 Listen</button>`;
-
-      slidePreviewsHtml += `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">
-        <span class="slide-label">Slide ${i + 1}</span>
-        ${speakBtn}
-        <div class="slide-content md-doc">${renderMarkdown(clean)}</div>
-      </div>`;
+      // Same shared per-slide renderer as the board + pupil decks (one markup/typography/button source).
+      slidePreviewsHtml += renderPslide(clean, i, { on: i === 0 });
 
       slideNotesHtml += `<div class="pslide-note-item${i === 0 ? ' on' : ''}" data-slide="${i}">
         <label><span class="sr-only">Private notes for slide ${i + 1}</span>
@@ -706,23 +701,8 @@ export function renderBoardNext(options: {
 
     slides.forEach((s, i) => {
       const { clean } = splitTeacherNotes(s);
-      const speakText = getSpeakText(clean);
-      const speakBtn = `<button type="button" class="ws-speak pslide-speak" data-speak-text="${esc(speakText)}" title="Read slide aloud">🔊 Listen</button>`;
-
-      const { heading } = parseSlideInfo(clean, i);
-
-      // The heading is shown as the board eyebrow; render the remaining Markdown with the same
-      // safe renderer used by pupil slides and resource previews.
-      const contentMd = clean.replace(/^##\s+.*(?:\n|$)/, '').trim();
-      const contentHtml = renderMarkdown(contentMd);
-
-      slideListHtml += `
-        <div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">
-          <p class="eyebrow">${esc(heading)}</p>
-          ${speakBtn}
-          <div class="slide-content md-doc">${contentHtml}</div>
-        </div>
-      `;
+      // One shared per-slide renderer — same markup/typography/buttons as the pupil + cockpit decks.
+      slideListHtml += renderPslide(clean, i, { on: i === 0 });
     });
   }
 
@@ -748,10 +728,10 @@ export function renderBoardNext(options: {
 
       <footer class="present-foot">
         <div class="present-controls">
-          <button class="button ghost pslide-prev" type="button" id="slide-prev-btn">← Previous</button>
-          <button class="button pslide-next" type="button" id="slide-next-btn">Next →</button>
+          <button class="btn-soft pslide-prev" type="button" id="slide-prev-btn">◀ Back</button>
+          <button class="btn-soft pslide-next" type="button" id="slide-next-btn">Next ▶</button>
         </div>
-        <span class="present-position">Slide <b class="pslide-n">1</b> of ${totalSlides}</span>
+        <span class="present-position">Slide <b class="pslide-n">1</b> / ${totalSlides}</span>
         <div class="present-controls">
           <span class="badge live" data-timer><span data-timer-display>—:—</span></span>
           <button class="button ghost" type="button" id="fullscreen-btn" onclick="if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();}">Full screen</button>

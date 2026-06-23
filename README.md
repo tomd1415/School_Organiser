@@ -69,6 +69,8 @@ Read in this order:
 | [docs/FUTURE_WAVES.md](docs/FUTURE_WAVES.md) | Strategic idea backlog beyond Phase 11 (Wave 6+): absence/cover, quiet automation, insight from the record, pupil-facing depth. |
 | [BUGREPORT.md](BUGREPORT.md) | The 19 June 2026 project-wide audit — 50 findings (privacy/security, correctness, recovery, transactional invariants) with reproduction + fix sketch per item. |
 | [docs/REMEDIATION_PLAN.md](docs/REMEDIATION_PLAN.md) | The fix-and-finish programme: the BUGREPORT findings organised into Waves 0 + A1–A8 (foundations first), **plus** the consolidated outstanding-features track (Wave 6+/Phase 14/Phase 7 tail). |
+| [docs/UI_SEPARATION_PLAN.md](docs/UI_SEPARATION_PLAN.md) | Plan to get the UI to ~95% isolation from the back-end (view-models, one `paths.ts` URL module, CSS ownership, a component gallery, guardrails) **+ the live board slide-sync feature**. Grounded in a coupling audit. |
+| [docs/TEST_LAB_PLAN.md](docs/TEST_LAB_PLAN.md) | The isolated "Test Lab" (run any lesson sandboxed: teacher + test pupil, write answers, mark — no effect on real classes). Phases 1–2 built; isolation by an `is_test` occurrence partition. |
 | [docs/PHASE_1_PLAN.md](docs/PHASE_1_PLAN.md) | Detailed build plan for Phase 1 (the MVP): schema, real-timetable seed, ClockService, screens. |
 | [docs/PHASE_2_PLAN.md](docs/PHASE_2_PLAN.md) | Detailed build plan for Phase 2: tasks, time, events, focus mode, captured info, pupils. |
 | [docs/PHASE_3_PLAN.md](docs/PHASE_3_PLAN.md) | Detailed build plan for Phase 3: schemes of work, lesson plans, the hosted resource store. |

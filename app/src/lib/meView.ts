@@ -75,6 +75,24 @@ function resultsCard(r: PupilResults): string {
   </section>`;
 }
 
+/**
+ * The ONE source of per-slide markup, shared by every surface (pupil /me + preview, presenter, the
+ * projector board, and the cockpit mirror) so a slide renders identically everywhere: a `.slide-content
+ * md-doc` body (consistent table/code/heading framing), one "Listen" button class, the `.pslide` +
+ * `data-slide` JS contract. Callers wrap this stage in their own chrome (deck head/nav, board foot, …).
+ */
+export function renderPslide(clean: string, i: number, opts: { on?: boolean; notesPanel?: string } = {}): string {
+  const slideText = extractTextFromMarkdown(clean);
+  const speakButton = slideText
+    ? `<button type="button" class="ws-speak btn-soft pslide-speak-btn" data-speak-text="${esc(slideText)}" title="Read slide aloud">🔊 Listen</button>`
+    : '';
+  return `<div class="pslide${opts.on ? ' on' : ''}" data-slide="${i}">
+    <div class="pslide-content-header">${speakButton}</div>
+    <div class="slide-content md-doc">${renderMarkdown(clean)}</div>
+    ${opts.notesPanel ?? ''}
+  </div>`;
+}
+
 export function renderSlideDeck(md: string, deckId: string, level: Level, audience: 'pupil' | 'teacher' = 'pupil'): string {
   const slides = sliceSlidesForLevel(md, level);
   if (slides.length === 0) return '';
@@ -84,15 +102,7 @@ export function renderSlideDeck(md: string, deckId: string, level: Level, audien
       const notesPanel = audience === 'teacher' && notes
         ? `<aside class="pslide-notes" aria-label="Teaching notes — not shown to pupils"><span class="pslide-notes-h">🧑‍🏫 Teaching notes <span class="muted">— only you see these</span></span><div class="pslide-notes-body">${renderMarkdown(notes)}</div></aside>`
         : '';
-      const slideText = extractTextFromMarkdown(clean);
-      const speakButton = slideText
-        ? `<button type="button" class="ws-speak btn-soft pslide-speak-btn" data-speak-text="${esc(slideText)}" title="Read slide aloud">🔊 Listen</button>`
-        : '';
-      return `<div class="pslide${i === 0 ? ' on' : ''}" data-slide="${i}">
-        <div class="pslide-content-header">${speakButton}</div>
-        ${renderMarkdown(clean)}
-        ${notesPanel}
-      </div>`;
+      return renderPslide(clean, i, { on: i === 0, notesPanel });
     })
     .join('');
   return `<section class="pupil-slides${audience === 'teacher' ? ' teacher-present' : ''}" data-deck="${esc(deckId)}" aria-label="Lesson slides">

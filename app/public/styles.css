@@ -499,6 +499,8 @@ body[data-shell="next"] main.cockpit-workspace > .reading-width {
   width: 100%;
 }
 
+body[data-shell="next"] main.cockpit-workspace > .card,
+body[data-shell="next"] main.cockpit-workspace > .map,
 body[data-shell="next"] main.cockpit-workspace > .setup,
 body[data-shell="next"] main.cockpit-workspace > .marking-list-card,
 body[data-shell="next"] main.cockpit-workspace > .ta-next-gen-card,
@@ -520,7 +522,6 @@ body[data-shell="next"] main.cockpit-workspace > .now-screen,
 body[data-shell="next"] main.cockpit-workspace > .overhaul-cockpit,
 body[data-shell="next"] main.cockpit-workspace > .tt-overhaul,
 body[data-shell="next"] main.cockpit-workspace > .schemes-overhaul,
-body[data-shell="next"] main.cockpit-workspace > .map,
 body[data-shell="next"] main.cockpit-workspace > .kit,
 body[data-shell="next"] main.cockpit-workspace > .workspace-width {
   max-width: 1540px;
@@ -575,7 +576,6 @@ body.focus-mode[data-shell="next"] .scaffolded-ribbon {
 }
 
 body.focus-mode[data-shell="next"] .console-main-container {
-  margin-left: 0 !important;
   max-width: 840px;
   margin-right: auto !important;
   margin-left: auto !important;

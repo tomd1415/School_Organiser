@@ -44,7 +44,7 @@ export function renderConceptsNext(data: ConceptsNextData): string {
     : `<p class="muted">No teaching concepts yet — add the first one below. They're woven into generated lessons where they fit.</p>`;
     
   return `
-    <section class="card kit concepts-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
+    <section class="card concepts-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <h1>Teaching concepts</h1>
       <p class="muted">Cohort-level teaching ideas, analogies and "always do this" approaches. They're given to
         the AI for every lesson/scheme generation and woven in <em>where they fit</em>, without lengthening the

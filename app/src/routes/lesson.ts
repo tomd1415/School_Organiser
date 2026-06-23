@@ -816,7 +816,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           hx-post="/lesson/pupil-view/save?${scopeQ}&amp;lp=${lp}&amp;kind=${kind}&amp;scope=${edit}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(md)}</textarea>
         <span class="ws-saved" id="pv-${kind}-status" aria-live="polite"></span></details>`;
     const bodyContent = banner + editor('slides', '📊 Slides', slidesMd ?? '') + editor('worksheet', '📝 Worksheet', ws?.markdown ?? '');
-    const page = `<section class="pupil-card pv-card" hx-headers='{"x-csrf-token":"${csrf}"}'>${header}${bodyContent}</section>`;
+    const page = `<section class="pupil-card pv-card pupil-work-card" hx-headers='{"x-csrf-token":"${csrf}"}'>${header}${bodyContent}</section>`;
     return reply.type('text/html').send(pupilLayout(page, csrf));
   });
 
@@ -847,7 +847,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       `<a class="ws-tab${l === level ? ' is-on' : ''}" href="/lesson/pupil-preview?${scopeQ}&amp;lp=${lp}&amp;level=${l}">${label}</a>`;
     const deck = slidesMd ? renderSlideDeck(slidesMd, `preview-${gcKey}-${lp}`, level) : '';
     const wsHtml = ws
-      ? `<div class="ws-doc">${renderWorksheet(ws.markdown, { mode: 'preview', level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`
+      ? `<div class="ws-doc ws-doc-preview">${renderWorksheet(ws.markdown, { mode: 'preview', level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`
       : '<p class="pupil-note">No worksheet for this lesson yet — generate or upload one, then preview.</p>';
     const header = `<div class="pv-bar">
         <div><strong>${esc(master?.title ?? 'Lesson')}</strong> <span class="muted">${isMaster ? 'master lesson' : 'this class'} · 👁 preview as a pupil — answers are NOT saved</span></div>
@@ -855,7 +855,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         <div><a class="link" href="/lesson/pupil-view?${scopeQ}&amp;lp=${lp}&amp;level=${level}" target="_blank" rel="noopener" title="The clean projector board (slides only)">🖥 Board (slides) ↗</a></div>
       </div>`;
     const body = deck
-      ? `<section class="pupil-card pv-card">${header}
+      ? `<section class="pupil-card pv-card pupil-work-card">${header}
           <div class="pupil-twopane" data-pane="work">
             <div class="pane-toggle" role="tablist" aria-label="Show slides or worksheet">
               <button type="button" class="pane-tab" role="tab" data-pane-btn="slides" aria-selected="false">📊 Slides</button>
@@ -864,7 +864,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
             <div class="pupil-pane pupil-pane-slides">${deck}</div>
             <div class="pupil-pane pupil-pane-work">${wsHtml}</div>
           </div></section>`
-      : `<section class="pupil-card pv-card">${header}${wsHtml}</section>`;
+      : `<section class="pupil-card pv-card pupil-work-card">${header}${wsHtml}</section>`;
     return reply.type('text/html').send(pupilLayout(body, csrf));
   });
 

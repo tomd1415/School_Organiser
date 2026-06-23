@@ -158,7 +158,18 @@ button {
   cursor: pointer;
 }
 button.link { background: none; color: var(--accent); padding: 0; }
+/* UI-consistency restore: an <a class="link"> must read like <button class="link"> (the next shell lost
+   the base anchor styling, so anchor-links fell back to the UA default blue/purple). */
+a.link { background: none; color: var(--accent); padding: 0; text-decoration: none; cursor: pointer; }
+a.link:hover { text-decoration: underline; }
 .inline { display: inline; }
+
+/* UI-consistency restore (lost with the recovered classic sheet): the card header is a space-between row
+   (eyebrow + title on the left, a badge pushed right); and the small-caps section label .eyebrow should
+   look like its twin .kicker everywhere — not just inside the projector board. */
+body[data-shell="next"] .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+body[data-shell="next"] .card-head > h2, body[data-shell="next"] .card-head h1 { margin: 0; }
+body[data-shell="next"] .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; font-weight: 800; color: var(--accent); margin: 0 0 0.15rem; }
 
 /* Minimal top bar — used only by the deny-by-default TA / pupil surfaces (not the Rail & Stage teacher
    chrome). The old horizontal teacher nav (.nav / .nav-more) was removed in the Rail & Stage redesign. */

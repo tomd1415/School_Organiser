@@ -28,7 +28,7 @@ test('teacher drives + locks the pupil deck live over SSE (one session, two page
     if (!r.ok()) continue;
     const html = await r.text();
     const slides = (html.match(/class="pslide[ "]/g) || []).length;
-    if (slides >= 2 && /class="ws-doc"/.test(html)) {
+    if (slides >= 2 && /class="ws-doc[ "]/.test(html)) {
       plan = id;
       break;
     }
