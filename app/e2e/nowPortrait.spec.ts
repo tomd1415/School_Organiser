@@ -8,7 +8,7 @@ async function gridTracks(page: import('@playwright/test').Page): Promise<number
   return cols.split(' ').filter(Boolean).map((v) => parseFloat(v));
 }
 
-test('Now fits a 1080×1920 portrait monitor with a thin-timeline 3-column grid', async ({ page }) => {
+test('Now fits a 1080×1920 portrait monitor — timeline ⅓ left, content ⅔ right, filled', async ({ page }) => {
   await page.setViewportSize({ width: 1080, height: 1920 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.now-grid')).toBeVisible();
