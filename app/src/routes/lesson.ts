@@ -860,6 +860,49 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(pupilLayout(body, csrf));
   });
 
+  // Dev / force-live launcher: open ANY timetabled lesson's LIVE cockpit at ANY date (default today),
+  // decoupled from the timetable clock — so the live features (slide-sync, marking, needs-attention) can
+  // be tested on demand instead of waiting for the real slot. In the cockpit, "🧪 Test as pupil" opens the
+  // fillable pupil view in a new tab on the SAME occurrence. Teacher-only; the test pupil is fictitious.
+  app.get('/dev/force-live', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).safeParse(req.query);
+    const today = localParts(new Date(), 'Europe/London').isoDate;
+    const date = (q.success && q.data.date) || today;
+    const [lessons, periods] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions()]);
+    const slot = new Map(periods.map((p) => [`${p.weekday}:${p.slotOrder}`, p]));
+    const DAY = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const teaching = lessons
+      .filter((l) => l.purpose === 'teaching' || l.purpose === 'form')
+      .sort((a, b) => a.weekday - b.weekday || a.slotOrder - b.slotOrder);
+    const rows = teaching
+      .map((l) => {
+        const p = slot.get(`${l.weekday}:${l.slotOrder}`);
+        const when = p ? `${DAY[l.weekday] ?? '?'} ${esc(p.label)} ${esc(p.start)}–${esc(p.end)}` : `${DAY[l.weekday] ?? '?'} slot ${l.slotOrder}`;
+        const courses = l.courses.map((c) => esc(c.name)).join(', ');
+        return `<tr>
+          <td>${when}</td>
+          <td><strong>${esc(l.groupName ?? '—')}</strong>${courses ? ` <span class="muted">${courses}</span>` : ''}${l.isSelf ? '' : ` <span class="muted">· ${esc(l.staffName)}</span>`}</td>
+          <td><a class="button small" href="/lesson?lesson=${l.lessonId}&amp;date=${esc(date)}" target="_blank" rel="noopener">Open live cockpit →</a></td>
+        </tr>`;
+      })
+      .join('');
+    const body = `<section class="card">
+      <h1>🧪 Test a live lesson <span class="badge ai">dev</span></h1>
+      <p class="muted">Open any lesson's <strong>live</strong> teacher cockpit at any date — no waiting for its timetable slot.
+        In the cockpit, use <strong>🧪 Test as pupil</strong> to open the fillable pupil view in a new tab and drive the lesson
+        (slides sync + lock, marking) live, side by side. The test pupil is fictitious — <strong>no real pupil data</strong>.
+        If a slot has no plan bound, pick one in the cockpit's plan selector first (slides + worksheet come from the plan).</p>
+      <form method="get" action="/dev/force-live" class="kit-filter">
+        <label>Date <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
+        <noscript><button type="submit">Go</button></noscript>
+      </form>
+      ${teaching.length
+        ? `<div class="table-scroll"><table class="kit-table"><thead><tr><th>When</th><th>Class</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+        : '<p class="muted">No timetabled teaching lessons found — set up the timetable first (Setup → Timetable).</p>'}
+    </section>`;
+    return reply.type('text/html').send(layout({ title: 'Test a live lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
+  });
+
   // Presenter view — the slides on the TEACHER's own screen WITH the per-slide teaching notes. The board
   // (/lesson/pupil-view) stays clean; this route is requireAuth so notes never reach a pupil.
   app.get('/lesson/present', { preHandler: requireAuth }, async (req, reply) => {

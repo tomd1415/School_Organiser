@@ -40,14 +40,25 @@ describe('test pupil (integration)', () => {
     const futureDate = '2099-03-03'; // a throwaway occurrence — never a real teaching record
     let occId = 0;
     try {
+      // The in-page (HTMX) launcher gets an HX-Redirect so the SPA-style shell swaps to /me…
       const open = await app.inject({
+        method: 'POST',
+        url: '/test-pupil/open',
+        headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded', 'hx-request': 'true' },
+        payload: `lesson=${slot.id}&date=${futureDate}&level=core`,
+      });
+      expect(open.statusCode).toBe(200);
+      expect(open.headers['hx-redirect']).toBe('/me');
+      // …while a plain (non-HTMX) submit — the cockpit's "🧪 Test as pupil" new-tab form — gets a normal
+      // 302 redirect so the new tab lands directly on the pupil view.
+      const openTab = await app.inject({
         method: 'POST',
         url: '/test-pupil/open',
         headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' },
         payload: `lesson=${slot.id}&date=${futureDate}&level=core`,
       });
-      expect(open.statusCode).toBe(200);
-      expect(open.headers['hx-redirect']).toBe('/me');
+      expect(openTab.statusCode).toBe(302);
+      expect(openTab.headers.location).toBe('/me');
       cookie = firstCookie(open.headers['set-cookie']) || cookie; // session now carries testPupilId
 
       // The fictitious test pupil now exists (find-or-create) and is excluded from the real roster.

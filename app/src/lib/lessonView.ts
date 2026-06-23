@@ -638,12 +638,13 @@ export function renderLessonCockpit(options: {
               <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
             </details>
 
-            <form class="test-pupil-launch" hx-post="/test-pupil/open" hx-swap="none" title="Open this lesson as a test pupil — the real worksheet, autosave and Done, at any level (no time limit)">
+            <form class="test-pupil-launch" method="post" action="/test-pupil/open" target="_blank" title="Open this lesson as a test pupil in a NEW TAB (the real worksheet, autosave and Done, at any level) — keep the cockpit open beside it to drive the lesson live">
+              <input type="hidden" name="_csrf" value="${esc(csrf)}">
               <input type="hidden" name="lesson" value="${h.lessonId}">
               <input type="hidden" name="date" value="${esc(h.date)}">
               🧪 Test as pupil
               <select name="level" aria-label="level"><option value="support">🟢 Support</option><option value="core" selected>🟡 Core</option><option value="challenge">🔴 Challenge</option></select>
-              <button type="submit" class="link">open →</button>
+              <button type="submit" class="link">open in new tab →</button>
             </form>
 
             <div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${groupCourseId}&amp;lp=${lp}" hx-trigger="load" hx-swap="innerHTML"></div>

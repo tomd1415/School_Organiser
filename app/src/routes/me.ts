@@ -423,8 +423,13 @@ export function registerMeRoutes(app: FastifyInstance): void {
     req.session.set('testLessonId', b.data.lesson);
     req.session.set('testDate', b.data.date);
     req.session.set('testLevel', b.data.level);
-    reply.header('HX-Redirect', '/me');
-    return reply.send('');
+    // HTMX launch (the in-page form) follows HX-Redirect; a plain target="_blank" form (used to open the
+    // pupil view in a new tab beside the cockpit) gets a normal redirect instead.
+    if (req.headers['hx-request'] === 'true') {
+      reply.header('HX-Redirect', '/me');
+      return reply.send('');
+    }
+    return reply.redirect('/me');
   });
 
   app.post('/test-pupil/level', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {

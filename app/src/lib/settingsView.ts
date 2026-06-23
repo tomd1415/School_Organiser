@@ -332,6 +332,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         <li>${emOn === 'true' ? `📧 email intake: ${emLast ? esc(emLast) : 'on, not polled yet'}` : '📧 email intake off'}</li>
       </ul>
       <p class="muted">Setup checklist: <a href="/welcome">/welcome</a> · September: <a href="/setup/rollover">rollover wizard</a></p>
+      <p class="muted">Testing: <a href="/dev/force-live">🧪 test a live lesson</a> — open any lesson's live cockpit + a fictitious test pupil, on demand (no real pupil data).</p>
     </section>
   `;
 }
