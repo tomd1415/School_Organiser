@@ -2104,16 +2104,29 @@ body[data-shell="next"] .now-grid {
   align-items: start;
   grid-template-columns: 1.15fr 0.9fr 0.95fr;
 }
-body[data-shell="next"][data-orientation="portrait"] .now-grid {
-  display: flex;
-  flex-direction: column;
-  max-width: 680px;
-  margin: 0 auto;
-}
-@media (max-width: 1180px) {
+/* Portrait monitors (e.g. a 1080×1920 desk screen turned 90°): KEEP a multi-column layout so the whole
+   Now screen fits on one screen instead of collapsing into one long scroll. Three columns — two content
+   columns plus a deliberately THIN timeline (~a third of the usable width) in the middle. Driven by a
+   CSS orientation media query (not the old hard-coded data-orientation attribute, which never updated). */
+@media (orientation: portrait) and (min-width: 700px) {
   body[data-shell="next"] .now-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1.1fr 0.8fr 1.1fr; /* left · timeline (thin) · right */
+    gap: 1rem;
+    max-width: none;
+    margin: 0;
   }
+  body[data-shell="next"] .now-col-left,
+  body[data-shell="next"] .now-col-right,
+  body[data-shell="next"] .now-col-middle { gap: 1rem; }
+}
+/* Narrow phones in portrait (not the primary target) simply stack. */
+@media (orientation: portrait) and (max-width: 699px) {
+  body[data-shell="next"] .now-grid { grid-template-columns: 1fr; }
+}
+/* Small LANDSCAPE laptops collapse to one column (unchanged) — now scoped to landscape so it no longer
+   hijacks a portrait monitor, which is wider than a phone but still under 1180px. */
+@media (orientation: landscape) and (max-width: 1180px) {
+  body[data-shell="next"] .now-grid { grid-template-columns: 1fr; }
 }
 body[data-shell="next"] .now-col-left,
 body[data-shell="next"] .now-col-middle,
