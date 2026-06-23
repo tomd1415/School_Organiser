@@ -62,7 +62,7 @@ export async function getCourseCurriculumHistory(courseId: number): Promise<Curr
          JOIN lesson_occurrences o ON o.id = oc.occurrence_id
          JOIN group_courses gc ON gc.id = oc.group_course_id
          JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-         WHERE gc.group_id IN (SELECT id FROM chain) AND gc.course_id = $2 AND o.date <= CURRENT_DATE
+         WHERE gc.group_id IN (SELECT id FROM chain) AND gc.course_id = $2 AND o.date <= CURRENT_DATE AND NOT o.is_test /* TEST-LAB-GUARD */
        )
        SELECT title, (SELECT count(*)::int FROM covered) AS n
        FROM covered ORDER BY date DESC LIMIT 10`,

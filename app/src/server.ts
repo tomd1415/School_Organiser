@@ -67,6 +67,7 @@ import { coverageAtRisk } from './repos/brief';
 import { buildBrief } from './services/brief';
 import { runDueMarkJobs } from './services/markingQueue';
 import { processPendingDeletions } from './repos/fileDeletions';
+import { wipeTestOccurrences } from './repos/testLab';
 import { pollEmailOnce } from './services/emailPoll';
 import { getSetting, setSetting } from './repos/settings';
 import { sweepReviews } from './services/reviewLesson';
@@ -344,6 +345,22 @@ function schedulePendingDeletions(app: FastifyInstance): void {
   setInterval(() => void run(), 15 * 60 * 1000);
 }
 
+/** Test Lab: sweep away STALE test runs (is_test occurrences older than ~1 day, by created_at) on boot
+ * then every 6h — catches a teacher who closed the tab without hitting "Reset". created_at-based, not
+ * date-based, because a Test Lab run can be dated anything (a date-based reaper would miss far-future runs). */
+function scheduleTestLabReaper(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const n = await wipeTestOccurrences(true);
+      if (n > 0) app.log.info(`test lab: reaped ${n} stale test run(s)`);
+    } catch (err) {
+      app.log.error({ err }, 'test-lab reaper crashed');
+    }
+  };
+  void run();
+  setInterval(() => void run(), 6 * 60 * 60 * 1000);
+}
+
 /** Wave 7.1: compute the morning brief on boot then daily, logging a one-line summary. This is the
  * seam scheduled AI work (7.2 reviewer sweep, 7.3 spaced retrieval) will hook onto. Read-only. */
 function scheduleMorningBrief(app: FastifyInstance): void {
@@ -420,6 +437,7 @@ export async function start(): Promise<void> {
     schedulePendingDeletions(app);
     scheduleMorningBrief(app);
     scheduleReviewSweep(app);
+    scheduleTestLabReaper(app);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

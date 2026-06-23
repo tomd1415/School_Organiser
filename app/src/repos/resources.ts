@@ -417,7 +417,7 @@ export async function taMayAccessResource(resourceId: number, taStaffId: number)
                   WHERE a.id = rl.adaptation_id AND a.lesson_plan_id = oc.lesson_plan_id AND a.group_course_id = oc.group_course_id)
      JOIN lesson_occurrences lo ON lo.id = oc.occurrence_id
      JOIN timetabled_lessons tl ON tl.id = lo.timetabled_lesson_id
-     WHERE rl.resource_id = $1 AND (($2 > 0 AND tl.staff_id = $2) OR lo.date = CURRENT_DATE)
+     WHERE rl.resource_id = $1 AND NOT lo.is_test /* TEST-LAB-GUARD */ AND (($2 > 0 AND tl.staff_id = $2) OR lo.date = CURRENT_DATE)
      LIMIT 1`,
     [resourceId, taStaffId],
   );

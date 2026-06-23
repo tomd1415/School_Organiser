@@ -27,7 +27,7 @@ export async function pastLessonsForClass(groupCourseId: number, beforeDate: str
        FROM lesson_occurrences o
        JOIN occurrence_courses oc ON oc.occurrence_id = o.id
        JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-      WHERE oc.group_course_id = $1 AND o.date < $2::date
+      WHERE oc.group_course_id = $1 AND o.date < $2::date AND NOT o.is_test /* TEST-LAB-GUARD */
         AND coalesce(lp.objectives, '') <> ''
       ORDER BY o.date DESC`,
     [groupCourseId, beforeDate],

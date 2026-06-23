@@ -583,7 +583,7 @@ export async function listEditorLessons(yearId: number): Promise<EditorLesson[]>
             COALESCE((SELECT json_agg(gc.course_id) FROM timetabled_lesson_courses tlc
                       JOIN group_courses gc ON gc.id = tlc.group_course_id
                       WHERE tlc.timetabled_lesson_id = tl.id), '[]') AS "courseIds",
-            (SELECT count(*)::int FROM lesson_occurrences o WHERE o.timetabled_lesson_id = tl.id) AS "occurrenceCount",
+            (SELECT count(*)::int FROM lesson_occurrences o WHERE o.timetabled_lesson_id = tl.id AND NOT o.is_test) AS "occurrenceCount", /* TEST-LAB-GUARD */
             to_char(tl.start_time,'HH24:MI') AS "startTime", to_char(tl.end_time,'HH24:MI') AS "endTime"
      FROM timetabled_lessons tl
      JOIN period_definitions p ON p.id = tl.period_definition_id
@@ -636,7 +636,7 @@ export async function updateLessonField(id: number, field: string, value: string
 
 /** Delete a slot lesson — blocked once it has taught history (occurrences). */
 export async function deleteLesson(id: number): Promise<boolean> {
-  const used = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM lesson_occurrences WHERE timetabled_lesson_id = $1`, [id]);
+  const used = await pool.query<{ n: number }>(`SELECT count(*)::int n FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND NOT is_test /* TEST-LAB-GUARD */`, [id]);
   if (used.rows[0]!.n > 0) return false;
   await pool.query(`DELETE FROM timetabled_lesson_courses WHERE timetabled_lesson_id = $1`, [id]);
   await pool.query(`DELETE FROM timetabled_lessons WHERE id = $1`, [id]);
@@ -695,6 +695,7 @@ export async function setGroupCourse(groupId: number, courseId: number, on: bool
            USING lesson_occurrences lo
           WHERE oc.occurrence_id = lo.id
             AND oc.group_course_id = $1
+            AND NOT lo.is_test /* TEST-LAB-GUARD: course-deactivation reconcile touches only real occurrences */
             AND lo.date > CURRENT_DATE
             AND oc.lesson_plan_id IS NULL
             AND oc.stopping_point IS NULL

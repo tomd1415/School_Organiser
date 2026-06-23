@@ -61,7 +61,7 @@ beforeAll(async () => {
     `WITH occ AS (
        INSERT INTO lesson_occurrences (timetabled_lesson_id, date)
        SELECT id, CURRENT_DATE FROM timetabled_lessons ORDER BY id LIMIT 1
-       ON CONFLICT (timetabled_lesson_id, date) DO NOTHING RETURNING id)
+       ON CONFLICT (timetabled_lesson_id, date, is_test) DO NOTHING RETURNING id)
      INSERT INTO occurrence_courses (occurrence_id, group_course_id)
      SELECT COALESCE((SELECT id FROM occ),
                      (SELECT id FROM lesson_occurrences
@@ -350,7 +350,7 @@ describe('pupil login + surface (integration)', () => {
       `WITH o AS (
          INSERT INTO lesson_occurrences (timetabled_lesson_id, date)
          SELECT id, DATE '2001-02-03' FROM timetabled_lessons ORDER BY id LIMIT 1
-         ON CONFLICT (timetabled_lesson_id, date) DO NOTHING RETURNING id)
+         ON CONFLICT (timetabled_lesson_id, date, is_test) DO NOTHING RETURNING id)
        INSERT INTO occurrence_courses (occurrence_id, group_course_id)
        SELECT COALESCE((SELECT id FROM o),
                        (SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = (SELECT id FROM timetabled_lessons ORDER BY id LIMIT 1) AND date = DATE '2001-02-03')), $1

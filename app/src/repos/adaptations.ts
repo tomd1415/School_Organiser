@@ -223,7 +223,7 @@ export async function recentPaceSamples(groupCourseId: number, limit = 6): Promi
      FROM occurrence_courses oc
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
      JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE AND oc.progress_step IS NOT NULL
+     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE AND oc.progress_step IS NOT NULL AND NOT o.is_test /* TEST-LAB-GUARD */
      ORDER BY o.date DESC
      LIMIT $2`,
     [groupCourseId, limit],
@@ -263,7 +263,7 @@ export async function recentGroupHistory(groupCourseId: number, limit = 4): Prom
      FROM occurrence_courses oc
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE
+     WHERE oc.group_course_id = $1 AND o.date <= CURRENT_DATE AND NOT o.is_test /* TEST-LAB-GUARD */
        AND (oc.stopping_point IS NOT NULL
             OR EXISTS (SELECT 1 FROM notes n WHERE n.occurrence_id = o.id AND n.body <> '')
             OR EXISTS (SELECT 1 FROM ta_feedback tf WHERE tf.occurrence_course_id = oc.id))

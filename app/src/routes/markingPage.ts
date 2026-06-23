@@ -38,7 +38,7 @@ async function markableLessons(): Promise<Row[]> {
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
      JOIN pupil_answers a ON a.occurrence_course_id = oc.id AND a.value <> '' AND a.field_key NOT LIKE 'task.%'
      LEFT JOIN pupil_marks m ON m.pupil_answer_id = a.id
-     WHERE o.date <= CURRENT_DATE
+     WHERE o.date <= CURRENT_DATE AND NOT o.is_test /* TEST-LAB-GUARD */
      GROUP BY oc.id, o.date, g.name, c.name, lp.title
      ORDER BY o.date DESC, g.name
      LIMIT 80`,

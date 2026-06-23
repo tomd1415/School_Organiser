@@ -433,7 +433,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
       // give OUR gc some history (past occurrence with a stopping point), then the AI gate degrades
       const occ = await pool.query<{ id: number }>(
         `INSERT INTO lesson_occurrences (timetabled_lesson_id, date) VALUES ($1, $2)
-         ON CONFLICT (timetabled_lesson_id, date) DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id RETURNING id`,
+         ON CONFLICT (timetabled_lesson_id, date, is_test) DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id RETURNING id`,
         [lessonId, PAST],
       );
       await pool.query(
@@ -1001,7 +1001,7 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const slot = await pool.query<{ id: number }>(`SELECT id FROM timetabled_lessons WHERE purpose='teaching' ORDER BY id LIMIT 1`);
     const occ = await pool.query<{ id: number }>(
       `INSERT INTO lesson_occurrences (timetabled_lesson_id, date) VALUES ($1, '2001-01-08')
-       ON CONFLICT (timetabled_lesson_id, date) DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id RETURNING id`,
+       ON CONFLICT (timetabled_lesson_id, date, is_test) DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id RETURNING id`,
       [slot.rows[0]!.id],
     );
     await pool.query(

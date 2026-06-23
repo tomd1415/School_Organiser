@@ -63,7 +63,7 @@ export function registerGroupHistoryRoutes(app: FastifyInstance): void {
                JOIN group_courses gc ON gc.id = oc.group_course_id
                JOIN courses c ON c.id = gc.course_id
                LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-               WHERE gc.group_id = $1 AND (oc.lesson_plan_id IS NOT NULL OR oc.stopping_point IS NOT NULL)
+               WHERE gc.group_id = $1 AND NOT o.is_test /* TEST-LAB-GUARD */ AND (oc.lesson_plan_id IS NOT NULL OR oc.stopping_point IS NOT NULL)
                ORDER BY o.date DESC LIMIT 15`,
               [g.id],
             ),
@@ -72,7 +72,7 @@ export function registerGroupHistoryRoutes(app: FastifyInstance): void {
                FROM notes n
                LEFT JOIN lesson_occurrences o ON o.id = n.occurrence_id
                LEFT JOIN timetabled_lessons tl ON tl.id = o.timetabled_lesson_id
-               WHERE (n.group_id = $1 OR tl.group_id = $1) AND n.body <> '' AND NOT n.safeguarding
+               WHERE (n.group_id = $1 OR tl.group_id = $1) AND n.body <> '' AND NOT n.safeguarding AND o.is_test IS NOT TRUE /* TEST-LAB-GUARD (LEFT JOIN: keep notes with no occurrence) */
                ORDER BY 1 DESC LIMIT 15`,
               [g.id],
             ),

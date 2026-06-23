@@ -40,7 +40,7 @@ export async function pupilMarksHistory(pupilId: number, limit = 30): Promise<Ma
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
      JOIN group_courses gc ON gc.id = oc.group_course_id
      JOIN courses c ON c.id = gc.course_id
-     WHERE a.pupil_id = $1 AND m.status = 'confirmed'
+     WHERE a.pupil_id = $1 AND m.status = 'confirmed' AND NOT o.is_test /* TEST-LAB-GUARD */
      GROUP BY o.date, c.name, oc.id
      ORDER BY o.date DESC
      LIMIT $2`,

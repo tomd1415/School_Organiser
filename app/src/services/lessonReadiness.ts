@@ -53,7 +53,7 @@ export async function weekReadiness(weekDates: string[]): Promise<Map<string, Le
      FROM lesson_occurrences o
      JOIN occurrence_courses oc ON oc.occurrence_id = o.id
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-     WHERE o.date = ANY($1)`,
+     WHERE o.date = ANY($1) AND NOT o.is_test /* TEST-LAB-GUARD */`,
     [weekDates],
   );
   const developedGC = new Map<string, Set<number>>(); // `${date}:${lessonId}` → group-courses with a developed plan

@@ -99,7 +99,7 @@ export async function slotSchedule(lessonId: number, groupCourseId: number, from
      FROM occurrence_courses oc
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-     WHERE o.timetabled_lesson_id = $1 AND oc.group_course_id = $2 AND o.date BETWEEN $3 AND $4
+     WHERE o.timetabled_lesson_id = $1 AND oc.group_course_id = $2 AND o.date BETWEEN $3 AND $4 AND NOT o.is_test /* TEST-LAB-GUARD */
      ORDER BY o.date`,
     [lessonId, groupCourseId, fromDate, toDate],
   );
@@ -154,7 +154,7 @@ export async function classSchedule(groupCourseId: number, fromDate: string, toD
      JOIN timetabled_lesson_courses tlc
        ON tlc.timetabled_lesson_id = o.timetabled_lesson_id AND tlc.group_course_id = oc.group_course_id
      LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
-     WHERE oc.group_course_id = $1 AND o.date BETWEEN $2 AND $3
+     WHERE oc.group_course_id = $1 AND o.date BETWEEN $2 AND $3 AND NOT o.is_test /* TEST-LAB-GUARD */
      ORDER BY o.date, o.timetabled_lesson_id`,
     [groupCourseId, fromDate, toDate],
   );
@@ -210,7 +210,7 @@ export async function setPlannerLock(groupCourseId: number, timetabledLessonId: 
   const { rowCount } = await pool.query(
     `UPDATE occurrence_courses oc SET planner_locked = $4
      FROM lesson_occurrences o
-     WHERE o.id = oc.occurrence_id AND oc.group_course_id = $1 AND o.timetabled_lesson_id = $2 AND o.date = $3`,
+     WHERE o.id = oc.occurrence_id AND oc.group_course_id = $1 AND o.timetabled_lesson_id = $2 AND o.date = $3 AND NOT o.is_test /* TEST-LAB-GUARD */`,
     [groupCourseId, timetabledLessonId, date, locked],
   );
   return (rowCount ?? 0) > 0;

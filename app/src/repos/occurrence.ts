@@ -21,20 +21,36 @@ export async function taMayAccessOccurrenceCourse(occurrenceCourseId: number, ta
 /** How many class-lessons the teacher has actually taught (recorded a stopping point or progress for)
  *  — the signal behind the earned "unlock advanced tools" nudge. */
 export async function countTaughtLessons(): Promise<number> {
+  // TEST-LAB-GUARD: a Test Lab run can set stopping_point/progress_step, so exclude is_test occurrences
+  // from the "lessons taught" signal behind the advanced-tools nudge.
   const { rows } = await pool.query<{ n: number }>(
-    `SELECT count(*)::int AS n FROM occurrence_courses WHERE stopping_point IS NOT NULL OR progress_step IS NOT NULL`,
+    `SELECT count(*)::int AS n FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     WHERE (oc.stopping_point IS NOT NULL OR oc.progress_step IS NOT NULL) AND NOT o.is_test`,
   );
   return rows[0]?.n ?? 0;
 }
 
-/** Find-or-create the occurrence for a slot on a date, and materialise its courses. */
-export async function findOrCreateOccurrence(lessonId: number, date: string): Promise<number> {
+/** True if this occurrence-course belongs to a Test Lab (is_test) occurrence. */
+export async function occurrenceCourseIsTest(occurrenceCourseId: number): Promise<boolean> {
+  const { rows } = await pool.query<{ t: boolean }>(
+    `SELECT o.is_test AS t FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     WHERE oc.id = $1`,
+    [occurrenceCourseId],
+  );
+  return rows[0]?.t === true;
+}
+
+/** Find-or-create the occurrence for a slot on a date, and materialise its courses. `isTest` selects the
+ *  sandboxed Test Lab partition — real callers leave it false and always hit the real occurrence. */
+export async function findOrCreateOccurrence(lessonId: number, date: string, isTest = false): Promise<number> {
   const { rows } = await pool.query<{ id: number }>(
-    `INSERT INTO lesson_occurrences (timetabled_lesson_id, date) VALUES ($1, $2)
-     ON CONFLICT (timetabled_lesson_id, date)
+    `INSERT INTO lesson_occurrences (timetabled_lesson_id, date, is_test) VALUES ($1, $2, $3)
+     ON CONFLICT (timetabled_lesson_id, date, is_test)
        DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id
      RETURNING id`,
-    [lessonId, date],
+    [lessonId, date, isTest],
   );
   const id = rows[0]?.id;
   if (id === undefined) throw new Error('failed to find or create occurrence');
@@ -57,10 +73,10 @@ export async function findOrCreateOccurrence(lessonId: number, date: string): Pr
 
 /** Read-only: the occurrence id for a slot+date if it already exists (no write, no prep
  * materialisation, no row lock) — for hot read paths like the pupil surface. */
-export async function findOccurrence(lessonId: number, date: string): Promise<number | null> {
+export async function findOccurrence(lessonId: number, date: string, isTest = false): Promise<number | null> {
   const { rows } = await pool.query<{ id: number }>(
-    `SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2`,
-    [lessonId, date],
+    `SELECT id FROM lesson_occurrences WHERE timetabled_lesson_id = $1 AND date = $2 AND is_test = $3`,
+    [lessonId, date, isTest],
   );
   return rows[0]?.id ?? null;
 }
@@ -124,7 +140,7 @@ export async function getLastStoppingPoints(lessonId: number, beforeDate: string
             to_char(o.date, 'YYYY-MM-DD') AS date
      FROM lesson_occurrences o
      JOIN occurrence_courses oc ON oc.occurrence_id = o.id
-     WHERE o.timetabled_lesson_id = $1 AND o.date < $2::date
+     WHERE o.timetabled_lesson_id = $1 AND o.date < $2::date AND NOT o.is_test
        AND oc.stopping_point IS NOT NULL AND oc.stopping_point <> ''
      ORDER BY oc.group_course_id, o.date DESC`,
     [lessonId, beforeDate],

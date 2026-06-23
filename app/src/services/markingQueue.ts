@@ -6,12 +6,16 @@
 import { appConfig } from '../config/app';
 import { marksEnabled } from '../auth/marksGate';
 import { getMarkingSettings, occCoursePlan, enqueueOpenMark, claimDueMarkJobs } from '../repos/marking';
+import { occurrenceCourseIsTest } from '../repos/occurrence';
 import { markObjective, markOpen } from './marking';
 
 const DEBOUNCE_MS = 120_000;
 const RETRY_MS = 300_000; // re-arm a job whose AI pass couldn't run (transient outage), so marks aren't dropped
 
 export async function onPupilDone(occurrenceCourseId: number): Promise<void> {
+  // TEST-LAB-GUARD: a Test Lab run's "Done" must never mark or queue an AI job (its answers are already
+  // excluded from answersForMarking, so this is belt-and-braces — it stops a mark_job row being written).
+  if (await occurrenceCourseIsTest(occurrenceCourseId)) return;
   if (!(await marksEnabled())) return;
   const oc = await occCoursePlan(occurrenceCourseId);
   if (!oc) return;

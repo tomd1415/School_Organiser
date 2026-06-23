@@ -248,7 +248,8 @@ export async function classFeedbackAllTime(groupCourseId: number): Promise<Class
     `SELECT f.rating, f.liked, f.disliked, f.comment
      FROM pupil_lesson_feedback f
      JOIN occurrence_courses oc ON oc.id = f.occurrence_course_id
-     WHERE oc.group_course_id = $1`,
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     WHERE oc.group_course_id = $1 AND NOT o.is_test /* TEST-LAB-GUARD */`,
     [groupCourseId],
   );
   return aggFeedback(rows);

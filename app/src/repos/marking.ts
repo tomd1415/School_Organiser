@@ -321,7 +321,7 @@ export async function marksBacklog(): Promise<MarksBacklogRow[]> {
      JOIN courses c ON c.id = gc.course_id
      JOIN pupil_answers a ON a.occurrence_course_id = oc.id
      JOIN pupil_marks m ON m.pupil_answer_id = a.id
-     WHERE o.date >= (now() - interval '21 days')::date
+     WHERE o.date >= (now() - interval '21 days')::date AND NOT o.is_test /* TEST-LAB-GUARD */
      GROUP BY oc.id, c.name, g.name, o.date, o.timetabled_lesson_id, oc.marks_released_at
      HAVING count(*) FILTER (WHERE m.status = 'suggested') > 0
          OR (oc.marks_released_at IS NULL AND count(*) FILTER (WHERE m.status = 'confirmed') > 0)
@@ -337,7 +337,7 @@ export async function recentMarkedOccurrenceCourses(groupCourseId: number, limit
   const { rows } = await pool.query<{ id: number }>(
     `SELECT oc.id FROM occurrence_courses oc
      JOIN lesson_occurrences o ON o.id = oc.occurrence_id
-     WHERE oc.group_course_id = $1
+     WHERE oc.group_course_id = $1 AND NOT o.is_test /* TEST-LAB-GUARD */
        AND EXISTS (SELECT 1 FROM pupil_answers a JOIN pupil_marks m ON m.pupil_answer_id = a.id WHERE a.occurrence_course_id = oc.id)
      ORDER BY o.date DESC, oc.id DESC
      LIMIT $2`,
