@@ -1657,7 +1657,24 @@ body[data-shell="next"] *::-webkit-scrollbar-thumb:hover {
 body[data-shell="next"] .tt-table td {
   background: var(--surface) !important;
   border-color: var(--line) !important;
+  position: relative; /* anchor the per-cell 🧪 Test Lab badge */
 }
+/* Test Lab: a small corner badge on your own teaching cells — jump straight into a sandbox of that lesson. */
+body[data-shell="next"] .tt-test {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 2;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 5px;
+  text-decoration: none;
+  opacity: 0.5;
+  background: var(--violet-soft);
+  border: 1px solid var(--violet);
+}
+body[data-shell="next"] .tt-test:hover { opacity: 1; }
 body[data-shell="next"] .tt-free {
   background: repeating-linear-gradient(45deg, var(--green-soft), var(--green-soft) 6px, rgba(25, 56, 37, 0.7) 6px, rgba(25, 56, 37, 0.7) 12px) !important;
 }
@@ -2271,6 +2288,14 @@ body[data-shell="next"] .test-lab-banner {
 }
 body[data-shell="next"] .test-lab-banner a { color: var(--violet); font-weight: 700; }
 body[data-shell="next"] .overhaul-cockpit.test-lab { outline: 2px dashed var(--violet); outline-offset: 6px; }
+/* Test Lab launcher: pick a lesson by topic (course → its scheme lessons). */
+body[data-shell="next"] .tl-topics { display: grid; gap: 0.4rem; margin: 1rem 0; }
+body[data-shell="next"] .tl-course > summary { cursor: pointer; padding: 0.5rem 0.2rem; font-size: 0.95rem; }
+body[data-shell="next"] .tl-lessons { list-style: none; margin: 0.3rem 0 0.9rem; padding: 0 0 0 0.6rem; display: grid; gap: 0.4rem; }
+body[data-shell="next"] .tl-lessons li { display: flex; align-items: center; gap: 0.6rem; }
+body[data-shell="next"] .tl-lesson { color: var(--text); }
+body[data-shell="next"] .tl-advanced { margin-top: 1.5rem; }
+body[data-shell="next"] .tl-advanced > summary { cursor: pointer; color: var(--muted); padding: 0.4rem 0; }
 body[data-shell="next"] .live-bar h1 {
   margin: 0;
   font-size: clamp(1.2rem, 2.2vw, 1.7rem);

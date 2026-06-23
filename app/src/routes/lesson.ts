@@ -15,8 +15,8 @@ import {
 } from '../repos/occurrence';
 import { setSlide, setSlidesLocked } from '../repos/slideSync';
 import { broadcast as broadcastSlide } from '../services/slideSync';
-import { countTestOccurrences, wipeTestOccurrences } from '../repos/testLab';
-import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
+import { countTestOccurrences, pickTestSlotForPlan, wipeTestOccurrences } from '../repos/testLab';
+import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, listCourses, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
 import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
 import { getOpenReviewForPlan } from '../repos/reviews';
@@ -876,8 +876,29 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const q = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).safeParse(req.query);
     const today = localParts(new Date(), 'Europe/London').isoDate;
     const date = (q.success && q.data.date) || today;
-    const [lessons, periods, testRuns] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions(), countTestOccurrences()]);
+    const [lessons, periods, testRuns, courses] = await Promise.all([
+      getTimetabledLessons(),
+      getPeriodDefinitions(),
+      countTestOccurrences(),
+      listCourses(),
+    ]);
+    const perCourse = await Promise.all(courses.map((c) => listCoursePlans(Number(c.id))));
     const csrf = reply.generateCsrf();
+
+    // PRIMARY: pick a lesson BY TOPIC. Each course's scheme lessons, each opening its content sandboxed.
+    const topicList = courses
+      .map((c, i) => {
+        const plans = perCourse[i] ?? [];
+        if (!plans.length) return '';
+        const items = plans
+          .map((pl) => `<li><a class="button small" href="/test-lab/plan/${pl.id}" target="_blank" rel="noopener">🧪 Test</a> <span class="tl-lesson">${esc(pl.title)}</span></li>`)
+          .join('');
+        return `<details class="tl-course"><summary><strong>${esc(c.name)}</strong> <span class="muted">${plans.length} lesson${plans.length === 1 ? '' : 's'}</span></summary><ul class="tl-lessons">${items}</ul></details>`;
+      })
+      .filter(Boolean)
+      .join('');
+
+    // ADVANCED: open a specific class + date slot (the sandbox inherits whatever plan is bound that day).
     const slot = new Map(periods.map((p) => [`${p.weekday}:${p.slotOrder}`, p]));
     const DAY = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const teaching = lessons
@@ -887,11 +908,11 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       .map((l) => {
         const p = slot.get(`${l.weekday}:${l.slotOrder}`);
         const when = p ? `${DAY[l.weekday] ?? '?'} ${esc(p.label)} ${esc(p.start)}–${esc(p.end)}` : `${DAY[l.weekday] ?? '?'} slot ${l.slotOrder}`;
-        const courses = l.courses.map((c) => esc(c.name)).join(', ');
+        const courseNames = l.courses.map((c) => esc(c.name)).join(', ');
         return `<tr>
           <td>${when}</td>
-          <td><strong>${esc(l.groupName ?? '—')}</strong>${courses ? ` <span class="muted">${courses}</span>` : ''}${l.isSelf ? '' : ` <span class="muted">· ${esc(l.staffName)}</span>`}</td>
-          <td><a class="button small" href="/lesson?lesson=${l.lessonId}&amp;date=${esc(date)}&amp;lab=1" target="_blank" rel="noopener">Open sandbox cockpit →</a></td>
+          <td><strong>${esc(l.groupName ?? '—')}</strong>${courseNames ? ` <span class="muted">${courseNames}</span>` : ''}${l.isSelf ? '' : ` <span class="muted">· ${esc(l.staffName)}</span>`}</td>
+          <td><a class="button small ghost" href="/lesson?lesson=${l.lessonId}&amp;date=${esc(date)}&amp;lab=1" target="_blank" rel="noopener">Open sandbox →</a></td>
         </tr>`;
       })
       .join('');
@@ -902,25 +923,25 @@ export function registerLessonRoutes(app: FastifyInstance): void {
          </form>`
       : '<span class="muted">No active test runs.</span>';
     const body = `<section class="card">
-      <h1>🧪 Test Lab</h1>
-      <p class="muted"><strong>Easiest way in:</strong> open the lesson you want to test (from the timetable or Now screen) and click
-        <strong>🧪 Test this lesson</strong> in its cockpit — it jumps straight here for that exact lesson.</p>
-      <p class="muted">Or pick a <strong>class</strong> below and a <strong>date</strong>: that opens a <strong>sandbox copy</strong> of whatever
-        lesson is planned for that class on that date — slides + worksheet and all — where you can run it as teacher, open
-        <strong>🧪 Test as pupil</strong> in a new tab, write answers and mark. Everything is isolated: <strong>nothing here touches real
-        classes' marking, planner or history</strong>, and you can wipe it all with Reset. The list below is your weekly timetable
-        (every class · time); the date sets which day's planned lesson you test (a day with nothing planned opens empty —
-        bind a plan in the cockpit, or pick a day you've planned).</p>
-      <div class="kit-filter" style="display:flex;align-items:end;gap:1rem;flex-wrap:wrap;">
-        <form method="get" action="/test-lab">
-          <label>Date to test <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
+      <div class="card-head"><h1>🧪 Test Lab</h1>${resetBtn}</div>
+      <p class="muted">Pick the <strong>lesson</strong> you want to test — it opens a <strong>sandbox copy</strong> (its real slides + worksheet)
+        where you run it as teacher, open <strong>🧪 Test as pupil</strong> in a new tab, write answers and mark. Everything is isolated:
+        <strong>nothing here touches real classes' marking, planner or history</strong>. You can also hit <strong>🧪 Test this lesson</strong> on
+        any lesson cockpit, in the Now screen, or in Schemes.</p>
+      ${topicList
+        ? `<div class="tl-topics">${topicList}</div>`
+        : '<p class="muted">No lessons in your schemes yet — author a scheme of work first (Schemes).</p>'}
+      <details class="tl-advanced">
+        <summary>Advanced: open a specific class + date slot</summary>
+        <p class="muted">Opens a sandbox of whatever lesson is planned for that class on that date (empty if nothing's planned — bind a plan in the cockpit).</p>
+        <form method="get" action="/test-lab" class="kit-filter">
+          <label>Date <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
           <noscript><button type="submit">Go</button></noscript>
         </form>
-        ${resetBtn}
-      </div>
-      ${teaching.length
-        ? `<div class="table-scroll"><table class="kit-table"><thead><tr><th>When</th><th>Class</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
-        : '<p class="muted">No timetabled teaching lessons found — set up the timetable first (Setup → Timetable).</p>'}
+        ${teaching.length
+          ? `<div class="table-scroll"><table class="kit-table"><thead><tr><th>When</th><th>Class</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+          : '<p class="muted">No timetabled lessons found — set up the timetable first (Setup → Timetable).</p>'}
+      </details>
     </section>`;
     return reply.type('text/html').send(layout({ title: 'Test Lab', body, authed: true, csrfToken: csrf }));
   });
@@ -930,6 +951,28 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const n = await wipeTestOccurrences();
     app.log.info(`test lab: reset wiped ${n} run(s)`);
     return reply.redirect('/test-lab');
+  });
+
+  // "Test this lesson by topic": from a lesson PLAN (schemes / Test Lab topic picker). Resolve a real
+  // class + slot that takes the plan's course, mint the SANDBOXED occurrence, bind the plan to it, and
+  // open the lab cockpit on that section — so the teacher tests the actual lesson content, isolated.
+  app.get('/test-lab/plan/:lp', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ lp: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) {
+      const e = errorPage(reply, 400, 'That lesson reference looks wrong.');
+      return reply.code(e.code).type('text/html').send(e.html);
+    }
+    const slot = await pickTestSlotForPlan(p.data.lp);
+    if (!slot) {
+      const e = errorPage(reply, 400, "This lesson's course isn't timetabled to a class yet — add a class for it, then test from that lesson's cockpit.");
+      return reply.code(e.code).type('text/html').send(e.html);
+    }
+    const date = localParts(new Date(), 'Europe/London').isoDate;
+    const occId = await findOrCreateOccurrence(slot.lessonId, date, true); // sandbox
+    const target = (await getOccurrenceCourses(occId)).find((o) => Number(o.groupCourseId) === slot.groupCourseId);
+    if (target) await setOccurrenceCoursePlan(target.occurrenceCourseId, p.data.lp); // bind the chosen plan
+    const oc = target ? `&oc=${target.occurrenceCourseId}` : '';
+    return reply.redirect(`/lesson?lesson=${slot.lessonId}&date=${date}&lab=1${oc}`);
   });
 
   // Back-compat: the old dev launcher path now redirects to the Test Lab.

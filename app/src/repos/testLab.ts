@@ -63,3 +63,22 @@ export async function countTestOccurrences(): Promise<number> {
   const { rows } = await pool.query<{ n: number }>(`SELECT count(*)::int AS n FROM lesson_occurrences WHERE is_test`);
   return rows[0]?.n ?? 0;
 }
+
+/** "Test this lesson by topic": a lesson PLAN isn't tied to a slot, so to sandbox it we pick a real class
+ *  (an active group_course) that takes the plan's course, and one of that class's timetable slots — that
+ *  gives the sandbox occurrence a class context (worksheet level, slides) to render against. Returns null
+ *  when the plan's course has no timetabled class yet (nothing to test it against). */
+export async function pickTestSlotForPlan(planId: number): Promise<{ lessonId: number; groupCourseId: number } | null> {
+  const { rows } = await pool.query<{ lessonId: number; groupCourseId: number }>(
+    `SELECT tlc.timetabled_lesson_id AS "lessonId", gc.id AS "groupCourseId"
+     FROM lesson_plans lp
+     JOIN group_courses gc ON gc.course_id = lp.course_id AND gc.active
+     JOIN timetabled_lesson_courses tlc ON tlc.group_course_id = gc.id
+     JOIN timetabled_lessons tl ON tl.id = tlc.timetabled_lesson_id
+     WHERE lp.id = $1
+     ORDER BY gc.id, tl.id
+     LIMIT 1`,
+    [planId],
+  );
+  return rows[0] ?? null;
+}

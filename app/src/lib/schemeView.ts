@@ -141,6 +141,7 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
       </details>
       <div class="plan-preview-actions">
         <a class="button small" href="/lesson/preview?plan=${p.id}" target="_blank" rel="noopener" title="Open a read-only preview of the live teacher cockpit without creating a lesson occurrence">▶ Preview live lesson ↗</a>
+        <a class="button small" href="/test-lab/plan/${p.id}" target="_blank" rel="noopener" title="Run THIS lesson in the Test Lab — a live sandbox where you drive it as teacher + a test pupil who writes answers, with no effect on real classes">🧪 Test in Test Lab ↗</a>
         <a class="link" href="/lesson/pupil-preview?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="See exactly what a pupil works in — the slides AND the worksheet they fill in (read-only preview; nothing is saved). Switch ability level in the preview.">👁 Preview as pupil (worksheet) ↗</a>
         <a class="link" href="/lesson/pupil-view?master=1&amp;lp=${p.id}&amp;level=core" target="_blank" rel="noopener" title="The clean projector board for this master lesson — slides only">🖥 Board (slides) ↗</a>
       </div>

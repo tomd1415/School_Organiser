@@ -30,13 +30,30 @@ afterAll(async () => {
 });
 
 describe('Test Lab launcher', () => {
-  it('GET /test-lab lists timetabled lessons linking to the SANDBOX cockpit (lab=1)', async () => {
+  it('GET /test-lab lets you pick a lesson BY TOPIC + has the advanced class+date sandbox slots', async () => {
     const res = await app.inject({ method: 'GET', url: '/test-lab', headers: { cookie } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Test Lab');
-    expect(res.body).toContain('type="date"'); // date picker (default today)
-    // every cockpit link is a sandbox link
+    // primary: per-lesson "Test by topic" links
+    expect(res.body).toMatch(/\/test-lab\/plan\/\d+/);
+    // advanced: class+date sandbox slot links + date picker
+    expect(res.body).toContain('type="date"');
     expect(res.body).toMatch(/\/lesson\?lesson=\d+&(?:amp;)?date=\d{4}-\d{2}-\d{2}&(?:amp;)?lab=1/);
+  });
+
+  it('GET /test-lab/plan/:lp opens a SANDBOX of that lesson (302 → /lesson…&lab=1)', async () => {
+    const plan = (
+      await pool.query<{ id: number }>(
+        `SELECT lp.id FROM lesson_plans lp
+         JOIN group_courses gc ON gc.course_id = lp.course_id AND gc.active
+         JOIN timetabled_lesson_courses tlc ON tlc.group_course_id = gc.id
+         WHERE lp.active LIMIT 1`,
+      )
+    ).rows[0]?.id;
+    if (!plan) return; // no plan whose course is timetabled — skip
+    const res = await app.inject({ method: 'GET', url: `/test-lab/plan/${plan}`, headers: { cookie } });
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.location).toMatch(/^\/lesson\?lesson=\d+&date=\d{4}-\d{2}-\d{2}&lab=1/);
   });
 
   it('honours the ?date param for the cockpit links', async () => {

@@ -89,7 +89,12 @@ export function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect, r
   }
   if (l.purpose === 'teaching' || l.purpose === 'free' || l.purpose === 'form') {
     const href = isFree ? `/free?lesson=${l.lessonId}&date=${esc(date)}` : `/lesson?lesson=${l.lessonId}&date=${esc(date)}`;
-    return `<a class="tt-lesson tt-${esc(l.purpose)}${isFree ? ' tt-is-free' : ''}" style="${style}" href="${href}">${inner}</a>`;
+    // A corner "🧪" jumps into a sandbox of your OWN teaching lesson (Test Lab). Sibling of the cell link
+    // (no nested anchors); the <td> is position:relative so it sits in the corner.
+    const testLink = !isFree && l.purpose === 'teaching' && l.isSelf
+      ? `<a class="tt-test" href="/lesson?lesson=${l.lessonId}&date=${esc(date)}&lab=1" target="_blank" rel="noopener" title="Test this lesson in the Test Lab (sandbox — no effect on the real class)" aria-label="Test this lesson in the Test Lab">🧪</a>`
+      : '';
+    return `<a class="tt-lesson tt-${esc(l.purpose)}${isFree ? ' tt-is-free' : ''}" style="${style}" href="${href}">${inner}</a>${testLink}`;
   }
   return `<span class="tt-lesson tt-${esc(l.purpose)}" style="${style}">${inner}</span>`;
 }

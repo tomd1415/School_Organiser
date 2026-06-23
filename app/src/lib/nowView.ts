@@ -148,7 +148,7 @@ export function renderCurrentCard(
       <div class="ld-notes-head"><h2>Quick note</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: occurrenceId })}</div>
       ${renderNotesList(listId, notes)}
     </div>
-    <p><a href="${openHref}">Open lesson detail →</a></p>
+    <p><a href="${openHref}">Open lesson detail →</a> &nbsp;·&nbsp; <a href="${openHref}&lab=1" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
   </div>`;
 }
 
@@ -186,7 +186,7 @@ export function renderNextCard(
     <h2>${heading}</h2>
     <p class="ld-meta">${when}${room}</p>
     ${isFreeOrCover ? '' : courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
-    <p><a href="${openHref}">Open next lesson →</a></p>
+    <p><a href="${openHref}">Open next lesson →</a> &nbsp;·&nbsp; <a href="${openHref}&lab=1" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
   </div>`;
 }
 
