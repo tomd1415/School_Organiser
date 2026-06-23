@@ -1,7 +1,9 @@
 # Test Lab — plan
 
-**Status:** proposal (planning session, 2026-06-23). Not built. Researched + adversarially reviewed via
-a multi-agent pass; this doc folds in the corrections the review found.
+**Status:** Phase 1 (isolation core) + Phase 2 (launcher + sandbox cockpit + teardown) BUILT and verified
+(2026-06-23). Decisions taken: two-tab UX (no split-screen); AI cockpit buttons confirm-gated in lab mode.
+Phase 3 (single-monitor split view) intentionally skipped. Researched + adversarially reviewed via a
+multi-agent pass; this doc folds in the corrections the review found.
 
 ## Goal (from the teacher)
 

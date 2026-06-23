@@ -642,4 +642,21 @@
       }
     }
   });
+
+  // Test Lab: the cockpit's generative AI actions (adapt lesson / regenerate resources / cover work /
+  // retrieval starter) WRITE to the REAL class's saved lesson + resources (adaptations, resource
+  // versions) — keyed on the class/plan, NOT the sandboxed occurrence — so the Test Lab teardown can't
+  // undo them. Confirm before firing one from inside a Test Lab cockpit. (htmx fires htmx:confirm for
+  // every request; the lazily-loaded adapt panel means a delegated listener is the robust hook.)
+  var AI_WRITE = /\/(ai|resources-ai|cover-pack|retrieval-starter|improve-master|adapt-scheme)$|\/resources\/generate$/;
+  document.body.addEventListener('htmx:confirm', function (e) {
+    var elt = e.detail && e.detail.elt;
+    if (!elt || !elt.closest || !elt.closest('.test-lab')) return; // only inside a Test Lab cockpit
+    if (!AI_WRITE.test(e.detail.path || '')) return; // only the generative AI writes
+    if (elt.getAttribute('hx-confirm')) return; // its own confirm already handles it
+    e.preventDefault();
+    if (window.confirm('🧪 Test Lab: this AI action changes the REAL class’s saved lesson/resources — it is NOT undone by reset. Continue?')) {
+      e.detail.issueRequest(true);
+    }
+  });
 })();

@@ -63,14 +63,34 @@ describe('lesson cockpit feature parity (restored affordances)', () => {
     expect(html).toContain('/lesson/present?gc=21');
     expect(html).toContain('/lesson/print?lesson=99');
   });
-  it('has the plan-tools card: quick-peek, test-as-pupil, cover-pack, group-context, slots', () => {
+  it('has the plan-tools card: quick-peek, cover-pack, group-context, slots', () => {
     expect(html).toContain('/lesson/worksheet-preview?gc=21');
-    expect(html).toContain('/test-pupil/open');
     expect(html).toContain('/lesson/oc/11/cover-pack');
     expect(html).toContain('/lesson/group-context/21');
     expect(html).toContain('/lesson/oc/11/image-todo');
     expect(html).toContain('/lesson/oc/11/spaced-recall');
     expect(html).toContain('/lesson/plan/42/review-flag');
+  });
+  it('the "Test as pupil" launch is Test-Lab-only (hidden in a real cockpit, shown with lab=1)', () => {
+    expect(html).not.toContain('/test-pupil/open'); // a real teaching cockpit never offers it
+    const labHtml = renderLessonCockpit({
+      detail,
+      notes: [] as any,
+      prep: [],
+      plansByCourse: new Map([[21, [{ id: 42, title: 'Binary addition' }]]]),
+      resByPlan: new Map(),
+      matByPlan: new Map(),
+      effByKey: new Map(),
+      adaptedResByKey: new Map(),
+      taFbByOc: new Map(),
+      exceptionsHtml: '',
+      csrf: 'test-token',
+      slidesByKey: new Map([['21:42', '## Slide one\n\nbody']]),
+      pupilWorkByOc: new Map([[11, []]]),
+      lab: true,
+    });
+    expect(labHtml).toContain('/test-pupil/open'); // the sandbox cockpit does
+    expect(labHtml).toContain('test-lab-banner'); // and shows the persistent sandbox banner
   });
   it('notes are manageable (delete + add follow-up)', () => {
     expect(html).toContain('/notes/5/delete');

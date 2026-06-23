@@ -35,10 +35,10 @@ test('teacher drives + locks the pupil deck live over SSE (one session, two page
   }
   test.skip(!plan, 'no plan with ≥2 slides AND a worksheet in the dev DB');
 
-  // The force-live launcher (also under test) lists guaranteed-valid lesson + "today" date pairs. Walk
-  // them and open each live cockpit until one yields a REAL occurrence-course (a form/empty period has
-  // none → oc 0). Read that section's oc id + a CSRF token from the rendered cockpit.
-  const fl = await page.request.get('/dev/force-live');
+  // The Test Lab launcher lists guaranteed-valid lesson + "today" date pairs. Walk them and open each
+  // SANDBOX cockpit (lab=1 — the same is_test occurrence the test pupil resolves) until one yields a real
+  // occurrence-course (a form/empty period has none → oc 0). Read that section's oc id + a CSRF token.
+  const fl = await page.request.get('/test-lab');
   expect(fl.ok()).toBeTruthy();
   const flHtml = await fl.text();
   const links = [...flHtml.matchAll(/\/lesson\?lesson=(\d+)&(?:amp;)?date=(\d{4}-\d{2}-\d{2})/g)];
@@ -49,7 +49,7 @@ test('teacher drives + locks the pupil deck live over SSE (one session, two page
   let oc = '';
   let csrf = '';
   for (const m of links) {
-    const res = await page.request.get(`/lesson?lesson=${m[1]}&date=${m[2]}`);
+    const res = await page.request.get(`/lesson?lesson=${m[1]}&date=${m[2]}&lab=1`);
     if (!res.ok()) continue;
     const html = await res.text();
     const real = [...html.matchAll(/id="oc-(\d+)-plan"/g)].map((x) => x[1]!).find((n) => Number(n) > 0);
@@ -61,7 +61,7 @@ test('teacher drives + locks the pupil deck live over SSE (one session, two page
       break;
     }
   }
-  test.skip(!oc || !csrf, 'no lesson yielded a real occurrence-course in the dev DB');
+  test.skip(!oc || !csrf, 'no lesson yielded a sandbox occurrence-course in the dev DB');
 
   // Bind the slides+worksheet plan to that occurrence-course (so both the cockpit and /me get a deck).
   const bind = await page.request.post(`/occurrence-course/${oc}/plan`, {
@@ -72,7 +72,7 @@ test('teacher drives + locks the pupil deck live over SSE (one session, two page
 
   // Teacher page: cockpit now shows the slides card with the live controls.
   const teacher = page;
-  await teacher.goto(`/lesson?lesson=${lesson}&date=${date}&oc=${oc}`, { waitUntil: 'domcontentloaded' });
+  await teacher.goto(`/lesson?lesson=${lesson}&date=${date}&oc=${oc}&lab=1`, { waitUntil: 'domcontentloaded' });
   const slidesCard = teacher.locator(`.slides-card[data-oc="${oc}"]`);
   await expect(slidesCard).toBeVisible();
   // need ≥2 slides in the cockpit deck for "Next" to advance

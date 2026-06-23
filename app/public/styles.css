@@ -2255,6 +2255,22 @@ body[data-shell="next"] .live-bar {
   border: 1.5px solid var(--line-strong);
   border-radius: var(--radius);
 }
+/* Test Lab: a persistent "this is a sandbox" banner above the cockpit, plus a dashed frame so a test
+   cockpit is never mistaken for a real live lesson. */
+body[data-shell="next"] .test-lab-banner {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--violet-soft);
+  border: 1.5px solid var(--violet);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+body[data-shell="next"] .test-lab-banner a { color: var(--violet); font-weight: 700; }
+body[data-shell="next"] .overhaul-cockpit.test-lab { outline: 2px dashed var(--violet); outline-offset: 6px; }
 body[data-shell="next"] .live-bar h1 {
   margin: 0;
   font-size: clamp(1.2rem, 2.2vw, 1.7rem);

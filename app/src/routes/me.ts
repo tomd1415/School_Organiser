@@ -169,8 +169,10 @@ export function registerMeRoutes(app: FastifyInstance): void {
           <p class="pupil-note">${state.isSchoolDay ? 'Check back when your lesson starts.' : 'No school today.'}</p></section>`;
       } else {
         // Read-first: only create+materialise the occurrence if it doesn't exist yet (avoids a
-        // write + row lock on every pupil GET once the lesson has been opened once).
-        const occId = (await findOccurrence(lesson.lessonId, lesson.date)) ?? (await findOrCreateOccurrence(lesson.lessonId, lesson.date));
+        // write + row lock on every pupil GET once the lesson has been opened once). The fictitious test
+        // pupil ALWAYS resolves the sandboxed is_test occurrence (Test Lab), so its work can never land on
+        // a real class's occurrence_course — it converges with the lab cockpit (opened with ?lab=1).
+        const occId = (await findOccurrence(lesson.lessonId, lesson.date, isTest)) ?? (await findOrCreateOccurrence(lesson.lessonId, lesson.date, isTest));
         const sections = await getOccurrenceCourses(occId);
         let blocks: string[];
         {

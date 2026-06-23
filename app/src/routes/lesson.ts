@@ -14,6 +14,7 @@ import {
 } from '../repos/occurrence';
 import { setSlide, setSlidesLocked } from '../repos/slideSync';
 import { broadcast as broadcastSlide } from '../services/slideSync';
+import { countTestOccurrences, wipeTestOccurrences } from '../repos/testLab';
 import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
 import type { PlanRow } from '../services/scheme';
 import { schemeLessons } from '../repos/specPoints';
@@ -107,6 +108,7 @@ const Query = z.object({
   lesson: z.coerce.number().int().positive(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   oc: z.coerce.number().int().positive().optional(), // BUG-052: which split-lesson section to show
+  lab: z.string().optional(), // Test Lab: `lab=1` opens the SANDBOXED (is_test) occurrence, not the real one
 });
 const PreviewQuery = z.object({ plan: z.coerce.number().int().positive() });
 
@@ -576,11 +578,12 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       return reply.code(e.code).type('text/html').send(e.html);
     }
     const { lesson, date } = parsed.data;
+    const isLab = parsed.data.lab === '1'; // Test Lab: resolve the SANDBOXED occurrence, converging with /me's test pupil
 
     try {
       // BUG-060: opening a lesson is read-hot — try the read-only lookup first and only run the
       // occurrence/course/prep upserts when the occurrence genuinely doesn't exist yet.
-      const occurrenceId = (await findOccurrence(lesson, date)) ?? (await findOrCreateOccurrence(lesson, date));
+      const occurrenceId = (await findOccurrence(lesson, date, isLab)) ?? (await findOrCreateOccurrence(lesson, date, isLab));
       const header = await getOccurrenceHeader(occurrenceId);
       if (!header) {
         const e = errorPage(reply, 404, 'That lesson no longer exists.');
@@ -689,6 +692,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           slidesByKey,
           pupilWorkByOc,
           selectedOc: parsed.data.oc, // BUG-052: render the section the tab bar selected (default first)
+          lab: isLab, // Test Lab: show the sandbox banner + the "Test as pupil" launch, confirm-gate AI writes
         });
         return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf }));
       }
@@ -860,15 +864,16 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(pupilLayout(body, csrf));
   });
 
-  // Dev / force-live launcher: open ANY timetabled lesson's LIVE cockpit at ANY date (default today),
-  // decoupled from the timetable clock — so the live features (slide-sync, marking, needs-attention) can
-  // be tested on demand instead of waiting for the real slot. In the cockpit, "🧪 Test as pupil" opens the
-  // fillable pupil view in a new tab on the SAME occurrence. Teacher-only; the test pupil is fictitious.
-  app.get('/dev/force-live', { preHandler: requireAuth }, async (req, reply) => {
+  // Test Lab launcher: pick any timetabled lesson + date and open its SANDBOXED cockpit (?lab=1 → an
+  // is_test occurrence, isolated from real marking/planner/history). In the cockpit, "🧪 Test as pupil"
+  // opens the fillable pupil view in a new tab on the SAME sandboxed occurrence — drive both sides live,
+  // write answers, mark — and "Reset" wipes every test run. Teacher-only; the test pupil is fictitious.
+  app.get('/test-lab', { preHandler: requireAuth }, async (req, reply) => {
     const q = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).safeParse(req.query);
     const today = localParts(new Date(), 'Europe/London').isoDate;
     const date = (q.success && q.data.date) || today;
-    const [lessons, periods] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions()]);
+    const [lessons, periods, testRuns] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions(), countTestOccurrences()]);
+    const csrf = reply.generateCsrf();
     const slot = new Map(periods.map((p) => [`${p.weekday}:${p.slotOrder}`, p]));
     const DAY = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const teaching = lessons
@@ -882,25 +887,48 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         return `<tr>
           <td>${when}</td>
           <td><strong>${esc(l.groupName ?? '—')}</strong>${courses ? ` <span class="muted">${courses}</span>` : ''}${l.isSelf ? '' : ` <span class="muted">· ${esc(l.staffName)}</span>`}</td>
-          <td><a class="button small" href="/lesson?lesson=${l.lessonId}&amp;date=${esc(date)}" target="_blank" rel="noopener">Open live cockpit →</a></td>
+          <td><a class="button small" href="/lesson?lesson=${l.lessonId}&amp;date=${esc(date)}&amp;lab=1" target="_blank" rel="noopener">Open sandbox cockpit →</a></td>
         </tr>`;
       })
       .join('');
+    const resetBtn = testRuns > 0
+      ? `<form method="post" action="/test-lab/reset" onsubmit="return confirm('Wipe ${testRuns} Test Lab run${testRuns === 1 ? '' : 's'}? This deletes the sandboxed occurrences and all their test work.')">
+           <input type="hidden" name="_csrf" value="${esc(csrf)}">
+           <button type="submit" class="button ghost small">↺ Reset Test Lab (${testRuns} run${testRuns === 1 ? '' : 's'})</button>
+         </form>`
+      : '<span class="muted">No active test runs.</span>';
     const body = `<section class="card">
-      <h1>🧪 Test a live lesson <span class="badge ai">dev</span></h1>
-      <p class="muted">Open any lesson's <strong>live</strong> teacher cockpit at any date — no waiting for its timetable slot.
-        In the cockpit, use <strong>🧪 Test as pupil</strong> to open the fillable pupil view in a new tab and drive the lesson
-        (slides sync + lock, marking) live, side by side. The test pupil is fictitious — <strong>no real pupil data</strong>.
-        If a slot has no plan bound, pick one in the cockpit's plan selector first (slides + worksheet come from the plan).</p>
-      <form method="get" action="/dev/force-live" class="kit-filter">
-        <label>Date <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
-        <noscript><button type="submit">Go</button></noscript>
-      </form>
+      <h1>🧪 Test Lab</h1>
+      <p class="muted">Pick a lesson and date to open its <strong>sandboxed</strong> teacher cockpit — at any date, no waiting for the
+        timetable slot. In the cockpit, use <strong>🧪 Test as pupil</strong> to open the fillable pupil view in a new tab and drive
+        the lesson live (slides sync + lock, write answers, mark) side by side. Everything is isolated: <strong>nothing here
+        touches real classes' marking, planner or history</strong>, and you can wipe it all with Reset. If a slot has no plan bound,
+        pick one in the cockpit's plan selector first (slides + worksheet come from the plan).</p>
+      <div class="kit-filter" style="display:flex;align-items:end;gap:1rem;flex-wrap:wrap;">
+        <form method="get" action="/test-lab">
+          <label>Date <input type="date" name="date" value="${esc(date)}" onchange="this.form.submit()"></label>
+          <noscript><button type="submit">Go</button></noscript>
+        </form>
+        ${resetBtn}
+      </div>
       ${teaching.length
         ? `<div class="table-scroll"><table class="kit-table"><thead><tr><th>When</th><th>Class</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
         : '<p class="muted">No timetabled teaching lessons found — set up the timetable first (Setup → Timetable).</p>'}
     </section>`;
-    return reply.type('text/html').send(layout({ title: 'Test a live lesson', body, authed: true, csrfToken: reply.generateCsrf() }));
+    return reply.type('text/html').send(layout({ title: 'Test Lab', body, authed: true, csrfToken: csrf }));
+  });
+
+  // Wipe all Test Lab runs (sandboxed is_test occurrences + their work). Returns to the launcher.
+  app.post('/test-lab/reset', { preHandler: [requireAuth, app.csrfProtection] }, async (_req, reply) => {
+    const n = await wipeTestOccurrences();
+    app.log.info(`test lab: reset wiped ${n} run(s)`);
+    return reply.redirect('/test-lab');
+  });
+
+  // Back-compat: the old dev launcher path now redirects to the Test Lab.
+  app.get('/dev/force-live', { preHandler: requireAuth }, async (req, reply) => {
+    const d = typeof (req.query as { date?: unknown }).date === 'string' ? (req.query as { date: string }).date : '';
+    return reply.redirect(/^\d{4}-\d{2}-\d{2}$/.test(d) ? `/test-lab?date=${d}` : '/test-lab');
   });
 
   // Presenter view — the slides on the TEACHER's own screen WITH the per-slide teaching notes. The board

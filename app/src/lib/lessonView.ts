@@ -174,7 +174,9 @@ export function renderLessonCockpit(options: {
   lockedStateMap?: Map<number, boolean>; // track client-simulated group lock state
   preview?: { backHref: string }; // read-only scheme preview: never expose occurrence write controls
   selectedOc?: number; // BUG-052: which split-lesson section (occurrence-course) to show; default first
-}): string {
+  lab?: boolean; // Test Lab: this cockpit is on a sandboxed (is_test) occurrence — show the banner + the
+}): string { //          "Test as pupil" launch, and confirm-gate the AI writes that touch real shared rows
+
   const {
     detail,
     notes,
@@ -192,6 +194,7 @@ export function renderLessonCockpit(options: {
     lockedStateMap = new Map(),
     preview,
     selectedOc,
+    lab = false,
   } = options;
   const isPreview = preview != null;
 
@@ -408,10 +411,11 @@ export function renderLessonCockpit(options: {
     : '';
 
   return `
-    <div class="ld overhaul-cockpit" hx-headers='{"x-csrf-token":"${csrf}"}'>
+    <div class="ld overhaul-cockpit${lab ? ' test-lab' : ''}" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      ${lab ? `<div class="test-lab-banner" role="status">🧪 <strong>TEST LAB</strong> — sandbox: nothing here affects real classes (marking, planner, history) and it's wiped on reset. <a href="/test-lab">← Test Lab</a></div>` : ''}
       <section class="live-bar" aria-labelledby="lesson-title">
         <div>
-          <span class="badge ${isPreview ? 'ai' : 'live'}"><span class="dot" aria-hidden="true"></span> ${isPreview ? 'Lesson preview · not live' : 'Live lesson'}</span>
+          <span class="badge ${isPreview ? 'ai' : lab ? 'ai' : 'live'}"><span class="dot" aria-hidden="true"></span> ${isPreview ? 'Lesson preview · not live' : lab ? '🧪 Test Lab · sandbox' : 'Live lesson'}</span>
           <h1 id="lesson-title">${esc(heading)}</h1>
           <p>${esc(meta)}${isPreview ? ' · No lesson occurrence or pupil record is created' : ` · ${pupilWorkRows.length} pupils`}</p>
         </div>
@@ -638,14 +642,14 @@ export function renderLessonCockpit(options: {
               <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
             </details>
 
-            <form class="test-pupil-launch" method="post" action="/test-pupil/open" target="_blank" title="Open this lesson as a test pupil in a NEW TAB (the real worksheet, autosave and Done, at any level) — keep the cockpit open beside it to drive the lesson live">
+            ${lab ? `<form class="test-pupil-launch" method="post" action="/test-pupil/open" target="_blank" title="Open this lesson as a test pupil in a NEW TAB (the real worksheet, autosave and Done, at any level) — keep this cockpit open beside it to drive the lesson live. Everything is sandboxed.">
               <input type="hidden" name="_csrf" value="${esc(csrf)}">
               <input type="hidden" name="lesson" value="${h.lessonId}">
               <input type="hidden" name="date" value="${esc(h.date)}">
               🧪 Test as pupil
               <select name="level" aria-label="level"><option value="support">🟢 Support</option><option value="core" selected>🟡 Core</option><option value="challenge">🔴 Challenge</option></select>
               <button type="submit" class="link">open in new tab →</button>
-            </form>
+            </form>` : ''}
 
             <div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${groupCourseId}&amp;lp=${lp}" hx-trigger="load" hx-swap="innerHTML"></div>
             <div class="ld-review" hx-get="/lesson/plan/${lp}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>

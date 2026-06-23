@@ -29,25 +29,41 @@ afterAll(async () => {
   await pool.end();
 });
 
-describe('force-live dev mode', () => {
-  it('GET /dev/force-live lists timetabled lessons linking to the live cockpit', async () => {
-    const res = await app.inject({ method: 'GET', url: '/dev/force-live', headers: { cookie } });
+describe('Test Lab launcher', () => {
+  it('GET /test-lab lists timetabled lessons linking to the SANDBOX cockpit (lab=1)', async () => {
+    const res = await app.inject({ method: 'GET', url: '/test-lab', headers: { cookie } });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain('Test a live lesson');
+    expect(res.body).toContain('Test Lab');
     expect(res.body).toContain('type="date"'); // date picker (default today)
-    expect(res.body).toMatch(/\/lesson\?lesson=\d+&(?:amp;)?date=\d{4}-\d{2}-\d{2}/); // a cockpit link
+    // every cockpit link is a sandbox link
+    expect(res.body).toMatch(/\/lesson\?lesson=\d+&(?:amp;)?date=\d{4}-\d{2}-\d{2}&(?:amp;)?lab=1/);
   });
 
   it('honours the ?date param for the cockpit links', async () => {
-    const res = await app.inject({ method: 'GET', url: '/dev/force-live?date=2026-05-04', headers: { cookie } });
+    const res = await app.inject({ method: 'GET', url: '/test-lab?date=2026-05-04', headers: { cookie } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('value="2026-05-04"');
     if (/\/lesson\?lesson=/.test(res.body)) expect(res.body).toContain('date=2026-05-04');
   });
 
   it('is teacher-only', async () => {
-    const res = await app.inject({ method: 'GET', url: '/dev/force-live' }); // no cookie
+    const res = await app.inject({ method: 'GET', url: '/test-lab' }); // no cookie
     expect(res.statusCode).not.toBe(200);
+  });
+
+  it('GET /dev/force-live redirects to /test-lab (back-compat)', async () => {
+    const res = await app.inject({ method: 'GET', url: '/dev/force-live', headers: { cookie } });
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.location).toBe('/test-lab');
+  });
+
+  it('POST /test-lab/reset wipes test runs and redirects to /test-lab', async () => {
+    const res = await app.inject({
+      method: 'POST', url: '/test-lab/reset',
+      headers: { cookie, 'content-type': 'application/x-www-form-urlencoded', 'x-csrf-token': token },
+    });
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.location).toBe('/test-lab');
   });
 
   it('a plain (non-HTMX) /test-pupil/open redirects to /me (so a new-tab form lands on the pupil view)', async () => {
