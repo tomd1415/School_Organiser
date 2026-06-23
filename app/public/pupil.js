@@ -101,7 +101,10 @@
     document.querySelectorAll('.pupil-slides[data-deck]').forEach(function (deck) {
       var oc = deck.getAttribute('data-deck');
       if (!oc || !/^\d+$/.test(oc) || typeof EventSource === 'undefined') return;
-      var es = new EventSource('/me/slide-stream?oc=' + encodeURIComponent(oc));
+      // The pupil /me deck follows /me/slide-stream; the projector board overrides data-sync-url to the
+      // teacher-readable stream (same 'slide'/'lock' events). Default keeps the pupil behaviour.
+      var syncUrl = deck.getAttribute('data-sync-url') || ('/me/slide-stream?oc=' + encodeURIComponent(oc));
+      var es = new EventSource(syncUrl);
       es.addEventListener('slide', function (ev) {
         try { var d = JSON.parse(ev.data); if (typeof d.index === 'number') deckShow(deck, d.index); } catch (e) {}
       });

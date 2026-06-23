@@ -18,6 +18,7 @@ import { migrate } from './db/migrate';
 import { registerAuthRoutes } from './auth/routes';
 import { registerHealthRoutes } from './routes/health';
 import { registerNowRoutes } from './routes/now';
+import { registerUiGalleryRoutes } from './routes/uiGallery';
 import { registerTimetableRoutes } from './routes/timetable';
 import { registerOverseeRoutes } from './routes/oversee';
 import { registerPupilRoutes } from './routes/pupils';
@@ -236,6 +237,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerHealthRoutes(app);
   registerAuthRoutes(app);
   registerNowRoutes(app);
+  registerUiGalleryRoutes(app);
   registerTimetableRoutes(app);
   registerOverseeRoutes(app);
   registerPupilRoutes(app);

@@ -13,8 +13,8 @@ import {
   setOccurrenceCoursePlan,
   setOccurrenceProgress,
 } from '../repos/occurrence';
-import { setSlide, setSlidesLocked } from '../repos/slideSync';
-import { broadcast as broadcastSlide } from '../services/slideSync';
+import { getSlideState, setSlide, setSlidesLocked } from '../repos/slideSync';
+import { broadcast as broadcastSlide, subscribe as subscribeSlide, sseFrame } from '../services/slideSync';
 import { countTestOccurrences, pickTestSlotForPlan, wipeTestOccurrences } from '../repos/testLab';
 import { getLessonPlan, getPlanContext, getPlanRow, listCoursePlans, listCourses, schemeIdForPlan, updatePlanField, getActiveScheme } from '../repos/schemes';
 import type { PlanRow } from '../services/scheme';
@@ -764,6 +764,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         lp: z.coerce.number().int().positive(),
         level: z.enum(['support', 'core', 'challenge']).default('core'),
         edit: z.enum(['off', 'local', 'master']).default('off'),
+        oc: z.coerce.number().int().positive().optional(), // live occurrence-course → board follows cockpit
       })
       .safeParse(req.query);
     if (!q.success) return reply.code(400).type('text/html').send('<p>Bad request.</p>');
@@ -789,6 +790,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         level,
         lp,
         gcKey,
+        oc: q.data.oc, // when opened from a LIVE cockpit, the board follows that occurrence's slide moves
       });
       return reply.type('text/html').send(pupilLayout(page, csrf));
     }
@@ -1066,6 +1068,30 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     await setSlidesLocked(p.data.id, locked);
     broadcastSlide(p.data.id, 'lock', { locked });
     return reply.code(204).send();
+  });
+
+  // Teacher-readable slide stream — the projector board (/lesson/pupil-view) subscribes to this so it
+  // FOLLOWS the cockpit's slide moves + lock, exactly like a pupil's /me does over /me/slide-stream. Kept
+  // distinct from /me/slide-stream (pupil-surface, enrolment-gated) so the teacher↔pupil seam stays clean;
+  // the teacher may read any occurrence's deck state (they can see everything anyway). Read-only (SSE).
+  app.get('/lesson/oc/:id/slide-stream', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const oc = p.data.id;
+    reply.hijack();
+    const res = reply.raw;
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    const st = await getSlideState(oc); // land a late joiner on the current slide immediately
+    res.write(sseFrame('slide', { index: st.currentSlide }));
+    res.write(sseFrame('lock', { locked: st.slidesLocked }));
+    const unsub = subscribeSlide(oc, { write: (f) => res.write(f) });
+    const keepAlive = setInterval(() => { try { res.write(': keep-alive\n\n'); } catch { /* closed */ } }, 25000);
+    req.raw.on('close', () => { clearInterval(keepAlive); unsub(); });
   });
 
   async function poolOccurrenceOf(occurrenceCourseId: number): Promise<number | null> {

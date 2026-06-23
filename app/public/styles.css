@@ -2296,6 +2296,9 @@ body[data-shell="next"] .tl-lessons li { display: flex; align-items: center; gap
 body[data-shell="next"] .tl-lesson { color: var(--text); }
 body[data-shell="next"] .tl-advanced { margin-top: 1.5rem; }
 body[data-shell="next"] .tl-advanced > summary { cursor: pointer; color: var(--muted); padding: 0.4rem 0; }
+/* UI gallery (dev): each showcased component sits in a dashed "stage" so its own chrome is clear. */
+body[data-shell="next"] .gallery-item { margin: 1.5rem 0; }
+body[data-shell="next"] .gallery-stage { border: 1px dashed var(--line-strong); border-radius: 10px; padding: 1rem; margin-top: 0.6rem; }
 body[data-shell="next"] .live-bar h1 {
   margin: 0;
   font-size: clamp(1.2rem, 2.2vw, 1.7rem);

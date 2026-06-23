@@ -1,7 +1,8 @@
 # UI / back-end separation plan (→ ~95% isolation) + board slide-sync
 
-**Status:** proposal (2026-06-24). Goal: make the UI a self-contained layer that can be **redesigned in
-isolation** from routes/services/repos/DB, and finish the live **board slide-sync** feature along the way.
+**Status:** Phase 0 (board slide-sync) + Phase 1 (component gallery) **BUILT & verified** (2026-06-24);
+Phases 2–5 proposed. Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
+routes/services/repos/DB, and finish the live **board slide-sync** feature along the way.
 Grounded in a coupling audit of the actual codebase (numbers below). Not a SPA/JSON-API rewrite — see
 *Non-goals*.
 

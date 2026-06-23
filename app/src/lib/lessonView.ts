@@ -392,7 +392,7 @@ export function renderLessonCockpit(options: {
 
   const boardHref = isPreview
     ? `/lesson/pupil-view?master=1&amp;lp=${lp}&amp;level=${currentLevel}`
-    : `/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}`;
+    : `/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}${oc ? `&amp;oc=${oc}` : ''}`;
 
   // BUG-052: split-lesson course/class switcher (only when there's more than one section). Plain links
   // reload the cockpit scoped to the chosen occurrence-course; preview is single-section so shows none.
@@ -689,8 +689,9 @@ export function renderBoardNext(options: {
   level: Level;
   lp: number;
   gcKey: number;
+  oc?: number; // live occurrence-course id → the board FOLLOWS the cockpit's slide moves over SSE
 }): string {
-  const { master, className, slidesMd, level, lp, gcKey } = options;
+  const { master, className, slidesMd, level, lp, gcKey, oc } = options;
 
   let slideListHtml = '';
   let totalSlides = 0;
@@ -719,7 +720,7 @@ export function renderBoardNext(options: {
       </header>
 
       <section id="present-slide" class="present-slide" aria-labelledby="board-slide-title">
-        <div class="pupil-slides" data-deck="${gcKey}-${lp}">
+        <div class="pupil-slides" data-deck="${oc ?? `${gcKey}-${lp}`}"${oc ? ` data-sync-url="/lesson/oc/${oc}/slide-stream"` : ''}>
           <div class="pslide-stage">
             ${slideListHtml || '<div class="pslide on"><p class="muted">No slides available.</p></div>'}
           </div>
