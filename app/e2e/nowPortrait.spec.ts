@@ -22,12 +22,15 @@ test('Now fits a 1080×1920 portrait monitor with a thin-timeline 3-column grid'
   expect(tracks[1]! / total).toBeLessThan(0.34);
   expect(tracks[1]! / total).toBeGreaterThan(0.22);
 
-  // everything fits on one screen — no meaningful vertical scroll
+  // everything fits on one screen — the workspace (the real scroll container, overflow-y:auto) must not
+  // scroll — AND the content should fill most of the height (redistributed, not bunched at the top).
   const { scrollH, clientH } = await page.evaluate(() => {
-    const el = document.scrollingElement || document.documentElement;
+    const el = document.querySelector('main.cockpit-workspace') as HTMLElement;
     return { scrollH: el.scrollHeight, clientH: el.clientHeight };
   });
-  expect(scrollH, `content ${scrollH}px must fit the ${clientH}px viewport`).toBeLessThanOrEqual(clientH + 8);
+  expect(scrollH, `workspace content ${scrollH}px must fit its ${clientH}px height (no scroll)`).toBeLessThanOrEqual(clientH + 8);
+  const fill = await page.locator('.now-grid').evaluate((el) => el.getBoundingClientRect().height);
+  expect(fill, `grid ${fill}px should fill most of the ${clientH}px workspace`).toBeGreaterThan(clientH * 0.8);
 
   await page.screenshot({ path: 'test-results/now-portrait.png' });
 });

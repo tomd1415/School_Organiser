@@ -2109,15 +2109,50 @@ body[data-shell="next"] .now-grid {
    columns plus a deliberately THIN timeline (~a third of the usable width) in the middle. Driven by a
    CSS orientation media query (not the old hard-coded data-orientation attribute, which never updated). */
 @media (orientation: portrait) and (min-width: 700px) {
+  /* Fill the tall screen: the now-screen stretches to the full height of the (scrollable) workspace minus
+     its 1.25rem top/bottom padding, and the grid flexes to take whatever's left under the strip/banners. */
+  body[data-shell="next"] .now-screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%; /* fill the workspace's content box exactly (no magic viewport maths) */
+  }
   body[data-shell="next"] .now-grid {
     grid-template-columns: 1.1fr 0.8fr 1.1fr; /* left · timeline (thin) · right */
     gap: 1rem;
     max-width: none;
     margin: 0;
+    flex: 1;               /* take the remaining height */
+    align-items: stretch;  /* every column runs the full height */
   }
+  /* Spread each column's cards down its full height instead of bunching them at the top. */
   body[data-shell="next"] .now-col-left,
   body[data-shell="next"] .now-col-right,
-  body[data-shell="next"] .now-col-middle { gap: 1rem; }
+  body[data-shell="next"] .now-col-middle {
+    gap: 1rem;
+    justify-content: space-between;
+  }
+  /* The timeline runs the full height: the card, its inner wrapper and the list all grow, and the slots
+     space out evenly down the column. A single continuous "spine" replaces the per-slot connector so the
+     line stays unbroken however far the slots spread. */
+  body[data-shell="next"] .now-col-middle .agenda-card { flex: 1; display: flex; flex-direction: column; }
+  body[data-shell="next"] .now-col-middle .agenda-timeline { flex: 1; display: flex; }
+  body[data-shell="next"] .now-col-middle .timeline-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  body[data-shell="next"] .now-col-middle .timeline-list::before {
+    content: "";
+    position: absolute;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    left: 4.34rem;
+    width: 1.5px;
+    background: var(--line);
+  }
+  body[data-shell="next"] .now-col-middle .timeline-slot::after { display: none; }
 }
 /* Narrow phones in portrait (not the primary target) simply stack. */
 @media (orientation: portrait) and (max-width: 699px) {
