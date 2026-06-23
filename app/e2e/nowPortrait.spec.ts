@@ -14,13 +14,12 @@ test('Now fits a 1080×1920 portrait monitor with a thin-timeline 3-column grid'
   await expect(page.locator('.now-grid')).toBeVisible();
 
   const tracks = await gridTracks(page);
-  expect(tracks).toHaveLength(3); // did NOT collapse to one column
-  // the middle column (timeline) is the thinnest — roughly a third of the usable width
-  expect(tracks[1]).toBeLessThan(tracks[0]!);
-  expect(tracks[1]).toBeLessThan(tracks[2]!);
-  const total = tracks[0]! + tracks[1]! + tracks[2]!;
-  expect(tracks[1]! / total).toBeLessThan(0.34);
-  expect(tracks[1]! / total).toBeGreaterThan(0.22);
+  expect(tracks).toHaveLength(2); // two columns: timeline (left) + content (right)
+  // the LEFT column (timeline) is the thinner ~⅓; the right content column takes ~⅔
+  expect(tracks[0]).toBeLessThan(tracks[1]!);
+  const total = tracks[0]! + tracks[1]!;
+  expect(tracks[0]! / total).toBeGreaterThan(0.28);
+  expect(tracks[0]! / total).toBeLessThan(0.40);
 
   // everything fits on one screen — the workspace (the real scroll container, overflow-y:auto) must not
   // scroll — AND the content should fill most of the height (redistributed, not bunched at the top).
