@@ -1,7 +1,10 @@
 # UI / back-end separation plan (→ ~95% isolation) + board slide-sync
 
-**Status:** Phase 0 (board slide-sync) + Phase 1 (component gallery) **BUILT & verified** (2026-06-24);
-Phases 2–5 proposed. Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
+**Status:** Phase 0 (board slide-sync) + Phase 1 (component gallery) **BUILT & verified** (2026-06-24).
+Phase 4 *started*: the pupil-card width is now by **intent** (default reading width; full-width when a
+work card or — structurally — when it contains a two-pane) instead of an incidental `:not()` marker, and a
+regression where the unified deck's `.md-doc` silently shrank the whole pupil surface to 800px was caught
++ fixed (with an E2E width guard). Phases 2, 3, the rest of 4, and 5 remain — see below. Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
 routes/services/repos/DB, and finish the live **board slide-sync** feature along the way.
 Grounded in a coupling audit of the actual codebase (numbers below). Not a SPA/JSON-API rewrite — see
 *Non-goals*.

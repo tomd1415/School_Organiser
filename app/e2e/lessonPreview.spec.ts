@@ -47,6 +47,14 @@ test('"Preview as pupil" shows the worksheet, not just the slides board', async 
     if ((await page.locator('.ws-doc, .pupil-pane-work, .ws-table, .ws-input, .ws-blank').count()) > 0) {
       await expect(page.getByText(/preview as a pupil/i)).toBeVisible(); // it's the pupil view, never the board
       await expect(page.locator('.ws-doc, .pupil-pane-work, .ws-table, .ws-input, .ws-blank').first()).toBeAttached();
+      // Width regression guard: a two-pane pupil surface must be FULL-WIDTH — never squeezed into a reading
+      // column by the md-doc cap (the deck's .slide-content.md-doc once shrank the whole pupil page to 800px).
+      await page.setViewportSize({ width: 1280, height: 900 });
+      const twopane = page.locator('.pupil-twopane');
+      if (await twopane.count()) {
+        const w = await twopane.first().evaluate((el) => el.getBoundingClientRect().width);
+        expect(w, 'pupil two-pane must be full-width, not a 40rem/50rem reading column').toBeGreaterThan(1000);
+      }
       done = true;
       break;
     }

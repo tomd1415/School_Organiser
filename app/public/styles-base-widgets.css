@@ -811,8 +811,10 @@ body.hx-busy::before {
 @keyframes hx-busy-slide { from { background-position: -40% 0; } to { background-position: 140% 0; } }
 @media print { body.hx-busy::before { display: none; } }
 
-/* markdown document preview (generated resources) */
-main:has(.md-doc) { max-width: 50rem; }
+/* markdown document preview (generated resources): a reading cap for teacher doc previews. EXCLUDE the
+   pupil surface — its slide deck now wraps slides in .slide-content.md-doc (one shared renderer), and that
+   must NOT shrink the whole pupil page; pupil width is governed by the .pupil-card rules below. */
+main:not(.pupil-main):has(.md-doc) { max-width: 50rem; }
 .md-doc { line-height: 1.55; }
 .md-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: 0.4rem; margin-bottom: 0.8rem; font-size: 0.82rem; }
 .md-doc h1 { font-size: 1.5rem; margin: 0.6rem 0 0.4rem; }
@@ -994,8 +996,13 @@ body.deck {
 .pupil-body { background: var(--bg); }
 /* Pupils arrange their browser window in all sorts of ways — let the work use the full width. */
 .pupil-main { max-width: none; margin: 0; padding: 1rem 1.25rem; }
-/* The login / no-lesson card stays a comfortable reading width, centred. */
-.pupil-main > .pupil-card:not(.pupil-work-card) { max-width: 40rem; margin-left: auto; margin-right: auto; }
+/* Pupil card width by INTENT, not by an incidental marker class (which silently mis-sized the preview +
+   editor — see docs/UI_SEPARATION_PLAN.md Phase 4). Default: a comfortable reading width, centred (login /
+   no-lesson / single info cards). A card is FULL-WIDTH when it is a worksheet/work surface (`.pupil-work-card`)
+   OR — structurally, so it can never go wrong — when it contains a two-pane (slides + worksheet). */
+.pupil-main > .pupil-card { max-width: 40rem; margin-left: auto; margin-right: auto; }
+.pupil-main > .pupil-card.pupil-work-card { max-width: none; }
+.pupil-main > .pupil-card:has(.pupil-twopane) { max-width: none; } /* separate rule: a parser without :has drops only THIS line, not the marker override above */
 .pupil-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
 .pupil-hi { font-weight: 700; font-size: 1.15rem; }
 .pupil-logout { background: none; color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.7rem; font-size: 0.9rem; }
