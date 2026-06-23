@@ -35,6 +35,8 @@ import { addDays, weekdayOf, tzDateToEpoch } from '../lib/time';
 import {
   renderNowNext,
   renderStrip,
+  renderTimelineCard,
+  renderTimelineShell,
   renderCurrentCard,
   renderNextCard,
   renderDayList,
@@ -222,6 +224,25 @@ export function registerNowRoutes(app: FastifyInstance): void {
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');
+    }
+  });
+
+  // Auto-refreshing day timeline (every 30s). Re-renders the agenda card with a FRESH `now` so the
+  // done/active/next markers advance through the day — INCLUDING across lesson boundaries. Unlike
+  // /now/clock it never stops polling: the card has no text inputs, so swapping it can never wipe a
+  // half-typed Mind Dump note (a separate column). resolveNowLessons resolves minutes in the SCHOOL
+  // timezone (ctx.tz), so the markers stay correct regardless of the browser's clock/zone.
+  app.get('/now/timeline', { preHandler: requireAuth }, async (_req, reply) => {
+    const now = new Date();
+    try {
+      const { ctx, state } = await resolveNowLessons(now);
+      const [allLessons, periods] = await Promise.all([getTimetabledLessons(), getPeriodDefinitions()]);
+      const card = renderTimelineCard(allLessons, periods, state, now, ctx.tz) || renderTimelineShell();
+      return reply.type('text/html').send(card);
+    } catch (err) {
+      app.log.error({ err }, 'timeline fragment render failed');
+      // Keep the self-polling element alive so a transient DB blip doesn't freeze the timeline.
+      return reply.type('text/html').send(renderTimelineShell());
     }
   });
 

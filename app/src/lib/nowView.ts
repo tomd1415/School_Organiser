@@ -334,6 +334,24 @@ export interface NowNextData {
   captured?: CapturedItem[];
 }
 
+// The day timeline polls itself every 30s so the done/active/next markers walk through the day — and
+// crucially ACROSS lesson boundaries — without a full reload. The SAME opening tag is used by both the
+// page-load render and the /now/timeline fragment, so the swapped-in element keeps the poll alive; an
+// attribute-less replacement would de-register the timer and freeze the timeline after one tick. The
+// card has no text inputs, so re-rendering it can never wipe the Mind Dump note (a sibling column).
+const NOW_TIMELINE_OPEN =
+  '<section id="now-timeline" class="card agenda-card" hx-get="/now/timeline" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">';
+
+// Fallback shell for the fragment route when there is nothing to show (e.g. a poll that ticks past
+// midnight into a non-teaching day). Returning '' there would make the self-replacing element vanish and
+// never poll again — this keeps the poller alive instead.
+export function renderTimelineShell(): string {
+  return `${NOW_TIMELINE_OPEN}
+    <div class="card-head"><h2>Timetable</h2></div>
+    <p class="muted">No timetable slots to show right now.</p>
+  </section>`;
+}
+
 export function renderTimelineCard(
   lessons: LessonRow[] | undefined,
   periods: PeriodRow[] | undefined,
@@ -385,12 +403,19 @@ export function renderTimelineCard(
     let statusClass = '';
     let stateLabel = '';
     
+    let fillStyle = '';
     if (currentMinutes >= endMin) {
       statusClass = 'done';
       stateLabel = 'done';
     } else if (currentMinutes >= startMin && currentMinutes < endMin) {
       statusClass = 'active current';
       stateLabel = 'active';
+      // Subtle "time elapsed" fill that grows from the TOP of the block as the lesson runs (the 30s
+      // /now/timeline poll keeps it advancing). A violet tint layered over the slot's normal base, with
+      // a hard stop at the elapsed fraction — so the filled height = how far through the lesson we are.
+      const span = endMin - startMin;
+      const pct = span > 0 ? Math.max(0, Math.min(100, Math.round(((currentMinutes - startMin) / span) * 100))) : 0;
+      fillStyle = ` style="background: linear-gradient(to bottom, color-mix(in srgb, var(--violet) 22%, transparent) 0 ${pct}%, transparent ${pct}% 100%), var(--violet-soft);"`;
     } else {
       statusClass = 'next';
       stateLabel = 'next';
@@ -401,9 +426,9 @@ export function renderTimelineCard(
     if (l && l.courses && l.courses.length > 0) {
       detail += ` · ${l.courses.map(c => c.name).join(', ')}`;
     }
-    
+
     return `
-      <li class="timeline-slot ${statusClass}">
+      <li class="timeline-slot ${statusClass}"${fillStyle}>
         <time>${p.start}</time>
         <span class="node"></span>
         <div class="slot-details">
@@ -416,7 +441,7 @@ export function renderTimelineCard(
   }).join('');
 
   return `
-    <section class="card agenda-card">
+    ${NOW_TIMELINE_OPEN}
       <div class="card-head">
         <h2>${esc(targetLabel)}</h2>
         <span class="badge good">${todayPeriods.length} slots</span>

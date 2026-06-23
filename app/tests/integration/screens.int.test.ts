@@ -54,6 +54,29 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('now-strip');
   });
 
+  it('Now day-timeline fragment renders the agenda card AND re-emits its own 30s poll', async () => {
+    const res = await app.inject({ method: 'GET', url: '/now/timeline', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('id="now-timeline"');
+    // re-emits the poll attrs so the self-replacing element keeps advancing (never freezes after one tick)
+    expect(res.body).toContain('hx-get="/now/timeline"');
+    expect(res.body).toContain('hx-trigger="every 30s"');
+    expect(res.body).toMatch(/agenda-card|timeline-list/);
+  });
+
+  it('Now timeline keeps polling — two sequential GETs both succeed (unlike the clock strip, it never stops)', async () => {
+    const a = await app.inject({ method: 'GET', url: '/now/timeline', headers: { cookie: session } });
+    const b = await app.inject({ method: 'GET', url: '/now/timeline', headers: { cookie: session } });
+    expect(a.statusCode).toBe(200);
+    expect(b.statusCode).toBe(200);
+    expect(b.body).toContain('hx-trigger="every 30s"'); // still self-polling on the second tick
+  });
+
+  it('Now timeline is auth-gated (anon → redirect to login)', async () => {
+    const anon = await app.inject({ method: 'GET', url: '/now/timeline' });
+    expect(anon.statusCode).toBe(302);
+  });
+
   it('Oversee page renders the week of supervised lessons', async () => {
     const res = await app.inject({ method: 'GET', url: '/oversee', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);

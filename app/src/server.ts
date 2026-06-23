@@ -153,11 +153,12 @@ export async function buildApp(): Promise<FastifyInstance> {
     }
   };
 
-  // Background polls (the 30s Now clock, 45s Focus, the live pupil-work grid) must NOT count as user
-  // activity — otherwise an unattended laptop never idles out (the DPIA R3 control was defeated). The
+  // Background polls (the 30s Now clock + day timeline, 45s Focus, the live pupil-work grid) must NOT
+  // count as user activity — else an unattended laptop never idles out (the DPIA R3 control was defeated).
+  // The
   // idle timeout is still ENFORCED on these requests; only the lastSeen bump is skipped.
   const isBackgroundPoll = (url: string): boolean =>
-    url.startsWith('/now/clock') || url.startsWith('/focus/inner') || /\/pupil-work(\?|$)/.test(url);
+    url.startsWith('/now/clock') || url.startsWith('/now/timeline') || url.startsWith('/focus/inner') || /\/pupil-work(\?|$)/.test(url);
 
   app.addHook('onRequest', async (req, reply) => {
     const role = req.session?.get?.('role');
