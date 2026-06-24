@@ -115,6 +115,7 @@ describe('paths builders — exact URLs', () => {
     [paths.meDone(20), '/me/done?oc=20'],
     [paths.meFeedback(20), '/me/feedback?oc=20'],
     [paths.meAnswer(20), '/me/answer?oc=20'],
+    [paths.pupilImage('2026/06/a b.png'), '/pupil-image?p=2026%2F06%2Fa%20b.png'],
     // safeguarding
     [paths.safeguardingSource('note', 12), '/safeguarding/note/12'],
     // setup / admin

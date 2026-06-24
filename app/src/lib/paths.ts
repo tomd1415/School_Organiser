@@ -231,6 +231,8 @@ export const paths = {
   meDone: (oc: number): string => `/me/done?oc=${oc}`,
   meFeedback: (oc: number): string => `/me/feedback?oc=${oc}`,
   meAnswer: (oc: number): string => `/me/answer?oc=${oc}`,
+  // Serve a stored pupil screenshot (the `img:<relpath>` answer value → same-origin image URL).
+  pupilImage: (rel: string): string => `/pupil-image?p=${encodeURIComponent(rel)}`,
 
   // ── Safeguarding ────────────────────────────────────────────────────────────────────────────────
   safeguardingSource: (sourceType: string, sourceId: number): string => `/safeguarding/${sourceType}/${sourceId}`,

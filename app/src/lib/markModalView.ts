@@ -84,7 +84,9 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
   const fields = renderWorksheet(ws.markdown, { mode: 'review', keyPrefix: ws.keyPrefix }).fields.filter(
     (f) => shownKeys.has(f.key) || ansByKey.has(f.key) || markByKey.has(f.key),
   );
-  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons');
+  // 'image' = a screenshot-paste answer (the pupil drops a picture of their work). It IS markable, so it
+  // belongs with the questions — previously omitted entirely, so pasted screenshots had nowhere to show.
+  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons' || f.kind === 'image');
   const checks = fields.filter((f) => f.kind === 'check');
   const pointByKey = new Map<string, any>((scheme?.points ?? []).map((p: any) => [ws.keyPrefix + p.fieldKey, p]));
 
@@ -111,12 +113,18 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
       const ansVal = ans?.value ?? '';
       const mono = (s: string): string => `<pre class="mm-code">${esc(s)}</pre>`;
       const modelHtml = modelText ? (codey ? mono(modelText) : esc(modelText) + alts) : '<span class="muted">— no model answer —</span>';
-      const ansHtml = ansVal ? (codey ? mono(ansVal) : esc(ansVal)) : '<span class="mm-blank">— left blank —</span>';
+      // A screenshot answer is stored as `img:<relpath>` — show the picture, not the raw value.
+      const shotUrl = f.kind === 'image' && ansVal.startsWith('img:') ? paths.pupilImage(ansVal.slice(4)) : null;
+      const ansHtml = f.kind === 'image'
+        ? shotUrl
+          ? `<a class="mm-shot-link" href="${shotUrl}" target="_blank" rel="noopener" title="open full size"><img class="mm-shot" src="${shotUrl}" alt="${esc(first)}’s screenshot" loading="lazy"></a>`
+          : '<span class="mm-blank">— no screenshot yet —</span>'
+        : ansVal ? (codey ? mono(ansVal) : esc(ansVal)) : '<span class="mm-blank">— left blank —</span>';
       const norm = (s: string): string => s.replace(/\r/g, '').split('\n').map((l) => l.trimEnd()).join('\n').trim();
       const parsonsHint = f.kind === 'parsons' && ansVal
         ? norm(ansVal) === norm(modelText) ? ' <span class="mm-badge mm-ok">✓ correct order</span>' : ' <span class="mm-badge mm-warn">order differs</span>'
         : '';
-      const kindTag = f.kind === 'parsons' ? '<span class="mm-tag">Parson’s</span>' : f.kind === 'code' ? '<span class="mm-tag">code</span>' : '';
+      const kindTag = f.kind === 'parsons' ? '<span class="mm-tag">Parson’s</span>' : f.kind === 'code' ? '<span class="mm-tag">code</span>' : f.kind === 'image' ? '<span class="mm-tag">screenshot</span>' : '';
       const control = marking
         ? ans
           ? markControl(oc, pid, ans.id, mk, maxMarks, wi)
