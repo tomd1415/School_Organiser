@@ -250,7 +250,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = `<section class="card"><h1>Schemes of work</h1><p class="muted">Unavailable — the database is not reachable.</p></section>`;
     }
-    return reply.type('text/html').send(layout({ title: 'Schemes', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Schemes', body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 
   // 10.27 — export one scheme to a JSON file a colleague can import (no pupil data; file-based).

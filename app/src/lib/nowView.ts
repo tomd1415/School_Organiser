@@ -17,6 +17,7 @@ import { renderPrepList, renderPrepAdd } from './prepView';
 import { renderTimerBanner } from '../routes/timer';
 import { markOpenAttrs } from '../routes/markModal';
 import { addDays, toMinutes, weekdayOf, fromMinutes } from './time';
+import { paths } from './paths';
 
 export interface NeedsRow {
   rank: number; // 0 = safeguarding (always top), then overdue/urgent → routine
@@ -91,7 +92,7 @@ export function renderStrip(
 
   let nextLine = '';
   if (state.nextTeaching && next) {
-    const href = `/lesson?lesson=${next.lessonId}&date=${esc(state.nextTeaching.date)}`;
+    const href = paths.lessonOpen(next.lessonId, state.nextTeaching.date);
     const what =
       nextEx.mode === 'free' ? `<span class="now-ex-free">Free</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
       : nextEx.mode === 'cover' ? `<span class="now-ex-cover">On cover</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
@@ -99,7 +100,7 @@ export function renderStrip(
     nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${what} <a href="${href}">open</a>`;
   }
 
-  const poll = changed ? '' : ` data-bg-poll hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"`;
+  const poll = changed ? '' : ` data-bg-poll hx-get="${paths.nowClock(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"`;
   const notice = changed ? ` &nbsp;·&nbsp; <a class="now-changed" href="/">↻ the lesson has changed — refresh</a>` : '';
   return `<div id="now-strip" class="now-strip"${poll}>
     <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}${notice}
@@ -129,7 +130,7 @@ export function renderCurrentCard(
     .filter(Boolean)
     .join(' · ');
   const listId = `notes-list-${occurrenceId}`;
-  const openHref = `/lesson?lesson=${current.lessonId}&date=${esc(state.isoDate)}`;
+  const openHref = paths.lessonOpen(current.lessonId, state.isoDate);
 
   const exBanner = ex.mode !== 'none'
     ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
@@ -148,7 +149,7 @@ export function renderCurrentCard(
       <div class="ld-notes-head"><h2>Quick note</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: occurrenceId })}</div>
       ${renderNotesList(listId, notes)}
     </div>
-    <p><a href="${openHref}">Open lesson detail →</a> &nbsp;·&nbsp; <a href="${openHref}&lab=1" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
+    <p><a href="${openHref}">Open lesson detail →</a> &nbsp;·&nbsp; <a href="${paths.lessonOpen(current.lessonId, state.isoDate, { lab: true })}" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
   </div>`;
 }
 
@@ -174,7 +175,7 @@ export function renderNextCard(
     ? `${fromMinutes(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
     : esc(slot.date);
   const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
-  const openHref = `/lesson?lesson=${next.lessonId}&date=${esc(slot.date)}`;
+  const openHref = paths.lessonOpen(next.lessonId, slot.date);
   const exBanner = ex.mode !== 'none'
     ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
     : '';
@@ -186,7 +187,7 @@ export function renderNextCard(
     <h2>${heading}</h2>
     <p class="ld-meta">${when}${room}</p>
     ${isFreeOrCover ? '' : courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
-    <p><a href="${openHref}">Open next lesson →</a> &nbsp;·&nbsp; <a href="${openHref}&lab=1" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
+    <p><a href="${openHref}">Open next lesson →</a> &nbsp;·&nbsp; <a href="${paths.lessonOpen(next.lessonId, slot.date, { lab: true })}" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
   </div>`;
 }
 
@@ -210,7 +211,7 @@ export function renderDayList(
   const items = rows
     .map((l) => {
       const courses = l.courses.map((c) => esc(c.name)).join(' · ');
-      return `<li><a href="/lesson?lesson=${l.lessonId}&date=${esc(date)}">
+      return `<li><a href="${paths.lessonOpen(l.lessonId, date)}">
         <span class="day-time">${esc(l.start)}</span>
         <span class="day-group">${esc(l.groupName ?? purposeLabel(l.purpose))}</span>
         ${courses ? `<span class="muted day-courses">${courses}</span>` : ''}
@@ -231,7 +232,7 @@ export function needsMeRows(marks: MarksBacklogRow[], bell: BellTask[], events: 
   for (const t of bell) {
     rows.push({
       rank: 1,
-      html: `<li id="bell-${t.id}" class="nm-row"><button type="button" class="link nm-done" title="Mark done" aria-label="Mark done" hx-post="/tasks/${t.id}/done" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button><span class="nm-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span><span class="nm-text">${esc(t.title)}</span></li>`,
+      html: `<li id="bell-${t.id}" class="nm-row"><button type="button" class="link nm-done" title="Mark done" aria-label="Mark done" hx-post="${paths.taskDone(t.id)}" hx-target="#bell-${t.id}" hx-swap="outerHTML">✓</button><span class="nm-tag">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span><span class="nm-text">${esc(t.title)}</span></li>`,
     });
   }
   for (const e of dueSoon(events, today).slice(0, 6)) {
@@ -244,7 +245,7 @@ export function needsMeRows(marks: MarksBacklogRow[], bell: BellTask[], events: 
     if (r.suggested > 0) bits.push(`${r.suggested} to confirm`);
     if (r.unreleased) bits.push('ready to release');
     const flag = r.needsReview > 0 ? ` <span class="mk-review" title="${r.needsReview} need your eyes">⚠${r.needsReview}</span>` : '';
-    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><button type="button" class="nm-text nm-mark" ${markOpenAttrs(`/lesson/oc/${r.occurrenceCourseId}/mark`)} title="open marking">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</button></li>` });
+    rows.push({ rank: 2, html: `<li class="nm-row"><span class="nm-tag">marks</span><button type="button" class="nm-text nm-mark" ${markOpenAttrs(paths.occMark(r.occurrenceCourseId))} title="open marking">${esc(r.groupName)} · ${esc(r.courseName)} <span class="muted">${esc(bits.join(', '))}</span>${flag}</button></li>` });
   }
   for (const i of heads.filter((h) => !h.safeguarding).slice(0, 6)) {
     rows.push({ rank: 4, html: `<li class="nm-row"><span class="nm-tag">heads-up</span><span class="nm-text">${esc(i.body || '(captured note)')}${i.groupName ? ` <span class="muted">· ${esc(i.groupName)}</span>` : ''}</span></li>` });
@@ -271,15 +272,15 @@ export function renderNeedsMe(marks: MarksBacklogRow[], bell: BellTask[], events
   return `<div class="now-card now-needs">
     <p class="kicker">Needs me</p>
     <ul class="nm-list">${shown}${more}</ul>
-    <p class="nm-foot"><a href="/marking">✎ Marking</a> · <a href="/tasks">Tasks</a> · <a href="/events">Events</a> · <a href="/captured">Captured</a></p>
+    <p class="nm-foot"><a href="${paths.marking()}">✎ Marking</a> · <a href="${paths.tasks()}">Tasks</a> · <a href="${paths.events()}">Events</a> · <a href="${paths.captured()}">Captured</a></p>
   </div>`;
 }
 
 export function renderDayCard(part: 'start' | 'end', items: PrepItem[], date: string): string {
   return `<details class="now-card now-daycard">
     <summary>${part === 'start' ? 'Start-of-day checklist' : 'End-of-day checklist'}${items.length ? ` (${items.length})` : ''}</summary>
-    ${renderPrepList(items, '/day-checklist', 'day', `day-${part}`)}
-    ${renderPrepAdd('/day-checklist/add', { date, part }, `day-${part}`)}
+    ${renderPrepList(items, paths.dayChecklist(), 'day', `day-${part}`)}
+    ${renderPrepAdd(paths.dayChecklistAdd(), { date, part }, `day-${part}`)}
   </details>`;
 }
 
@@ -297,7 +298,7 @@ export function renderMorningBrief(items: BriefItem[]): string {
 export function renderCurrentInterests(items: InterestItem[]): string {
   if (items.length === 0) return '';
   const row = (i: InterestItem): string => {
-    const href = i.kind === 'task' ? '/tasks?view=interest' : '/captured';
+    const href = i.kind === 'task' ? paths.tasksFiltered('interest') : paths.captured();
     return `<li class="${i.fresh ? 'ci-fresh' : 'ci-fading'}"><a href="${href}">${esc(i.label)}</a></li>`;
   };
   return `<div class="now-card ci-card">
@@ -340,7 +341,7 @@ export interface NowNextData {
 // attribute-less replacement would de-register the timer and freeze the timeline after one tick. The
 // card has no text inputs, so re-rendering it can never wipe the Mind Dump note (a sibling column).
 const NOW_TIMELINE_OPEN =
-  '<section id="now-timeline" class="card agenda-card" hx-get="/now/timeline" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">';
+  `<section id="now-timeline" class="card agenda-card" hx-get="${paths.nowTimeline()}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">`;
 
 // Fallback shell for the fragment route when there is nothing to show (e.g. a poll that ticks past
 // midnight into a non-teaching day). Returning '' there would make the self-replacing element vanish and
@@ -475,11 +476,11 @@ export function renderInboxQueueCard(captured: CapturedItem[] | undefined, csrf:
         <p class="inbox-item-text">${esc(item.body || '(captured note)')}</p>
         <div class="inbox-item-actions" hx-headers='{"x-csrf-token":"${csrf}"}'>
           <button class="button small ghost" type="button" 
-            hx-post="/captured/${item.id}/to-task" 
+            hx-post="${paths.capturedToTask(item.id)}" 
             hx-target="#inbox-item-${item.id}" 
             hx-swap="outerHTML">✓ Task</button>
           <button class="button small ghost" type="button" 
-            hx-post="/captured/${item.id}/flag/archived" 
+            hx-post="${paths.capturedFlag(item.id, 'archived')}" 
             hx-target="#inbox-item-${item.id}" 
             hx-swap="outerHTML">Archive</button>
         </div>
@@ -511,7 +512,7 @@ export function renderMindDumpCard(csrf: string): string {
           <h2>Capture thought</h2>
         </div>
       </div>
-      <form class="capture-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <form class="capture-form" hx-post="${paths.captureQuick()}" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <div class="textarea-wrapper">
           <textarea name="body" placeholder="Jot down notes (e.g. 'Order green whiteboard markers' or 'Daniel Reed did great iteration today')..."></textarea>
         </div>
@@ -556,22 +557,22 @@ export function renderNowNext(data: NowNextData): string {
   const nudgeHtml = showNudge
     ? `<div class="exp-nudge" id="exp-nudge">
         <span class="exp-nudge-text">✨ You've taught 20+ lessons — ready for the planning &amp; AI tools?</span>
-        <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
+        <form hx-post="${paths.settingsExperience()}" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
           <input type="hidden" name="experience" value="power">
           <button type="submit" class="btn-secondary">Turn on advanced tools</button>
         </form>
-        <button type="button" class="link" hx-post="/settings/experience-nudge/dismiss" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
+        <button type="button" class="link" hx-post="${paths.settingsExperienceNudgeDismiss()}" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
       </div>`
     : '';
 
   const exceptionBanner = exToday
-    ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="/timetable">see the week</a></p>`
+    ? `<p class="ex-note">⚠ ${exToday} timetable exception${exToday === 1 ? '' : 's'} today — <a href="${paths.timetable()}">see the week</a></p>`
     : '';
 
   return `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
     ${renderTimerBanner(running)}
     <!-- Hidden poll strip to preserve hx-get clock contract -->
-    <div id="now-strip" class="now-strip" style="display: none;" hx-get="/now/clock?sig=${encodeURIComponent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"></div>
+    <div id="now-strip" class="now-strip" style="display: none;" hx-get="${paths.nowClock(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"></div>
 
     ${nudgeHtml}
     ${exceptionBanner}

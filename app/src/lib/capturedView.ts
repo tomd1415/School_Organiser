@@ -1,6 +1,7 @@
 import { esc } from './html';
 import { CAPTURED_CATEGORIES, CATEGORY_LABELS, type CapturedItem } from '../services/captured';
 import type { GroupOpt } from '../repos/tasks';
+import { paths } from './paths';
 
 function categoryOptions(current: string | null): string {
   return (
@@ -17,9 +18,9 @@ function groupOptions(groups: GroupOpt[], current: number | null): string {
 }
 
 export function renderCapturedItem(item: CapturedItem, groups: GroupOpt[]): string {
-  const save = (trigger: string) => `hx-post="/captured/${item.id}" hx-swap="none" hx-trigger="${trigger}"`;
+  const save = (trigger: string) => `hx-post="${paths.capturedItem(item.id)}" hx-swap="none" hx-trigger="${trigger}"`;
   const flag = (f: string, on: boolean, label: string) =>
-    `<button type="button" class="link${on ? ' on' : ''}" hx-post="/captured/${item.id}/flag/${f}" hx-target="#cap-${item.id}" hx-swap="outerHTML">${label}</button>`;
+    `<button type="button" class="link${on ? ' on' : ''}" hx-post="${paths.capturedFlag(item.id, f)}" hx-target="#cap-${item.id}" hx-swap="outerHTML">${label}</button>`;
   return `<li class="captured${item.safeguarding ? ' sg' : ''}" id="cap-${item.id}">
     <textarea name="body" rows="2" placeholder="Something you were told…" ${save('input changed delay:600ms, blur')}>${esc(item.body)}</textarea>
     <div class="task-controls">
@@ -31,9 +32,9 @@ export function renderCapturedItem(item: CapturedItem, groups: GroupOpt[]): stri
       <span class="note-status" id="cap-${item.id}-status"></span>
     </div>
     <div class="task-actions">
-      <button type="button" class="link" hx-post="/captured/${item.id}/suggest" hx-target="#cap-${item.id}" hx-swap="outerHTML" hx-disabled-elt="this" title="AI suggests a category, date and class (safeguarding stays local)">✨ Suggest</button>
-      <button type="button" class="link" hx-post="/captured/${item.id}/to-task" hx-target="#cap-${item.id}" hx-swap="outerHTML">→ make a task</button>
-      <button type="button" class="link danger" hx-post="/captured/${item.id}/flag/archived" hx-target="#cap-${item.id}" hx-swap="outerHTML">archive</button>
+      <button type="button" class="link" hx-post="${paths.capturedSuggest(item.id)}" hx-target="#cap-${item.id}" hx-swap="outerHTML" hx-disabled-elt="this" title="AI suggests a category, date and class (safeguarding stays local)">✨ Suggest</button>
+      <button type="button" class="link" hx-post="${paths.capturedToTask(item.id)}" hx-target="#cap-${item.id}" hx-swap="outerHTML">→ make a task</button>
+      <button type="button" class="link danger" hx-post="${paths.capturedFlag(item.id, 'archived')}" hx-target="#cap-${item.id}" hx-swap="outerHTML">archive</button>
     </div>
   </li>`;
 }
@@ -43,5 +44,5 @@ export function renderCapturedList(items: CapturedItem[], groups: GroupOpt[]): s
 }
 
 export function renderNewCapturedButton(): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="/captured" hx-target="#captured-list" hx-swap="beforeend">＋ Capture</button>`;
+  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.captured()}" hx-target="#captured-list" hx-swap="beforeend">＋ Capture</button>`;
 }

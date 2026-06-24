@@ -34,20 +34,21 @@ describe('readinessDots', () => {
 describe('renderLesson free routing + dots', () => {
   it('a teaching lesson links to /lesson and shows readiness dots', () => {
     const html = renderLesson(lesson(), '2026-03-03', NO_EXCEPTION, { noScheme: false, noPlan: true, needsEdit: false });
-    expect(html).toContain('href="/lesson?lesson=7&date=2026-03-03"');
+    // URL now built via paths.lessonOpen → HTML-attribute form (&amp; joiner; browser-identical).
+    expect(html).toContain('href="/lesson?lesson=7&amp;date=2026-03-03"');
     expect(html).toContain('tt-dot-purple'); // dots show on own teaching lessons
   });
 
   it('a permanent free slot opens the free-period workspace, not the lesson', () => {
     const html = renderLesson(lesson({ purpose: 'free', groupName: null }), '2026-03-03', NO_EXCEPTION);
-    expect(html).toContain('href="/free?lesson=7&date=2026-03-03"');
+    expect(html).toContain('href="/free?lesson=7&amp;date=2026-03-03"');
     expect(html).toContain('tt-is-free');
     expect(html).not.toContain('/lesson?');
   });
 
   it('a teaching lesson freed for THIS date by an exception also opens /free', () => {
     const html = renderLesson(lesson(), '2026-03-03', FREE_EX);
-    expect(html).toContain('href="/free?lesson=7&date=2026-03-03"');
+    expect(html).toContain('href="/free?lesson=7&amp;date=2026-03-03"');
   });
 
   it('does NOT show readiness dots on a lesson I only oversee', () => {

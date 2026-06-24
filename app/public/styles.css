@@ -5,6 +5,25 @@
 @import url('/static/styles-base-widgets.css');
 @import url('/static/styles-base.css');
 
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   STYLESHEET OWNERSHIP & CLASS CATALOGUE  (docs/UI_SEPARATION_PLAN.md Phase 4)
+   Three sheets, layered base → theme. A class appearing in two sheets is almost always a
+   light-STRUCTURE / dark-THEME pair (intentional), NOT accidental duplication:
+     1. styles-base.css          — fonts, *{box-sizing}, body, :focus-visible, reduced-motion. Tiny base.
+     2. styles-base-widgets.css  — STRUCTURE for every widget (cards, tables, the timetable grid, inputs,
+                                    buttons, pupil + deck surfaces). Light, unscoped `.foo {}`.
+     3. styles.css (this file)   — the DARK theme + the "next" shell; almost all rules are scoped under
+                                    `body[data-shell="next"]`, re-skinning the widget structure above.
+   To restyle a component, edit the sheet that OWNS the property: structure/layout → styles-base-widgets.css;
+   colour/theme → this file's body[data-shell] block.
+
+   PAGE WIDTH is set by INTENT, not by which component class the page root happens to carry. The shell adds
+   `main.cockpit-workspace.cockpit-w-{reading|working|wide|full}` from `nextShell({width})`; the WIDTH INTENT
+   block (below, after the legacy per-component rules) is the single source of width truth. A redesigned view
+   DECLARES its width intent — it is never enrolled in a component-class list. (Legacy per-component width
+   rules remain as a fallback for pages that have not declared an intent yet.)
+   ════════════════════════════════════════════════════════════════════════════════════════════════ */
+
 :root {
   color-scheme: dark;
   --bg: #080b12;
@@ -528,6 +547,20 @@ body[data-shell="next"] main.cockpit-workspace > .workspace-width {
   margin: 0 auto;
   width: 100%;
 }
+
+/* ── WIDTH INTENT (single source of truth) ────────────────────────────────────────────────────────
+   The page's content-column width is set ONCE by the shell from a view-declared hint (`nextShell({width})`
+   → `main.cockpit-workspace.cockpit-w-{reading|working|wide|full}`). Placed AFTER the legacy per-component
+   width rules above and at matching specificity, so the intent wins over any component class on the root
+   (e.g. a `.card .welcome` root no longer renders at the `.card` width by accident). New / redesigned views
+   should declare a width intent instead of relying on the component-class lists above — see the class
+   catalogue near the top of this file and docs/UI_SEPARATION_PLAN.md (Phase 4).
+     reading ≈ prose (welcome, pedagogy)   working = standard cards (default)
+     wide    = dashboards (now, cockpit, timetable, schemes, kit)   full = edge-to-edge                       */
+body[data-shell="next"] main.cockpit-workspace.cockpit-w-reading > * { max-width: 800px; margin: 0 auto; width: 100%; }
+body[data-shell="next"] main.cockpit-workspace.cockpit-w-working > * { max-width: 1180px; margin: 0 auto; width: 100%; }
+body[data-shell="next"] main.cockpit-workspace.cockpit-w-wide > *    { max-width: 1540px; margin: 0 auto; width: 100%; }
+body[data-shell="next"] main.cockpit-workspace.cockpit-w-full > *    { max-width: none; margin: 0; width: 100%; }
 
 
 /* Overhauled chips */

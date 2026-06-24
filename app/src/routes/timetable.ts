@@ -115,6 +115,6 @@ export function registerTimetableRoutes(app: FastifyInstance): void {
       explicitYear,
       csrf: reply.generateCsrf(),
     });
-    return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf() }));
+    return reply.type('text/html').send(layout({ title: 'Timetable', body, authed: true, csrfToken: reply.generateCsrf(), width: 'wide' }));
   });
 }

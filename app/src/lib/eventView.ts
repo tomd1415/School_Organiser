@@ -1,6 +1,7 @@
 // Pure HTML for event/deadline items (inline-editable, HTMX). Same pattern as tasks.
 import { esc } from './html';
 import { EVENT_KINDS, EVENT_KIND_LABELS, type UpcomingEvent } from '../services/event';
+import { paths } from './paths';
 
 function kindOptions(current: string): string {
   return EVENT_KINDS.map(
@@ -9,7 +10,7 @@ function kindOptions(current: string): string {
 }
 
 export function renderEventItem(e: UpcomingEvent): string {
-  const save = (trigger: string) => `hx-post="/events/${e.id}" hx-swap="none" hx-trigger="${trigger}"`;
+  const save = (trigger: string) => `hx-post="${paths.event(e.id)}" hx-swap="none" hx-trigger="${trigger}"`;
   return `<li class="event" id="event-${e.id}">
     <input class="event-title" type="text" name="title" value="${esc(e.title)}" placeholder="Event…" ${save('input changed delay:600ms, blur')}>
     <div class="task-controls">
@@ -23,8 +24,8 @@ export function renderEventItem(e: UpcomingEvent): string {
       <span class="note-status" id="event-${e.id}-status"></span>
     </div>
     <div class="task-actions">
-      <button type="button" class="link" hx-post="/events/${e.id}/done" hx-target="#event-${e.id}" hx-swap="outerHTML">✓ done</button>
-      <button type="button" class="link danger" hx-post="/events/${e.id}/cancel" hx-target="#event-${e.id}" hx-swap="outerHTML">cancel</button>
+      <button type="button" class="link" hx-post="${paths.eventDone(e.id)}" hx-target="#event-${e.id}" hx-swap="outerHTML">✓ done</button>
+      <button type="button" class="link danger" hx-post="${paths.eventCancel(e.id)}" hx-target="#event-${e.id}" hx-swap="outerHTML">cancel</button>
     </div>
   </li>`;
 }
@@ -34,5 +35,5 @@ export function renderEventList(events: UpcomingEvent[]): string {
 }
 
 export function renderNewEventButton(): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="/events" hx-target="#events-list" hx-swap="beforeend">＋ New event</button>`;
+  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.events()}" hx-target="#events-list" hx-swap="beforeend">＋ New event</button>`;
 }

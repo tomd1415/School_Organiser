@@ -2,6 +2,7 @@ import { esc } from './html';
 import { LOAD_LABELS, LOADS, URGENCIES, URGENCY_LABELS } from '../services/task';
 import type { GroupOpt } from '../repos/tasks';
 import type { RecurringDef } from '../repos/recurringTasks';
+import { paths } from './paths';
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
@@ -23,7 +24,7 @@ function patternOptions(groups: GroupOpt[], current: string): string {
 }
 
 export function renderRecurringItem(def: RecurringDef, groups: GroupOpt[]): string {
-  const save = (trigger: string) => `hx-post="/recurring/${def.id}" hx-swap="none" hx-trigger="${trigger}"`;
+  const save = (trigger: string) => `hx-post="${paths.recurringDef(def.id)}" hx-swap="none" hx-trigger="${trigger}"`;
   const cog = `<option value=""${def.cognitiveLoad ? '' : ' selected'}>— load —</option>${enumOptions(LOADS, LOAD_LABELS, def.cognitiveLoad ?? '')}`;
   return `<li class="task${def.active ? '' : ' inactive'}" id="recur-${def.id}">
     <input class="task-title" type="text" name="title" value="${esc(def.title)}" placeholder="Recurring task…" ${save('input changed delay:600ms, blur')}>
@@ -36,8 +37,8 @@ export function renderRecurringItem(def: RecurringDef, groups: GroupOpt[]): stri
       <span class="note-status" id="recur-${def.id}-status"></span>
     </div>
     <div class="task-actions">
-      <button type="button" class="link" hx-post="/recurring/${def.id}/${def.active ? 'deactivate' : 'activate'}" hx-target="#recur-${def.id}" hx-swap="outerHTML">${def.active ? 'pause' : 'resume'}</button>
-      <button type="button" class="link danger" hx-post="/recurring/${def.id}/delete" hx-target="#recur-${def.id}" hx-swap="outerHTML" hx-confirm="Delete this recurring task? (existing instances stay)">delete</button>
+      <button type="button" class="link" hx-post="${paths.recurringDefToggle(def.id, def.active ? 'deactivate' : 'activate')}" hx-target="#recur-${def.id}" hx-swap="outerHTML">${def.active ? 'pause' : 'resume'}</button>
+      <button type="button" class="link danger" hx-post="${paths.recurringDefDelete(def.id)}" hx-target="#recur-${def.id}" hx-swap="outerHTML" hx-confirm="Delete this recurring task? (existing instances stay)">delete</button>
     </div>
   </li>`;
 }
@@ -47,5 +48,5 @@ export function renderRecurringList(defs: RecurringDef[], groups: GroupOpt[]): s
 }
 
 export function renderNewRecurringButton(): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="/recurring" hx-target="#recurring-list" hx-swap="beforeend">＋ New recurring task</button>`;
+  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.recurring()}" hx-target="#recurring-list" hx-swap="beforeend">＋ New recurring task</button>`;
 }

@@ -1,6 +1,7 @@
 import { esc } from './html';
 import type { EquipmentRow } from '../repos/equipment';
 import { addDays } from '../lib/time';
+import { paths } from './paths';
 
 const CATEGORIES = ['physical-computing', 'robotics', 'computers', 'peripherals', 'av', 'consumables', 'other'];
 
@@ -10,7 +11,7 @@ function staleBefore(today: string): string {
 
 function renderRow(e: EquipmentRow, today: string): string {
   const save = (field: string) =>
-    `hx-post="/kit/${e.id}" hx-vals='{"field":"${field}"}' hx-trigger="input changed delay:700ms, blur" hx-swap="none"`;
+    `hx-post="${paths.kitItem(e.id)}" hx-vals='{"field":"${field}"}' hx-trigger="input changed delay:700ms, blur" hx-swap="none"`;
   const broken = e.qtyTotal != null && e.qtyWorking != null && e.qtyWorking < e.qtyTotal;
   const stale = !e.lastChecked || e.lastChecked < staleBefore(today);
   return `<tr class="kit-row${e.active ? '' : ' kit-archived'}" id="kit-${e.id}">
@@ -22,13 +23,13 @@ function renderRow(e: EquipmentRow, today: string): string {
     <td><input class="kit-tags" name="value" value="${esc(e.tags ?? '')}" placeholder="tags…" ${save('tags')}></td>
     <td class="kit-checked${stale ? ' kit-stale' : ''}" title="${stale ? 'not checked for over a term' : 'last stock-take'}">
       ${esc(e.lastChecked ?? 'never')}
-      <button type="button" class="link" title="Mark counted/tested today" hx-post="/kit/${e.id}/checked" hx-target="#kit-${e.id}" hx-swap="outerHTML">✓ today</button>
+      <button type="button" class="link" title="Mark counted/tested today" hx-post="${paths.kitChecked(e.id)}" hx-target="#kit-${e.id}" hx-swap="outerHTML">✓ today</button>
     </td>
     <td>
       <span class="note-status" id="kit-${e.id}-status"></span>
       ${e.active
-        ? `<button type="button" class="link danger" hx-post="/kit/${e.id}/archive" hx-target="#kit-${e.id}" hx-swap="outerHTML" hx-confirm="Archive ${esc(e.name)}? It stays in the records but leaves the planning list.">archive</button>`
-        : `<button type="button" class="link" hx-post="/kit/${e.id}/restore" hx-target="#kit-${e.id}" hx-swap="outerHTML">restore</button>`}
+        ? `<button type="button" class="link danger" hx-post="${paths.kitArchive(e.id)}" hx-target="#kit-${e.id}" hx-swap="outerHTML" hx-confirm="Archive ${esc(e.name)}? It stays in the records but leaves the planning list.">archive</button>`
+        : `<button type="button" class="link" hx-post="${paths.kitRestore(e.id)}" hx-target="#kit-${e.id}" hx-swap="outerHTML">restore</button>`}
     </td>
   </tr>`;
 }
@@ -80,20 +81,20 @@ export function renderKitPage(options: KitPageOptions): string {
       </div>
       <p class="muted">Referred to while planning, and given to the AI for every planning feature —
         practical work is planned within what's listed here. Archive (don't delete) anything that leaves the room.</p>
-      <form method="get" action="/kit" class="kit-filter" style="margin-bottom: 20px;">
+      <form method="get" action="${paths.kit()}" class="kit-filter" style="margin-bottom: 20px;">
         <input type="search" name="q" value="${esc(q)}" placeholder="filter… name, notes, tags">
         <label style="margin-left: 12px;"><input type="checkbox" name="archived" value="1"${showArchived ? ' checked' : ''} onchange="this.form.submit()"> show archived</label>
         <noscript><button type="submit">Go</button></noscript>
       </form>
       ${tables}
-      <form class="kit-add" hx-post="/kit/add" hx-target="closest section" hx-swap="outerHTML" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color, #eaeaea);">
+      <form class="kit-add" hx-post="${paths.kitAdd()}" hx-target="closest section" hx-swap="outerHTML" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color, #eaeaea);">
         <input type="text" name="name" placeholder="new item… e.g. micro:bit v2" required maxlength="200">
         <select name="category">${catOpts}</select>
         <button type="submit" class="btn-secondary">＋ add</button>
       </form>
       <details class="kit-import"${importStatus ? ' open' : ''} style="margin-top: 20px; padding: 12px; border: 1px dashed var(--border-color, #ccc); border-radius: 6px;">
         <summary style="cursor: pointer; font-weight: 500;">📥 Import kit from a CSV (spreadsheet stock-take)</summary>
-        <form hx-post="/kit/import" hx-target="closest section" hx-swap="outerHTML" style="margin-top: 12px;">
+        <form hx-post="${paths.kitImport()}" hx-target="closest section" hx-swap="outerHTML" style="margin-top: 12px;">
           <p class="muted">Paste a CSV with a <strong>name</strong> column (optionally category, total, working, location, notes, tags). Existing items are matched by name and updated — re-importing never duplicates.</p>
           <textarea name="csv" rows="5" placeholder="name,category,total,working,location&#10;micro:bit v2,physical-computing,16,14,cupboard B" style="width: 100%; box-sizing: border-box;"></textarea>
           <div style="margin-top: 10px;">

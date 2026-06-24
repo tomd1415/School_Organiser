@@ -4,6 +4,7 @@ import type { LessonReadiness } from '../services/lessonReadiness';
 import { GridCell, GridLesson } from '../services/timetable';
 import { DayKind } from '../services/clock';
 import { addDays, weekdayOf } from './time';
+import { paths } from './paths';
 
 const TZ = 'Europe/London';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -85,14 +86,14 @@ export function renderLesson(l: GridLesson, date: string, ex: ExceptionEffect, r
   // exception) opens the free-period workspace; teaching/form open the lesson.
   const isFree = l.purpose === 'free' || ex.mode === 'free';
   if (l.purpose === 'club') {
-    return `<a class="tt-lesson tt-club" style="${style}" href="/club?lesson=${l.lessonId}&date=${esc(date)}">${inner}</a>`;
+    return `<a class="tt-lesson tt-club" style="${style}" href="${paths.clubOpen(l.lessonId, date)}">${inner}</a>`;
   }
   if (l.purpose === 'teaching' || l.purpose === 'free' || l.purpose === 'form') {
-    const href = isFree ? `/free?lesson=${l.lessonId}&date=${esc(date)}` : `/lesson?lesson=${l.lessonId}&date=${esc(date)}`;
+    const href = isFree ? paths.freeOpen(l.lessonId, date) : paths.lessonOpen(l.lessonId, date);
     // A corner "🧪" jumps into a sandbox of your OWN teaching lesson (Test Lab). Sibling of the cell link
     // (no nested anchors); the <td> is position:relative so it sits in the corner.
     const testLink = !isFree && l.purpose === 'teaching' && l.isSelf
-      ? `<a class="tt-test" href="/lesson?lesson=${l.lessonId}&date=${esc(date)}&lab=1" target="_blank" rel="noopener" title="Test this lesson in the Test Lab (sandbox — no effect on the real class)" aria-label="Test this lesson in the Test Lab">🧪</a>`
+      ? `<a class="tt-test" href="${paths.lessonOpen(l.lessonId, date, { lab: true })}" target="_blank" rel="noopener" title="Test this lesson in the Test Lab (sandbox — no effect on the real class)" aria-label="Test this lesson in the Test Lab">🧪</a>`
       : '';
     return `<a class="tt-lesson tt-${esc(l.purpose)}${isFree ? ' tt-is-free' : ''}" style="${style}" href="${href}">${inner}</a>${testLink}`;
   }
@@ -131,10 +132,10 @@ export function renderTimetableNext(data: TimetableNextData): string {
       <div class="tt-head">
         <h1>Timetable${yearLabel}</h1>
         <nav class="tt-weeknav">
-          <a href="/timetable?date=${esc(prev)}${yearQ}" class="chip">◀ Prev</a>
-          <a href="/timetable" class="chip">This week</a>
-          <a href="/timetable?date=${esc(next)}${yearQ}" class="chip">Next ▶</a>
-        </nav>${explicitYear ? ' <a class="tt-exit-preview muted" href="/timetable">exit preview →</a>' : ''}
+          <a href="${paths.timetableDate(prev, yearQ)}" class="chip">◀ Prev</a>
+          <a href="${paths.timetable()}" class="chip">This week</a>
+          <a href="${paths.timetableDate(next, yearQ)}" class="chip">Next ▶</a>
+        </nav>${explicitYear ? ` <a class="tt-exit-preview muted" href="${paths.timetable()}">exit preview →</a>` : ''}
       </div>
       <div class="tt-grid-container">
         ${table}

@@ -1,32 +1,46 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Phase 2 guard (docs/UI_SEPARATION_PLAN.md): the view layer must reference back-end route URLs through
-// paths.ts, not raw literals. As each view file is migrated, move it from PARTIAL → FULLY_MIGRATED.
-const SRC = join(__dirname, '..', 'src');
+// Phase 2 guard (docs/UI_SEPARATION_PLAN.md): the view layer references back-end route URLs through
+// paths.ts, never as raw literals. EVERY `src/lib/*View.ts` is now fully migrated, so the guard auto-covers
+// all of them — a new view file must use paths.ts (or be added to the exceptions below with a reason).
+const LIB = join(__dirname, '..', 'src', 'lib');
+const VIEW_FILES = readdirSync(LIB)
+  .filter((f) => f.endsWith('View.ts'))
+  .map((f) => `lib/${f}`);
 
-// Fully migrated: NO raw route-URL literal (a `/path`) may appear in an href / hx-* / action attribute.
-const FULLY_MIGRATED = ['lib/lessonView.ts'];
+// Files exempted from the guard (none today). Add with a one-line reason if a view legitimately needs a raw
+// literal — prefer adding a builder to paths.ts instead.
+const EXCEPT = new Set<string>([]);
+const FULLY_MIGRATED = VIEW_FILES.filter((f) => !EXCEPT.has(f));
 
-// Partially migrated: only these route-prefix families have been moved onto paths.ts so far.
-const PARTIAL: Array<{ file: string; prefixes: string[] }> = [];
+// (1) No raw route URL DIRECTLY in an attribute value.
+const RAW_ROUTE_ATTR = /(?:hx-(?:post|get|put|delete|patch)|href|action)=["'`]\/[a-z]/g;
 
-const RAW_ROUTE = /(?:hx-(?:post|get|put|delete|patch)|href|action)=["'`]\/[a-z]/g;
+// (2) No route-URL string literal ANYWHERE — also catches INDIRECTED uses the attribute check misses:
+// `const href = \`/lesson?…\``, a URL passed as an argument (`renderPrepList(prep, '/prep', …)`), or a
+// ternary. A quoted string that starts with `/<lowercase-word>` is a back-end route; relative imports
+// start with `.` (not `/`) and asset paths are filtered out below.
+const ROUTE_LITERAL = /["'`]\/[a-z][a-zA-Z0-9-]*(?:[/?][^"'`]*)?["'`]/g;
+const ASSET = /\.(css|js|mjs|svg|png|ico|woff2?|map)["'`]$/;
 
 describe('paths.ts migration guard', () => {
   for (const file of FULLY_MIGRATED) {
-    it(`${file} is fully migrated to paths.ts (no raw route-URL literals)`, () => {
-      const raw = readFileSync(join(SRC, file), 'utf8').match(RAW_ROUTE) ?? [];
-      expect(raw, `raw route URLs found (use paths.ts): ${raw.join(', ')}`).toEqual([]);
+    const code = readFileSync(join(LIB, '..', file), 'utf8');
+
+    it(`${file}: no raw route URL in an attribute`, () => {
+      const raw = code.match(RAW_ROUTE_ATTR) ?? [];
+      expect(raw, `use paths.ts: ${raw.join(', ')}`).toEqual([]);
+    });
+
+    it(`${file}: no route-URL string literal (incl. indirected / arg-passed)`, () => {
+      const hits = (code.match(ROUTE_LITERAL) ?? []).filter((m) => !ASSET.test(m));
+      expect(hits, `route URL literal(s) — add a paths.ts builder: ${hits.join(', ')}`).toEqual([]);
     });
   }
 
-  for (const { file, prefixes } of PARTIAL) {
-    it(`${file} uses paths.ts for its migrated families`, () => {
-      const code = readFileSync(join(SRC, file), 'utf8');
-      const offenders = prefixes.filter((p) => new RegExp(`["'\`]${p.replace(/\//g, '\\/')}`).test(code));
-      expect(offenders, `use paths.ts for: ${offenders.join(', ')}`).toEqual([]);
-    });
-  }
+  it('covers every src/lib/*View.ts (sanity: the glob found files)', () => {
+    expect(VIEW_FILES.length).toBeGreaterThan(20);
+  });
 });

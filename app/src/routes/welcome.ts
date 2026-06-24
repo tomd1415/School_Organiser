@@ -100,7 +100,7 @@ export function registerWelcomeRoutes(app: FastifyInstance): void {
               </form>`
         }
       </section>`;
-    return reply.type('text/html').send(layout({ title: 'Welcome', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Welcome', body, authed: true, csrfToken: csrf, width: 'reading' }));
   });
 
   app.post('/welcome/identity', { preHandler: app.csrfProtection }, async (req, reply) => {

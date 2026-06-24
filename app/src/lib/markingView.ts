@@ -1,5 +1,6 @@
 import { esc } from './html';
 import { markOpenAttrs } from '../routes/markModal';
+import { paths } from './paths';
 
 export interface MarkingRow {
   oc: number;
@@ -30,8 +31,8 @@ function rowHtml(r: MarkingRow): string {
     <td class="mk-num">${r.pupilsWithWork}</td>
     <td class="mk-status">${status}</td>
     <td>
-      <button type="button" class="btn-secondary mk-mark" ${markOpenAttrs(`/lesson/oc/${r.oc}/mark`)}>✎ Mark</button>
-      <a class="link mk-atl" href="/lesson/oc/${r.oc}/atl" title="whole-class attitude-to-learning grid">ATL</a>
+      <button type="button" class="btn-secondary mk-mark" ${markOpenAttrs(paths.occMark(r.oc))}>✎ Mark</button>
+      <a class="link mk-atl" href="${paths.occAtl(r.oc)}" title="whole-class attitude-to-learning grid">ATL</a>
     </td>
   </tr>`;
 }

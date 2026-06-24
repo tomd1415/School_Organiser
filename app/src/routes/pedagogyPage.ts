@@ -20,6 +20,6 @@ export function registerPedagogyRoutes(app: FastifyInstance): void {
         and age group. Source: <a href="${esc(PEDAGOGY_SOURCE_URL)}" target="_blank" rel="noopener">teachcomputing.org/pedagogy</a>.</p>
       <ol class="ped-list">${cards}</ol>
     </section>`;
-    return reply.type('text/html').send(layout({ title: 'Computing pedagogy', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Computing pedagogy', body, authed: true, csrfToken: csrf, width: 'reading' }));
   });
 }

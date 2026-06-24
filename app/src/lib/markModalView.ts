@@ -5,6 +5,7 @@ import { type Level } from './worksheetForm';
 import { type PupilMarkRow } from '../repos/marking';
 import { type PupilWorkRow } from '../repos/pupilWork';
 import { type OccurrenceHeader } from '../services/occurrence';
+import { paths } from './paths';
 
 export interface MarkModalViewOptions {
   oc: number;
@@ -27,7 +28,7 @@ const firstNameOf = (full: string): string => full.split(/\s+/)[0] ?? full;
 function markControl(oc: number, pid: number, answerId: number, mk: PupilMarkRow | undefined, maxMarks: number, wi: number): string {
   const awarded = mk?.marksAwarded;
   const set = (m: number | string) =>
-    `hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/save" hx-target="#mark-modal-body" hx-swap="innerHTML"`
+    `hx-post="${paths.occPupilMarkSave(oc, pid)}" hx-target="#mark-modal-body" hx-swap="innerHTML"`
     + ` hx-vals='{"answerId":"${answerId}","marks":"${m}","total":"${maxMarks}","ws":"${wi}"}'`;
   if (maxMarks <= 1) {
     return `<div class="mm-tick">
@@ -37,7 +38,7 @@ function markControl(oc: number, pid: number, answerId: number, mk: PupilMarkRow
   return `<div class="mm-num">
     <button type="button" class="mm-t mm-t-yes" ${set(maxMarks)} title="full marks">✓</button>
     <input class="mm-score" type="number" min="0" max="${maxMarks}" value="${awarded ?? ''}" inputmode="numeric"
-      hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/save" hx-trigger="change" hx-target="#mark-modal-body" hx-swap="innerHTML"
+      hx-post="${paths.occPupilMarkSave(oc, pid)}" hx-trigger="change" hx-target="#mark-modal-body" hx-swap="innerHTML"
       hx-vals='js:{"answerId":"${answerId}","marks":event.target.value,"total":"${maxMarks}","ws":"${wi}"}'>
     <span class="mm-of">/ ${maxMarks}</span>
     <button type="button" class="mm-t mm-t-no" ${set(0)} title="zero">✗</button></div>`;
@@ -89,7 +90,7 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
 
   const wsTabs = worksheets.length > 1
     ? `<div class="mm-wstabs" role="tablist" aria-label="Worksheets">${worksheets
-        .map((w, i) => `<button type="button" class="ws-tab${i === wi ? ' is-on' : ''}" role="tab" aria-selected="${i === wi}" hx-get="/lesson/oc/${oc}/pupil/${pid}/mark?ws=${i}" hx-target="#mark-modal-body" hx-swap="innerHTML">${esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`)}</button>`)
+        .map((w, i) => `<button type="button" class="ws-tab${i === wi ? ' is-on' : ''}" role="tab" aria-selected="${i === wi}" hx-get="${paths.occPupilMarkWs(oc, pid, i)}" hx-target="#mark-modal-body" hx-swap="innerHTML">${esc(w.title.replace(/\s*[—-]\s*worksheet\.md$/i, '').trim() || `Worksheet ${i + 1}`)}</button>`)
         .join('')}</div>`
     : '';
 
@@ -145,24 +146,24 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
 
   const navBtn = (p: typeof prev, label: string, dir: 'prev' | 'next') =>
     p
-      ? `<button type="button" class="mm-navbtn" data-mark-nav="${dir}" hx-get="/lesson/oc/${oc}/pupil/${p.pupilId}/mark" hx-target="#mark-modal-body" hx-swap="innerHTML">${label}</button>`
+      ? `<button type="button" class="mm-navbtn" data-mark-nav="${dir}" hx-get="${paths.occPupilMark(oc, p.pupilId)}" hx-target="#mark-modal-body" hx-swap="innerHTML">${label}</button>`
       : `<button type="button" class="mm-navbtn" disabled>${label}</button>`;
 
   const footer = marking
     ? `<footer class="mm-foot">
         <label class="mm-comment">💬 Comment back to ${esc(first)}
           <textarea rows="2" placeholder="a kind line they'll see with their marks"
-            hx-post="/lesson/oc/${oc}/pupil/${pid}/comment" hx-trigger="change" hx-swap="none">${esc(comment)}</textarea></label>
+            hx-post="${paths.occPupilComment(oc, pid)}" hx-trigger="change" hx-swap="none">${esc(comment)}</textarea></label>
         <div class="mm-actions">
           ${navBtn(prev, `← ${prev ? esc(firstNameOf(prev.displayName)) : 'Prev'}`, 'prev')}
-          <button type="button" class="mm-confirm" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-vals='{"ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML"
+          <button type="button" class="mm-confirm" hx-post="${paths.occPupilMarkConfirm(oc, pid)}" hx-vals='{"ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML"
             title="accept every AI mark for this pupil as checked">✓ Confirm all</button>
           ${next
-            ? `<button type="button" class="mm-next" hx-post="/lesson/oc/${oc}/pupil/${pid}/mark/confirm" hx-vals='{"next":"${next.pupilId}","ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML">Confirm &amp; next → ${esc(firstNameOf(next.displayName))}</button>`
+            ? `<button type="button" class="mm-next" hx-post="${paths.occPupilMarkConfirm(oc, pid)}" hx-vals='{"next":"${next.pupilId}","ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML">Confirm &amp; next → ${esc(firstNameOf(next.displayName))}</button>`
             : `<span class="mm-last">last pupil</span>`}
           ${navBtn(next, `skip →`, 'next')}
         </div></footer>`
-    : `<footer class="mm-foot"><p class="muted">Auto-marking is off — turn it on in <a href="/settings">Settings → Auto-marking</a> to record marks here. (Model answers and pupil answers are shown above.)</p>
+    : `<footer class="mm-foot"><p class="muted">Auto-marking is off — turn it on in <a href="${paths.settings()}">Settings → Auto-marking</a> to record marks here. (Model answers and pupil answers are shown above.)</p>
         <div class="mm-actions">${navBtn(prev, '← Prev', 'prev')}${navBtn(next, 'Next →', 'next')}</div></footer>`;
 
   return `<div class="mm">
@@ -176,7 +177,7 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
         <span class="mm-pos">Pupil ${idx + 1} of ${roster.length}</span>
         ${marking ? `<span class="mm-score-tot ${scoreState}">${awarded}/${total}</span> <span class="mm-checked">${checked}/${markable} checked</span>` : ''}
         ${roster.length > 1 ? '<span class="mm-kbd" title="use the arrow keys to move through the class">← →</span>' : ''}
-        <a class="mm-atl-link" href="/lesson/oc/${oc}/atl" title="open the whole-class ATL grid (for live use during the lesson)">ATL grid →</a>
+        <a class="mm-atl-link" href="${paths.occAtl(oc)}" title="open the whole-class ATL grid (for live use during the lesson)">ATL grid →</a>
       </div>
       ${wsTabs}
     </header>

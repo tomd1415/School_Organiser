@@ -569,7 +569,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       pupilWorkByOc: new Map(),
       preview: { backHref },
     });
-    return reply.type('text/html').send(layout({ title: `${plan.title} · preview`, body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: `${plan.title} · preview`, body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 
   app.get('/lesson', { preHandler: requireAuth }, async (req, reply) => {
@@ -698,7 +698,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
           selectedOc: parsed.data.oc, // BUG-052: render the section the tab bar selected (default first)
           lab: isLab, // Test Lab: show the sandbox banner + the "Test as pupil" launch, confirm-gate AI writes
         });
-        return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf }));
+        return reply.type('text/html').send(layout({ title, body, authed: true, csrfToken: csrf, width: 'wide' }));
       }
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');

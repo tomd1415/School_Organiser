@@ -3,6 +3,7 @@
 import { esc } from './html';
 import { LOAD_LABELS, LOADS, URGENCIES, URGENCY_LABELS } from '../services/task';
 import type { GroupOpt, TaskRow } from '../repos/tasks';
+import { paths } from './paths';
 
 function enumOptions(values: readonly string[], labels: Record<string, string>, current: string | null, none?: string): string {
   const head = none ? `<option value=""${current ? '' : ' selected'}>${esc(none)}</option>` : '';
@@ -48,10 +49,10 @@ export function renderEmailDetail(detail: string): string {
 }
 
 export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
-  const save = (trigger: string) => `hx-post="/tasks/${t.id}" hx-swap="none" hx-trigger="${trigger}"`;
+  const save = (trigger: string) => `hx-post="${paths.task(t.id)}" hx-swap="none" hx-trigger="${trigger}"`;
   const triage =
     t.status === 'inbox'
-      ? `<button type="button" class="link" hx-post="/tasks/${t.id}/triage" hx-target="#task-${t.id}" hx-swap="outerHTML">▶ open</button>`
+      ? `<button type="button" class="link" hx-post="${paths.taskTriage(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">▶ open</button>`
       : '';
   const detail = (t.detail ?? '').trim();
   return `<li class="task" id="task-${t.id}">
@@ -67,10 +68,10 @@ export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
     </div>
     <div class="task-actions">
       ${triage}
-      <button type="button" class="link${t.interest ? ' on' : ''}" title="Current interest" hx-post="/tasks/${t.id}/interest" hx-target="#task-${t.id}" hx-swap="outerHTML">${t.interest ? '⭐' : '☆'}</button>
-      ${t.status === 'done' || t.status === 'dropped' ? '' : `<button type="button" class="link" hx-post="/timer/start" hx-vals='{"task":${t.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ time</button>`}
-      <button type="button" class="link" hx-post="/tasks/${t.id}/done" hx-target="#task-${t.id}" hx-swap="outerHTML">✓ done</button>
-      <button type="button" class="link danger" hx-post="/tasks/${t.id}/drop" hx-target="#task-${t.id}" hx-swap="outerHTML">drop</button>
+      <button type="button" class="link${t.interest ? ' on' : ''}" title="Current interest" hx-post="${paths.taskInterest(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">${t.interest ? '⭐' : '☆'}</button>
+      ${t.status === 'done' || t.status === 'dropped' ? '' : `<button type="button" class="link" hx-post="${paths.timerStart()}" hx-vals='{"task":${t.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ time</button>`}
+      <button type="button" class="link" hx-post="${paths.taskDone(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">✓ done</button>
+      <button type="button" class="link danger" hx-post="${paths.taskDrop(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">drop</button>
     </div>
   </li>`;
 }
@@ -80,5 +81,5 @@ export function renderTaskList(listId: string, tasks: TaskRow[], groups: GroupOp
 }
 
 export function renderNewTaskButton(listId: string): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="/tasks" hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New task</button>`;
+  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.tasks()}" hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New task</button>`;
 }

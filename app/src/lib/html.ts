@@ -4,14 +4,21 @@ import { esc } from './esc';
 // Re-exported so the many `import { esc } from '../lib/html'` call sites keep working.
 export { esc };
 
+// `width` is the page's WIDTH INTENT — the single, explicit way to set the content column width, applied
+// by the shell to <main> (see the width-intent block in styles.css). It beats the legacy per-component
+// width rules, so a redesigned view never has to be added to a class list to get the right width. Omit it
+// to fall through to the legacy component-class width rules (the default for ordinary card pages).
+type WidthIntent = 'reading' | 'working' | 'wide' | 'full';
+
 interface LayoutOptions {
   title: string;
   body: string;
   authed?: boolean;
   csrfToken?: string;
+  width?: WidthIntent;
 }
 
-export function nextShell({ title, body, authed = false, csrfToken }: LayoutOptions): string {
+export function nextShell({ title, body, authed = false, csrfToken, width }: LayoutOptions): string {
   const exp = getExperienceMode();
   const csrfHdr = authed && csrfToken ? ` hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'` : '';
   
@@ -85,7 +92,7 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
     ${authed ? renderRail(exp, undefined, railFootNext) : ''}
     <div class="console-main-container">
       ${headerBlock}
-      <main id="main-content" class="cockpit-workspace">${body}</main>
+      <main id="main-content" class="cockpit-workspace${width ? ` cockpit-w-${width}` : ''}">${body}</main>
     </div>
   </div>
   ${
@@ -116,6 +123,6 @@ export function nextShell({ title, body, authed = false, csrfToken }: LayoutOpti
 }
 
 /** The single page chrome (Rail & Stage): a persistent left nav rail + a main "stage" pane. */
-export function layout({ title, body, authed = false, csrfToken }: LayoutOptions): string {
-  return nextShell({ title, body, authed, csrfToken });
+export function layout({ title, body, authed = false, csrfToken, width }: LayoutOptions): string {
+  return nextShell({ title, body, authed, csrfToken, width });
 }

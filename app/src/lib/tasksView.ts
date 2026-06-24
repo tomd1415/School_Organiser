@@ -1,6 +1,7 @@
 import { esc } from './html';
 import { renderNewTaskButton, renderTaskList } from './taskView';
 import type { GroupOpt, TaskRow } from '../repos/tasks';
+import { paths } from './paths';
 
 export interface TasksPageOptions {
   view: 'inbox' | 'open' | 'done' | 'interest';
@@ -15,7 +16,7 @@ export function renderTasksPage(options: TasksPageOptions): string {
   const listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
 
   const chip = (v: string, label: string) =>
-    `<a href="/tasks?view=${v}" class="chip${v === view ? ' active' : ''}">${label}</a>`;
+    `<a href="${paths.tasksFiltered(v)}" class="chip${v === view ? ' active' : ''}">${label}</a>`;
 
   const chips = [
     chip('inbox', 'Inbox'),
@@ -27,7 +28,7 @@ export function renderTasksPage(options: TasksPageOptions): string {
   const pasteBox = view === 'inbox'
     ? `<details class="paste-box">
         <summary>✉ Paste an email</summary>
-        <form hx-post="/tasks/paste" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+        <form hx-post="${paths.tasksPaste()}" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea>
           <div style="margin-top: 10px;">
             <button type="submit" class="btn-secondary">Make task</button>
@@ -47,7 +48,7 @@ export function renderTasksPage(options: TasksPageOptions): string {
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
           ${view === 'inbox' ? renderNewTaskButton('tasks-list-inbox') : ''}
-          <a class="chip" href="/recurring">Recurring tasks →</a>
+          <a class="chip" href="${paths.recurring()}">Recurring tasks →</a>
         </div>
       </div>
 
@@ -57,7 +58,7 @@ export function renderTasksPage(options: TasksPageOptions): string {
 
       <details class="task-calibrate card" id="task-calibrate" style="margin-bottom: 20px; padding: 12px;">
         <summary style="cursor: pointer; font-weight: 500;">📊 Calibrate my time estimates</summary>
-        <div style="margin-top: 12px;" hx-get="/tasks/calibrate" hx-trigger="toggle from:#task-calibrate once" hx-target="this" hx-swap="innerHTML">
+        <div style="margin-top: 12px;" hx-get="${paths.tasksCalibrate()}" hx-trigger="toggle from:#task-calibrate once" hx-target="this" hx-swap="innerHTML">
           <span class="muted">analysing your timed tasks…</span>
         </div>
       </details>

@@ -2,6 +2,7 @@
 // general-notes screens. CSRF is supplied once by an `hx-headers` ancestor, so
 // these fragments carry none. Returned by the /notes endpoints for HTMX swaps.
 import { esc } from './html';
+import { paths } from './paths';
 
 export interface FollowupItem {
   id: number;
@@ -20,7 +21,7 @@ export interface NoteItem {
 }
 
 export function renderFollowup(f: FollowupItem): string {
-  return `<li id="fu-${f.id}" class="fu${f.done ? ' done' : ''}"><label><input type="checkbox" ${f.done ? 'checked' : ''} hx-post="/followups/${f.id}/toggle" hx-target="#fu-${f.id}" hx-swap="outerHTML"> ${esc(f.text)}</label></li>`;
+  return `<li id="fu-${f.id}" class="fu${f.done ? ' done' : ''}"><label><input type="checkbox" ${f.done ? 'checked' : ''} hx-post="${paths.followupToggle(f.id)}" hx-target="#fu-${f.id}" hx-swap="outerHTML"> ${esc(f.text)}</label></li>`;
 }
 
 export function renderNoteItem(n: NoteItem): string {
@@ -30,14 +31,14 @@ export function renderNoteItem(n: NoteItem): string {
   const revField = n.rev != null ? `<input type="hidden" name="rev" id="note-${n.id}-rev" value="${esc(n.rev)}">` : '';
   const include = n.rev != null ? ` hx-include="#note-${n.id}-rev"` : '';
   return `<li class="note" id="note-${n.id}">
-    ${revField}<textarea name="body" rows="2" placeholder="Type a note…" hx-post="/notes/${n.id}" hx-trigger="input changed delay:800ms, blur" hx-swap="none"${include}>${esc(n.body)}</textarea>
+    ${revField}<textarea name="body" rows="2" placeholder="Type a note…" hx-post="${paths.note(n.id)}" hx-trigger="input changed delay:800ms, blur" hx-swap="none"${include}>${esc(n.body)}</textarea>
     <div class="note-meta">
       <span class="note-status" id="note-${n.id}-status"></span>
       <span class="muted note-time">${esc(n.time)}</span>
-      <button type="button" class="link danger" hx-post="/notes/${n.id}/delete" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">delete</button>
+      <button type="button" class="link danger" hx-post="${paths.noteDelete(n.id)}" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">delete</button>
     </div>
     <ul class="followups" id="note-${n.id}-fu">${fus}</ul>
-    <form class="fu-form" hx-post="/notes/${n.id}/followups" hx-target="#note-${n.id}-fu" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+    <form class="fu-form" hx-post="${paths.noteFollowups(n.id)}" hx-target="#note-${n.id}-fu" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
       <input type="text" name="text" data-followup placeholder="+ follow-up" autocomplete="off">
     </form>
   </li>`;
@@ -48,7 +49,7 @@ export function renderNotesList(listId: string, notes: NoteItem[]): string {
 }
 
 export function renderNewNoteButton(listId: string, vals: Record<string, string | number>): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="/notes" hx-vals='${JSON.stringify(vals)}' hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New note</button>`;
+  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.notes()}" hx-vals='${JSON.stringify(vals)}' hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New note</button>`;
 }
 
 /** A small "saved" flash, swapped in by an out-of-band update after autosave. */

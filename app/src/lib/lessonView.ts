@@ -311,8 +311,8 @@ export function renderLessonCockpit(options: {
     ? ''
     : `<section class="prep-card card" aria-labelledby="prep-title">
         <div class="card-head"><div><p class="eyebrow">Before the bell</p><h2 id="prep-title">Prep checklist</h2></div></div>
-        ${renderPrepList(prep, '/prep', 'prep', `prep-${h.occurrenceId}`)}
-        ${renderPrepAdd('/prep/add', { occurrence: h.occurrenceId }, `prep-${h.occurrenceId}`)}
+        ${renderPrepList(prep, paths.prep(), 'prep', `prep-${h.occurrenceId}`)}
+        ${renderPrepAdd(paths.prepAdd(), { occurrence: h.occurrenceId }, `prep-${h.occurrenceId}`)}
       </section>`;
 
   // TA feedback the room logged for this class — the cockpit is passed `taFbByOc` but never rendered it.

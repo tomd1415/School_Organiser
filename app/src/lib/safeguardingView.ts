@@ -1,5 +1,6 @@
 import { esc } from './html';
 import type { SafeguardingItem, SgSource } from '../repos/safeguarding';
+import { paths } from './paths';
 
 const SOURCE_LABEL: Record<SgSource, string> = { answer: 'pupil answer', captured: 'captured note', ta_feedback: 'TA feedback' };
 export const STATUSES = ['recorded', 'actioned', 'referred'] as const;
@@ -19,7 +20,7 @@ export function renderItem(i: SafeguardingItem): string {
       <span class="muted">${esc(i.at)}</span>
     </div>
     <div class="sg-text">${esc(i.text)}</div>
-    <form class="sg-action" hx-post="/safeguarding/${i.sourceType}/${i.sourceId}" hx-target="#${rowId(i)}" hx-swap="outerHTML">
+    <form class="sg-action" hx-post="${paths.safeguardingSource(i.sourceType, i.sourceId)}" hx-target="#${rowId(i)}" hx-swap="outerHTML">
       <select name="status">${sel(i.status === 'new' ? 'recorded' : i.status)}</select>
       <input type="text" name="note" maxlength="500" placeholder="what was done (e.g. spoke to DSL, logged on CPOMS)" value="${esc(i.actionNote)}">
       <button type="submit" class="btn-secondary">Record</button>

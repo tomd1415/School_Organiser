@@ -31,6 +31,7 @@ export const paths = {
 
   // ── Plan / group-course (cockpit lazy panels + tools) ───────────────────────────────────────────
   planReviewFlag: (lp: number): string => `/lesson/plan/${lp}/review-flag`,
+  planApplyImprovement: (lp: number): string => `/lesson/plan/${lp}/apply-improvement`,
   groupContext: (gc: number): string => `/lesson/group-context/${gc}`,
   adaptControls: (gc: number, lp: number): string => `/lesson/adapt/${gc}/${lp}`,
 
@@ -38,7 +39,10 @@ export const paths = {
   freeMark: (): string => '/free/mark',
   mapShift: (): string => '/map/shift',
   testLab: (): string => '/test-lab',
+  testLabPlan: (lp: number): string => `/test-lab/plan/${lp}`,
   testPupilOpen: (): string => '/test-pupil/open',
+  pedagogy: (): string => '/pedagogy',
+  kitPanel: (): string => '/kit/panel',
 
   // ── Query-string routes (HTML-attribute form; see header) ───────────────────────────────────────
   lessonOpen: (lesson: number, date: string, opts: { oc?: number; lab?: boolean } = {}): string =>
@@ -53,4 +57,223 @@ export const paths = {
     `/lesson/pupil-view?${scopeQ(gc)}&amp;lp=${lp}&amp;level=${level}` + (oc ? `&amp;oc=${oc}` : ''),
   worksheetPreview: (gc: number, lp: number, level: string): string => `/lesson/worksheet-preview?gc=${gc}&amp;lp=${lp}&amp;level=${level}`,
   imageTodo: (oc: number, gc: number, lp: number): string => `/lesson/oc/${oc}/image-todo?gc=${gc}&amp;lp=${lp}`,
+  lessonPreview: (plan: number): string => `/lesson/preview?plan=${plan}`,
+
+  // ── Settings ────────────────────────────────────────────────────────────────────────────────────
+  settingsSchool: (): string => '/settings/school',
+  settingsNav: (): string => '/settings/nav',
+  settingsPassword: (): string => '/settings/password',
+  settingsTeacherIdle: (): string => '/settings/teacher-idle',
+  settingsAiKey: (): string => '/settings/ai-key',
+  settingsAi: (): string => '/settings/ai',
+  settingsPupilAccess: (): string => '/settings/pupil-access',
+  settingsPupilIdle: (): string => '/settings/pupil-idle',
+  settingsMarksAccess: (): string => '/settings/marks-access',
+  settingsEmail: (key: string): string => `/settings/email?key=${key}`, // single fixed param → no &amp; joiner
+  settingsEmailTest: (): string => '/settings/email/test',
+  settingsTaAccount: (): string => '/settings/ta-account',
+  settingsTaAccountAction: (id: number, action: 'active' | 'password' | 'delete'): string => `/settings/ta-account/${id}/${action}`,
+  settingsTaPassword: (): string => '/settings/ta-password',
+
+  // ── Schemes of work (the /schemes×44 family — largest) ──────────────────────────────────────────
+  schemesCreate: (course: number): string => `/schemes/create?course=${course}`,
+  schemesAuthor: (course: number): string => `/schemes/author?course=${course}`,
+  schemesImport: (): string => '/schemes/import',
+  schemesSpotCheck: (): string => '/schemes/spot-check',
+  // …course-scoped
+  schemesCourseScheme: (course: number, scheme: number): string => `/schemes?course=${course}&amp;scheme=${scheme}`,
+  schemesCourseConvert: (course: number): string => `/schemes/course/${course}/convert`,
+  schemesCourseConvertPanel: (course: number): string => `/schemes/course/${course}/convert-panel`,
+  schemesCourseConvertSearch: (course: number): string => `/schemes/course/${course}/convert-search`,
+  schemesCourseSummary: (course: number): string => `/schemes/course/${course}/summary`,
+  schemesCourseContext: (course: number): string => `/schemes/course/${course}/context`,
+  // …scheme-scoped (the header row; `addUnit` POSTs a new unit, distinct from `unit/:id` which edits one)
+  schemesAddUnit: (scheme: number): string => `/schemes/${scheme}/unit`,
+  schemesLabels: (scheme: number): string => `/schemes/${scheme}/labels`,
+  schemesMoveCourse: (scheme: number): string => `/schemes/${scheme}/move-course`,
+  schemesDelete: (scheme: number): string => `/schemes/${scheme}/delete`,
+  schemesActivate: (scheme: number): string => `/schemes/${scheme}/activate`,
+  schemesVersion: (scheme: number): string => `/schemes/${scheme}/version`,
+  schemesExport: (scheme: number): string => `/schemes/${scheme}/export`,
+  // …unit-scoped
+  schemesUnit: (unit: number): string => `/schemes/unit/${unit}`,
+  schemesUnitPlan: (unit: number): string => `/schemes/unit/${unit}/plan`,
+  schemesUnitResourcesAi: (unit: number): string => `/schemes/unit/${unit}/resources-ai`,
+  schemesUnitReviewAi: (unit: number): string => `/schemes/unit/${unit}/review-ai`,
+  schemesUnitReviewSequence: (unit: number): string => `/schemes/unit/${unit}/review-sequence`,
+  schemesUnitLayForm: (unit: number): string => `/schemes/unit/${unit}/lay-form`,
+  schemesUnitLayDown: (unit: number): string => `/schemes/unit/${unit}/lay-down`,
+  // …plan-scoped
+  schemesPlan: (plan: number): string => `/schemes/plan/${plan}`,
+  schemesPlanDraft: (plan: number): string => `/schemes/plan/${plan}/draft`,
+  schemesPlanResources: (plan: number): string => `/schemes/plan/${plan}/resources`,
+  schemesPlanResourcesAi: (plan: number): string => `/schemes/plan/${plan}/resources-ai`,
+  schemesPlanReview: (plan: number): string => `/schemes/plan/${plan}/review`,
+  schemesPlanReviewAi: (plan: number): string => `/schemes/plan/${plan}/review-ai`,
+  schemesPlanCompare: (plan: number): string => `/schemes/plan/${plan}/compare`,
+  // …advisory-review cards
+  schemesReviewApply: (review: number): string => `/schemes/review/${review}/apply`,
+  schemesReviewDismiss: (review: number): string => `/schemes/review/${review}/dismiss`,
+  // …generic tree-row controls (kind narrows to the two reorderable row types)
+  schemesRowMove: (kind: 'unit' | 'plan', id: number, dir: 'up' | 'down'): string => `/schemes/${kind}/${id}/move/${dir}`,
+  schemesRowDelete: (kind: 'unit' | 'plan', id: number): string => `/schemes/${kind}/${id}/delete`,
+
+  // ── Top-level nav / page roots ──────────────────────────────────────────────────────────────────
+  schemes: (): string => '/schemes',
+  settings: (): string => '/settings',
+  timetable: (): string => '/timetable',
+  tasks: (): string => '/tasks',
+  tasksFiltered: (view: string): string => `/tasks?view=${view}`,
+  captured: (): string => '/captured',
+  events: (): string => '/events',
+  marking: (): string => '/marking',
+  notes: (): string => '/notes',
+  recurring: (): string => '/recurring',
+  resources: (): string => '/resources',
+  kit: (): string => '/kit',
+  ta: (): string => '/ta',
+  workBlocks: (): string => '/work-blocks',
+  captureQuick: (): string => '/capture-quick',
+  dayChecklist: (): string => '/day-checklist',
+  dayChecklistAdd: (): string => '/day-checklist/add',
+  prep: (): string => '/prep',
+  prepAdd: (): string => '/prep/add',
+  timerStart: (): string => '/timer/start',
+  followupToggle: (id: number): string => `/followups/${id}/toggle`,
+
+  // ── Now screen ──────────────────────────────────────────────────────────────────────────────────
+  nowClock: (sig: string): string => `/now/clock?sig=${encodeURIComponent(sig)}`,
+  nowTimeline: (): string => '/now/timeline',
+  settingsExperience: (): string => '/settings/experience',
+  settingsExperienceNudgeDismiss: (): string => '/settings/experience-nudge/dismiss',
+
+  // ── Tasks ───────────────────────────────────────────────────────────────────────────────────────
+  task: (id: number): string => `/tasks/${id}`,
+  taskTriage: (id: number): string => `/tasks/${id}/triage`,
+  taskInterest: (id: number): string => `/tasks/${id}/interest`,
+  taskDone: (id: number): string => `/tasks/${id}/done`,
+  taskDrop: (id: number): string => `/tasks/${id}/drop`,
+  tasksPaste: (): string => '/tasks/paste',
+  tasksCalibrate: (): string => '/tasks/calibrate',
+
+  // ── Recurring task defs ─────────────────────────────────────────────────────────────────────────
+  recurringDef: (id: number): string => `/recurring/${id}`,
+  recurringDefToggle: (id: number, action: 'activate' | 'deactivate'): string => `/recurring/${id}/${action}`,
+  recurringDefDelete: (id: number): string => `/recurring/${id}/delete`,
+
+  // ── Captured intake ─────────────────────────────────────────────────────────────────────────────
+  capturedItem: (id: number): string => `/captured/${id}`,
+  capturedFlag: (id: number, flag: string): string => `/captured/${id}/flag/${flag}`,
+  capturedSuggest: (id: number): string => `/captured/${id}/suggest`,
+  capturedToTask: (id: number): string => `/captured/${id}/to-task`,
+
+  // ── Events ──────────────────────────────────────────────────────────────────────────────────────
+  event: (id: number): string => `/events/${id}`,
+  eventDone: (id: number): string => `/events/${id}/done`,
+  eventCancel: (id: number): string => `/events/${id}/cancel`,
+
+  // ── Notes ───────────────────────────────────────────────────────────────────────────────────────
+  note: (id: number): string => `/notes/${id}`,
+
+  // ── Kit register ────────────────────────────────────────────────────────────────────────────────
+  kitItem: (id: number): string => `/kit/${id}`,
+  kitChecked: (id: number): string => `/kit/${id}/checked`,
+  kitArchive: (id: number): string => `/kit/${id}/archive`,
+  kitRestore: (id: number): string => `/kit/${id}/restore`,
+  kitAdd: (): string => '/kit/add',
+  kitImport: (): string => '/kit/import',
+
+  // ── Concepts ────────────────────────────────────────────────────────────────────────────────────
+  concept: (id: number): string => `/concepts/${id}`,
+  conceptCourse: (id: number): string => `/concepts/${id}/course`,
+  conceptArchive: (id: number): string => `/concepts/${id}/archive`,
+  conceptRestore: (id: number): string => `/concepts/${id}/restore`,
+  conceptAdd: (): string => '/concepts/add',
+
+  // ── Work blocks (focus) ─────────────────────────────────────────────────────────────────────────
+  workBlock: (id: number): string => `/work-blocks/${id}`,
+  workBlockDone: (id: number): string => `/work-blocks/${id}/done`,
+  workBlockDiverted: (id: number): string => `/work-blocks/${id}/diverted`,
+  workBlockDelete: (id: number): string => `/work-blocks/${id}/delete`,
+
+  // ── Resources library ───────────────────────────────────────────────────────────────────────────
+  resourcesList: (): string => '/resources/list',
+  resourcesListQuery: (q: string, kind: string, page: number): string =>
+    `/resources/list?q=${encodeURIComponent(q)}&amp;kind=${encodeURIComponent(kind)}&amp;page=${page}`,
+  resourcesGenerate: (): string => '/resources/generate',
+  resourceViewUrl: (id: number): string => `/resources/${id}/view`,
+  resourceDownload: (id: number): string => `/resources/${id}/download`,
+  resourceUsage: (id: number): string => `/resources/${id}/usage`,
+  schemesPlanResourceDetach: (plan: number, res: number): string => `/schemes/plan/${plan}/resources/${res}/detach`,
+  schemesPlanResourcesSearch: (plan: number): string => `/schemes/plan/${plan}/resources/search`,
+
+  // ── Marking (occurrence-course / per-pupil mark modal) ──────────────────────────────────────────
+  occMark: (oc: number): string => `/lesson/oc/${oc}/mark`,
+  occAtl: (oc: number): string => `/lesson/oc/${oc}/atl`,
+  occPupilMark: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark`,
+  occPupilMarkWs: (oc: number, pid: number, ws: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark?ws=${ws}`,
+  occPupilMarkSave: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark/save`,
+  occPupilMarkConfirm: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark/confirm`,
+  occPupilComment: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/comment`,
+
+  // ── Timetable cells + week nav ──────────────────────────────────────────────────────────────────
+  // `yearQ` is a pre-built query fragment from the route (incl. its own joiner); passed through verbatim.
+  timetableDate: (date: string, yearQ: string): string => `/timetable?date=${esc(date)}${yearQ}`,
+  clubOpen: (lesson: number, date: string): string => `/club?lesson=${lesson}&amp;date=${esc(date)}`,
+  freeOpen: (lesson: number, date: string): string => `/free?lesson=${lesson}&amp;date=${esc(date)}`,
+
+  // ── TA (read-only assistant view) ───────────────────────────────────────────────────────────────
+  taWhich: (which: string): string => `/ta?which=${which}`,
+  taFeedback: (): string => '/ta/feedback',
+  taLesson: (lesson: number, iso: string): string => `/ta?lesson=${lesson}&amp;date=${iso}`,
+
+  // ── Pupil /me surface ───────────────────────────────────────────────────────────────────────────
+  meDone: (oc: number): string => `/me/done?oc=${oc}`,
+  meFeedback: (oc: number): string => `/me/feedback?oc=${oc}`,
+  meAnswer: (oc: number): string => `/me/answer?oc=${oc}`,
+
+  // ── Safeguarding ────────────────────────────────────────────────────────────────────────────────
+  safeguardingSource: (sourceType: string, sourceId: number): string => `/safeguarding/${sourceType}/${sourceId}`,
+
+  // ── Setup / admin (the /setup×31 family) ────────────────────────────────────────────────────────
+  setup: (): string => '/setup',
+  setupTab: (tab: string, year: number): string => `/setup?tab=${tab}&amp;year=${year}`,
+  setupYear: (id: number): string => `/setup/year/${id}`,
+  setupYearMakeCurrent: (id: number): string => `/setup/year/${id}/make-current`,
+  setupYearAdd: (): string => '/setup/year/add',
+  setupTerm: (id: number): string => `/setup/term/${id}`,
+  setupTermDelete: (id: number): string => `/setup/term/${id}/delete`,
+  setupTermAdd: (year: number): string => `/setup/term/add?year=${year}`,
+  setupPeriod: (id: number): string => `/setup/period/${id}`,
+  setupPeriodDelete: (id: number): string => `/setup/period/${id}/delete`,
+  setupPeriodAdd: (year: number, weekday: number): string => `/setup/period/add?year=${year}&amp;weekday=${weekday}`,
+  setupDayCopy: (year: number): string => `/setup/day/copy?year=${year}`,
+  setupDayApplyModel: (year: number): string => `/setup/day/apply-model?year=${year}`,
+  setupRoomToggle: (id: number, action: 'archive' | 'restore'): string => `/setup/room/${id}/${action}`,
+  setupRoomAdd: (): string => '/setup/room/add',
+  setupStaffToggle: (id: number, action: 'archive' | 'restore'): string => `/setup/staff/${id}/${action}`,
+  setupStaffAdd: (): string => '/setup/staff/add',
+  setupCourse: (id: number): string => `/setup/course/${id}`,
+  setupCourseToggle: (id: number, action: 'archive' | 'restore'): string => `/setup/course/${id}/${action}`,
+  setupCourseAdd: (): string => '/setup/course/add',
+  setupGroup: (id: number): string => `/setup/group/${id}`,
+  setupGroupCourse: (groupId: number, courseId: number): string => `/setup/group/${groupId}/course/${courseId}`,
+  setupGroupToggle: (id: number, action: 'archive' | 'restore'): string => `/setup/group/${id}/${action}`,
+  setupGroupEnrol: (id: number): string => `/setup/group/${id}/enrol`,
+  setupGroupAdd: (year: number): string => `/setup/group/add?year=${year}`,
+  setupEnrolmentMove: (enrolmentId: number, year: number): string => `/setup/enrolment/${enrolmentId}/move?year=${year}`,
+  setupEnrolmentRemove: (enrolmentId: number): string => `/setup/enrolment/${enrolmentId}/remove`,
+  setupLesson: (id: number): string => `/setup/lesson/${id}`,
+  setupLessonCourse: (lessonId: number, courseId: number): string => `/setup/lesson/${lessonId}/course/${courseId}`,
+  setupLessonDelete: (id: number): string => `/setup/lesson/${id}/delete`,
+  setupLessonAdd: (period: number, year: number): string => `/setup/lesson/add?period=${period}&amp;year=${year}`,
+  // `/setup/rollover?from=…&to=…` (the "from" param only appears when a previous year exists).
+  setupRolloverRoll: (from: number | null, to: number): string =>
+    from == null ? `/setup/rollover?to=${to}` : `/setup/rollover?from=${from}&amp;to=${to}`,
+  groupHistory: (id: number): string => `/group/${id}/history`,
+
+  // ── Cross-cutting page links ────────────────────────────────────────────────────────────────────
+  pupils: (): string => '/pupils',
+  setupRollover: (): string => '/setup/rollover',
+  welcome: (): string => '/welcome',
 } as const;

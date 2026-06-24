@@ -198,7 +198,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
           periods,
           captured,
         });
-        return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf }));
+        return reply.type('text/html').send(layout({ title: 'Now', body, authed: true, csrfToken: csrf, width: 'wide' }));
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       const body = `<section class="now"><p class="kicker">Now</p><h1>Now</h1><p class="muted">The database is not reachable — start the stack with <code>./start.sh</code>.</p></section>`;

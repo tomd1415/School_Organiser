@@ -1,4 +1,5 @@
 import { esc } from './html';
+import { paths } from './paths';
 import { renderMarkdown } from './markdown';
 import { sliceSlidesForLevel, splitTeacherNotes } from './slideDeck';
 import { renderWorksheet, savedTick, type Level } from './worksheetForm';
@@ -44,7 +45,7 @@ function chipRow(group: 'liked' | 'disliked', selected: Set<string>): string {
 function feedbackWidget(oc: number, fb: { rating: number | null; liked: string; disliked: string; comment: string } | null): string {
   const liked = new Set((fb?.liked ?? '').split(',').map((s) => s.trim()).filter(Boolean));
   const disliked = new Set((fb?.disliked ?? '').split(',').map((s) => s.trim()).filter(Boolean));
-  return `<form class="pupil-feedback" id="fb-${oc}" hx-post="/me/feedback?oc=${oc}" hx-trigger="change delay:400ms" hx-swap="none">
+  return `<form class="pupil-feedback" id="fb-${oc}" hx-post="${paths.meFeedback(oc)}" hx-trigger="change delay:400ms" hx-swap="none">
     <h3>How was this lesson?</h3>
     <div class="face-row">
       ${FACES.map((f) => `<label class="face" title="${f.l}"><input type="radio" name="rating" value="${f.v}"${fb?.rating === f.v ? ' checked' : ''}> <span>${f.e}</span></label>`).join('')}
@@ -121,8 +122,8 @@ function doneBlock(oc: number, done: boolean): string {
     ${
       done
         ? `<p class="done-yes">✓ You marked this done — well done!</p>
-           <button type="button" class="link" hx-post="/me/done?oc=${oc}" hx-vals='{"done":"false"}' hx-target="#done-${oc}" hx-swap="outerHTML">not finished yet</button>`
-        : `<button type="button" class="pupil-go done-btn" hx-post="/me/done?oc=${oc}" hx-vals='{"done":"true"}' hx-target="#done-${oc}" hx-swap="outerHTML">I'm done ✓</button>`
+           <button type="button" class="link" hx-post="${paths.meDone(oc)}" hx-vals='{"done":"false"}' hx-target="#done-${oc}" hx-swap="outerHTML">not finished yet</button>`
+        : `<button type="button" class="pupil-go done-btn" hx-post="${paths.meDone(oc)}" hx-vals='{"done":"true"}' hx-target="#done-${oc}" hx-swap="outerHTML">I'm done ✓</button>`
     }
   </div>`;
 }
@@ -177,7 +178,7 @@ export async function buildOccurrenceBlock(
         fetchFeedback(oc),
       ]);
       const renderOne = (w: (typeof worksheets)[number]): string =>
-        `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: `/me/answer?oc=${oc}`, autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
+        `<div class="ws-doc">${renderWorksheet(w.markdown, { mode: 'form', level, values, action: paths.meAnswer(oc), autofill: { name, date: todayLabel }, keyPrefix: w.keyPrefix }).html}</div>`;
       let wsHtml: string;
       if (worksheets.length === 1) {
         wsHtml = renderOne(worksheets[0]!);

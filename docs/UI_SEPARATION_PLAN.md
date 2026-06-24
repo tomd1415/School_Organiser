@@ -1,12 +1,18 @@
 # UI / back-end separation plan (→ ~95% isolation) + board slide-sync
 
 **Status:** Phase 0 (board slide-sync) + Phase 1 (component gallery) **BUILT & verified** (2026-06-24).
-Phase 4 *started*: the pupil-card width is now by **intent** (default reading width; full-width when a
-work card or — structurally — when it contains a two-pane) instead of an incidental `:not()` marker, and a
-regression where the unified deck's `.md-doc` silently shrank the whole pupil surface to 800px was caught
-+ fixed (with an E2E width guard). Phase 2 *started*: `paths.ts` exists and the cockpit's (`lessonView.ts`)
-path-only lesson-action URLs are migrated onto it, enforced by a grep guard (`tests/pathsGuard.test.ts`);
-query-string URLs + the other view files remain. Phase 3, the rest of 4, and 5 remain — see below.
+Phase 2 *view layer COMPLETE*: **every `src/lib/*View.ts` references route URLs through `paths.ts`** (~150
+builders) — zero raw route literals remain in any view, enforced by a guard (`tests/pathsGuard.test.ts`)
+that catches both attribute and *indirected* (const/arg/ternary) literals, plus a builder oracle
+(`tests/pathsBuilders.test.ts`). Only the **route files'** inline HTML still holds raw URLs.
+Phase 4 *well underway*: page **width is now an explicit INTENT** set once by the shell
+(`main.cockpit-workspace.cockpit-w-{reading|working|wide|full}` from `nextShell({width})`) rather than a
+per-component-class lottery — this fixed a latent bug where `.welcome`/`.pedagogy` rendered at the 1180px
+`.card` width because `.card` shadowed their reading intent (now 800px). The 3-sheet ownership model
+(base-structure → dark-theme) is documented as a class catalogue atop `styles.css`; the earlier pupil-card
+width-by-intent + `.md-doc` regression fix also landed. Guarded by `tests/shellWidth.test.ts`,
+`tests/cssOwnership.test.ts`, and an E2E (`e2e/widthIntent.spec.ts`). Phase 3, the rest of 4, and 5 remain
+— see below.
 Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
 routes/services/repos/DB, and finish the live **board slide-sync** feature along the way.
 Grounded in a coupling audit of the actual codebase (numbers below). Not a SPA/JSON-API rewrite — see
@@ -31,7 +37,7 @@ A redesign of layout/look already touches **only** these files — routes/servic
 | # | Coupling | Measured | Effect |
 |---|----------|----------|--------|
 | 1 | Views import **data-shape types** from `repos`/`services` | 20 / 22 view files (mostly `import type`; a few runtime-value imports e.g. `weekdayName`, `LOAD_LABELS`, `URGENCIES`) | A data-model rename can ripple into views. Low runtime risk (types compile away); the runtime-value imports are the real coupling. |
-| 2 | Views **hard-code route URLs** (`hx-post`/`hx-get`/`href`/`action`) | **~179 distinct URLs** across views (`/schemes`×44, `/settings`×37, `/lesson`×37, `/setup`×31, `/oc`×15…) | The biggest coupling. An endpoint rename means hunting strings across views; views and routes are string-coupled both ways. |
+| 2 | Views **hard-code route URLs** (`hx-post`/`hx-get`/`href`/`action`) | ~~**~179 distinct URLs** across views~~ → **0 (RESOLVED for the view layer)**; all go through `paths.ts` (~150 builders). Only route-file inline HTML still hard-codes URLs. | Was the biggest coupling. An endpoint rename is now one edit in `paths.ts`; the guard prevents regressions. |
 | 3 | **CSS keyed on marker classes** the markup must remember to include, spread across 3 sheets | 3 sheets, large shared-class surface; width depends on `.pupil-work-card`/`.kit`/etc. | Same logical view renders differently by which class is present (the pupil-preview width bug). Edits can hit a shadowed copy. |
 
 ## Target: the UI as an isolatable module (~95%)
@@ -102,14 +108,32 @@ Steps:
 
 Effort: **medium–large** (~179 call-sites, but mechanical + incremental). Highest decoupling payoff.
 
-**Progress (2026-06-24):** `src/lib/paths.ts` created. **`lessonView.ts` (the cockpit — highest churn) is
-now FULLY migrated** — every route URL (path-only **and** query-string) goes through `paths`. The
-query-string escaping convention is settled: builders emit the **HTML-attribute form** (`&amp;` joiners,
-`esc()`-ed values) so no rendered bytes change, and a `scopeQ(gc)` helper handles the `master=1` vs `gc=`
-preview/class split. Verified by the cockpit parity test (asserts exact URLs) + the slide/board/preview
-E2E; locked by `tests/pathsGuard.test.ts`, which now asserts lessonView has **no raw route-URL literal**.
-**Remaining:** the other view files (`schemeView`, `settingsView`, `setupView`, …) migrate family-by-family
-(move each `FULLY_MIGRATED`/`PARTIAL` in the guard as it lands), then the route files' inline-HTML URLs.
+**Progress (2026-06-24): coupling #2 is eliminated from the view layer — EVERY `src/lib/*View.ts` (all 22)
+now references route URLs through `paths.ts`; zero raw route literals remain in any view.** `paths.ts` holds
+~150 typed builders. The migration ran in three waves: (1) the three highest-churn files by hand
+(`lessonView`, `settingsView`, `schemeView`); (2) the remaining 18 files via a discovery→author→migrate
+agent workflow (one agent inventories each file's URLs, `paths.ts` is authored centrally to keep names
+consistent, then one agent per file rewrites its call-sites against an explicit map).
+
+Conventions settled along the way:
+- **Query strings emit the HTML-attribute form** (`&amp;` joiners, `esc()`/`encodeURIComponent` applied
+  *inside* the builder so call sites pass raw values and never double-encode); `scopeQ(gc)` handles the
+  `master=1` vs `gc=` split. Several views previously used a raw `&` joiner (a malformed entity in an
+  `href`); these are canonicalised to `&amp;` — **browser-identical** and correct HTML. The only rendered
+  tests pinning the old raw form (`tests/timetableDots.test.ts`) were updated to `&amp;`.
+- **The guard now catches *indirected* coupling, not just attributes.** `tests/pathsGuard.test.ts`
+  auto-covers every `*View.ts` with two checks: (1) no raw URL in an `hx-*`/`href`/`action` attribute, and
+  (2) **no route-URL string literal anywhere** — which catches URLs built into a `const`/ternary or passed
+  as an argument (e.g. `renderPrepList(prep, '/prep', …)`). Check (2) found two arg-passed literals
+  (`/prep`, `/prep/add`) the original attribute-only guard had missed in `lessonView`; both are now builders.
+
+Test coverage: `tests/pathsBuilders.test.ts` (127 assertions) pins every builder's exact output (the oracle
+for `paths.ts` itself); `tests/settingsViewUrls.test.ts` + `tests/schemeViewUrls.test.ts` assert literal
+URLs from those views; the guard proves the views *use* the builders. Verified green: typecheck · 886 unit ·
+376 integration · 17 E2E (boot tests render the migrated `/timetable`, `/tasks`, `/captured`, `/schemes`,
+`/settings` with no client errors).
+**Remaining for Phase 2:** the **route files'** inline-HTML URLs (the views are done). The shell/layout
+(`html.ts`) nav links are out of the `*View.ts` glob and tracked separately.
 
 ### Phase 3 — View-models — kills coupling #1
 
@@ -139,6 +163,25 @@ Steps:
 4. Lint/convention: a check for a class defined as a rule-start in >1 sheet.
 
 Effort: **medium–large** (careful, visual). Do after the gallery so every change is screenshot-verified.
+
+**Progress (2026-06-24):** Step 2 (the highest-value, user-visible part) is **done**: width is set by a
+shell-applied **intent** class (`main.cockpit-workspace.cockpit-w-{reading|working|wide|full}` from
+`nextShell({width})`), placed after — and beating — the legacy per-component width lists, so a redesigned
+view declares its width rather than being enrolled in a class list. This fixed a real bug (`.welcome` /
+`.pedagogy` rendered at 1180px because `.card` shadowed their reading intent; now 800px). Migrated so far:
+now / timetable / schemes / kit / cockpit / preview → `wide`; welcome / pedagogy → `reading`; ordinary card
+pages keep the legacy default. Step 3 (catalogue) is **done** — a class-ownership block atop `styles.css`.
+Guards: `tests/shellWidth.test.ts`, `tests/cssOwnership.test.ts` (width-intent single-source),
+`e2e/widthIntent.spec.ts` (reading < wide, measured).
+
+**Re-scoped from the audit:** Step 1 ("one class, one sheet") is **largely N/A** as written — `styles.css`
+scopes nearly all rules under `body[data-shell="next"]` to re-skin the structural `styles-base-widgets.css`,
+so a class in both sheets is an intentional *structure / theme* pair, not an accidental duplicate. Flattening
+that would erase a sound structure-vs-theme split. The catalogue documents this model instead; Step 4's
+blanket "class in >1 sheet" lint would be all false positives, so the guard is narrowed to the width-intent
+single-source. **Remaining for Phase 4:** migrate the rest of the routes to declare a width intent, then
+delete the legacy per-component width lists (currently kept as a no-risk fallback); fold the `max-width:none
+!important` deck/board overrides into `full` intent where they apply.
 
 ### Phase 5 — Conventions + guardrails (lock it in)
 

@@ -71,7 +71,7 @@ export function registerKitRoutes(app: FastifyInstance): void {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       body = '<section class="card"><h1>Kit</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
-    return reply.type('text/html').send(layout({ title: 'Kit', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Kit', body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 
   app.post('/kit/add', guard, async (req, reply) => {

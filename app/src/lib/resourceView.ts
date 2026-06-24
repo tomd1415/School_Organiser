@@ -1,4 +1,5 @@
 import { esc } from './html';
+import { paths } from './paths';
 import type { LinkedResource, ResourceRow } from '../repos/resources';
 
 const KIND_ICON: Record<string, string> = {
@@ -51,15 +52,15 @@ export function renderResourceItem(r: ResourceRow): string {
   const used =
     r.usedCount > 0
       ? `<button type="button" class="link res-used" title="where this resource is used"
-          hx-get="/resources/${r.id}/usage" hx-target="#res-${r.id}-usage" hx-swap="innerHTML">📋 ${r.usedCount}</button>`
+          hx-get="${paths.resourceUsage(r.id)}" hx-target="#res-${r.id}-usage" hx-swap="innerHTML">📋 ${r.usedCount}</button>`
       : '';
   return `<li class="res" id="res-${r.id}">
     <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
-    <a href="/resources/${r.id}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
+    <a href="${paths.resourceViewUrl(r.id)}" target="_blank" rel="noopener">${esc(r.title)}</a>
     ${used}
     ${r.unit || r.yearGroup ? `<span class="res-unit" title="year group · unit">${[r.yearGroup, r.unit].filter(Boolean).map((x) => esc(x as string)).join(' · ')}</span>` : ''}
     <span class="muted res-meta">${esc(r.source)}${r.versionNo ? ` · v${r.versionNo}` : ''}${r.byteSize ? ' · ' + fmtSize(r.byteSize) : ''}</span>
-    <a class="link" href="/resources/${r.id}/download">download</a>
+    <a class="link" href="${paths.resourceDownload(r.id)}">download</a>
     <span class="res-usage" id="res-${r.id}-usage"></span>
     ${r.sourceAttribution ? `<div class="res-attrib muted" title="attribution / licence">⚖ ${esc(r.sourceAttribution)}</div>` : ''}
   </li>`;
@@ -75,7 +76,7 @@ export function renderSearchBar(kinds: string[], q: string, kind: string): strin
       ),
     )
     .join('');
-  return `<form class="res-search" hx-get="/resources/list" hx-target="#res-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:300ms, change">
+  return `<form class="res-search" hx-get="${paths.resourcesList()}" hx-target="#res-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:300ms, change">
     <input type="search" name="q" value="${esc(q)}" placeholder="Search resources by name…" autocomplete="off">
     <select name="kind">${opts}</select>
   </form>`;
@@ -100,7 +101,7 @@ export function renderResourceListPaged(p: PagedResources): string {
     : '<li class="muted">No matching resources.</li>';
   const link = (pg: number, label: string, on: boolean): string =>
     on
-      ? `<a class="link" hx-get="/resources/list?q=${encodeURIComponent(p.q)}&kind=${encodeURIComponent(p.kind)}&page=${pg}" hx-target="#res-list" hx-swap="outerHTML">${label}</a>`
+      ? `<a class="link" hx-get="${paths.resourcesListQuery(p.q, p.kind, pg)}" hx-target="#res-list" hx-swap="outerHTML">${label}</a>`
       : `<span class="muted">${label}</span>`;
   const note = p.q || p.kind ? ` matching ${[p.q && `“${esc(p.q)}”`, p.kind && esc(p.kind)].filter(Boolean).join(' · ')}` : '';
   return `<div id="res-list">
@@ -111,7 +112,7 @@ export function renderResourceListPaged(p: PagedResources): string {
 }
 
 export function renderUploadForm(): string {
-  return `<form class="res-upload" hx-post="/resources" hx-encoding="multipart/form-data" hx-target="#resources-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+  return `<form class="res-upload" hx-post="${paths.resources()}" hx-encoding="multipart/form-data" hx-target="#resources-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
     <input type="file" name="file" required>
     <button type="submit" class="btn-secondary">Upload</button>
   </form>`;
@@ -121,7 +122,7 @@ export function renderUploadForm(): string {
 export function renderGenerateForm(): string {
   return `<details class="res-generate">
     <summary>✨ Generate a resource with AI</summary>
-    <form hx-post="/resources/generate" hx-target="#resources-list" hx-swap="afterbegin" hx-disabled-elt="find button" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+    <form hx-post="${paths.resourcesGenerate()}" hx-target="#resources-list" hx-swap="afterbegin" hx-disabled-elt="find button" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
       <textarea name="brief" rows="3" required placeholder="Describe it — e.g. 'A one-page Year 7 worksheet on binary addition: 6 questions building up, lots of answer space, minimal text, for autistic pupils.'"></textarea>
       <button type="submit" class="btn-secondary">Generate (Markdown)</button>
       <span class="muted res-generate-hint">saved as an editable .md resource</span>
@@ -137,16 +138,16 @@ export function renderPlanResourcesBlock(planId: number, linked: LinkedResource[
         linked,
         (r) =>
           `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
-              <a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a>
-              <a class="link" href="/resources/${r.resourceId}/download">↓</a>
-              <button type="button" class="link danger" title="unlink" hx-post="/schemes/plan/${planId}/resources/${r.resourceId}/detach" hx-target="#plan-${planId}-res" hx-swap="outerHTML">✕</button></li>`,
+              <a href="${paths.resourceViewUrl(r.resourceId)}" target="_blank" rel="noopener">${esc(r.title)}</a>
+              <a class="link" href="${paths.resourceDownload(r.resourceId)}">↓</a>
+              <button type="button" class="link danger" title="unlink" hx-post="${paths.schemesPlanResourceDetach(planId, r.resourceId)}" hx-target="#plan-${planId}-res" hx-swap="outerHTML">✕</button></li>`,
       )
     : '<span class="muted">no resources linked</span>';
   return `<div class="plan-res" id="plan-${planId}-res">
     ${items}
     <div class="res-attach">
       <input type="search" name="q" placeholder="attach a resource by name…" autocomplete="off"
-        hx-get="/schemes/plan/${planId}/resources/search" hx-trigger="keyup changed delay:300ms" hx-target="#plan-${planId}-attach">
+        hx-get="${paths.schemesPlanResourcesSearch(planId)}" hx-trigger="keyup changed delay:300ms" hx-target="#plan-${planId}-attach">
       <div class="res-attach-results" id="plan-${planId}-attach"></div>
     </div>
   </div>`;
@@ -158,7 +159,7 @@ export function renderAttachResults(planId: number, rows: ResourceRow[]): string
   return `<ul class="res-attach-list">${rows
     .map(
       (r) =>
-        `<li><button type="button" class="link" title="attach" hx-post="/schemes/plan/${planId}/resources" hx-vals='{"resource_id":${r.id}}' hx-target="#plan-${planId}-res" hx-swap="outerHTML">＋</button>
+        `<li><button type="button" class="link" title="attach" hx-post="${paths.schemesPlanResources(planId)}" hx-vals='{"resource_id":${r.id}}' hx-target="#plan-${planId}-res" hx-swap="outerHTML">＋</button>
           <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span> ${esc(r.title)}</li>`,
     )
     .join('')}</ul>`;
@@ -169,6 +170,6 @@ export function renderLinkedResources(rows: LinkedResource[]): string {
   return renderResourceGroups(
     rows,
     (r) =>
-      `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span> <a href="/resources/${r.resourceId}/view" target="_blank" rel="noopener">${esc(r.title)}</a> <a class="link" href="/resources/${r.resourceId}/download">↓</a></li>`,
+      `<li><span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span> <a href="${paths.resourceViewUrl(r.resourceId)}" target="_blank" rel="noopener">${esc(r.title)}</a> <a class="link" href="${paths.resourceDownload(r.resourceId)}">↓</a></li>`,
   );
 }
