@@ -250,6 +250,8 @@ export function registerNowRoutes(app: FastifyInstance): void {
     const title = typeof (req.query as { title?: unknown }).title === 'string' ? (req.query as { title: string }).title : 'School Organiser';
     const now = new Date();
     try {
+      const csrf = reply.generateCsrf();
+      const exp = getExperienceMode();
       const ctx = await getClockContext();
       const state = resolveNow(now, ctx);
 
@@ -307,6 +309,10 @@ export function registerNowRoutes(app: FastifyInstance): void {
           ${leftAnchorHtml}
         </div>
         <div class="header-middle">
+          <form class="header-exp" role="group" aria-label="Experience level" hx-post="/settings/experience" hx-swap="none" hx-headers='{"x-csrf-token":"${esc(csrf)}"}' hx-on::after-request="if(event.detail.successful)location.reload()">
+            <button type="submit" name="experience" value="everyday" class="seg${exp === 'everyday' ? ' is-on' : ''}"${exp === 'everyday' ? ' aria-current="true"' : ''} title="Everyday: the daily core">Everyday</button>
+            <button type="submit" name="experience" value="power" class="seg${exp === 'power' ? ' is-on' : ''}"${exp === 'power' ? ' aria-current="true"' : ''} title="Power: reveal planning, authoring & admin">Power</button>
+          </form>
           <div class="search-box">
             <input id="global-search" class="topbar-search" type="search" name="q" placeholder="Search or jump to a page…  press /" autocomplete="off" aria-label="Search or jump to a page"
               hx-get="/search" hx-trigger="input changed delay:250ms, focus" hx-target="#search-results" hx-swap="innerHTML">
