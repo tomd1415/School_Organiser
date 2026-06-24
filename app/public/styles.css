@@ -1980,6 +1980,16 @@ body[data-shell="next"] .mm-ans {
 }
 body[data-shell="next"] .mm-model .mm-lbl { color: var(--green) !important; }
 body[data-shell="next"] .mm-ans .mm-lbl { color: var(--blue) !important; }
+/* Pupil screenshot answer in the marking modal */
+body[data-shell="next"] .mm-shot {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+body[data-shell="next"] .mm-shot-link { display: inline-block; }
 body[data-shell="next"] .mm-code {
   background: var(--bg) !important;
   border: 1px solid var(--line) !important;
