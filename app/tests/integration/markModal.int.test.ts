@@ -119,6 +119,25 @@ describe('marking modal (integration)', () => {
     expect(r.body).toContain('What is a list?');
   });
 
+  it('the comment-back textarea is named so its value posts, and the comment persists + reloads', async () => {
+    // Regression (2026-06-24): the modal's comment textarea had no name= attribute, so HTMX never
+    // serialised the typed value → the POST body was empty → the handler 400'd silently → nothing saved.
+    const before = await app.inject({ method: 'GET', url: `/lesson/oc/${oc}/pupil/${pupil}/mark`, headers: { cookie: session } });
+    expect(before.body).toContain('<textarea name="comment"'); // without this the value is never sent
+
+    const note = 'Well done Ada, a clear definition.';
+    const save = await app.inject({
+      method: 'POST', url: `/lesson/oc/${oc}/pupil/${pupil}/comment`,
+      headers: { cookie: `${session}; ${csrfCookie}`, 'content-type': 'application/x-www-form-urlencoded', 'x-csrf-token': csrf },
+      payload: `comment=${encodeURIComponent(note)}`,
+    });
+    expect(save.statusCode).toBe(200);
+    expect(save.body).toContain('comment saved');
+
+    const after = await app.inject({ method: 'GET', url: `/lesson/oc/${oc}/pupil/${pupil}/mark`, headers: { cookie: session } });
+    expect(after.body).toContain(note); // the saved comment is reloaded into the textarea
+  });
+
   it('saving a mark records a teacher-confirmed mark (the "checked" state)', async () => {
     const aid = Number((await pool.query<{ id: number }>(`SELECT id FROM pupil_answers WHERE pupil_id=$1 AND occurrence_course_id=$2 AND field_key='t1.r1.c2'`, [pupil, oc])).rows[0]!.id);
     const r = await app.inject({

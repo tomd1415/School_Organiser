@@ -58,4 +58,9 @@ describe('marking modal — pupil screenshot answers', () => {
     expect(html).toContain('no screenshot yet');
     expect(html).not.toContain('class="mm-shot"');
   });
+
+  // Regression (2026-06-24): the comment-back textarea must be named or HTMX never submits its value.
+  it('the comment-back textarea carries name="comment"', () => {
+    expect(render(null)).toContain('<textarea name="comment"');
+  });
 });
