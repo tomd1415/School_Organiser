@@ -13,6 +13,7 @@ import { PupilWorkRow } from '../repos/pupilWork';
 import { renderMarkdown } from './markdown';
 import { sliceSlidesForLevel, splitTeacherNotes } from './slideDeck';
 import { renderPslide } from './meView'; // ONE per-slide renderer shared by cockpit, board + pupil decks
+import { paths } from './paths'; // route URLs (path-only family migrated; see docs/UI_SEPARATION_PLAN.md Phase 2)
 
 // Custom interface for notes in the cockpit
 export interface CockpitNote {
@@ -74,10 +75,10 @@ export function renderRecentNotesList(notes: CockpitNote[]): string {
           <span class="${badgeClass}">${esc(label)}</span>
           <span class="recent-note-body">${esc(n.body || '(empty note)')}</span>
           <time>${esc(n.time)}</time>
-          <button type="button" class="link danger recent-note-del" title="Delete this note" aria-label="Delete note" hx-post="/notes/${n.id}/delete" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">✕</button>
+          <button type="button" class="link danger recent-note-del" title="Delete this note" aria-label="Delete note" hx-post="${paths.noteDelete(n.id)}" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">✕</button>
         </div>
         <ul class="fu-list" id="note-${n.id}-fus">${fus}</ul>
-        <form class="fu-add" hx-post="/notes/${n.id}/followups" hx-target="#note-${n.id}-fus" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+        <form class="fu-add" hx-post="${paths.noteFollowups(n.id)}" hx-target="#note-${n.id}-fus" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <input type="text" name="text" placeholder="add a follow-up…" maxlength="2000" aria-label="Add a follow-up to this note">
         </form>
       </li>`;
@@ -280,7 +281,7 @@ export function renderLessonCockpit(options: {
         const markEl = isPreview
           ? `<span class="step">${marker}</span>`
           : `<button type="button" class="step seq-mark" data-step="${i}" aria-label="Mark step ${i + 1} as the one we're on"
-               hx-post="/occurrence-course/${oc}/progress" hx-vals='${esc(JSON.stringify({ step: i, label: stepLabel }))}' hx-swap="none"
+               hx-post="${paths.occProgress(oc)}" hx-vals='${esc(JSON.stringify({ step: i, label: stepLabel }))}' hx-swap="none"
                title="Tap to mark: we're up to here">${marker}</button>`;
 
         return `<li class="${state}" data-step="${i}">
@@ -357,7 +358,7 @@ export function renderLessonCockpit(options: {
 
   const groupEditDialog = isPreview ? '' : `
     <dialog id="groups-dialog" aria-labelledby="group-dialog-title">
-      <form hx-post="/lesson/oc/${oc}/save-groups" hx-target="#groups-card-content" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.closest('dialog').close()">
+      <form hx-post="${paths.occSaveGroups(oc)}" hx-target="#groups-card-content" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.closest('dialog').close()">
         <header class="dialog-head">
           <div>
             <p class="eyebrow">Before independent work</p>
@@ -391,8 +392,8 @@ export function renderLessonCockpit(options: {
   `;
 
   const boardHref = isPreview
-    ? `/lesson/pupil-view?master=1&amp;lp=${lp}&amp;level=${currentLevel}`
-    : `/lesson/pupil-view?gc=${groupCourseId}&amp;lp=${lp}&amp;level=${currentLevel}${oc ? `&amp;oc=${oc}` : ''}`;
+    ? paths.boardView(null, lp, currentLevel)
+    : paths.boardView(groupCourseId, lp, currentLevel, oc);
 
   // BUG-052: split-lesson course/class switcher (only when there's more than one section). Plain links
   // reload the cockpit scoped to the chosen occurrence-course; preview is single-section so shows none.
@@ -400,14 +401,14 @@ export function renderLessonCockpit(options: {
     ? `<nav class="cockpit-course-tabs" aria-label="Classes in this lesson">${detail.sections
         .map((s) => {
           const on = s.occurrenceCourseId === oc;
-          return `<a class="course-tab${on ? ' active' : ''}"${on ? ' aria-current="page"' : ''} href="/lesson?lesson=${h.lessonId}&amp;date=${esc(h.date)}&amp;oc=${s.occurrenceCourseId}"${s.colour ? ` style="--tab-colour:${esc(s.colour)}"` : ''}>${esc(s.courseName || 'Class')}</a>`;
+          return `<a class="course-tab${on ? ' active' : ''}"${on ? ' aria-current="page"' : ''} href="${paths.lessonOpen(h.lessonId, h.date, { oc: s.occurrenceCourseId })}"${s.colour ? ` style="--tab-colour:${esc(s.colour)}"` : ''}>${esc(s.courseName || 'Class')}</a>`;
         })
         .join('')}</nav>`
     : '';
 
   return `
     <div class="ld overhaul-cockpit${lab ? ' test-lab' : ''}" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      ${lab ? `<div class="test-lab-banner" role="status">🧪 <strong>TEST LAB</strong> — sandbox: nothing here affects real classes (marking, planner, history) and it's wiped on reset. <a href="/test-lab">← Test Lab</a></div>` : ''}
+      ${lab ? `<div class="test-lab-banner" role="status">🧪 <strong>TEST LAB</strong> — sandbox: nothing here affects real classes (marking, planner, history) and it's wiped on reset. <a href="${paths.testLab()}">← Test Lab</a></div>` : ''}
       <section class="live-bar" aria-labelledby="lesson-title">
         <div>
           <span class="badge ${isPreview ? 'ai' : lab ? 'ai' : 'live'}"><span class="dot" aria-hidden="true"></span> ${isPreview ? 'Lesson preview · not live' : lab ? '🧪 Test Lab · sandbox' : 'Live lesson'}</span>
@@ -418,13 +419,13 @@ export function renderLessonCockpit(options: {
         <div class="lesson-actions">
           ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
           <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
-          ${isPreview || lab ? '' : `<a class="button ghost" href="/lesson?lesson=${h.lessonId}&amp;date=${esc(h.date)}&amp;lab=1" target="_blank" rel="noopener" title="Open THIS lesson in the Test Lab — a sandbox copy you can run as teacher + test pupil and write answers on, with no effect on the real class">🧪 Test this lesson</a>`}
-          ${lp ? `<a class="button ghost" href="/lesson/pupil-preview?${isPreview ? 'master=1' : `gc=${groupCourseId}`}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener" title="See the slides AND the worksheet a pupil works in (read-only preview)">👁 As pupil</a>` : ''}
-          ${lp ? `<a class="button ghost" href="/lesson/present?${isPreview ? 'master=1' : `gc=${groupCourseId}`}&amp;lp=${lp}&amp;level=${currentLevel}" target="_blank" rel="noopener" title="Your slides WITH private teaching notes — shown only on your screen, never on the board">🧑‍🏫 Presenter</a>` : ''}
-          <a class="button ghost" href="/lesson/print?lesson=${h.lessonId}&amp;date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable lesson plan">🖨 Plan</a>
-          ${isPreview ? '' : `<a class="button ghost" href="/today/print?date=${esc(h.date)}" target="_blank" rel="noopener" title="Printable cover / briefing sheet for today">🖨 Cover</a>`}
+          ${isPreview || lab ? '' : `<a class="button ghost" href="${paths.lessonOpen(h.lessonId, h.date, { lab: true })}" target="_blank" rel="noopener" title="Open THIS lesson in the Test Lab — a sandbox copy you can run as teacher + test pupil and write answers on, with no effect on the real class">🧪 Test this lesson</a>`}
+          ${lp ? `<a class="button ghost" href="${paths.pupilPreview(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener" title="See the slides AND the worksheet a pupil works in (read-only preview)">👁 As pupil</a>` : ''}
+          ${lp ? `<a class="button ghost" href="${paths.present(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener" title="Your slides WITH private teaching notes — shown only on your screen, never on the board">🧑‍🏫 Presenter</a>` : ''}
+          <a class="button ghost" href="${paths.lessonPrint(h.lessonId, h.date)}" target="_blank" rel="noopener" title="Printable lesson plan">🖨 Plan</a>
+          ${isPreview ? '' : `<a class="button ghost" href="${paths.todayPrint(h.date)}" target="_blank" rel="noopener" title="Printable cover / briefing sheet for today">🖨 Cover</a>`}
           <button class="button focus-mode-toggle" type="button">Focus Mode</button>
-          ${isPreview ? '' : `<button class="button ghost" type="button" title="No class this period? Mark it free and assign yourself tasks" hx-post="/free/mark" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>Make free</button>`}
+          ${isPreview ? '' : `<button class="button ghost" type="button" title="No class this period? Mark it free and assign yourself tasks" hx-post="${paths.freeMark()}" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>Make free</button>`}
         </div>
       </section>
 
@@ -434,11 +435,11 @@ export function renderLessonCockpit(options: {
         ? ''
         : `<div class="cockpit-planbar">
             <label class="stop-label">Lesson plan
-              <select name="lesson_plan_id" hx-post="/occurrence-course/${oc}/plan" hx-trigger="change" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()" title="Bind or change the lesson plan for this class (changes the slides, outline and worksheet)">
+              <select name="lesson_plan_id" hx-post="${paths.occPlan(oc)}" hx-trigger="change" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()" title="Bind or change the lesson plan for this class (changes the slides, outline and worksheet)">
                 <option value=""${activeSection?.lessonPlanId == null ? ' selected' : ''}>— no plan —</option>
                 ${(plansByCourse.get(groupCourseId) ?? []).map((p) => `<option value="${p.id}"${p.id === activeSection?.lessonPlanId ? ' selected' : ''}>${esc(p.title)}</option>`).join('')}
               </select>
-              <a class="link" href="/schemes?course=${activeSection?.courseId ?? ''}">edit on Schemes →</a>
+              <a class="link" href="${paths.schemesCourse(activeSection?.courseId)}">edit on Schemes →</a>
             </label>
             ${activeSection?.lastStop ? `<p class="ld-last">Last time → stopped at <strong>${esc(activeSection.lastStop.stoppingPoint)}</strong> <span class="muted">(${esc(activeSection.lastStop.date)})</span></p>` : ''}
           </div>`}
@@ -505,7 +506,7 @@ export function renderLessonCockpit(options: {
                   : `<label class="stop-label" title="Tap a step on the left, or type where you got to — saved automatically for next time">
                       <span class="sr-only">Stopping point</span>
                       <input class="stop-input" name="stopping_point" value="${esc(activeSection?.stoppingPoint ?? '')}" placeholder="✎ where we got to…"
-                        hx-post="/occurrence-course/${oc}/stopping" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
+                        hx-post="${paths.occStopping(oc)}" hx-trigger="input changed delay:800ms, blur" hx-swap="none">
                     </label>`}
               </div>
             </div>
@@ -531,7 +532,7 @@ export function renderLessonCockpit(options: {
               ? `<div class="lesson-preview-placeholder"><strong>Fast capture is disabled in preview.</strong><span>When this is a real lesson, notes are saved against its occurrence and shown here.</span></div>`
               : `<div class="note-form">
               <!-- Fast capture categories -->
-              <form hx-post="/lesson/oc/${oc}/fast-capture" hx-target="#recent-notes-list" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+              <form hx-post="${paths.occFastCapture(oc)}" hx-target="#recent-notes-list" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
                 <div class="note-types" aria-label="Note type">
                   <input type="hidden" name="category" id="fast-capture-category" value="Learning">
                   <button class="note-type active" type="button" onclick="document.getElementById('fast-capture-category').value='Learning'; this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Learning</button>
@@ -621,7 +622,7 @@ export function renderLessonCockpit(options: {
                 <h2 id="adapt-title">Adapt this lesson</h2>
               </div>
             </div>
-            <div hx-get="/lesson/adapt/${groupCourseId}/${lp}" hx-trigger="load" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
+            <div hx-get="${paths.adaptControls(groupCourseId, lp)}" hx-trigger="load" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
           </section>`}
 
           ${isPreview || !lp ? '' : `
@@ -631,14 +632,14 @@ export function renderLessonCockpit(options: {
             <details class="ws-preview" id="ws-prev-d-${oc}">
               <summary>👁 Quick peek — each ability level</summary>
               <div class="ws-preview-tabs" role="tablist">
-                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=support" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
-                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
-                <button type="button" class="ws-tab" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=challenge" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🔴 Challenge</button>
+                <button type="button" class="ws-tab" hx-get="${paths.worksheetPreview(groupCourseId, lp, 'support')}" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟢 Support</button>
+                <button type="button" class="ws-tab" hx-get="${paths.worksheetPreview(groupCourseId, lp, 'core')}" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🟡 Core</button>
+                <button type="button" class="ws-tab" hx-get="${paths.worksheetPreview(groupCourseId, lp, 'challenge')}" hx-target="#ws-prev-${oc}" hx-swap="innerHTML">🔴 Challenge</button>
               </div>
-              <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="/lesson/worksheet-preview?gc=${groupCourseId}&amp;lp=${lp}&amp;level=core" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
+              <div id="ws-prev-${oc}" class="ws-preview-body" hx-get="${paths.worksheetPreview(groupCourseId, lp, 'core')}" hx-trigger="toggle from:#ws-prev-d-${oc} once" hx-swap="innerHTML"><span class="muted">Loading preview…</span></div>
             </details>
 
-            ${lab ? `<form class="test-pupil-launch" method="post" action="/test-pupil/open" target="_blank" title="Open this lesson as a test pupil in a NEW TAB (the real worksheet, autosave and Done, at any level) — keep this cockpit open beside it to drive the lesson live. Everything is sandboxed.">
+            ${lab ? `<form class="test-pupil-launch" method="post" action="${paths.testPupilOpen()}" target="_blank" title="Open this lesson as a test pupil in a NEW TAB (the real worksheet, autosave and Done, at any level) — keep this cockpit open beside it to drive the lesson live. Everything is sandboxed.">
               <input type="hidden" name="_csrf" value="${esc(csrf)}">
               <input type="hidden" name="lesson" value="${h.lessonId}">
               <input type="hidden" name="date" value="${esc(h.date)}">
@@ -647,19 +648,19 @@ export function renderLessonCockpit(options: {
               <button type="submit" class="link">open in new tab →</button>
             </form>` : ''}
 
-            <div class="img-todo-slot" hx-get="/lesson/oc/${oc}/image-todo?gc=${groupCourseId}&amp;lp=${lp}" hx-trigger="load" hx-swap="innerHTML"></div>
-            <div class="ld-review" hx-get="/lesson/plan/${lp}/review-flag" hx-trigger="load" hx-swap="innerHTML"></div>
-            <div class="ld-recall-slot" hx-get="/lesson/oc/${oc}/spaced-recall" hx-trigger="load" hx-swap="innerHTML"></div>
-            <div class="ld-cover"><button type="button" class="link" title="Generate self-contained cover work + answers for a cover teacher (AI)" hx-post="/lesson/oc/${oc}/cover-pack" hx-target="#cover-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">📋 Generate cover work (AI)</button><span id="cover-${oc}"></span></div>
+            <div class="img-todo-slot" hx-get="${paths.imageTodo(oc, groupCourseId, lp)}" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-review" hx-get="${paths.planReviewFlag(lp)}" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-recall-slot" hx-get="${paths.occSpacedRecall(oc)}" hx-trigger="load" hx-swap="innerHTML"></div>
+            <div class="ld-cover"><button type="button" class="link" title="Generate self-contained cover work + answers for a cover teacher (AI)" hx-post="${paths.occCoverPack(oc)}" hx-target="#cover-${oc}" hx-swap="innerHTML" hx-disabled-elt="this">📋 Generate cover work (AI)</button><span id="cover-${oc}"></span></div>
 
             <details class="group-ctx-tool">
               <summary>🧭 Teaching context for this class</summary>
-              <div hx-get="/lesson/group-context/${groupCourseId}" hx-trigger="toggle once" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
+              <div hx-get="${paths.groupContext(groupCourseId)}" hx-trigger="toggle once" hx-swap="innerHTML"><span class="muted">Loading…</span></div>
             </details>
 
             <p class="ld-slot-links">
-              <a class="link" href="/map?slot=${h.lessonId}:${groupCourseId}">📅 term map for this class →</a>
-              <button type="button" class="link" hx-post="/map/shift" hx-vals='${esc(JSON.stringify({ slot: `${h.lessonId}:${groupCourseId}`, date: h.date }))}' hx-confirm="Didn't finish? This lesson repeats at the next ${esc(activeSection?.courseName ?? 'class')} slot and everything after shifts back one school week (holidays skipped)." title="repeat this lesson next week and shift the rest">↻ continue next week</button>
+              <a class="link" href="${paths.mapSlot(h.lessonId, groupCourseId)}">📅 term map for this class →</a>
+              <button type="button" class="link" hx-post="${paths.mapShift()}" hx-vals='${esc(JSON.stringify({ slot: `${h.lessonId}:${groupCourseId}`, date: h.date }))}' hx-confirm="Didn't finish? This lesson repeats at the next ${esc(activeSection?.courseName ?? 'class')} slot and everything after shifts back one school week (holidays skipped)." title="repeat this lesson next week and shift the rest">↻ continue next week</button>
             </p>
           </section>`}
         </aside>
@@ -670,7 +671,7 @@ export function renderLessonCockpit(options: {
         ${isPreview
           ? `<div class="card-head"><div><p class="eyebrow">Live pupil work</p><h2>Progress and marking</h2></div><span class="badge ai">Available when live</span></div>
              <div class="lesson-preview-placeholder"><strong>No pupil data is loaded in preview.</strong><span>The live lesson shows saves, completion, feedback and marking controls here.</span></div>`
-          : `<div class="pupil-work-panel" hx-get="/lesson/oc/${oc}/pupil-work" hx-trigger="load" hx-swap="innerHTML"></div>`}
+          : `<div class="pupil-work-panel" hx-get="${paths.occPupilWork(oc)}" hx-trigger="load" hx-swap="innerHTML"></div>`}
       </section>
 
       ${groupEditDialog}
@@ -720,7 +721,7 @@ export function renderBoardNext(options: {
       </header>
 
       <section id="present-slide" class="present-slide" aria-labelledby="board-slide-title">
-        <div class="pupil-slides" data-deck="${oc ?? `${gcKey}-${lp}`}"${oc ? ` data-sync-url="/lesson/oc/${oc}/slide-stream"` : ''}>
+        <div class="pupil-slides" data-deck="${oc ?? `${gcKey}-${lp}`}"${oc ? ` data-sync-url="${paths.occSlideStream(oc)}"` : ''}>
           <div class="pslide-stage">
             ${slideListHtml || '<div class="pslide on"><p class="muted">No slides available.</p></div>'}
           </div>

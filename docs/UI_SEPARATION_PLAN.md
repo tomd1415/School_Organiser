@@ -4,7 +4,10 @@
 Phase 4 *started*: the pupil-card width is now by **intent** (default reading width; full-width when a
 work card or — structurally — when it contains a two-pane) instead of an incidental `:not()` marker, and a
 regression where the unified deck's `.md-doc` silently shrank the whole pupil surface to 800px was caught
-+ fixed (with an E2E width guard). Phases 2, 3, the rest of 4, and 5 remain — see below. Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
++ fixed (with an E2E width guard). Phase 2 *started*: `paths.ts` exists and the cockpit's (`lessonView.ts`)
+path-only lesson-action URLs are migrated onto it, enforced by a grep guard (`tests/pathsGuard.test.ts`);
+query-string URLs + the other view files remain. Phase 3, the rest of 4, and 5 remain — see below.
+Goal: make the UI a self-contained layer that can be **redesigned in isolation** from
 routes/services/repos/DB, and finish the live **board slide-sync** feature along the way.
 Grounded in a coupling audit of the actual codebase (numbers below). Not a SPA/JSON-API rewrite — see
 *Non-goals*.
@@ -98,6 +101,15 @@ Steps:
    is migrated.
 
 Effort: **medium–large** (~179 call-sites, but mechanical + incremental). Highest decoupling payoff.
+
+**Progress (2026-06-24):** `src/lib/paths.ts` created. **`lessonView.ts` (the cockpit — highest churn) is
+now FULLY migrated** — every route URL (path-only **and** query-string) goes through `paths`. The
+query-string escaping convention is settled: builders emit the **HTML-attribute form** (`&amp;` joiners,
+`esc()`-ed values) so no rendered bytes change, and a `scopeQ(gc)` helper handles the `master=1` vs `gc=`
+preview/class split. Verified by the cockpit parity test (asserts exact URLs) + the slide/board/preview
+E2E; locked by `tests/pathsGuard.test.ts`, which now asserts lessonView has **no raw route-URL literal**.
+**Remaining:** the other view files (`schemeView`, `settingsView`, `setupView`, …) migrate family-by-family
+(move each `FULLY_MIGRATED`/`PARTIAL` in the guard as it lands), then the route files' inline-HTML URLs.
 
 ### Phase 3 — View-models — kills coupling #1
 

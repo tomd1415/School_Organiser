@@ -42,3 +42,8 @@ Privacy/AI rules in detail: `docs/SECURITY_AND_PRIVACY.md`, `docs/DPIA.md`.
 The user commits work themselves between sessions — don't commit/push unless asked. Verify AI
 features with a throwaway smoke script (`app/scripts/X-smoke.ts`, self-cleaning, then delete it);
 keep test data out of real tables (clean up in `finally`).
+
+UI layer (server-rendered, being isolated — see `docs/UI_SEPARATION_PLAN.md`): the views (`app/src/lib/*View.ts`)
+are pure `data → HTML`. For **migrated** route families, reference URLs via `app/src/lib/paths.ts` (the
+single source of truth), not raw literals — `tests/pathsGuard.test.ts` enforces this. Preview/redesign views
+in isolation (no DB) at the dev-only `/ui-gallery`; add a fixture in `app/src/lib/uiFixtures.ts` for new views.
