@@ -160,8 +160,9 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
   const footer = marking
     ? `<footer class="mm-foot">
         <label class="mm-comment">💬 Comment back to ${esc(first)}
-          <textarea rows="2" placeholder="a kind line they'll see with their marks"
+          <textarea name="comment" rows="2" placeholder="a kind line they'll see with their marks"
             hx-post="${paths.occPupilComment(oc, pid)}" hx-trigger="change" hx-swap="none">${esc(comment)}</textarea></label>
+        <span class="note-status" id="cmt-status-${pid}" aria-live="polite"></span>
         <div class="mm-actions">
           ${navBtn(prev, `← ${prev ? esc(firstNameOf(prev.displayName)) : 'Prev'}`, 'prev')}
           <button type="button" class="mm-confirm" hx-post="${paths.occPupilMarkConfirm(oc, pid)}" hx-vals='{"ws":"${wi}"}' hx-target="#mark-modal-body" hx-swap="innerHTML"
