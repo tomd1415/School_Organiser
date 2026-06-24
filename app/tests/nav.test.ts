@@ -15,8 +15,10 @@ import {
 import { layout } from '../src/lib/html';
 
 const ALL_HREFS = NAV_MODEL.map((i) => i.href);
-const DEFAULT_DAILY = ['/', '/focus', '/timetable', '/tasks', '/captured'];
-const ADVANCED = ['/recurring', '/time', '/pupils', '/concepts', '/kit', '/setup', '/settings'];
+// Rail & Stage rebuild: the TODAY group is the daily default; power = expert-setup + Coverage (Settings
+// moved to everyday). Kept in NAV_MODEL order for the group assertion below.
+const DEFAULT_DAILY = ['/', '/timetable', '/focus', '/tasks', '/marking', '/planner'];
+const ADVANCED = ['/recurring', '/coverage', '/concepts', '/pupils', '/kit', '/time', '/setup'];
 
 // renderRail reads module-level override + experience state; always reset both.
 afterEach(() => {
@@ -30,9 +32,9 @@ describe('nav model (single source of truth)', () => {
     expect(NAV_MODEL.filter((i) => i.tier === 'power').map((i) => i.href).sort()).toEqual([...ADVANCED].sort());
   });
 
-  it('hrefs are unique and the daily default is exactly the leaner five', () => {
+  it('hrefs are unique and the TODAY group is the daily default', () => {
     expect(new Set(ALL_HREFS).size).toBe(ALL_HREFS.length);
-    expect(NAV_MODEL.filter((i) => i.group === 'daily').map((i) => i.href)).toEqual(DEFAULT_DAILY);
+    expect(NAV_MODEL.filter((i) => i.group === 'TODAY').map((i) => i.href)).toEqual(DEFAULT_DAILY);
   });
 });
 
@@ -52,6 +54,40 @@ describe('renderRail (Scaffolded Ribbon)', () => {
     const foot = '<div class="custom-foot">Foot Content</div>';
     const html = renderRail('everyday', undefined, foot);
     expect(html).toContain(foot);
+  });
+});
+
+describe('rail grouping (Rail & Stage rebuild)', () => {
+  const GROUPS = ['TODAY', 'FLAGGED', 'RECORD', 'CURRICULUM', 'CLASSES', 'SETUP'];
+
+  it('every nav item belongs to one of the six semantic groups', () => {
+    expect(NAV_MODEL.every((i) => GROUPS.includes(i.group))).toBe(true);
+    // Safeguarding is the sole FLAGGED item and is everyday (never gated).
+    const flagged = NAV_MODEL.filter((i) => i.group === 'FLAGGED');
+    expect(flagged.map((i) => i.href)).toEqual(['/safeguarding']);
+    expect(flagged[0]?.tier).toBe('everyday');
+  });
+
+  it('renders the six group captions and a status dot per item', () => {
+    const html = renderRail('power');
+    for (const label of ['Today', 'Flagged', 'Record', 'Curriculum', 'Classes', 'Setup']) {
+      expect(html).toContain(`>${label}<`);
+    }
+    expect(html).toContain('class="rail-dot"');
+    expect(html).toContain('class="rail-group-label"');
+  });
+
+  it('power-only items are hidden in everyday and shown in power; Safeguarding always shows', () => {
+    const everyday = renderRail('everyday');
+    const power = renderRail('power');
+    for (const href of ['/coverage', '/pupils', '/kit', '/setup']) {
+      expect(everyday).not.toContain(`href="${href}"`);
+      expect(power).toContain(`href="${href}"`);
+    }
+    // Everyday items + Safeguarding render regardless of experience.
+    expect(everyday).toContain('href="/safeguarding"');
+    expect(everyday).toContain('href="/settings"'); // Settings is everyday now
+    expect(everyday).toContain('class="ribbon-indicator"'); // safeguarding pulse, never gated
   });
 });
 

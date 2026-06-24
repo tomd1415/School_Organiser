@@ -5,6 +5,7 @@ import { layout } from '../lib/html';
 import { renderSlideDeck } from '../lib/meView';
 import { renderWorksheet } from '../lib/worksheetForm';
 import { renderTimelineCard } from '../lib/nowView';
+import { renderToggle } from '../lib/components';
 import {
   GALLERY_LESSONS,
   GALLERY_NOW_STATE,
@@ -45,6 +46,38 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         <span class="badge warn">badge · warn</span>
       </p>`;
 
+    // The shared component vocabulary for the Rail & Stage rebuild (docs/new-ui). Build screens from these.
+    const kitRow = (cap: string, html: string): string =>
+      `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="min-width:150px;color:var(--quiet);font-size:12px;text-transform:uppercase;letter-spacing:.5px">${cap}</span>${html}</div>`;
+    const componentKit = `
+      ${kitRow('Badges (category tones)', `
+        <span class="badge live">Logistics</span>
+        <span class="badge warn">Pupil</span>
+        <span class="badge">Admin</span>
+        <span class="badge good">Curriculum</span>
+        <span class="badge red">⚑ Safeguarding</span>
+        <span class="badge ai">AI</span>`)}
+      ${kitRow('Filter chips + count', `
+        <span class="chip active">All <span class="chip-count">12</span></span>
+        <span class="chip">Logistics <span class="chip-count">4</span></span>
+        <span class="chip">Pupil <span class="chip-count">3</span></span>`)}
+      ${kitRow('Segmented tabs', `
+        <span class="ws-tab is-on">Inbox</span><span class="ws-tab">Today</span><span class="ws-tab">Scheduled</span><span class="ws-tab">Done</span>`)}
+      ${kitRow('Toggle (off / on)', `${renderToggle({ label: 'Off', checked: false })} ${renderToggle({ label: 'On', checked: true })}`)}
+      ${kitRow('Status dots', `
+        <span class="tt-dot tt-dot-red"></span><span class="tt-dot tt-dot-purple"></span><span class="tt-dot tt-dot-blue"></span>`)}
+      ${kitRow('Saved affordance', `<span class="note-status saved">saved ✓</span>`)}
+      <div class="stats-grid" style="margin-top:6px">
+        <div class="stat-card"><span class="stat-label">Lessons</span><strong class="stat-value">7</strong></div>
+        <div class="stat-card"><span class="stat-label">To mark</span><strong class="stat-value">18</strong></div>
+        <div class="stat-card"><span class="stat-label">AI calls</span><strong class="stat-value" style="color:var(--teal)">42</strong></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div class="card" style="border-left:3px solid var(--teal);padding:14px 16px"><strong>Tone-left-border card</strong><p class="muted" style="margin:.25rem 0 0">teal · Logistics</p></div>
+        <div class="card" style="border-left:3px solid var(--red);padding:14px 16px"><strong>Safeguarding card</strong><p class="muted" style="margin:.25rem 0 0">red · withheld from AI</p></div>
+      </div>`;
+
     const worksheetHtml = `<div class="ws-doc ws-doc-preview">${renderWorksheet(SAMPLE_WORKSHEET_MD, { mode: 'preview', level: 'core', autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`;
 
     const body = `<section class="card workspace-width">
@@ -52,6 +85,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       <p class="muted">Every showcased view, rendered with fixture data — no DB, no live state. Redesign the
         UI (views + CSS + client JS) against this page in isolation from the back-end. See
         <code>docs/UI_SEPARATION_PLAN.md</code>.</p>
+      ${item('Component kit (Rail & Stage rebuild)', 'The shared vocabulary every redesigned screen is built from — badges in the SPEC category tones (Logistics→teal · Pupil→amber · Admin→grey · Curriculum→green · Safeguarding→red), filter chips, segmented tabs, the pill+knob toggle, status dots, the saved affordance, stat grid, and tone-left-border cards.', componentKit)}
       ${item('Primitives', 'Shared chrome: card header (eyebrow + title + badge), buttons, links, badges.', primitives)}
       ${item('Slide deck', 'renderPslide via renderSlideDeck — one per-slide renderer shared by pupil / preview / presenter / board / cockpit (note the table + blockquote framing).', renderSlideDeck(SAMPLE_SLIDES_MD, 'gallery', 'core'))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}

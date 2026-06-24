@@ -181,97 +181,77 @@ body[data-shell="next"] .unified-console-wrapper {
 }
 
 /* Global Left Ribbon navigation (collapsible) */
+/* ── Rail & Stage rebuild (docs/new-ui SPEC §0): always-open 232px grouped nav rail. ─────────────────
+   Renders from NAV_MODEL via renderRail(); app.js adds .active + aria-current to the matching .ribbon-link.
+   Class hooks kept for app.js/focus-mode/print: .scaffolded-ribbon, .ribbon-link(.active/.sg-flag),
+   .ribbon-indicator, .ribbon-tier.tier-foot (the rail foot: experience toggle, settings, a11y, logout). */
 body[data-shell="next"] .scaffolded-ribbon {
-  width: 60px;
+  width: 232px;
+  flex-shrink: 0;
   height: 100vh;
-  background: linear-gradient(180deg, #111824, #0b1019);
-  border-right: 2.5px solid var(--line);
+  background: var(--rail);
+  border-right: 1px solid var(--line);
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  padding: 0.75rem 0;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 18px 12px;
   overflow-y: auto;
-  overflow-x: hidden;
-  flex-shrink: 0;
   position: sticky;
   top: 0;
-}
-body[data-shell="next"] .scaffolded-ribbon:hover,
-body[data-shell="next"] .scaffolded-ribbon:focus-within { /* BUG-057: expand for keyboard users too */
-  width: 200px;
 }
 
 body[data-shell="next"] .ribbon-brand {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.55rem;
+  gap: 10px;
+  padding: 4px 8px 18px;
   color: var(--text);
   text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 850;
-  border-bottom: 2.5px solid var(--line);
-  margin-bottom: 0.75rem;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
   white-space: nowrap;
 }
-body[data-shell="next"] .ribbon-brand .icon {
-  font-size: 1.3rem;
-  min-width: 24px;
+body[data-shell="next"] .ribbon-brand .brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--teal);
+  color: #07201d;
   display: grid;
   place-items: center;
-}
-body[data-shell="next"] .ribbon-brand .lbl-txt {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-brand .lbl-txt {
-  opacity: 1;
+  font-size: 13px;
+  font-weight: 800;
+  flex: none;
 }
 
-body[data-shell="next"] .ribbon-tier {
+/* Groups: small uppercase caption + items */
+body[data-shell="next"] .rail-group {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0 0.5rem 0.75rem;
-  border-bottom: 1.5px solid var(--line);
-  margin-bottom: 0.75rem;
+  gap: 2px;
+  margin-bottom: 14px;
 }
-body[data-shell="next"] .ribbon-tier.tier-urgency { border-bottom-color: var(--red-soft); }
-body[data-shell="next"] .ribbon-tier.tier-operations { border-bottom-color: var(--violet-soft); }
-body[data-shell="next"] .ribbon-tier.tier-admin { border-bottom: 0; margin-bottom: 0; }
-body[data-shell="next"] .ribbon-tier.tier-foot {
-  margin-top: auto;
-  border-top: 1.5px solid var(--line);
-  border-bottom: 0;
-  padding-top: 0.75rem;
-  margin-bottom: 0;
-}
-
-body[data-shell="next"] .tier-label {
-  font-size: 0.52rem;
-  font-weight: 900;
+body[data-shell="next"] .rail-group-label {
+  font-size: 11px;
   text-transform: uppercase;
+  letter-spacing: 1px;
   color: var(--quiet);
-  padding: 0 0.5rem;
-  white-space: nowrap;
-  letter-spacing: 0.05em;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  font-weight: 700;
+  padding: 4px 8px 6px;
 }
-body[data-shell="next"] .scaffolded-ribbon:hover .tier-label { opacity: 0.7; }
 
+/* Nav items: status dot + label + optional count pill */
 body[data-shell="next"] .ribbon-link {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.55rem;
+  gap: 10px;
+  padding: 8px;
   border-radius: 8px;
   color: var(--muted);
   text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 800;
-  transition: all 0.2s ease;
+  font-size: 13.5px;
+  font-weight: 600;
   min-height: 38px;
   position: relative;
   background: transparent;
@@ -279,50 +259,55 @@ body[data-shell="next"] .ribbon-link {
   width: 100%;
   text-align: left;
   cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
 }
-body[data-shell="next"] .ribbon-link:hover {
-  background: var(--surface-2) !important;
-  color: #fff !important;
-}
+body[data-shell="next"] .ribbon-link .lbl-txt { flex: 1; min-width: 0; }
+body[data-shell="next"] .ribbon-link:hover { background: var(--surface-2); color: var(--text); }
 body[data-shell="next"] .ribbon-link.active {
-  background: var(--surface-3) !important;
-  color: #fff !important;
-  border-left: 3px solid var(--violet);
-  padding-left: 0.35rem;
+  background: var(--surface-3);
+  color: #fff;
+  font-weight: 700;
 }
+/* Foot links (rail-exp / rail-gear / logout / a11y) still use an .icon span */
 body[data-shell="next"] .ribbon-link .icon {
-  font-size: 1.1rem;
-  min-width: 24px;
+  font-size: 1.05rem;
+  min-width: 20px;
   display: grid;
   place-items: center;
+  flex: none;
 }
-body[data-shell="next"] .ribbon-link .lbl-txt {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  white-space: nowrap;
+body[data-shell="next"] .rail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
 }
-body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-link .lbl-txt,
-body[data-shell="next"] .scaffolded-ribbon:focus-within .ribbon-link .lbl-txt {
-  opacity: 1;
+body[data-shell="next"] .rail-count {
+  background: var(--teal);
+  color: #07201d;
+  font-weight: 700;
+  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex: none;
 }
 
-/* Safeguarding indicators */
-body[data-shell="next"] .ribbon-link.sg-flag { color: var(--red) !important; }
+/* Safeguarding emphasis (FLAGGED group) */
+body[data-shell="next"] .ribbon-link.sg-flag { color: var(--red); }
+body[data-shell="next"] .ribbon-link.sg-flag .rail-dot { background: var(--red) !important; }
 body[data-shell="next"] .ribbon-indicator {
-  position: absolute;
-  top: 6px;
-  left: 20px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--red);
   box-shadow: 0 0 5px var(--red);
   animation: pulse-glow 1.5s infinite;
-}
-body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-indicator {
-  left: auto;
-  right: 10px;
-  top: 15px;
+  flex: none;
 }
 @keyframes pulse-glow {
   0% { transform: scale(0.9); opacity: 0.5; }
@@ -330,44 +315,19 @@ body[data-shell="next"] .scaffolded-ribbon:hover .ribbon-indicator {
   100% { transform: scale(0.9); opacity: 0.5; }
 }
 
-/* Collapsible drawer */
-body[data-shell="next"] .collapsible-drawer {
-  margin-top: auto;
-}
-body[data-shell="next"] .drawer-header-btn {
+/* Rail foot: pinned to the bottom (experience toggle, Settings, accessibility, logout) */
+body[data-shell="next"] .ribbon-tier {
   display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.55rem;
-  border-radius: 8px;
-  background: transparent;
-  border: 0;
-  color: var(--quiet);
-  font-size: 0.8rem;
-  font-weight: 800;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  min-height: 38px;
-}
-body[data-shell="next"] .drawer-header-btn:hover { background: var(--surface-2); color: #fff; }
-body[data-shell="next"] .drawer-header-btn .drawer-arrow {
-  margin-left: auto;
-  font-size: 0.55rem;
-  transition: transform 0.2s ease;
-  opacity: 0;
-}
-body[data-shell="next"] .scaffolded-ribbon:hover .drawer-header-btn .drawer-arrow { opacity: 0.7; }
-body[data-shell="next"] .drawer-links {
-  display: none;
   flex-direction: column;
-  gap: 0.2rem;
-  padding-left: 0.5rem;
-  margin-top: 0.25rem;
-  border-left: 1.5px dashed var(--line);
+  gap: 0.35rem;
+  padding: 0 0.5rem 0.75rem;
 }
-body[data-shell="next"] .collapsible-drawer.open .drawer-links { display: flex; }
-body[data-shell="next"] .collapsible-drawer.open .drawer-header-btn .drawer-arrow { transform: rotate(90deg); }
+body[data-shell="next"] .ribbon-tier.tier-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+  margin-bottom: 0;
+}
 
 /* Right main page container */
 body[data-shell="next"] .console-main-container {
@@ -429,6 +389,41 @@ body[data-shell="next"] .header-middle {
   align-items: center;
   gap: 0.4rem;
 }
+
+/* Experience segmented control (Everyday ↔ Power) — SPEC §0 header */
+body[data-shell="next"] .header-exp {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  padding: 3px;
+  margin: 0;
+}
+body[data-shell="next"] .header-exp .seg {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 7px;
+  padding: 6px 12px;
+  min-height: 34px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+body[data-shell="next"] .header-exp .seg:hover { color: var(--text); }
+body[data-shell="next"] .header-exp .seg.is-on {
+  background: var(--surface-3);
+  color: #fff;
+}
+
+/* Pill+knob toggle theme (structure in styles-base-widgets.css) */
+body[data-shell="next"] .toggle-row { color: var(--text); font-weight: 600; }
+body[data-shell="next"] .toggle-knob { background: var(--line-strong); }
+body[data-shell="next"] .toggle-switch input:checked + .toggle-knob { background: var(--green); }
+body[data-shell="next"] .toggle-switch input:focus-visible + .toggle-knob { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Accessibility Preferences details panel in Footer */
 body[data-shell="next"] details.a11y {

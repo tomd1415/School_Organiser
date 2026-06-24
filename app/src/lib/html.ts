@@ -36,13 +36,6 @@ export function nextShell({ title, body, authed = false, csrfToken, width }: Lay
   const railFootNext =
     authed && csrfToken
       ? `<div class="ribbon-tier tier-foot"${csrfHdr}>
-          <form hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
-            <input type="hidden" name="experience" value="${exp === 'power' ? 'everyday' : 'power'}">
-            <button type="submit" class="ribbon-link rail-exp" title="${exp === 'power' ? 'Hide the advanced tools again' : 'Reveal planning, authoring and admin tools'}">
-              <span class="icon">${exp === 'power' ? '◧' : '▸'}</span>
-              <span class="lbl-txt">${exp === 'power' ? 'Advanced tools: on' : 'Show advanced tools'}</span>
-            </button>
-          </form>
           <a class="ribbon-link rail-gear" href="/settings" title="Settings">
             <span class="icon">⚙️</span>
             <span class="lbl-txt">Settings</span>

@@ -1,5 +1,6 @@
 import { esc } from './html';
 import { paths } from './paths'; // route URLs (see docs/UI_SEPARATION_PLAN.md Phase 2)
+import { renderToggle } from './components'; // pill+knob on/off switch (Rail & Stage rebuild)
 import { AI_FEATURES, MODEL_OPTIONS } from '../llm/features';
 import type { TaAccount } from '../repos/taAccounts';
 
@@ -179,8 +180,11 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
             <div id="ai-key-result"></div>`
       }
       <div class="setup-add">
-        <label><input type="checkbox"${aiEnabled !== 'false' ? ' checked' : ''}
-          hx-post="${paths.settingsAi()}" hx-vals='js:{"key":"ai_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"> AI features enabled</label>
+        ${renderToggle({
+          label: 'AI features enabled',
+          checked: aiEnabled !== 'false',
+          inputAttrs: `hx-post="${paths.settingsAi()}" hx-vals='js:{"key":"ai_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"`,
+        })}
         <label>Monthly cap (pence) <input class="setup-num" style="width:6rem" value="${esc(cap ?? '')}" placeholder="default"
           hx-post="${paths.settingsAi()}" hx-vals='js:{"key":"ai_month_cap_pence","value":event.target.value}' hx-trigger="input changed delay:700ms, blur" hx-swap="none"></label>
       </div>
@@ -194,9 +198,12 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
       </div>
       ${featureModelPickerHtml}
       <div class="setup-add" style="flex-direction:column;align-items:stretch;max-width:42rem">
-        <label><input type="checkbox"${reviewOn === 'true' ? ' checked' : ''}
-          hx-post="${paths.settingsAi()}" hx-vals='js:{"key":"ai_review_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none">
-          AI lesson reviewer <strong>(off by default)</strong></label>
+        ${renderToggle({
+          label: 'AI lesson reviewer',
+          labelHtml: 'AI lesson reviewer <strong>(off by default)</strong>',
+          checked: reviewOn === 'true',
+          inputAttrs: `hx-post="${paths.settingsAi()}" hx-vals='js:{"key":"ai_review_enabled","value":event.target.checked ? "true" : "false"}' hx-trigger="change" hx-swap="none"`,
+        })}
         <p class="muted">A second opinion on an <strong>upcoming, not-yet-taught</strong> lesson, judged against the
           spec and any uploaded documents. It only ever <em>suggests</em> — you Apply or Dismiss each review on the
           Schemes page; the master lesson is never changed automatically. Runs on the <strong>Planning</strong> model

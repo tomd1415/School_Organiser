@@ -10,7 +10,10 @@
 
 import { esc } from './esc';
 
-export type NavGroup = 'daily' | 'setup';
+// Rail & Stage rebuild (docs/new-ui): the six semantic rail groups, in render order. The rail renders
+// every group always-open (no folding) — `tier` alone gates power-only items. Group labels are the small
+// uppercase captions in SPEC §0.
+export type NavGroup = 'TODAY' | 'FLAGGED' | 'RECORD' | 'CURRICULUM' | 'CLASSES' | 'SETUP';
 // Rail & Stage redesign — `tier` gates the rail's "Advanced" section: 'power' items appear only when
 // the teacher has turned advanced tools on (the `experience` switch). 'everyday' items always show.
 export type NavTier = 'everyday' | 'power';
@@ -28,29 +31,34 @@ export interface NavItem {
 // Timetable, Tasks, Captured) and still drives the configurable Today pins. `tier` is the rail's
 // everyday-vs-advanced split: the expert-set-up pages (Pupils, Concepts, Kit, Recurring, Time, Setup,
 // Settings) are 'power' and fold into the Advanced section. /concepts (idea 1.1) was added here.
+// Grouping + tiers follow the rebuild SPEC §0 / §"Navigation model": everything touched *during the day*
+// is in TODAY; FLAGGED is Safeguarding pinned on its own (everyday, never gated); RECORD is what you log;
+// CURRICULUM is planning/curriculum; CLASSES is cohort views; SETUP is admin/config. `tier:'power'` items
+// (Coverage, Concepts, Pupils, Kit, Time, Setup, Recurring) only appear when advanced tools are on. `key`
+// values are unchanged (the `g`+letter jump map).
 export const NAV_MODEL: readonly NavItem[] = [
-  { href: '/', label: 'Now', key: 'h', group: 'daily', tier: 'everyday' },
-  { href: '/marking', label: 'Marking', key: 'a', group: 'setup', tier: 'everyday' },
-  { href: '/focus', label: 'Focus', key: 'f', group: 'daily', tier: 'everyday' },
-  { href: '/timetable', label: 'Timetable', key: 't', group: 'daily', tier: 'everyday' },
-  { href: '/oversee', label: 'Oversee', group: 'setup', tier: 'everyday' },
-  { href: '/tasks', label: 'Tasks', key: 'k', group: 'daily', tier: 'everyday' },
-  { href: '/recurring', label: 'Recurring', group: 'setup', tier: 'power' },
-  { href: '/events', label: 'Events', key: 'e', group: 'setup', tier: 'everyday' },
-  { href: '/time', label: 'Time', group: 'setup', tier: 'power' },
-  { href: '/captured', label: 'Captured', key: 'c', group: 'daily', tier: 'everyday' },
-  { href: '/pupils', label: 'Pupils', key: 'p', group: 'setup', tier: 'power' },
-  { href: '/safeguarding', label: 'Safeguarding', key: 'g', group: 'setup', tier: 'everyday' },
-  { href: '/notes', label: 'Notes', group: 'setup', tier: 'everyday' },
-  { href: '/schemes', label: 'Schemes', key: 's', group: 'setup', tier: 'everyday' },
-  { href: '/concepts', label: 'Concepts', group: 'setup', tier: 'power' },
-  { href: '/coverage', label: 'Coverage', group: 'setup', tier: 'everyday' },
-  { href: '/map', label: 'Map', key: 'm', group: 'setup', tier: 'everyday' },
-  { href: '/planner', label: 'Planner', group: 'setup', tier: 'everyday' },
-  { href: '/kit', label: 'Kit', group: 'setup', tier: 'power' },
-  { href: '/resources', label: 'Resources', key: 'r', group: 'setup', tier: 'everyday' },
-  { href: '/setup', label: 'Setup', group: 'setup', tier: 'power' },
-  { href: '/settings', label: 'Settings', group: 'setup', tier: 'power' },
+  { href: '/', label: 'Now', key: 'h', group: 'TODAY', tier: 'everyday' },
+  { href: '/timetable', label: 'Timetable', key: 't', group: 'TODAY', tier: 'everyday' },
+  { href: '/focus', label: 'Focus', key: 'f', group: 'TODAY', tier: 'everyday' },
+  { href: '/tasks', label: 'Tasks', key: 'k', group: 'TODAY', tier: 'everyday' },
+  { href: '/marking', label: 'Marking', key: 'a', group: 'TODAY', tier: 'everyday' },
+  { href: '/planner', label: 'Planner', group: 'TODAY', tier: 'everyday' },
+  { href: '/safeguarding', label: 'Safeguarding', key: 'g', group: 'FLAGGED', tier: 'everyday' },
+  { href: '/captured', label: 'Captured', key: 'c', group: 'RECORD', tier: 'everyday' },
+  { href: '/notes', label: 'Notes', group: 'RECORD', tier: 'everyday' },
+  { href: '/events', label: 'Events', key: 'e', group: 'RECORD', tier: 'everyday' },
+  { href: '/recurring', label: 'Recurring', group: 'RECORD', tier: 'power' },
+  { href: '/schemes', label: 'Schemes', key: 's', group: 'CURRICULUM', tier: 'everyday' },
+  { href: '/map', label: 'Map', key: 'm', group: 'CURRICULUM', tier: 'everyday' },
+  { href: '/resources', label: 'Resources', key: 'r', group: 'CURRICULUM', tier: 'everyday' },
+  { href: '/coverage', label: 'Coverage', group: 'CURRICULUM', tier: 'power' },
+  { href: '/concepts', label: 'Concepts', group: 'CURRICULUM', tier: 'power' },
+  { href: '/oversee', label: 'Oversee', group: 'CLASSES', tier: 'everyday' },
+  { href: '/pupils', label: 'Pupils', key: 'p', group: 'CLASSES', tier: 'power' },
+  { href: '/settings', label: 'Settings', group: 'SETUP', tier: 'everyday' },
+  { href: '/kit', label: 'Kit', group: 'SETUP', tier: 'power' },
+  { href: '/time', label: 'Time', group: 'SETUP', tier: 'power' },
+  { href: '/setup', label: 'Setup', group: 'SETUP', tier: 'power' },
 ];
 
 // The daily set is teacher-configurable (idea 6). It's a write-through in-memory value, not a TTL
@@ -58,7 +66,7 @@ export const NAV_MODEL: readonly NavItem[] = [
 // the Settings handler updates it on save (single-process LAN app — no cross-instance coherence to
 // worry about). Unset → the NAV_MODEL 'daily' default (the leaner five).
 const KNOWN_HREFS = new Set(NAV_MODEL.map((i) => i.href));
-const DEFAULT_DAILY: readonly string[] = NAV_MODEL.filter((i) => i.group === 'daily').map((i) => i.href);
+const DEFAULT_DAILY: readonly string[] = NAV_MODEL.filter((i) => i.group === 'TODAY').map((i) => i.href);
 let navDailyOverride: string[] | null = null;
 
 /** Keep only known hrefs, in NAV_MODEL order; drop unknowns (a removed page can't haunt the bar). */
@@ -102,79 +110,63 @@ export function shouldShowExperienceNudge(experience: Experience, dismissed: boo
 
 const SAFEGUARDING_HREF = '/safeguarding';
 
-/**
- * Render the persistent left navigation rail (Rail & Stage). Three groups:
- *  • Today — the configurable pin set (nav_daily; default the leaner five), always shown.
- *  • Safeguarding — pinned on its own, always visible, never gated (SEND non-negotiable).
- *  • Plan — everyday pages not pinned to Today, in a collapsible section.
- *  • Advanced — 'power'-tier pages, shown only when the experience switch is on.
- * Active-state is applied client-side by app.js (it reads window.__NAV__ + the path), so this stays
- * a pure, path-free render — exactly like the old top bar.
- */
+// The six groups in render order, each with its caption + a status-dot tone (mapped to a repo token).
+const RAIL_GROUPS: ReadonlyArray<{ id: NavGroup; label: string; tone: string }> = [
+  { id: 'TODAY', label: 'Today', tone: 'teal' },
+  { id: 'FLAGGED', label: 'Flagged', tone: 'red' },
+  { id: 'RECORD', label: 'Record', tone: 'quiet' },
+  { id: 'CURRICULUM', label: 'Curriculum', tone: 'green' },
+  { id: 'CLASSES', label: 'Classes', tone: 'amber' },
+  { id: 'SETUP', label: 'Setup', tone: 'quiet' },
+];
 
+/**
+ * Render the persistent left navigation rail (Rail & Stage rebuild — docs/new-ui SPEC §0). Always-open
+ * 232px rail: brand, then the six semantic groups (each a small uppercase caption + items). Every item is
+ * a status dot + label (+ optional count pill, wired later). `tier:'power'` items appear only when the
+ * experience switch is on; FLAGGED/Safeguarding is always shown and never gated. Renders from NAV_MODEL —
+ * the single source of truth — so the rail can no longer drift from the jump map. Active-state is applied
+ * client-side by app.js (it reads the path, adds `.active`+`aria-current` to the matching `.ribbon-link`),
+ * so this stays a pure, path-free render. `dailyHrefs` is unused by the always-open rail (kept for
+ * signature stability + the Settings nav-config, which still persists a pin set).
+ *
+ * `counts` optionally supplies per-href attention counts → a count pill (e.g. Tasks 5, Marking 18).
+ */
 export function renderRail(
   experience: Experience = getExperienceMode(),
-  dailyHrefs: readonly string[] = getNavDailyHrefs(),
+  _dailyHrefs: readonly string[] = getNavDailyHrefs(),
   railFoot = '',
+  counts: Readonly<Record<string, number>> = {},
 ): string {
-  const link = (href: string, icon: string, label: string, extraClass = '', extraSpan = '') => `
-    <a href="${href}" class="ribbon-link${extraClass}" title="${esc(label)}">
-      <span class="icon">${icon}</span>
-      <span class="lbl-txt">${esc(label)}</span>
-      ${extraSpan}
+  const dotVar = (tone: string) => (tone === 'quiet' ? 'var(--quiet)' : `var(--${tone})`);
+
+  const item = (it: NavItem, tone: string): string => {
+    const isSg = it.href === SAFEGUARDING_HREF;
+    const n = counts[it.href];
+    return `
+    <a href="${it.href}" class="ribbon-link${isSg ? ' sg-flag' : ''}" title="${esc(it.label)}">
+      <span class="rail-dot" style="background:${dotVar(tone)}"></span>
+      <span class="lbl-txt">${esc(it.label)}</span>
+      ${n ? `<span class="rail-count">${n}</span>` : ''}
+      ${isSg ? '<span class="ribbon-indicator"></span>' : ''}
     </a>`;
+  };
+
+  const groups = RAIL_GROUPS.map((g) => {
+    const items = NAV_MODEL.filter((i) => i.group === g.id && (i.tier === 'everyday' || experience === 'power'));
+    if (!items.length) return '';
+    return `<div class="rail-group">
+      <span class="rail-group-label">${esc(g.label)}</span>
+      ${items.map((i) => item(i, g.tone)).join('')}
+    </div>`;
+  }).join('');
 
   return `<nav class="scaffolded-ribbon" id="scaffolded-ribbon" aria-label="Global navigation">
-    <!-- Brand Link at the top -->
     <a href="/" class="ribbon-brand" title="School Organiser">
-      <span class="icon">🏫</span>
+      <span class="brand-mark" aria-hidden="true">SO</span>
       <span class="lbl-txt">School Organiser</span>
     </a>
-
-    <!-- Tier 1: Safety & Active Tracking -->
-    <div class="ribbon-tier tier-urgency">
-      <span class="tier-label">Tier 1: Safety</span>
-      ${link('/', '🌅', 'Now Screen')}
-      ${link('/safeguarding', '⚑', 'Safeguarding', ' sg-flag', '<span class="ribbon-indicator"></span>')}
-      ${link('/oversee', '🖥️', 'Oversee')}
-    </div>
-
-    <!-- Tier 2: Daily Operations -->
-    <div class="ribbon-tier tier-operations">
-      <span class="tier-label">Tier 2: Daily Ops</span>
-      ${link('/timetable', '📅', 'Timetable')}
-      ${link('/tasks', '📝', 'Checklists')}
-      ${link('/focus', '🎯', 'Focus')}
-      ${link('/marking', '🏆', 'Marking Queue')}
-      ${link('/captured', '📥', 'Mind Inbox')}
-      ${link('/events', '📣', 'Events')}
-      ${link('/notes', '📓', 'Notes')}
-      ${link('/coverage', '📊', 'Coverage')}
-      ${link('/map', '🗺️', 'Map')}
-      ${link('/planner', '🗓️', 'Planner')}
-      ${link('/resources', '🗂️', 'Resources')}
-    </div>
-
-    <!-- Tier 3: Collapsible Drawer (Long-term admin/planning) -->
-    <div class="ribbon-tier tier-admin collapsible-drawer" id="ribbon-drawer">
-      <button class="drawer-header-btn" type="button" id="ribbon-drawer-toggle">
-        <span class="icon">⚙️</span>
-        <span class="lbl-txt">Advanced Drawer</span>
-        <span class="drawer-arrow">▶</span>
-      </button>
-      <div class="drawer-links">
-        ${link('/schemes', '📚', 'Schemes')}
-        ${link('/concepts', '🧬', 'Concepts')}
-        ${link('/setup', '🔌', 'Setup')}
-        ${link('/kit', '🛒', 'Kit Carts')}
-        ${link('/settings', '🔧', 'Settings')}
-        ${link('/recurring', '🔁', 'Recurring')}
-        ${link('/time', '⏱️', 'Time')}
-        ${link('/pupils', '👥', 'Pupils')}
-      </div>
-    </div>
-
-    <!-- Tier 4: Bottom ribbon foot controls -->
+    ${groups}
     ${railFoot}
   </nav>`;
 }
