@@ -12,6 +12,21 @@ const KIND_ICON: Record<string, string> = {
   note: '🗒',
 };
 
+// §10 kind badge: a tone-tinted label per resource kind (SLIDES teal · SHEET green · QUIZ amber · the
+// rest grey). Reuses the shared .badge tones. The friendly label is also used for the filter pills.
+const KIND_BADGE: Record<string, { cls: string; label: string }> = {
+  slides: { cls: 'live', label: 'Slides' },
+  worksheet: { cls: 'good', label: 'Worksheet' },
+  quiz: { cls: 'warn', label: 'Quiz' },
+  document: { cls: '', label: 'Document' },
+  image: { cls: '', label: 'Image' },
+  link: { cls: '', label: 'Link' },
+  note: { cls: '', label: 'Note' },
+};
+function kindBadge(kind: string): { cls: string; label: string } {
+  return KIND_BADGE[kind] ?? { cls: '', label: kind.charAt(0).toUpperCase() + kind.slice(1) };
+}
+
 // Linked resources are grouped into three buckets so a lesson's resource list reads cleanly:
 // images, the teacher's own ORIGINAL uploads/imports, and what the AI GENERATED. Empty buckets hide.
 type ResGroupKey = 'images' | 'original' | 'generated';
@@ -48,20 +63,31 @@ function fmtSize(bytes: number | null): string {
 }
 
 export function renderResourceItem(r: ResourceRow): string {
-  // where-used: a 📋 badge when the resource is attached to plans / source-linked to units.
+  // §10 resource card: kind badge · version (mono) · title · meta (🔗 used · size · source) · Open /
+  // Present↗ (slides) / download. Stays an <li> so the upload/generate/version POSTs can prepend it
+  // straight into the #resources-list grid.
+  const badge = kindBadge(r.kind);
+  const view = paths.resourceViewUrl(r.id);
   const used =
     r.usedCount > 0
       ? `<button type="button" class="link res-used" title="where this resource is used"
-          hx-get="${paths.resourceUsage(r.id)}" hx-target="#res-${r.id}-usage" hx-swap="innerHTML">📋 ${r.usedCount}</button>`
+          hx-get="${paths.resourceUsage(r.id)}" hx-target="#res-${r.id}-usage" hx-swap="innerHTML">🔗 ${r.usedCount}</button>`
       : '';
-  return `<li class="res" id="res-${r.id}">
-    <span class="res-kind">${KIND_ICON[r.kind] ?? '📄'}</span>
-    <a href="${paths.resourceViewUrl(r.id)}" target="_blank" rel="noopener">${esc(r.title)}</a>
-    ${used}
-    ${r.unit || r.yearGroup ? `<span class="res-unit" title="year group · unit">${[r.yearGroup, r.unit].filter(Boolean).map((x) => esc(x as string)).join(' · ')}</span>` : ''}
-    <span class="muted res-meta">${esc(r.source)}${r.versionNo ? ` · v${r.versionNo}` : ''}${r.byteSize ? ' · ' + fmtSize(r.byteSize) : ''}</span>
-    <a class="link" href="${paths.resourceDownload(r.id)}">download</a>
+  const meta = [used, r.byteSize ? fmtSize(r.byteSize) : '', esc(r.source)].filter(Boolean).join(' · ');
+  return `<li class="card res-card" id="res-${r.id}">
+    <div class="res-card-head">
+      <span class="badge ${badge.cls}">${esc(badge.label)}</span>
+      ${r.versionNo ? `<span class="res-ver">v${r.versionNo}</span>` : ''}
+      ${r.unit || r.yearGroup ? `<span class="res-unit" title="year group · unit">${[r.yearGroup, r.unit].filter(Boolean).map((x) => esc(x as string)).join(' · ')}</span>` : ''}
+    </div>
+    <a class="res-card-title" href="${view}" target="_blank" rel="noopener">${esc(r.title)}</a>
+    <div class="res-card-meta muted">${meta}</div>
     <span class="res-usage" id="res-${r.id}-usage"></span>
+    <div class="res-card-actions">
+      <a class="button small" href="${view}" target="_blank" rel="noopener">Open</a>
+      ${r.kind === 'slides' ? `<a class="link" href="${paths.resourcePresent(r.id)}" target="_blank" rel="noopener">Present ↗</a>` : ''}
+      <a class="link" href="${paths.resourceDownload(r.id)}">download</a>
+    </div>
     ${r.sourceAttribution ? `<div class="res-attrib muted" title="attribution / licence">⚖ ${esc(r.sourceAttribution)}</div>` : ''}
   </li>`;
 }
@@ -69,16 +95,14 @@ export function renderResourceItem(r: ResourceRow): string {
 // Search box + kind filter. Submits q + kind via hx-get on every keystroke (debounced)
 // and on filter change, swapping just the #res-list partial.
 export function renderSearchBar(kinds: string[], q: string, kind: string): string {
-  const opts = ['<option value="">All types</option>']
-    .concat(
-      kinds.map(
-        (k) => `<option value="${esc(k)}"${k === kind ? ' selected' : ''}>${KIND_ICON[k] ?? '📄'} ${esc(k)}</option>`,
-      ),
-    )
-    .join('');
+  // Filter pills as radio inputs so the kind survives every live-search submit (the form serialises the
+  // checked radio on each keyup/change) — no JS, and they style as a segmented pill row.
+  const pill = (val: string, label: string) =>
+    `<label class="res-pill${val === kind ? ' is-on' : ''}"><input type="radio" name="kind" value="${esc(val)}"${val === kind ? ' checked' : ''}>${esc(label)}</label>`;
+  const pills = [pill('', 'All')].concat(kinds.map((k) => pill(k, kindBadge(k).label))).join('');
   return `<form class="res-search" hx-get="${paths.resourcesList()}" hx-target="#res-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:300ms, change">
     <input type="search" name="q" value="${esc(q)}" placeholder="Search resources by name…" autocomplete="off">
-    <select name="kind">${opts}</select>
+    <div class="res-pills">${pills}</div>
   </form>`;
 }
 
@@ -103,10 +127,10 @@ export function renderResourceListPaged(p: PagedResources): string {
     on
       ? `<a class="link" hx-get="${paths.resourcesListQuery(p.q, p.kind, pg)}" hx-target="#res-list" hx-swap="outerHTML">${label}</a>`
       : `<span class="muted">${label}</span>`;
-  const note = p.q || p.kind ? ` matching ${[p.q && `“${esc(p.q)}”`, p.kind && esc(p.kind)].filter(Boolean).join(' · ')}` : '';
+  const note = p.q || p.kind ? ` matching ${[p.q && `“${esc(p.q)}”`, p.kind && esc(kindBadge(p.kind).label)].filter(Boolean).join(' · ')}` : '';
   return `<div id="res-list">
     <p class="muted res-count">${p.total} resource${p.total === 1 ? '' : 's'}${note}</p>
-    <ul class="res-list" id="resources-list">${items}</ul>
+    <ul class="res-grid" id="resources-list">${items}</ul>
     <div class="res-pager">${link(page - 1, '‹ prev', page > 1)} <span class="muted">page ${page} / ${pages}</span> ${link(page + 1, 'next ›', page < pages)}</div>
   </div>`;
 }

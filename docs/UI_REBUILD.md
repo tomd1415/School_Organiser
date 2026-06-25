@@ -208,7 +208,22 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   Gaps-filter nav). Gallery fixture + item (now 15). Verified: typecheck · 940 unit · 377 integration ·
   gallery + coverage E2E · screenshot.
 
-**Next:** the rest of CURRICULUM (Resources §10) · CLASSES (Pupils §11) · SETUP
+- **Resources (`/resources`, SPEC §10)** — redesigned the existing `resourceView.ts` to the §10 hosted
+  store: a search box + **filter pills** (All · per-kind) — rendered as **radio inputs** so the kind
+  survives every live-search submit (the form serialises the checked radio; no JS) — over a **card grid**
+  (`auto-fill, minmax(290px,1fr)`). Each card: a **kind badge** (Slides teal · Worksheet green · Quiz amber ·
+  others grey, via shared `.badge` tones) · **version** (mono) · title · meta (**🔗 linked-lesson count** ·
+  size · source) · **Open / Present ↗** (slides only, → the existing `/resources/:id/present`) / download,
+  plus the where-used 📋→🔗 panel and the ⚖ attribution line. `renderResourceItem` stays an `<li>` so the
+  upload/generate/version POSTs still prepend a card into the grid. New `paths.resourcePresent()` builder
+  (+ oracle). CSS: `.res-grid`/`.res-card*`/`.res-pill(.is-on)` in `styles-base-widgets.css`. **Tests:**
+  `tests/resourceView.test.ts` (5) + `e2e/resources.spec.ts` (boot + pill-filter). Gallery fixture + item
+  (now 16). Verified: typecheck · 946 unit · 377 integration (resource page/search/where-used assertions
+  still green) · gallery + resources E2E · screenshot.
+
+**✅ CURRICULUM group complete** (Schemes · Map · Coverage · Resources).
+
+**Next:** CLASSES (Pupils §11) · SETUP
 (Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
 cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 

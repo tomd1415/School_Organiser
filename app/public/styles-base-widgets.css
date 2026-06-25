@@ -504,6 +504,20 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .res-pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; font-size: 0.85rem; }
 .res-list { list-style: none; padding: 0; margin: 0; }
 .res { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+/* §10 resources: search + filter pills, then a kind-badged card grid. */
+.res-search { flex-direction: column; align-items: stretch; }
+.res-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.res-pill { position: relative; font-size: 0.8rem; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; color: var(--muted); }
+.res-pill input { position: absolute; opacity: 0; pointer-events: none; }
+.res-pill.is-on { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.res-grid { list-style: none; padding: 0; margin: 0.6rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.res-card { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.8rem 0.9rem; }
+.res-card-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.res-ver { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 0.72rem; color: var(--muted); }
+.res-card-title { font-weight: 600; text-decoration: none; }
+.res-card-meta { font-size: 0.78rem; display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; align-items: center; }
+.res-card .res-used { padding: 0; }
+.res-card-actions { display: flex; gap: 0.7rem; align-items: center; margin-top: auto; padding-top: 0.35rem; }
 .res-kind { font-size: 1.1rem; }
 .res-meta { font-size: 0.78rem; margin-left: auto; }
 .res-unit { font-size: 0.72rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 0.35rem; }
