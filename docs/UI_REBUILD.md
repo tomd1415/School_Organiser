@@ -79,8 +79,15 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
   gallery+boot E2E · screenshots. (The repo's task model is urgency-based, so the tabs follow the real
   views — Open/Interest — rather than the mock's Today/Scheduled.)
 
-**Next:** Marking → Oversee → Focus → Planner → Timetable → Now (Focus/Planner/Oversee need their inline
-route-renders extracted into `*View.ts` first).
+- **Marking (`/marking`)** — *not a detailed SPEC section* (the marking **modal** is §17), so this was a
+  light **align-to-the-design-system** pass: the status pills now use the shared `.badge` tones (to-confirm
+  →amber · to-look-at→red · unmarked→grey · all-checked→green), the Mark action uses the shared `.button`,
+  width set to `wide`, and wide tables get a `.table-container { overflow-x:auto }` + `min-width` so they
+  scroll in portrait. It already used the shared stat grid + cards. Verified: typecheck · 899 unit · marking
+  integration (14) · boot E2E.
+
+**Next:** Oversee → Focus → Planner → Timetable → Now (Oversee/Focus/Planner need their inline route-renders
+extracted into `*View.ts` first).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

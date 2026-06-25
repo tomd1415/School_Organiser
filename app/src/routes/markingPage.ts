@@ -58,6 +58,6 @@ export function registerMarkingPageRoutes(app: FastifyInstance): void {
       : `<p class="mk-gate">Auto-marking is currently <strong>off</strong>. You can still open a lesson to see pupil answers beside the model answers — turn marking on in <a href="/settings">Settings → Auto-marking</a> to record marks.</p>`;
 
     const body = renderMarkingPage({ rows, toDo, gateNote, csrf });
-    return reply.type('text/html').send(layout({ title: 'Marking', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Marking', body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 }
