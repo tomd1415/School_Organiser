@@ -1691,7 +1691,8 @@ html[data-textscale="3"] { font-size: 142%; }
 @media (max-width: 640px) { .mm-grid { grid-template-columns: 1fr; } .mm-next { margin-left: 0; } }
 
 /* /marking landing page */
-.mk-table { width:100%; border-collapse: collapse; margin-top: 0.6rem; }
+.table-container { overflow-x: auto; } /* wide tables scroll inside the card in portrait (SPEC §0) */
+.mk-table { width:100%; min-width: 640px; border-collapse: collapse; margin-top: 0.6rem; }
 .mk-table th, .mk-table td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .mk-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
 .mk-when { white-space: nowrap; color: var(--muted); font-size: 0.9rem; }

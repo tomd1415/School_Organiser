@@ -15,15 +15,17 @@ export interface MarkingRow {
   answers: number;
 }
 
-function pill(n: number, cls: string, label: string): string {
-  return n > 0 ? `<span class="mk-pill ${cls}" title="${label}">${n} ${label}</span>` : '';
+// Status pills use the shared .badge tones (Rail & Stage rebuild): to-confirm→amber, to-look-at→red,
+// unmarked→grey, all-checked→green — so Marking matches the rest of the redesign.
+function pill(n: number, tone: string, label: string): string {
+  return n > 0 ? `<span class="badge ${tone}" title="${label}">${n} ${label}</span>` : '';
 }
 
 function rowHtml(r: MarkingRow): string {
   const done = r.marked >= r.answers && r.toConfirm === 0;
   const status = done
-    ? `<span class="mk-pill mk-done">✓ all checked</span>`
-    : `${pill(r.toConfirm, 'mk-confirm', 'to confirm')}${pill(r.needsReview, 'mk-warn', 'to look at')}${r.marked < r.answers ? `<span class="mk-pill mk-todo">${r.answers - r.marked} unmarked</span>` : ''}`;
+    ? `<span class="badge good">✓ all checked</span>`
+    : `${pill(r.toConfirm, 'warn', 'to confirm')}${pill(r.needsReview, 'red', 'to look at')}${r.marked < r.answers ? `<span class="badge">${r.answers - r.marked} unmarked</span>` : ''}`;
   return `<tr class="${done ? 'mk-row-done' : ''}">
     <td class="mk-when">${esc(r.date)}</td>
     <td><strong>${esc(r.groupName)}</strong> <span class="muted">${esc(r.courseName)}</span></td>
@@ -31,7 +33,7 @@ function rowHtml(r: MarkingRow): string {
     <td class="mk-num">${r.pupilsWithWork}</td>
     <td class="mk-status">${status}</td>
     <td>
-      <button type="button" class="btn-secondary mk-mark" ${markOpenAttrs(paths.occMark(r.oc))}>✎ Mark</button>
+      <button type="button" class="button small mk-mark" ${markOpenAttrs(paths.occMark(r.oc))}>✎ Mark</button>
       <a class="link mk-atl" href="${paths.occAtl(r.oc)}" title="whole-class attitude-to-learning grid">ATL</a>
     </td>
   </tr>`;
