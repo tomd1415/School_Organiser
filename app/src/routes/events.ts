@@ -33,7 +33,7 @@ export function registerEventRoutes(app: FastifyInstance): void {
         <p class="muted">Parents' evenings, deadlines, exams, INSET, trips — and contact you owe. "Blocks work" removes the overlapping work window.</p>
         ${listHtml}
       </section>`;
-    return reply.type('text/html').send(layout({ title: "What's coming", body, authed: true, csrfToken: csrf, width: 'reading' }));
+    return reply.type('text/html').send(layout({ title: "What's coming", body, authed: true, csrfToken: csrf, width: 'working' }));
   });
 
   app.post('/events', guard, async (_req, reply) => {

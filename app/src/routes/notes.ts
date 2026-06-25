@@ -133,6 +133,6 @@ export function registerNoteRoutes(app: FastifyInstance): void {
         ${chipsHtml}
         ${gridHtml}
       </section>`;
-    return reply.type('text/html').send(layout({ title: 'Notes', body, authed: true, csrfToken: csrf, width: 'working' }));
+    return reply.type('text/html').send(layout({ title: 'Notes', body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 }
