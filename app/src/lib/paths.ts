@@ -52,6 +52,8 @@ export const paths = {
   lessonPrint: (lesson: number, date: string): string => `/lesson/print?lesson=${lesson}&amp;date=${esc(date)}`,
   todayPrint: (date: string): string => `/today/print?date=${esc(date)}`,
   schemesCourse: (course?: number | null): string => `/schemes?course=${course ?? ''}`,
+  coverage: (): string => '/coverage',
+  coverageFiltered: (course: number, cov: 'all' | 'covered' | 'gaps'): string => `/coverage?course=${course}&amp;cov=${cov}`,
   mapSlot: (lesson: number, gc: number): string => `/map?slot=${lesson}:${gc}`,
   pupilPreview: (gc: number | null, lp: number, level: string): string => `/lesson/pupil-preview?${scopeQ(gc)}&amp;lp=${lp}&amp;level=${level}`,
   present: (gc: number | null, lp: number, level: string): string => `/lesson/present?${scopeQ(gc)}&amp;lp=${lp}&amp;level=${level}`,

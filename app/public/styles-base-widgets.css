@@ -204,6 +204,33 @@ body[data-shell="next"] .eyebrow { text-transform: uppercase; letter-spacing: 0.
 .cov-checklist { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0 0.5rem 1rem; }
 .cov-check { font-weight: 400; }
 .cov-points code, .cov-uncovered code, .cov-check code { color: var(--muted); }
+/* §9 coverage report: filterable spec-area cards with % bars + status-dot point rows. */
+.cov-report-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.cov-report-head h2 { margin: 0; }
+.cov-overall { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; font-size: 0.9rem; }
+.cov-bar { display: inline-block; width: 80px; height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; vertical-align: middle; }
+.cov-bar-lg { width: 120px; height: 8px; }
+.cov-bar-fill { display: block; height: 100%; background: var(--good); border-radius: 4px; }
+.cov-filter { display: flex; gap: 6px; flex-wrap: wrap; margin: 0.6rem 0 1rem; }
+.cov-area { border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.9rem; margin-bottom: 0.8rem; background: var(--card); }
+.cov-area-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+.cov-area-head h3 { margin: 0; font-size: 0.95rem; }
+.cov-area-count { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cov-area-head .cov-bar { margin-left: auto; }
+.cov-points-list { list-style: none; margin: 0; padding: 0; }
+.cov-point { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.75rem; padding: 0.3rem 0; border-top: 1px solid var(--line); }
+.cov-point:first-child { border-top: 0; }
+.cov-pt-main { display: flex; align-items: baseline; gap: 0.5rem; flex: 1; min-width: 0; }
+.cov-pt-meta { font-size: 0.8rem; }
+.cov-dot { font-weight: 700; flex: none; }
+.cov-dot-ok { color: var(--good); }
+.cov-dot-gap { color: var(--error); }
+.cov-code { color: var(--muted); flex: none; }
+.cov-label { min-width: 0; }
+.cov-by { color: var(--accent); text-decoration: none; font-weight: 600; }
+.cov-notyet { color: var(--error); }
+.cov-manage { margin-top: 1rem; }
+.cov-manage > summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 .cov-drop-warn { background: #fff4e5; border: 1px solid #f0c98a; color: #7a4a00; border-radius: 8px; padding: 0.5rem 0.8rem; margin: 0 0 0.8rem; font-size: 0.95rem; }
 
 /* timetable grid */
