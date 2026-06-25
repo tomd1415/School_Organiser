@@ -3401,6 +3401,40 @@ body[data-shell="next"] .ev-edit > summary { cursor: pointer; color: var(--quiet
 body[data-shell="next"] .ev-edit-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
 body[data-shell="next"] .ev-actions { flex: none; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; }
 
+/* ── Tasks (Rail & Stage rebuild — SPEC §4): segmented tabs + tone task cards ─────────────────────── */
+body[data-shell="next"] .tasks-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+body[data-shell="next"] .tasks-head h1 { margin: 0; }
+body[data-shell="next"] .tasks-head-actions { display: flex; gap: 8px; align-items: center; }
+
+body[data-shell="next"] .seg-tabs { display: inline-flex; gap: 3px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: 9px; padding: 3px; margin-bottom: 16px; flex-wrap: wrap; }
+body[data-shell="next"] .seg-tab { display: inline-flex; align-items: center; gap: 6px; border-radius: 7px; padding: 6px 12px; min-height: 34px; color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 700; }
+body[data-shell="next"] .seg-tab:hover { color: var(--text); }
+body[data-shell="next"] .seg-tab.is-on { background: var(--surface-3); color: #fff; }
+body[data-shell="next"] .seg-n { background: var(--surface-2); color: var(--muted); font-size: 0.7rem; min-width: 18px; height: 18px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+body[data-shell="next"] .seg-tab.is-on .seg-n { background: var(--teal); color: #07201d; }
+
+body[data-shell="next"] .task-cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+body[data-shell="next"] .task-card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--line-strong); border-radius: 12px; padding: 10px 12px; }
+body[data-shell="next"] .task-card.ts-red { border-left-color: var(--red); }
+body[data-shell="next"] .task-card.ts-amber { border-left-color: var(--amber); }
+body[data-shell="next"] .task-card.ts-teal { border-left-color: var(--teal); }
+body[data-shell="next"] .task-card.is-done { opacity: 0.7; }
+body[data-shell="next"] .task-head { display: flex; align-items: center; gap: 8px; }
+body[data-shell="next"] .task-check { flex: none; background: transparent; border: none; color: var(--muted); font-size: 1.15rem; cursor: pointer; min-width: 28px; min-height: 28px; padding: 0; }
+body[data-shell="next"] .task-check.on { color: var(--green); }
+body[data-shell="next"] .task-card .task-title { flex: 1; min-width: 0; background: transparent; border: 1px solid transparent; color: var(--text); border-radius: 8px; padding: 4px 6px; font: inherit; font-weight: 600; }
+body[data-shell="next"] .task-card .task-title:hover { border-color: var(--line); }
+body[data-shell="next"] .task-card .task-title:focus { border-color: var(--line-strong); background: var(--bg); outline: none; }
+body[data-shell="next"] .task-card.is-done .task-title { text-decoration: line-through; color: var(--muted); }
+body[data-shell="next"] .task-src { flex: none; font-family: ui-monospace, monospace; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; color: var(--teal); border: 1px solid var(--teal); border-radius: 4px; padding: 1px 5px; }
+body[data-shell="next"] .task-star { flex: none; }
+body[data-shell="next"] .task-edit { margin: 6px 0 0 6px; }
+body[data-shell="next"] .task-edit > summary { cursor: pointer; color: var(--quiet); font-size: 0.78rem; min-height: 30px; display: inline-flex; align-items: center; }
+body[data-shell="next"] .task-edit-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+body[data-shell="next"] .task-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+body[data-shell="next"] .task-foot-actions { display: flex; gap: 10px; align-items: center; }
+body[data-shell="next"] .task-empty { padding: 12px; }
+
 body[data-shell="next"] .cc-master,
 body[data-shell="next"] .ex-banner.ex-free,
 body[data-shell="next"] .now-exbanner.now-ex-free,

@@ -7,6 +7,7 @@ import type { CapturedItem } from '../services/captured';
 import type { GroupOpt } from '../repos/tasks';
 import type { NoteCard } from './notesView';
 import type { UpcomingEvent } from '../services/event';
+import type { TaskRow } from '../repos/tasks';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -93,6 +94,15 @@ export const GALLERY_EVENTS: UpcomingEvent[] = [
   { id: 3, kind: 'trip', title: 'Bletchley Park trip', date: '2026-07-03', leadDays: 14, affectsAvailability: true, status: 'upcoming' },
   { id: 4, kind: 'parents_evening', title: "Year 11 parents' evening", date: '2026-07-15', leadDays: null, affectsAvailability: false, status: 'upcoming' },
   { id: 5, kind: 'other', title: 'Order new micro:bits', date: null, leadDays: null, affectsAvailability: false, status: 'upcoming' },
+];
+
+// Tasks (SPEC §4): variety across tones + states — an email inbox item, an urgent one, an interest one,
+// and a done (struck) one.
+export const GALLERY_TASKS: TaskRow[] = [
+  { id: 1, title: 'Reply to parent about Y9 homework load', detail: '• from: a.parent@example.com\nCould we have a quick chat about the homework this term?\n(imported from the intake mailbox)', urgency: 'this_week', estimateMin: 10, cognitiveLoad: 'low', groupId: 2, context: null, status: 'inbox', interest: false, source: 'email' },
+  { id: 2, title: 'Print the cover work for P3', detail: null, urgency: 'urgent_today', estimateMin: 5, cognitiveLoad: 'low', groupId: null, context: 'staffroom printer', status: 'triaged', interest: false, source: null },
+  { id: 3, title: 'Plan the recursion lesson properly', detail: null, urgency: 'by_next_lesson', estimateMin: 45, cognitiveLoad: 'high', groupId: 2, context: null, status: 'triaged', interest: true, source: null },
+  { id: 4, title: 'Tidy the shared resources folder', detail: null, urgency: 'someday', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'done', interest: false, source: null },
 ];
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.

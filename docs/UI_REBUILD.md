@@ -69,8 +69,18 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
 
 **✅ RECORD group complete** (Captured · Notes · Events).
 
-**Next:** the **TODAY** group — Tasks → Marking → Oversee → Focus → Planner → Timetable → Now (the bigger
-daily-driver screens; Focus/Planner/Oversee need their inline route-renders extracted into `*View.ts` first).
+### TODAY group (in progress)
+- **Tasks (`/tasks`, SPEC §4)** — a **segmented tab control** (Inbox / Open / Done / ⭐ Interest, with
+  counts from a new `taskCounts()`) over **tone-left-border task cards**: urgency-toned left border (urgent
+  →red · by-next-lesson→amber · this-week/email/scheduled→teal · someday→grey), an **EMAIL** source tag
+  (`TaskRow.source` now exposed), a **done-checkbox** (struck-through when done), the urgency badge, the ✉
+  email detail, and triage/edit controls in a disclosure (open while triaging an inbox item). Repurposed
+  `taskView` (tasks-only). Gallery fixture added. Verified: typecheck · 899 unit · tasks integration ·
+  gallery+boot E2E · screenshots. (The repo's task model is urgency-based, so the tabs follow the real
+  views — Open/Interest — rather than the mock's Today/Scheduled.)
+
+**Next:** Marking → Oversee → Focus → Planner → Timetable → Now (Focus/Planner/Oversee need their inline
+route-renders extracted into `*View.ts` first).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

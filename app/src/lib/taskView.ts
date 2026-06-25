@@ -48,38 +48,61 @@ export function renderEmailDetail(detail: string): string {
     ${provenance ? `<p class="task-detail-prov">${esc(provenance)}</p>` : ''}`;
 }
 
+// Rail & Stage rebuild (SPEC §4): a task card with a tone left-border (by urgency / email / scheduled),
+// an editable title, urgency badge + EMAIL source tag, a done-checkbox (non-inbox; struck when done), and
+// the triage/edit controls in a disclosure (open while triaging an inbox item). All saves are unchanged.
+const BADGE_OF: Record<string, string> = { red: 'red', amber: 'warn', teal: 'live', quiet: '' };
+function taskTone(t: TaskRow): 'red' | 'amber' | 'teal' | 'quiet' {
+  if (t.urgency === 'urgent_today') return 'red';
+  if (t.urgency === 'by_next_lesson') return 'amber';
+  if (t.source === 'email' || t.status === 'scheduled' || t.urgency === 'this_week') return 'teal';
+  return 'quiet';
+}
+
 export function renderTaskItem(t: TaskRow, groups: GroupOpt[]): string {
   const save = (trigger: string) => `hx-post="${paths.task(t.id)}" hx-swap="none" hx-trigger="${trigger}"`;
-  const triage =
-    t.status === 'inbox'
-      ? `<button type="button" class="link" hx-post="${paths.taskTriage(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">▶ open</button>`
-      : '';
+  const tone = taskTone(t);
+  const isInbox = t.status === 'inbox';
+  const isDone = t.status === 'done' || t.status === 'dropped';
   const detail = (t.detail ?? '').trim();
-  return `<li class="task" id="task-${t.id}">
-    <input class="task-title" type="text" name="title" value="${esc(t.title)}" placeholder="Task…" ${save('input changed delay:600ms, blur')}>
-    ${detail ? `<details class="task-detail"><summary>✉ what it says</summary><div class="task-detail-body">${renderEmailDetail(detail)}</div></details>` : ''}
-    <div class="task-controls">
-      <select name="urgency" ${save('change')}>${enumOptions(URGENCIES, URGENCY_LABELS, t.urgency)}</select>
-      <input class="task-est" type="number" name="estimate_min" min="0" step="5" value="${t.estimateMin ?? ''}" placeholder="min" ${save('input changed delay:600ms, blur')}>
-      <select name="cognitive_load" ${save('change')}>${enumOptions(LOADS, LOAD_LABELS, t.cognitiveLoad, '— load —')}</select>
-      <select name="group_id" ${save('change')}>${groupOptions(groups, t.groupId)}</select>
-      <input class="task-ctx" type="text" name="context" value="${esc(t.context ?? '')}" placeholder="context" ${save('input changed delay:600ms, blur')}>
-      <span class="note-status" id="task-${t.id}-status"></span>
+  const check = isInbox
+    ? ''
+    : `<button type="button" class="task-check${isDone ? ' on' : ''}" title="${isDone ? 'done' : 'mark done'}"${isDone ? '' : ` hx-post="${paths.taskDone(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML"`}>${isDone ? '☑' : '☐'}</button>`;
+  return `<li class="task-card ts-${tone}${isDone ? ' is-done' : ''}" id="task-${t.id}">
+    <div class="task-head">
+      ${check}
+      <input class="task-title" type="text" name="title" value="${esc(t.title)}" placeholder="Task…" ${save('input changed delay:600ms, blur')}>
+      ${t.source === 'email' ? '<span class="task-src">EMAIL</span>' : ''}
+      <span class="badge ${BADGE_OF[tone]}">${esc(URGENCY_LABELS[t.urgency] ?? t.urgency)}</span>
+      <button type="button" class="link task-star${t.interest ? ' on' : ''}" title="Current interest" hx-post="${paths.taskInterest(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">${t.interest ? '⭐' : '☆'}</button>
     </div>
-    <div class="task-actions">
-      ${triage}
-      <button type="button" class="link${t.interest ? ' on' : ''}" title="Current interest" hx-post="${paths.taskInterest(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">${t.interest ? '⭐' : '☆'}</button>
-      ${t.status === 'done' || t.status === 'dropped' ? '' : `<button type="button" class="link" hx-post="${paths.timerStart()}" hx-vals='{"task":${t.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ time</button>`}
-      <button type="button" class="link" hx-post="${paths.taskDone(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">✓ done</button>
-      <button type="button" class="link danger" hx-post="${paths.taskDrop(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">drop</button>
+    ${detail ? `<details class="task-detail"${isInbox ? ' open' : ''}><summary>✉ what it says</summary><div class="task-detail-body">${renderEmailDetail(detail)}</div></details>` : ''}
+    <details class="task-edit"${isInbox ? ' open' : ''}>
+      <summary>${isInbox ? 'Triage — urgency · time · load · class' : 'Edit'}</summary>
+      <div class="task-edit-row">
+        <select name="urgency" ${save('change')}>${enumOptions(URGENCIES, URGENCY_LABELS, t.urgency)}</select>
+        <input class="task-est" type="number" name="estimate_min" min="0" step="5" value="${t.estimateMin ?? ''}" placeholder="min" ${save('input changed delay:600ms, blur')}>
+        <select name="cognitive_load" ${save('change')}>${enumOptions(LOADS, LOAD_LABELS, t.cognitiveLoad, '— load —')}</select>
+        <select name="group_id" ${save('change')}>${groupOptions(groups, t.groupId)}</select>
+        <input class="task-ctx" type="text" name="context" value="${esc(t.context ?? '')}" placeholder="context" ${save('input changed delay:600ms, blur')}>
+      </div>
+    </details>
+    <div class="task-foot">
+      <span class="note-status" id="task-${t.id}-status"></span>
+      <span class="task-foot-actions">
+        ${isInbox ? `<button type="button" class="button small" hx-post="${paths.taskTriage(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">▶ Triage</button>` : ''}
+        ${isDone ? '' : `<button type="button" class="link" hx-post="${paths.timerStart()}" hx-vals='{"task":${t.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ time</button>`}
+        ${isDone ? '' : `<button type="button" class="link danger" hx-post="${paths.taskDrop(t.id)}" hx-target="#task-${t.id}" hx-swap="outerHTML">drop</button>`}
+      </span>
     </div>
   </li>`;
 }
 
 export function renderTaskList(listId: string, tasks: TaskRow[], groups: GroupOpt[]): string {
-  return `<ul class="tasks-list notes-list" id="${esc(listId)}">${tasks.map((t) => renderTaskItem(t, groups)).join('')}</ul>`;
+  const cards = tasks.map((t) => renderTaskItem(t, groups)).join('');
+  return `<ul class="task-cards" id="${esc(listId)}">${cards || '<li class="muted task-empty">Nothing here.</li>'}</ul>`;
 }
 
 export function renderNewTaskButton(listId: string): string {
-  return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.tasks()}" hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New task</button>`;
+  return `<button type="button" class="button" data-new-note hx-post="${paths.tasks()}" hx-target="#${esc(listId)}" hx-swap="beforeend">＋ Task</button>`;
 }
