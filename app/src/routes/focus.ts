@@ -22,6 +22,7 @@ import { renderTimerBanner } from './timer';
 import { callLLMStructured } from '../llm/client';
 import { taskBreakdownSchema } from '../llm/schemas/taskBreakdown';
 import { TASK_BREAKDOWN_SYSTEM, TASK_BREAKDOWN_VERSION, taskBreakdownInstruction } from '../llm/prompts/taskBreakdown';
+import { renderFocusInner, renderSubStep, type FocusVM } from '../lib/focusView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -29,10 +30,6 @@ function modeForMinutes(minutes: number): FocusMode {
   if (minutes < 9 * 60) return 'morning';
   if (minutes >= 16 * 60) return 'end_of_day';
   return 'free_period';
-}
-
-function renderSubStep(s: SubStep): string {
-  return `<li id="substep-${s.id}" class="fu${s.done ? ' done' : ''}"><label><input type="checkbox" ${s.done ? 'checked' : ''} hx-post="/focus/substep/${s.id}/toggle" hx-target="#substep-${s.id}" hx-swap="outerHTML"> ${esc(s.title)}</label></li>`;
 }
 
 /** Build the focus card (everything inside #focus-inner). Reused by GET /focus and done-and-next.
@@ -72,40 +69,18 @@ async function buildInner(now: Date, modeOverride: FocusMode | null): Promise<{ 
   // What's on screen: the picked task + the effective mode. The poll re-renders only when this shifts.
   const sig = `${picked?.id ?? 'none'}|${mode}`;
   const pollUrl = `/focus/inner?sig=${encodeURIComponent(sig)}${modeOverride ? `&mode=${modeOverride}` : ''}`;
-  const poller = `<div class="focus-poll" data-bg-poll hx-get="${pollUrl}" hx-trigger="every 45s" hx-target="#focus-inner" hx-swap="innerHTML" style="display:none"></div>`;
-
-  const tab = (m: FocusMode, label: string) =>
-    `<a href="/focus?mode=${m}"${m === mode ? ' class="active"' : ''}>${label}</a>`;
-  const modeNav = `<nav class="task-tabs">${tab('morning', 'Morning')} ${tab('free_period', 'Free period')} ${tab('end_of_day', 'End of day')}</nav>`;
-
-  if (!picked) {
-    const done =
-      mode === 'end_of_day'
-        ? `<div class="focus-done"><h1>✅ You're done — go home.</h1><p class="muted">Nothing quick or urgent is left. Anything heavier is parked for tomorrow.</p></div>`
-        : `<div class="focus-done"><h1>Nothing to focus on</h1><p class="muted">No eligible task right now${windowMinutes != null ? ` that fits ${windowMinutes} min` : ''}.</p></div>`;
-    return { html: `${modeNav}${done}${poller}`, sig };
-  }
-
-  const subs = await listSubtasks(picked.id);
-  const subList = subs.map(renderSubStep).join('');
-  const window = windowMinutes != null ? ` · ~${windowMinutes} min window` : '';
-
-  return { html: `${modeNav}
-    <div class="focus-card">
-      <p class="kicker">Do this now${window}</p>
-      <h1>${esc(picked.title)}</h1>
-      <ul class="followups" id="substeps-${picked.id}">${subList}</ul>
-      <form class="fu-form" hx-post="/focus/${picked.id}/breakdown" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
-        <input type="text" name="text" data-followup placeholder="+ break into a step" autocomplete="off">
-      </form>
-      <button type="button" class="link fu-ai" hx-post="/focus/${picked.id}/breakdown-ai" hx-target="#substeps-${picked.id}" hx-swap="beforeend" hx-disabled-elt="this">✨ Break down with AI</button>
-      <div class="focus-actions">
-        <button type="button" class="btn-secondary" hx-post="/timer/start" hx-vals='{"task":${picked.id}}' hx-target="#timer-banner" hx-swap="outerHTML">▶ start</button>
-        <button type="button" class="btn-secondary" hx-post="/focus/${picked.id}/done" hx-target="#focus-inner" hx-swap="innerHTML">✓ done &amp; next</button>
-        <a class="link" href="/tasks">see all tasks</a>
-      </div>
-      <p class="muted">${hidden} other task${hidden === 1 ? '' : 's'} hidden — on purpose.</p>
-    </div>${poller}`, sig };
+  const subs = picked ? await listSubtasks(picked.id) : [];
+  const vm: FocusVM = {
+    mode,
+    pollUrl,
+    picked: picked
+      ? { id: picked.id, title: picked.title, urgency: picked.urgency, estimateMin: picked.estimateMin, cognitiveLoad: picked.cognitiveLoad }
+      : null,
+    windowMinutes,
+    hidden,
+    subStepsHtml: subs.map(renderSubStep).join(''),
+  };
+  return { html: renderFocusInner(vm), sig };
 }
 
 export function registerFocusRoutes(app: FastifyInstance): void {
@@ -124,7 +99,7 @@ export function registerFocusRoutes(app: FastifyInstance): void {
       inner = `<p class="muted">Focus is unavailable — the database is not reachable.</p>`;
     }
     const body = `<section class="card focus" hx-headers='{"x-csrf-token":"${csrf}"}'>${banner}<div id="focus-inner">${inner}</div></section>`;
-    return reply.type('text/html').send(layout({ title: 'Focus', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Focus', body, authed: true, csrfToken: csrf, width: 'working' }));
   });
 
   // Self-poll target (every 45s from inside #focus-inner): re-render only when the picked task or mode

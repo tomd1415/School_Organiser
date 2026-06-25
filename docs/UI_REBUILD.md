@@ -102,7 +102,20 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
 - Rail groupings already match the advice (Concepts/Recurring/Time as power; Club/Free/TA contextual, not rail
   items; Radar/standalone-Planning/Cover correctly absent). No nav changes needed.
 
-**Next:** Focus → Planner → Timetable → Now (Focus/Planner need their inline route-renders extracted first).
+- **Focus (`/focus`, SPEC §5)** — **extracted** the inline render into `src/lib/focusView.ts`
+  (`renderSubStep` + `renderFocusInner(vm)`; the route's `buildInner` keeps the FocusService data work and
+  passes a view-model). Redesigned to the spec: a 3-mode **segmented control** (Morning / Free period / End
+  of day) over a big **teal-gradient "Do this now" card** — caption (urgency · ~N min window · estimate ·
+  load), tappable step checklist, break-down (+ AI), Done & next / Start timer, and "N hidden — on purpose";
+  the empty end-of-day shows the green **wind-down** banner. New `paths.focus*` builders. Width `working`.
+  Gallery fixture. **Tests added** (per your request, incl. Playwright): `tests/focusView.test.ts` (4 render
+  cases) + `e2e/focus.spec.ts` (live: 3 mode tabs, card-or-windown, mode-switch, no console errors). Verified:
+  typecheck · 907 unit · focus integration (2) · 19 E2E.
+
+**Testing discipline (from here on):** each screen gets a **view unit test** + a **Playwright spec** (live
+render + no console errors + a key interaction), on top of the gallery fixture + boot/gallery E2E.
+
+**Next:** Planner → Timetable → Now (Planner needs its inline route-render extracted first).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

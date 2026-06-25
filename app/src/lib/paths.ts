@@ -160,6 +160,13 @@ export const paths = {
   tasksPaste: (): string => '/tasks/paste',
   tasksCalibrate: (): string => '/tasks/calibrate',
 
+  // ── Focus (one-thing-now) ───────────────────────────────────────────────────────────────────────
+  focusMode: (mode: string): string => `/focus?mode=${mode}`,
+  focusDone: (id: number): string => `/focus/${id}/done`,
+  focusBreakdown: (id: number): string => `/focus/${id}/breakdown`,
+  focusBreakdownAi: (id: number): string => `/focus/${id}/breakdown-ai`,
+  focusSubstepToggle: (id: number): string => `/focus/substep/${id}/toggle`,
+
   // ── Recurring task defs ─────────────────────────────────────────────────────────────────────────
   recurringDef: (id: number): string => `/recurring/${id}`,
   recurringDefToggle: (id: number, action: 'activate' | 'deactivate'): string => `/recurring/${id}/${action}`,

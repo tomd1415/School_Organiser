@@ -3450,6 +3450,20 @@ body[data-shell="next"] .ov-ta { font-size: 0.85rem; color: var(--muted); }
 body[data-shell="next"] .ov-spacer { flex: 1; }
 body[data-shell="next"] .ov-card-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 
+/* ── Focus (Rail & Stage rebuild — SPEC §5): one-thing-now teal card + wind-down ──────────────────── */
+body[data-shell="next"] .focus-modes { margin-bottom: 16px; }
+body[data-shell="next"] .focus-card { background: linear-gradient(135deg, var(--teal-soft), var(--surface)); border: 1px solid var(--teal); border-radius: 16px; padding: 22px 24px; }
+body[data-shell="next"] .focus-kicker { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal); font-weight: 700; }
+body[data-shell="next"] .focus-title { margin: 6px 0 4px; font-size: 1.55rem; }
+body[data-shell="next"] .focus-caption { margin: 0 0 14px; color: var(--muted); font-size: 0.88rem; }
+body[data-shell="next"] .focus-steps { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+body[data-shell="next"] .focus-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+body[data-shell="next"] .focus-hidden { margin: 12px 0 0; font-size: 0.82rem; }
+body[data-shell="next"] .focus-done { text-align: center; padding: 40px 20px; }
+body[data-shell="next"] .focus-done h1 { margin: 0 0 6px; }
+body[data-shell="next"] .focus-clear { background: var(--green-soft); border: 1px solid var(--green); border-radius: 16px; }
+body[data-shell="next"] .focus-clear h1 { color: var(--green); }
+
 body[data-shell="next"] .cc-master,
 body[data-shell="next"] .ex-banner.ex-free,
 body[data-shell="next"] .now-exbanner.now-ex-free,
