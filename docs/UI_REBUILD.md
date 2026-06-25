@@ -241,11 +241,45 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   **stale checked-date red** · archive-not-delete). Only gap closed: added **`min-width:760px`** to
   `.kit-table` so the table scrolls inside its wrapper on narrow screens (SPEC §12) rather than crushing.
 
-**Next:** SETUP — **Settings §3** (a 6-section card rebuild: School · AI · TA · Email · Password · Data-health,
-toggles + ✓-Saved chips; the page already uses `renderToggle`), **`/time` §6** (today's time-blocks list),
-**Setup §16** (year admin). Then the **Lesson cockpit §17** — the deepest screen, its own dedicated pass —
-and the pupil `/me` overlay (DPIA-gated). Deferred: the Schemes Classes-matrix lens + the Pupils §11
-cohort-analytics layer (both need data wiring).
+- **Settings (`/settings`, SPEC §3)** — restructured from one long `.card` of `<h2>` blocks into a
+  **reading-width column of stacked section cards** (each section its own `.card`): School · Navigation ·
+  Password · AI · TA access · Pupil access · Auto-marking · Email intake · Data health. The page already
+  inline-autosaves and uses the pill `renderToggle` (AI features / reviewer); width set to **`reading`**.
+  Pure re-wrap — no IDs/forms/targets changed, so every autosave/DPIA-gate/HTMX flow is intact. CSS:
+  `.settings-page`/`.settings-head`/`.settings-section` in `styles-base-widgets.css`. Verified: typecheck ·
+  946 unit · screens integration · screenshot (reading-width section cards). (Kept the existing section set
+  + order — the SPEC's extra sections like Navigation/Pupil/Auto-marking have no SPEC slot but must stay.)
+
+- **Planner / time & actuals (`/time`, SPEC §6)** — the repo's `/time` *is* §6 (confirmed earlier: the rail
+  "Planner" is the lesson-laying grid; §6 = time & actuals here). It already shows **Work windows**
+  (slot · time mono · duration, timetable-derived) + a planned/actual **Work log**. Added the §6 **status
+  marks** (▢ planned · ▣ done · ⚠ diverted-keeps-the-plan-in-amber) to each log block and set the page to
+  **`reading`** width. CSS: `.wb-status.wb-done`/`.wb-diverted` tones. Verified: typecheck · 946 unit ·
+  screenshot. (The SPEC's break/lunch "✕ not work time" rows aren't shown — the Work-windows model already
+  excludes them; the timetable-derived per-block model is a larger feature, not pursued.)
+
+- **Year setup (`/setup`, SPEC §16)** — **verified already aligned, no changes**: the tabbed admin hub
+  (Year & terms · Day shape · Rooms & staff · Courses · Groups & pupils · Timetable) already reads cleanly
+  in the rebuilt shell — tab pills, dark-themed `.setup-table`s inside `.table-scroll`, the Prep-&-Advanced
+  eyebrow/heading. Matches §16's "hub for rarely-changed things"; the §16 data/safety tiles (backups, SAR/
+  erasure, idle logout, AI-call audit) surface from **Settings → Data health** (now carded). Screenshot-confirmed.
+
+## Status
+
+**✅ Rebuilt & verified:** Foundation (rail · header · toggle · gallery kit) · **RECORD** (Captured · Notes ·
+Events) · **TODAY** (Tasks · Marking · Oversee · Focus · Planner · Timetable · Now) · **CURRICULUM** (Schemes ·
+Map · Coverage · Resources) · **CLASSES** (Pupils) · **SETUP** (Kit · Settings · `/time` · Setup) · Safeguarding
+(pinned). Gallery now showcases 16 fixture-backed views; full gate green throughout (typecheck · 946 unit ·
+377 integration · E2E).
+
+**Remaining — each its own focused session:**
+- **Lesson cockpit (`/lesson/:id`, §17)** — the deepest screen (board mirror · in-lesson flow tracker · right
+  icon rail · modals · marking modal · adaptation override-else-master scope strip). The SPEC itself flags it
+  for a dedicated pass; not started.
+- **Pupil `/me` overlay** — the calm light-theme pupil worksheet surface, behind the DPIA gate.
+
+**Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
+**cohort-analytics** layer (class chips · level chips · completion % · ATL trend).
 (Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
 cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 

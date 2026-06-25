@@ -124,7 +124,7 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
           NAV_MODEL,
           featureModelPickerHtml: featureModelPicker,
         });
-        return reply.type('text/html').send(layout({ title: 'Settings', body, authed: true, csrfToken: csrf }));
+        return reply.type('text/html').send(layout({ title: 'Settings', body, authed: true, csrfToken: csrf, width: 'reading' }));
       }
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
