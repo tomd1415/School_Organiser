@@ -11,7 +11,7 @@ import {
   toggleFollowup,
   updateNoteBody,
 } from '../repos/notes';
-import { renderFollowup, renderNewNoteButton, renderNoteItem, renderNotesList, renderSavedStatus, renderRevUpdate, renderConflictStatus } from '../lib/notesView';
+import { renderFollowup, renderNoteItem, renderNoteCard, renderNotesGrid, renderNotesSearch, renderNotesChips, renderSavedStatus, renderRevUpdate, renderConflictStatus } from '../lib/notesView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -35,7 +35,11 @@ export function registerNoteRoutes(app: FastifyInstance): void {
       courseId: parsed.data.course ?? null,
       groupId: parsed.data.group ?? null,
     });
-    return reply.type('text/html').send(renderNoteItem({ id, body: '', time: 'now', followups: [], rev }));
+    // The /notes knowledge base appends a card; the lesson/cockpit list appends the inline editable item.
+    const fresh = parsed.data.kind === 'general'
+      ? renderNoteCard({ id, body: '', date: 'now', rev, courseName: null, groupName: null, pupilName: null, safeguarding: false })
+      : renderNoteItem({ id, body: '', time: 'now', followups: [], rev });
+    return reply.type('text/html').send(fresh);
   });
 
   // Autosave the body (10.10: optimistic-concurrency when the client sends its loaded `rev`). Returns
@@ -84,28 +88,51 @@ export function registerNoteRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(renderSavedStatus(`oc-${id.data.id}-status`));
   });
 
-  // General notes list + capture (§9). kind='general'.
+  // General notes — a searchable knowledge base (SPEC §2). kind='general'.
   app.get('/notes', { preHandler: requireAuth }, async (req, reply) => {
     const q = z
-      .object({ course: z.coerce.number().int().positive().optional(), group: z.coerce.number().int().positive().optional() })
+      .object({
+        q: z.string().max(200).optional(),
+        link: z.enum(['course', 'group', 'pupil', 'general']).optional(),
+        course: z.coerce.number().int().positive().optional(),
+        group: z.coerce.number().int().positive().optional(),
+      })
       .safeParse(req.query);
-    const filter = q.success ? { courseId: q.data.course, groupId: q.data.group } : {};
+    const { q: search = '', link, course: courseId, group: groupId } = q.success ? q.data : {};
     const csrf = reply.generateCsrf();
-    let listHtml: string;
+    const isFragment = !!req.headers['hx-request']; // live search swaps just the grid
+
+    let gridHtml: string;
+    let chipsHtml = '';
     try {
-      const rows = await listGeneralNotes(filter);
-      const items = rows.map((n) => ({ id: n.id, body: n.body, time: n.date, followups: [], rev: n.rev }));
-      listHtml = renderNotesList('notes-list-general', items);
+      const shown = await listGeneralNotes({ q: search, link, courseId, groupId });
+      gridHtml = renderNotesGrid(shown);
+      if (!isFragment) {
+        const all = await listGeneralNotes({});
+        const counts = { course: 0, group: 0, pupil: 0, general: 0 };
+        for (const n of all) {
+          if (n.pupilName) counts.pupil++;
+          else if (n.groupName) counts.group++;
+          else if (n.courseName) counts.course++;
+          else counts.general++;
+        }
+        chipsHtml = renderNotesChips(counts, link ?? '', search);
+      }
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
-      listHtml = `<p class="muted">Notes are unavailable — the database is not reachable.</p>`;
+      gridHtml = `<ul class="notes-grid" id="notes-grid"><li class="muted">Notes are unavailable — the database is not reachable.</li></ul>`;
     }
+
+    if (isFragment) return reply.type('text/html').send(gridHtml);
+
     const body = `
       <section class="card notes" hx-headers='{"x-csrf-token":"${csrf}"}'>
-        <div class="ld-notes-head"><h1>Notes</h1>${renderNewNoteButton('notes-list-general', { kind: 'general' })}</div>
-        <p class="muted">General notes and the knowledge base. Notes made during a lesson live on that lesson's page and feed the per-class AI feedback loop.</p>
-        ${listHtml}
+        <div class="ld-notes-head"><h1>Notes</h1></div>
+        <p class="muted">Your searchable knowledge base. Notes made during a lesson live on that lesson's page and feed the per-class AI feedback loop.</p>
+        ${renderNotesSearch(search, link ?? '')}
+        ${chipsHtml}
+        ${gridHtml}
       </section>`;
-    return reply.type('text/html').send(layout({ title: 'Notes', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Notes', body, authed: true, csrfToken: csrf, width: 'working' }));
   });
 }

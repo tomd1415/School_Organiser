@@ -52,6 +52,78 @@ export function renderNewNoteButton(listId: string, vals: Record<string, string 
   return `<button type="button" class="btn-secondary" data-new-note hx-post="${paths.notes()}" hx-vals='${JSON.stringify(vals)}' hx-target="#${esc(listId)}" hx-swap="beforeend">＋ New note</button>`;
 }
 
+// ── Notes knowledge base (Rail & Stage rebuild — SPEC §2) ───────────────────────────────────────────
+// The /notes page is a searchable grid of cards: a kind badge (by what the note links to), the date, the
+// editable body (autosave, kept inline so the workflow is unchanged) and link chips. New render fns so the
+// shared inline renderNoteItem above (Now / cockpit / pupils) is untouched. NoteCard is a UI-owned shape.
+export interface NoteCard {
+  id: number;
+  body: string;
+  date: string;
+  rev: string;
+  courseName: string | null;
+  groupName: string | null;
+  pupilName: string | null;
+  safeguarding: boolean;
+}
+
+type NoteLinkKind = 'pupil' | 'group' | 'course' | 'general';
+const LINK_BADGE: Record<NoteLinkKind, { cls: string; label: string }> = {
+  pupil: { cls: 'warn', label: 'Pupil' }, // amber
+  group: { cls: 'live', label: 'Group' }, // teal
+  course: { cls: 'good', label: 'Course' }, // green
+  general: { cls: '', label: 'General' }, // grey
+};
+const noteLinkKind = (n: NoteCard): NoteLinkKind => (n.pupilName ? 'pupil' : n.groupName ? 'group' : n.courseName ? 'course' : 'general');
+
+export function renderNoteCard(n: NoteCard): string {
+  const b = LINK_BADGE[noteLinkKind(n)];
+  const chips = [
+    n.courseName ? `<span class="note-chip">📘 ${esc(n.courseName)}</span>` : '',
+    n.groupName ? `<span class="note-chip">👥 ${esc(n.groupName)}</span>` : '',
+    n.pupilName ? `<span class="note-chip">🧑 ${esc(n.pupilName)}</span>` : '',
+  ].filter(Boolean).join('');
+  return `<li class="note-card${n.safeguarding ? ' sg' : ''}" id="note-${n.id}">
+    <div class="note-card-head"><span class="badge ${b.cls}">${b.label}</span><span class="note-card-date">${esc(n.date)}</span></div>
+    <input type="hidden" name="rev" id="note-${n.id}-rev" value="${esc(n.rev)}">
+    <textarea class="note-card-body" name="body" rows="3" placeholder="Type a note…" hx-post="${paths.note(n.id)}" hx-trigger="input changed delay:800ms, blur" hx-swap="none" hx-include="#note-${n.id}-rev">${esc(n.body)}</textarea>
+    ${chips ? `<div class="note-chips">${chips}</div>` : ''}
+    <div class="note-card-foot">
+      <span class="note-status" id="note-${n.id}-status"></span>
+      <button type="button" class="link danger" hx-post="${paths.noteDelete(n.id)}" hx-target="#note-${n.id}" hx-swap="outerHTML" hx-confirm="Delete this note?">delete</button>
+    </div>
+  </li>`;
+}
+
+export function renderNotesGrid(notes: NoteCard[]): string {
+  const cards = notes.map(renderNoteCard).join('');
+  return `<ul class="notes-grid" id="notes-grid">${cards || '<li class="muted notes-empty">No notes match.</li>'}</ul>`;
+}
+
+/** Search field (live-filters the grid) + New note. The active link filter rides along via a hidden field. */
+export function renderNotesSearch(q: string, activeLink: string): string {
+  return `<div class="notes-top">
+    <label class="notes-search"><span class="notes-search-ico" aria-hidden="true">⌕</span>
+      <input type="search" name="q" value="${esc(q)}" placeholder="Search notes…" autocomplete="off" aria-label="Search notes"
+        hx-get="${paths.notes()}" hx-trigger="input changed delay:300ms, search" hx-target="#notes-grid" hx-swap="outerHTML" hx-include="[name=link]"></label>
+    <input type="hidden" name="link" value="${esc(activeLink)}">
+    ${renderNewNoteButton('notes-grid', { kind: 'general' })}
+  </div>`;
+}
+
+/** Filter chips by link kind, with counts. */
+export function renderNotesChips(counts: Readonly<Record<string, number>>, active: string, q: string): string {
+  const qs = q ? `&amp;q=${esc(q)}` : '';
+  const chip = (link: string, label: string, n: number) =>
+    `<a href="${link ? `${paths.notesFiltered(link)}${qs}` : `${paths.notes()}${q ? `?q=${esc(q)}` : ''}`}" class="chip${(active ?? '') === link ? ' active' : ''}">${esc(label)}${n ? ` <span class="chip-count">${n}</span>` : ''}</a>`;
+  const total = (counts.course ?? 0) + (counts.group ?? 0) + (counts.pupil ?? 0) + (counts.general ?? 0);
+  const order: Array<[string, string]> = [['group', 'Groups'], ['pupil', 'Pupils'], ['course', 'Courses'], ['general', 'General']];
+  return `<div class="cap-chips">${[
+    chip('', 'All', total),
+    ...order.filter(([k]) => (counts[k] ?? 0) > 0 || k === active).map(([k, label]) => chip(k, label, counts[k] ?? 0)),
+  ].join('')}</div>`;
+}
+
 /** A small "saved" flash, swapped in by an out-of-band update after autosave. */
 export function renderSavedStatus(statusId: string): string {
   return `<span class="note-status saved" id="${esc(statusId)}" hx-swap-oob="true">saved ✓</span>`;

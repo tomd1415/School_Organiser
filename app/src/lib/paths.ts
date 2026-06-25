@@ -129,6 +129,7 @@ export const paths = {
   events: (): string => '/events',
   marking: (): string => '/marking',
   notes: (): string => '/notes',
+  notesFiltered: (link: string): string => `/notes?link=${link}`,
   recurring: (): string => '/recurring',
   resources: (): string => '/resources',
   kit: (): string => '/kit',
