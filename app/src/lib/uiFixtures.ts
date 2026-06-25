@@ -5,6 +5,7 @@ import type { NowState } from '../services/clock';
 import type { LessonRow, PeriodRow } from '../services/timetable';
 import type { CapturedItem } from '../services/captured';
 import type { GroupOpt } from '../repos/tasks';
+import type { NoteCard } from './notesView';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -72,6 +73,16 @@ export const GALLERY_CAPTURED: CapturedItem[] = [
   { id: 4, body: 'Idea: a binary-to-denary card game for the Year 8 starter.', category: 'curriculum', surfaceOn: '2026-09-02', addedAt: '20 Jun', groupId: null, groupName: null, safeguarding: false, interest: false, archived: false },
 ];
 export const GALLERY_CAPTURED_COUNTS: Record<string, number> = { logistics: 1, pupil: 1, safeguarding: 1, curriculum: 1 };
+
+// Notes knowledge base (SPEC §2): one of each link kind (course / group / pupil / general). Pupil shown as
+// a PUPIL_n token — never a real name (privacy).
+export const GALLERY_NOTES: NoteCard[] = [
+  { id: 1, body: 'Recursion lands better with the Russian-doll demo than the factorial one — lead with that next time.', date: '2026-06-23', rev: 'r1', courseName: 'GCSE CS', groupName: null, pupilName: null, safeguarding: false },
+  { id: 2, body: '9X respond well to mini-whiteboards for quick checks — keep a set in the room.', date: '2026-06-22', rev: 'r2', courseName: null, groupName: '9X', pupilName: null, safeguarding: false },
+  { id: 3, body: 'Prefers a worked example before independent practice; struggles when it is flipped.', date: '2026-06-20', rev: 'r3', courseName: null, groupName: null, pupilName: 'PUPIL_4', safeguarding: false },
+  { id: 4, body: 'Keep a spare set of USB-C cables in B14 — they always go missing.', date: '2026-06-18', rev: 'r4', courseName: null, groupName: null, pupilName: null, safeguarding: false },
+];
+export const GALLERY_NOTES_COUNTS: Record<string, number> = { course: 1, group: 1, pupil: 1, general: 1 };
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

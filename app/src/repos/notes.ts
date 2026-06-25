@@ -91,10 +91,14 @@ export interface NoteListRow {
   rev: string;
   courseName: string | null;
   groupName: string | null;
+  pupilName: string | null;
   safeguarding: boolean;
 }
 
-export async function listGeneralNotes(filter: { courseId?: number; groupId?: number }): Promise<NoteListRow[]> {
+// Which entity a general note links to (drives the knowledge-base kind badge + filter chips, SPEC §2).
+export type NoteLink = 'course' | 'group' | 'pupil' | 'general';
+
+export async function listGeneralNotes(filter: { courseId?: number; groupId?: number; q?: string; link?: NoteLink }): Promise<NoteListRow[]> {
   const conds = [`n.kind = 'general'`];
   const params: unknown[] = [];
   if (filter.courseId) {
@@ -105,14 +109,25 @@ export async function listGeneralNotes(filter: { courseId?: number; groupId?: nu
     params.push(filter.groupId);
     conds.push(`n.group_id = $${params.length}`);
   }
+  if (filter.q && filter.q.trim()) {
+    params.push(`%${filter.q.trim()}%`);
+    conds.push(`n.body ILIKE $${params.length}`);
+  }
+  // Filter by which entity the note links to (the knowledge-base kind chips). Exclusive by priority
+  // pupil > group > course so each note has exactly one kind — matching the badge + the chip counts.
+  if (filter.link === 'pupil') conds.push(`n.pupil_id IS NOT NULL`);
+  else if (filter.link === 'group') conds.push(`n.group_id IS NOT NULL AND n.pupil_id IS NULL`);
+  else if (filter.link === 'course') conds.push(`n.course_id IS NOT NULL AND n.group_id IS NULL AND n.pupil_id IS NULL`);
+  else if (filter.link === 'general') conds.push(`n.course_id IS NULL AND n.group_id IS NULL AND n.pupil_id IS NULL`);
   const { rows } = await pool.query<NoteListRow>(
     `SELECT n.id, n.body, n.safeguarding,
             to_char(n.created_at AT TIME ZONE 'Europe/London', 'YYYY-MM-DD') AS date,
             to_char(n.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') AS rev,
-            c.name AS "courseName", g.name AS "groupName"
+            c.name AS "courseName", g.name AS "groupName", p.display_name AS "pupilName"
      FROM notes n
      LEFT JOIN courses c ON c.id = n.course_id
      LEFT JOIN groups g  ON g.id = n.group_id
+     LEFT JOIN pupils p  ON p.id = n.pupil_id
      WHERE ${conds.join(' AND ')}
      ORDER BY n.created_at DESC`,
     params,

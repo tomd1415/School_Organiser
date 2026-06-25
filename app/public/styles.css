@@ -3341,6 +3341,32 @@ body[data-shell="next"] .cap-refile > summary { cursor: pointer; color: var(--qu
 body[data-shell="next"] .cap-refile-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
 body[data-shell="next"] .cap-empty { margin-top: 14px; }
 
+/* ── Notes knowledge base (Rail & Stage rebuild — SPEC §2): search + chips + card grid ───────────── */
+body[data-shell="next"] .notes-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+body[data-shell="next"] .notes-search { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 10px; min-height: var(--target); }
+body[data-shell="next"] .notes-search-ico { color: var(--quiet); font-size: 1rem; }
+body[data-shell="next"] .notes-search input { flex: 1; min-width: 0; background: transparent; border: none; color: var(--text); font: inherit; padding: 8px 0; outline: none; }
+body[data-shell="next"] .cap-chips + .notes-grid { margin-top: 4px; }
+
+body[data-shell="next"] .notes-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+}
+body[data-shell="next"] .note-card { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+body[data-shell="next"] .note-card.sg { border-color: var(--red); }
+body[data-shell="next"] .note-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+body[data-shell="next"] .note-card-date { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--quiet); }
+body[data-shell="next"] .note-card-body {
+  width: 100%; background: transparent; border: 1px solid transparent; color: var(--text);
+  border-radius: 8px; padding: 4px 6px; font: inherit; font-size: 0.9rem; line-height: 1.5; resize: vertical;
+}
+body[data-shell="next"] .note-card-body:hover { border-color: var(--line); }
+body[data-shell="next"] .note-card-body:focus { border-color: var(--line-strong); background: var(--bg); outline: none; }
+body[data-shell="next"] .note-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+body[data-shell="next"] .note-chip { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; color: var(--muted); }
+body[data-shell="next"] .note-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+body[data-shell="next"] .notes-empty { grid-column: 1 / -1; padding: 12px; }
+
 body[data-shell="next"] .cc-master,
 body[data-shell="next"] .ex-banner.ex-free,
 body[data-shell="next"] .now-exbanner.now-ex-free,

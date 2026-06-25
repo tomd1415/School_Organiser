@@ -49,9 +49,19 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
   `paths.safeguarding()`/`paths.capturedFiltered()`. Gallery fixture added. Verified: typecheck · 899 unit ·
   captured integration · gallery+boot E2E · screenshot (both orientations).
 
-**Next:** Notes (`/notes`, SPEC §2) → Events (`/events`, SPEC §7), then the other groups.
+- **Notes (`/notes`, SPEC §2)** — rebuilt into a searchable **knowledge-base grid**: a search field (live,
+  HX-swaps just the grid) + New note, **filter chips with counts** by what each note links to (Groups /
+  Pupils / Courses / General), and a `repeat(auto-fill,minmax(280px,1fr))` card grid. Each card: a kind
+  **badge** (Course green · Group teal · Pupil amber · General grey), the date (mono), the **editable body**
+  (autosave kept inline — workflow unchanged), and **link chips** (📘 course · 👥 group · 🧑 pupil). New
+  render fns (`renderNoteCard`/`renderNotesGrid`/`renderNotesSearch`/`renderNotesChips`) so the shared inline
+  `renderNoteItem` (Now / cockpit / Pupils) is untouched; `POST /notes` branches on kind (general→card,
+  lesson→item). Repo: `listGeneralNotes` gained `q`/`link` filters + a pupil join (`NoteListRow.pupilName`).
+  Gallery fixture added. Verified: typecheck · 899 unit · notes integration · gallery+boot E2E · screenshots.
 
-Order: **RECORD** (Captured ✓ → Notes → Events) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
+**Next:** Events (`/events`, SPEC §7), then the other groups.
+
+Order: **RECORD** (Captured ✓ → Notes ✓ → Events) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →
 **CLASSES** (Pupils) → **SETUP** (Kit → Settings → Setup) → **Lesson cockpit** (own pass) → pupil `/me`.
 Per-screen pattern: extract any inline route-render into a `*View.ts`; redesign to the SPEC section using the
