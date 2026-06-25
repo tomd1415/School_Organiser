@@ -3367,6 +3367,40 @@ body[data-shell="next"] .note-chip { background: var(--bg); border: 1px solid va
 body[data-shell="next"] .note-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
 body[data-shell="next"] .notes-empty { grid-column: 1 / -1; padding: 12px; }
 
+/* ── Events (Rail & Stage rebuild — SPEC §7): grouped by how-soon, tone date chips + kind badges ──── */
+body[data-shell="next"] .ev-section { margin-bottom: 18px; }
+body[data-shell="next"] .ev-group-head { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--quiet); margin: 0 0 8px; }
+body[data-shell="next"] .ev-group-n { background: var(--surface-3); color: var(--muted); font-size: 0.7rem; min-width: 18px; height: 18px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+body[data-shell="next"] .events-group { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+body[data-shell="next"] .event-card { display: flex; align-items: stretch; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+body[data-shell="next"] .ev-chip {
+  flex: none; width: 46px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface-2);
+  font-family: ui-monospace, monospace; line-height: 1;
+}
+body[data-shell="next"] .ev-chip .ev-day { font-size: 1.15rem; font-weight: 700; }
+body[data-shell="next"] .ev-chip .ev-mon { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+body[data-shell="next"] .ev-chip.ev-red { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+body[data-shell="next"] .ev-chip.ev-amber { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+body[data-shell="next"] .ev-chip.ev-teal { background: var(--teal-soft); border-color: var(--teal); color: var(--teal); }
+body[data-shell="next"] .ev-chip.ev-none { border-style: dashed; color: var(--quiet); }
+
+body[data-shell="next"] .ev-main { flex: 1; min-width: 0; }
+body[data-shell="next"] .ev-head { display: flex; align-items: center; gap: 8px; }
+body[data-shell="next"] .ev-title { flex: 1; min-width: 0; background: transparent; border: 1px solid transparent; color: var(--text); border-radius: 8px; padding: 4px 6px; font: inherit; font-weight: 600; }
+body[data-shell="next"] .ev-title:hover { border-color: var(--line); }
+body[data-shell="next"] .ev-title:focus { border-color: var(--line-strong); background: var(--bg); outline: none; }
+body[data-shell="next"] .ev-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 0 0 6px; font-size: 0.8rem; }
+body[data-shell="next"] .ev-when-red { color: var(--red); }
+body[data-shell="next"] .ev-when-amber { color: var(--amber); }
+body[data-shell="next"] .ev-when-teal { color: var(--teal); }
+body[data-shell="next"] .ev-when-quiet { color: var(--muted); }
+body[data-shell="next"] .ev-edit { margin: 6px 0 0 6px; }
+body[data-shell="next"] .ev-edit > summary { cursor: pointer; color: var(--quiet); font-size: 0.78rem; min-height: 30px; display: inline-flex; align-items: center; }
+body[data-shell="next"] .ev-edit-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+body[data-shell="next"] .ev-actions { flex: none; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; }
+
 body[data-shell="next"] .cc-master,
 body[data-shell="next"] .ex-banner.ex-free,
 body[data-shell="next"] .now-exbanner.now-ex-free,

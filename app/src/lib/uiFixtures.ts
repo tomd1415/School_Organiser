@@ -6,6 +6,7 @@ import type { LessonRow, PeriodRow } from '../services/timetable';
 import type { CapturedItem } from '../services/captured';
 import type { GroupOpt } from '../repos/tasks';
 import type { NoteCard } from './notesView';
+import type { UpcomingEvent } from '../services/event';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -83,6 +84,16 @@ export const GALLERY_NOTES: NoteCard[] = [
   { id: 4, body: 'Keep a spare set of USB-C cables in B14 — they always go missing.', date: '2026-06-18', rev: 'r4', courseName: null, groupName: null, pupilName: null, safeguarding: false },
 ];
 export const GALLERY_NOTES_COUNTS: Record<string, number> = { course: 1, group: 1, pupil: 1, general: 1 };
+
+// Events (SPEC §7): a fixed "today" so the how-soon grouping is deterministic in the gallery.
+export const GALLERY_EVENTS_TODAY = '2026-06-23';
+export const GALLERY_EVENTS: UpcomingEvent[] = [
+  { id: 1, kind: 'report_deadline', title: 'Year 9 reports due', date: '2026-06-25', leadDays: 7, affectsAvailability: false, status: 'upcoming' },
+  { id: 2, kind: 'meeting', title: 'Department meeting', date: '2026-06-24', leadDays: null, affectsAvailability: true, status: 'upcoming' },
+  { id: 3, kind: 'trip', title: 'Bletchley Park trip', date: '2026-07-03', leadDays: 14, affectsAvailability: true, status: 'upcoming' },
+  { id: 4, kind: 'parents_evening', title: "Year 11 parents' evening", date: '2026-07-15', leadDays: null, affectsAvailability: false, status: 'upcoming' },
+  { id: 5, kind: 'other', title: 'Order new micro:bits', date: null, leadDays: null, affectsAvailability: false, status: 'upcoming' },
+];
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

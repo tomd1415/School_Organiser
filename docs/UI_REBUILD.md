@@ -59,9 +59,20 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
   lesson→item). Repo: `listGeneralNotes` gained `q`/`link` filters + a pupil join (`NoteListRow.pupilName`).
   Gallery fixture added. Verified: typecheck · 899 unit · notes integration · gallery+boot E2E · screenshots.
 
-**Next:** Events (`/events`, SPEC §7), then the other groups.
+- **Events (`/events`, SPEC §7)** — rebuilt into **groups by how-soon** (This week / Next two weeks / Later /
+  No date yet, each with a count). Each event is a card with a **tone date chip** (mono day+month), the
+  **editable title**, a **kind badge** and an **"in N days"** line (overdue→red). kind→tone: deadlines/exams/
+  data-drops red · trip amber · parents'/open evenings teal · meetings/INSET/other grey. Editing
+  (kind/date/lead/blocks-work) is in an **Edit** disclosure; ✓/✕ done/cancel. New event → "No date yet"
+  group. Repurposed `eventView` (events-only; Now renders events itself). Gallery fixture (fixed "today" for
+  deterministic grouping). Verified: typecheck · 899 unit · events integration · gallery+boot E2E · screenshot.
 
-Order: **RECORD** (Captured ✓ → Notes ✓ → Events) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
+**✅ RECORD group complete** (Captured · Notes · Events).
+
+**Next:** the **TODAY** group — Tasks → Marking → Oversee → Focus → Planner → Timetable → Now (the bigger
+daily-driver screens; Focus/Planner/Oversee need their inline route-renders extracted into `*View.ts` first).
+
+Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →
 **CLASSES** (Pupils) → **SETUP** (Kit → Settings → Setup) → **Lesson cockpit** (own pass) → pupil `/me`.
 Per-screen pattern: extract any inline route-render into a `*View.ts`; redesign to the SPEC section using the

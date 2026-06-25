@@ -3,9 +3,15 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { layout } from '../lib/html';
 import { createEvent, listUpcoming, setEventStatus, updateEventField } from '../repos/events';
-import { renderEventItem, renderEventList, renderNewEventButton } from '../lib/eventView';
+import { renderEventCard, renderEventsGrouped, renderNewEventButton } from '../lib/eventView';
 import { renderSavedStatus } from '../lib/notesView';
 import type { UpcomingEvent } from '../services/event';
+import { getClockContext } from '../repos/clock';
+import { localParts } from '../lib/time';
+
+async function todayIso(): Promise<string> {
+  return localParts(new Date(), (await getClockContext()).tz).isoDate;
+}
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
@@ -16,7 +22,7 @@ export function registerEventRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
     let listHtml: string;
     try {
-      listHtml = renderEventList(await listUpcoming());
+      listHtml = renderEventsGrouped(await listUpcoming(), await todayIso());
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Events are unavailable — the database is not reachable.</p>`;
@@ -27,7 +33,7 @@ export function registerEventRoutes(app: FastifyInstance): void {
         <p class="muted">Parents' evenings, deadlines, exams, INSET, trips — and contact you owe. "Blocks work" removes the overlapping work window.</p>
         ${listHtml}
       </section>`;
-    return reply.type('text/html').send(layout({ title: "What's coming", body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: "What's coming", body, authed: true, csrfToken: csrf, width: 'reading' }));
   });
 
   app.post('/events', guard, async (_req, reply) => {
@@ -35,7 +41,7 @@ export function registerEventRoutes(app: FastifyInstance): void {
     const created: UpcomingEvent =
       (await listUpcoming()).find((x) => x.id === id) ??
       { id, kind: 'other', title: 'New event', date: null, leadDays: null, affectsAvailability: false, status: 'upcoming' };
-    return reply.type('text/html').send(renderEventItem(created));
+    return reply.type('text/html').send(renderEventCard(created, await todayIso()));
   });
 
   app.post('/events/:id', guard, async (req, reply) => {
