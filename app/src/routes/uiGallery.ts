@@ -4,7 +4,7 @@ import { appConfig } from '../config/app';
 import { layout } from '../lib/html';
 import { renderSlideDeck } from '../lib/meView';
 import { renderWorksheet } from '../lib/worksheetForm';
-import { renderTimelineCard } from '../lib/nowView';
+import { renderTimelineCard, renderNowHero } from '../lib/nowView';
 import { renderToggle } from '../lib/components';
 import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
@@ -33,6 +33,9 @@ import {
   GALLERY_SCHEME_HEADER,
   GALLERY_SCHEME_UNITS,
   GALLERY_SCHEME_PLANS,
+  GALLERY_NOW_HERO_STATE,
+  GALLERY_NOW_HERO_LESSON,
+  GALLERY_NOW_HERO_NEXT,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -130,6 +133,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         csrf: 'gallery',
       }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
+      ${item('Now — hero', 'renderNowHero — the prominent “what’s happening now” strip atop the Now screen: period eyebrow, lesson title, room + start time, the time-remaining countdown, and what’s next. Rendered once at load (no self-poll).', renderNowHero(GALLERY_NOW_HERO_STATE, GALLERY_NOW_HERO_LESSON, GALLERY_NOW_HERO_NEXT))}
       ${item('Now — day timeline', 'renderTimelineCard with a fixed clock (P1 done · P2 active · P3 next).', renderTimelineCard(GALLERY_LESSONS, GALLERY_PERIODS, GALLERY_NOW_STATE, new Date('2026-06-23T10:05:00Z'), 'Europe/London'))}
     </section>`;
 

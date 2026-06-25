@@ -161,6 +161,20 @@ export const GALLERY_SCHEME_PLANS: PlanRow[] = [
   schemePlan(15, 3, 'Packets and protocols', 0, true),
 ];
 
+// Now hero (UI rebuild): an in-lesson state so the hero showcases the period eyebrow + countdown + next.
+export const GALLERY_NOW_HERO_STATE: NowState = {
+  isoDate: '2026-06-23',
+  weekday: WEEKDAY,
+  minutes: 10 * 60 + 47,
+  isSchoolDay: true,
+  dayKind: 'school',
+  current: { date: '2026-06-23', weekday: WEEKDAY, slotOrder: 3, slotType: 'lesson', label: 'Period 3', lessonIndex: 2, startMin: 10 * 60 + 5, endMin: 11 * 60 + 5 },
+  minutesRemaining: 18,
+  nextTeaching: { date: '2026-06-23', weekday: WEEKDAY, slotOrder: 4, slotType: 'lesson', label: 'Period 4', lessonIndex: 3, startMin: 11 * 60 + 25, endMin: 12 * 60 + 25 },
+};
+export const GALLERY_NOW_HERO_LESSON = { lessonId: 7, purpose: 'teaching', groupName: 'Year 9 Computing', roomName: 'B14', courses: [{ name: 'Networks', colour: null }] };
+export const GALLERY_NOW_HERO_NEXT = { lessonId: 8, purpose: 'teaching', groupName: 'Free', roomName: null, courses: [] };
+
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {
   isoDate: '2026-06-23',

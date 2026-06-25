@@ -3276,6 +3276,10 @@ body[data-shell="next"] .sg-item.sg-new {
 }
 
 /* ── Captured (Rail & Stage rebuild — SPEC §1): capture bar + filter chips + triage cards ─────────── */
+body[data-shell="next"] .now-hero {
+  border-color: var(--teal-soft);
+  background: linear-gradient(100deg, var(--teal-soft), var(--surface));
+}
 body[data-shell="next"] .capture-bar {
   display: flex;
   gap: 10px;
