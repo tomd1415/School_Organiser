@@ -14,8 +14,9 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await page.goto('/ui-gallery', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('h1', { hasText: 'UI gallery' })).toBeVisible();
-  // each section renders (component kit + 4 fixture-backed views)
-  await expect(page.locator('.gallery-item')).toHaveCount(5);
+  // each section renders (component kit + 5 fixture-backed views)
+  await expect(page.locator('.gallery-item')).toHaveCount(6);
+  await expect(page.locator('.gallery-stage .captured-card').first()).toBeVisible(); // Captured cards
   await expect(page.locator('.gallery-stage .toggle-switch').first()).toBeVisible(); // component kit toggle
   await expect(page.locator('.gallery-stage .pslide').first()).toBeVisible(); // slide deck
   await expect(page.locator('.gallery-stage .ws-doc')).toBeVisible(); // worksheet

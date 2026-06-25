@@ -19,6 +19,7 @@ export interface CapturedItem {
   body: string;
   category: string | null;
   surfaceOn: string | null; // YYYY-MM-DD
+  addedAt?: string; // "DD Mon" — when captured (optional: literal constructions may omit it)
   groupId: number | null;
   groupName: string | null;
   safeguarding: boolean;

@@ -125,6 +125,7 @@ export const paths = {
   tasks: (): string => '/tasks',
   tasksFiltered: (view: string): string => `/tasks?view=${view}`,
   captured: (): string => '/captured',
+  capturedFiltered: (category: string): string => `/captured?category=${category}`,
   events: (): string => '/events',
   marking: (): string => '/marking',
   notes: (): string => '/notes',
@@ -235,6 +236,7 @@ export const paths = {
   pupilImage: (rel: string): string => `/pupil-image?p=${encodeURIComponent(rel)}`,
 
   // ── Safeguarding ────────────────────────────────────────────────────────────────────────────────
+  safeguarding: (): string => '/safeguarding',
   safeguardingSource: (sourceType: string, sourceId: number): string => `/safeguarding/${sourceType}/${sourceId}`,
 
   // ── Setup / admin (the /setup×31 family) ────────────────────────────────────────────────────────

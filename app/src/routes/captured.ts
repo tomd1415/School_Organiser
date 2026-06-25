@@ -4,8 +4,8 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { listGroups } from '../repos/tasks';
 import { createCaptured, getCaptured, listCaptured, promoteCapturedToTask, toggleCapturedFlag, updateCapturedField } from '../repos/captured';
-import { renderCapturedItem, renderCapturedList, renderNewCapturedButton } from '../lib/capturedView';
-import { CAPTURED_CATEGORIES, CATEGORY_LABELS } from '../services/captured';
+import { renderCaptureBar, renderCapturedChips, renderCapturedItem, renderCapturedList } from '../lib/capturedView';
+import { CAPTURED_CATEGORIES } from '../services/captured';
 import { renderSavedStatus } from '../lib/notesView';
 import { callLLMStructured } from '../llm/client';
 import { modelForFeature } from '../repos/settings';
@@ -24,42 +24,27 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     const csrf = reply.generateCsrf();
 
     let listHtml: string;
+    let chipsHtml = '';
     try {
-      const [items, groups] = await Promise.all([listCaptured(category), listGroups()]);
-      listHtml = renderCapturedList(items, groups);
+      const [all, groups] = await Promise.all([listCaptured(), listGroups()]);
+      const counts: Record<string, number> = {};
+      for (const it of all) if (it.category) counts[it.category] = (counts[it.category] ?? 0) + 1;
+      const shown = category ? all.filter((i) => i.category === category) : all;
+      chipsHtml = renderCapturedChips(counts, category);
+      listHtml = renderCapturedList(shown, groups);
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
       listHtml = `<p class="muted">Captured info is unavailable — the database is not reachable.</p>`;
     }
 
-    const chip = (c: string | undefined, label: string) =>
-        `<a href="/captured${c ? `?category=${c}` : ''}" class="chip${c === category ? ' active' : ''}">${label}</a>`;
-      const chips = [chip(undefined, 'All'), ...CAPTURED_CATEGORIES.map((c) => chip(c, CATEGORY_LABELS[c] ?? c))].join(' ');
-
-      const body = `
-        <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
-          <div class="ld-notes-head">
-            <h1>Captured Inbox</h1>
-            ${renderNewCapturedButton()}
-          </div>
-          <p class="muted">Things you were told but can't action yet. Pick a category, set when it should resurface, or make it a task. ⚑ safeguarding stays out of AI.</p>
-          <div class="task-chips" style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
-            ${chips}
-          </div>
-          ${listHtml}
-          
-          <div class="captured-sticky-capture" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color, #eaeaea);">
-            <h3>Quick Capture</h3>
-            <form class="qc-form" hx-post="/capture-quick" hx-target="#qc-status" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
-              <div style="display: flex; gap: 12px; align-items: center;">
-                <input id="qc-input" type="text" name="body" placeholder="Something you were told..." autocomplete="off" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #ccc); font-family: inherit; font-size: 14px;">
-                <button type="submit" class="btn-primary">Capture</button>
-              </div>
-              <span id="qc-status" class="qc-status"></span>
-            </form>
-          </div>
-        </section>`;
-      return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf }));
+    const body = `
+      <section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
+        <div class="ld-notes-head"><h1>Captured</h1></div>
+        ${renderCaptureBar()}
+        ${chipsHtml}
+        ${listHtml}
+      </section>`;
+    return reply.type('text/html').send(layout({ title: 'Captured', body, authed: true, csrfToken: csrf, width: 'reading' }));
   });
 
   // 10.20 — capture from ANYWHERE: the topbar quick-capture box writes straight to the store, so a
@@ -72,12 +57,15 @@ export function registerCapturedRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send('<span class="qc-status saved">captured ✓ — find it in <a href="/captured">Captured</a></span>');
   });
 
-  app.post('/captured', guard, async (_req, reply) => {
-    const id = await createCaptured('');
-    const groups = await listGroups();
-    return reply.type('text/html').send(
-      renderCapturedItem({ id, body: '', category: null, surfaceOn: null, groupId: null, groupName: null, safeguarding: false, interest: false, archived: false }, groups),
-    );
+  // The capture bar posts the typed line here; create it, then return the freshly-built card to prepend.
+  app.post('/captured', guard, async (req, reply) => {
+    const b = z.object({ body: z.string().max(2000).optional() }).safeParse(req.body);
+    const text = (b.success && b.data.body ? b.data.body : '').trim();
+    if (!text) return reply.code(400).type('text/html').send('');
+    const id = await createCaptured(text);
+    const [item, groups] = await Promise.all([getCaptured(id), listGroups()]);
+    if (!item) return reply.code(500).type('text/html').send('');
+    return reply.type('text/html').send(renderCapturedItem(item, groups));
   });
 
   app.post('/captured/:id', guard, async (req, reply) => {

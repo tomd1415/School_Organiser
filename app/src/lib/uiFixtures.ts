@@ -3,6 +3,8 @@
 // docs/UI_SEPARATION_PLAN.md (Phase 1). Add a fixture here when you add a view worth previewing.
 import type { NowState } from '../services/clock';
 import type { LessonRow, PeriodRow } from '../services/timetable';
+import type { CapturedItem } from '../services/captured';
+import type { GroupOpt } from '../repos/tasks';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -60,6 +62,16 @@ export const GALLERY_LESSONS: LessonRow[] = [
   { lessonId: 2, purpose: 'teaching', weekday: WEEKDAY, slotOrder: 2, isSelf: true, staffName: 'Me', groupName: '8B', courses: [{ name: 'Computing', colour: '#5eead4' }] },
   { lessonId: 3, purpose: 'teaching', weekday: WEEKDAY, slotOrder: 3, isSelf: true, staffName: 'Me', groupName: '11C', courses: [{ name: 'GCSE CS', colour: '#fbbf24' }] },
 ];
+
+// Captured (SPEC §1): a spread of categories incl. a safeguarding-flagged item (withheld from AI).
+export const GALLERY_GROUPS: GroupOpt[] = [{ id: 1, name: '7A' }, { id: 2, name: '9X' }];
+export const GALLERY_CAPTURED: CapturedItem[] = [
+  { id: 1, body: 'B14 projector being replaced over half term — book the trolley for week 3.', category: 'logistics', surfaceOn: '2026-10-27', addedAt: '24 Jun', groupId: null, groupName: null, safeguarding: false, interest: false, archived: false },
+  { id: 2, body: 'PUPIL_4 found the recursion task much easier than expected — push them next time.', category: 'pupil', surfaceOn: null, addedAt: '24 Jun', groupId: 2, groupName: '9X', safeguarding: false, interest: true, archived: false },
+  { id: 3, body: 'Mentioned something at the end of the lesson — logged for the register.', category: 'safeguarding', surfaceOn: null, addedAt: '23 Jun', groupId: 2, groupName: '9X', safeguarding: true, interest: false, archived: false },
+  { id: 4, body: 'Idea: a binary-to-denary card game for the Year 8 starter.', category: 'curriculum', surfaceOn: '2026-09-02', addedAt: '20 Jun', groupId: null, groupName: null, safeguarding: false, interest: false, archived: false },
+];
+export const GALLERY_CAPTURED_COUNTS: Record<string, number> = { logistics: 1, pupil: 1, safeguarding: 1, curriculum: 1 };
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

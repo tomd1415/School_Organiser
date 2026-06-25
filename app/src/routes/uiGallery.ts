@@ -6,12 +6,16 @@ import { renderSlideDeck } from '../lib/meView';
 import { renderWorksheet } from '../lib/worksheetForm';
 import { renderTimelineCard } from '../lib/nowView';
 import { renderToggle } from '../lib/components';
+import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import {
   GALLERY_LESSONS,
   GALLERY_NOW_STATE,
   GALLERY_PERIODS,
   SAMPLE_SLIDES_MD,
   SAMPLE_WORKSHEET_MD,
+  GALLERY_CAPTURED,
+  GALLERY_CAPTURED_COUNTS,
+  GALLERY_GROUPS,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -88,6 +92,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Component kit (Rail & Stage rebuild)', 'The shared vocabulary every redesigned screen is built from — badges in the SPEC category tones (Logistics→teal · Pupil→amber · Admin→grey · Curriculum→green · Safeguarding→red), filter chips, segmented tabs, the pill+knob toggle, status dots, the saved affordance, stat grid, and tone-left-border cards.', componentKit)}
       ${item('Primitives', 'Shared chrome: card header (eyebrow + title + badge), buttons, links, badges.', primitives)}
       ${item('Slide deck', 'renderPslide via renderSlideDeck — one per-slide renderer shared by pupil / preview / presenter / board / cockpit (note the table + blockquote framing).', renderSlideDeck(SAMPLE_SLIDES_MD, 'gallery', 'core'))}
+      ${item('Captured (SPEC §1)', 'renderCaptureBar + renderCapturedChips + renderCapturedList — the capture bar, category-filter chips with counts, and tone-left-border triage cards. The safeguarding-flagged card is withheld from AI and routes to the register (Open register), never "Make a task".', renderCaptureBar() + renderCapturedChips(GALLERY_CAPTURED_COUNTS, undefined) + renderCapturedList(GALLERY_CAPTURED, GALLERY_GROUPS))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Now — day timeline', 'renderTimelineCard with a fixed clock (P1 done · P2 active · P3 next).', renderTimelineCard(GALLERY_LESSONS, GALLERY_PERIODS, GALLERY_NOW_STATE, new Date('2026-06-23T10:05:00Z'), 'Europe/London'))}
     </section>`;
