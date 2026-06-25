@@ -20,18 +20,32 @@ import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
 import { importRoster } from '../services/misImport';
 
+// §11 roster card: initials avatar · name · token, with the GDPR actions (archive / SAR export /
+// anonymise / erase) tucked into a ⋯ disclosure so the grid stays calm.
+function pupilInitials(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0]![0]! + (parts.length > 1 ? parts[parts.length - 1]![0]! : '')).toUpperCase();
+}
 function renderPupil(p: RosterEntry): string {
-  return `<li class="pupil${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
-    <a class="pupil-name" href="/pupils/${p.id}">${esc(p.displayName)}</a>
-    <span class="muted pupil-token">${esc(p.aiToken)}</span>
-    <button type="button" class="link" hx-post="/pupils/${p.id}/${p.active ? 'deactivate' : 'activate'}" hx-target="#pupil-${p.id}" hx-swap="outerHTML">${p.active ? 'archive' : 'restore'}</button>
-    <a class="link" href="/pupils/${p.id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
-    <button type="button" class="link" title="leaver: remove name + login, keep cohort data"
-      hx-post="/pupils/${p.id}/anonymise" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
-      hx-confirm="Anonymise ${esc(p.displayName)}? Their name, login and 'what works for me' profile are removed; their answers/marks stay but no longer named. This cannot be undone.">anonymise…</button>
-    <button type="button" class="link danger" title="permanently erase ALL of this pupil's data"
-      hx-post="/pupils/${p.id}/erase" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
-      hx-prompt="PERMANENT erasure of ${esc(p.displayName)} — every answer, mark, feedback, profile and login. Type ${esc(p.aiToken)} to confirm.">erase…</button>
+  return `<li class="roster-card${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
+    <a class="roster-main" href="/pupils/${p.id}">
+      <span class="roster-avatar" aria-hidden="true">${esc(pupilInitials(p.displayName))}</span>
+      <span class="roster-id"><span class="pupil-name">${esc(p.displayName)}</span><span class="muted pupil-token">${esc(p.aiToken)}</span></span>
+    </a>
+    <details class="roster-actions">
+      <summary title="manage this pupil" aria-label="manage this pupil">⋯</summary>
+      <div class="roster-menu">
+        <button type="button" class="link" hx-post="/pupils/${p.id}/${p.active ? 'deactivate' : 'activate'}" hx-target="#pupil-${p.id}" hx-swap="outerHTML">${p.active ? 'archive' : 'restore'}</button>
+        <a class="link" href="/pupils/${p.id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
+        <button type="button" class="link" title="leaver: remove name + login, keep cohort data"
+          hx-post="/pupils/${p.id}/anonymise" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
+          hx-confirm="Anonymise ${esc(p.displayName)}? Their name, login and 'what works for me' profile are removed; their answers/marks stay but no longer named. This cannot be undone.">anonymise…</button>
+        <button type="button" class="link danger" title="permanently erase ALL of this pupil's data"
+          hx-post="/pupils/${p.id}/erase" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
+          hx-prompt="PERMANENT erasure of ${esc(p.displayName)} — every answer, mark, feedback, profile and login. Type ${esc(p.aiToken)} to confirm.">erase…</button>
+      </div>
+    </details>
   </li>`;
 }
 
@@ -110,13 +124,12 @@ export function registerPupilRoutes(app: FastifyInstance): void {
         : ' <strong>No AI key is configured yet</strong>, so nothing is sent anywhere regardless.';
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Pupils (roster)</h1>
-        <p class="muted">Names are stored <strong>locally only</strong>. Each gets a stable token
-          (<code>PUPIL_1</code>…) — the only thing any AI feature ever sees in place of the name.${keyNote}</p>
+        <p class="privacy-banner">⚑ Individual pupils are <strong>never named or described to any AI service</strong> — only cohort-level prose. Each name maps to a stable token (<code>PUPIL_1</code>…), the only thing any AI feature ever sees.${keyNote}</p>
         <form class="pupil-add" hx-post="/pupils" hx-target="#pupil-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <input type="text" name="name" placeholder="Pupil name…" autocomplete="off" required>
           <button type="submit" class="btn-secondary">Add</button>
         </form>
-        <ul class="pupil-list" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
+        <ul class="pupil-list roster-grid" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
         <details class="mis-import">
           <summary>⬆ Import from MIS (CSV)</summary>
           <p class="muted">Paste a SIMS/Arbor export (or any CSV). Needs a <strong>name</strong> column (or

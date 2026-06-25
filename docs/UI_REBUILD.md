@@ -223,7 +223,29 @@ render + no console errors + a key interaction), on top of the gallery fixture +
 
 **✅ CURRICULUM group complete** (Schemes · Map · Coverage · Resources).
 
-**Next:** CLASSES (Pupils §11) · SETUP
+### CLASSES group
+- **Pupils (`/pupils`, SPEC §11)** — added the signature **red privacy banner** (individual pupils are
+  *never named or described to any AI service* — only cohort prose; each name → a `PUPIL_n` token) and
+  rebuilt the teacher roster as an **initials-avatar card grid** (`auto-fill, minmax(220px,1fr)`): each
+  card an avatar · name · token, with the GDPR actions (archive / ⬇ SAR export / anonymise / erase) tucked
+  into a calm **⋯ menu**. (The §11 cohort-analytics layer — class chips, Support/Core/Challenge level chips,
+  completion %, ATL-trend arrows — needs per-pupil level/completion/ATL + group data the roster query
+  doesn't carry; **deferred** like the Schemes matrix.) Inline render kept in the route (avoids churn on
+  the many GDPR-action URLs). CSS: `.privacy-banner`/`.roster-grid`/`.roster-card`/`.roster-avatar` in
+  `styles-base-widgets.css`. **Test:** `e2e/pupils.spec.ts` (banner + grid). Verified: typecheck · 946 unit ·
+  screens integration · screenshot.
+
+### SETUP group (in progress)
+- **Kit (`/kit`, SPEC §12)** — was already built to §12 (filter · show-archived · ＋add · category-grouped
+  tables in `.table-scroll` · Item/Own/Work/Location/Notes/Tags/Checked + ✓ stock-take · **Work<Own red** ·
+  **stale checked-date red** · archive-not-delete). Only gap closed: added **`min-width:760px`** to
+  `.kit-table` so the table scrolls inside its wrapper on narrow screens (SPEC §12) rather than crushing.
+
+**Next:** SETUP — **Settings §3** (a 6-section card rebuild: School · AI · TA · Email · Password · Data-health,
+toggles + ✓-Saved chips; the page already uses `renderToggle`), **`/time` §6** (today's time-blocks list),
+**Setup §16** (year admin). Then the **Lesson cockpit §17** — the deepest screen, its own dedicated pass —
+and the pupil `/me` overlay (DPIA-gated). Deferred: the Schemes Classes-matrix lens + the Pupils §11
+cohort-analytics layer (both need data wiring).
 (Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
 cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 
