@@ -126,8 +126,17 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   - **Open IA question for the teacher:** the prototype's "Planner" is time-&-actuals; the repo's rail
     "Planner" is the lesson-laying grid. Keep them distinct (recommended — "code wins"), or repoint the rail?
 
-**Next:** Timetable → Now (the two large daily screens), then the CURRICULUM / CLASSES / SETUP groups
-(`/time` gets the SPEC §6 time-blocks design).
+- **Timetable (`/timetable`)** — **design-system alignment** (the week grid was already built to the
+  look: `.tt-*` classes dark-themed, `renderCell`/`renderLesson`/`readinessDots` (🔴 no scheme · 🟣 plan
+  to develop · 🔵 resource to edit), week nav, legend). Per ADVICE §1 the width was set to **`full`** (the
+  5-day grid wants the whole stage), and a **portrait scroll safety-net** added: `min-width:720px` on
+  `.tt-table` so the grid scrolls inside its existing `.table-scroll` wrapper on narrow screens (SPEC §0/
+  advice §7) rather than crushing columns. **Tests added:** `e2e/timetable.spec.ts` (live render + legend +
+  full-width intent + no console errors; week-nav advances to a dated week). Verified: typecheck · timetable
+  unit (16) · Playwright (3) · screenshots both orientations (zero body horizontal overflow in either).
+
+**Next:** Now (the flagship 3-column/portrait daily screen — completes the TODAY group), then the
+CURRICULUM / CLASSES / SETUP groups (`/time` gets the SPEC §6 time-blocks design).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

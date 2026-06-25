@@ -212,7 +212,9 @@ main:has(.tt) { max-width: 76rem; }
 .tt-head h1 { margin: 0 0 0.5rem; }
 .tt-weeknav { display: flex; gap: 0.75rem; }
 .tt-weeknav a { text-decoration: none; color: var(--accent); font-weight: 600; }
-.tt-table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
+/* min-width makes the wide grid scroll inside its .table-scroll wrapper on narrow screens
+   (SPEC §0/advice §7) rather than crushing columns to illegibility. */
+.tt-table { width: 100%; min-width: 720px; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
 .tt-table thead th { padding: 0.4rem; color: var(--muted); font-size: 0.85rem; font-weight: 700; }
 .tt-table thead th .tt-date { display: block; font-weight: 400; font-size: 0.75rem; }
 .tt-corner { width: 3.2rem; }
