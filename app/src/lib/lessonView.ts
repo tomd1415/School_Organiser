@@ -395,6 +395,23 @@ export function renderLessonCockpit(options: {
     ? paths.boardView(null, lp, currentLevel)
     : paths.boardView(groupCourseId, lp, currentLevel, oc);
 
+  // §17 action rail: the old horizontal button row, now a thin sticky vertical icon column to the right
+  // of the content grid. Board is visually primary; each is an icon with a title + aria-label. Focus mode
+  // is a toggle (lit when active, via body.focus-mode). The top of the screen stays deliberately light.
+  const railLink = (icon: string, label: string, attrs: string, primary = false) =>
+    `<a class="action-btn${primary ? ' action-primary' : ''}" ${attrs} title="${label}" aria-label="${label}">${icon}</a>`;
+  const actionRailHtml = `<nav class="action-rail" aria-label="Lesson actions">
+    ${isPreview ? railLink('←', 'Back to scheme', `href="${esc(preview!.backHref)}"`) : ''}
+    ${railLink('🖥', 'Open board screen', `href="${boardHref}" target="_blank" rel="noopener"`, true)}
+    ${lp ? railLink('👁', 'View as pupil (slides + worksheet)', `href="${paths.pupilPreview(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener"`) : ''}
+    ${lp ? railLink('🧑‍🏫', 'Presenter view (slides + private notes)', `href="${paths.present(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener"`) : ''}
+    ${railLink('🖨', 'Print lesson plan', `href="${paths.lessonPrint(h.lessonId, h.date)}" target="_blank" rel="noopener"`)}
+    ${isPreview ? '' : railLink('📑', 'Print cover / briefing sheet for today', `href="${paths.todayPrint(h.date)}" target="_blank" rel="noopener"`)}
+    ${isPreview || lab ? '' : railLink('🧪', 'Test this lesson in the Test Lab (sandbox)', `href="${paths.lessonOpen(h.lessonId, h.date, { lab: true })}" target="_blank" rel="noopener"`)}
+    <button class="action-btn focus-mode-toggle" type="button" title="Focus mode (hide everything but the board & flow)" aria-label="Toggle focus mode">⛶</button>
+    ${isPreview ? '' : `<button class="action-btn" type="button" title="No class this period? Mark it free and assign yourself tasks" aria-label="Make this period free" hx-post="${paths.freeMark()}" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>∅</button>`}
+  </nav>`;
+
   // BUG-052: split-lesson course/class switcher (only when there's more than one section). Plain links
   // reload the cockpit scoped to the chosen occurrence-course; preview is single-section so shows none.
   const sectionTabs = detail.sections.length > 1
@@ -416,17 +433,6 @@ export function renderLessonCockpit(options: {
           <p>${esc(meta)}${isPreview ? ' · No lesson occurrence or pupil record is created' : ` · ${pupilWorkRows.length} pupils`}</p>
         </div>
         <div class="lesson-clock" data-clock>—:—</div>
-        <div class="lesson-actions">
-          ${isPreview ? `<a class="button ghost" href="${esc(preview.backHref)}">← Back to scheme</a>` : ''}
-          <a class="button primary" href="${boardHref}" target="_blank" rel="noopener">Open board screen</a>
-          ${isPreview || lab ? '' : `<a class="button ghost" href="${paths.lessonOpen(h.lessonId, h.date, { lab: true })}" target="_blank" rel="noopener" title="Open THIS lesson in the Test Lab — a sandbox copy you can run as teacher + test pupil and write answers on, with no effect on the real class">🧪 Test this lesson</a>`}
-          ${lp ? `<a class="button ghost" href="${paths.pupilPreview(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener" title="See the slides AND the worksheet a pupil works in (read-only preview)">👁 As pupil</a>` : ''}
-          ${lp ? `<a class="button ghost" href="${paths.present(isPreview ? null : groupCourseId, lp, currentLevel)}" target="_blank" rel="noopener" title="Your slides WITH private teaching notes — shown only on your screen, never on the board">🧑‍🏫 Presenter</a>` : ''}
-          <a class="button ghost" href="${paths.lessonPrint(h.lessonId, h.date)}" target="_blank" rel="noopener" title="Printable lesson plan">🖨 Plan</a>
-          ${isPreview ? '' : `<a class="button ghost" href="${paths.todayPrint(h.date)}" target="_blank" rel="noopener" title="Printable cover / briefing sheet for today">🖨 Cover</a>`}
-          <button class="button focus-mode-toggle" type="button">Focus Mode</button>
-          ${isPreview ? '' : `<button class="button ghost" type="button" title="No class this period? Mark it free and assign yourself tasks" hx-post="${paths.freeMark()}" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>Make free</button>`}
-        </div>
       </section>
 
       ${sectionTabs}
@@ -446,6 +452,7 @@ export function renderLessonCockpit(options: {
 
       ${exceptionsHtml}
 
+      <div class="cockpit-stage">
       <div class="cockpit">
         <!-- Column 1: Slides & mirror -->
         <div class="cockpit-column">
@@ -664,6 +671,8 @@ export function renderLessonCockpit(options: {
             </p>
           </section>`}
         </aside>
+      </div>
+      ${actionRailHtml}
       </div>
 
       <!-- Live Pupil Work grid embedded below for full access -->

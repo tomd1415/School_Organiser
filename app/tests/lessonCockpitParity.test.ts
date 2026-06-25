@@ -93,7 +93,7 @@ describe('lesson cockpit feature parity (restored affordances)', () => {
     expect(labHtml).toContain('test-lab-banner'); // and shows the persistent sandbox banner
   });
   it('a real cockpit offers "Test this lesson" (jump to the sandbox); the sandbox itself does not', () => {
-    expect(html).toContain('🧪 Test this lesson');
+    expect(html).toContain('Test this lesson in the Test Lab'); // §17: now an icon button in the action rail (aria-label)
     expect(html).toMatch(/href="\/lesson\?lesson=\d+&amp;date=[^"]+&amp;lab=1"/); // jumps to the same lesson, sandboxed
     const labHtml = renderLessonCockpit({
       detail, notes: [] as any, prep: [], plansByCourse: new Map(), resByPlan: new Map(), matByPlan: new Map(),
