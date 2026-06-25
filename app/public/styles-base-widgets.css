@@ -619,9 +619,31 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .cal-insight { background: #eef4fb; border-radius: 8px; padding: 0.4rem 0.7rem; }
 .map-drag-hint { font-size: 0.8rem; }
 .map-grip { cursor: grab; color: var(--muted); -webkit-user-select: none; user-select: none; }
-tr[draggable="true"] { cursor: grab; }
-tr.map-dragging { opacity: 0.5; }
-tr.map-drop-over td { background: rgba(80, 140, 255, 0.14); box-shadow: inset 0 2px 0 var(--accent); }
+/* §8 timeline rail: a date rail (mono date + connector node + line) beside tone-bordered lesson cards. */
+.map-timeline { list-style: none; margin: 0.8rem 0 0; padding: 0; }
+.map-row { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.75rem; align-items: stretch; }
+.map-rail { position: relative; display: flex; flex-direction: column; align-items: flex-end; padding: 0.55rem 0.6rem 0.55rem 0; }
+.map-rail .map-date { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.82rem; color: var(--muted); }
+.map-node { position: absolute; right: -5px; top: 0.7rem; width: 9px; height: 9px; border-radius: 50%; background: var(--line); border: 2px solid var(--card); z-index: 1; }
+.map-row:not(:last-child) .map-rail::after { content: ""; position: absolute; right: -1px; top: 0.7rem; bottom: -0.75rem; width: 2px; background: var(--line); }
+.map-card { border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 10px; padding: 0.6rem 0.85rem; margin-bottom: 0.5rem; background: var(--card); }
+.map-card-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.map-card-status { font-size: 0.8rem; margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: baseline; }
+.map-title { font-weight: 600; text-decoration: none; }
+.map-past .map-card { border-left-color: var(--good); }
+.map-past .map-title { color: var(--muted); }
+.map-today .map-card { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card)); }
+.map-today .map-node { background: var(--accent); }
+.map-empty .map-card { border-style: dashed; border-left-style: dashed; background: transparent; }
+.map-nothing { text-decoration: none; }
+li[draggable="true"] .map-card { cursor: grab; }
+li.map-dragging { opacity: 0.5; }
+li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
+@media (max-width: 720px) {
+  .map-row { grid-template-columns: 1fr; gap: 0.15rem; }
+  .map-rail { flex-direction: row; align-items: center; padding: 0.2rem 0; }
+  .map-node, .map-rail::after { display: none; }
+}
 .map-kit-summary { margin: 0.4rem 0 0.6rem; font-size: 0.85rem; }
 .map-kit-summary ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
 .oc-kit { font-size: 0.9rem; }

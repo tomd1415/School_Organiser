@@ -12,6 +12,7 @@ import type { OverseePageData } from './overseeView';
 import { renderSubStep, type FocusVM } from './focusView';
 import type { SubStep } from '../repos/tasks';
 import type { SchemeHeader, UnitRow, PlanRow } from '../services/scheme';
+import type { MapPageData } from './mapView';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -160,6 +161,28 @@ export const GALLERY_SCHEME_PLANS: PlanRow[] = [
   schemePlan(14, 2, 'DNS and IP addresses', 1, false),
   schemePlan(15, 3, 'Packets and protocols', 0, true),
 ];
+
+// Curriculum map (SPEC §8): one slot's term-calendar timeline — past taught (green, stopping points),
+// today (teal), future weeks (plain; an empty one dashed). Fixed dates so the gallery is deterministic.
+export const GALLERY_MAP: MapPageData = {
+  slots: [
+    { lessonId: 4, groupCourseId: 9, groupName: '9X', courseId: 2, courseName: 'Computing', weekday: 2, periodLabel: 'P3' },
+    { lessonId: 5, groupCourseId: 10, groupName: '8B', courseId: 2, courseName: 'Computing', weekday: 4, periodLabel: 'P1' },
+  ],
+  chosen: { lessonId: 4, groupCourseId: 9, groupName: '9X', courseId: 2, courseName: 'Computing', weekday: 2, periodLabel: 'P3' },
+  entries: [
+    { date: '2026-06-09', lessonPlanId: 71, planTitle: 'LANs and WANs', stoppingPoint: 'slide 8', adapted: false, kitNeeded: null },
+    { date: '2026-06-16', lessonPlanId: 72, planTitle: 'Network topologies', stoppingPoint: 'the bus/star task', adapted: true, kitNeeded: null },
+    { date: '2026-06-23', lessonPlanId: 73, planTitle: 'Packets & protocols', stoppingPoint: null, adapted: false, kitNeeded: '16× micro:bit' },
+    { date: '2026-06-30', lessonPlanId: 74, planTitle: 'The TCP handshake', stoppingPoint: null, adapted: false, kitNeeded: null },
+  ],
+  futureDates: ['2026-06-30', '2026-07-07', '2026-07-14'],
+  today: '2026-06-23',
+  upcomingKit: [{ date: '2026-06-23', kit: '16× micro:bit' }],
+  pastWeeks: 6,
+  futureWeeks: 12,
+  csrf: 'gallery',
+};
 
 // Now hero (UI rebuild): an in-lesson state so the hero showcases the period eyebrow + countdown + next.
 export const GALLERY_NOW_HERO_STATE: NowState = {

@@ -14,8 +14,8 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await page.goto('/ui-gallery', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('h1', { hasText: 'UI gallery' })).toBeVisible();
-  // each section renders (component kit + 12 fixture-backed views)
-  await expect(page.locator('.gallery-item')).toHaveCount(13);
+  // each section renders (component kit + 13 fixture-backed views)
+  await expect(page.locator('.gallery-item')).toHaveCount(14);
   await expect(page.locator('.gallery-stage .focus-card').first()).toBeVisible(); // Focus card
   await expect(page.locator('.gallery-stage .captured-card').first()).toBeVisible(); // Captured cards
   await expect(page.locator('.gallery-stage .note-card').first()).toBeVisible(); // Notes grid
@@ -27,6 +27,7 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await expect(page.locator('.gallery-stage .toggle-switch').first()).toBeVisible(); // component kit toggle
   await expect(page.locator('.gallery-stage .pslide').first()).toBeVisible(); // slide deck
   await expect(page.locator('.gallery-stage .ws-doc')).toBeVisible(); // worksheet
+  await expect(page.locator('.gallery-stage .map-timeline').first()).toBeVisible(); // Curriculum map rail
   await expect(page.locator('.gallery-stage .now-hero').first()).toBeVisible(); // Now hero
   await expect(page.locator('.gallery-stage .timeline-slot').first()).toBeVisible(); // now timeline
 
