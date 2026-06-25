@@ -120,15 +120,15 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
     featureModelPickerHtml,
   } = options;
 
+  // §3: one reading-width column of stacked section cards (each its own .card), every field inline-autosaves.
   return `
-    <section class="card setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      <div class="ld-notes-head" style="margin-bottom: 12px;">
-        <div>
-          <p class="eyebrow" style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #666);">Prep & Advanced</p>
-          <h1 style="margin: 0;">Settings</h1>
-        </div>
+    <div class="settings-page setup" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <div class="settings-head">
+        <p class="eyebrow">Prep &amp; Advanced</p>
+        <h1>Settings</h1>
       </div>
 
+      <section class="card settings-section">
       <h2>School</h2>
       <label class="stop-label">School name
         <input class="stop-input" name="value" value="${esc(school ?? '')}"
@@ -136,6 +136,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         <span class="note-status" id="school-status"></span>
       </label>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Navigation</h2>
       <p class="muted">Pick which links stay on the always-visible bar; the rest fold into the
         "⚙ Setup &amp; admin" menu. Default: Now, Focus, Timetable, Tasks, Captured.</p>
@@ -146,6 +149,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
       </form>
 
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Password</h2>
       ${
         envManaged
@@ -164,6 +170,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         <span class="note-status" id="teacher-idle-status"></span>
       </div>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>AI</h2>
       <p class="muted">Key: ${aiKeySet ? `✅ set (${AI_KEY_ENV_MANAGED ? 'via .env' : 'in Settings'})` : '— not set; all AI features degrade gracefully'} ·
         provider: <strong>Anthropic (Claude)</strong> · every call is redacted, safeguarding-withheld and audited regardless.</p>
@@ -225,6 +234,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
       </div>
       <span class="note-status" id="ai-status"></span>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>TA access</h2>
       <p class="muted">Each TA gets their <strong>own password</strong> for the normal login page and lands on a
         <strong>read-only view of the current lesson</strong> (plan + resources, peek at the next) with a feedback form —
@@ -249,6 +261,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
           : ''
       }</div>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Pupil access</h2>
       <p class="muted">Pupils log in with <strong>class code → tap your name → PIN</strong> and see only <code>/me</code>:
         their class's live worksheet to type into, a Done ✓ button and a quick lesson-feedback widget. Manage PINs and
@@ -277,6 +292,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         <span class="note-status" id="pupil-status"></span>
       </div>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Auto-marking</h2>
       <p class="muted">Marks pupils' answers (objective answers instantly; written answers AI-suggested, you confirm),
         shows released results on the pupil's screen, builds "what works for me" profiles, and can remember a pupil's
@@ -301,6 +319,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
             </div>`
       }
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Email intake</h2>
       <p class="muted">Emails arriving in this mailbox become inbox tasks automatically (the paste box still works too).
         Use a <strong>dedicated or forwarded mailbox</strong>, not your main school account — set an Outlook rule that
@@ -330,6 +351,9 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
       </div>
       <div id="email-test-result">${emLast ? `<p class="muted">last poll: ${esc(emLast)}</p>` : ''}</div>
 
+      </section>
+
+      <section class="card settings-section">
       <h2>Data health</h2>
       <ul class="rollover-checks">
         <li>${health.current ? `✅ current year: <strong>${esc(health.current)}</strong>` : '⚠ no current academic year set'} (${health.years} year${health.years === 1 ? '' : 's'} in the database)</li>
@@ -341,6 +365,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
       </ul>
       <p class="muted">Setup checklist: <a href="${paths.welcome()}">/welcome</a> · September: <a href="${paths.setupRollover()}">rollover wizard</a></p>
       <p class="muted">Testing: <a href="${paths.testLab()}">🧪 Test Lab</a> — run any lesson in a sandbox (teacher + test pupil, write answers, mark) with no effect on real classes.</p>
-    </section>
+      </section>
+    </div>
   `;
 }

@@ -96,7 +96,7 @@ export function registerTimeRoutes(app: FastifyInstance): void {
         <p class="muted">Planned vs. what you actually did — tap <strong>diverted</strong> when reality wins.</p>
         ${logHtml}
       </section>`;
-    return reply.type('text/html').send(layout({ title: 'Time', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Time', body, authed: true, csrfToken: csrf, width: 'reading' }));
   });
 
   app.post('/work-blocks', guard, async (req, reply) => {
