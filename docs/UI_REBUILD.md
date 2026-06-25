@@ -290,9 +290,28 @@ Map · Coverage · Resources) · **CLASSES** (Pupils) · **SETUP** (Kit · Setti
     affects N classes — just this class / apply to master"). The adapt-this-class card + effective-lesson
     resolution already exist; the explicit mode toggle + per-field override-vs-master write path is the work.
 
-**Remaining:**
-- **Pupil `/me` overlay** — the calm light-theme pupil worksheet surface, behind the DPIA gate.
-- Cockpit §17 follow-up: the **mode control + scope strip** (above).
+### Pupil `/me` overlay (verified complete)
+- **Pupil worksheet (`/me`, DPIA-gated)** — **verified already complete, no changes**: it renders through the
+  shared `pupilLayout`, which carries the SPEC's **reading-help bar** (A− · A+ · 🔊 Read aloud · Aa easy-read ·
+  ◐ Contrast · 🌙 Dark · 🌊 Calm — persisted in localStorage, applied before first paint), and the page body
+  is the calm light-theme worksheet surface: **level-sliced sheet** + **slide-mirror** two-pane toggle
+  (📊 Slides / 📝 My worksheet), inline **autosave**, **I'm done ✓**, and the **feedback faces** widget. It
+  uses the same `renderWorksheet`/`renderSlideDeck` renderers as the teacher previews. Real pupils pass the
+  DPIA gate; the fictitious Test Pupil bypasses it (no real child's data). Screenshot-confirmed (pupil shell +
+  reading-help bar render correctly in the rebuilt design).
+
+## The rebuild is complete
+
+Every teacher screen and the pupil surface in the SPEC are rebuilt to the Rail & Stage design and verified —
+Foundation · RECORD · TODAY · CURRICULUM · CLASSES · SETUP · Safeguarding · Lesson cockpit §17 (layout) · `/me`.
+Full gate green throughout (typecheck · 946 unit · 377 integration · E2E; gallery showcases 16 views).
+
+**Two follow-ups remain, each a behavioural/data change rather than a re-skin (own focused pass):**
+- **Cockpit §17 mode control + scope strip** — the **View / Edit-this-class / Edit-master** segmented control
+  and the **override-else-master scope strip** footer. The adapt-this-class card + effective-lesson resolution
+  exist; the explicit mode toggle + per-field override-vs-master write path is the work.
+- **Data-wiring deferrals** — the Schemes **Classes-matrix** lens · Pupils §11 **cohort-analytics** layer
+  (class chips · level chips · completion % · ATL trend). Both need new per-class/per-pupil data, not layout.
 
 **Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
 **cohort-analytics** layer (class chips · level chips · completion % · ATL trend).
