@@ -39,6 +39,10 @@
   @media (max-width: 540px) {
     .so-daytl { display: none; }
   }
+  /* Lesson cockpit: pack the side info cards into masonry columns so more fit
+     on screen without shrinking the board mirror (which lives in the left column). */
+  .so-cock-side { column-width: 320px; column-gap: 14px; }
+  .so-cock-side > section { break-inside: avoid; margin: 0 0 14px; }
   @media (orientation: portrait), (max-width: 1024px) {
     .so-risk-head { align-items: flex-start !important; }
     .so-risk-metrics { width: 100%; gap: 14px 20px !important; }
@@ -103,7 +107,7 @@
       </div>
     </header>
 
-    <main class="so-main" style="flex:1; padding:24px; max-width:1320px; width:100%;">
+    <main class="so-main" style="flex:1; padding:24px; max-width:1520px; width:100%;">
 
       <!-- ============ NOW ============ -->
       <sc-if value="{{ isNow }}" hint-placeholder-val="{{ true }}">
@@ -358,7 +362,7 @@
           </div>
 
           <sc-if value="{{ cockpit.showSide }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex; flex-direction:column; gap:18px;">
+          <div class="so-cock-side">
             <!-- who may need you -->
             <section style="background:#141d26; border:1px solid #232c37; border-radius:14px; padding:18px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><h2 style="margin:0; font-size:15px;">Who may need you</h2><span style="font-size:12px; color:#9aa4b0;">live</span></div>
@@ -1419,6 +1423,166 @@
       </div>
       </sc-if>
 
+      <!-- ============ CONCEPTS ============ -->
+      <sc-if value="{{ isConcepts }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:900px; margin:0 auto; width:100%;">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:220px; background:#0e141b; border:1px solid #2a333f; border-radius:9px; padding:0 13px;">
+            <span style="color:#5f6b78;">⌕</span>
+            <input placeholder="Search concepts…" style="flex:1; background:none; border:none; color:#e7ebf0; padding:11px 0; font-family:inherit; font-size:15px; outline:none;">
+          </div>
+          <button type="button" style="background:oklch(0.72 0.1 200); border:none; color:#0e141b; font-weight:700; border-radius:9px; padding:0 18px; cursor:pointer; font-family:inherit; font-size:14px; min-height:44px;">＋ Concept</button>
+        </div>
+        <p style="margin:0 0 16px; font-size:13px; color:#9aa4b0; max-width:660px;">Standing teaching concepts — the misconceptions, analogies and worked examples you reuse. Linked to the lessons and spec points that teach them, so they surface while planning.</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ conceptItems }}" as="c" hint-placeholder-count="4">
+            <section style="background:#141d26; border:1px solid #232c37; border-radius:12px; padding:15px 16px;">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+                <span style="font-size:15px; font-weight:700; color:#e7ebf0;">{{ c.title }}</span>
+                <span style="{{ c.tagStyle }}">{{ c.area }}</span>
+                <div style="flex:1;"></div>
+                <span style="font-size:12px; color:#9aa4b0;">🔗 {{ c.linked }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:7px;">
+                <div style="display:flex; gap:9px; align-items:flex-start;"><span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:oklch(0.84 0.11 25); min-width:96px;">Misconception</span><span style="flex:1; font-size:13.5px; color:#cdd4dc;">{{ c.misconception }}</span></div>
+                <div style="display:flex; gap:9px; align-items:flex-start;"><span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:oklch(0.82 0.1 155); min-width:96px;">Use instead</span><span style="flex:1; font-size:13.5px; color:#cdd4dc;">{{ c.fix }}</span></div>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ RECURRING ============ -->
+      <sc-if value="{{ isRecurring }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:820px; margin:0 auto; width:100%;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
+          <h2 style="margin:0; font-size:16px;">Recurring tasks</h2>
+          <span style="font-size:12px; color:#9aa4b0;">standing reminders that re-create themselves</span>
+          <div style="flex:1;"></div>
+          <button type="button" style="background:oklch(0.72 0.1 200); border:none; color:#0e141b; font-weight:700; border-radius:9px; padding:9px 16px; cursor:pointer; font-family:inherit; font-size:13px; min-height:42px;">＋ Recurring task</button>
+        </div>
+        <p style="margin:0 0 16px; font-size:13px; color:#9aa4b0; max-width:640px;">A per-lesson task lands every time you teach that class — even twice in one day. Weekly and dated cadences drop into Tasks on schedule. Pause one to stop it generating without losing the definition.</p>
+        <div style="display:flex; flex-direction:column; gap:9px;">
+          <sc-for list="{{ recurringItems }}" as="r" hint-placeholder-count="4">
+            <section style="display:flex; align-items:center; gap:14px; background:#141d26; border:1px solid #232c37; border-radius:11px; padding:13px 15px; {{ r.dimStyle }}">
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:14.5px; font-weight:700; color:#e7ebf0;">{{ r.title }}</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                  <span style="{{ r.cadenceStyle }}">{{ r.cadence }}</span>
+                  <span style="font-size:12px; color:#9aa4b0;">next: {{ r.next }}</span>
+                </div>
+              </div>
+              <button type="button" onClick="{{ r.onToggle }}" aria-pressed="{{ r.on }}" style="{{ r.toggleStyle }}"><span style="{{ r.knobStyle }}"></span></button>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ CLUB SESSION ============ -->
+      <sc-if value="{{ isClub }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:760px; margin:0 auto; width:100%;">
+        <section style="display:flex; align-items:center; gap:14px; background:linear-gradient(120deg,#152431,#11181f); border:1px solid #25404e; border-radius:14px; padding:16px 18px; margin-bottom:16px; flex-wrap:wrap;">
+          <span style="width:46px; height:46px; flex:none; border-radius:12px; background:#1a232d; display:flex; align-items:center; justify-content:center; font-size:22px;">🎟️</span>
+          <div style="flex:1; min-width:0;"><div style="font-size:17px; font-weight:700;">Robotics club</div><div style="font-size:12.5px; color:#9aa4b0;">After school · Tue 15:30–16:30 · B14 · not a lesson</div></div>
+          <span style="font-size:12px; color:#9aa4b0;">8 regulars</span>
+        </section>
+        <section style="background:#141d26; border:1px solid #232c37; border-radius:14px; padding:16px 18px; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;"><h2 style="margin:0; font-size:15px;">Today — where everyone got up to</h2><div style="flex:1;"></div><span style="{{ savedChip }}">✓ Saved</span></div>
+          <textarea placeholder="A free-text record of what happened — who's mid-build, what to chase next week…" style="width:100%; min-height:120px; background:#0e141b; border:1px solid #2a333f; color:#e7ebf0; border-radius:10px; padding:12px 14px; font-family:inherit; font-size:14.5px; line-height:1.5; outline:none; resize:vertical;">Group A finished the line-follower chassis; Maya & Sam debugging the sensor threshold. Need 4 more AA batteries before next week.</textarea>
+        </section>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:#5f6b78; margin-bottom:10px;">Recent sessions</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ clubHistory }}" as="h" hint-placeholder-count="3">
+            <section style="background:#141d26; border:1px solid #232c37; border-radius:10px; padding:12px 15px;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;"><span style="font-size:12px; font-family:'JetBrains Mono',monospace; color:#9aa4b0;">{{ h.date }}</span></div>
+              <div style="font-size:13.5px; color:#cdd4dc;">{{ h.note }}</div>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ FREE PERIOD WORKSPACE ============ -->
+      <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:760px; margin:0 auto; width:100%;">
+        <section style="display:flex; align-items:center; gap:14px; background:#141d26; border:1px solid #232c37; border-radius:14px; padding:16px 18px; margin-bottom:16px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:0;"><div style="font-size:17px; font-weight:700;">Free · Period 5</div><div style="font-size:12.5px; color:#9aa4b0;">13:30–14:30 · 50 min · earmark what to get done</div></div>
+          <button type="button" style="background:#1a232d; border:1px solid #2a333f; color:#e7ebf0; border-radius:9px; padding:9px 14px; cursor:pointer; font-family:inherit; font-size:13px; min-height:42px;">↺ Use for teaching instead</button>
+        </section>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <h2 style="margin:0; font-size:15px;">Earmarked for this period</h2><div style="flex:1;"></div>
+          <button type="button" style="background:#1a232d; border:1px solid #2a333f; color:#e7ebf0; border-radius:8px; padding:7px 13px; cursor:pointer; font-family:inherit; font-size:12.5px; min-height:38px;">＋ Pull from Tasks</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ freeTasks }}" as="t" hint-placeholder-count="3">
+            <section style="display:flex; align-items:center; gap:13px; background:#141d26; border:1px solid #232c37; border-radius:11px; padding:13px 15px; {{ t.dimStyle }}">
+              <button type="button" onClick="{{ t.onToggle }}" aria-label="Done" style="{{ t.boxStyle }}">{{ t.check }}</button>
+              <div style="flex:1; min-width:0;"><div style="font-size:14.5px; {{ t.titleStyle }}">{{ t.title }}</div></div>
+              <span style="font-size:12px; color:#9aa4b0; font-family:'JetBrains Mono',monospace;">{{ t.est }}</span>
+            </section>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px; color:#5f6b78; margin-top:14px;">Scoped to this date &amp; slot. Ticked-off items stay logged against the period.</div>
+      </div>
+      </sc-if>
+
+      <!-- ============ TA VIEW (separate read-only surface) ============ -->
+      <sc-if value="{{ isTa }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:720px; margin:0 auto; width:100%;">
+        <div style="display:flex; align-items:center; gap:9px; background:oklch(0.72 0.1 200 / .1); border:1px solid oklch(0.72 0.1 200 / .35); border-radius:10px; padding:11px 14px; margin-bottom:16px;">
+          <span style="font-size:15px;">👁</span><span style="font-size:12.5px; color:#cdd4dc;"><b style="color:oklch(0.82 0.08 200);">TA view preview.</b> A TA logs in with the separate TA password and sees only this: the current lesson, read-only. No pupil names, no notes, no navigation.</span>
+        </div>
+        <section style="background:#141d26; border:1px solid #232c37; border-radius:14px; padding:18px 20px;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+            <span style="font-size:18px; font-weight:700;">Year 7 Computing</span>
+            <span style="font-size:12px; font-weight:700; background:oklch(0.78 0.12 75 / .16); color:oklch(0.84 0.1 75); border:1px solid oklch(0.78 0.12 75 / .4); border-radius:20px; padding:3px 11px;">Room B12 (cover)</span>
+            <div style="flex:1;"></div>
+            <span style="font-size:12px; color:#9aa4b0; font-family:'JetBrains Mono',monospace;">Lesson 3 · 11:05–12:05</span>
+          </div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:#5f6b78; margin-bottom:6px;">Objective</div>
+          <div style="font-size:15px; color:#e7ebf0; margin-bottom:16px;">Use a count-controlled loop to repeat instructions a fixed number of times.</div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:#5f6b78; margin-bottom:8px;">Lesson outline</div>
+          <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:16px;">
+            <sc-for list="{{ taOutline }}" as="o" hint-placeholder-count="3">
+              <div style="display:flex; gap:11px; align-items:center; background:#0e141b; border:1px solid #232c37; border-radius:9px; padding:10px 13px;"><span style="font-size:12px; font-family:'JetBrains Mono',monospace; color:#9aa4b0; min-width:46px;">{{ o.time }}</span><span style="flex:1; font-size:13.5px; color:#cdd4dc;">{{ o.text }}</span></div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:#5f6b78; margin-bottom:8px;">Send the teacher a note</div>
+          <textarea placeholder="e.g. front group needed extra support with the loop counter…" style="width:100%; min-height:80px; background:#0e141b; border:1px solid #2a333f; color:#e7ebf0; border-radius:10px; padding:11px 13px; font-family:inherit; font-size:14px; line-height:1.5; outline:none; resize:vertical;"></textarea>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:10px;"><button type="button" style="background:oklch(0.72 0.1 200); border:none; color:#0e141b; font-weight:700; border-radius:9px; padding:10px 18px; cursor:pointer; font-family:inherit; font-size:13.5px; min-height:44px;">Send to teacher</button><span style="font-size:12px; color:#5f6b78;">Flagged notes go straight to the safeguarding register, never to AI.</span></div>
+        </section>
+      </div>
+      </sc-if>
+
+      <!-- ============ TIME · week report ============ -->
+      <sc-if value="{{ isTime }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:780px; margin:0 auto; width:100%;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+          <h2 style="margin:0; font-size:16px;">This week</h2>
+          <span style="font-size:12px; color:#9aa4b0;">planned vs actual · from your Planner blocks</span>
+          <div style="flex:1;"></div>
+          <span style="font-size:12px; color:#9aa4b0; font-family:'JetBrains Mono',monospace;">22–26 Jun</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:18px;">
+          <sc-for list="{{ timeStats }}" as="t" hint-placeholder-count="4">
+            <div style="background:#141d26; border:1px solid #232c37; border-radius:12px; padding:14px 15px;"><div style="font-size:11px; color:#9aa4b0; text-transform:uppercase; letter-spacing:.6px;">{{ t.label }}</div><div style="font-size:20px; font-weight:700; margin-top:5px; color:{{ t.tone }};">{{ t.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ timeRows }}" as="r" hint-placeholder-count="5">
+            <section style="display:flex; align-items:center; gap:14px; background:#141d26; border:1px solid #232c37; border-radius:11px; padding:12px 15px;">
+              <span style="min-width:42px; font-size:13px; font-weight:700;">{{ r.day }}</span>
+              <div style="flex:1; min-width:0;"><div style="height:9px; background:#0e141b; border-radius:5px; overflow:hidden; display:flex;"><span style="{{ r.plannedStyle }}"></span><span style="{{ r.divertStyle }}"></span></div></div>
+              <span style="font-size:12px; color:#9aa4b0; font-family:'JetBrains Mono',monospace; white-space:nowrap;">{{ r.summary }}</span>
+            </section>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:18px; margin-top:14px; font-size:12px; color:#9aa4b0; flex-wrap:wrap;"><span style="color:oklch(0.82 0.1 155);">▣ worked the plan</span><span style="color:oklch(0.84 0.1 75);">⚠ diverted</span></div>
+      </div>
+      </sc-if>
+
       <!-- generic placeholder screen -->
       <sc-if value="{{ isOther }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px; gap:10px; color:#9aa4b0;">
@@ -1975,6 +2139,8 @@ class Component extends DCLogic {
     pupilClass: 0,
     planningDraft: false,
     experience: 'everyday',
+    recurringOn: { r0:true, r1:true, r2:false, r3:true },
+    freeDone: {},
   };
 
   componentDidMount() {
@@ -2040,6 +2206,7 @@ class Component extends DCLogic {
         mkNav('Captured','captured','#5f6b78'),
         mkNav('Notes','notes','#5f6b78'),
         mkNav('Events','events','#5f6b78'),
+        mkNav('Recurring','recurring','#5f6b78', null, null, true),
       ]},
       { label: 'Curriculum', items: [
         mkNav('Schemes','schemes','#5f6b78'),
@@ -2047,6 +2214,7 @@ class Component extends DCLogic {
         mkNav('Map','map','#5f6b78'),
         mkNav('Resources','resources','#5f6b78'),
         mkNav('Coverage','coverage','#5f6b78', null, null, true),
+        mkNav('Concepts','concepts','#5f6b78', null, null, true),
       ]},
       { label: 'Classes', items: [
         mkNav('Oversee','oversee','#5f6b78'),
@@ -2057,6 +2225,7 @@ class Component extends DCLogic {
         mkNav('Settings','settings','#5f6b78'),
         mkNav('Year setup','setup','#5f6b78', null, null, true),
         mkNav('Kit','kit','#5f6b78', null, null, true),
+        mkNav('Time','time','#5f6b78', null, null, true),
       ]},
     ];
     const navGroups = navGroupsAll
@@ -2088,6 +2257,12 @@ class Component extends DCLogic {
       oversee:['Oversee','Lessons you prepare but a TA or cover teacher leads'],
       planning:['Planning assistant','Draft, summarise and redesign \u2014 you review every draft'],
       setup:['Year setup','Timetable, the September rollover and onboarding'],
+      concepts:['Concepts','Standing teaching concepts \u00b7 misconceptions & worked examples'],
+      recurring:['Recurring','Standing tasks that re-create themselves'],
+      club:['Robotics club','Club session record \u00b7 not a lesson'],
+      free:['Free period','Earmark tasks to get done this period'],
+      time:['Time','Time-tracking \u00b7 planned vs actual across the week'],
+      ta:['TA view','Read-only current lesson \u2014 what a TA sees'],
     };
     const t = titles[screen] || [screen.charAt(0).toUpperCase()+screen.slice(1), 'Specced in reconstruction pack'];
 
@@ -2280,7 +2455,7 @@ class Component extends DCLogic {
           { icon:'◳', title:s.cockFocus?'Exit focus mode':'Focus mode', style:s.cockFocus?onFocus:norm, onClick:()=>this.setState(st=>({ cockFocus:!st.cockFocus })) },
         ];
       })(),
-      gridCols: s.cockFocus ? '1fr' : '1.3fr 1fr',
+      gridCols: s.cockFocus ? '1fr' : 'minmax(684px, 720px) minmax(0, 1fr)',
       showSide: !s.cockFocus,
       // note categories
       noteCats: ['Learning','Support','Behaviour','Safeguarding'].map(c=>({
@@ -3154,7 +3329,90 @@ class Component extends DCLogic {
         + (s.experience===k ? 'background:#2a3a47; color:#fff; font-weight:700;' : 'background:transparent; color:#9aa4b0;'),
     }));
 
+    // ================= CONCEPTS =================
+    const conceptDefs = [
+      { title:'Variables are boxes, not equals', area:'Programming', linked:'5 lessons', misconception:'Pupils read x = 5 as a maths equation, not assignment.', fix:'“Put 5 into the box called x” + a live trace table.' },
+      { title:'A network packet ≠ the whole message', area:'Networks', linked:'3 lessons', misconception:'They think one file travels as one lump.', fix:'Postcard-stack analogy; show headers + reassembly.' },
+      { title:'Binary is just place value in 2s', area:'Data rep', linked:'4 lessons', misconception:'Treated as a magic code to memorise.', fix:'Extend the denary place-value table they already know.' },
+      { title:'The CPU does one thing at a time, fast', area:'Architecture', linked:'2 lessons', misconception:'“Multitasking” = literally simultaneous.', fix:'Fetch–decode–execute as a very fast single queue.' },
+    ];
+    const conceptItems = conceptDefs.map(c => ({ ...c,
+      tagStyle: 'font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; background:#0e141b; border:1px solid #2a333f; color:#9aa4b0;' }));
+
+    // ================= RECURRING =================
+    const recToggle = (on) => 'position:relative; width:46px; height:26px; flex:none; border-radius:14px; border:none; cursor:pointer; background:'+(on?'oklch(0.7 0.12 155)':'#2a333f')+';';
+    const recKnob = (on) => 'position:absolute; top:3px; left:'+(on?'23px':'3px')+'; width:20px; height:20px; border-radius:50%; background:#fff;';
+    const recDefs = [
+      { key:'r0', title:'Set the retrieval starter', cadence:'per-lesson · all classes', next:'next: P1 Y10 today' },
+      { key:'r1', title:'Take the register', cadence:'per-lesson', next:'next: P1 Y10 today' },
+      { key:'r2', title:'Back up club kit list', cadence:'weekly · Mon', next:'paused' },
+      { key:'r3', title:'Submit weekly cover availability', cadence:'weekly · Fri', next:'next: Fri' },
+    ];
+    const recurringItems = recDefs.map(r => {
+      const on = s.recurringOn[r.key];
+      return { title:r.title, cadence:r.cadence, next: on ? r.next : 'paused', on,
+        onToggle: () => this.setState(st => ({ recurringOn: { ...st.recurringOn, [r.key]: !st.recurringOn[r.key] } })),
+        dimStyle: on ? '' : 'opacity:.55;',
+        cadenceStyle: 'font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:6px; background:oklch(0.72 0.1 200 / .14); color:oklch(0.82 0.08 200); border:1px solid oklch(0.72 0.1 200 / .4);',
+        toggleStyle: recToggle(on), knobStyle: recKnob(on) };
+    });
+
+    // ================= CLUB =================
+    const clubHistory = [
+      { date:'17 Jun', note:'Built the motor mounts; introduced the ultrasonic sensor.' },
+      { date:'10 Jun', note:'Soldering safety + first chassis assembly. Two kits short.' },
+      { date:'03 Jun', note:'Planned the line-follower challenge; formed groups.' },
+    ];
+
+    // ================= FREE PERIOD =================
+    const freeDefs = [
+      { key:'f0', title:'Mark Y9 Networks (18 answers)', est:'~30 min' },
+      { key:'f1', title:'Print Y10 robotics kit list', est:'~5 min' },
+      { key:'f2', title:'Reply to parent re Y10 trip', est:'~10 min' },
+    ];
+    const freeTasks = freeDefs.map(t => {
+      const done = !!s.freeDone[t.key];
+      return { title:t.title, est:t.est, check: done?'✓':'',
+        onToggle: () => this.setState(st => ({ freeDone: { ...st.freeDone, [t.key]: !st.freeDone[t.key] } })),
+        dimStyle: done ? 'opacity:.55;' : '',
+        titleStyle: done ? 'color:#9aa4b0; text-decoration:line-through;' : 'color:#e7ebf0;',
+        boxStyle: 'width:22px; height:22px; flex:none; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; '
+          + (done ? 'background:oklch(0.7 0.12 155); color:#0e141b; border:none;' : 'background:#0e141b; border:1.5px solid #3a4654; color:transparent;') };
+    });
+
+    // ================= TA VIEW =================
+    const taOutline = [
+      { time:'11:05', text:'Starter — recall: what does a loop do? (5 min)' },
+      { time:'11:15', text:'Worked example — count-controlled loop on the board (15 min)' },
+      { time:'11:35', text:'Independent task — worksheet Q1–Q4 (25 min)' },
+      { time:'12:00', text:'Plenary — exit ticket (5 min)' },
+    ];
+
+    // ================= TIME (week report) =================
+    const timeStats = [
+      { label:'Planned', value:'6h 20m', tone:'#e7ebf0' },
+      { label:'Worked to plan', value:'4h 55m', tone:'oklch(0.82 0.1 155)' },
+      { label:'Diverted', value:'1h 25m', tone:'oklch(0.84 0.1 75)' },
+      { label:'Left to leave', value:'on track', tone:'oklch(0.82 0.08 200)' },
+    ];
+    const timeRowDefs = [
+      { day:'Mon', plan:80, divert:20, summary:'2 blocks · 1 diverted' },
+      { day:'Tue', plan:100, divert:0, summary:'3 blocks' },
+      { day:'Wed', plan:70, divert:30, summary:'pastoral ran over' },
+      { day:'Thu', plan:100, divert:0, summary:'2 blocks' },
+      { day:'Fri', plan:90, divert:10, summary:'planned' },
+    ];
+    const timeRows = timeRowDefs.map(r => ({ day:r.day, summary:r.summary,
+      plannedStyle: 'display:block; height:100%; width:'+r.plan+'%; background:oklch(0.7 0.12 155);',
+      divertStyle: 'display:block; height:100%; width:'+r.divert+'%; background:oklch(0.78 0.12 75);' }));
+
     return {
+      isTime: screen==='time', timeStats, timeRows,
+      isConcepts: screen==='concepts', conceptItems,
+      isRecurring: screen==='recurring', recurringItems,
+      isClub: screen==='club', clubHistory,
+      isFree: screen==='free', freeTasks,
+      isTa: screen==='ta', taOutline,
       isRadar: screen==='radar',
       isOversee: screen==='oversee', overseeLessons,
       isPlanning: screen==='planning', planningActions,
@@ -3218,7 +3476,7 @@ class Component extends DCLogic {
       openCreate: inspector.openCreate,
       openSchemeEditor: () => this.setState({ inspector:{ kind:'scheme' } }),
       openUnitEditor: () => this.setState({ inspector:{ kind:'unit' } }),
-      isOther: !['now','timetable','lesson','marking','oversee','radar','cover','schemes','captured','notes','settings','tasks','focus','planner','events','map','coverage','resources','pupils','kit','safeguarding','planning','setup'].includes(screen),
+      isOther: !['now','timetable','lesson','marking','oversee','radar','cover','schemes','captured','notes','settings','tasks','focus','planner','events','map','coverage','resources','pupils','kit','safeguarding','planning','setup','concepts','recurring','club','free','time','ta'].includes(screen),
       otherKey: screen, otherTitle: otherTitles[screen] || screen,
       needs, checklist, weekdays, ttRows,
       editModes, lessonTabs, outline, resources,
