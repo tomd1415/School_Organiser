@@ -193,7 +193,22 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   Gallery fixture + item added (now 14). Verified: typecheck · 931 unit · 377 integration · gallery + map
   E2E · screenshot (gallery rail: past/today/future + empty).
 
-**Next:** the rest of CURRICULUM (Coverage §9 · Resources §10) · CLASSES (Pupils §11) · SETUP
+- **Coverage (`/coverage`, SPEC §9)** — added a focused **coverage report** (`src/lib/coverageView.ts`,
+  `renderCoverageReport`): the spec-point backbone as **cards per spec area** (grouped by code prefix) each
+  with a **% bar**, the point rows a **status dot** (✓ covered green · ○ gap red) · code (mono) · label ·
+  meta — covered points **link to the lesson that closes them** (↗), gaps read **"not yet"** in red. An
+  **All · Covered · Gaps** filter (full-nav chips via `paths.coverageFiltered`) hides points and **drops
+  emptied areas**. % = covered ÷ total. Enhanced `schemeCoverage` to also return the covering lesson
+  (`coveringPlanId`/`Title` via a LATERAL join) so the "links to the lesson" requirement has data. The rich
+  machinery is preserved: the AI gap-filler + per-lesson mapping checklists stay below the report, and the
+  spec-point management table moved into a "Manage spec points" disclosure. (Data is binary covered/not —
+  the spec's amber "partial"/"today" states aren't tracked, so they're not faked.) New `paths.coverage()`/
+  `coverageFiltered()` (+ oracle). CSS: `.cov-report`/`.cov-area`/`.cov-bar`/`.cov-dot*`/`.cov-filter` in
+  `styles-base-widgets.css`. **Tests:** `tests/coverageView.test.ts` (5) + `e2e/coverage.spec.ts` (boot +
+  Gaps-filter nav). Gallery fixture + item (now 15). Verified: typecheck · 940 unit · 377 integration ·
+  gallery + coverage E2E · screenshot.
+
+**Next:** the rest of CURRICULUM (Resources §10) · CLASSES (Pupils §11) · SETUP
 (Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
 cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 

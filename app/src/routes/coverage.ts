@@ -8,6 +8,7 @@ import { esc, layout } from '../lib/html';
 import { renderSavedStatus } from '../lib/notesView';
 import { listCourses, getActiveScheme } from '../repos/schemes';
 import { suggestCoverage, type CoverageSuggestion } from '../services/coverageCheck';
+import { renderCoverageReport, type CoverageFilter } from '../lib/coverageView';
 
 type SchemeLike = { id: number; title: string; version: number };
 import { parseSpecPoints } from '../lib/specImport';
@@ -68,7 +69,7 @@ async function docsSection(courseId: number): Promise<string> {
   </div>`;
 }
 
-function renderCovBody(courseId: number, points: SpecPointRow[], scheme: SchemeLike | null, coverage: CoverageRow[], lessons: SchemeLessonRow[]): string {
+function renderCovBody(courseId: number, points: SpecPointRow[], scheme: SchemeLike | null, coverage: CoverageRow[], lessons: SchemeLessonRow[], filter: CoverageFilter = 'all'): string {
   const list = points.length
     ? `<table class="kit-table cov-points"><thead><tr><th>Code</th><th>Spec point</th><th></th></tr></thead><tbody>${points
         .map(
@@ -78,14 +79,13 @@ function renderCovBody(courseId: number, points: SpecPointRow[], scheme: SchemeL
         .join('')}</tbody></table>`
     : '<p class="muted">No spec points yet — paste some above.</p>';
 
-  let coveragePanel = '<p class="muted">No active scheme of work for this course yet — create one on the Schemes page, then map its lessons here.</p>';
+  // §9 coverage report: spec-area cards with % bars + status-dot point rows (filterable). The AI gap-filler
+  // and the per-lesson mapping checklists stay below it.
+  let coveragePanel = renderCoverageReport({ courseId, scheme, coverage, filter });
   if (scheme) {
-    const covered = coverage.filter((c) => c.covered).length;
-    const uncovered = coverage.filter((c) => !c.covered);
-    coveragePanel = `<h2>Coverage — ${esc(scheme.title)} (v${scheme.version})</h2>
-      <p class="cov-summary">${covered}/${coverage.length} covered${uncovered.length ? ` · <strong class="cov-gap">${uncovered.length} not yet covered</strong>` : coverage.length ? ' — all covered ✓' : ''}</p>
-      ${uncovered.length ? `<ul class="cov-uncovered">${uncovered.map((c) => `<li>${c.code === c.title ? '' : `<code>${esc(c.code)}</code> `}${esc(c.title)}</li>`).join('')}</ul>
-      <p><button type="button" class="btn-secondary" hx-post="/coverage/suggest" hx-vals='{"scheme":"${scheme.id}","course":"${courseId}"}' hx-target="#cov-suggest" hx-swap="innerHTML">✨ Suggest coverage for the gaps</button></p>
+    const uncoveredN = coverage.filter((c) => !c.covered).length;
+    coveragePanel += `
+      ${uncoveredN ? `<p><button type="button" class="btn-secondary" hx-post="/coverage/suggest" hx-vals='{"scheme":"${scheme.id}","course":"${courseId}"}' hx-target="#cov-suggest" hx-swap="innerHTML">✨ Suggest coverage for the gaps</button></p>
       <div id="cov-suggest"></div>` : ''}
       <h2>Map lessons → spec points</h2>
       <p class="muted">Open a lesson and tick the spec points it covers.</p>
@@ -99,9 +99,10 @@ function renderCovBody(courseId: number, points: SpecPointRow[], scheme: SchemeL
         : '<p class="muted">This scheme has no lessons yet.</p>'}`;
   }
   return `<div id="cov-body">
-    <h2>Spec points (${points.length})</h2>
-    ${list}
     ${coveragePanel}
+    <details class="cov-manage"><summary>Manage spec points (${points.length})</summary>
+      ${list}
+    </details>
   </div>`;
 }
 
@@ -137,10 +138,10 @@ function renderSuggestions(courseId: number, suggestions: CoverageSuggestion[]):
   </form>`;
 }
 
-async function bodyFor(courseId: number): Promise<string> {
+async function bodyFor(courseId: number, filter: CoverageFilter = 'all'): Promise<string> {
   const [points, scheme] = await Promise.all([listSpecPoints(courseId), getActiveScheme(courseId)]);
   const [coverage, lessons] = scheme ? await Promise.all([schemeCoverage(scheme.id), schemeLessons(scheme.id)]) : [[], []];
-  return renderCovBody(courseId, points, scheme, coverage, lessons);
+  return renderCovBody(courseId, points, scheme, coverage, lessons, filter);
 }
 
 export function registerCoverageRoutes(app: FastifyInstance): void {
@@ -148,7 +149,8 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
 
   app.get('/coverage', { preHandler: requireAuth }, async (req, reply) => {
     const csrf = reply.generateCsrf();
-    const q = z.object({ course: z.coerce.number().int().positive().optional() }).safeParse(req.query);
+    const q = z.object({ course: z.coerce.number().int().positive().optional(), cov: z.enum(['all', 'covered', 'gaps']).optional() }).safeParse(req.query);
+    const filter: CoverageFilter = (q.success && q.data.cov) || 'all';
     let body: string;
     try {
       const courses = await listCourses();
@@ -168,7 +170,7 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
             </form>
             <p class="muted">Re-importing updates titles and order without duplicating (matched by code). A line keeps its code (e.g. <code>1.1.1</code>) if it has one.</p>
           </details>
-          ${await bodyFor(courseId)}
+          ${await bodyFor(courseId, filter)}
           ${await docsSection(courseId)}`
         : '<p class="muted">No courses yet — add one in Setup first.</p>';
       body = `

@@ -13,6 +13,7 @@ import { renderSubStep, type FocusVM } from './focusView';
 import type { SubStep } from '../repos/tasks';
 import type { SchemeHeader, UnitRow, PlanRow } from '../services/scheme';
 import type { MapPageData } from './mapView';
+import type { CoverageReportData } from './coverageView';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -182,6 +183,22 @@ export const GALLERY_MAP: MapPageData = {
   pastWeeks: 6,
   futureWeeks: 12,
   csrf: 'gallery',
+};
+
+// Coverage report (SPEC §9): spec-area cards with % bars + status-dot point rows. Mixed covered/gap so
+// the gallery shows both states and an area that's partially covered.
+export const GALLERY_COVERAGE: CoverageReportData = {
+  courseId: 2,
+  scheme: { id: 31, title: 'OCR J277 GCSE', version: 4 },
+  filter: 'all',
+  coverage: [
+    { id: 1, code: '1.1.1', title: 'The purpose of the CPU', covered: true, coveringPlanId: 81, coveringPlanTitle: 'Inside the CPU' },
+    { id: 2, code: '1.1.2', title: 'Von Neumann architecture', covered: true, coveringPlanId: 81, coveringPlanTitle: 'Inside the CPU' },
+    { id: 3, code: '1.1.3', title: 'Registers and the FDE cycle', covered: false, coveringPlanId: null, coveringPlanTitle: null },
+    { id: 4, code: '1.2.1', title: 'Primary storage (memory)', covered: true, coveringPlanId: 82, coveringPlanTitle: 'RAM, ROM & cache' },
+    { id: 5, code: '2.1.1', title: 'Networks: LANs and WANs', covered: false, coveringPlanId: null, coveringPlanTitle: null },
+    { id: 6, code: '2.1.2', title: 'Network topologies', covered: false, coveringPlanId: null, coveringPlanTitle: null },
+  ],
 };
 
 // Now hero (UI rebuild): an in-lesson state so the hero showcases the period eyebrow + countdown + next.

@@ -31,6 +31,9 @@ describe('paths builders — exact URLs', () => {
     [paths.prepAdd(), '/prep/add'],
     [paths.timerStart(), '/timer/start'],
     [paths.followupToggle(3), '/followups/3/toggle'],
+    // coverage
+    [paths.coverage(), '/coverage'],
+    [paths.coverageFiltered(2, 'gaps'), '/coverage?course=2&amp;cov=gaps'],
     // map
     [paths.map(), '/map'],
     [paths.mapShift(), '/map/shift'],

@@ -16,6 +16,8 @@ export interface CoverageRow {
   code: string;
   title: string;
   covered: boolean;
+  coveringPlanId: number | null; // the first lesson that covers this point (§9 "links to the lesson")
+  coveringPlanTitle: string | null;
 }
 
 export interface SchemeLessonRow {
@@ -81,13 +83,19 @@ export async function setPlanSpecPoint(planId: number, pointId: number, on: bool
 export async function schemeCoverage(schemeId: number): Promise<CoverageRow[]> {
   const { rows } = await pool.query<CoverageRow>(
     `SELECT sp.id, sp.code, sp.title,
-            EXISTS (
-              SELECT 1 FROM lesson_plan_spec_points m
-              JOIN lesson_plans lp ON lp.id = m.lesson_plan_id
-              JOIN units u ON u.id = lp.unit_id
-              WHERE m.spec_point_id = sp.id AND u.scheme_id = $1
-            ) AS covered
+            (cov.lesson_plan_id IS NOT NULL) AS covered,
+            cov.lesson_plan_id AS "coveringPlanId",
+            cov.plan_title AS "coveringPlanTitle"
      FROM course_spec_points sp
+     LEFT JOIN LATERAL (
+       SELECT lp.id AS lesson_plan_id, lp.title AS plan_title
+       FROM lesson_plan_spec_points m
+       JOIN lesson_plans lp ON lp.id = m.lesson_plan_id
+       JOIN units u ON u.id = lp.unit_id
+       WHERE m.spec_point_id = sp.id AND u.scheme_id = $1
+       ORDER BY u.display_order, lp.display_order, lp.id
+       LIMIT 1
+     ) cov ON true
      WHERE sp.active AND sp.course_id = (SELECT course_id FROM schemes_of_work WHERE id = $1)
      ORDER BY sp.display_order, sp.id`,
     [schemeId],
