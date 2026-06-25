@@ -272,11 +272,27 @@ Map · Coverage · Resources) · **CLASSES** (Pupils) · **SETUP** (Kit · Setti
 (pinned). Gallery now showcases 16 fixture-backed views; full gate green throughout (typecheck · 946 unit ·
 377 integration · E2E).
 
-**Remaining — each its own focused session:**
-- **Lesson cockpit (`/lesson/:id`, §17)** — the deepest screen (board mirror · in-lesson flow tracker · right
-  icon rail · modals · marking modal · adaptation override-else-master scope strip). The SPEC itself flags it
-  for a dedicated pass; not started.
+### Lesson cockpit §17 (signature pass done)
+- **Lesson cockpit (`/lesson/:id`, SPEC §17)** — the deepest screen. The board mirror · flow tracker · live
+  tools · planbar · split-course tabs · modals were already built. This pass delivered §17's **signature
+  re-layout**: the **top is now deliberately light** (status line + clock; the planbar + course tabs sit
+  below) and the old **horizontal action button row became a thin 50px sticky vertical icon rail** to the
+  right of the content grid (`.cockpit-stage` wraps `.cockpit` + `.action-rail`). Each action is a 50×48
+  icon button with `title` + `aria-label` — **Board screen ↗ primary (accent)**, View-as-pupil, Presenter,
+  Print plan, Print cover, Test-lab, Make-free, and **Focus mode** (lit teal when active). **Focus mode now
+  collapses the grid to two columns and hides the right live-tools column** (§17). CSS: `.cockpit-stage`/
+  `.action-rail`/`.action-btn(.action-primary)` + the focus-mode rules in `styles.css`'s next scope
+  (responsive: the rail becomes a horizontal row ≤820px). **Tests:** `e2e/cockpit.spec.ts` (rail + primary +
+  the old row gone + Focus-mode collapse/hide) + updated `lessonCockpitParity.test.ts` for the rail markup.
+  Verified: typecheck · 946 unit · 377 integration · cockpit E2E · screenshots (normal + focus mode).
+  - **Deferred (a deeper behavioural/data change, its own pass):** the **View / Edit-this-class / Edit-master
+    mode segmented control** + the **adaptation override-else-master scope strip** footer ("this change
+    affects N classes — just this class / apply to master"). The adapt-this-class card + effective-lesson
+    resolution already exist; the explicit mode toggle + per-field override-vs-master write path is the work.
+
+**Remaining:**
 - **Pupil `/me` overlay** — the calm light-theme pupil worksheet surface, behind the DPIA gate.
+- Cockpit §17 follow-up: the **mode control + scope strip** (above).
 
 **Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
 **cohort-analytics** layer (class chips · level chips · completion % · ATL trend).

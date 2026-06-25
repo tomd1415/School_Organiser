@@ -2301,7 +2301,7 @@ body[data-shell="next"] .lesson-page .page {
 }
 body[data-shell="next"] .live-bar {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   gap: 1rem;
   align-items: center;
   margin-bottom: 1.5rem;
@@ -2356,6 +2356,49 @@ body[data-shell="next"] .lesson-clock {
 body[data-shell="next"] .lesson-actions {
   display: flex;
   gap: 0.5rem;
+}
+/* §17 action rail: a thin sticky vertical icon column beside the content grid (was a button row). */
+body[data-shell="next"] .cockpit-stage {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+body[data-shell="next"] .cockpit-stage > .cockpit {
+  flex: 1;
+  min-width: 0;
+}
+body[data-shell="next"] .action-rail {
+  position: sticky;
+  top: 1rem;
+  flex: none;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+body[data-shell="next"] .action-btn {
+  width: 50px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+body[data-shell="next"] .action-btn:hover { border-color: var(--line-strong); }
+body[data-shell="next"] .action-btn.action-primary { background: var(--accent); border-color: var(--accent); color: #0e141b; }
+/* Focus mode: light the toggle + collapse to two columns, hiding the right live-tools column (§17). */
+body.focus-mode[data-shell="next"] .action-rail .focus-mode-toggle { background: var(--accent); border-color: var(--accent); color: #0e141b; }
+body.focus-mode[data-shell="next"] .cockpit { grid-template-columns: 1.3fr 1fr; }
+body.focus-mode[data-shell="next"] .cockpit-column:last-child { display: none; }
+@media (max-width: 820px) {
+  body[data-shell="next"] .cockpit-stage { flex-direction: column-reverse; }
+  body[data-shell="next"] .action-rail { position: static; flex-direction: row; flex-wrap: wrap; width: auto; }
 }
 /* BUG-052: split-lesson course/class switcher above the cockpit. */
 body[data-shell="next"] .cockpit-course-tabs {
