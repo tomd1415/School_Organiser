@@ -4,6 +4,7 @@ import { CAPTURED_CATEGORIES, type CapturedItem } from '../services/captured';
 
 const SELECT = `SELECT n.id, n.body, n.category,
                        to_char(n.surface_on, 'YYYY-MM-DD') AS "surfaceOn",
+                       to_char(n.created_at, 'DD Mon') AS "addedAt",
                        n.group_id AS "groupId", g.name AS "groupName",
                        n.safeguarding, n.interest, n.archived
                 FROM notes n LEFT JOIN groups g ON g.id = n.group_id`;

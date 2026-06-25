@@ -3275,6 +3275,72 @@ body[data-shell="next"] .sg-item.sg-new {
   color: var(--text) !important;
 }
 
+/* ── Captured (Rail & Stage rebuild — SPEC §1): capture bar + filter chips + triage cards ─────────── */
+body[data-shell="next"] .capture-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--teal-soft);
+  background: linear-gradient(100deg, var(--teal-soft), var(--surface));
+}
+body[data-shell="next"] .capture-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  min-height: var(--target);
+}
+body[data-shell="next"] .capture-go { flex: none; min-height: var(--target); }
+body[data-shell="next"] .capture-help { font-size: 13px; margin: 0 0 14px; }
+
+body[data-shell="next"] .cap-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+body[data-shell="next"] .captured-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+body[data-shell="next"] .captured-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+body[data-shell="next"] .captured-card.cap-logistics { border-left-color: var(--teal); }
+body[data-shell="next"] .captured-card.cap-pupil { border-left-color: var(--amber); }
+body[data-shell="next"] .captured-card.cap-curriculum { border-left-color: var(--green); }
+body[data-shell="next"] .captured-card.cap-cpd { border-left-color: var(--violet); }
+body[data-shell="next"] .captured-card.cap-safeguarding { border-left-color: var(--red); }
+
+body[data-shell="next"] .cap-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+body[data-shell="next"] .cap-subject { color: var(--quiet); font-size: 0.8rem; }
+body[data-shell="next"] .cap-spacer { flex: 1; }
+body[data-shell="next"] .cap-added { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+body[data-shell="next"] .cap-body {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+body[data-shell="next"] .cap-body:hover { border-color: var(--line); }
+body[data-shell="next"] .cap-body:focus { border-color: var(--line-strong); background: var(--bg); outline: none; }
+body[data-shell="next"] .cap-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+body[data-shell="next"] .cap-resurface { color: var(--muted); font-size: 0.82rem; }
+body[data-shell="next"] .cap-resurface strong { color: var(--text); }
+body[data-shell="next"] .cap-refile { margin-top: 8px; }
+body[data-shell="next"] .cap-refile > summary { cursor: pointer; color: var(--quiet); font-size: 0.78rem; min-height: 32px; display: inline-flex; align-items: center; }
+body[data-shell="next"] .cap-refile-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+body[data-shell="next"] .cap-empty { margin-top: 14px; }
+
 body[data-shell="next"] .cc-master,
 body[data-shell="next"] .ex-banner.ex-free,
 body[data-shell="next"] .now-exbanner.now-ex-free,

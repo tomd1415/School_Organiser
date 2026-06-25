@@ -36,8 +36,22 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
 - **Tests**: `tests/nav.test.ts` updated + a new rail-grouping/power-gating test (15 pass); `gallery.spec.ts`
   asserts the kit. Verified: typecheck · 894 unit · 376 integration · 18 E2E.
 
-### ⏳ Phase B — screens, group-by-group (not started)
-Order: **RECORD** (Captured → Notes → Events) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
+### ⏳ Phase B — screens, group-by-group (in progress)
+
+**Done:**
+- **Captured (`/captured`, SPEC §1)** — rebuilt to the capture-bar + triage-card design: a teal capture bar
+  (type a line → Capture + → the new card prepends, input clears), category-filter chips **with counts**,
+  tone-left-border cards (badge + subject + "added" date + body + "↳ resurfaces …" + actions) with a
+  **Re-file** disclosure for category/date/class. Safeguarding honoured: a flagged capture shows **⚑ Flagged
+  · withheld from AI** + "kept out of AI entirely" and its primary action is **Open register**, never "Make a
+  task". Route computes per-category counts + creates from the typed body; the stale light-themed bottom
+  Quick-Capture box was removed (`/capture-quick` route kept for the topbar). Added `CapturedItem.addedAt` +
+  `paths.safeguarding()`/`paths.capturedFiltered()`. Gallery fixture added. Verified: typecheck · 899 unit ·
+  captured integration · gallery+boot E2E · screenshot (both orientations).
+
+**Next:** Notes (`/notes`, SPEC §2) → Events (`/events`, SPEC §7), then the other groups.
+
+Order: **RECORD** (Captured ✓ → Notes → Events) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →
 **CLASSES** (Pupils) → **SETUP** (Kit → Settings → Setup) → **Lesson cockpit** (own pass) → pupil `/me`.
 Per-screen pattern: extract any inline route-render into a `*View.ts`; redesign to the SPEC section using the
