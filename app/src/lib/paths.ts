@@ -135,6 +135,8 @@ export const paths = {
   kit: (): string => '/kit',
   ta: (): string => '/ta',
   workBlocks: (): string => '/work-blocks',
+  oversee: (): string => '/oversee',
+  overseeWeek: (date: string): string => `/oversee?date=${date}`,
   captureQuick: (): string => '/capture-quick',
   dayChecklist: (): string => '/day-checklist',
   dayChecklistAdd: (): string => '/day-checklist/add',

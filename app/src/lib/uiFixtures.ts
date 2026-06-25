@@ -8,6 +8,7 @@ import type { GroupOpt } from '../repos/tasks';
 import type { NoteCard } from './notesView';
 import type { UpcomingEvent } from '../services/event';
 import type { TaskRow } from '../repos/tasks';
+import type { OverseePageData } from './overseeView';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -104,6 +105,21 @@ export const GALLERY_TASKS: TaskRow[] = [
   { id: 3, title: 'Plan the recursion lesson properly', detail: null, urgency: 'by_next_lesson', estimateMin: 45, cognitiveLoad: 'high', groupId: 2, context: null, status: 'triaged', interest: true, source: null },
   { id: 4, title: 'Tidy the shared resources folder', detail: null, urgency: 'someday', estimateMin: null, cognitiveLoad: null, groupId: null, context: null, status: 'done', interest: false, source: null },
 ];
+
+// Oversee (SPEC §13): a day with a plan-missing row (red) + a resources-warning row, and a ready day.
+export const GALLERY_OVERSEE: OverseePageData = {
+  prevDate: '2026-06-15',
+  nextDate: '2026-06-29',
+  days: [
+    { name: 'Mon', dateLabel: '23 Jun', isToday: true, rows: [
+      { lessonId: 1, date: '2026-06-23', start: '09:00', end: '10:00', groupName: '8C', purpose: 'teaching', courseNames: ['Computing'], staffName: 'Mr Okafor (TA)', noPlan: true, needsEdit: false },
+      { lessonId: 2, date: '2026-06-23', start: '11:20', end: '12:20', groupName: '7B', purpose: 'teaching', courseNames: ['Computing'], staffName: 'Ms Reed (cover)', noPlan: false, needsEdit: true },
+    ] },
+    { name: 'Wed', dateLabel: '25 Jun', isToday: false, rows: [
+      { lessonId: 3, date: '2026-06-25', start: '13:30', end: '14:30', groupName: '9A', purpose: 'teaching', courseNames: ['GCSE CS'], staffName: 'Mr Okafor (TA)', noPlan: false, needsEdit: false },
+    ] },
+  ],
+};
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

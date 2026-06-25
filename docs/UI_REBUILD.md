@@ -86,8 +86,23 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
   scroll in portrait. It already used the shared stat grid + cards. Verified: typecheck · 899 unit · marking
   integration (14) · boot E2E.
 
-**Next:** Oversee → Focus → Planner → Timetable → Now (Oversee/Focus/Planner need their inline route-renders
-extracted into `*View.ts` first).
+- **Oversee (`/oversee`, SPEC §13)** — **extracted** the inline route-render into `src/lib/overseeView.ts`
+  (pure data→HTML) and rebuilt to the spec: TA-led lessons grouped by day, each a **tone-left-border card**
+  (slot · ⚑ class · course · TA name) with **plan-set/resources status pills** (reusing `weekReadiness` —
+  `noPlan`→"plan missing" red + red left border, `needsEdit`→"resources ⚠" amber), and an Open action to the
+  lesson page (where Set-plan/Attach-resources/Add-note happen). Week nav via new `paths.oversee()/overseeWeek()`.
+  Width `working`. Gallery fixture. Verified: typecheck · 901 unit · oversee/timetable integration · gallery+boot E2E.
+
+### Designer ADVICE incorporated (`ADVICE - for the developers.md`, commit `1bd24c7`)
+- **Width intents corrected** to the designer's table: **Notes → wide**, **Events → working** (Captured=reading,
+  Tasks=working already matched). Marking=wide (not in the table; table page).
+- **Token `--ink` vs `--text`:** verified `--text` IS defined in `styles.css` (`#f3f7fc`; flips to `#fff`
+  high-contrast / `#000` print) and `--ink: var(--text)` aliases it in the next shell — so the screens are
+  theme-correct and the two are equivalent here. Kept `--text` (no churn); flagged for the designer.
+- Rail groupings already match the advice (Concepts/Recurring/Time as power; Club/Free/TA contextual, not rail
+  items; Radar/standalone-Planning/Cover correctly absent). No nav changes needed.
+
+**Next:** Focus → Planner → Timetable → Now (Focus/Planner need their inline route-renders extracted first).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →
