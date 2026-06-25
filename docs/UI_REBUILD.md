@@ -178,7 +178,22 @@ render + no console errors + a key interaction), on top of the gallery fixture +
 
 **✅ TODAY group complete** (Tasks · Marking · Oversee · Focus · Planner · Timetable · Now).
 
-**Next:** the rest of CURRICULUM (Map §8 · Coverage §9 · Resources §10) · CLASSES (Pupils §11) · SETUP
+### CURRICULUM group (in progress)
+- **Map (`/map`, SPEC §8)** — **extracted** the inline route-render into `src/lib/mapView.ts` (advancing
+  the UI-separation goal) and rebuilt the term calendar from a `<table>` into a **timeline rail of
+  tone-bordered cards**: a left **date rail** (mono date · connector node + line) beside lesson cards —
+  **past** green-bordered with "stopped at …" + **↻ continue next week** (carry-over), **today** teal, and
+  the holiday-aware **future** weeks plain (an empty week **dashed** "— nothing planned"); ✏ marks an
+  adapted lesson. Read-only (editing stays on the lesson screen). **Drag-to-move future weeks preserved** —
+  the rail carries `data-map-slot`/`-csrf` and draggable `<li>`s; `public/app.js` was updated from
+  `table`/`tr` selectors to `.map-timeline`/`li`. New `paths.map()`/`paths.mapMove()` builders (+ oracle
+  assertions); all view URLs via `paths.ts`. CSS: `.map-timeline`/`.map-row`/`.map-rail`/`.map-card`(tones)
+  in `styles-base-widgets.css` (collapses ≤720px). **Tests:** `tests/mapView.test.ts` (7) + `e2e/map.spec.ts`
+  (live boot + drag-hook attr) + updated the screens-integration assertion (`map-table`→`map-timeline`).
+  Gallery fixture + item added (now 14). Verified: typecheck · 931 unit · 377 integration · gallery + map
+  E2E · screenshot (gallery rail: past/today/future + empty).
+
+**Next:** the rest of CURRICULUM (Coverage §9 · Resources §10) · CLASSES (Pupils §11) · SETUP
 (Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
 cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 

@@ -37,7 +37,9 @@ export const paths = {
 
   // ── Misc actions referenced by the cockpit (path-only) ──────────────────────────────────────────
   freeMark: (): string => '/free/mark',
+  map: (): string => '/map',
   mapShift: (): string => '/map/shift',
+  mapMove: (): string => '/map/move',
   testLab: (): string => '/test-lab',
   testLabPlan: (lp: number): string => `/test-lab/plan/${lp}`,
   testPupilOpen: (): string => '/test-pupil/open',

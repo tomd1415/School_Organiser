@@ -31,6 +31,11 @@ describe('paths builders — exact URLs', () => {
     [paths.prepAdd(), '/prep/add'],
     [paths.timerStart(), '/timer/start'],
     [paths.followupToggle(3), '/followups/3/toggle'],
+    // map
+    [paths.map(), '/map'],
+    [paths.mapShift(), '/map/shift'],
+    [paths.mapMove(), '/map/move'],
+    [paths.mapSlot(4, 9), '/map?slot=4:9'],
     // now
     [paths.nowClock('a b&c'), '/now/clock?sig=a%20b%26c'], // encodeURIComponent applied inside
     [paths.nowTimeline(), '/now/timeline'],

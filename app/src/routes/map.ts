@@ -8,55 +8,12 @@ import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { getClockContext } from '../repos/clock';
 import { localParts, addDays } from '../lib/time';
-import { getCurrentYearEnd, layLessonsIntoSlot, listAllSlots, moveBinding, slotSchedule, type ScheduleEntry, type SlotOption } from '../repos/delivery';
-import { upcomingSlotDates, weekdayName } from '../services/delivery';
+import { getCurrentYearEnd, layLessonsIntoSlot, listAllSlots, moveBinding, slotSchedule } from '../repos/delivery';
+import { upcomingSlotDates } from '../services/delivery';
+import { renderMapPage, slotKey } from '../lib/mapView';
 
 const PAST_WEEKS = 6;
 const FUTURE_WEEKS = 12;
-
-function slotKey(s: SlotOption): string {
-  return `${s.lessonId}:${s.groupCourseId}`;
-}
-
-function slotLabel(s: SlotOption): string {
-  return `${s.groupName ?? 'group'} · ${s.courseName} · ${weekdayName(s.weekday)} ${s.periodLabel}`;
-}
-
-function renderRow(
-  date: string,
-  e: ScheduleEntry | undefined,
-  kind: 'past' | 'today' | 'future',
-  lessonId: number,
-  courseId: number,
-  shift?: { slotKey: string; today: string },
-  dragSlot?: string,
-): string {
-  const open = `/lesson?lesson=${lessonId}&date=${esc(date)}`;
-  const kit = e?.planTitle && e.kitNeeded ? `<div class="map-kit" title="kit this lesson needs">🔧 ${esc(e.kitNeeded)}</div>` : '';
-  const title = e?.planTitle
-    ? `<a href="${open}">${esc(e.planTitle)}</a>${e.adapted ? ' <span class="map-adapted">✏ adapted</span>' : ''}` +
-      ` <a class="map-master" href="/schemes?course=${courseId}" title="edit the master lesson on the Schemes page">master ↗</a>${kit}`
-    : `<a href="${open}" class="muted">— nothing planned</a>`;
-  // 5.9: carry-over — a recent lesson that didn't finish repeats next week; the rest shift back.
-  const canShift = shift && e?.planTitle && kind !== 'future' && date >= addDays(shift.today, -14);
-  const shiftBtn = canShift
-    ? ` <button type="button" class="link map-shift" hx-post="/map/shift" hx-vals='{"slot":"${shift.slotKey}","date":"${esc(date)}"}'
-        hx-confirm="Continue this lesson next week? Everything after it shifts back one school week (holidays still skipped)." title="didn't finish — repeat next week, shift the rest">↻ continue next week</button>`
-    : '';
-  const status =
-    kind === 'past'
-      ? e?.stoppingPoint
-        ? `<span class="map-stop">stopped at ${esc(e.stoppingPoint)}</span>${shiftBtn}`
-        : `<span class="muted">no record</span>${shiftBtn}`
-      : kind === 'today'
-        ? `<strong class="map-today">today</strong>${shiftBtn}`
-        : '';
-  // C3: future weeks are drag-to-shift targets; a future week WITH a lesson can be picked up and
-  // dropped on another week (they swap, or move into an empty week). History (past/today) is fixed.
-  const drag = kind === 'future' && dragSlot ? ` data-date="${esc(date)}"${e?.planTitle ? ' draggable="true"' : ''}` : '';
-  const handle = kind === 'future' && dragSlot && e?.planTitle ? '<span class="map-grip" title="drag to another week" aria-hidden="true">⠿</span> ' : '';
-  return `<tr class="map-${kind}"${drag}><td class="map-date">${esc(date)}</td><td>${handle}${title}</td><td>${status}</td></tr>`;
-}
 
 export function registerMapRoutes(app: FastifyInstance): void {
   app.get('/map', { preHandler: requireAuth }, async (req, reply) => {
@@ -75,51 +32,28 @@ export function registerMapRoutes(app: FastifyInstance): void {
         // Past + today come from real occurrences; future weeks from the holiday-aware date walk.
         const pastFrom = addDays(today, -7 * PAST_WEEKS);
         const entries = await slotSchedule(chosen.lessonId, chosen.groupCourseId, pastFrom, addDays(today, 7 * FUTURE_WEEKS));
-        const byDate = new Map(entries.map((e) => [e.date, e]));
         const yearEnd = await getCurrentYearEnd();
         const futureDates = upcomingSlotDates(chosen.weekday, addDays(today, 1), FUTURE_WEEKS, ctx.terms).filter(
           (d) => !yearEnd || d <= yearEnd,
         );
-
-        const shift = { slotKey: slotKey(chosen), today };
-        const pastRows = entries
-          .filter((e) => e.date < today)
-          .map((e) => renderRow(e.date, e, 'past', chosen.lessonId, chosen.courseId, shift));
-        const todayRow = byDate.has(today) ? [renderRow(today, byDate.get(today), 'today', chosen.lessonId, chosen.courseId, shift)] : [];
-        const futureRows = futureDates.map((d) => renderRow(d, byDate.get(d), 'future', chosen.lessonId, chosen.courseId, undefined, slotKey(chosen)));
-
-        const opts = slots
-          .map((s) => `<option value="${slotKey(s)}"${slotKey(s) === slotKey(chosen) ? ' selected' : ''}>${esc(slotLabel(s))}</option>`)
-          .join('');
-        const rows = [...pastRows, ...todayRow, ...futureRows].join('');
 
         // C1: a kit checklist for the weeks ahead — every bound lesson from today on that names kit, so
         // the teacher can gather equipment in advance (only materialised/bound weeks carry a plan + kit).
         const upcomingKit = entries
           .filter((e) => e.date >= today && e.lessonPlanId != null && (e.kitNeeded ?? '').trim() !== '')
           .map((e) => ({ date: e.date, kit: (e.kitNeeded ?? '').trim() }));
-        const kitSummary = upcomingKit.length
-          ? `<details class="map-kit-summary"><summary>🔧 Kit needed across the next weeks (${upcomingKit.length})</summary>
-              <ul>${upcomingKit.map((k) => `<li><span class="map-date">${esc(k.date)}</span> — ${esc(k.kit)}</li>`).join('')}</ul></details>`
-          : '';
-        body = `
-          <section class="card map" hx-headers='{"x-csrf-token":"${csrf}"}'>
-            <h1>Curriculum map</h1>
-            <form method="get" action="/map" class="map-pick">
-              <label>Group &amp; weekly slot
-                <select name="slot" onchange="this.form.submit()">${opts}</select>
-              </label>
-              <noscript><button type="submit">Go</button></noscript>
-            </form>
-            <p class="muted">Last ${PAST_WEEKS} weeks taught, then the next ${FUTURE_WEEKS} school weeks (holidays skipped). ✏ = adapted for this group.
-              <a href="/schemes?course=${chosen.courseId}">fill this slot from a downloaded unit →</a></p>
-            ${kitSummary}
-            <p class="muted map-drag-hint">Tip: drag a future lesson (⠿) onto another week to move it — they swap, or it fills an empty week.</p>
-            <div class="table-scroll"><table class="map-table" data-map-slot="${slotKey(chosen)}" data-map-csrf="${csrf}">
-              <thead><tr><th>Week</th><th>Lesson</th><th></th></tr></thead>
-              <tbody>${rows || '<tr><td colspan="3" class="muted">nothing recorded or planned in this window</td></tr>'}</tbody>
-            </table></div>
-          </section>`;
+
+        body = renderMapPage({
+          slots,
+          chosen,
+          entries,
+          futureDates,
+          today,
+          upcomingKit,
+          pastWeeks: PAST_WEEKS,
+          futureWeeks: FUTURE_WEEKS,
+          csrf,
+        });
       }
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');

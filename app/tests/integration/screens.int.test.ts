@@ -486,12 +486,12 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     }
   });
 
-  it('Curriculum map renders the slot picker + week table, and honours ?slot= (5.6)', async () => {
+  it('Curriculum map renders the slot picker + week timeline, and honours ?slot= (5.6)', async () => {
     const res = await app.inject({ method: 'GET', url: '/map', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Curriculum map');
     expect(res.body).toContain('map-pick');
-    expect(res.body).toContain('map-table');
+    expect(res.body).toContain('map-timeline'); // §8 rebuild: timeline rail (was a table)
     const second = [...res.body.matchAll(/option value="(\d+:\d+)"/g)].map((m) => m[1])[1];
     if (second) {
       const r2 = await app.inject({ method: 'GET', url: `/map?slot=${second}`, headers: { cookie: session } });
