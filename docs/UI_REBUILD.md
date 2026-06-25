@@ -115,7 +115,19 @@ are deferred. Full plan: `/home/duguid/.claude/plans/peppy-pondering-brook.md`.
 **Testing discipline (from here on):** each screen gets a **view unit test** + a **Playwright spec** (live
 render + no console errors + a key interaction), on top of the gallery fixture + boot/gallery E2E.
 
-**Next:** Planner → Timetable → Now (Planner needs its inline route-render extracted first).
+- **Planner (`/planner`)** — **design-system alignment** (not a §6 rebuild). Important finding (code wins):
+  the SPEC §6 "Planner (time & actuals)" — today's time blocks (planned / done / diverted / actual notes) —
+  is the repo's **`/time`** route (`workBlockView`), **not** `/planner`. The rail's **"Planner" → `/planner`**
+  is the repo's own **lesson-laying drag-grid** (drag tray-lessons onto a week×slots grid, cascade-insert) —
+  no matching SPEC section. So `/planner` got: width → `wide` (the grid + tray need room), confirmed it reads
+  consistently in the shell (the 21 `.pl-*` rules are already dark-themed), + a Playwright smoke test
+  (`e2e/planner.spec.ts`). **The SPEC §6 design will land on `/time`** when the SETUP group is reached.
+  Verified: typecheck · 907 unit · planner integration (2) · 20 E2E.
+  - **Open IA question for the teacher:** the prototype's "Planner" is time-&-actuals; the repo's rail
+    "Planner" is the lesson-laying grid. Keep them distinct (recommended — "code wins"), or repoint the rail?
+
+**Next:** Timetable → Now (the two large daily screens), then the CURRICULUM / CLASSES / SETUP groups
+(`/time` gets the SPEC §6 time-blocks design).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →
