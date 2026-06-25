@@ -289,6 +289,21 @@ a.tt-lesson:hover { background: #eef3fc; }
 .now-strip .now-week { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
 .now-strip a { color: var(--accent); font-weight: 600; }
 .now-changed { font-weight: 700; color: var(--warn); }
+/* Now hero (UI rebuild): the prominent "what's happening now" strip atop the Now screen. */
+.now-hero { display: flex; gap: 16px; align-items: stretch; border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; margin-bottom: 1.1rem; }
+.now-hero-main { flex: 1; min-width: 0; }
+.now-hero-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; }
+.now-hero-title { font-size: 1.6rem; font-weight: 700; margin: 4px 0 2px; line-height: 1.1; }
+.now-hero-sub { font-size: 0.9rem; color: var(--muted); }
+.now-hero-side { flex: none; text-align: right; padding-left: 20px; border-left: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.now-hero-k { font-size: 0.72rem; color: var(--muted); }
+.now-hero-count { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 2rem; font-weight: 500; color: var(--accent); }
+.now-hero-count small { font-size: 0.8rem; margin-left: 4px; color: var(--muted); }
+.now-hero-next { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+@media (max-width: 720px) {
+  .now-hero { flex-direction: column; }
+  .now-hero-side { text-align: left; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
+}
 .now-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem 1.4rem; }
 /* Rail & Stage — the current group name is the single dominant element, readable across the room. */
 .now-card h1 { margin: 0.1rem 0 0.5rem; font-size: var(--fs-hero); font-weight: 700; line-height: 1.05; }

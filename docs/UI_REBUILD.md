@@ -162,8 +162,25 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   - **Follow-up:** the Classes matrix lens (units × classes, taught/today/planned/not-placed + adapted
     marks) — needs delivery+adaptation data wiring; the lens toggle is already in place for it.
 
-**Next:** Now (the flagship 3-column/portrait daily screen — completes the TODAY group), then the rest of
-CURRICULUM (Resources / Coverage / Map) / CLASSES / SETUP (`/time` gets the SPEC §6 time-blocks design).
+- **Now (`/`, flagship)** — **"add hero, keep 3-col"** (the teacher's chosen scope: the current screen
+  already exceeds the prototype — mind-dump, inbox queue, day-prep — and has delicate self-polling, so a
+  full re-layout wasn't worth the risk). Added a prominent **hero strip** (`renderNowHero`) atop the screen:
+  a calm teal-gradient block with the period eyebrow (Now · {period}), the lesson title, room + start time,
+  the **time-remaining countdown**, and **what's next** — handling all states (in-lesson / free / cover /
+  outside-lesson / no-school). It renders **once at load** from the same now/next signals as the hidden
+  self-polling `#now-strip`, so it never interferes with the clock/timeline pollers (the strip's "↻ changed
+  — refresh" notice still drives mid-lesson updates). The existing 3-column grid (timeline · cards) is
+  unchanged. CSS: `.now-hero*` structure in `styles-base-widgets.css` (collapses ≤720px) + teal-gradient
+  theme in `styles.css`'s next scope. **Tests:** `tests/nowHero.test.ts` (4 states) + a `.now-hero` assertion
+  in `e2e/nowPortrait.spec.ts` (confirms the hero fits the one-screen no-scroll portrait constraint). Gallery
+  fixture + item added (now 13). Verified: typecheck · 918 unit · screens integration (54) · gallery +
+  nowPortrait (portrait one-screen + landscape 3-col) E2E · screenshots (gallery in-lesson hero, live).
+
+**✅ TODAY group complete** (Tasks · Marking · Oversee · Focus · Planner · Timetable · Now).
+
+**Next:** the rest of CURRICULUM (Map §8 · Coverage §9 · Resources §10) · CLASSES (Pupils §11) · SETUP
+(Kit §12 · Settings §3 · Setup §16; `/time` gets the SPEC §6 time-blocks design) · the deepest Lesson
+cockpit §17 · pupil `/me`. Deferred: the Schemes **Classes-matrix** lens.
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

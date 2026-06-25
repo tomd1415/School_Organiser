@@ -11,6 +11,7 @@ async function gridTracks(page: import('@playwright/test').Page): Promise<number
 test('Now fits a 1080×1920 portrait monitor — timeline ⅓ left, content ⅔ right, filled', async ({ page }) => {
   await page.setViewportSize({ width: 1080, height: 1920 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.now-hero')).toBeVisible(); // the rebuilt hero sits above the grid
   await expect(page.locator('.now-grid')).toBeVisible();
 
   const tracks = await gridTracks(page);

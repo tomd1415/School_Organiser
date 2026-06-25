@@ -107,6 +107,69 @@ export function renderStrip(
   </div>`;
 }
 
+// The prominent "hero" strip atop the Now screen (UI rebuild): a calm gradient block stating what's
+// happening NOW (period · lesson · room · started) with the time-remaining countdown and what's next.
+// Rendered once at page load from the same now/next signals as the (hidden) self-polling #now-strip —
+// it does not poll itself, so it never interferes with the clock/timeline pollers; the strip's
+// "↻ changed — refresh" notice still drives mid-lesson updates.
+export function renderNowHero(
+  state: NowState,
+  current: NowLesson | null,
+  next: NowLesson | null,
+  curEx: ExceptionEffect = NO_EXCEPTION,
+  nextEx: ExceptionEffect = NO_EXCEPTION,
+): string {
+  let eyebrow = 'Now';
+  let title = 'Outside lesson time';
+  let sub = '';
+  if (!state.isSchoolDay) {
+    eyebrow = 'Today';
+    title = 'No school today';
+    sub = state.dayKind.replace(/_/g, ' ');
+  } else if (state.current) {
+    eyebrow = `Now · ${state.current.label}`;
+    if (curEx.mode === 'free') {
+      title = 'Free';
+      sub = curEx.detail || 'protected work time';
+    } else if (curEx.mode === 'cover') {
+      title = 'On cover';
+      sub = curEx.detail || '';
+    } else if (current) {
+      title = lessonName(current);
+      const room = curEx.mode === 'room' ? (curEx.roomName ?? current.roomName) : current.roomName;
+      sub = [current.courses.map((c) => c.name).join(' · '), room, `started ${fromMinutes(state.current.startMin)}`]
+        .filter(Boolean)
+        .join(' · ');
+    }
+  }
+
+  const mins = state.isSchoolDay && state.current ? state.minutesRemaining : null;
+  let nextLine = '';
+  if (state.nextTeaching && next) {
+    const what = nextEx.mode === 'free' ? 'Free' : nextEx.mode === 'cover' ? 'On cover' : lessonName(next);
+    nextLine = `<span class="now-hero-next">Next: ${esc(what)} · ${esc(state.nextTeaching.label)}</span>`;
+  } else if (state.nextTeaching) {
+    nextLine = `<span class="now-hero-next">Next: ${esc(state.nextTeaching.label)}</span>`;
+  }
+
+  const side =
+    mins != null || nextLine
+      ? `<div class="now-hero-side">
+          ${mins != null ? `<span class="now-hero-k">Time remaining</span><span class="now-hero-count">${mins}<small>min</small></span>` : ''}
+          ${nextLine}
+        </div>`
+      : '';
+
+  return `<div class="now-hero">
+    <div class="now-hero-main">
+      <div class="now-hero-eyebrow">${esc(eyebrow)}</div>
+      <div class="now-hero-title">${esc(title)}</div>
+      ${sub ? `<div class="now-hero-sub">${esc(sub)}</div>` : ''}
+    </div>
+    ${side}
+  </div>`;
+}
+
 export function renderCurrentCard(
   current: NowLesson,
   courses: OccurrenceCourseRow[],
@@ -576,6 +639,8 @@ export function renderNowNext(data: NowNextData): string {
 
     ${nudgeHtml}
     ${exceptionBanner}
+
+    ${renderNowHero(state, current, next, curEx, nextEx)}
 
     <div class="now-grid">
       <!-- COLUMN 1: Contextual Action Cards -->
