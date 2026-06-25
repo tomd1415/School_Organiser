@@ -11,6 +11,7 @@ import type { TaskRow } from '../repos/tasks';
 import type { OverseePageData } from './overseeView';
 import { renderSubStep, type FocusVM } from './focusView';
 import type { SubStep } from '../repos/tasks';
+import type { SchemeHeader, UnitRow, PlanRow } from '../services/scheme';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -136,6 +137,29 @@ export const GALLERY_FOCUS: FocusVM = {
   hidden: 4,
   subStepsHtml: GALLERY_FOCUS_STEPS.map(renderSubStep).join(''),
 };
+
+// Schemes (UI rebuild): a scheme header + units/plans so the meta header (real stats) and the Spine
+// lens (units sidebar with planned% bars + lesson panels) render with no DB.
+export const GALLERY_SCHEME_HEADER: SchemeHeader = {
+  id: 31, courseId: 9, courseName: 'Y9 Computing', title: 'Y9 Networks & the Internet', version: 3, active: true, labels: 'Year 9, Networks',
+};
+export const GALLERY_SCHEME_UNITS: UnitRow[] = [
+  { id: 1, title: 'How networks work', displayOrder: 0 },
+  { id: 2, title: 'The Internet', displayOrder: 1 },
+  { id: 3, title: 'Data & protocols', displayOrder: 2 },
+];
+const schemePlan = (id: number, unitId: number, title: string, order: number, planned: boolean): PlanRow => ({
+  id, unitId, title, objectives: planned ? 'Pupils can…' : null, outline: planned ? '1. starter…' : null,
+  durationMin: 50, displayOrder: order, kitNeeded: id % 2 ? 'micro:bit ×16' : null,
+});
+export const GALLERY_SCHEME_PLANS: PlanRow[] = [
+  schemePlan(10, 1, 'LANs and WANs', 0, true),
+  schemePlan(11, 1, 'Network topologies', 1, true),
+  schemePlan(12, 1, 'Hardware: switches & routers', 2, false),
+  schemePlan(13, 2, 'How the Internet is organised', 0, true),
+  schemePlan(14, 2, 'DNS and IP addresses', 1, false),
+  schemePlan(15, 3, 'Packets and protocols', 0, true),
+];
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

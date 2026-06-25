@@ -227,14 +227,14 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const changed = await app.inject({ method: 'GET', url: '/focus/inner?sig=stale-value', headers: { cookie: session } });
     expect(changed.statusCode).toBe(200);
     expect(changed.headers['hx-reswap']).toBeUndefined();
-    expect(changed.body).toContain('task-tabs');
+    expect(changed.body).toContain('focus-modes'); // the rebuilt Focus mode segmented control
   });
 
   it('Captured page renders', async () => {
     const res = await app.inject({ method: 'GET', url: '/captured', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('Captured');
-    expect(res.body).toContain('data-new-note');
+    expect(res.body).toContain('capture-bar'); // the rebuilt capture bar (replaces the old new-note button)
   });
 
   it('Recurring page renders', async () => {
@@ -721,11 +721,11 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     const page = await app.inject({ method: 'GET', url: '/captured', headers: { cookie: session } });
     const token = /x-csrf-token":"([^"]+)"/.exec(page.body)?.[1] ?? '';
     const cookie = firstCookie(page.headers['set-cookie']) || session;
-    const create = await app.inject({ method: 'POST', url: '/captured', headers: { cookie, 'x-csrf-token': token } });
+    // The rebuilt capture bar creates from typed text (an empty POST is a 400), so seed the disclosure here.
+    const create = await app.inject({ method: 'POST', url: '/captured', headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('worried — a pupil said they want to hurt myself at home') });
     const id = /id="cap-(\d+)"/.exec(create.body)?.[1];
     expect(id).toBeTruthy();
     try {
-      await app.inject({ method: 'POST', url: `/captured/${id}`, headers: { cookie, 'x-csrf-token': token, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'body=' + encodeURIComponent('worried — a pupil said they want to hurt myself at home') });
       const sug = await app.inject({ method: 'POST', url: `/captured/${id}/suggest`, headers: { cookie, 'x-csrf-token': token } });
       expect(sug.statusCode).toBe(200);
       const { getCaptured } = await import('../../src/repos/captured');

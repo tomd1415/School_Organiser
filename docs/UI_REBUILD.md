@@ -135,8 +135,35 @@ render + no console errors + a key interaction), on top of the gallery fixture +
   full-width intent + no console errors; week-nav advances to a dated week). Verified: typecheck · timetable
   unit (16) · Playwright (3) · screenshots both orientations (zero body horizontal overflow in either).
 
-**Next:** Now (the flagship 3-column/portrait daily screen — completes the TODAY group), then the
-CURRICULUM / CLASSES / SETUP groups (`/time` gets the SPEC §6 time-blocks design).
+### CURRICULUM group (started — teacher priority)
+- **Schemes (`/schemes`)** — rebuilt to the prototype's **two-lens** model, **Spine + header first** (the
+  teacher's chosen scope; the **Classes matrix lens is deferred** to a follow-up — it needs per-lesson-
+  per-class delivery+adaptation data the page doesn't yet compute). Built:
+  - **Scheme meta header card** (`renderSchemesNext`): scheme title · course tag (`.badge.good`) ·
+    `v{n} · live/draft` mono chip · version-switch chips · **real stats** (Units / Lessons / Versions —
+    no invented coverage figure; spec-coverage/exam arrive with the matrix) · a **Spine|Classes lens
+    toggle** (Spine active, Classes shown disabled "coming in a follow-up") · Make live / ＋ New version /
+    ⚙ Scheme (the existing labels/move/delete controls, folded into a disclosure).
+  - **Spine lens** (`renderSchemeTree`, redesigned internals): a 248px **Units sidebar** — each unit a
+    selectable button with a **planned% bar** (% of its lessons that have both objectives + outline, a
+    genuine readiness signal) — beside a **lessons panel** showing the selected unit. Unit selection is
+    client-side (inline onclick, scoped to `.sch-spine`, matching the existing tree idiom); structural
+    edits still swap the whole `#scheme-tree`. **Crucially, each unit panel reuses `renderUnit`/`renderPlan`
+    verbatim**, so every editing / AI-draft / resources / review / compare / lay-down affordance — and the
+    ~10 routes that swap `#plan-`/`#unit-`/`#scheme-tree` — keep working untouched. The route builds the
+    tree inline (one fetch) to feed the header's real counts.
+  - CSS: `.sch-header`/`.sch-stats`/`.sch-lens`/`.sch-spine`/`.sch-units`/`.sch-unit-btn`(+bar)/`.sch-lessons`
+    in `styles-base-widgets.css` (token-driven, ≤1024px collapses to one column). **Tests added:**
+    `tests/scheme.test.ts` (+7: spine layout, selectable units, planned% bar, hidden panels, empty state,
+    header card stats, lens) + `e2e/schemes.spec.ts` (live boot + unit-swap interaction against the gallery
+    fixture). Gallery fixture added (`GALLERY_SCHEME_*`, gallery now 12). Verified: typecheck · 914 unit ·
+    scheme units (12) · gallery+schemes E2E · screenshots (gallery fixture, live empty-state, **live
+    real-data** 7-unit/46-lesson scheme) — zero body horizontal overflow either orientation.
+  - **Follow-up:** the Classes matrix lens (units × classes, taught/today/planned/not-placed + adapted
+    marks) — needs delivery+adaptation data wiring; the lens toggle is already in place for it.
+
+**Next:** Now (the flagship 3-column/portrait daily screen — completes the TODAY group), then the rest of
+CURRICULUM (Resources / Coverage / Map) / CLASSES / SETUP (`/time` gets the SPEC §6 time-blocks design).
 
 Order: **RECORD** (Captured ✓ → Notes ✓ → Events ✓) → **TODAY** (Tasks → Marking → Oversee → Focus → Planner →
 Timetable → Now) → **FLAGGED** (Safeguarding) → **CURRICULUM** (Resources → Coverage → Map → Schemes) →

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { buildSchemeTree, type PlanRow, type UnitRow } from '../src/services/scheme';
-import { renderPlan } from '../src/lib/schemeView';
+import { buildSchemeTree, type PlanRow, type UnitRow, type SchemeHeader } from '../src/services/scheme';
+import { renderPlan, renderSchemeTree, renderSchemesNext } from '../src/lib/schemeView';
 
 const units: UnitRow[] = [
   { id: 2, title: 'B', displayOrder: 1 },
@@ -49,5 +49,77 @@ describe('renderPlan — Schemes card reuses the pupil preview (13.2)', () => {
     expect(html).toContain('/lesson/preview?plan=42');
     expect(html).toContain('Preview live lesson');
     expect(html).toContain('without creating a lesson occurrence');
+  });
+});
+
+const scheme: SchemeHeader = { id: 7, courseId: 3, courseName: 'Y9 Computing', title: 'Networks', version: 2, active: true, labels: null };
+
+describe('renderSchemeTree — Spine lens (UI rebuild)', () => {
+  const withObj = (id: number, unitId: number, planned: boolean): PlanRow => ({
+    id, unitId, title: `L${id}`, objectives: planned ? 'O' : null, outline: planned ? 'L' : null, durationMin: 50, displayOrder: id, kitNeeded: null,
+  });
+  const tree = buildSchemeTree(
+    [{ id: 1, title: 'Unit One', displayOrder: 0 }, { id: 2, title: 'Unit Two', displayOrder: 1 }],
+    [withObj(10, 1, true), withObj(11, 1, false), withObj(12, 2, true)],
+  );
+  const html = renderSchemeTree(scheme, tree);
+
+  it('renders the spine layout as #scheme-tree (preserving the swap target)', () => {
+    expect(html).toContain('id="scheme-tree"');
+    expect(html).toContain('class="sch-spine"');
+  });
+
+  it('shows a selectable unit button per unit, the first active', () => {
+    expect(html).toContain('class="sch-unit-btn active" data-unit="1"');
+    expect(html).toContain('data-unit="2"');
+    expect(html).toContain('Unit One');
+    expect(html).toContain('Unit Two');
+  });
+
+  it('shows the planned% bar (1 of 2 lessons planned in unit one = 50%)', () => {
+    expect(html).toContain('50%');
+    expect(html).toContain('width:50%');
+  });
+
+  it('renders one lesson panel per unit, all but the first hidden', () => {
+    expect(html).toContain('class="sch-unit-panel" data-unit="1"');
+    expect(html).toContain('class="sch-unit-panel" data-unit="2" hidden');
+  });
+
+  it('falls back to an add-unit empty state with no units', () => {
+    const empty = renderSchemeTree(scheme, []);
+    expect(empty).toContain('sch-tree-empty');
+    expect(empty).toContain('No units yet');
+  });
+});
+
+describe('renderSchemesNext — scheme meta header (UI rebuild)', () => {
+  const html = renderSchemesNext({
+    courseId: 3,
+    currentCourseName: 'Y9 Computing',
+    scheme,
+    courses: [{ id: 3, name: 'Y9 Computing' }],
+    versions: [{ id: 7, version: 2, active: true }, { id: 6, version: 1, active: false }],
+    unitCount: 4,
+    lessonCount: 18,
+    treeHtml: '<div id="scheme-tree"></div>',
+    teachingCtxHtml: '',
+    allSchemesHtml: '',
+    convertPanelHtml: '',
+    csrf: 'tok',
+  });
+
+  it('renders the header card with the scheme title and real stats', () => {
+    expect(html).toContain('class="card sch-header"');
+    expect(html).toContain('Networks');
+    expect(html).toContain('<span class="sch-stat-v">4</span>');  // units
+    expect(html).toContain('<span class="sch-stat-v">18</span>'); // lessons
+    expect(html).toContain('<span class="sch-stat-v">2</span>');  // versions
+  });
+
+  it('shows the Spine lens active and Classes deferred', () => {
+    expect(html).toContain('class="seg is-on"');
+    expect(html).toContain('class="seg seg-soon"');
+    expect(html).toContain('coming in a follow-up');
   });
 });

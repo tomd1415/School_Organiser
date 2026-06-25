@@ -14,14 +14,16 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await page.goto('/ui-gallery', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('h1', { hasText: 'UI gallery' })).toBeVisible();
-  // each section renders (component kit + 10 fixture-backed views)
-  await expect(page.locator('.gallery-item')).toHaveCount(11);
+  // each section renders (component kit + 11 fixture-backed views)
+  await expect(page.locator('.gallery-item')).toHaveCount(12);
   await expect(page.locator('.gallery-stage .focus-card').first()).toBeVisible(); // Focus card
   await expect(page.locator('.gallery-stage .captured-card').first()).toBeVisible(); // Captured cards
   await expect(page.locator('.gallery-stage .note-card').first()).toBeVisible(); // Notes grid
   await expect(page.locator('.gallery-stage .event-card').first()).toBeVisible(); // Events grouped
   await expect(page.locator('.gallery-stage .task-card').first()).toBeVisible(); // Tasks cards
   await expect(page.locator('.gallery-stage .ov-card').first()).toBeVisible(); // Oversee cards
+  await expect(page.locator('.gallery-stage .sch-spine').first()).toBeVisible(); // Schemes spine
+  await expect(page.locator('.gallery-stage .sch-unit-btn').first()).toBeVisible(); // Schemes units sidebar
   await expect(page.locator('.gallery-stage .toggle-switch').first()).toBeVisible(); // component kit toggle
   await expect(page.locator('.gallery-stage .pslide').first()).toBeVisible(); // slide deck
   await expect(page.locator('.gallery-stage .ws-doc')).toBeVisible(); // worksheet

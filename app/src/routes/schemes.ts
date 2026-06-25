@@ -99,6 +99,13 @@ import { listAdaptationsForPlan } from '../repos/adaptations';
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
 
+// Prepend a transient note/warning as the first child of the #scheme-tree element (so it clears on the
+// next tree swap). Matches the opening tag regardless of its class attribute — renderSchemeTree now emits
+// `<div id="scheme-tree" class="sch-spine">` (or `…class="sch-tree-empty">`), so a bare-string match misses.
+function injectIntoTree(html: string, fragment: string): string {
+  return html.replace(/<div id="scheme-tree"[^>]*>/, (m) => m + fragment);
+}
+
 async function treeHtml(schemeId: number): Promise<string> {
   const [scheme, units, plans] = await Promise.all([getScheme(schemeId), listUnits(schemeId), listPlansForScheme(schemeId)]);
   if (!scheme) return '<div id="scheme-tree"><p class="muted">Scheme not found.</p></div>';
@@ -225,13 +232,19 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
         const current = courses.find((c) => Number(c.id) === courseId);
         const scheme = q.success && q.data.scheme ? await getScheme(q.data.scheme) : await getActiveScheme(courseId);
         const versions = await listSchemeVersions(courseId);
-        const [tree, teachingCtx, allSchemes, courseSlots, clockCtx] = await Promise.all([
-          scheme ? treeHtml(scheme.id) : Promise.resolve(renderSchemeEmpty(courseId, undefined, current?.name)),
+        // Build the tree here (rather than treeHtml()) so the header card can show real unit/lesson
+        // counts from the same data — one fetch, no double round-trip.
+        const [units, plans, teachingCtx, allSchemes, courseSlots, clockCtx] = await Promise.all([
+          scheme ? listUnits(scheme.id) : Promise.resolve([]),
+          scheme ? listPlansForScheme(scheme.id) : Promise.resolve([]),
           getCourseTeachingContext(courseId),
           listAllSchemes(),
           listSlotsForCourse(courseId),
           getClockContext(),
         ]);
+        const tree = scheme
+          ? renderSchemeTree(scheme, buildSchemeTree(units, plans), await openReviewPlanIds(plans.map((p) => p.id)))
+          : renderSchemeEmpty(courseId, undefined, current?.name);
         const today = localParts(new Date(), clockCtx.tz).isoDate;
         body = renderSchemesNext({
           courseId,
@@ -239,6 +252,8 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           scheme,
           courses,
           versions,
+          unitCount: units.length,
+          lessonCount: plans.length,
           treeHtml: tree,
           teachingCtxHtml: renderTeachingContext(courseId, teachingCtx),
           allSchemesHtml: renderAllSchemes(allSchemes, scheme?.id),
@@ -531,7 +546,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const sid = await schemeIdForUnit(id.data.id);
     const tree = sid ? await treeHtml(sid) : '<div id="scheme-tree"></div>';
     const note = `<p class="adapt-note">unit resources: ${done} lesson${done === 1 ? '' : 's'} done${skipped ? `, ${skipped} skipped` : ''}</p>`;
-    return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
+    return reply.type('text/html').send(injectIntoTree(tree, note));
   });
 
   // ── Wave 5: the advisory lesson reviewer (idea 8, lean cut; off by default) ───────────────────
@@ -566,7 +581,7 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const note = r.disabled
       ? '<p class="adapt-note">The AI reviewer is off — turn it on in <a href="/settings">Settings → AI</a> first.</p>'
       : `<p class="adapt-note">unit review: ${r.reviewed} lesson${r.reviewed === 1 ? '' : 's'} reviewed${r.skipped ? `, ${r.skipped} skipped` : ''}${r.stopped ? ' (stopped — AI unavailable or the monthly cap is reached)' : ''}. Open a lesson to see its findings.</p>`;
-    return reply.type('text/html').send(tree.replace('<div id="scheme-tree">', `<div id="scheme-tree">${note}`));
+    return reply.type('text/html').send(injectIntoTree(tree, note));
   });
 
   // E1: spot-check a random lesson from across the curriculum (gated + cost-capped like one review).
@@ -789,10 +804,10 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
     const orphaned = sid ? await specPointsSolelyCoveredByPlan(id.data.id) : [];
     await deletePlan(id.data.id);
     let html = sid ? await treeHtml(sid) : '';
-    if (orphaned.length && html.includes('<div id="scheme-tree">')) {
+    if (orphaned.length && html.includes('id="scheme-tree"')) {
       const names = orphaned.map((p) => esc(p.code === p.title ? p.title : p.code)).join(', ');
       const warn = `<div class="cov-drop-warn">⚠ That lesson was the only one covering ${orphaned.length} spec point${orphaned.length === 1 ? '' : 's'} — now uncovered: ${names}. <a class="link" href="/coverage">review coverage →</a></div>`;
-      html = html.replace('<div id="scheme-tree">', `<div id="scheme-tree">${warn}`);
+      html = injectIntoTree(html, warn);
     }
     return reply.type('text/html').send(html);
   });
