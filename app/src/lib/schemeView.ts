@@ -211,18 +211,51 @@ export function renderLayResult(laid: LaidLesson[], totalLessons: number): strin
   return `<div class="lay-result"><p><strong>Laid ${laid.length} lesson${laid.length === 1 ? '' : 's'} into the calendar:</strong></p><ol class="lay-list">${rows}</ol>${short}</div>`;
 }
 
+// % of a unit's lessons that are "planned" (have both objectives and an outline) — a genuine,
+// already-available readiness signal, shown as the unit progress bar in the spine sidebar.
+function unitPlannedPct(u: UnitWithPlans): number {
+  if (u.plans.length === 0) return 0;
+  const ready = u.plans.filter((p) => (p.objectives ?? '').trim() && (p.outline ?? '').trim()).length;
+  return Math.round((ready / u.plans.length) * 100);
+}
+
+// The scheme "Spine" lens: a Units sidebar (selectable, each with a planned% bar) beside a lessons
+// panel that shows the selected unit's lessons. Selection is client-side (inline onclick, matching the
+// existing tree idiom) so it needs no round-trip; structural edits (add/move/delete) still swap the
+// whole #scheme-tree and reset to the first unit. Each unit panel reuses renderUnit/renderPlan verbatim,
+// so every editing/AI/resources/compare affordance — and every route that swaps #plan-/#unit-/#scheme-tree
+// — keeps working unchanged.
 export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[], openReviews: ReadonlySet<number> = new Set()): string {
-  const toggles =
-    tree.length > 0
-      ? `<p class="tree-tools muted">
-          <button type="button" class="link" onclick="this.closest('#scheme-tree').querySelectorAll('details').forEach(d=>d.open=true)">expand all</button> ·
-          <button type="button" class="link" onclick="this.closest('#scheme-tree').querySelectorAll('details').forEach(d=>d.open=false)">collapse all</button>
-        </p>`
-      : '';
-  return `<div id="scheme-tree">
-    ${toggles}
-    ${tree.map((u) => renderUnit(u, openReviews)).join('')}
-    <button type="button" class="btn-secondary" hx-post="${paths.schemesAddUnit(scheme.id)}" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
+  if (tree.length === 0) {
+    return `<div id="scheme-tree" class="sch-tree-empty">
+      <p class="muted">No units yet — add the first one to start building this scheme.</p>
+      <button type="button" class="btn-secondary" hx-post="${paths.schemesAddUnit(scheme.id)}" hx-target="#scheme-tree" hx-swap="outerHTML">＋ Unit</button>
+    </div>`;
+  }
+  const select = (id: number) =>
+    `var s=this.closest('.sch-spine');s.querySelectorAll('.sch-unit-panel').forEach(p=>p.hidden=(p.dataset.unit!=='${id}'));s.querySelectorAll('.sch-unit-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')`;
+  const sidebar = tree
+    .map((u, i) => {
+      const pct = unitPlannedPct(u);
+      const n = u.plans.length;
+      return `<button type="button" class="sch-unit-btn${i === 0 ? ' active' : ''}" data-unit="${u.id}" onclick="${select(u.id)}">
+        <span class="sch-unit-row"><span class="sch-unit-name">${esc(u.title || 'Untitled unit')}</span><span class="sch-unit-pct">${pct}%</span></span>
+        <span class="sch-unit-count">${n} lesson${n === 1 ? '' : 's'}</span>
+        <span class="sch-unit-bar"><span style="width:${pct}%"></span></span>
+      </button>`;
+    })
+    .join('');
+  const panels = tree
+    .map((u, i) => `<div class="sch-unit-panel" data-unit="${u.id}"${i === 0 ? '' : ' hidden'}>${renderUnit(u, openReviews)}</div>`)
+    .join('');
+  return `<div id="scheme-tree" class="sch-spine">
+    <aside class="sch-units">
+      <div class="sch-units-head"><span class="sch-units-cap">Units</span>
+        <button type="button" class="link sch-units-add" title="Add a unit" aria-label="Add a unit" hx-post="${paths.schemesAddUnit(scheme.id)}" hx-target="#scheme-tree" hx-swap="outerHTML">＋</button>
+      </div>
+      ${sidebar}
+    </aside>
+    <div class="sch-lessons">${panels}</div>
   </div>`;
 }
 
@@ -349,6 +382,8 @@ export interface SchemesNextData {
   scheme: any;
   courses: Array<{ id: number; name: string }>;
   versions: Array<{ id: number; version: number; active: boolean }>;
+  unitCount: number;
+  lessonCount: number;
   treeHtml: string;
   teachingCtxHtml: string;
   allSchemesHtml: string;
@@ -363,6 +398,8 @@ export function renderSchemesNext(data: SchemesNextData): string {
     scheme,
     courses,
     versions,
+    unitCount,
+    lessonCount,
     treeHtml,
     teachingCtxHtml,
     allSchemesHtml,
@@ -374,31 +411,58 @@ export function renderSchemesNext(data: SchemesNextData): string {
     `<a href="${paths.schemesCourse(c.id)}" class="chip${Number(c.id) === courseId ? ' active' : ''}">${esc(c.name)}</a>`;
 
   const verLinks = versions
-    .map((v) => `<a href="${paths.schemesCourseScheme(courseId, v.id)}" class="chip${scheme && v.id === scheme.id ? ' active' : ''}">v${v.version}${v.active ? '' : ' (draft)'}</a>`)
+    .map((v) => `<a href="${paths.schemesCourseScheme(courseId, v.id)}" class="chip sch-ver-chip${scheme && v.id === scheme.id ? ' active' : ''}">v${v.version}${v.active ? '' : ' (draft)'}</a>`)
     .join(' ');
 
+  // The scheme meta header: identity (title · course tag · version·status) + real stats (units /
+  // lessons / versions) + the Spine|Classes lens toggle (Classes deferred to a follow-up) + the scheme
+  // actions (Make live / new version / ⚙ settings). Stats are computed from live data — no invented
+  // coverage figure; spec-coverage/exam stats arrive with the Classes-matrix follow-up.
+  const headerCard = scheme
+    ? `<section class="card sch-header">
+        <div class="sch-header-id">
+          <h2 class="sch-header-title">${esc(scheme.title)}</h2>
+          <div class="sch-header-tags">
+            <span class="badge good">${esc(currentCourseName)}</span>
+            <span class="sch-ver">v${scheme.version} · ${scheme.active ? 'live' : 'draft'}</span>
+            ${versions.length > 1 ? `<span class="sch-vers" title="switch version">${verLinks}</span>` : ''}
+          </div>
+        </div>
+        <div class="sch-stats">
+          <div class="sch-stat"><span class="sch-stat-k">Units</span><span class="sch-stat-v">${unitCount}</span></div>
+          <div class="sch-stat"><span class="sch-stat-k">Lessons</span><span class="sch-stat-v">${lessonCount}</span></div>
+          <div class="sch-stat"><span class="sch-stat-k">Versions</span><span class="sch-stat-v">${versions.length}</span></div>
+        </div>
+        <div class="sch-lens" role="group" aria-label="Scheme view">
+          <span class="seg is-on" aria-current="true">Spine</span>
+          <span class="seg seg-soon" title="Classes matrix — coming in a follow-up" aria-disabled="true">Classes</span>
+        </div>
+        <div class="sch-header-actions">
+          ${scheme.active ? '' : `<button type="button" class="button small" hx-post="${paths.schemesActivate(scheme.id)}" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make live</button>`}
+          <button type="button" class="button small" hx-post="${paths.schemesVersion(scheme.id)}" title="Start a new draft version of this scheme">＋ New version</button>
+          <details class="sch-cog">
+            <summary class="chip chip-btn" title="Scheme settings — labels, move course, delete">⚙ Scheme</summary>
+            ${renderSchemeControls(scheme, courses)}
+          </details>
+        </div>
+      </section>`
+    : '';
+
   return `
-    <section class="card schemes-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
-      <h1>Schemes of work <a class="ped-link chip" href="${paths.pedagogy()}" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a></h1>
-      <div class="task-chips" style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
+    <section class="schemes-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
+      <div class="sch-topbar">
+        <h1>Schemes of work</h1>
+        <a class="ped-link chip" href="${paths.pedagogy()}" title="The AI applies the NCCE 12 principles of computing pedagogy when it plans">📘 pedagogy</a>
+      </div>
+      <div class="sch-courses task-chips">
         ${courses.map(tab).join(' ')}
       </div>
       <p class="scheme-course">Course: <strong>${esc(currentCourseName)}</strong>
         <button type="button" class="chip chip-btn" hx-post="${paths.schemesCourseSummary(courseId)}" hx-target="#course-${courseId}-summary" hx-swap="innerHTML" hx-disabled-elt="this">✨ summarise this course's notes</button>
       </p>
       <div id="course-${courseId}-summary"></div>
+      ${headerCard}
       ${teachingCtxHtml}
-      ${
-        scheme
-          ? `<p class="scheme-meta" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <strong>${esc(scheme.title)}</strong> · 
-              ${verLinks}
-              ${scheme.active ? '' : ` · <button type="button" class="chip chip-btn" hx-post="${paths.schemesActivate(scheme.id)}" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make live</button>`}
-              · <button type="button" class="chip chip-btn" hx-post="${paths.schemesVersion(scheme.id)}">＋ new version</button>
-            </p>
-            ${renderSchemeControls(scheme, courses)}`
-          : ''
-      }
       <p class="sch-spot"><button type="button" class="chip chip-btn" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
         hx-post="${paths.schemesSpotCheck()}" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
       <div id="spot-check-slot"></div>

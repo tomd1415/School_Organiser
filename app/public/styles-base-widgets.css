@@ -385,6 +385,51 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .plan-detail summary { cursor: pointer; font-size: 0.8rem; color: var(--muted); }
 .plan-detail label { display: block; font-size: 0.82rem; font-weight: 600; margin-top: 0.4rem; }
 .plan-detail textarea { width: 100%; font: inherit; font-weight: 400; border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem; }
+
+/* ── Schemes redesign (UI rebuild): meta header + Spine lens (units sidebar + lessons panel) ── */
+.sch-topbar { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.sch-topbar h1 { margin: 0; }
+.sch-courses { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+.sch-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-left: 4px solid var(--accent); }
+.sch-header-id { min-width: 200px; }
+.sch-header-title { margin: 0; font-size: 1.15rem; }
+.sch-header-tags { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 0.35rem; }
+.sch-ver { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 0.72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
+.sch-vers { display: flex; gap: 4px; flex-wrap: wrap; }
+.sch-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-left: auto; }
+.sch-stat-k { display: block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.sch-stat-v { font-size: 1.15rem; font-weight: 700; }
+.sch-lens { display: inline-flex; gap: 4px; border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+.sch-lens .seg { font-size: 0.82rem; padding: 5px 12px; border-radius: 7px; }
+.sch-lens .seg.is-on { background: var(--accent); color: #0e141b; font-weight: 700; }
+.sch-lens .seg-soon { color: var(--muted); cursor: not-allowed; }
+.sch-header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.sch-cog { position: relative; }
+.sch-cog > summary { list-style: none; cursor: pointer; }
+.sch-cog > summary::-webkit-details-marker { display: none; }
+.sch-cog[open] .scheme-controls { display: block; margin-top: 0.5rem; }
+
+.sch-spine { display: grid; grid-template-columns: 248px 1fr; gap: 16px; align-items: start; margin: 1rem 0; }
+.sch-units { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.sch-units-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.sch-units-cap { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); }
+.sch-unit-btn { display: block; width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 9px 11px; margin-bottom: 4px; cursor: pointer; font: inherit; color: inherit; }
+.sch-unit-btn:hover { border-color: var(--line); }
+.sch-unit-btn.active { background: var(--accent-soft); border-color: var(--accent); }
+.sch-unit-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sch-unit-name { font-weight: 700; font-size: 0.92rem; }
+.sch-unit-pct { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+.sch-unit-count { display: block; font-size: 0.75rem; color: var(--muted); margin: 2px 0 7px; }
+.sch-unit-bar { display: block; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.sch-unit-bar > span { display: block; height: 100%; background: var(--good); border-radius: 3px; }
+.sch-lessons { min-width: 0; }
+.sch-lessons .unit { background: var(--card); border-radius: 14px; padding: 14px 16px; }
+/* a transient note/warning injected at the top of the spine spans both columns (above the grid) */
+.sch-spine > .adapt-note, .sch-spine > .cov-drop-warn { grid-column: 1 / -1; margin: 0; }
+@media (max-width: 1024px) {
+  .sch-spine { grid-template-columns: 1fr; }
+  .sch-stats { margin-left: 0; }
+}
 /* 5.3: convert a downloaded unit */
 .convert-panel { margin: 0.8rem 0; font-size: 0.9rem; }
 .convert-panel summary { cursor: pointer; color: var(--accent); font-weight: 600; }
