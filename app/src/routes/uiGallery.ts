@@ -16,6 +16,7 @@ import { renderSchemesNext, renderSchemeTree } from '../lib/schemeView';
 import { buildSchemeTree } from '../services/scheme';
 import { renderMapPage } from '../lib/mapView';
 import { renderCoverageReport } from '../lib/coverageView';
+import { renderSearchBar, renderResourceListPaged } from '../lib/resourceView';
 import {
   GALLERY_LESSONS,
   GALLERY_NOW_STATE,
@@ -40,6 +41,7 @@ import {
   GALLERY_NOW_HERO_NEXT,
   GALLERY_MAP,
   GALLERY_COVERAGE,
+  GALLERY_RESOURCES,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -137,6 +139,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         csrf: 'gallery',
       }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
+      ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}
       ${item('Curriculum map (SPEC §8)', 'renderMapPage — one class’s weekly slot as a term-calendar timeline rail: past taught lessons (green border, “stopped at …”, ↻ continue next week), today (teal), and the holiday-aware future weeks (plain; an empty week dashed). Read-only; future weeks drag to reorder.', renderMapPage(GALLERY_MAP))}
       ${item('Now — hero', 'renderNowHero — the prominent “what’s happening now” strip atop the Now screen: period eyebrow, lesson title, room + start time, the time-remaining countdown, and what’s next. Rendered once at load (no self-poll).', renderNowHero(GALLERY_NOW_HERO_STATE, GALLERY_NOW_HERO_LESSON, GALLERY_NOW_HERO_NEXT))}

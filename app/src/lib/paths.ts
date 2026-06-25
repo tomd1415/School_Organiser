@@ -218,6 +218,7 @@ export const paths = {
   resourcesGenerate: (): string => '/resources/generate',
   resourceViewUrl: (id: number): string => `/resources/${id}/view`,
   resourceDownload: (id: number): string => `/resources/${id}/download`,
+  resourcePresent: (id: number): string => `/resources/${id}/present`,
   resourceUsage: (id: number): string => `/resources/${id}/usage`,
   schemesPlanResourceDetach: (plan: number, res: number): string => `/schemes/plan/${plan}/resources/${res}/detach`,
   schemesPlanResourcesSearch: (plan: number): string => `/schemes/plan/${plan}/resources/search`,

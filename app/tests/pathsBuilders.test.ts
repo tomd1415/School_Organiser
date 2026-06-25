@@ -95,6 +95,7 @@ describe('paths builders — exact URLs', () => {
     [paths.resourcesGenerate(), '/resources/generate'],
     [paths.resourceViewUrl(3), '/resources/3/view'],
     [paths.resourceDownload(3), '/resources/3/download'],
+    [paths.resourcePresent(3), '/resources/3/present'],
     [paths.resourceUsage(3), '/resources/3/usage'],
     [paths.schemesPlanResourceDetach(11, 4), '/schemes/plan/11/resources/4/detach'],
     [paths.schemesPlanResourcesSearch(11), '/schemes/plan/11/resources/search'],

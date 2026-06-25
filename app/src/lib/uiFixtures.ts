@@ -14,6 +14,7 @@ import type { SubStep } from '../repos/tasks';
 import type { SchemeHeader, UnitRow, PlanRow } from '../services/scheme';
 import type { MapPageData } from './mapView';
 import type { CoverageReportData } from './coverageView';
+import type { PagedResources } from './resourceView';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -198,6 +199,20 @@ export const GALLERY_COVERAGE: CoverageReportData = {
     { id: 4, code: '1.2.1', title: 'Primary storage (memory)', covered: true, coveringPlanId: 82, coveringPlanTitle: 'RAM, ROM & cache' },
     { id: 5, code: '2.1.1', title: 'Networks: LANs and WANs', covered: false, coveringPlanId: null, coveringPlanTitle: null },
     { id: 6, code: '2.1.2', title: 'Network topologies', covered: false, coveringPlanId: null, coveringPlanTitle: null },
+  ],
+};
+
+// Resources (SPEC §10): a paged card grid with varied kinds so the gallery shows each badge tone.
+export const GALLERY_RESOURCES: PagedResources = {
+  total: 3,
+  page: 1,
+  pageSize: 24,
+  q: '',
+  kind: '',
+  rows: [
+    { id: 1, title: 'Networks — slides deck', kind: 'slides', mimeType: null, source: 'ai_generated', sourceAttribution: '', unit: 'Networks', yearGroup: 'Y9', versionNo: 3, byteSize: 248 * 1024, usedCount: 2 },
+    { id: 2, title: 'Packets & protocols worksheet', kind: 'worksheet', mimeType: null, source: 'uploaded', sourceAttribution: 'Teach Computing (OGL)', unit: 'Networks', yearGroup: 'Y9', versionNo: 1, byteSize: 36 * 1024, usedCount: 1 },
+    { id: 3, title: 'CPU starter quiz', kind: 'quiz', mimeType: null, source: 'uploaded', sourceAttribution: '', unit: null, yearGroup: null, versionNo: null, byteSize: 12 * 1024, usedCount: 0 },
   ],
 };
 
