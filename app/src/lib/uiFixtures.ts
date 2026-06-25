@@ -9,6 +9,8 @@ import type { NoteCard } from './notesView';
 import type { UpcomingEvent } from '../services/event';
 import type { TaskRow } from '../repos/tasks';
 import type { OverseePageData } from './overseeView';
+import { renderSubStep, type FocusVM } from './focusView';
+import type { SubStep } from '../repos/tasks';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -119,6 +121,20 @@ export const GALLERY_OVERSEE: OverseePageData = {
       { lessonId: 3, date: '2026-06-25', start: '13:30', end: '14:30', groupName: '9A', purpose: 'teaching', courseNames: ['GCSE CS'], staffName: 'Mr Okafor (TA)', noPlan: false, needsEdit: false },
     ] },
   ],
+};
+
+// Focus (SPEC §5): the picked task with a couple of steps, in a free-period window.
+const GALLERY_FOCUS_STEPS: SubStep[] = [
+  { id: 1, title: 'Mark the first ten books', done: true },
+  { id: 2, title: 'Note who needs a nudge next lesson', done: false },
+];
+export const GALLERY_FOCUS: FocusVM = {
+  mode: 'free_period',
+  pollUrl: '/focus/inner?sig=gallery',
+  picked: { id: 1, title: 'Mark 9X books before tomorrow', urgency: 'by_next_lesson', estimateMin: 25, cognitiveLoad: 'medium' },
+  windowMinutes: 35,
+  hidden: 4,
+  subStepsHtml: GALLERY_FOCUS_STEPS.map(renderSubStep).join(''),
 };
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.

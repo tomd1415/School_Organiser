@@ -11,6 +11,7 @@ import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/not
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
+import { renderFocusInner } from '../lib/focusView';
 import {
   GALLERY_LESSONS,
   GALLERY_NOW_STATE,
@@ -26,6 +27,7 @@ import {
   GALLERY_EVENTS_TODAY,
   GALLERY_TASKS,
   GALLERY_OVERSEE,
+  GALLERY_FOCUS,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -107,6 +109,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Events (SPEC §7)', 'renderEventsGrouped — upcoming events grouped by how-soon (This week / Next two weeks / Later / No date yet), each a card with a tone date chip (Deadline red · Trip amber · Parents/Open teal · Meeting grey), editable title, kind badge and an "in N days" line.', renderEventsGrouped(GALLERY_EVENTS, GALLERY_EVENTS_TODAY))}
       ${item('Tasks (SPEC §4)', 'renderTaskList — tone-left-border task cards (urgency: urgent→red · by-next-lesson→amber · this-week/email/scheduled→teal · someday→grey), an EMAIL source tag, a done-checkbox (struck when done), the urgency badge, and triage/edit controls in a disclosure. The live page wraps these in a segmented Inbox/Open/Done/Interest tab control with counts.', `<div class="tasks-page">${renderTaskList('gallery-tasks', GALLERY_TASKS, GALLERY_GROUPS)}</div>`)}
       ${item('Oversee (SPEC §13)', 'renderOverseePage — TA-led lessons grouped by day; each row shows the slot · ⚑ class · course · TA name + plan-set/resources status pills. A missing plan turns the row red; Open leads to the lesson page where the plan/resources/note are set.', renderOverseePage(GALLERY_OVERSEE))}
+      ${item('Focus (SPEC §5)', 'renderFocusInner — the one-thing-now teal card: the single chosen task with a caption (urgency · window · estimate · load), a tappable step checklist, break-down + Done & next actions, and "N hidden — on purpose". Mode segmented control (Morning / Free period / End of day); an empty end-of-day shows the green wind-down banner.', `<div class="focus">${renderFocusInner(GALLERY_FOCUS)}</div>`)}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Now — day timeline', 'renderTimelineCard with a fixed clock (P1 done · P2 active · P3 next).', renderTimelineCard(GALLERY_LESSONS, GALLERY_PERIODS, GALLERY_NOW_STATE, new Date('2026-06-23T10:05:00Z'), 'Europe/London'))}
     </section>`;
