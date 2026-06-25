@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
 import { calibrationHeadline, calibrationInsight, gatherCalibration } from '../services/estimateCalibration';
-import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, toggleTaskInterest, updateTaskField } from '../repos/tasks';
+import { createTask, createTaskFromEmail, getTaskRow, listGroups, listInterestTasks, listTasks, setTaskStatus, taskCounts, toggleTaskInterest, updateTaskField, type GroupOpt, type TaskRow } from '../repos/tasks';
 import { parseEmail } from '../services/emailIntake';
-import { renderTaskItem, renderTaskList } from '../lib/taskView';
+import { renderTaskItem } from '../lib/taskView';
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 import { getRunningTimer } from '../repos/timeEntries';
 import { renderTimerBanner } from './timer';
@@ -21,33 +21,26 @@ export function registerTaskRoutes(app: FastifyInstance): void {
     const view = q.success ? q.data.view : 'inbox';
     const csrf = reply.generateCsrf();
 
-    let listHtml: string;
     let banner = renderTimerBanner(null);
-    let tasks: any[] = [];
-    let groups: any[] = [];
-    let running: any = null;
+    let tasks: TaskRow[] = [];
+    let groups: GroupOpt[] = [];
+    let running: Awaited<ReturnType<typeof getRunningTimer>> = null;
+    let counts = { inbox: 0, open: 0, done: 0, interest: 0 };
     try {
-      [tasks, groups, running] = await Promise.all([
+      [tasks, groups, running, counts] = await Promise.all([
         view === 'interest' ? listInterestTasks() : listTasks(view),
         listGroups(),
         getRunningTimer(),
+        taskCounts(),
       ]);
-      listHtml = renderTaskList(`tasks-list-${view}`, tasks, groups);
       banner = renderTimerBanner(running);
     } catch (err) {
       app.log.error({ err }, 'page render failed (shown as unavailable)');
-      listHtml = `<p class="muted">Tasks are unavailable — the database is not reachable.</p>`;
     }
 
     const { renderTasksPage } = await import('../lib/tasksView');
-      const body = renderTasksPage({
-        view,
-        csrf,
-        tasks,
-        groups,
-        bannerHtml: banner,
-      });
-      return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf }));
+    const body = renderTasksPage({ view, csrf, tasks, groups, bannerHtml: banner, counts });
+    return reply.type('text/html').send(layout({ title: 'Tasks', body, authed: true, csrfToken: csrf, width: 'working' }));
   });
 
   // D1: calibrate the teacher's time estimates from their timed history (deterministic headline +

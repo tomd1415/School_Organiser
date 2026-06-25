@@ -15,6 +15,7 @@ export interface TaskRow {
   context: string | null;
   status: string;
   interest: boolean;
+  source?: string | null; // 'email' for tasks created from a pasted/intaken email → an EMAIL tag (SPEC §4)
 }
 
 export interface GroupOpt {
@@ -122,7 +123,7 @@ export async function setTaskTriage(taskId: number, urgency: string | null, grou
 export async function listTasks(view: TaskView): Promise<TaskRow[]> {
   const { rows } = await pool.query<TaskRow>(
     `SELECT id, title, detail, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
-            group_id AS "groupId", context, status, interest
+            group_id AS "groupId", context, status, interest, source
      FROM tasks
      WHERE status = ANY($1)
      ORDER BY array_position(ARRAY['urgent_today','by_next_lesson','this_week','someday'], urgency),
@@ -166,7 +167,20 @@ export async function setTaskStatus(id: number, status: string): Promise<void> {
 }
 
 const TASK_ROW_COLS = `id, title, urgency, estimate_min AS "estimateMin", cognitive_load AS "cognitiveLoad",
-                       group_id AS "groupId", context, status, interest`;
+                       group_id AS "groupId", context, status, interest, source`;
+
+/** Tab counts for the Tasks segmented control (SPEC §4). One grouped query. */
+export async function taskCounts(): Promise<{ inbox: number; open: number; done: number; interest: number }> {
+  const { rows } = await pool.query<{ inbox: number; open: number; done: number; interest: number }>(
+    `SELECT count(*) FILTER (WHERE status = 'inbox')                                    AS inbox,
+            count(*) FILTER (WHERE status IN ('triaged','scheduled','in_progress'))     AS open,
+            count(*) FILTER (WHERE status IN ('done','dropped'))                        AS done,
+            count(*) FILTER (WHERE interest AND status NOT IN ('done','dropped'))       AS interest
+     FROM tasks`,
+  );
+  const r = rows[0];
+  return { inbox: Number(r?.inbox ?? 0), open: Number(r?.open ?? 0), done: Number(r?.done ?? 0), interest: Number(r?.interest ?? 0) };
+}
 
 export async function getTaskRow(id: number): Promise<TaskRow | null> {
   const { rows } = await pool.query<TaskRow>(`SELECT ${TASK_ROW_COLS} FROM tasks WHERE id = $1`, [id]);
