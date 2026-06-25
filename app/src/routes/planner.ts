@@ -254,7 +254,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
       app.log.error({ err }, 'planner render failed');
       body = '<section class="card"><h1>Planner</h1><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
-    return reply.type('text/html').send(layout({ title: 'Planner', body, authed: true, csrfToken: csrf }));
+    return reply.type('text/html').send(layout({ title: 'Planner', body, authed: true, csrfToken: csrf, width: 'wide' }));
   });
 
   // A drop resolves here: rearrange the class's bindings via the tested cascade primitives, then the
