@@ -16,3 +16,20 @@ test('Pupils renders the privacy banner + roster grid, no console errors', async
 
   expect(errors, errors.join('\n')).toEqual([]);
 });
+
+// §11 cohort analytics: class chips select a roster; the selected class shows its cohort (header +
+// level/completion/ATL cards). Tolerant of seed data (a class may have no levels recorded yet).
+test('Pupils class chips switch to the per-class cohort view', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/pupils', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.pupil-classchips')).toBeVisible();
+  const classChip = page.locator('.pupil-classchips .chip').nth(1); // [0] is "All"
+  test.skip((await classChip.count()) === 0, 'no class with a roster in the seed');
+  await classChip.click();
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page).toHaveURL(/class=\d+/);
+  await expect(page.locator('.cohort-head')).toBeVisible();   // class header (count · course · midpoint)
+  await expect(page.locator('.roster-card .lvl-chip').first()).toBeVisible(); // each card carries a level chip
+  expect(errors, errors.join('\n')).toEqual([]);
+});
