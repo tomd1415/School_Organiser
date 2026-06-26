@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
 import { materialiseAssessment, setAssessmentStatus } from '../../src/repos/assessments';
-import { assignToClass, attemptMarkingRows, confirmMarksForAttempt, enqueueAttemptMark, getAttempt } from '../../src/repos/assessmentAttempts';
+import { assignToClass, attemptMarkingRows, confirmMarksForAttempt, enqueueAttemptMark, getAttempt, writeAwardedMark } from '../../src/repos/assessmentAttempts';
 import { setSetting } from '../../src/repos/settings';
 import { invalidateMarksGate } from '../../src/auth/marksGate';
 import { startTake, answer as saveTakeAnswer, submit } from '../../src/services/assessmentTake';
@@ -128,5 +128,19 @@ describe('assessment marking lifecycle (AI off)', () => {
     const res = await markAttempt(attemptId);
     expect(res.objective.marked).toBe(0); // partA already marked → skipped
     expect(['unavailable', 'nothing', 'ok']).toContain(res.open.status);
+  });
+
+  it('a teacher can hand-mark an un-AI-marked OPEN answer (the override route INSERTs a confirmed mark)', async () => {
+    // partB is an open answer left unmarked with AI off — there is NO awarded-mark row yet (marker null),
+    // which is exactly the case the override route's insert-fallback handles (was silently dropped before).
+    const before = await rowFor(partBId);
+    expect(before.marker).toBeNull();
+    await writeAwardedMark({ answerId: before.answerId!, marksAwarded: 2, marksTotal: before.partMarks, marker: 'teacher', confidence: null, status: 'confirmed', needsReview: false, feedback: 'good', pointsHit: [], evidence: [], historyEntry: { override: true } });
+    await recomputeAttempt(attemptId);
+    const after = await rowFor(partBId);
+    expect(after.marker).toBe('teacher');
+    expect(after.status).toBe('confirmed');
+    expect(after.marksAwarded).toBe(2);
+    expect((await getAttempt(attemptId))!.scoreAwarded).toBe(3); // partA(1) + partB(2); partC disclosure 0
   });
 });

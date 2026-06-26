@@ -97,16 +97,18 @@ describe('assessment analytics — is_test exclusion + release', () => {
     expect(r!.awarded).toBe(2); // confirmed marks only
     expect(r!.total).toBe(2);
     expect(r!.items).toHaveLength(1);
+    expect(r!.specPoints).toHaveLength(1); // confirmed objective → spec-point breakdown shown
     await setReleased(assessmentId, gcId, false); // un-release → hidden again
     expect(await pupilResults(pupilId, assessmentId)).toBeNull();
   });
 
-  it('a pupil never sees a SUGGESTED (unconfirmed) mark', async () => {
-    // make the mark suggested again, release, and assert the confirmed-only read returns no items
+  it('a pupil never sees a SUGGESTED (unconfirmed) mark — per-part OR per-spec-point', async () => {
+    // make the mark suggested again, release, and assert BOTH the confirmed-only reads return nothing
     await pool.query(`UPDATE assessment_awarded_marks am SET status='suggested' FROM assessment_answers ans WHERE ans.id=am.answer_id AND ans.attempt_id IN (SELECT id FROM assessment_attempts WHERE assessment_id=$1 AND pupil_id=$2 AND NOT is_test)`, [assessmentId, pupilId]);
     await releaseFor(assessmentId, gcId, true);
     const r = await pupilResults(pupilId, assessmentId);
-    expect(r!.items).toHaveLength(0); // suggested mark excluded → nothing confirmed to show
+    expect(r!.items).toHaveLength(0); // suggested mark excluded from the per-part list
+    expect(r!.specPoints).toHaveLength(0); // and from the per-spec-point breakdown (was leaking before)
     await confirmMarksForAttempt((await pool.query<{ id: number }>(`SELECT id FROM assessment_attempts WHERE assessment_id=$1 AND pupil_id=$2 AND NOT is_test`, [assessmentId, pupilId])).rows[0]!.id);
   });
 });
