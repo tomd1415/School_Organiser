@@ -103,6 +103,8 @@ describe('paths builders — exact URLs', () => {
     [paths.schemesPlanResourceDetach(11, 4), '/schemes/plan/11/resources/4/detach'],
     [paths.schemesPlanResourcesSearch(11), '/schemes/plan/11/resources/search'],
     [paths.schemesPlanResources(11), '/schemes/plan/11/resources'],
+    [paths.schemesPlanResourcesAi(11), '/schemes/plan/11/resources-ai'],
+    [paths.schemesPlanResourcesAiStatus(11), '/schemes/plan/11/resources-ai/status'],
     // marking / mark modal
     [paths.occMark(20), '/lesson/oc/20/mark'],
     [paths.occAtl(20), '/lesson/oc/20/atl'],

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tidyResourceSet, mergeResourceContents, normaliseResourceKind } from '../src/llm/schemas/lessonResources';
+import { tidyResourceSet, mergeResourceContents, normaliseResourceKind, assessResourceSet, type TidyResource } from '../src/llm/schemas/lessonResources';
 
 // The slide viewer splits a slides document on `## ` headings (routes/resources.ts), so the count of
 // slides a teacher actually sees is this:
@@ -93,6 +93,83 @@ describe('tidyResourceSet — the reported "only the first slide" bug', () => {
     expect(normaliseResourceKind('Teaching Assistant guidance')).toBe('ta_notes');
     expect(normaliseResourceKind('answers')).toBe('answers'); // not mistaken for ta_notes
     expect(normaliseResourceKind('Support worksheet')).toBe('support'); // legacy kind still recognised
+  });
+});
+
+describe('assessResourceSet — "completed but incomplete" (the reported thin Core/Challenge)', () => {
+  // A structurally COMPLETE set: deck with all three `# ` level sections (≥5 slides), worksheet with
+  // three substantive `## 🟢/🟡/🔴` tiers, and non-trivial ta_notes + answers.
+  const goodDeck =
+    '## Starter\n\n🚀\n\n- hook\n\n## Big idea\n\n💡\n\n- idea\n' +
+    '# 🟢 Support\n\n## Support slide\n\n🟢\n\n- easier\n' +
+    '# 🟡 Core\n\n## Core slide\n\n🟡\n\n- core\n' +
+    '# 🔴 Challenge\n\n## Challenge slide\n\n🔴\n\n- stretch';
+  const goodWorksheet =
+    'How to use this sheet: type your answers in the boxes.\n\n' +
+    '## 🟢 Support\n\nFollow these steps and answer the questions about the CPU and memory in full.\n\n' +
+    '## 🟡 Core\n\nExplain what the CPU does and how RAM differs from storage, with examples.\n\n' +
+    '## 🔴 Challenge\n\nEvaluate why cache exists and how it speeds the fetch-execute cycle.';
+  const complete: TidyResource[] = [
+    { kind: 'slides', title: 'S', content: goodDeck },
+    { kind: 'worksheet', title: 'W', content: goodWorksheet },
+    { kind: 'ta_notes', title: 'TA', content: 'Support pupils at each level; watch for the RAM/ROM mix-up.' },
+    { kind: 'answers', title: 'Ans', content: 'CPU processes instructions; RAM is volatile working memory.' },
+  ];
+
+  it('passes a structurally complete set with no issues', () => {
+    const a = assessResourceSet(complete);
+    expect(a.complete).toBe(true);
+    expect(a.issues).toEqual([]);
+    expect(a.regenerate).toEqual([]);
+  });
+
+  it('flags the worksheet (for regeneration) when the 🔴 Challenge tier is absent', () => {
+    const docs = complete.map((d) =>
+      d.kind === 'worksheet'
+        ? { ...d, content: '## 🟢 Support\n\nfull support task here for pupils to type answers into.\n\n## 🟡 Core\n\nfull core task here for pupils to complete.' }
+        : d,
+    );
+    const a = assessResourceSet(docs);
+    expect(a.complete).toBe(false);
+    expect(a.regenerate).toEqual(['worksheet']);
+    expect(a.issues.some((i) => i.kind === 'worksheet' && /Challenge/.test(i.problem))).toBe(true);
+  });
+
+  it('flags the worksheet when a tier is present but a stub (truncated mid-generation)', () => {
+    const docs = complete.map((d) =>
+      d.kind === 'worksheet'
+        ? { ...d, content: goodWorksheet.replace('Evaluate why cache exists and how it speeds the fetch-execute cycle.', 'Eval') }
+        : d,
+    );
+    const a = assessResourceSet(docs);
+    expect(a.regenerate).toContain('worksheet');
+    expect(a.issues.some((i) => /too thin/.test(i.problem))).toBe(true);
+  });
+
+  it('flags the deck when it is a stub with no level sections (the slides-stub bug)', () => {
+    const docs = complete.map((d) => (d.kind === 'slides' ? { ...d, content: '## Intro\n\n🙂\n\n- one\n\n## Recap\n\n✅\n\n- two' } : d));
+    const a = assessResourceSet(docs);
+    expect(a.complete).toBe(false);
+    expect(a.regenerate).toContain('slides');
+    expect(a.issues.some((i) => /level section/.test(i.problem))).toBe(true);
+    expect(a.issues.some((i) => /stub/.test(i.problem))).toBe(true);
+  });
+
+  it('reports a missing document as needing regeneration', () => {
+    const docs = complete.filter((d) => d.kind !== 'answers');
+    const a = assessResourceSet(docs);
+    expect(a.regenerate).toEqual(['answers']);
+    expect(a.issues).toEqual([{ kind: 'answers', problem: 'answers is missing' }]);
+  });
+
+  it('orders the regenerate list slides → worksheet → ta_notes → answers (pupil-facing first)', () => {
+    const a = assessResourceSet([
+      { kind: 'answers', title: 'A', content: 'x' }, // too short
+      { kind: 'ta_notes', title: 'T', content: 'y' }, // too short
+      { kind: 'worksheet', title: 'W', content: '## 🟢 Support\n\nonly support here, the rest is missing entirely.' },
+      { kind: 'slides', title: 'S', content: '## one\n\n## two' }, // stub, no levels
+    ]);
+    expect(a.regenerate).toEqual(['slides', 'worksheet', 'ta_notes', 'answers']);
   });
 });
 

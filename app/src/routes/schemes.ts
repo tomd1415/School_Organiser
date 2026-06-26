@@ -54,12 +54,12 @@ import {
 } from '../repos/resources';
 import { checksum, relPathFor, storeBuffer } from '../lib/resourceStore';
 import { safeFilename } from '../services/resource';
-import { lessonResourcesSchema, normaliseResourceKind, tidyResourceSet } from '../llm/schemas/lessonResources';
-import { generateLessonDeck, applyDedicatedDeck } from '../services/slideGen';
-import { LESSON_RESOURCES_INSTRUCTION, LESSON_RESOURCES_SYSTEM, LESSON_RESOURCES_VERSION, lessonResourceItems, lessonImageItems, lessonMaterialItems, examStyleItems } from '../llm/prompts/lessonResources';
-import { examProfileForCourse } from '../services/examProfile';
-import { ensureSourceImagesForPlan } from '../services/sourceImages';
-import { lessonMaterialsForPlan, lessonMaterialsForResourceIds, readUseMaterials } from '../services/lessonMaterials';
+import { lessonMaterialItems } from '../llm/prompts/lessonResources';
+import { generateResourcesForPlan } from '../services/resourceGen';
+import { enqueueResourceJob, getResourceJobForPlan, activeResourceJobsForPlans } from '../repos/resourceJobs';
+import { runResourceJob } from '../services/resourceJobs';
+import { paths } from '../lib/paths';
+import { lessonMaterialsForResourceIds, readUseMaterials } from '../services/lessonMaterials';
 import { lessonStructure, unitCandidates, searchUnits } from '../services/convertUnit';
 import { getCourseCurriculumHistory } from '../repos/curriculumHistory';
 import { curriculumHistoryItems } from '../llm/prompts/curriculumHistory';
@@ -72,7 +72,7 @@ import { classSchedule, classSlots, getCurrentYearEnd, layLessonsAcrossClass, li
 import { upcomingClassSlots } from '../services/delivery';
 import { getClockContext } from '../repos/clock';
 import { addDays, localParts } from '../lib/time';
-import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
+import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderResourceJobStatus, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 import { teachingContextItems } from '../llm/prompts/teachingContext';
@@ -111,109 +111,22 @@ function injectIntoTree(html: string, fragment: string): string {
 async function treeHtml(schemeId: number): Promise<string> {
   const [scheme, units, plans] = await Promise.all([getScheme(schemeId), listUnits(schemeId), listPlansForScheme(schemeId)]);
   if (!scheme) return '<div id="scheme-tree"><p class="muted">Scheme not found.</p></div>';
-  const openReviews = await openReviewPlanIds(plans.map((p) => p.id));
-  return renderSchemeTree(scheme, buildSchemeTree(units, plans), openReviews);
+  const planIds = plans.map((p) => p.id);
+  const [openReviews, activeJobs] = await Promise.all([openReviewPlanIds(planIds), activeResourceJobsForPlans(planIds)]);
+  return renderSchemeTree(scheme, buildSchemeTree(units, plans), openReviews, activeJobs);
+}
+
+// The lesson-screen variant of the resource-job spinner (the cockpit posts ?from=lesson into a small
+// span). It polls the same status endpoint; on done the endpoint replies HX-Refresh to reload the lesson.
+// Built inline here (a route file) rather than in a *View.ts so the ?from=lesson query stays out of the
+// paths-guard-checked views — the lesson cockpit already posts that literal from lesson.ts.
+function lessonResourceJobWidget(planId: number, label: string): string {
+  return `<span class="resjob" role="status" aria-live="polite" hx-get="${paths.schemesPlanResourcesAiStatus(planId)}?from=lesson" hx-trigger="every 2s" hx-target="this" hx-swap="outerHTML"><span class="resjob-spinner" aria-hidden="true"></span> <span class="muted">${esc(label)} — generating in the background; this can take a minute or two…</span></span>`;
 }
 
 
-// Generate/update ONE lesson's resource set (slides outline, worksheet, support, answers) and put
-// each file where it belongs: the resource store, linked to the plan, so it surfaces on the lesson
-// screen and the plan editor. Re-running creates new VERSIONS of the same documents, not copies.
-const RES_KIND_LABEL: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'TA notes', answers: 'answers', support: 'support worksheet' };
-const RES_KIND_STORE: Record<string, string> = { slides: 'slides', worksheet: 'worksheet', ta_notes: 'ta_notes', answers: 'document', support: 'worksheet' };
-
-async function generateResourcesForPlan(planId: number, useMaterials = true): Promise<{ ok: boolean; message: string }> {
-  const [ctx, row] = await Promise.all([getPlanContext(planId), getPlanRow(planId)]);
-  if (!ctx || !row) return { ok: false, message: 'Lesson not found.' };
-  if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
-    return { ok: false, message: 'Write or ✨draft the objectives/outline first — resources are generated from them.' };
-  }
-  const standing = await standingPrefItems();
-  const concepts = await conceptItemsFor(ctx.courseId);
-  const modelChoice = await modelForFeature('lesson_resources', 'plan');
-  const equipment = await listActiveEquipment();
-  // Carry over the source slides' images so the model can embed them where the lesson refers to a
-  // visual (best-effort; empty when the plan has no linked Office source). Never blocks generation.
-  // (This also backfills unit-level source links onto the plan, so the material read below sees them.)
-  const images = await ensureSourceImagesForPlan(planId).catch(() => []);
-  // Phase 12 B2: build the worksheet ON the lesson's own prepared materials (extracted text). Runs
-  // after the image step so any unit-level sources it linked are visible here. Best-effort; empty ⇒
-  // no item, so a lesson with no uploaded materials generates exactly as before. B4: opt-out skips it.
-  const materials = useMaterials
-    ? await lessonMaterialsForPlan(planId).catch(() => ({ text: '', files: [], truncated: false }))
-    : { text: '', files: [], truncated: false };
-  // B5: weight OCR GCSE exam-style questions by how close this course is to its exams (KS3 ⇒ none).
-  const examProfile = await examProfileForCourse(ctx.courseId, new Date()).catch(
-    () => ({ stage: 'foundational', weighting: 'none', monthsToExam: null, label: '' }) as const,
-  );
-  // One context array, shared by the four-doc call and the dedicated deck call below.
-  const contextItems = [
-    ...standing,
-    ...concepts,
-    ...teachingContextItems(ctx.teachingContext),
-    ...equipmentItem(equipment),
-    ...lessonImageItems(images),
-    ...lessonMaterialItems(materials.text),
-    ...examStyleItems(examProfile),
-    ...lessonResourceItems({ courseName: ctx.courseName, unitTitle: ctx.unitTitle, planTitle: ctx.planTitle, objectives: row.objectives, outline: row.outline }),
-  ];
-  const callOnce = () =>
-    callLLMStructured(
-      {
-        feature: 'lesson_resources',
-        model: modelChoice,
-        promptVersion: LESSON_RESOURCES_VERSION,
-        system: LESSON_RESOURCES_SYSTEM,
-        context: contextItems,
-        instruction: LESSON_RESOURCES_INSTRUCTION,
-        maxTokens: 32000, // generous: the worksheet/TA-notes/answers set must never truncate (the deck is a separate call)
-      },
-      lessonResourcesSchema,
-    );
-  // The slide deck is generated in its OWN call: the four-doc call reliably under-invests in the deck
-  // (a 2–3 slide stub — the "only the first couple of slides" bug). Run both at once so the dedicated
-  // deck adds no wall-time, then override the four-doc call's stub deck with the full one.
-  const [result, deck] = await Promise.all([
-    callOnce(),
-    generateLessonDeck({ model: modelChoice, context: contextItems, mode: 'generate' }).catch(() => null),
-  ]);
-  if (result.status !== 'ok' || !result.data) return { ok: false, message: result.message ?? 'AI unavailable — nothing generated.' };
-  let tidy = applyDedicatedDeck(tidyResourceSet(result.data.resources), deck, ctx.planTitle);
-  if (tidy.missing.length) {
-    // the model occasionally burns its budget on one document — one retry usually completes the set
-    const second = await callOnce();
-    if (second.status === 'ok' && second.data) {
-      const retry = applyDedicatedDeck(tidyResourceSet(second.data.resources), deck, ctx.planTitle);
-      if (retry.missing.length < tidy.missing.length) tidy = retry;
-    }
-  }
-  if (tidy.missing.length) {
-    return { ok: false, message: `The AI returned an incomplete set (missing: ${tidy.missing.join(', ')}) — try again.` };
-  }
-
-  const existing = await listResourcesForPlan(planId);
-  let created = 0;
-  let updated = 0;
-  for (const r of tidy.docs) {
-    const kind = r.kind;
-    const filename = `${safeFilename(ctx.planTitle).replace(/\.md$/i, '') || 'lesson'} — ${RES_KIND_LABEL[kind] ?? kind}.md`;
-    const buf = Buffer.from(r.content, 'utf8');
-    const match = existing.find((e) => e.title === filename);
-    if (match) {
-      await addVersionWithFile(match.resourceId, { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-regenerated' }); // BUG-028
-      updated++;
-    } else {
-      const id = await createResourceWithVersion(
-        { title: filename, kind: RES_KIND_STORE[kind] ?? 'document', mimeType: 'text/markdown', source: 'ai_generated' },
-        { filename, buf, checksum: checksum(buf), author: 'ai', changeNote: 'AI-generated' },
-      ); // BUG-028: atomic row+version+file
-      await linkResourceToPlan(id, planId);
-      created++;
-    }
-  }
-  const builtOn = materials.files.length ? ` · built on ${materials.files.length} of your file(s)${materials.truncated ? ' (partial)' : ''}` : '';
-  return { ok: true, message: `resources ready ✓ — ${created} new, ${updated} updated${builtOn} (linked below)` };
-}
+// generateResourcesForPlan now lives in services/resourceGen.ts (it became an async job — see
+// services/resourceJobs.ts). The unit-level "all lessons" batch below still calls it synchronously.
 
 export function registerSchemeRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
@@ -246,8 +159,12 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           getClockContext(),
         ]);
         const schemeTree = scheme ? buildSchemeTree(units, plans) : [];
+        const planIds = plans.map((p) => p.id);
+        const [openReviews, activeJobs] = scheme
+          ? await Promise.all([openReviewPlanIds(planIds), activeResourceJobsForPlans(planIds)])
+          : [new Set<number>(), new Map()];
         const tree = scheme
-          ? renderSchemeTree(scheme, schemeTree, await openReviewPlanIds(plans.map((p) => p.id)))
+          ? renderSchemeTree(scheme, schemeTree, openReviews, activeJobs)
           : renderSchemeEmpty(courseId, undefined, current?.name);
         const today = localParts(new Date(), clockCtx.tz).isoDate;
 
@@ -542,22 +459,58 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
   });
 
 
-  // Generate/update a lesson's resource set (AI) — slides outline + worksheet + support + answers.
+  // Generate/update a lesson's resource set (AI) — slides + worksheet + TA notes + answers. This used to
+  // BLOCK the HTTP request for the whole multi-minute generation, so a slow line or a dropped connection
+  // left a spinner that never resolved — or, on a 5xx/abort htmx swallows, a silent nothing. It now
+  // ENQUEUES a background job (services/resourceJobs.ts) and returns a polling widget at once; the job
+  // re-checks completeness and regenerates any thin/missing document before saving (services/resourceGen).
   app.post('/schemes/plan/:id/resources-ai', guard, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');
-    const q = z.object({ from: z.enum(['lesson']).optional() }).safeParse(req.query);
-    const res = await generateResourcesForPlan(id.data.id, readUseMaterials(req.body));
-    if (q.success && q.data.from === 'lesson') {
-      if (res.ok) {
-        reply.header('HX-Refresh', 'true');
+    const fromLesson = z.object({ from: z.enum(['lesson']).optional() }).safeParse(req.query);
+    // Cheap, deterministic pre-check (no AI): a lesson with no objectives/outline has nothing to generate
+    // FROM. Do it synchronously so the teacher gets the guidance instantly rather than after a 2s poll, and
+    // we never enqueue a job that can only fail.
+    const row = await getPlanRow(id.data.id);
+    if (!row) return reply.code(404).send('');
+    if (!(row.objectives ?? '').trim() && !(row.outline ?? '').trim()) {
+      return reply.type('text/html').send(`<span class="muted">Write or ✨draft the objectives/outline first — resources are generated from them.</span>`);
+    }
+    const job = await enqueueResourceJob(id.data.id, readUseMaterials(req.body));
+    void runResourceJob(job.id); // fire-and-forget; the worker claims it, the server.ts sweep is the backstop
+    if (fromLesson.success && fromLesson.data.from === 'lesson') {
+      return reply.type('text/html').send(lessonResourceJobWidget(id.data.id, job.stage || 'Queued…'));
+    }
+    return reply.type('text/html').send(renderResourceJobStatus(id.data.id, job));
+  });
+
+  // Poll a plan's resource job. While it runs, return the live-progress widget (it keeps polling). When it
+  // finishes, re-render the WHOLE plan (HX-Retarget) so the new resources appear and the polling element —
+  // and its timer — is replaced, stopping the poll. ?from=lesson instead reloads the lesson screen on done.
+  app.get('/schemes/plan/:id/resources-ai/status', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const fromLesson = z.object({ from: z.enum(['lesson']).optional() }).safeParse(req.query);
+    const lesson = fromLesson.success && fromLesson.data.from === 'lesson';
+    const job = await getResourceJobForPlan(id.data.id);
+    if (!job || job.status === 'queued' || job.status === 'running') {
+      // still working (or no job at all — render nothing, which removes the widget and stops the poll)
+      if (lesson) return reply.type('text/html').send(job ? lessonResourceJobWidget(id.data.id, job.stage || 'Working…') : '');
+      return reply.type('text/html').send(renderResourceJobStatus(id.data.id, job));
+    }
+    // done | error
+    if (lesson) {
+      if (job.status === 'done') {
+        reply.header('HX-Refresh', 'true'); // reload the lesson screen so the new resources show
         return reply.send('');
       }
-      return reply.type('text/html').send(`<span class="muted">${esc(res.message)}</span>`);
+      return reply.type('text/html').send(`<span class="muted">${esc(job.message)}</span>`);
     }
     const updated = await getPlanRow(id.data.id);
     if (!updated) return reply.code(404).send('');
-    return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: res.message }));
+    reply.header('HX-Retarget', `#plan-${id.data.id}`);
+    reply.header('HX-Reswap', 'outerHTML');
+    return reply.type('text/html').send(renderPlan(updated, { open: true, draftStatus: job.message }));
   });
 
   // …and for every lesson in a unit (one AI call per lesson; stops early if AI is unavailable).

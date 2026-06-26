@@ -102,3 +102,118 @@ export function tidyResourceSet(resources: Array<{ kind: string; title: string; 
   const missing = ['slides', 'worksheet'].filter((k) => !have.has(k));
   return { docs, missing };
 }
+
+// ── Completeness check ───────────────────────────────────────────────────────────────────────────
+// A resource set can PARSE cleanly (every kind present, so tidyResourceSet reports nothing missing)
+// yet still be DEFICIENT in ways the teacher only spots later: the worksheet missing its 🔴 Challenge
+// tier, the deck a 2–3 slide stub with no level sections, an empty answers doc. The four-doc call shares
+// one token budget across all of slides/worksheet/ta_notes/answers and reliably under-invests in the
+// LATER documents (the same pathology slideGen.ts already splits the deck out to fix), so a "completed"
+// run can quietly ship a thin Core/Challenge. assessResourceSet inspects the STRUCTURE of each document
+// and reports which ones are deficient so the job can regenerate exactly those — never a name, never AI.
+export type ResourceKind = 'slides' | 'worksheet' | 'ta_notes' | 'answers';
+export interface ResourceIssue {
+  kind: ResourceKind;
+  problem: string; // human-readable, for the job's status line
+}
+export interface ResourceAssessment {
+  complete: boolean;
+  issues: ResourceIssue[];
+  regenerate: ResourceKind[]; // distinct kinds to re-run, slides/worksheet first (most important to pupils)
+}
+
+// Lenient floors — these catch GROSS deficiencies (a missing tier, a stub deck, an empty doc), not
+// stylistic thinness, so a legitimately short-but-complete document is never flagged.
+const MIN_DOC_CHARS = 20; // a ta_notes/answers doc with less than this is effectively empty
+const MIN_TIER_BODY_CHARS = 40; // a worksheet level (🟢/🟡/🔴) with less body than this is a stub/truncated
+const MIN_SLIDE_COUNT = 5; // a real differentiated deck is 14–24 slides; fewer than this is the stub bug
+
+/** The body text under a `## ` worksheet TIER heading, sliced to the NEXT tier heading (not the next
+ *  `## ` — a tier may itself contain `## `-level blocks). Keyed on the tier emoji in the heading line.
+ *  Returns null when that tier's heading is absent entirely. */
+function worksheetTierBodies(content: string): Record<'support' | 'core' | 'challenge', string | null> {
+  const norm = content.replace(/\r\n/g, '\n');
+  const tiers: Array<['support' | 'core' | 'challenge', string]> = [
+    ['support', '🟢'],
+    ['core', '🟡'],
+    ['challenge', '🔴'],
+  ];
+  const found = tiers
+    .map(([tier, emoji]) => {
+      const m = new RegExp(`^##\\s+.*${emoji}`, 'm').exec(norm); // the emoji on a depth-2 heading line
+      return m ? { tier, idx: m.index } : null;
+    })
+    .filter((x): x is { tier: 'support' | 'core' | 'challenge'; idx: number } => x !== null)
+    .sort((a, b) => a.idx - b.idx);
+  const bodies: Record<'support' | 'core' | 'challenge', string | null> = { support: null, core: null, challenge: null };
+  for (let i = 0; i < found.length; i++) {
+    const start = found[i]!.idx;
+    const end = i + 1 < found.length ? found[i + 1]!.idx : norm.length;
+    bodies[found[i]!.tier] = norm.slice(start, end).replace(/^##.*\n?/, '').trim(); // drop the heading line
+  }
+  return bodies;
+}
+
+/** The number of slides a teacher would actually see — the deck splits on depth-2 `## ` headings. */
+function slideCount(content: string): number {
+  return content
+    .replace(/\r\n/g, '\n')
+    .split(/\n(?=##\s)/)
+    .filter((s) => /^##\s/.test(s.trim()))
+    .length;
+}
+
+/** Inspect a tidied resource set for structural completeness (see the block comment above). Pure —
+ *  no AI, no DB. The caller regenerates `regenerate` (its dedicated per-document call) and re-checks. */
+export function assessResourceSet(docs: TidyResource[]): ResourceAssessment {
+  const by = new Map<string, TidyResource>(docs.map((d) => [d.kind, d]));
+  const issues: ResourceIssue[] = [];
+
+  // 1. Every kind must be present and non-empty.
+  for (const kind of ['slides', 'worksheet', 'ta_notes', 'answers'] as ResourceKind[]) {
+    const d = by.get(kind);
+    if (!d || !d.content.trim()) issues.push({ kind, problem: `${kind} is missing` });
+  }
+
+  // 2. Worksheet — all three differentiation tiers present, each with real content.
+  const ws = by.get('worksheet');
+  if (ws && ws.content.trim()) {
+    const bodies = worksheetTierBodies(ws.content);
+    const tierLabels: Array<['support' | 'core' | 'challenge', string]> = [
+      ['support', '🟢 Support'],
+      ['core', '🟡 Core'],
+      ['challenge', '🔴 Challenge'],
+    ];
+    for (const [tier, label] of tierLabels) {
+      const body = bodies[tier];
+      if (body == null) issues.push({ kind: 'worksheet', problem: `worksheet missing the ${label} tier` });
+      else if (body.length < MIN_TIER_BODY_CHARS) issues.push({ kind: 'worksheet', problem: `worksheet ${label} tier is too thin (likely truncated)` });
+    }
+  }
+
+  // 3. Slides — all three level dividers present (depth-1 `# `) and not a stub.
+  const slides = by.get('slides');
+  if (slides && slides.content.trim()) {
+    for (const [emoji, label] of [
+      ['🟢', '🟢 Support'],
+      ['🟡', '🟡 Core'],
+      ['🔴', '🔴 Challenge'],
+    ] as const) {
+      if (!new RegExp(`^#\\s+.*${emoji}`, 'm').test(slides.content)) {
+        issues.push({ kind: 'slides', problem: `deck missing the ${label} level section` });
+      }
+    }
+    if (slideCount(slides.content) < MIN_SLIDE_COUNT) issues.push({ kind: 'slides', problem: 'deck is only a stub (too few slides)' });
+  }
+
+  // 4. ta_notes / answers — present-but-trivial is as bad as absent.
+  for (const kind of ['ta_notes', 'answers'] as ResourceKind[]) {
+    const d = by.get(kind);
+    if (d && d.content.trim() && d.content.trim().length < MIN_DOC_CHARS) issues.push({ kind, problem: `${kind} is too short to be usable` });
+  }
+
+  // Distinct kinds to regenerate, slides/worksheet first (they matter most to pupils).
+  const order: ResourceKind[] = ['slides', 'worksheet', 'ta_notes', 'answers'];
+  const regenerate = order.filter((k) => issues.some((i) => i.kind === k));
+  return { complete: issues.length === 0, issues, regenerate };
+}

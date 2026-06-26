@@ -114,6 +114,7 @@ export const paths = {
   schemesPlanDraft: (plan: number): string => `/schemes/plan/${plan}/draft`,
   schemesPlanResources: (plan: number): string => `/schemes/plan/${plan}/resources`,
   schemesPlanResourcesAi: (plan: number): string => `/schemes/plan/${plan}/resources-ai`,
+  schemesPlanResourcesAiStatus: (plan: number): string => `/schemes/plan/${plan}/resources-ai/status`,
   schemesPlanReview: (plan: number): string => `/schemes/plan/${plan}/review`,
   schemesPlanReviewAi: (plan: number): string => `/schemes/plan/${plan}/review-ai`,
   schemesPlanCompare: (plan: number): string => `/schemes/plan/${plan}/compare`,

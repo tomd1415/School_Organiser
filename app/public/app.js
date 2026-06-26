@@ -264,6 +264,43 @@
     if (isWrite(d)) markUnsaved(elt);
   });
 
+  // No silent failures: surface any htmx TRANSPORT error (5xx, dropped connection, request timeout) as a
+  // toast. htmx's responseHandling maps 4xx/5xx to {swap:false, error:true} and fires htmx:sendError /
+  // htmx:timeout on network failures — so WITHOUT this, a failed AI generation, a lost LAN connection or a
+  // server slip leaves nothing on screen at all (the reported "it finishes without an error message"). Uses
+  // its OWN toast element so it never disturbs the autosave "not saved" warning above.
+  (function () {
+    var errTimer = null;
+    function errorToast(msg) {
+      var t = document.getElementById('hx-error-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'hx-error-toast';
+        t.className = 'hx-toast hx-toast-error';
+        t.setAttribute('role', 'alert');
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(errTimer);
+      errTimer = setTimeout(function () { t.classList.remove('show'); }, 7000);
+    }
+    function messageFor(ev, xhr) {
+      var status = xhr && xhr.status;
+      if (ev === 'htmx:timeout') return '⚠ The server took too long to respond — please try again.';
+      if (!status) return '⚠ Lost connection to the server — check the network and try again.';
+      if (status >= 500) return '⚠ The server hit an error (' + status + ') — nothing was changed. Please try again.';
+      if (status === 404) return '⚠ That item is no longer there — try reloading the page.';
+      return '⚠ Request failed (' + status + ') — please try again.';
+    }
+    ['htmx:responseError', 'htmx:sendError', 'htmx:timeout'].forEach(function (ev) {
+      document.body.addEventListener(ev, function (e) {
+        var d = (e && e.detail) || {};
+        errorToast(messageFor(ev, d.xhr));
+      });
+    });
+  })();
+
   // Command palette & jump keys navigation
   var NAV_ITEMS = Array.isArray(window.__NAV__) ? window.__NAV__ : [];
   var NAV = {};

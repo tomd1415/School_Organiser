@@ -8,6 +8,7 @@ import { weekdayName } from '../services/delivery';
 import type { UnitCandidate } from '../services/convertUnit';
 import type { ReviewRow } from '../repos/reviews';
 import type { PlanAdaptation } from '../repos/adaptations';
+import type { ResourceJob } from '../repos/resourceJobs';
 
 // Wave 5 — the advisory AI review card shown under a lesson on the Schemes page. It only ever
 // suggests: the teacher Applies the rewrite to the master (reusing updatePlanField) or Dismisses it.
@@ -106,7 +107,21 @@ function rowActions(kind: 'unit' | 'plan', id: number, confirm: string): string 
   </span>`;
 }
 
-export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: string; reviewOpen?: boolean } = {}): string {
+// The live progress widget for an in-flight "Generate resources" job. While the job is queued/running it
+// polls its status endpoint every 2s; when the job finishes the status endpoint retargets the swap to the
+// whole plan (HX-Retarget), so this element — and its polling timer — is replaced and polling stops. An
+// already-finished (or absent) job renders nothing, so the slot is simply empty.
+export function renderResourceJobStatus(planId: number, job: ResourceJob | null): string {
+  if (!job || job.status === 'done' || job.status === 'error') return '';
+  const label = job.stage.trim() || (job.status === 'queued' ? 'Queued…' : 'Working…');
+  return `<div class="resjob" role="status" aria-live="polite"
+    hx-get="${paths.schemesPlanResourcesAiStatus(planId)}" hx-trigger="every 2s" hx-target="this" hx-swap="outerHTML">
+    <span class="resjob-spinner" aria-hidden="true"></span> <span class="muted">${esc(label)}</span>
+    <span class="resjob-hint muted">— building all four documents can take a minute or two; you can keep working and it carries on</span>
+  </div>`;
+}
+
+export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: string; reviewOpen?: boolean; resourceJob?: ResourceJob | null } = {}): string {
   const save = (t: string) => `hx-post="${paths.schemesPlan(p.id)}" hx-swap="none" hx-trigger="${t}"`;
   return `<li class="plan" id="plan-${p.id}">
     <div class="row-head">
@@ -126,11 +141,12 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
         : ''}
       <div class="plan-ai">
         <button type="button" class="btn-secondary" hx-post="${paths.schemesPlanDraft(p.id)}" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Draft with AI</button>
-        <button type="button" class="btn-secondary" title="slides outline + worksheet + support version + answers — stored and linked to this lesson; re-running updates the versions"
-          hx-post="${paths.schemesPlanResourcesAi(p.id)}" hx-target="#plan-${p.id}" hx-swap="outerHTML" hx-disabled-elt="this">📄 Generate resources</button>
+        <button type="button" class="btn-secondary" title="slides outline + worksheet + support version + answers — stored and linked to this lesson; re-running updates the versions. Runs in the background — you can keep working while it generates."
+          hx-post="${paths.schemesPlanResourcesAi(p.id)}" hx-target="#plan-${p.id}-resjob" hx-swap="innerHTML" hx-disabled-elt="this">📄 Generate resources</button>
         <button type="button" class="btn-secondary" title="an AI second opinion on this upcoming lesson, judged against the spec — it suggests; you apply or dismiss (only when the reviewer is enabled in Settings → AI)"
           hx-post="${paths.schemesPlanReviewAi(p.id)}" hx-target="#plan-${p.id}-review" hx-swap="innerHTML" hx-disabled-elt="this">🔎 Review (AI)</button>
         <span class="plan-draft-status" id="plan-${p.id}-draft">${esc(opts.draftStatus ?? '')}</span>
+        <div class="resjob-slot" id="plan-${p.id}-resjob">${renderResourceJobStatus(p.id, opts.resourceJob ?? null)}</div>
       </div>
       <div class="plan-review" id="plan-${p.id}-review"${opts.reviewOpen ? ` hx-get="${paths.schemesPlanReview(p.id)}" hx-trigger="load" hx-swap="innerHTML"` : ''}></div>
       <details class="adapt-edit"${p.objectives || p.outline ? '' : ' open'}>
@@ -158,7 +174,7 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
   </li>`;
 }
 
-function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>): string {
+function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>, activeJobs: ReadonlyMap<number, ResourceJob> = new Map()): string {
   const save = (t: string) => `hx-post="${paths.schemesUnit(u.id)}" hx-swap="none" hx-trigger="${t}"`;
   return `<section class="unit" id="unit-${u.id}">
     <div class="row-head">
@@ -166,7 +182,7 @@ function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>): string 
       <span class="note-status" id="unit-${u.id}-status"></span>
       ${rowActions('unit', u.id, 'Delete this unit and its plans?')}
     </div>
-    <ol class="plans">${u.plans.map((p) => renderPlan(p, { reviewOpen: openReviews.has(p.id) })).join('')}</ol>
+    <ol class="plans">${u.plans.map((p) => renderPlan(p, { reviewOpen: openReviews.has(p.id), resourceJob: activeJobs.get(p.id) ?? null })).join('')}</ol>
     <button type="button" class="link" hx-post="${paths.schemesUnitPlan(u.id)}" hx-target="#scheme-tree" hx-swap="outerHTML">＋ lesson plan</button>
     <button type="button" class="link" title="one AI call per lesson; existing documents get new versions"
       hx-post="${paths.schemesUnitResourcesAi(u.id)}" hx-target="#scheme-tree" hx-swap="outerHTML" hx-disabled-elt="this"
@@ -229,7 +245,12 @@ function unitPlannedPct(u: UnitWithPlans): number {
 // whole #scheme-tree and reset to the first unit. Each unit panel reuses renderUnit/renderPlan verbatim,
 // so every editing/AI/resources/compare affordance — and every route that swaps #plan-/#unit-/#scheme-tree
 // — keeps working unchanged.
-export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[], openReviews: ReadonlySet<number> = new Set()): string {
+export function renderSchemeTree(
+  scheme: SchemeHeader,
+  tree: UnitWithPlans[],
+  openReviews: ReadonlySet<number> = new Set(),
+  activeJobs: ReadonlyMap<number, ResourceJob> = new Map(),
+): string {
   if (tree.length === 0) {
     return `<div id="scheme-tree" class="sch-tree-empty">
       <p class="muted">No units yet — add the first one to start building this scheme.</p>
@@ -250,7 +271,7 @@ export function renderSchemeTree(scheme: SchemeHeader, tree: UnitWithPlans[], op
     })
     .join('');
   const panels = tree
-    .map((u, i) => `<div class="sch-unit-panel" data-unit="${u.id}"${i === 0 ? '' : ' hidden'}>${renderUnit(u, openReviews)}</div>`)
+    .map((u, i) => `<div class="sch-unit-panel" data-unit="${u.id}"${i === 0 ? '' : ' hidden'}>${renderUnit(u, openReviews, activeJobs)}</div>`)
     .join('');
   return `<div id="scheme-tree" class="sch-spine">
     <aside class="sch-units">

@@ -786,9 +786,19 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .atl-arrow.atl-flat { color: var(--muted); }
 
 /* AI draft-lesson (Phase 4.3) */
-.plan-ai { display: flex; align-items: center; gap: 0.6rem; margin: 0.25rem 0 0.6rem; }
+.plan-ai { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0.25rem 0 0.6rem; }
 .plan-ai button.htmx-request { opacity: 0.6; }
 .plan-draft-status { font-size: 0.8rem; color: var(--muted); }
+/* Async "Generate resources" job — the live-progress spinner shown under the lesson's AI buttons while a
+   background generation runs (services/resourceJobs.ts). The slot spans the row and collapses when empty
+   (no job), so it adds no layout of its own. Reuses the @keyframes hx-spin defined below. */
+.resjob-slot { flex-basis: 100%; }
+.resjob-slot:empty { display: none; }
+.resjob { display: inline-flex; align-items: baseline; gap: 0.4rem; font-size: 0.8rem; color: var(--muted); }
+.resjob-spinner { align-self: center; width: 0.85rem; height: 0.85rem; border-radius: 50%; border: 2px solid currentColor;
+  border-top-color: transparent; animation: hx-spin 0.8s linear infinite; flex: none; }
+.resjob-hint { opacity: 0.75; }
+@media (prefers-reduced-motion: reduce) { .resjob-spinner { animation: none; } }
 
 /* AI author-scheme (Phase 4.4) */
 .scheme-author { margin: 0.5rem 0; }
@@ -1664,6 +1674,8 @@ select.ws-ed-kind { font: inherit; padding: 0.3rem; border: 1px solid var(--line
   background: #7f1d1d; color: #fff; padding: 0.6rem 1rem; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   font-size: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .hx-toast.show { opacity: 1; }
+/* The transport-error toast (app.js) sits above the autosave toast so the two never overlap if both show. */
+.hx-toast-error { bottom: 4rem; }
 
 /* ── Track C — SEND accessibility on the pupil surface ────────────────────────────────────────── */
 /* 10.12 reading-help toolbar (on every pupil page) */

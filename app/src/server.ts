@@ -71,6 +71,7 @@ import { generateDueInstances } from './repos/recurringTasks';
 import { coverageAtRisk } from './repos/brief';
 import { buildBrief } from './services/brief';
 import { runDueMarkJobs } from './services/markingQueue';
+import { bootSweepResourceJobs, tickResourceJobs } from './services/resourceJobs';
 import { processPendingDeletions } from './repos/fileDeletions';
 import { wipeTestOccurrences } from './repos/testLab';
 import { pollEmailOnce } from './services/emailPoll';
@@ -368,6 +369,23 @@ function schedulePendingDeletions(app: FastifyInstance): void {
   setInterval(() => void run(), 15 * 60 * 1000);
 }
 
+/** Async "Generate resources" jobs: on boot, fail any job left 'running' by a restart (so the teacher
+ *  sees "interrupted, try again" instead of a dead spinner) and kick any queued-but-unstarted jobs; then
+ *  every minute, a safety-net tick that starts a queued job the fire-and-forget runner missed. Live jobs
+ *  (status 'running') are NEVER touched by the tick — a real generation can take minutes. */
+function scheduleResourceJobs(app: FastifyInstance): void {
+  const boot = async (): Promise<void> => {
+    try {
+      const { orphaned, queued } = await bootSweepResourceJobs();
+      if (orphaned > 0 || queued > 0) app.log.info(`resource jobs: failed ${orphaned} orphaned, ran ${queued} queued on boot`);
+    } catch (err) {
+      app.log.error({ err }, 'resource-job boot sweep crashed');
+    }
+  };
+  void boot();
+  setInterval(() => void tickResourceJobs().catch((err) => app.log.error({ err }, 'resource-job tick crashed')), 60_000);
+}
+
 /** Test Lab: sweep away STALE test runs (is_test occurrences older than ~1 day, by created_at) on boot
  * then every 6h — catches a teacher who closed the tab without hitting "Reset". created_at-based, not
  * date-based, because a Test Lab run can be dated anything (a date-based reaper would miss far-future runs). */
@@ -459,6 +477,7 @@ export async function start(): Promise<void> {
     scheduleMarkingQueue(app);
     scheduleAssessmentMarkQueue(app);
     schedulePendingDeletions(app);
+    scheduleResourceJobs(app);
     scheduleMorningBrief(app);
     scheduleReviewSweep(app);
     scheduleTestLabReaper(app);
