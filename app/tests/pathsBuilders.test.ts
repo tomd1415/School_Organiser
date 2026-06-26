@@ -11,6 +11,8 @@ describe('paths builders — exact URLs', () => {
   it.each<[string, string]>([
     // top-level roots
     [paths.schemes(), '/schemes'],
+    [paths.schemesLens(9, 'classes', 31), '/schemes?course=9&amp;scheme=31&amp;lens=classes'],
+    [paths.schemesLens(9, 'spine', null), '/schemes?course=9&amp;lens=spine'],
     [paths.settings(), '/settings'],
     [paths.timetable(), '/timetable'],
     [paths.tasks(), '/tasks'],

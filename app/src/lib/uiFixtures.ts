@@ -216,6 +216,29 @@ export const GALLERY_RESOURCES: PagedResources = {
   ],
 };
 
+// Schemes Classes-matrix lens: units × classes with mixed delivery states (taught/today/planned/not-placed
+// + adapted) so the gallery shows every cell tone. Fixed "today" keeps it deterministic.
+export const GALLERY_SCHEME_MATRIX = {
+  classes: [
+    { groupCourseId: 1, name: '9X' },
+    { groupCourseId: 2, name: '9Y' },
+    { groupCourseId: 3, name: '9Z' },
+  ],
+  units: [
+    { title: 'How networks work', lessons: [{ id: 10, title: 'LANs and WANs' }, { id: 11, title: 'Network topologies' }] },
+    { title: 'The Internet', lessons: [{ id: 13, title: 'How the Internet is organised' }, { id: 14, title: 'DNS and IP addresses' }] },
+  ],
+  placements: {
+    '1:10': { date: '2026-06-09', adapted: false },
+    '2:10': { date: '2026-06-11', adapted: true },
+    '3:10': { date: '2026-06-12', adapted: false },
+    '1:11': { date: '2026-06-23', adapted: false }, // == today
+    '2:11': { date: '2026-06-30', adapted: false },
+    '1:13': { date: '2026-07-07', adapted: true },
+  },
+  today: '2026-06-23',
+};
+
 // Now hero (UI rebuild): an in-lesson state so the hero showcases the period eyebrow + countdown + next.
 export const GALLERY_NOW_HERO_STATE: NowState = {
   isoDate: '2026-06-23',
