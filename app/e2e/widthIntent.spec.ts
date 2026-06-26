@@ -18,8 +18,9 @@ async function contentWidth(page: import('@playwright/test').Page): Promise<numb
 test('width intent: reading pages are narrower than wide pages, driven by the shell class', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1200 });
 
-  // a WIDE page (timetable)
-  await page.goto('/timetable', { waitUntil: 'domcontentloaded' });
+  // a WIDE page (schemes) — note /timetable is now 'full' width (UI rebuild), so it's no longer the
+  // 'wide' exemplar; schemes carries the 'wide' intent.
+  await page.goto('/schemes', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('main.cockpit-workspace.cockpit-w-wide')).toBeAttached();
   const wide = await contentWidth(page);
 

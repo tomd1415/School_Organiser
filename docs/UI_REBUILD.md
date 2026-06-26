@@ -351,6 +351,19 @@ Full gate green throughout (typecheck · 946 unit · 377 integration · E2E; gal
   an unguarded ATL scan — added `AND NOT o.is_test` so sandbox scores never leak into a real cohort trend.
   Verified: typecheck · 960 unit · 379 integration · pupils E2E · screenshot.
 
+### Overflow fix — long text in card grids (post-rebuild)
+- Reported: text not fitting its box on **Schemes / Map / Coverage / Pupils**. Root cause (shared across the
+  card grids): a long **unbreakable token** didn't wrap, and grid-item cards default to `min-width: auto`,
+  so the token **expanded its grid track** — breaking the columns / pushing the page wider — instead of
+  wrapping. Fix (CSS only, `styles-base-widgets.css`): `overflow-wrap: anywhere` on the free-text titles/
+  names/labels (`.sch-header-title`/`.sch-unit-name`/`.sch-mx-classname`/`.cov-label`/`.cov-by`/`.map-title`/
+  `.res-card-title`/`.cohort-head h2`/`.cov-area-head h3` …) and `min-width: 0` on the grid-item cards
+  (`.roster-card`/`.res-card`/`.map-card`/`.note-card`/`.event-card`/`.task-card`/`.captured-card`/`.ov-card`
+  + the spine columns) so a long word can't expand a track. The roster name now **wraps** rather than
+  ellipsis-hiding. **Regression guard:** `e2e/overflow.spec.ts` injects a long token into the card-grid
+  screens and asserts no horizontal page overflow. Verified by screenshot across all five (spine · matrix ·
+  coverage · map · pupils) with a long word injected — all wrap/clip cleanly, grids stay uniform.
+
 ## ✅ The "Rail & Stage" UI rebuild is complete
 
 Every screen, the pupil surface, the cockpit (layout + mode control + scope strip), and **both** former
