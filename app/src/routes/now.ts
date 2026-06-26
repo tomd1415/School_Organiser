@@ -256,26 +256,22 @@ export function registerNowRoutes(app: FastifyInstance): void {
 
       let leftAnchorHtml = '';
       if (state.current) {
-        const currentLesson = await getSelfLessonAt(state.current.weekday, state.current.slotOrder);
-        const currentLabel = currentLesson ? (currentLesson.groupName ?? purposeLabel(currentLesson.purpose)) : 'Lesson';
         const currentEndEpochMs = tzDateToEpoch(state.isoDate, state.current.endMin, ctx.tz);
         const dotColor = 'var(--green)';
         leftAnchorHtml = `
           <div class="context-scaffold-anchor">
             <span class="live-dot" id="scaffold-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
             <span class="scaffold-meta" id="scaffold-meta">Now: ${esc(state.current.label)}</span>
-            <strong class="scaffold-title" id="scaffold-title">${esc(currentLabel)} (ends <span data-epoch-ms="${currentEndEpochMs}">...</span>)</strong>
+            <strong class="scaffold-title" id="scaffold-title">ends in <span data-epoch-ms="${currentEndEpochMs}">…</span></strong>
           </div>`;
       } else if (state.nextTeaching) {
-        const next = await getSelfLessonAt(state.nextTeaching.weekday, state.nextTeaching.slotOrder);
-        const nextLabel = next ? (next.groupName ?? purposeLabel(next.purpose)) : 'Lesson';
         const nextEpochMs = tzDateToEpoch(state.nextTeaching.date, state.nextTeaching.startMin, ctx.tz);
         const dotColor = 'var(--amber)';
         leftAnchorHtml = `
           <div class="context-scaffold-anchor">
             <span class="live-dot" id="scaffold-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
             <span class="scaffold-meta" id="scaffold-meta">Next: ${esc(state.nextTeaching.label)}</span>
-            <strong class="scaffold-title" id="scaffold-title">${esc(nextLabel)} (starts <span data-epoch-ms="${nextEpochMs}">...</span>)</strong>
+            <strong class="scaffold-title" id="scaffold-title">in <span data-epoch-ms="${nextEpochMs}">…</span></strong>
           </div>`;
       } else {
         const dotColor = 'var(--blue)';

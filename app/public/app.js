@@ -92,11 +92,13 @@
       var epoch = parseInt(el.getAttribute('data-epoch-ms'), 10);
       if (isNaN(epoch)) return;
       var diff = epoch - now;
-      if (diff <= 0) { el.textContent = 'started'; return; }
-      var totalSec = Math.floor(diff / 1000);
-      var mins = Math.floor(totalSec / 60);
-      var secs = totalSec % 60;
-      el.textContent = mins === 0 ? 'starts in ' + secs + 's' : secs === 0 ? 'starts in ' + mins + ' mins' : 'starts in ' + mins + 'm ' + secs + 's';
+      // Just the time remaining in HOURS and MINUTES (no seconds, no "starts in" prefix — the surrounding
+      // template supplies the wording, e.g. "… in", "ends in"). So "2h 5m", "25m", or "< 1 min".
+      if (diff <= 0) { el.textContent = '< 1 min'; return; }
+      var totalMin = Math.floor(diff / 60000);
+      var hrs = Math.floor(totalMin / 60);
+      var rem = totalMin % 60;
+      el.textContent = totalMin === 0 ? '< 1 min' : hrs > 0 ? (hrs + 'h ' + rem + 'm') : (rem + 'm');
     });
   }
 
