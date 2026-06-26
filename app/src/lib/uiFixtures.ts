@@ -15,6 +15,7 @@ import type { SchemeHeader, UnitRow, PlanRow } from '../services/scheme';
 import type { MapPageData } from './mapView';
 import type { CoverageReportData } from './coverageView';
 import type { PagedResources } from './resourceView';
+import type { AssessmentTree } from '../services/assessment';
 
 // A few slides with varied content (list, table, blockquote) to prove the ONE deck renderer frames them
 // the same on every surface (pupil / preview / presenter / board / cockpit).
@@ -252,6 +253,50 @@ export const GALLERY_NOW_HERO_STATE: NowState = {
 };
 export const GALLERY_NOW_HERO_LESSON = { lessonId: 7, purpose: 'teaching', groupName: 'Year 9 Computing', roomName: 'B14', courses: [{ name: 'Networks', colour: null }] };
 export const GALLERY_NOW_HERO_NEXT = { lessonId: 8, purpose: 'teaching', groupName: 'Free', roomName: null, courses: [] };
+
+// Per-unit assessment (Phase 1): a small draft tree showing a covered objective question (auto-marked) and
+// an uncovered stretch question (open / AI-marked) — for the review/edit view in the gallery.
+export const GALLERY_ASSESSMENT_SPEC_POINTS = [
+  { id: 100, code: '1.2.4', title: 'Network topologies' },
+  { id: 200, code: '1.3.1', title: 'Network security threats' },
+];
+export const GALLERY_ASSESSMENT: AssessmentTree = {
+  id: 1, unitId: 9, schemeId: 3, courseId: 2, title: 'Networks — end-of-unit assessment', style: 'gcse',
+  examBoard: 'OCR J277', status: 'draft', marksTotal: 7, blueprint: { coveredSpecPointIds: [100], uncoveredSpecPointIds: [200], groupCourseId: 5 },
+  sourceType: 'ai_generated', promptVersion: 'generate_assessment@1',
+  questions: [
+    {
+      id: 10, assessmentId: 1, displayOrder: 0, commandWordCode: 'state', archetypeCode: 'recall', stem: 'A school connects its computers in one room.',
+      specPointId: 100, isUncovered: false, difficultyBand: 3, difficultyStep: 1, marksTotal: 3, modelAnswer: null,
+      parts: [
+        {
+          id: 100, questionId: 10, partLabel: 'a', displayOrder: 0, prompt: 'Which topology connects every device to a central switch?', marks: 1,
+          expectedResponseType: 'multiple_choice', partConfig: { options: ['Bus', 'Star', 'Mesh', 'Ring'] }, modelAnswer: 'Star',
+          markPoints: [{ id: 1000, partId: 100, displayOrder: 0, text: 'Star', marks: 1, isRequired: true, acceptedAlternatives: [], kind: 'choice' }],
+          misconceptions: [{ id: 1, partId: 100, label: 'confuses star with mesh', description: 'A mesh links devices to each other, not via a central switch.' }],
+        },
+        {
+          id: 101, questionId: 10, partLabel: 'b', displayOrder: 1, prompt: 'State one advantage of a star topology.', marks: 2,
+          expectedResponseType: 'short_text', partConfig: null, modelAnswer: 'A fault in one cable only affects that one device.',
+          markPoints: [{ id: 1001, partId: 101, displayOrder: 0, text: 'one device failure does not bring down the rest', marks: 2, isRequired: false, acceptedAlternatives: ['fault isolation'], kind: 'keyword' }],
+          misconceptions: [],
+        },
+      ],
+    },
+    {
+      id: 20, assessmentId: 1, displayOrder: 1, commandWordCode: 'explain', archetypeCode: 'apply', stem: 'A company is worried about data being intercepted.',
+      specPointId: 200, isUncovered: true, difficultyBand: 6, difficultyStep: 2, marksTotal: 4, modelAnswer: null,
+      parts: [
+        {
+          id: 200, questionId: 20, partLabel: 'a', displayOrder: 0, prompt: 'Explain how encryption protects the data in transit.', marks: 4,
+          expectedResponseType: 'extended_response', partConfig: null, modelAnswer: 'Encryption scrambles the data with a key so an interceptor sees only ciphertext…',
+          markPoints: [{ id: 2000, partId: 200, displayOrder: 0, text: 'Level 2 (3–4): scrambling + key + only the recipient can read · Level 1 (1–2): basic mention of encryption', marks: 4, isRequired: false, acceptedAlternatives: [], kind: 'open' }],
+          misconceptions: [{ id: 2, partId: 200, label: 'encryption = password', description: 'Pupils often equate encryption with a login password rather than transforming the data.' }],
+        },
+      ],
+    },
+  ],
+};
 
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {

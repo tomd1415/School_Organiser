@@ -140,3 +140,30 @@ export function computeSpecPointResults(tree: AssessmentTree, awarded: AwardedFo
 export function scoreOfAttempt(awarded: AwardedForPart[]): { awarded: number; total: number } {
   return awarded.reduce((acc, a) => ({ awarded: acc.awarded + a.marksAwarded, total: acc.total + a.marksTotal }), { awarded: 0, total: 0 });
 }
+
+export interface AssessmentReadiness {
+  ok: boolean;
+  reasons: string[]; // why it CAN'T be marked ready (empty when ok)
+  marksTotal: number; // computed from part marks (the authoritative tariff)
+}
+
+/** Can this draft be flipped to `ready`? A paper needs ≥1 question, every part needs ≥1 mark point, and the
+ *  total marks must be > 0. Pure → unit-tested; the route uses it both to guard the flip and to render the
+ *  "what's missing" note. Marks are computed from the parts (the materialiser's source of truth), not the
+ *  stored marks_total, so an un-recomputed tree can't pass on a stale total. */
+export function assessmentReadiness(tree: AssessmentTree): AssessmentReadiness {
+  const reasons: string[] = [];
+  if (tree.questions.length === 0) reasons.push('Add at least one question.');
+  let partCount = 0;
+  let marksTotal = 0;
+  tree.questions.forEach((q, qi) => {
+    q.parts.forEach((p) => {
+      partCount += 1;
+      marksTotal += p.marks || 0;
+      if (p.markPoints.length === 0) reasons.push(`Q${qi + 1}${p.partLabel} has no mark points.`);
+    });
+  });
+  if (tree.questions.length > 0 && partCount === 0) reasons.push('Add at least one part.');
+  if (marksTotal <= 0) reasons.push('The paper is worth zero marks.');
+  return { ok: reasons.length === 0, reasons, marksTotal };
+}

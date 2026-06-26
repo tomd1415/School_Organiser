@@ -57,6 +57,7 @@ import { registerClubRoutes } from './routes/club';
 import { registerPedagogyRoutes } from './routes/pedagogyPage';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { registerSearchRoutes } from './routes/search';
+import { registerAssessmentRoutes } from './routes/assessments';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { signLessonImages } from './lib/lessonImageSig';
 import { pupilCfg } from './auth/pupilAccessCache';
@@ -276,6 +277,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerPedagogyRoutes(app);
   registerSafeguardingRoutes(app);
   registerSearchRoutes(app);
+  registerAssessmentRoutes(app);
 
   return app;
 }

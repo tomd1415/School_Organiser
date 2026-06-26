@@ -135,6 +135,80 @@ export async function materialiseAssessment(input: MaterialiseInput): Promise<nu
   });
 }
 
+// ── Phase 1: light editing of a DRAFT paper (the route gates editing to status === 'draft') ──────────
+// Each helper is scoped by assessment_id in its WHERE, so a forged child id from a DIFFERENT assessment
+// can't be edited through this assessment's routes. Marks live on the PART (the authoritative tariff the
+// materialiser sums); editing them re-rolls the question + assessment totals via recomputeAssessmentMarks.
+
+const clampPartMarks = (n: number): number => Math.max(0, Math.min(20, Math.round(Number.isFinite(n) ? n : 0)));
+
+/** Update a draft question's stem. Returns true if the question belongs to this assessment. */
+export async function updateQuestionStem(assessmentId: number, questionId: number, stem: string): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    `UPDATE assessment_questions SET stem = $3 WHERE id = $2 AND assessment_id = $1`,
+    [assessmentId, questionId, stem.slice(0, 4000)],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
+/** Update a part's prompt and/or marks. When marks change, the question + assessment totals are recomputed. */
+export async function updatePartFields(
+  assessmentId: number,
+  partId: number,
+  fields: { prompt?: string; marks?: number },
+): Promise<boolean> {
+  const prompt = fields.prompt == null ? null : fields.prompt.slice(0, 4000);
+  const marks = fields.marks == null ? null : clampPartMarks(fields.marks);
+  const { rowCount } = await pool.query(
+    `UPDATE assessment_question_parts p SET prompt = COALESCE($3, p.prompt), marks = COALESCE($4, p.marks)
+     FROM assessment_questions q
+     WHERE p.id = $2 AND q.id = p.question_id AND q.assessment_id = $1`,
+    [assessmentId, partId, prompt, marks],
+  );
+  const ok = (rowCount ?? 0) > 0;
+  if (ok && marks != null) await recomputeAssessmentMarks(assessmentId);
+  return ok;
+}
+
+/** Update a mark point's text / marks / kind (marks here are per-point and don't change the part tariff). */
+export async function updateMarkPointFields(
+  assessmentId: number,
+  markPointId: number,
+  fields: { text?: string; marks?: number; kind?: MarkKind },
+): Promise<boolean> {
+  const text = fields.text == null ? null : fields.text.slice(0, 2000);
+  const marks = fields.marks == null ? null : clampPartMarks(fields.marks);
+  const { rowCount } = await pool.query(
+    `UPDATE assessment_mark_points mp
+       SET text = COALESCE($3, mp.text), marks = COALESCE($4, mp.marks), kind = COALESCE($5, mp.kind)
+     FROM assessment_question_parts p
+     JOIN assessment_questions q ON q.id = p.question_id
+     WHERE mp.id = $2 AND p.id = mp.part_id AND q.assessment_id = $1`,
+    [assessmentId, markPointId, text, marks, fields.kind ?? null],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
+/** Recompute each question's marks_total (= Σ its parts' marks) and the assessment's marks_total
+ *  (= Σ its questions' totals), atomically. Mirrors the totals materialiseAssessment computes on insert. */
+export async function recomputeAssessmentMarks(assessmentId: number): Promise<void> {
+  await withTransaction(async (db) => {
+    await db.query(
+      `UPDATE assessment_questions q
+         SET marks_total = COALESCE((SELECT SUM(p.marks) FROM assessment_question_parts p WHERE p.question_id = q.id), 0)
+       WHERE q.assessment_id = $1`,
+      [assessmentId],
+    );
+    await db.query(
+      `UPDATE assessments
+         SET marks_total = COALESCE((SELECT SUM(q.marks_total) FROM assessment_questions q WHERE q.assessment_id = $1), 0),
+             updated_at = now()
+       WHERE id = $1`,
+      [assessmentId],
+    );
+  });
+}
+
 /** The full question→part→mark-point/misconception tree for review/take/results. */
 export async function assessmentWithQuestions(id: number): Promise<AssessmentTree | null> {
   const assessment = await getAssessment(id);

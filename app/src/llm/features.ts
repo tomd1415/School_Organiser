@@ -14,6 +14,7 @@ export interface FeatureDef {
 // Grouped by role for the Settings UI; `key` matches the wrapper `feature` label at each call site.
 export const AI_FEATURES: readonly FeatureDef[] = [
   { key: 'author_scheme', label: 'Author a scheme of work', role: 'design', note: 'Heavy curriculum design — Opus by default.' },
+  { key: 'generate_assessment', label: 'Generate a unit assessment', role: 'design', note: 'Builds an end-of-unit exam paper for a class — Opus by default.' },
   { key: 'class_intake', label: 'Set up a class from a description', role: 'design', note: 'Reads a free-text class description into the class fields — Opus by default.' },
   { key: 'draft_lesson', label: 'Draft a lesson', role: 'plan' },
   { key: 'adapt_lesson', label: 'Adapt a lesson for a class', role: 'plan' },

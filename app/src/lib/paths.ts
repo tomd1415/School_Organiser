@@ -293,6 +293,15 @@ export const paths = {
     from == null ? `/setup/rollover?to=${to}` : `/setup/rollover?from=${from}&amp;to=${to}`,
   groupHistory: (id: number): string => `/group/${id}/history`,
 
+  // ── Per-unit summative assessments (Phase 1) ────────────────────────────────────────────────────
+  unitAssessments: (unitId: number): string => `/units/${unitId}/assessments`,
+  unitAssessmentsGenerate: (unitId: number): string => `/units/${unitId}/assessments/generate`,
+  assessment: (id: number): string => `/assessments/${id}`,
+  assessmentReady: (id: number): string => `/assessments/${id}/ready`,
+  assessmentQuestion: (id: number, qid: number): string => `/assessments/${id}/questions/${qid}`,
+  assessmentPart: (id: number, pid: number): string => `/assessments/${id}/parts/${pid}`,
+  assessmentMarkPoint: (id: number, mid: number): string => `/assessments/${id}/markpoints/${mid}`,
+
   // ── Cross-cutting page links ────────────────────────────────────────────────────────────────────
   pupils: (): string => '/pupils',
   pupilsClass: (groupCourseId: number): string => `/pupils?class=${groupCourseId}`,

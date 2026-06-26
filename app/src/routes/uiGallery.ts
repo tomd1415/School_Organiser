@@ -17,6 +17,8 @@ import { buildSchemeTree } from '../services/scheme';
 import { renderMapPage } from '../lib/mapView';
 import { renderCoverageReport } from '../lib/coverageView';
 import { renderSearchBar, renderResourceListPaged } from '../lib/resourceView';
+import { assessmentReviewView } from '../lib/assessmentReviewView';
+import { assessmentReadiness } from '../services/assessment';
 import {
   GALLERY_LESSONS,
   GALLERY_NOW_STATE,
@@ -43,6 +45,8 @@ import {
   GALLERY_MAP,
   GALLERY_COVERAGE,
   GALLERY_RESOURCES,
+  GALLERY_ASSESSMENT,
+  GALLERY_ASSESSMENT_SPEC_POINTS,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -142,6 +146,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         csrf: 'gallery',
       }))}
       ${item('Schemes — Classes matrix (SPEC §8)', 'renderClassesMatrix — the Classes lens: units × classes, each cell a lesson’s delivery status for that class — taught (date, green) · today (teal) · planned (date, plain) · not placed (dashed) · △ adapted for the class. Read-only; placement happens on the Map.', renderClassesMatrix(GALLERY_SCHEME_MATRIX))}
+      ${item('Assessment review (Phase 1)', 'assessmentReviewView — the AI-generated draft paper for teacher review/edit: spec-point chips, covered/stretch badges, per-part widget + marks, mark-points (kind badge: objective=auto · open=AI-marked), misconceptions + model answers (collapsible), and the Mark-ready bar (here showing the draft is ready to flip). Editing affordances render because the paper is a draft.', assessmentReviewView(GALLERY_ASSESSMENT, { editable: true, csrf: 'gallery', specPoints: GALLERY_ASSESSMENT_SPEC_POINTS, readiness: assessmentReadiness(GALLERY_ASSESSMENT) }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}
