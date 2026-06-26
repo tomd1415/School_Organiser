@@ -412,6 +412,37 @@ export function renderLessonCockpit(options: {
     ${isPreview ? '' : `<button class="action-btn" type="button" title="No class this period? Mark it free and assign yourself tasks" aria-label="Make this period free" hx-post="${paths.freeMark()}" hx-vals='{"lesson":"${h.lessonId}","date":"${esc(h.date)}"}'>∅</button>`}
   </nav>`;
 
+  // §17 mode control + scope strip (additive): a View / Edit-this-class / Edit-master segmented control in
+  // the flow card. View leaves the live tracker alone; the edit modes reveal a panel BELOW it that autosaves
+  // to the SAME tested write paths (this class → /lesson/adapt = adaptControls; master → /schemes/plan), with
+  // a scope strip stating the blast radius. Client-side only (toggles data-flow-mode); no new route.
+  const modeBtn = (mode: string, label: string, on = false) =>
+    `<button type="button" class="flow-mode-btn${on ? ' is-on' : ''}" data-mode="${mode}" aria-pressed="${on}" onclick="var b=this,f=b.closest('.flow-edit');f.dataset.flowMode='${mode}';f.querySelectorAll('.flow-mode-btn').forEach(function(x){x.classList.toggle('is-on',x===b);x.setAttribute('aria-pressed',x===b)})">${label}</button>`;
+  const flowModeControl =
+    !isPreview && lp
+      ? `<div class="flow-mode" role="group" aria-label="Edit mode">${modeBtn('view', '👁 View', true)}${modeBtn('class', '✏ This class')}${modeBtn('master', '✏ Master')}</div>`
+      : '';
+  const flowEditPanel =
+    !isPreview && lp
+      ? `<div class="flow-edit-panel flow-panel-class">
+          <p class="edit-banner edit-local">✏ Editing <strong>this class’s</strong> version — the master and other classes are unchanged.</p>
+          <form hx-post="${paths.adaptControls(groupCourseId, lp)}" hx-trigger="input changed delay:1000ms from:textarea, blur from:textarea" hx-swap="none">
+            <label class="adapt-l">Objectives — this class<textarea name="objectives" rows="3" placeholder="(inherits the master)">${esc(effObjectives ?? '')}</textarea></label>
+            <label class="adapt-l">Outline — this class<textarea name="outline" rows="6" placeholder="(inherits the master)">${esc(effOutline ?? '')}</textarea></label>
+            <span class="note-status" id="adapt-${groupCourseId}-${lp}-status"></span>
+          </form>
+        </div>
+        <div class="flow-edit-panel flow-panel-master">
+          <p class="edit-banner edit-master">✏ Editing the <strong>master</strong> — changes apply to <strong>every</strong> class using this lesson.</p>
+          <label class="adapt-l">Objectives<textarea name="objectives" rows="3" hx-post="${paths.schemesPlan(lp)}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(activeSection?.planObjectives ?? '')}</textarea></label>
+          <label class="adapt-l">Outline<textarea name="outline" rows="6" hx-post="${paths.schemesPlan(lp)}" hx-trigger="input changed delay:1000ms, blur" hx-swap="none">${esc(activeSection?.planOutline ?? '')}</textarea></label>
+          <label class="adapt-l">🔧 Kit needed<input type="text" name="kit_needed" value="${esc(activeSection?.planKitNeeded ?? '')}" placeholder="e.g. 16× micro:bit" hx-post="${paths.schemesPlan(lp)}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"></label>
+          <span class="note-status" id="plan-${lp}-status"></span>
+        </div>
+        <p class="flow-scope-strip flow-scope-class">Only <strong>this class</strong> is affected — the master and other classes are unchanged.</p>
+        <p class="flow-scope-strip flow-scope-master">⚠ This changes the lesson for <strong>every class</strong> that uses it.</p>`
+      : '';
+
   // BUG-052: split-lesson course/class switcher (only when there's more than one section). Plain links
   // reload the cockpit scoped to the chosen occurrence-course; preview is single-section so shows none.
   const sectionTabs = detail.sections.length > 1
@@ -517,11 +548,15 @@ export function renderLessonCockpit(options: {
                     </label>`}
               </div>
             </div>
-            ${objectivesHtml}
-            ${kitHtml}
-            <ol class="sequence">
-              ${sequenceListHtml || '<li class="muted">No outline set for this plan.</li>'}
-            </ol>
+            <div class="flow-edit" data-flow-mode="view">
+              ${flowModeControl}
+              ${objectivesHtml}
+              ${kitHtml}
+              <ol class="sequence">
+                ${sequenceListHtml || '<li class="muted">No outline set for this plan.</li>'}
+              </ol>
+              ${flowEditPanel}
+            </div>
           </section>
 
           ${prepCard}

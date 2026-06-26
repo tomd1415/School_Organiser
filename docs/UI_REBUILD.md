@@ -306,12 +306,25 @@ Every teacher screen and the pupil surface in the SPEC are rebuilt to the Rail &
 Foundation · RECORD · TODAY · CURRICULUM · CLASSES · SETUP · Safeguarding · Lesson cockpit §17 (layout) · `/me`.
 Full gate green throughout (typecheck · 946 unit · 377 integration · E2E; gallery showcases 16 views).
 
-**Two follow-ups remain, each a behavioural/data change rather than a re-skin (own focused pass):**
-- **Cockpit §17 mode control + scope strip** — the **View / Edit-this-class / Edit-master** segmented control
-  and the **override-else-master scope strip** footer. The adapt-this-class card + effective-lesson resolution
-  exist; the explicit mode toggle + per-field override-vs-master write path is the work.
-- **Data-wiring deferrals** — the Schemes **Classes-matrix** lens · Pupils §11 **cohort-analytics** layer
-  (class chips · level chips · completion % · ATL trend). Both need new per-class/per-pupil data, not layout.
+### Cockpit §17 mode control + scope strip (done — additive)
+- **Mode control (`renderLessonCockpit` flow card)** — added a **View / ✏ This class / ✏ Master** segmented
+  control to the Lesson-flow card (the teacher's chosen **additive** approach). **View** leaves the live
+  step-tracker + its JS untouched; **Edit this class** / **Edit master** reveal an edit panel **below** the
+  tracker that autosaves to the **same tested write paths** — this class → `/lesson/adapt/:gc/:lp`
+  (`paths.adaptControls`, creating this group's override-else-master), master → `/schemes/plan/:lp`
+  (`paths.schemesPlan`, all classes) — each with its scope **banner** + a footer **scope strip** ("only this
+  class is affected" / "⚠ changes every class that uses it"). Client-side toggle (`data-flow-mode`); no new
+  route, no change to the live tracker or the column-3 adapt card. Preview stays read-only. CSS:
+  `.flow-mode(-btn)`/`.flow-edit-panel`/`.flow-scope-strip` in `styles.css`'s next scope. **Tests:**
+  extended `e2e/cockpit.spec.ts` (mode switch → matching panel + scope visible, others hidden, tracker
+  untouched). Verified: typecheck · 946 unit (parity green) · 377 integration · cockpit E2E · screenshots
+  (class + master modes). The deeper "replace the bespoke tracker with the unified §17 renderer" was
+  deliberately not taken (it would rework the live step-marking JS) — the additive control delivers the
+  mode + scope semantics safely.
+
+**Remaining (data wiring only — not layout):** Schemes **Classes-matrix** lens · Pupils §11
+**cohort-analytics** layer (class chips · level chips · completion % · ATL trend). Both need new
+per-class/per-pupil data plumbing; the lens toggle / roster grid are already in place for them.
 
 **Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
 **cohort-analytics** layer (class chips · level chips · completion % · ATL trend).
