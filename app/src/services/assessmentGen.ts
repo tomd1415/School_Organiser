@@ -53,25 +53,33 @@ export async function generateAssessment(unitId: number, groupCourseId: number, 
 
   const coveredSpecPointIds = blueprint.specPoints.filter((s) => s.covered).map((s) => s.id);
   const uncoveredSpecPointIds = blueprint.specPoints.filter((s) => !s.covered).map((s) => s.id);
-  const assessmentId = await materialiseAssessment({
-    unitId,
-    schemeId: blueprint.schemeId,
-    courseId: blueprint.courseId,
-    title: `${blueprint.unitTitle} — end-of-unit assessment`,
-    style: blueprint.style,
-    examBoard: blueprint.examBoard,
-    blueprint: {
-      coveredSpecPointIds,
-      uncoveredSpecPointIds,
-      groupCourseId,
+  let assessmentId: number;
+  try {
+    assessmentId = await materialiseAssessment({
+      unitId,
+      schemeId: blueprint.schemeId,
+      courseId: blueprint.courseId,
+      title: `${blueprint.unitTitle} — end-of-unit assessment`,
       style: blueprint.style,
       examBoard: blueprint.examBoard,
-      generatedAt: new Date().toISOString(),
-    },
-    sourceType: 'ai_generated',
-    promptVersion: GENERATE_ASSESSMENT_VERSION,
-    questions,
-  });
+      blueprint: {
+        coveredSpecPointIds,
+        uncoveredSpecPointIds,
+        groupCourseId,
+        style: blueprint.style,
+        examBoard: blueprint.examBoard,
+        warnings: warnings.slice(0, 50), // surfaced on the review page (the validator's normalisation notes)
+        generatedAt: new Date().toISOString(),
+      },
+      sourceType: 'ai_generated',
+      promptVersion: GENERATE_ASSESSMENT_VERSION,
+      questions,
+    });
+  } catch {
+    // The validator already enforces the DB's invariants, but degrade cleanly (write nothing) on any
+    // unexpected insert failure rather than 500 — the whole materialise is one transaction, so it rolls back.
+    return { ok: false, message: 'Could not save the generated assessment — please try again.', warnings };
+  }
 
   return { ok: true, assessmentId, warnings, message: 'Draft assessment created — review it, then Mark ready.' };
 }

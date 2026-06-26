@@ -8,7 +8,7 @@ import { getUnitForReview, schemeIdForUnit } from '../repos/schemes';
 import { listSpecPoints, getPlanSpecPointIds } from '../repos/specPoints';
 import { classSchedule } from '../repos/delivery';
 import { examProfileForCourse, type ExamProfile } from './examProfile';
-import { addDays } from '../lib/time';
+import { addDays, localParts } from '../lib/time';
 
 export interface BlueprintSpecPoint {
   id: number;
@@ -107,7 +107,9 @@ export async function blueprintForUnit(
   // The class's delivery across all its slots over a wide window; "covered" = the spec points of every
   // lesson it has been given (≤ today, unless window 'whole' also counts future placements).
   const window = opts?.window ?? 'to_date';
-  const todayIso = today.toISOString().slice(0, 10);
+  // The class's delivery dates are Europe/London civil dates (repos/delivery.ts), so resolve "today" the
+  // same way — a UTC slice would be a day behind for ~1h after local midnight during BST.
+  const todayIso = localParts(today, 'Europe/London').isoDate;
   const fromDate = addDays(todayIso, -3 * 365);
   const toDate = window === 'whole' ? addDays(todayIso, 365) : todayIso;
   const schedule = await classSchedule(groupCourseId, fromDate, toDate);

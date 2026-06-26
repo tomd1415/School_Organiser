@@ -154,7 +154,7 @@ function renderPart(assessmentId: number, p: AssessmentPart, editable: boolean):
         <textarea name="prompt" rows="2" hx-post="${url}" hx-swap="none" hx-trigger="input changed delay:800ms, blur">${esc(p.prompt)}</textarea>
       </label>
       <label class="asmt-l asmt-marks-l">Marks
-        <input type="number" name="marks" value="${p.marks}" min="0" max="20" hx-post="${url}" hx-swap="none" hx-trigger="change">
+        <input type="number" name="marks" value="${p.marks}" min="0" max="20" hx-post="${url}" hx-target="#assessment-review" hx-swap="outerHTML" hx-trigger="change">
       </label>
       <span class="note-status" id="${status}"></span>`
     : `<p>${esc(p.prompt)} <span class="muted">(${p.marks} mark${p.marks === 1 ? '' : 's'})</span></p>`;
@@ -226,9 +226,11 @@ export function assessmentReviewView(tree: AssessmentTree, opts: ReviewOpts): st
   const readiness = opts.readiness;
   let readyBar = '';
   if (opts.editable) {
-    if (readiness && !readiness.ok) {
+    // Treat an omitted readiness as NOT ready — never render an enabled Mark-ready button without a check.
+    if (!readiness || !readiness.ok) {
+      const reasons = readiness?.reasons.length ? readiness.reasons : ['Finish the paper first.'];
       readyBar = `<div class="asmt-ready-bar" id="asmt-ready-bar">
-        <p class="muted">Before you can Mark ready: ${readiness.reasons.map((r) => esc(r)).join(' · ')}</p>
+        <p class="muted">Before you can Mark ready: ${reasons.map((r) => esc(r)).join(' · ')}</p>
         <button type="button" class="button" disabled title="Resolve the items above first">Mark ready</button>
       </div>`;
     } else {

@@ -26,8 +26,11 @@ import { assessmentReviewView, renderGenerateNote, renderUnitAssessments, type C
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 
 // A numeric form field that treats an empty string as "not provided" (so a blank "auto" input is optional).
+// `.optional()` must sit INSIDE the preprocess target: an empty string is a present value, so an outer
+// `.optional()` wouldn't short-circuit it — the preprocess maps '' → undefined and the inner optional then
+// accepts it (an outer optional would feed undefined into z.coerce.number() → NaN → parse failure).
 const numField = (min: number, max: number) =>
-  z.preprocess((v) => (v === '' || v == null ? undefined : v), z.coerce.number().int().min(min).max(max));
+  z.preprocess((v) => (v === '' || v == null ? undefined : v), z.coerce.number().int().min(min).max(max).optional());
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const unitParam = z.object({ unitId: z.coerce.number().int().positive() });
@@ -41,6 +44,16 @@ function brandNewClassNotice(blueprint: unknown): string | null {
   return null;
 }
 
+/** The validator's normalisation notes, persisted into the blueprint JSON at generation time. */
+function persistedWarnings(blueprint: unknown): string[] | undefined {
+  const bp = blueprint as { warnings?: unknown } | null;
+  if (bp && Array.isArray(bp.warnings)) {
+    const ws = bp.warnings.filter((w): w is string => typeof w === 'string');
+    return ws.length ? ws : undefined;
+  }
+  return undefined;
+}
+
 async function renderReviewSection(assessmentId: number, csrf: string, notice?: string | null): Promise<string | null> {
   const tree = await assessmentWithQuestions(assessmentId);
   if (!tree) return null;
@@ -50,6 +63,7 @@ async function renderReviewSection(assessmentId: number, csrf: string, notice?: 
     csrf,
     specPoints,
     readiness: assessmentReadiness(tree),
+    warnings: persistedWarnings(tree.blueprint),
     notice: notice ?? brandNewClassNotice(tree.blueprint),
   });
 }
@@ -84,8 +98,8 @@ export function registerAssessmentRoutes(app: FastifyInstance): void {
       .object({
         groupCourseId: z.coerce.number().int().positive(),
         window: z.enum(['to_date', 'whole']).optional(),
-        questionCount: numField(1, 40).optional(),
-        totalMarks: numField(1, 200).optional(),
+        questionCount: numField(1, 40),
+        totalMarks: numField(1, 200),
       })
       .safeParse(req.body ?? {});
     if (!p.success || !b.success) return reply.type('text/html').send(renderGenerateNote('Pick a class first.'));
@@ -143,10 +157,17 @@ export function registerAssessmentRoutes(app: FastifyInstance): void {
     const status = `part-${p.data.pid}-status`;
     const a = await getAssessment(p.data.id);
     if (!a || a.status !== 'draft') return reply.type('text/html').send(renderSaveError(status, 'Only drafts can be edited.'));
-    const b = z.object({ prompt: z.string().max(4000).optional(), marks: numField(0, 20).optional() }).safeParse(req.body ?? {});
+    const b = z.object({ prompt: z.string().max(4000).optional(), marks: numField(0, 20) }).safeParse(req.body ?? {});
     if (!b.success) return reply.type('text/html').send(renderSaveError(status, 'Could not save.'));
     const ok = await updatePartFields(p.data.id, p.data.pid, { prompt: b.data.prompt, marks: b.data.marks });
-    return reply.type('text/html').send(ok ? renderSavedStatus(status) : renderSaveError(status, 'Not found.'));
+    if (!ok) return reply.type('text/html').send(renderSaveError(status, 'Not found.'));
+    // A marks change re-rolls the question + paper totals (and the Mark-ready bar), so re-render the whole
+    // section. A prompt-only edit is a quiet autosave (status span), so the textarea cursor isn't disturbed.
+    if (b.data.marks !== undefined) {
+      const section = await renderReviewSection(p.data.id, reply.generateCsrf());
+      if (section) return reply.type('text/html').send(section);
+    }
+    return reply.type('text/html').send(renderSavedStatus(status));
   });
 
   app.post('/assessments/:id/markpoints/:mid', guard, async (req, reply) => {
@@ -155,7 +176,7 @@ export function registerAssessmentRoutes(app: FastifyInstance): void {
     const status = `mp-${p.data.mid}-status`;
     const a = await getAssessment(p.data.id);
     if (!a || a.status !== 'draft') return reply.type('text/html').send(renderSaveError(status, 'Only drafts can be edited.'));
-    const b = z.object({ text: z.string().max(2000).optional(), marks: numField(0, 20).optional(), kind: z.string().max(20).optional() }).safeParse(req.body ?? {});
+    const b = z.object({ text: z.string().max(2000).optional(), marks: numField(0, 20), kind: z.string().max(20).optional() }).safeParse(req.body ?? {});
     if (!b.success) return reply.type('text/html').send(renderSaveError(status, 'Could not save.'));
     const ok = await updateMarkPointFields(p.data.id, p.data.mid, {
       text: b.data.text,

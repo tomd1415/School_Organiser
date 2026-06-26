@@ -120,6 +120,20 @@ describe('validateGenerated', () => {
     expect(r.questions).toHaveLength(0);
   });
 
+  it('dedupes duplicate part labels within a question (assessment_question_parts UNIQUE (question_id, part_label))', () => {
+    const r = validateGenerated({ questions: [q({ parts: [part({ partLabel: 'a' }), part({ partLabel: 'a' })] })] }, blueprint);
+    const labels = r.questions[0]!.parts.map((p) => p.partLabel);
+    expect(labels).toHaveLength(2);
+    expect(new Set(labels).size).toBe(2); // distinct → no UNIQUE-constraint crash in materialiseAssessment
+  });
+
+  it('assigns a free letter when a label is blank or collides with the fallback', () => {
+    const r = validateGenerated({ questions: [q({ parts: [part({ partLabel: '' }), part({ partLabel: 'a' }), part({ partLabel: '' })] })] }, blueprint);
+    const labels = r.questions[0]!.parts.map((p) => p.partLabel);
+    expect(new Set(labels).size).toBe(3); // all distinct
+    expect(labels.every((l) => l.length > 0)).toBe(true);
+  });
+
   it('caps a runaway question count at 40', () => {
     const many = Array.from({ length: 50 }, () => q());
     const r = validateGenerated({ questions: many }, blueprint);

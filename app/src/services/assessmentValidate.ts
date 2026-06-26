@@ -50,6 +50,10 @@ export function validateGenerated(data: GeneratedAssessment, blueprint: Assessme
       warnings.push(`Capped at ${MAX_QUESTIONS} questions; the rest were dropped.`);
       break;
     }
+    // assessment_question_parts has UNIQUE (question_id, part_label) — the AI labels are free strings with
+    // no uniqueness guarantee, so dedupe within the question (an empty or repeated label gets the next free
+    // letter). Without this a paper with two parts labelled "a" would crash materialiseAssessment.
+    const usedLabels = new Set<string>();
 
     // Resolve the spec-point code → id; drop/null an unknown code (never invent an id).
     let specPointId: number | null = null;
@@ -115,8 +119,16 @@ export function validateGenerated(data: GeneratedAssessment, blueprint: Assessme
         ? p.misconceptions.map((m) => ({ label: str(m.label), description: str(m.description) })).filter((m) => m.label || m.description)
         : [];
 
+      let partLabel = str(p.partLabel);
+      if (!partLabel || usedLabels.has(partLabel)) {
+        let i = parts.length;
+        while (usedLabels.has(letterFor(i))) i++;
+        partLabel = letterFor(i);
+      }
+      usedLabels.add(partLabel);
+
       parts.push({
-        partLabel: str(p.partLabel) || letterFor(parts.length),
+        partLabel,
         prompt,
         marks,
         expectedResponseType: responseType,
