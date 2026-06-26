@@ -748,11 +748,19 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .privacy-banner { border: 1px solid var(--error); border-left: 4px solid var(--error); border-radius: 10px; padding: 0.6rem 0.85rem; margin: 0.5rem 0 1rem; font-size: 0.9rem; background: color-mix(in srgb, var(--error) 10%, transparent); }
 .roster-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .roster-card { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+/* Overflow safety net (Schemes/Map/Coverage/Pupils + the other card grids): long unbreakable tokens must
+   wrap inside their card/cell, and grid-item cards must be allowed to shrink below their content
+   (min-width:0) so a long word can't expand a track and break the grid layout. */
+.sch-header-title, .sch-unit-name, .sch-mx-classname, .cov-label, .cov-by, .map-title, .map-nothing,
+.res-card-title, .note-card-body, .cohort-pct { overflow-wrap: anywhere; }
+.cov-area-head h3, .cohort-head h2 { overflow-wrap: anywhere; min-width: 0; }
+.roster-card, .res-card, .map-card, .note-card, .event-card, .task-card, .captured-card, .ov-card,
+.sch-units, .sch-lessons, .map-card-main, .cov-pt-main { min-width: 0; }
 .roster-card.inactive { opacity: 0.55; }
 .roster-main { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; flex: 1; min-width: 0; }
 .roster-avatar { flex: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
 .roster-id { display: flex; flex-direction: column; min-width: 0; }
-.roster-id .pupil-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-id .pupil-name { overflow-wrap: anywhere; } /* wrap long names rather than ellipsis-hide them */
 .roster-actions { position: relative; flex: none; }
 .roster-actions > summary { list-style: none; cursor: pointer; color: var(--muted); padding: 0 0.3rem; }
 .roster-actions > summary::-webkit-details-marker { display: none; }

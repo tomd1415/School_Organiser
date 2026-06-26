@@ -61,7 +61,8 @@ test('the projector board follows the cockpit’s slide navigation over SSE', as
   await teacher.goto(`/lesson?lesson=${lesson}&date=${date}&oc=${oc}&lab=1`, { waitUntil: 'domcontentloaded' });
   await expect(teacher.locator(`.slides-card[data-oc="${oc}"]`)).toBeVisible();
   expect(await teacher.locator('.slide-preview .pslide').count()).toBeGreaterThanOrEqual(2);
-  const boardHref = await teacher.locator('a:has-text("Open board screen")').getAttribute('href');
+  // §17 rebuild: the board action is now an icon button in the right action rail — match by aria-label.
+  const boardHref = await teacher.locator('a[aria-label="Open board screen"]').getAttribute('href');
   expect(boardHref, 'board link carries the live occurrence').toContain(`oc=${oc}`);
 
   // Board page (follows). Its deck subscribes to the teacher stream for this oc.
