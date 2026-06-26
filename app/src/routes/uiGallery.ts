@@ -20,6 +20,7 @@ import { renderSearchBar, renderResourceListPaged } from '../lib/resourceView';
 import { assessmentReviewView, renderAssignmentsPanel } from '../lib/assessmentReviewView';
 import { renderAvailableList, renderTakePage } from '../lib/assessmentTakeView';
 import { renderMarkingGrid } from '../lib/assessmentMarkModalView';
+import { renderTeacherResults, renderPupilResults } from '../lib/assessmentResultsView';
 import { assessmentReadiness } from '../services/assessment';
 import {
   GALLERY_LESSONS,
@@ -53,6 +54,8 @@ import {
   GALLERY_AVAILABLE_ASSESSMENTS,
   GALLERY_TAKE_PAPER,
   GALLERY_MARKING_ROWS,
+  GALLERY_TEACHER_RESULTS,
+  GALLERY_PUPIL_RESULTS,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -157,6 +160,8 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Pupil — assessments list (Phase 3)', 'renderAvailableList — the pupil-facing list of assessments set for their class: title, marks, style, and Start / Resume / Submitted actions. Light pupil theme.', renderAvailableList(GALLERY_AVAILABLE_ASSESSMENTS, 'Test Pupil'))}
       ${item('Pupil — take page (Phase 3, PII-safe)', 'renderTakePage over the PII-SAFE projection: question stems + part prompts + the answer widget per responseType (radios for multiple_choice, text/area for short/extended) + the marks tariff. By construction it carries NO mark-points / model answers / misconceptions — the answer key never reaches the pupil.', renderTakePage(GALLERY_TAKE_PAPER, new Map()))}
       ${item('Teacher — marking grid (Phase 4)', 'renderMarkingGrid — per-part marking for one attempt: the pupil’s answer (teacher sees full PII), the suggested mark + marker badge (auto / AI / teacher) + confidence + evidence + flags (needs-review · ⚑ safeguarding-withheld), an editable mark + feedback, “Mark now” and “Confirm all” (which skips needs-review).', renderMarkingGrid({ assessmentId: 1, attemptId: 1, title: 'Networks — end-of-unit assessment', pupilName: 'A. Pupil', scoreAwarded: 4, scoreTotal: 8, rows: GALLERY_MARKING_ROWS, csrf: 'gallery' }))}
+      ${item('Teacher — results dashboard (Phase 5)', 'renderTeacherResults — per-pupil score table (RAG by %, flag counts linking to the marking grid), a per-spec-point mastery heatmap (objective-only, RAG by %), and per-class Release controls (on-release held vs instant).', renderTeacherResults(GALLERY_TEACHER_RESULTS))}
+      ${item('Pupil — my results (Phase 5)', 'renderPupilResults — the gated, confirmed-only pupil panel: overall score, per-part feedback, and a by-topic (spec-point) breakdown. No mark-points / model answers — only confirmed marks + feedback.', renderPupilResults(GALLERY_PUPIL_RESULTS))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}

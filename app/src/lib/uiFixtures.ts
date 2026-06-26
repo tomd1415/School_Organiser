@@ -332,6 +332,40 @@ export const GALLERY_MARKING_ROWS = [
   { qOrder: 3, stem: 'Extension', partId: 400, partLabel: 'a', prompt: 'Describe a mesh topology.', partMarks: 3, responseType: 'extended_response', specPointId: null, answerId: 9004, answerText: 'Every device connects to every other device.', marksAwarded: null, marksTotal: null, marker: null, confidence: null, status: null, needsReview: null, disclosure: null, feedback: null, evidence: null },
 ];
 
+// Phase 5 — results dashboard + pupil panel fixtures.
+export const GALLERY_TEACHER_RESULTS = {
+  assessmentId: 1, title: 'Networks — end-of-unit assessment', marksTotal: 24,
+  perPupil: [
+    { attemptId: 11, pupilId: 1, status: 'submitted' as const, scoreAwarded: 20, scoreTotal: 24, needsReview: 0, disclosure: 0, confirmed: 6, marksCount: 6 },
+    { attemptId: 12, pupilId: 2, status: 'submitted' as const, scoreAwarded: 9, scoreTotal: 24, needsReview: 2, disclosure: 1, confirmed: 3, marksCount: 6 },
+    { attemptId: 13, pupilId: 3, status: 'in_progress' as const, scoreAwarded: 0, scoreTotal: 24, needsReview: 0, disclosure: 0, confirmed: 0, marksCount: 0 },
+  ],
+  specPoints: [
+    { specPointId: 100, code: '1.2.4', title: 'Topologies', awarded: 14, total: 16, pct: 88, nPupils: 8 },
+    { specPointId: 200, code: '1.3.1', title: 'Security threats', awarded: 6, total: 16, pct: 38, nPupils: 8 },
+    { specPointId: 300, code: '1.3.2', title: 'Encryption', awarded: 9, total: 16, pct: 56, nPupils: 8 },
+  ],
+  assignments: [
+    { id: 1, assessmentId: 1, groupCourseId: 5, availableFrom: null, availableUntil: null, resultsMode: 'on_release' as const, releasedAt: null },
+    { id: 2, assessmentId: 1, groupCourseId: 6, availableFrom: null, availableUntil: null, resultsMode: 'instant' as const, releasedAt: '2026-07-09T10:00:00Z' },
+  ],
+  pupilNames: new Map([[1, 'A. Pupil'], [2, 'B. Pupil'], [3, 'C. Pupil']]),
+  classNames: new Map([[5, '11C'], [6, '11D']]),
+  csrf: 'gallery',
+};
+export const GALLERY_PUPIL_RESULTS = {
+  title: 'Networks — end-of-unit assessment',
+  awarded: 20, total: 24,
+  items: [
+    { label: 'Q1a: Which topology uses a central switch?', awarded: 1, total: 1, feedback: 'Correct — well done.' },
+    { label: 'Q2a: Explain how encryption protects data.', awarded: 3, total: 4, feedback: 'Good — name the key exchange for full marks.' },
+  ],
+  specPoints: [
+    { code: '1.2.4', title: 'Topologies', awarded: 8, total: 8 },
+    { code: '1.3.1', title: 'Security threats', awarded: 6, total: 8 },
+  ],
+};
+
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {
   isoDate: '2026-06-23',
