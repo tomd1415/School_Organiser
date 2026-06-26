@@ -27,6 +27,7 @@ export const AI_FEATURES: readonly FeatureDef[] = [
   { key: 'resource_import', label: 'Title a bulk resource upload', role: 'plan', note: 'Proposes titles/categories for an uploaded archive from its Word description.' },
   { key: 'term_summary', label: "Summarise a term's notes", role: 'plan' },
   { key: 'mark_scheme', label: 'Derive a mark scheme', role: 'plan' },
+  { key: 'mark_assessment_answers', label: 'Mark assessment answers', role: 'plan', note: 'Marks open exam answers against the mark scheme — Sonnet by default.' },
   { key: 'captured_categorise', label: 'Auto-file a captured note', role: 'cheap' },
   { key: 'task_breakdown', label: 'Break a task into steps', role: 'cheap' },
   { key: 'retrieval_starter', label: 'Retrieval-practice starter', role: 'cheap' },

@@ -17,7 +17,9 @@ import { buildSchemeTree } from '../services/scheme';
 import { renderMapPage } from '../lib/mapView';
 import { renderCoverageReport } from '../lib/coverageView';
 import { renderSearchBar, renderResourceListPaged } from '../lib/resourceView';
-import { assessmentReviewView } from '../lib/assessmentReviewView';
+import { assessmentReviewView, renderAssignmentsPanel } from '../lib/assessmentReviewView';
+import { renderAvailableList, renderTakePage } from '../lib/assessmentTakeView';
+import { renderMarkingGrid } from '../lib/assessmentMarkModalView';
 import { assessmentReadiness } from '../services/assessment';
 import {
   GALLERY_LESSONS,
@@ -47,6 +49,10 @@ import {
   GALLERY_RESOURCES,
   GALLERY_ASSESSMENT,
   GALLERY_ASSESSMENT_SPEC_POINTS,
+  GALLERY_ELIGIBLE_CLASSES,
+  GALLERY_AVAILABLE_ASSESSMENTS,
+  GALLERY_TAKE_PAPER,
+  GALLERY_MARKING_ROWS,
 } from '../lib/uiFixtures';
 
 // UI component gallery (Phase 1 of docs/UI_SEPARATION_PLAN.md): renders view functions with FIXTURE data so
@@ -147,6 +153,10 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       }))}
       ${item('Schemes — Classes matrix (SPEC §8)', 'renderClassesMatrix — the Classes lens: units × classes, each cell a lesson’s delivery status for that class — taught (date, green) · today (teal) · planned (date, plain) · not placed (dashed) · △ adapted for the class. Read-only; placement happens on the Map.', renderClassesMatrix(GALLERY_SCHEME_MATRIX))}
       ${item('Assessment review (Phase 1)', 'assessmentReviewView — the AI-generated draft paper for teacher review/edit: spec-point chips, covered/stretch badges, per-part widget + marks, mark-points (kind badge: objective=auto · open=AI-marked), misconceptions + model answers (collapsible), and the Mark-ready bar (here showing the draft is ready to flip). Editing affordances render because the paper is a draft.', assessmentReviewView(GALLERY_ASSESSMENT, { editable: true, csrf: 'gallery', specPoints: GALLERY_ASSESSMENT_SPEC_POINTS, readiness: assessmentReadiness(GALLERY_ASSESSMENT) }))}
+      ${item('Assessment assignments (Phase 2)', 'renderAssignmentsPanel — assign a ready paper to its eligible classes (deduped by group_course): per-class availability window (datetime-local Open/Close) + results mode (on release / instant), an Assign/Update + Unassign action. Shown with one class already assigned with a window and one not.', renderAssignmentsPanel(1, GALLERY_ELIGIBLE_CLASSES, 'gallery'))}
+      ${item('Pupil — assessments list (Phase 3)', 'renderAvailableList — the pupil-facing list of assessments set for their class: title, marks, style, and Start / Resume / Submitted actions. Light pupil theme.', renderAvailableList(GALLERY_AVAILABLE_ASSESSMENTS, 'Test Pupil'))}
+      ${item('Pupil — take page (Phase 3, PII-safe)', 'renderTakePage over the PII-SAFE projection: question stems + part prompts + the answer widget per responseType (radios for multiple_choice, text/area for short/extended) + the marks tariff. By construction it carries NO mark-points / model answers / misconceptions — the answer key never reaches the pupil.', renderTakePage(GALLERY_TAKE_PAPER, new Map()))}
+      ${item('Teacher — marking grid (Phase 4)', 'renderMarkingGrid — per-part marking for one attempt: the pupil’s answer (teacher sees full PII), the suggested mark + marker badge (auto / AI / teacher) + confidence + evidence + flags (needs-review · ⚑ safeguarding-withheld), an editable mark + feedback, “Mark now” and “Confirm all” (which skips needs-review).', renderMarkingGrid({ assessmentId: 1, attemptId: 1, title: 'Networks — end-of-unit assessment', pupilName: 'A. Pupil', scoreAwarded: 4, scoreTotal: 8, rows: GALLERY_MARKING_ROWS, csrf: 'gallery' }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}

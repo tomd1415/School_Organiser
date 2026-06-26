@@ -301,6 +301,22 @@ export const paths = {
   assessmentQuestion: (id: number, qid: number): string => `/assessments/${id}/questions/${qid}`,
   assessmentPart: (id: number, pid: number): string => `/assessments/${id}/parts/${pid}`,
   assessmentMarkPoint: (id: number, mid: number): string => `/assessments/${id}/markpoints/${mid}`,
+  // Phase 2 — assign to class + availability window
+  assessmentAssign: (id: number): string => `/assessments/${id}/assign`,
+  assessmentAssignWindow: (id: number, gcId: number): string => `/assessments/${id}/assign/${gcId}/window`,
+  assessmentUnassign: (id: number, gcId: number): string => `/assessments/${id}/unassign/${gcId}`,
+  // Phase 3 — pupil take-flow (behind the pupil gate)
+  meAssessments: (): string => '/me/assessments',
+  meAssessment: (id: number): string => `/me/assessments/${id}`,
+  meAssessmentAnswer: (id: number): string => `/me/assessments/${id}/answer`,
+  meAssessmentSubmit: (id: number): string => `/me/assessments/${id}/submit`,
+  meAssessmentResults: (id: number): string => `/me/assessments/${id}/results`,
+  // Phase 4 — teacher marking (confirm/adjust)
+  assessmentMarkQueue: (): string => '/assessments/marking',
+  assessmentAttemptMarks: (id: number, attemptId: number): string => `/assessments/${id}/attempts/${attemptId}/marks`,
+  assessmentMarkNow: (id: number, attemptId: number): string => `/assessments/${id}/attempts/${attemptId}/mark`,
+  assessmentMarkConfirm: (id: number, attemptId: number): string => `/assessments/${id}/attempts/${attemptId}/confirm`,
+  assessmentMarkAnswer: (id: number, attemptId: number, answerId: number): string => `/assessments/${id}/attempts/${attemptId}/answers/${answerId}/override`,
 
   // ── Cross-cutting page links ────────────────────────────────────────────────────────────────────
   pupils: (): string => '/pupils',

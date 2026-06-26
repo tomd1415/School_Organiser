@@ -174,6 +174,22 @@ describe('paths builders — exact URLs', () => {
     [paths.assessmentQuestion(7, 3), '/assessments/7/questions/3'],
     [paths.assessmentPart(7, 4), '/assessments/7/parts/4'],
     [paths.assessmentMarkPoint(7, 5), '/assessments/7/markpoints/5'],
+    // assignment (Phase 2)
+    [paths.assessmentAssign(7), '/assessments/7/assign'],
+    [paths.assessmentAssignWindow(7, 5), '/assessments/7/assign/5/window'],
+    [paths.assessmentUnassign(7, 5), '/assessments/7/unassign/5'],
+    // pupil take-flow (Phase 3)
+    [paths.meAssessments(), '/me/assessments'],
+    [paths.meAssessment(7), '/me/assessments/7'],
+    [paths.meAssessmentAnswer(7), '/me/assessments/7/answer'],
+    [paths.meAssessmentSubmit(7), '/me/assessments/7/submit'],
+    [paths.meAssessmentResults(7), '/me/assessments/7/results'],
+    // teacher marking (Phase 4)
+    [paths.assessmentMarkQueue(), '/assessments/marking'],
+    [paths.assessmentAttemptMarks(7, 3), '/assessments/7/attempts/3/marks'],
+    [paths.assessmentMarkNow(7, 3), '/assessments/7/attempts/3/mark'],
+    [paths.assessmentMarkConfirm(7, 3), '/assessments/7/attempts/3/confirm'],
+    [paths.assessmentMarkAnswer(7, 3, 9), '/assessments/7/attempts/3/answers/9/override'],
   ])('builds %s', (actual, expected) => {
     expect(actual).toBe(expected);
   });

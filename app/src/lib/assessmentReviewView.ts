@@ -8,6 +8,7 @@ import type { AssessmentTree, AssessmentPart, AssessmentQuestion } from '../serv
 import type { AssessmentReadiness } from '../services/assessment';
 import type { AssessmentSummary } from '../repos/assessments';
 import type { MarkKind } from './deterministicMarker';
+import type { EligibleClass } from '../services/assessmentAssign';
 
 // ── The per-unit assessments page: list + "Generate for class X" ─────────────────────────────────────
 
@@ -95,6 +96,59 @@ export interface ReviewOpts {
   readiness?: AssessmentReadiness;
   warnings?: string[]; // generation warnings to surface once, on first review
   notice?: string | null;
+  assignments?: EligibleClass[]; // Phase 2 — rendered as the Assignments panel when the paper is ready
+}
+
+// ── Phase 2: the Assignments panel (eligible classes × window × results mode) ──────────────────────────
+
+/** A stored ISO timestamp → the `YYYY-MM-DDTHH:MM` form an <input type="datetime-local"> wants (or ''). */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  // The stored value is an ISO/Postgres timestamp; slice to minute precision for the local input.
+  const m = String(iso).match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  return m ? `${m[1]}T${m[2]}` : '';
+}
+
+function assignRow(assessmentId: number, c: EligibleClass): string {
+  const name = esc(c.groupName ?? `class #${c.groupCourseId}`);
+  const period = c.periodLabel ? ` <span class="muted">· ${esc(c.periodLabel)}</span>` : '';
+  const from = toLocalInput(c.window?.from);
+  const until = toLocalInput(c.window?.until);
+  const mode = c.resultsMode ?? 'on_release';
+  const url = c.assigned ? paths.assessmentAssignWindow(assessmentId, c.groupCourseId) : paths.assessmentAssign(assessmentId);
+  const statusBadgeHtml = c.assigned
+    ? `<span class="badge good">assigned${c.releasedAt ? ' · released' : ''}</span>`
+    : '<span class="badge">not assigned</span>';
+  const submitLabel = c.assigned ? 'Update' : 'Assign';
+  const unassign = c.assigned
+    ? `<button type="button" class="link danger" hx-post="${paths.assessmentUnassign(assessmentId, c.groupCourseId)}" hx-target="#assessment-assignments" hx-swap="outerHTML" hx-confirm="Unassign this class? Pupils will no longer see the paper.">Unassign</button>`
+    : '';
+  return `<form class="asmt-assign-row" hx-post="${url}" hx-target="#assessment-assignments" hx-swap="outerHTML">
+    <input type="hidden" name="groupCourseId" value="${c.groupCourseId}">
+    <div class="asmt-assign-class"><strong>${name}</strong>${period} ${statusBadgeHtml}</div>
+    <label class="asmt-assign-l">Open<input type="datetime-local" name="availableFrom" value="${esc(from)}"></label>
+    <label class="asmt-assign-l">Close<input type="datetime-local" name="availableUntil" value="${esc(until)}"></label>
+    <label class="asmt-assign-l">Results
+      <select name="resultsMode">
+        <option value="on_release"${mode === 'on_release' ? ' selected' : ''}>on release</option>
+        <option value="instant"${mode === 'instant' ? ' selected' : ''}>instant</option>
+      </select>
+    </label>
+    <div class="asmt-assign-actions"><button type="submit" class="btn-secondary">${submitLabel}</button> ${unassign}</div>
+  </form>`;
+}
+
+export function renderAssignmentsPanel(assessmentId: number, eligible: EligibleClass[], csrf: string, message?: string | null): string {
+  const rows = eligible.length
+    ? eligible.map((c) => assignRow(assessmentId, c)).join('')
+    : '<p class="muted">No timetabled class teaches this course yet.</p>';
+  const note = message ? `<p class="error">${esc(message)}</p>` : '';
+  return `<section id="assessment-assignments" class="asmt-assign card" hx-headers='{"x-csrf-token":"${esc(csrf)}"}'>
+    <div class="card-head"><div><p class="eyebrow">deliver</p><h2>Assign to classes</h2></div></div>
+    <p class="muted">Each class gets its own availability window (blank Open = available now; blank Close = no end) and a results mode (held until you Release, or shown instantly once confirmed).</p>
+    ${note}
+    ${rows}
+  </section>`;
 }
 
 const KIND_ORDER: MarkKind[] = ['exact', 'numeric', 'keyword', 'choice', 'tick', 'open'];
@@ -240,8 +294,11 @@ export function assessmentReviewView(tree: AssessmentTree, opts: ReviewOpts): st
       </div>`;
     }
   } else if (tree.status === 'ready') {
-    readyBar = '<p class="adapt-note">This paper is <strong>ready</strong> — assign it to a class to deliver it.</p>';
+    readyBar = '<p class="adapt-note">This paper is <strong>ready</strong> — assign it to a class below to deliver it.</p>';
   }
+
+  // The Assignments panel (Phase 2) renders for a ready paper when the route supplied the eligible classes.
+  const assignPanel = tree.status === 'ready' && opts.assignments ? renderAssignmentsPanel(tree.id, opts.assignments, opts.csrf) : '';
 
   const notice = opts.notice ? `<p class="adapt-note">${esc(opts.notice)}</p>` : '';
   const summary = `<p class="muted">Coverage: ${esc(coverSummary)}. ${opts.editable ? 'Edit any stem, prompt, marks or mark-point below — changes save as you type.' : 'Read-only.'}</p>`;
@@ -255,6 +312,7 @@ export function assessmentReviewView(tree: AssessmentTree, opts: ReviewOpts): st
     ${warnings}
     ${summary}
     ${readyBar}
+    ${assignPanel}
     ${questions}
   </section>`;
 }

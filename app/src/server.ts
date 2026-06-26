@@ -58,6 +58,9 @@ import { registerPedagogyRoutes } from './routes/pedagogyPage';
 import { registerSafeguardingRoutes } from './routes/safeguarding';
 import { registerSearchRoutes } from './routes/search';
 import { registerAssessmentRoutes } from './routes/assessments';
+import { registerAssessmentTakeRoutes } from './routes/assessmentTake';
+import { registerAssessmentMarkRoutes } from './routes/assessmentMark';
+import { runDueAttemptMarks } from './services/assessmentMarkQueue';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
 import { signLessonImages } from './lib/lessonImageSig';
 import { pupilCfg } from './auth/pupilAccessCache';
@@ -278,6 +281,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerSafeguardingRoutes(app);
   registerSearchRoutes(app);
   registerAssessmentRoutes(app);
+  registerAssessmentTakeRoutes(app);
+  registerAssessmentMarkRoutes(app);
 
   return app;
 }
@@ -331,6 +336,20 @@ function scheduleMarkingQueue(app: FastifyInstance): void {
     }
   };
   void run(); // boot sweep — catch up on jobs that came due during downtime
+  setInterval(() => void run(), 30_000);
+}
+
+/** Phase 4: drain due assessment open-mark jobs on boot then every 30s (mirrors scheduleMarkingQueue). */
+function scheduleAssessmentMarkQueue(app: FastifyInstance): void {
+  const run = async (): Promise<void> => {
+    try {
+      const n = await runDueAttemptMarks();
+      if (n > 0) app.log.info(`assessment marking: ran ${n} due open-mark job(s)`);
+    } catch (err) {
+      app.log.error({ err }, 'assessment mark queue sweep crashed');
+    }
+  };
+  void run();
   setInterval(() => void run(), 30_000);
 }
 
@@ -438,6 +457,7 @@ export async function start(): Promise<void> {
     scheduleRecurring(app);
     scheduleEmailPoll(app);
     scheduleMarkingQueue(app);
+    scheduleAssessmentMarkQueue(app);
     schedulePendingDeletions(app);
     scheduleMorningBrief(app);
     scheduleReviewSweep(app);

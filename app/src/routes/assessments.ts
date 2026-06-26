@@ -22,7 +22,8 @@ import { getUnitForReview } from '../repos/schemes';
 import { listSlotsForCourse } from '../repos/delivery';
 import { listSpecPoints } from '../repos/specPoints';
 import { normaliseMarkKind } from '../llm/schemas/markScheme';
-import { assessmentReviewView, renderGenerateNote, renderUnitAssessments, type ClassOption } from '../lib/assessmentReviewView';
+import { assessmentReviewView, renderAssignmentsPanel, renderGenerateNote, renderUnitAssessments, type ClassOption } from '../lib/assessmentReviewView';
+import { assign, eligibleClassesFor, unassignClass } from '../services/assessmentAssign';
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
 
 // A numeric form field that treats an empty string as "not provided" (so a blank "auto" input is optional).
@@ -58,6 +59,8 @@ async function renderReviewSection(assessmentId: number, csrf: string, notice?: 
   const tree = await assessmentWithQuestions(assessmentId);
   if (!tree) return null;
   const specPoints = await listSpecPoints(tree.courseId, true); // include archived so an archived code still renders
+  // A ready paper shows the Assignments panel (Phase 2); a draft doesn't (it can't be assigned yet).
+  const assignments = tree.status === 'ready' ? await eligibleClassesFor(assessmentId) : undefined;
   return assessmentReviewView(tree, {
     editable: tree.status === 'draft',
     csrf,
@@ -65,6 +68,7 @@ async function renderReviewSection(assessmentId: number, csrf: string, notice?: 
     readiness: assessmentReadiness(tree),
     warnings: persistedWarnings(tree.blueprint),
     notice: notice ?? brandNewClassNotice(tree.blueprint),
+    assignments,
   });
 }
 
@@ -184,5 +188,40 @@ export function registerAssessmentRoutes(app: FastifyInstance): void {
       kind: b.data.kind != null ? normaliseMarkKind(b.data.kind) : undefined,
     });
     return reply.type('text/html').send(ok ? renderSavedStatus(status) : renderSaveError(status, 'Not found.'));
+  });
+
+  // ── Phase 2: assign a ready paper to classes (window + results mode) ──────────────────────────────
+  const assignBody = z.object({
+    groupCourseId: z.coerce.number().int().positive(),
+    availableFrom: z.string().max(40).optional(),
+    availableUntil: z.string().max(40).optional(),
+    resultsMode: z.enum(['instant', 'on_release']).optional(),
+  });
+
+  async function assignmentsPanel(assessmentId: number, csrf: string, message?: string | null): Promise<string> {
+    return renderAssignmentsPanel(assessmentId, await eligibleClassesFor(assessmentId), csrf, message);
+  }
+
+  app.post('/assessments/:id/assign', guard, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    const b = assignBody.safeParse(req.body ?? {});
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const res = await assign(p.data.id, b.data.groupCourseId, { availableFrom: b.data.availableFrom, availableUntil: b.data.availableUntil, resultsMode: b.data.resultsMode });
+    return reply.type('text/html').send(await assignmentsPanel(p.data.id, reply.generateCsrf(), res.ok ? null : res.message));
+  });
+
+  app.post('/assessments/:id/assign/:gcId/window', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive(), gcId: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ availableFrom: z.string().max(40).optional(), availableUntil: z.string().max(40).optional(), resultsMode: z.enum(['instant', 'on_release']).optional() }).safeParse(req.body ?? {});
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const res = await assign(p.data.id, p.data.gcId, { availableFrom: b.data.availableFrom, availableUntil: b.data.availableUntil, resultsMode: b.data.resultsMode });
+    return reply.type('text/html').send(await assignmentsPanel(p.data.id, reply.generateCsrf(), res.ok ? null : res.message));
+  });
+
+  app.post('/assessments/:id/unassign/:gcId', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive(), gcId: z.coerce.number().int().positive() }).safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    await unassignClass(p.data.id, p.data.gcId);
+    return reply.type('text/html').send(await assignmentsPanel(p.data.id, reply.generateCsrf()));
   });
 }

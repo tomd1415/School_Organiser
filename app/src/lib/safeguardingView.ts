@@ -2,7 +2,7 @@ import { esc } from './html';
 import type { SafeguardingItem, SgSource } from '../repos/safeguarding';
 import { paths } from './paths';
 
-const SOURCE_LABEL: Record<SgSource, string> = { answer: 'pupil answer', captured: 'captured note', ta_feedback: 'TA feedback' };
+const SOURCE_LABEL: Record<SgSource, string> = { answer: 'pupil answer', captured: 'captured note', ta_feedback: 'TA feedback', assessment_answer: 'assessment answer' };
 export const STATUSES = ['recorded', 'actioned', 'referred'] as const;
 const STATUS_LABEL: Record<string, string> = { new: 'new', recorded: 'recorded', actioned: 'actioned', referred: 'referred to DSL' };
 

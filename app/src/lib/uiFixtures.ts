@@ -298,6 +298,40 @@ export const GALLERY_ASSESSMENT: AssessmentTree = {
   ],
 };
 
+// Phase 2 — eligible classes for the Assignments panel (one assigned with a window, one not).
+export const GALLERY_ELIGIBLE_CLASSES = [
+  { groupCourseId: 5, groupName: '11C', periodLabel: 'Tue P3', assigned: true, window: { from: '2026-07-01T09:00', until: '2026-07-08T16:00' }, resultsMode: 'on_release' as const, releasedAt: null },
+  { groupCourseId: 6, groupName: '11D', periodLabel: 'Thu P1', assigned: false },
+];
+
+// Phase 3 — pupil take-flow fixtures. The take page uses the PII-SAFE projection (no answer key) by
+// construction (TakePaper has no mark-points/model-answers), matching the privacy rule.
+export const GALLERY_AVAILABLE_ASSESSMENTS = [
+  { id: 1, title: 'Networks — end-of-unit assessment', style: 'gcse' as const, marksTotal: 24, groupCourseId: 5, resultsMode: 'on_release' as const, releasedAt: null, attemptStatus: 'not_started' as const },
+  { id: 2, title: 'Data representation — quick check', style: 'ks3' as const, marksTotal: 12, groupCourseId: 5, resultsMode: 'instant' as const, releasedAt: null, attemptStatus: 'in_progress' as const },
+];
+export const GALLERY_TAKE_PAPER = {
+  id: 1, title: 'Networks — end-of-unit assessment', style: 'gcse', marksTotal: 6,
+  questions: [
+    { questionId: 10, stem: 'A school connects its computers in one room.', parts: [
+      { partId: 100, partLabel: 'a', prompt: 'Which topology connects every device to a central switch?', responseType: 'multiple_choice', options: ['Bus', 'Star', 'Mesh', 'Ring'], marks: 1 },
+      { partId: 101, partLabel: 'b', prompt: 'State one advantage of a star topology.', responseType: 'short_text', options: [], marks: 2 },
+    ] },
+    { questionId: 20, stem: 'A company worries about data being intercepted.', parts: [
+      { partId: 200, partLabel: 'a', prompt: 'Explain how encryption protects data in transit.', responseType: 'extended_response', options: [], marks: 3 },
+    ] },
+  ],
+};
+
+// Phase 4 — the teacher marking grid (one attempt). A mix: objective auto-marked + confirmed, an AI mark
+// that needs review, a safeguarding-flagged (disclosure) answer withheld from AI, and an unmarked open part.
+export const GALLERY_MARKING_ROWS = [
+  { qOrder: 0, stem: 'Networks', partId: 100, partLabel: 'a', prompt: 'Which topology uses a central switch?', partMarks: 1, responseType: 'multiple_choice', specPointId: 100, answerId: 9001, answerText: 'Star', marksAwarded: 1, marksTotal: 1, marker: 'auto' as const, confidence: 1, status: 'confirmed' as const, needsReview: false, disclosure: false, feedback: '', evidence: ['Star'] },
+  { qOrder: 1, stem: 'Security', partId: 200, partLabel: 'a', prompt: 'Explain how encryption protects data.', partMarks: 4, responseType: 'extended_response', specPointId: null, answerId: 9002, answerText: 'It scrambles the data with a key so an interceptor sees only ciphertext.', marksAwarded: 3, marksTotal: 4, marker: 'ai' as const, confidence: 0.55, status: 'suggested' as const, needsReview: true, disclosure: false, feedback: 'Good — name the key exchange to reach full marks.', evidence: ['scrambles the data with a key'] },
+  { qOrder: 2, stem: 'Reflection', partId: 300, partLabel: 'a', prompt: 'How did you find this topic?', partMarks: 0, responseType: 'extended_response', specPointId: null, answerId: 9003, answerText: '(a flagged disclosure — withheld from AI)', marksAwarded: 0, marksTotal: 0, marker: 'auto' as const, confidence: null, status: 'suggested' as const, needsReview: true, disclosure: true, feedback: '', evidence: [] },
+  { qOrder: 3, stem: 'Extension', partId: 400, partLabel: 'a', prompt: 'Describe a mesh topology.', partMarks: 3, responseType: 'extended_response', specPointId: null, answerId: 9004, answerText: 'Every device connects to every other device.', marksAwarded: null, marksTotal: null, marker: null, confidence: null, status: null, needsReview: null, disclosure: null, feedback: null, evidence: null },
+];
+
 // "Now" = 10:05 → P1 done, P2 active, P3 next.
 export const GALLERY_NOW_STATE: NowState = {
   isoDate: '2026-06-23',

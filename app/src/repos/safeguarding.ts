@@ -4,7 +4,7 @@
 // safeguarding flag that withholds them). Teacher-only surface.
 import { pool } from '../db/pool';
 
-export type SgSource = 'answer' | 'captured' | 'ta_feedback';
+export type SgSource = 'answer' | 'captured' | 'ta_feedback' | 'assessment_answer';
 export type SgStatus = 'new' | 'recorded' | 'actioned' | 'referred';
 
 export interface SafeguardingItem {
@@ -31,7 +31,14 @@ const SOURCES = `
     FROM notes n WHERE n.safeguarding
   UNION ALL
   SELECT 'ta_feedback', t.id, NULLIF(btrim(t.pupils_text || E'\\n' || t.lesson_text, E'\\n'), ''), NULL, t.created_at
-    FROM ta_feedback t WHERE t.safeguarding`;
+    FROM ta_feedback t WHERE t.safeguarding
+  UNION ALL
+  SELECT 'assessment_answer', ans.id, ans.answer_text, p.display_name AS who, am.updated_at
+    FROM assessment_awarded_marks am
+    JOIN assessment_answers ans ON ans.id = am.answer_id
+    JOIN assessment_attempts at ON at.id = ans.attempt_id
+    JOIN pupils p ON p.id = at.pupil_id
+   WHERE am.disclosure AND NOT at.is_test`;
 
 export async function listSafeguardingItems(): Promise<SafeguardingItem[]> {
   const { rows } = await pool.query<SafeguardingItem>(
