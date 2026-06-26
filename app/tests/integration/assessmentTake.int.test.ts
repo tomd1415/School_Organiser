@@ -99,25 +99,32 @@ describe('assessment take lifecycle', () => {
     expect(res.ok).toBe(false);
   });
 
-  it('submits (double-submit guarded) and enqueues marking for a real pupil', async () => {
+  it('submits (double-submit guarded) and marks objective parts inline for a real pupil', async () => {
     const r = await startTake(assessmentId, pupilId, false);
     if ('error' in r) throw new Error('errored');
     expect(await submit(r.attempt)).toBe(true);
     const r2 = await getPupilAttempt(assessmentId, pupilId, false);
     expect(r2!.status).toBe('submitted');
     expect(await submit(r2!)).toBe(false); // already submitted
+    // On submit, objective parts mark inline (Phase 4 onAttemptSubmitted); test mode runs the open pass
+    // inline (AI off → no-op), so no queue row leaks into the test DB.
+    const markedObjective = await pool.query(
+      `SELECT 1 FROM assessment_awarded_marks am JOIN assessment_answers ans ON ans.id = am.answer_id WHERE ans.attempt_id = $1 AND am.marker = 'auto'`, [r.attempt.id]);
+    expect(markedObjective.rowCount).toBeGreaterThan(0);
     const queued = await pool.query(`SELECT 1 FROM assessment_mark_queue WHERE attempt_id = $1`, [r.attempt.id]);
-    expect(queued.rowCount).toBe(1);
+    expect(queued.rowCount).toBe(0);
     const items = await availableForPupil(pupilId, false);
     expect(items.find((a) => a.id === assessmentId)!.attemptStatus).toBe('submitted');
   });
 
-  it('a TEST attempt is separate and never enqueued for marking', async () => {
+  it('a TEST attempt is separate and never marked / enqueued', async () => {
     const r = await startTake(assessmentId, testPupilId, true);
     if ('error' in r) throw new Error('errored');
     expect(await submit(r.attempt)).toBe(true);
     const queued = await pool.query(`SELECT 1 FROM assessment_mark_queue WHERE attempt_id = $1`, [r.attempt.id]);
     expect(queued.rowCount).toBe(0); // test attempts are excluded from marking
+    const marked = await pool.query(`SELECT 1 FROM assessment_awarded_marks am JOIN assessment_answers ans ON ans.id = am.answer_id WHERE ans.attempt_id = $1`, [r.attempt.id]);
+    expect(marked.rowCount).toBe(0); // never marked
     expect((await assessmentWithQuestions(assessmentId))!.id).toBe(assessmentId); // sanity: tree still loads
     expect(takeTree((await assessmentWithQuestions(assessmentId))!).questions).toHaveLength(1);
   });

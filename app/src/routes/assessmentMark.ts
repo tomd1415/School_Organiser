@@ -11,13 +11,18 @@ import {
   attemptsNeedingReview,
   confirmMarksForAttempt,
   getAttempt,
+  listAssignmentsForAssessment,
   overrideMark,
 } from '../repos/assessmentAttempts';
+import { classNamesFor } from '../repos/assessmentAnalytics';
 import { getPupilName } from '../repos/pupilCredentials';
 import { markAttempt, recomputeAttempt } from '../services/assessmentMarking';
+import { releaseFor, teacherResults } from '../services/assessmentResults';
 import { renderMarkingGrid, renderModerationQueue } from '../lib/assessmentMarkModalView';
+import { renderReleaseSection, renderTeacherResults } from '../lib/assessmentResultsView';
 
 const attemptParams = z.object({ id: z.coerce.number().int().positive(), attemptId: z.coerce.number().int().positive() });
+const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 async function gridFor(assessmentId: number, attemptId: number, csrf: string): Promise<string | null> {
   const [attempt, a] = await Promise.all([getAttempt(attemptId), getAssessment(assessmentId)]);
@@ -81,5 +86,32 @@ export function registerAssessmentMarkRoutes(app: FastifyInstance): void {
     await recomputeAttempt(p.data.attemptId);
     const grid = await gridFor(p.data.id, p.data.attemptId, reply.generateCsrf());
     return reply.type('text/html').send(grid ?? '<section class="card"><p class="muted">No such attempt.</p></section>');
+  });
+
+  // ── Phase 5: teacher results dashboard + per-class release ────────────────────────────────────────
+  app.get('/assessments/:id/results', { preHandler: requireAuth }, async (req, reply) => {
+    const p = idParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const csrf = reply.generateCsrf();
+    const data = await teacherResults(p.data.id);
+    if (!data) {
+      return reply.type('text/html').send(layout({ title: 'Results', body: '<section class="card"><p class="muted">No such assessment.</p></section>', authed: true, csrfToken: csrf, width: 'wide' }));
+    }
+    const [pupilNames, classNames] = await Promise.all([
+      Promise.all(data.perPupil.map(async (pp) => [pp.pupilId, (await getPupilName(pp.pupilId)) ?? `pupil #${pp.pupilId}`] as const)).then((e) => new Map(e)),
+      classNamesFor(data.assignments.map((a) => a.groupCourseId)),
+    ]);
+    const body = renderTeacherResults({ ...data, pupilNames, classNames, csrf });
+    return reply.type('text/html').send(layout({ title: `${data.title} — results`, body, authed: true, csrfToken: csrf, width: 'wide' }));
+  });
+
+  app.post('/assessments/:id/release/:gcId', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive(), gcId: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z.object({ released: z.enum(['true', 'false']) }).safeParse(req.body ?? {});
+    if (!p.success || !b.success) return reply.code(400).send('');
+    await releaseFor(p.data.id, p.data.gcId, b.data.released === 'true');
+    const assignments = await listAssignmentsForAssessment(p.data.id);
+    const classNames = await classNamesFor(assignments.map((a) => a.groupCourseId));
+    return reply.type('text/html').send(renderReleaseSection({ assessmentId: p.data.id, assignments, classNames, csrf: reply.generateCsrf() }));
   });
 }

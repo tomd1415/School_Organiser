@@ -21,6 +21,7 @@ export interface CohortPupil {
   level: Level | null;
   completionPct: number | null; // null when the class has no delivered lessons yet
   atlTrend: AtlTrend;
+  assessmentPct: number | null; // Phase 5 — avg assessment score %, null when none taken yet
 }
 
 export interface ClassCohort {
@@ -112,6 +113,17 @@ export async function classCohort(groupCourseId: number, today: string): Promise
     byPupil.set(r.pupilId, arr);
   }
 
+  // Phase 5 — the assessment signal: each pupil's average % across this class's submitted (real) attempts.
+  const asmt = await pool.query<{ pupilId: number; pct: number }>(
+    `SELECT at.pupil_id AS "pupilId",
+            round(avg(CASE WHEN at.score_total > 0 THEN 100.0 * at.score_awarded / at.score_total END))::int AS pct
+     FROM assessment_attempts at
+     WHERE at.group_course_id = $1 AND NOT at.is_test AND at.status = 'submitted' AND at.score_total > 0
+     GROUP BY at.pupil_id`,
+    [groupCourseId],
+  );
+  const asmtByPupil = new Map(asmt.rows.map((r) => [r.pupilId, r.pct]));
+
   const pupils: CohortPupil[] = roster.rows.map((r) => ({
     id: r.id,
     displayName: r.displayName,
@@ -120,6 +132,7 @@ export async function classCohort(groupCourseId: number, today: string): Promise
     level: r.level,
     completionPct: deliveredLessons > 0 ? Math.round((r.done / deliveredLessons) * 100) : null,
     atlTrend: atlTrendOf(byPupil.get(r.id) ?? []),
+    assessmentPct: asmtByPupil.get(r.id) ?? null,
   }));
 
   const abilityMidpoint = medianLevel(pupils.map((p) => p.level).filter((l): l is Level => l != null));

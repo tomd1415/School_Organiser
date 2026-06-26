@@ -77,7 +77,7 @@ function renderCohortPupil(p: CohortPupil): string {
       <span class="roster-avatar" aria-hidden="true">${esc(pupilInitials(p.displayName))}</span>
       <span class="roster-id">
         <span class="pupil-name">${esc(p.displayName)}</span>
-        <span class="cohort-meta">${levelChip(p.level)}${p.completionPct != null ? `<span class="cohort-pct" title="lessons completed this class">${p.completionPct}%</span>` : ''}${atlArrow(p.atlTrend)}</span>
+        <span class="cohort-meta">${levelChip(p.level)}${p.completionPct != null ? `<span class="cohort-pct" title="lessons completed this class">${p.completionPct}%</span>` : ''}${p.assessmentPct != null ? `<span class="cohort-asmt" title="average assessment score">📝 ${p.assessmentPct}%</span>` : ''}${atlArrow(p.atlTrend)}</span>
       </span>
     </a>
     ${pupilActionsMenu(p.id, p.displayName, p.aiToken, p.active)}

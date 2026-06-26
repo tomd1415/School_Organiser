@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { pupilAccessEnabled, pupilLayout } from './pupilAuth';
 import { getPupilName } from '../repos/pupilCredentials';
 import { availableForPupil, answer as saveTakeAnswer, startTake, submit } from '../services/assessmentTake';
+import { pupilResults } from '../services/assessmentResults';
 import { getPupilAttempt } from '../repos/assessmentAttempts';
 import { getAssessment } from '../repos/assessments';
 import {
@@ -16,6 +17,7 @@ import {
   renderTakePage,
   renderTakeSaved,
 } from '../lib/assessmentTakeView';
+import { renderPupilResults, renderPupilResultsHeld } from '../lib/assessmentResultsView';
 
 interface ActingPupil {
   id: number;
@@ -109,5 +111,18 @@ export function registerAssessmentTakeRoutes(app: FastifyInstance): void {
     if (!attempt) return reply.type('text/html').send(renderTakeError('No attempt to submit.'));
     await submit(attempt); // double-submit guarded inside; never blocks on AI
     return reply.type('text/html').send(renderSubmitted({ id: p.data.id, title }));
+  });
+
+  // Phase 5 — the pupil's own results (gated: confirmed marks only, released-or-instant).
+  app.get('/me/assessments/:id/results', async (req, reply) => {
+    const acting = await resolvePupil(req, reply);
+    if (!acting) return;
+    const p = idParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const csrf = reply.generateCsrf();
+    const res = await pupilResults(acting.id, p.data.id);
+    if (res) return reply.type('text/html').send(pupilLayout(renderPupilResults(res), csrf));
+    const a = await getAssessment(p.data.id);
+    return reply.type('text/html').send(pupilLayout(renderPupilResultsHeld(a?.title ?? 'Your assessment'), csrf));
   });
 }

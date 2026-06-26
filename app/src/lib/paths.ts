@@ -311,6 +311,9 @@ export const paths = {
   meAssessmentAnswer: (id: number): string => `/me/assessments/${id}/answer`,
   meAssessmentSubmit: (id: number): string => `/me/assessments/${id}/submit`,
   meAssessmentResults: (id: number): string => `/me/assessments/${id}/results`,
+  // Phase 5 — results + teacher-controlled release
+  assessmentResults: (id: number): string => `/assessments/${id}/results`,
+  assessmentRelease: (id: number, gcId: number): string => `/assessments/${id}/release/${gcId}`,
   // Phase 4 — teacher marking (confirm/adjust)
   assessmentMarkQueue: (): string => '/assessments/marking',
   assessmentAttemptMarks: (id: number, attemptId: number): string => `/assessments/${id}/attempts/${attemptId}/marks`,

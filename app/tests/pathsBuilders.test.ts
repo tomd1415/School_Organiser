@@ -190,6 +190,9 @@ describe('paths builders — exact URLs', () => {
     [paths.assessmentMarkNow(7, 3), '/assessments/7/attempts/3/mark'],
     [paths.assessmentMarkConfirm(7, 3), '/assessments/7/attempts/3/confirm'],
     [paths.assessmentMarkAnswer(7, 3, 9), '/assessments/7/attempts/3/answers/9/override'],
+    // results + release (Phase 5)
+    [paths.assessmentResults(7), '/assessments/7/results'],
+    [paths.assessmentRelease(7, 5), '/assessments/7/release/5'],
   ])('builds %s', (actual, expected) => {
     expect(actual).toBe(expected);
   });
