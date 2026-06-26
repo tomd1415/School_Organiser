@@ -65,8 +65,10 @@ export interface AvailableAssessment {
 /** Assessments assigned to a pupil's class(es) that are READY and OPEN now, with this pupil's attempt
  *  status. `isTest` selects which attempt partition to read (real vs Test-Lab). */
 export async function availableAssessmentsForPupil(pupilId: number, isTest: boolean): Promise<AvailableAssessment[]> {
+  // DISTINCT ON (a.id): a pupil enrolled in two classes BOTH assigned the same paper would otherwise see it
+  // twice — collapse to one row per assessment (preferring the earliest-opening class).
   const { rows } = await pool.query<AvailableAssessment>(
-    `SELECT a.id, a.title, a.style, a.marks_total AS "marksTotal", ac.group_course_id AS "groupCourseId",
+    `SELECT DISTINCT ON (a.id) a.id, a.title, a.style, a.marks_total AS "marksTotal", ac.group_course_id AS "groupCourseId",
             ac.results_mode AS "resultsMode",
             to_char(ac.released_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "releasedAt",
             COALESCE(at.status, 'not_started') AS "attemptStatus"
@@ -77,9 +79,10 @@ export async function availableAssessmentsForPupil(pupilId: number, isTest: bool
      LEFT JOIN assessment_attempts at ON at.assessment_id = a.id AND at.pupil_id = $1 AND at.is_test = $2
      WHERE (ac.available_from IS NULL OR ac.available_from <= now())
        AND (ac.available_until IS NULL OR now() <= ac.available_until)
-     ORDER BY a.title`,
+     ORDER BY a.id, ac.available_from NULLS FIRST, ac.assigned_at`,
     [pupilId, isTest],
   );
+  rows.sort((x, y) => x.title.localeCompare(y.title));
   return rows;
 }
 
@@ -106,7 +109,11 @@ export async function pupilAssignmentFor(assessmentId: number, pupilId: number):
      JOIN group_courses gc ON gc.id = ac.group_course_id AND gc.active
      JOIN enrolments e     ON e.group_id = gc.group_id AND e.active AND e.pupil_id = $2
      WHERE ac.assessment_id = $1
-     ORDER BY ac.assigned_at
+     -- a pupil in two classes both assigned this paper: prefer the class where it's OPEN now, else earliest.
+     ORDER BY (a.status = 'ready'
+                AND (ac.available_from IS NULL OR ac.available_from <= now())
+                AND (ac.available_until IS NULL OR now() <= ac.available_until)) DESC,
+              ac.assigned_at
      LIMIT 1`,
     [assessmentId, pupilId],
   );

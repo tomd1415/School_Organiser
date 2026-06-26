@@ -3768,3 +3768,18 @@ body.cards-page {
   }
 }
 
+
+/* ── Per-unit summative assessments — dark theme (re-skins the structure in styles-base-widgets.css) ── */
+body[data-shell="next"] .asmt-part { border-left-color: var(--line, #2a2f3a); }
+body[data-shell="next"] .asmt-q { background: var(--surface, #161a22); border: 1px solid var(--line, #2a2f3a); border-radius: 10px; }
+body[data-shell="next"] .asmt-assign-row,
+body[data-shell="next"] .asmt-rel-row,
+body[data-shell="next"] .asmt-take-card,
+body[data-shell="next"] .asmt-unit-row,
+body[data-shell="next"] .asmt-modq-row,
+body[data-shell="next"] .asmt-presult-item,
+body[data-shell="next"] .asmt-results-table th,
+body[data-shell="next"] .asmt-results-table td { border-color: var(--line, #2a2f3a); }
+body[data-shell="next"] .asmt-mark-part { border-left-color: var(--line, #2a2f3a); }
+body[data-shell="next"] .asmt-mark-answer { background: rgba(255,255,255,0.04); }
+body[data-shell="next"] .cohort-asmt { color: var(--teal, #5eead4); }

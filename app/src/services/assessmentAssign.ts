@@ -28,7 +28,13 @@ export interface WindowResult {
 export function validateWindow(from?: string | null, until?: string | null): WindowResult {
   const parse = (s?: string | null): { ok: boolean; iso: string | null } => {
     if (s == null || s.trim() === '') return { ok: true, iso: null };
-    const d = new Date(s);
+    // A <input type="datetime-local"> value (YYYY-MM-DDTHH:MM[:SS]) carries NO timezone. Interpret it as
+    // UTC (append 'Z') so it round-trips EXACTLY with the UTC-rendered prefill (the repo renders the column
+    // back as a 'Z' string and the view slices it verbatim) — without this, a non-UTC server would shift
+    // the window by its offset on every save. Strings that already carry a tz (Z or ±offset) pass through.
+    const v = s.trim();
+    const bareLocal = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(v) ? `${v}Z` : v;
+    const d = new Date(bareLocal);
     if (Number.isNaN(d.getTime())) return { ok: false, iso: null };
     return { ok: true, iso: d.toISOString() };
   };

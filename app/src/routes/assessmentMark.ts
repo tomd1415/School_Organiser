@@ -13,6 +13,7 @@ import {
   getAttempt,
   listAssignmentsForAssessment,
   overrideMark,
+  writeAwardedMark,
 } from '../repos/assessmentAttempts';
 import { classNamesFor } from '../repos/assessmentAnalytics';
 import { getPupilName } from '../repos/pupilCredentials';
@@ -72,7 +73,17 @@ export function registerAssessmentMarkRoutes(app: FastifyInstance): void {
     const row = rows.find((r) => r.answerId === p.data.answerId);
     if (row) {
       const marks = Math.max(0, Math.min(row.partMarks, b.data.marks));
-      await overrideMark(p.data.answerId, marks, b.data.feedback ?? null);
+      if (row.marker == null) {
+        // No awarded-mark row yet (e.g. an OPEN answer the AI couldn't mark / AI off) — insert a fresh
+        // teacher-confirmed mark, so the teacher can always mark by hand (mirrors routes/markModal.ts).
+        await writeAwardedMark({
+          answerId: p.data.answerId, marksAwarded: marks, marksTotal: row.partMarks, marker: 'teacher',
+          confidence: null, status: 'confirmed', needsReview: false, feedback: b.data.feedback ?? '',
+          pointsHit: [], evidence: [], historyEntry: { override: true },
+        });
+      } else {
+        await overrideMark(p.data.answerId, marks, b.data.feedback ?? null);
+      }
       await recomputeAttempt(p.data.attemptId);
     }
     const grid = await gridFor(p.data.id, p.data.attemptId, reply.generateCsrf());

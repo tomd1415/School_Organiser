@@ -27,7 +27,7 @@ export function registerSafeguardingRoutes(app: FastifyInstance): void {
   });
 
   app.post('/safeguarding/:type/:id', guard, async (req, reply) => {
-    const p = z.object({ type: z.enum(['answer', 'captured', 'ta_feedback']), id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const p = z.object({ type: z.enum(['answer', 'captured', 'ta_feedback', 'assessment_answer']), id: z.coerce.number().int().positive() }).safeParse(req.params);
     if (!p.success) return reply.code(400).send('');
     const b = z.object({ status: z.enum(STATUSES), note: z.string().max(500).optional() }).safeParse(req.body);
     if (!b.success) return reply.code(400).send('');

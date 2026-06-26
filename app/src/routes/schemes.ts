@@ -95,6 +95,8 @@ import { recentAppliedFindings } from '../repos/reviews';
 import { applyReview, dismissOpenReview, getOpenReviewForPlan, openReviewPlanIds } from '../repos/reviews';
 import { renderReview, renderClassCompare, renderConvertDup, renderSchemesNext, renderClassesMatrix } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
+import { listAssessmentsForUnit } from '../repos/assessments';
+import { renderAssessmentUnitPanel } from '../lib/assessmentUnitPanelView';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const dir = z.enum(['up', 'down']);
@@ -746,6 +748,14 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
   });
 
   // 5.4: lay a unit into a group's weekly slot. The form lists the slots that teach this course.
+  // Phase 6 — the lazy "Assessments" panel for a unit on the Spine (loaded on first toggle).
+  app.get('/schemes/unit/:id/assessments', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const items = await listAssessmentsForUnit(id.data.id);
+    return reply.type('text/html').send(renderAssessmentUnitPanel(id.data.id, items));
+  });
+
   app.get('/schemes/unit/:id/lay-form', { preHandler: requireAuth }, async (req, reply) => {
     const id = idParam.safeParse(req.params);
     if (!id.success) return reply.code(400).send('');

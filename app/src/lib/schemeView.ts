@@ -181,6 +181,10 @@ function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>): string 
       <summary>📅 Lay into a group's calendar</summary>
       <div class="unit-lay-body" hx-get="${paths.schemesUnitLayForm(u.id)}" hx-trigger="toggle from:#unit-${u.id}-lay once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading slots…</span></div>
     </details>
+    <details class="unit-asmt" id="unit-${u.id}-asmt">
+      <summary>📝 Assessments</summary>
+      <div class="unit-asmt-body" hx-get="${paths.schemesUnitAssessments(u.id)}" hx-trigger="toggle from:#unit-${u.id}-asmt once" hx-target="this" hx-swap="innerHTML"><span class="muted">loading assessments…</span></div>
+    </details>
   </section>`;
 }
 

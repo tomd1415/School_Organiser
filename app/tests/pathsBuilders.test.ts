@@ -166,9 +166,10 @@ describe('paths builders — exact URLs', () => {
     [paths.setupRolloverRoll(2, 5), '/setup/rollover?from=2&amp;to=5'],
     [paths.setupRolloverRoll(null, 5), '/setup/rollover?to=5'],
     [paths.groupHistory(8), '/group/8/history'],
-    // per-unit assessments (Phase 1)
+    // per-unit assessments (Phase 1 + 6)
     [paths.unitAssessments(9), '/units/9/assessments'],
     [paths.unitAssessmentsGenerate(9), '/units/9/assessments/generate'],
+    [paths.schemesUnitAssessments(9), '/schemes/unit/9/assessments'],
     [paths.assessment(7), '/assessments/7'],
     [paths.assessmentReady(7), '/assessments/7/ready'],
     [paths.assessmentQuestion(7, 3), '/assessments/7/questions/3'],

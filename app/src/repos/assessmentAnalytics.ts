@@ -69,12 +69,33 @@ export interface PupilSpecPoint {
   total: number;
 }
 
-/** One attempt's per-spec-point results (the pupil's own breakdown). */
+/** One attempt's per-spec-point results from the cache (includes suggested marks) — TEACHER use only. */
 export async function pupilSpecPoints(attemptId: number): Promise<PupilSpecPoint[]> {
   const { rows } = await pool.query<PupilSpecPoint>(
     `SELECT sp.code, sp.title, r.marks_awarded AS awarded, r.marks_total AS total
      FROM assessment_spec_point_results r JOIN course_spec_points sp ON sp.id = r.spec_point_id
      WHERE r.attempt_id = $1 ORDER BY sp.display_order, sp.id`,
+    [attemptId],
+  );
+  return rows;
+}
+
+/** A pupil's per-spec-point breakdown computed from CONFIRMED, OBJECTIVE marks only — never the shared
+ *  spec-point cache (which is recomputed from suggested marks at mark time and would leak unconfirmed
+ *  scores). Objective = the part has mark points and none is an 'open' (AI-marked) point. */
+export async function pupilConfirmedSpecPoints(attemptId: number): Promise<PupilSpecPoint[]> {
+  const { rows } = await pool.query<PupilSpecPoint>(
+    `SELECT sp.code, sp.title, sum(am.marks_awarded)::int AS awarded, sum(am.marks_total)::int AS total
+     FROM assessment_awarded_marks am
+     JOIN assessment_answers ans ON ans.id = am.answer_id
+     JOIN assessment_question_parts p ON p.id = ans.part_id
+     JOIN assessment_questions q ON q.id = p.question_id
+     JOIN course_spec_points sp ON sp.id = q.spec_point_id
+     WHERE ans.attempt_id = $1 AND am.status = 'confirmed' AND q.spec_point_id IS NOT NULL
+       AND EXISTS (SELECT 1 FROM assessment_mark_points mp WHERE mp.part_id = p.id)
+       AND NOT EXISTS (SELECT 1 FROM assessment_mark_points mp WHERE mp.part_id = p.id AND mp.kind = 'open')
+     GROUP BY sp.id, sp.code, sp.title
+     ORDER BY sp.display_order, sp.id`,
     [attemptId],
   );
   return rows;

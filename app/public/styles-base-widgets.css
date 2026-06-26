@@ -1991,3 +1991,64 @@ html[data-textscale="3"] { font-size: 142%; }
 .toggle-knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform 0.15s ease; }
 .toggle-switch input:checked + .toggle-knob::after { transform: translateX(20px); }
 @media (prefers-reduced-motion: reduce) { .toggle-knob, .toggle-knob::after { transition: none; } }
+
+/* ── Per-unit summative assessments (review · assign · take · mark · results · unit panel) ─────────────
+   Structure/layout only; dark-theme colours live in styles.css under body[data-shell="next"]. Reuses the
+   shared .card/.badge/.chip/.muted vocabulary, so these rules are mostly grid/flow + spacing. */
+.assessment-review .asmt-head-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.asmt-q { margin: 14px 0; padding: 12px 14px; }
+.asmt-q-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.asmt-part { margin: 10px 0 10px 12px; padding-left: 12px; border-left: 2px solid var(--line, #ddd); }
+.asmt-part-head { display: flex; gap: 8px; align-items: center; }
+.asmt-l { display: block; margin: 6px 0; }
+.asmt-l textarea, .asmt-l input { width: 100%; }
+.asmt-marks-l { max-width: 8rem; }
+.asmt-mps { list-style: none; padding: 0; margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
+.asmt-mp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.asmt-mp .asmt-edit { flex: 1 1 14rem; min-width: 10rem; }
+.asmt-mp .asmt-marks { width: 4rem; }
+.asmt-model, .asmt-misc { margin: 6px 0; }
+.asmt-ready-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+
+.asmt-assign-row, .asmt-rel-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid var(--line, #eee); }
+.asmt-assign-l { display: flex; flex-direction: column; font-size: 12px; }
+.asmt-assign-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Pupil take-flow (light theme — chrome from pupil-card/pupil-go) */
+.asmt-take-cards, .asmt-take-list ul { list-style: none; padding: 0; margin: 0; }
+.asmt-take-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line, #eee); }
+.asmt-take-q { margin: 16px 0; }
+.asmt-take-part { margin: 10px 0; }
+.asmt-take-prompt { margin: 4px 0; }
+.asmt-take-widget textarea, .asmt-take-widget input[type="text"] { width: 100%; }
+.asmt-opts { display: flex; flex-direction: column; gap: 4px; }
+.asmt-opt { display: flex; gap: 6px; align-items: center; }
+.asmt-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.asmt-take-submit { margin-top: 18px; }
+.asmt-presult-items, .asmt-presult-spec { list-style: none; padding: 0; }
+.asmt-presult-item { padding: 6px 0; border-top: 1px solid var(--line, #eee); }
+
+/* Teacher marking grid + moderation queue */
+.asmt-mark-part { margin: 12px 0; padding: 10px 12px; border-left: 3px solid var(--line, #ddd); }
+.asmt-mark-answer { white-space: pre-wrap; margin: 6px 0; padding: 8px 10px; border-radius: 6px; background: rgba(0,0,0,0.03); }
+.asmt-mark-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.asmt-mark-controls { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; margin-top: 6px; }
+.asmt-mark-l { display: flex; flex-direction: column; font-size: 12px; }
+.asmt-mark-fb input { width: 18rem; max-width: 100%; }
+.asmt-mark-actions { display: flex; gap: 8px; }
+.asmt-modq-list { list-style: none; padding: 0; }
+.asmt-modq-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line, #eee); }
+
+/* Teacher results dashboard */
+.asmt-results-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.asmt-results-table th, .asmt-results-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line, #eee); }
+.asmt-results-table td.num { white-space: nowrap; }
+.asmt-heat { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.asmt-heat-cell { font-variant-numeric: tabular-nums; }
+
+/* Unit panel on the spine + the cohort assessment chip */
+.asmt-unit-list { list-style: none; padding: 0; margin: 0; }
+.asmt-unit-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 6px 0; border-top: 1px solid var(--line, #eee); }
+.asmt-unit-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.asmt-unit-gen { display: inline-block; margin-top: 8px; }
+.cohort-asmt { font-variant-numeric: tabular-nums; }

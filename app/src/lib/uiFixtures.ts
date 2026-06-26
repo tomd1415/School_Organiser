@@ -332,6 +332,12 @@ export const GALLERY_MARKING_ROWS = [
   { qOrder: 3, stem: 'Extension', partId: 400, partLabel: 'a', prompt: 'Describe a mesh topology.', partMarks: 3, responseType: 'extended_response', specPointId: null, answerId: 9004, answerText: 'Every device connects to every other device.', marksAwarded: null, marksTotal: null, marker: null, confidence: null, status: null, needsReview: null, disclosure: null, feedback: null, evidence: null },
 ];
 
+// Phase 6 — the per-unit assessments panel (Schemes spine).
+export const GALLERY_UNIT_ASSESSMENTS = [
+  { id: 1, title: 'Networks — end-of-unit assessment', style: 'gcse' as const, status: 'ready', marksTotal: 24, questionCount: 10, assignedClasses: 2 },
+  { id: 2, title: 'Networks — diagnostic (draft)', style: 'gcse' as const, status: 'draft', marksTotal: 0, questionCount: 6, assignedClasses: 0 },
+];
+
 // Phase 5 — results dashboard + pupil panel fixtures.
 export const GALLERY_TEACHER_RESULTS = {
   assessmentId: 1, title: 'Networks — end-of-unit assessment', marksTotal: 24,

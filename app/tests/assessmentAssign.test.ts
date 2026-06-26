@@ -16,6 +16,15 @@ describe('validateWindow', () => {
     expect(r.until).toMatch(/^2026-07-08T/);
   });
 
+  it('treats a tz-less datetime-local value as UTC (round-trips exactly, no server-offset drift)', () => {
+    // The repo renders the stored column back as a 'Z' string the view slices verbatim; parsing as UTC
+    // makes the wall-clock survive a non-UTC server. 09:00 in → 09:00:00Z out (not shifted by an offset).
+    expect(validateWindow('2026-07-01T09:00', null).from).toBe('2026-07-01T09:00:00.000Z');
+    expect(validateWindow(null, '2026-07-08T16:30:00').until).toBe('2026-07-08T16:30:00.000Z');
+    // an explicit-offset value is respected as given
+    expect(validateWindow('2026-07-01T09:00:00Z', null).from).toBe('2026-07-01T09:00:00.000Z');
+  });
+
   it('rejects close <= open', () => {
     expect(validateWindow('2026-07-08T16:00', '2026-07-01T09:00').ok).toBe(false);
     expect(validateWindow('2026-07-01T09:00', '2026-07-01T09:00').ok).toBe(false);

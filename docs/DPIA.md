@@ -179,6 +179,15 @@ redact (the count appears in the disposal audit). `ai_calls` audit rows are reta
 the redaction-control evidence; they contain no names. **[CONFIRM retention periods with DPO.]** All
 data is exportable for a subject-access request (DATA_MODEL §"Data portability").
 
+**Assessments.** The summative-assessment feature stores additional pupil PII: free-text answers
+(`assessment_answers`), per-pupil marks/feedback (`assessment_awarded_marks`) and objective per-spec-point
+results (`assessment_spec_point_results`); these cascade-delete with the pupil on erasure (FK
+`ON DELETE CASCADE` from `pupils`). The AI control is unchanged: generation is cohort-level (no pupil
+identity), marking sends only **redacted, slot-lettered** answers via the one wrapper, safeguarding-matched
+answers are **withheld from AI** (and surface in the safeguarding register), and all marking is behind the
+`pupil_marks_enabled` DPIA gate. Test-Lab attempts (`is_test`) are excluded from analytics and never
+AI-marked, and `wipeTestAttempts` clears them.
+
 ## 8. Outcome and sign-off
 
 Residual risk after measures: **low**, conditional on the sign-offs below and the **[CONFIRM]** items

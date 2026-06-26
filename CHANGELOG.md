@@ -7,6 +7,38 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-26 — Per-unit summative assessments (Phases 1–7) built
+
+The full assessment subsystem on top of the Phase-0 schema/repos: AI generation → teacher review/Mark-ready
+→ assign-to-class → pupil take-flow → AI-assisted marking → results + teacher-controlled release.
+
+- **Phase 1 — generation + review.** `blueprintForUnit` (covered vs not-yet-taught spec points for a chosen
+  class) → `generate_assessment` (Opus) → a pure validator (clamps marks, resolves spec-point codes→ids,
+  dedupes part labels, restricts widgets/kinds, drops empties) → `materialiseAssessment` (draft). Teacher
+  review/edit + **Mark ready** (guarded). Degrades to writing nothing with AI off.
+- **Phase 2 — assignment.** Assign a ready paper to its eligible classes (deduped by group_course) with an
+  availability window + results mode (`instant` / `on_release`); pure `validateWindow`.
+- **Phase 3 — pupil take-flow.** Light-theme list → start → answer (autosave) → submit, behind the pupil
+  gate, with the `is_test` partition. `takeTree` is the single PII-safe projection — the answer key
+  (mark-points / model answers / misconceptions) **never reaches the pupil** (unit-tested + e2e-asserted).
+- **Phase 4 — marking.** Objective parts auto-mark deterministically on submit (instant, free); open parts
+  go to the AI (Sonnet) in **anonymous, slot-lettered, redacted** batches via the one wrapper, on a durable
+  queue (boot sweep + tick). Safeguarding-matched answers are **withheld from AI** and flagged (disclosure),
+  surfacing in the safeguarding register. Teacher confirm/adjust grid + moderation queue; `needs_review`
+  is never auto-confirmed; per-spec-point objective results cached at mark time.
+- **Phase 5 — results + release.** Teacher dashboard (per-pupil scores + per-spec-point RAG heatmap +
+  per-class Release control); gated, **confirmed-only** pupil results (held until released unless instant).
+  Pupils-cohort screen gains an assessment-% chip. Every analytics read filters `WHERE NOT is_test`.
+- **Phase 6 — integration.** Lazy **"Assessments"** panel under each unit on the Schemes spine; the full
+  `paths.ts` builder set (guard + oracle green); a `/ui-gallery` fixture for every assessment view; CSS
+  (structure in `styles-base-widgets.css`, dark theme in `styles.css`).
+- **Phase 7 — verification.** Cross-cutting privacy guards (no pupil name to AI in generation or marking;
+  inputs in `context[]` never `system`; safeguarding withheld; `is_test` isolation; answer key never to
+  pupils); a full-lifecycle Playwright smoke (take → results → mark → confirm → release, AI off) + the
+  take-flow + gallery e2e. **A live-AI smoke is still pending** (needs the teacher's `ANTHROPIC_API_KEY`).
+
+No new migrations (built on Phase-0 `0063/0064`). The live end-to-end AI smoke is the one remaining DoD item.
+
 ### 2026-06-21 — Classic UI retired (finish) + cockpit adaptation editor restored
 
 Following the move to a single dark shell (`getUiShell()` is now always `next`; the `styles-overhaul.css`

@@ -14,8 +14,8 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await page.goto('/ui-gallery', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('h1', { hasText: 'UI gallery' })).toBeVisible();
-  // each section renders (component kit + 16 fixture-backed views)
-  await expect(page.locator('.gallery-item')).toHaveCount(17);
+  // each section renders (component kit + fixture-backed views, incl. the 8 assessment-subsystem views)
+  await expect(page.locator('.gallery-item')).toHaveCount(25);
   await expect(page.locator('.gallery-stage .focus-card').first()).toBeVisible(); // Focus card
   await expect(page.locator('.gallery-stage .captured-card').first()).toBeVisible(); // Captured cards
   await expect(page.locator('.gallery-stage .note-card').first()).toBeVisible(); // Notes grid
@@ -33,6 +33,15 @@ test('UI gallery renders every showcased component with no client-side errors', 
   await expect(page.locator('.gallery-stage .map-timeline').first()).toBeVisible(); // Curriculum map rail
   await expect(page.locator('.gallery-stage .now-hero').first()).toBeVisible(); // Now hero
   await expect(page.locator('.gallery-stage .timeline-slot').first()).toBeVisible(); // now timeline
+  // assessment subsystem (Phases 1–6)
+  await expect(page.locator('.gallery-stage .assessment-review').first()).toBeVisible(); // review/edit
+  await expect(page.locator('.gallery-stage .asmt-assign').first()).toBeVisible(); // assignments
+  await expect(page.locator('.gallery-stage .asmt-take').first()).toBeVisible(); // pupil take page
+  await expect(page.locator('.gallery-stage .asmt-marking').first()).toBeVisible(); // marking grid
+  await expect(page.locator('.gallery-stage .asmt-results-table').first()).toBeVisible(); // teacher results
+  await expect(page.locator('.gallery-stage .asmt-unit-list').first()).toBeVisible(); // unit panel
+  // the pupil take page (PII-safe projection) must not leak the review section's answer-key text
+  await expect(page.locator('.gallery-stage .asmt-take')).not.toContainText('Award by marker judgement');
 
   expect(errors, errors.join('\n')).toEqual([]);
   await page.screenshot({ path: 'test-results/ui-gallery.png', fullPage: true });

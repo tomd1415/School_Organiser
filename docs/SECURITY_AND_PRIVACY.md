@@ -102,6 +102,34 @@ and is suggested by the categoriser; once flagged, the item is removed from all 
 (planning, summaries, categorisation). The AI provider is **Anthropic (Claude)**; the same
 redaction *and* withholding rules apply regardless of provider.
 
+## Per-unit assessments (the assessment subsystem)
+
+The summative-assessment feature (generate → assign → take → mark → results) follows the same
+non-negotiables, enforced structurally:
+
+- **Generation carries no pupil identity.** A paper is generated from cohort-level curriculum content
+  (the spec points a *class* has been taught, the unit's lessons) — no pupil is ever named or described.
+  All factual inputs go through the wrapper's `context[]`, never the `system` string, so redaction +
+  the egress assert + the audit still apply (belt-and-braces).
+- **Marking sends only redacted, slot-lettered answers.** Open answers go to the AI (Sonnet) in
+  **anonymous batches**: each answer is a slot letter (A, B, C…) and the slot→answer map stays
+  server-side. A pupil who writes their own name in an answer has it tokenised before egress (the
+  wrapper's `containsRosterName` refuses to send if any name survives).
+- **Safeguarding answers are withheld entirely.** An answer tripping the content guard is **never sent
+  to the AI**; it is stored `disclosure=true, needs_review=true` and surfaces in the safeguarding
+  register (the `assessment_answer` stream).
+- **PII stored:** pupil free-text answers live in `assessment_answers`; per-pupil marks/feedback in
+  `assessment_awarded_marks`; objective per-spec-point results in `assessment_spec_point_results`. The
+  question paper itself (`assessments` + questions/parts/mark-points) holds **no** pupil identity.
+- **The answer key never reaches a pupil.** The pupil take-flow renders only the PII-safe `takeTree`
+  projection (stems, prompts, choice options, the marks tariff) — no mark-points, model answers or
+  misconceptions. Pupil results show **confirmed marks only**, and only once released (unless the class
+  is on `instant`); an unconfirmed/`needs_review` mark is never visible to a pupil.
+- **`is_test` partition:** the fictitious test pupil's attempts are `is_test=true`, are never AI-marked,
+  and are excluded from every cohort/analytics read (`WHERE NOT is_test`); `wipeTestAttempts` clears them.
+- **DPIA marks gate:** all per-pupil assessment marking is off until the teacher enables marking in
+  Settings (`pupil_marks_enabled`), the same gate as lesson marking.
+
 ## GDPR / data protection
 
 - **Lawful basis / role:** the school is the data controller; this tool is a processing system

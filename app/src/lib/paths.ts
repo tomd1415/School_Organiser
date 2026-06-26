@@ -296,6 +296,7 @@ export const paths = {
   // ── Per-unit summative assessments (Phase 1) ────────────────────────────────────────────────────
   unitAssessments: (unitId: number): string => `/units/${unitId}/assessments`,
   unitAssessmentsGenerate: (unitId: number): string => `/units/${unitId}/assessments/generate`,
+  schemesUnitAssessments: (unitId: number): string => `/schemes/unit/${unitId}/assessments`, // Phase 6 lazy spine panel
   assessment: (id: number): string => `/assessments/${id}`,
   assessmentReady: (id: number): string => `/assessments/${id}/ready`,
   assessmentQuestion: (id: number, qid: number): string => `/assessments/${id}/questions/${qid}`,

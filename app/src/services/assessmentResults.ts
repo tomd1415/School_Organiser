@@ -7,7 +7,7 @@ import { getPupilAttempt, listAssignmentsForAssessment, pupilAssignmentFor, setR
 import {
   perPupilForAssessment,
   pupilConfirmedMarks,
-  pupilSpecPoints,
+  pupilConfirmedSpecPoints,
   specPointMasteryForAssessment,
   type PupilResultRow,
   type SpecPointMastery,
@@ -60,7 +60,8 @@ export async function pupilResults(pupilId: number, assessmentId: number): Promi
   const attempt = await getPupilAttempt(assessmentId, pupilId, false);
   if (!resultsVisible(asg.resultsMode, asg.releasedAt, attempt?.status ?? null)) return null; // held / not submitted
   if (!attempt) return null;
-  const [marks, sp] = await Promise.all([pupilConfirmedMarks(attempt.id), pupilSpecPoints(attempt.id)]);
+  // Both reads are CONFIRMED-only — a pupil never sees an unconfirmed/suggested mark (per-part OR per-spec-point).
+  const [marks, sp] = await Promise.all([pupilConfirmedMarks(attempt.id), pupilConfirmedSpecPoints(attempt.id)]);
   const items = marks.map((m) => ({ label: `Q${m.qOrder + 1}${m.partLabel}: ${m.prompt}`, awarded: m.marksAwarded, total: m.marksTotal, feedback: m.feedback }));
   return {
     title: a.title,
