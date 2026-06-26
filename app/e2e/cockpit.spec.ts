@@ -31,3 +31,33 @@ test('Cockpit shows the §17 action rail + Focus mode collapses the grid', async
 
   expect(pageErrors, pageErrors.join('\n')).toEqual([]);
 });
+
+// §17 mode control: View / Edit-this-class / Edit-master in the flow card. The control only renders for a
+// plan-bound lesson, so scan the timetable for one; switching mode reveals the matching edit panel + scope
+// strip (the live tracker above is left untouched). Reuses the existing /lesson/adapt + /schemes/plan writes.
+test('Cockpit flow mode control reveals the this-class / master edit panels + scope strip', async ({ page }) => {
+  await page.goto('/timetable', { waitUntil: 'networkidle' });
+  const hrefs = await page.locator('a[href*="/lesson?lesson="]').evaluateAll((as) =>
+    Array.from(new Set(as.map((a) => (a as HTMLAnchorElement).getAttribute('href')!.replace(/&amp;/g, '&')))));
+  let found = false;
+  for (const href of hrefs.slice(0, 25)) {
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    if (await page.locator('.flow-mode').count()) { found = true; break; }
+  }
+  test.skip(!found, 'no plan-bound lesson in the seed to show the mode control');
+
+  await expect(page.locator('.sequence')).toBeVisible();
+  await expect(page.locator('.flow-panel-class')).toBeHidden();
+
+  await page.locator('.flow-mode-btn[data-mode="class"]').click();
+  await expect(page.locator('.flow-panel-class')).toBeVisible();
+  await expect(page.locator('.flow-scope-class')).toBeVisible();
+  await expect(page.locator('.flow-panel-master')).toBeHidden();
+
+  await page.locator('.flow-mode-btn[data-mode="master"]').click();
+  await expect(page.locator('.flow-panel-master')).toBeVisible();
+  await expect(page.locator('.flow-scope-master')).toBeVisible();
+  await expect(page.locator('.flow-panel-class')).toBeHidden();
+
+  await expect(page.locator('.sequence')).toBeVisible(); // live tracker untouched throughout
+});
