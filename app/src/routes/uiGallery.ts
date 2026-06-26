@@ -12,7 +12,7 @@ import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
 import { renderFocusInner } from '../lib/focusView';
-import { renderSchemesNext, renderSchemeTree } from '../lib/schemeView';
+import { renderSchemesNext, renderSchemeTree, renderClassesMatrix } from '../lib/schemeView';
 import { buildSchemeTree } from '../services/scheme';
 import { renderMapPage } from '../lib/mapView';
 import { renderCoverageReport } from '../lib/coverageView';
@@ -36,6 +36,7 @@ import {
   GALLERY_SCHEME_HEADER,
   GALLERY_SCHEME_UNITS,
   GALLERY_SCHEME_PLANS,
+  GALLERY_SCHEME_MATRIX,
   GALLERY_NOW_HERO_STATE,
   GALLERY_NOW_HERO_LESSON,
   GALLERY_NOW_HERO_NEXT,
@@ -124,7 +125,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Tasks (SPEC §4)', 'renderTaskList — tone-left-border task cards (urgency: urgent→red · by-next-lesson→amber · this-week/email/scheduled→teal · someday→grey), an EMAIL source tag, a done-checkbox (struck when done), the urgency badge, and triage/edit controls in a disclosure. The live page wraps these in a segmented Inbox/Open/Done/Interest tab control with counts.', `<div class="tasks-page">${renderTaskList('gallery-tasks', GALLERY_TASKS, GALLERY_GROUPS)}</div>`)}
       ${item('Oversee (SPEC §13)', 'renderOverseePage — TA-led lessons grouped by day; each row shows the slot · ⚑ class · course · TA name + plan-set/resources status pills. A missing plan turns the row red; Open leads to the lesson page where the plan/resources/note are set.', renderOverseePage(GALLERY_OVERSEE))}
       ${item('Focus (SPEC §5)', 'renderFocusInner — the one-thing-now teal card: the single chosen task with a caption (urgency · window · estimate · load), a tappable step checklist, break-down + Done & next actions, and "N hidden — on purpose". Mode segmented control (Morning / Free period / End of day); an empty end-of-day shows the green wind-down banner.', `<div class="focus">${renderFocusInner(GALLERY_FOCUS)}</div>`)}
-      ${item('Schemes (Spine lens)', 'renderSchemesNext — the scheme meta header (course tag · version·status · real stats: units/lessons/versions · Spine|Classes lens, Classes deferred) above the Spine lens: a Units sidebar (each with a planned% bar) beside the selected unit’s lessons. Units/lessons reuse the existing editors, so every AI/resources/compare affordance is preserved.', renderSchemesNext({
+      ${item('Schemes (Spine lens)', 'renderSchemesNext — the scheme meta header (course tag · version·status · real stats: units/lessons/versions · Spine|Classes lens) above the Spine lens: a Units sidebar (each with a planned% bar) beside the selected unit’s lessons. Units/lessons reuse the existing editors, so every AI/resources/compare affordance is preserved.', renderSchemesNext({
         courseId: GALLERY_SCHEME_HEADER.courseId,
         currentCourseName: GALLERY_SCHEME_HEADER.courseName,
         scheme: GALLERY_SCHEME_HEADER,
@@ -132,12 +133,15 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         versions: [{ id: 31, version: 3, active: true }, { id: 30, version: 2, active: false }],
         unitCount: GALLERY_SCHEME_UNITS.length,
         lessonCount: GALLERY_SCHEME_PLANS.length,
+        lens: 'spine',
         treeHtml: renderSchemeTree(GALLERY_SCHEME_HEADER, buildSchemeTree(GALLERY_SCHEME_UNITS, GALLERY_SCHEME_PLANS)),
+        matrixHtml: '',
         teachingCtxHtml: '',
         allSchemesHtml: '',
         convertPanelHtml: '',
         csrf: 'gallery',
       }))}
+      ${item('Schemes — Classes matrix (SPEC §8)', 'renderClassesMatrix — the Classes lens: units × classes, each cell a lesson’s delivery status for that class — taught (date, green) · today (teal) · planned (date, plain) · not placed (dashed) · △ adapted for the class. Read-only; placement happens on the Map.', renderClassesMatrix(GALLERY_SCHEME_MATRIX))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}

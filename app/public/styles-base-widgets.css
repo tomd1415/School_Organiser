@@ -474,6 +474,26 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
   .sch-spine { grid-template-columns: 1fr; }
   .sch-stats { margin-left: 0; }
 }
+/* Classes-matrix lens: units × classes grid; scrolls in its wrapper on narrow screens. */
+.sch-matrix-wrap { overflow-x: auto; margin: 1rem 0 0; }
+.sch-matrix { min-width: 520px; }
+.sch-mx-row { display: grid; gap: 6px; align-items: stretch; margin-bottom: 6px; }
+.sch-mx-head { position: sticky; top: 0; background: var(--card); padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 8px; z-index: 1; }
+.sch-mx-cell { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+.sch-mx-corner, .sch-mx-classname { font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; font-size: 0.72rem; color: var(--muted); }
+.sch-mx-classname { justify-content: center; }
+.sch-mx-lesson { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sch-mx-unit { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent); margin: 14px 0 8px; }
+.sch-matrix .sch-mx-cell:not(.sch-mx-corner):not(.sch-mx-classname):not(.sch-mx-lesson) { justify-content: center; border-radius: 7px; padding: 6px 4px; border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.sch-mx-taught { background: color-mix(in srgb, var(--good) 22%, transparent); border-color: color-mix(in srgb, var(--good) 55%, transparent) !important; }
+.sch-mx-today { background: color-mix(in srgb, var(--accent) 20%, transparent); border-color: var(--accent) !important; font-weight: 700; }
+.sch-mx-planned { background: var(--card); color: var(--muted); }
+.sch-mx-na { border-style: dashed !important; color: var(--muted); opacity: 0.6; }
+.sch-mx-adapt { color: var(--amber); font-size: 0.85em; }
+.sch-mx-legend { margin: 14px 0 0; font-size: 0.78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.sch-mx-key { display: inline-block; padding: 0 4px; border-radius: 4px; }
+.sch-mx-legend .sch-mx-taught { color: var(--good); }
+.sch-mx-legend .sch-mx-today { color: var(--accent); }
 /* 5.3: convert a downloaded unit */
 .convert-panel { margin: 0.8rem 0; font-size: 0.9rem; }
 .convert-panel summary { cursor: pointer; color: var(--accent); font-weight: 600; }

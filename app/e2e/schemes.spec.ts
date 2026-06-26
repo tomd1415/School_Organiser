@@ -41,3 +41,20 @@ test('Spine unit selection swaps the visible lesson panel', async ({ page }) => 
   await expect(panels.nth(0)).toBeHidden();
   await expect(unitButtons.nth(1)).toHaveClass(/active/);
 });
+
+// The Classes lens: the header toggle links to ?lens=classes, which renders the units × classes matrix
+// (or its "no classes timetabled" message). Reuses the live schemes page; tolerant of seed data.
+test('Scheme lens toggle switches Spine ↔ Classes', async ({ page }) => {
+  await page.goto('/schemes', { waitUntil: 'domcontentloaded' });
+  const classesLens = page.locator('.sch-lens a', { hasText: 'Classes' });
+  test.skip((await classesLens.count()) === 0, 'no scheme on the first course to show the lens toggle');
+  await classesLens.first().click();
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page).toHaveURL(/lens=classes/);
+  // either the matrix or the muted no-classes message — both valid
+  await expect(page.locator('.sch-matrix, .sch-matrix-empty')).not.toHaveCount(0);
+  // back to Spine
+  await page.locator('.sch-lens a', { hasText: 'Spine' }).first().click();
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page).toHaveURL(/lens=spine/);
+});

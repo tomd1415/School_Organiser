@@ -68,10 +68,10 @@ import { equipmentItem } from '../llm/prompts/equipment';
 import { convertUnitSchema } from '../llm/schemas/convertUnit';
 import { CONVERT_UNIT_SYSTEM, CONVERT_UNIT_VERSION, convertUnitInstruction } from '../llm/prompts/convertUnit';
 import { buildSchemeTree } from '../services/scheme';
-import { classSlots, getCurrentYearEnd, layLessonsAcrossClass, listSlotsForCourse } from '../repos/delivery';
+import { classSchedule, classSlots, getCurrentYearEnd, layLessonsAcrossClass, listSlotsForCourse } from '../repos/delivery';
 import { upcomingClassSlots } from '../services/delivery';
 import { getClockContext } from '../repos/clock';
-import { localParts } from '../lib/time';
+import { addDays, localParts } from '../lib/time';
 import { renderAllSchemes, renderConvertPanel, renderConvertResults, renderLayForm, renderLayResult, renderPlan, renderSchemeEmpty, renderSchemeLabels, renderSchemeTree, renderTeachingContext } from '../lib/schemeView';
 import { renderAttachResults, renderPlanResourcesBlock } from '../lib/resourceView';
 import { renderSavedStatus, renderSaveError } from '../lib/notesView';
@@ -93,7 +93,7 @@ import { reviewLessonMaster, reviewUnitMaster, spotCheckCurriculum, reviewScheme
 import { pastReviewItems } from '../llm/prompts/lessonReview';
 import { recentAppliedFindings } from '../repos/reviews';
 import { applyReview, dismissOpenReview, getOpenReviewForPlan, openReviewPlanIds } from '../repos/reviews';
-import { renderReview, renderClassCompare, renderConvertDup, renderSchemesNext } from '../lib/schemeView';
+import { renderReview, renderClassCompare, renderConvertDup, renderSchemesNext, renderClassesMatrix } from '../lib/schemeView';
 import { listAdaptationsForPlan } from '../repos/adaptations';
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
@@ -218,8 +218,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
 
   app.get('/schemes', { preHandler: requireAuth }, async (req, reply) => {
     const q = z
-      .object({ course: z.coerce.number().int().positive().optional(), scheme: z.coerce.number().int().positive().optional() })
+      .object({ course: z.coerce.number().int().positive().optional(), scheme: z.coerce.number().int().positive().optional(), lens: z.enum(['spine', 'classes']).optional() })
       .safeParse(req.query);
+    const lens: 'spine' | 'classes' = (q.success && q.data.lens) || 'spine';
     const csrf = reply.generateCsrf();
     let body: string;
     try {
@@ -242,10 +243,37 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           listSlotsForCourse(courseId),
           getClockContext(),
         ]);
+        const schemeTree = scheme ? buildSchemeTree(units, plans) : [];
         const tree = scheme
-          ? renderSchemeTree(scheme, buildSchemeTree(units, plans), await openReviewPlanIds(plans.map((p) => p.id)))
+          ? renderSchemeTree(scheme, schemeTree, await openReviewPlanIds(plans.map((p) => p.id)))
           : renderSchemeEmpty(courseId, undefined, current?.name);
         const today = localParts(new Date(), clockCtx.tz).isoDate;
+
+        // Classes-matrix lens: units × classes, each cell that lesson's delivery status for that class.
+        // Built only when the lens is selected. Classes come from the course's timetabled slots; per-class
+        // placements (date + adapted) from classSchedule over a ±~year window.
+        let matrixHtml = '';
+        if (scheme && lens === 'classes') {
+          const seen = new Set<number>();
+          const classes: Array<{ groupCourseId: number; name: string }> = [];
+          for (const s of courseSlots) {
+            if (!seen.has(s.groupCourseId)) { seen.add(s.groupCourseId); classes.push({ groupCourseId: s.groupCourseId, name: s.groupName ?? 'class' }); }
+          }
+          const from = addDays(today, -370);
+          const to = addDays(today, 370);
+          const scheds = await Promise.all(classes.map((c) => classSchedule(c.groupCourseId, from, to)));
+          const placements: Record<string, { date: string; adapted: boolean }> = {};
+          classes.forEach((c, i) => {
+            for (const e of scheds[i] ?? []) {
+              if (e.lessonPlanId == null) continue;
+              const key = `${c.groupCourseId}:${e.lessonPlanId}`;
+              if (!placements[key]) placements[key] = { date: e.date, adapted: e.adapted };
+            }
+          });
+          const matUnits = schemeTree.map((u) => ({ title: u.title, lessons: u.plans.map((p) => ({ id: p.id, title: p.title })) }));
+          matrixHtml = renderClassesMatrix({ classes, units: matUnits, placements, today });
+        }
+
         body = renderSchemesNext({
           courseId,
           currentCourseName: current?.name ?? '',
@@ -254,7 +282,9 @@ export function registerSchemeRoutes(app: FastifyInstance): void {
           versions,
           unitCount: units.length,
           lessonCount: plans.length,
+          lens,
           treeHtml: tree,
+          matrixHtml,
           teachingCtxHtml: renderTeachingContext(courseId, teachingCtx),
           allSchemesHtml: renderAllSchemes(allSchemes, scheme?.id),
           convertPanelHtml: renderConvertPanel(courseId, courseSlots, today),

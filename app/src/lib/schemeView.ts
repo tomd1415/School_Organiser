@@ -376,6 +376,68 @@ export function renderTeachingContext(courseId: number, text: string | null): st
   </details>`;
 }
 
+// ── Classes-matrix lens (SPEC §8/§ schemes): units × classes, each cell the delivery status of that
+// lesson for that class — taught (date, green) · today (teal) · planned (date, plain) · not placed (dashed),
+// with △ when the class has its own adaptation. Read-only; placement/editing live on the Map + lesson.
+export interface ClassesMatrixData {
+  classes: Array<{ groupCourseId: number; name: string }>;
+  units: Array<{ title: string; lessons: Array<{ id: number; title: string }> }>;
+  // keyed `${groupCourseId}:${lessonPlanId}` → the class's placement of that lesson
+  placements: Record<string, { date: string; adapted: boolean }>;
+  today: string;
+}
+
+function fmtMatrixDate(iso: string): string {
+  // "2026-06-23" → "23 Jun" (display-only; no Date parsing surprises — split the ISO string).
+  const [, m, d] = iso.split('-');
+  const MON = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${Number(d)} ${MON[Number(m)] ?? ''}`;
+}
+
+export function renderClassesMatrix(data: ClassesMatrixData): string {
+  const { classes, units, placements, today } = data;
+  if (!classes.length) {
+    return `<div id="scheme-tree" class="sch-matrix-empty"><p class="muted">No classes are timetabled for this course yet — the matrix shows which lessons each class has reached once they are.</p></div>`;
+  }
+  const cols = `minmax(150px, 1.4fr) repeat(${classes.length}, minmax(84px, 1fr))`;
+  const headRow = `<div class="sch-mx-row sch-mx-head" style="grid-template-columns:${cols}">
+    <div class="sch-mx-cell sch-mx-corner">Lesson</div>
+    ${classes.map((c) => `<div class="sch-mx-cell sch-mx-classname">${esc(c.name)}</div>`).join('')}
+  </div>`;
+
+  const cell = (gc: number, planId: number): string => {
+    const p = placements[`${gc}:${planId}`];
+    if (!p) return `<div class="sch-mx-cell sch-mx-na" title="not placed for this class">·</div>`;
+    const kind = p.date < today ? 'taught' : p.date === today ? 'today' : 'planned';
+    const label = kind === 'today' ? 'today' : fmtMatrixDate(p.date);
+    const adapt = p.adapted ? '<span class="sch-mx-adapt" title="adapted for this class">△</span>' : '';
+    return `<div class="sch-mx-cell sch-mx-${kind}" title="${kind}${kind === 'today' ? '' : ` · ${esc(p.date)}`}${p.adapted ? ' · adapted for this class' : ''}"><span>${esc(label)}</span>${adapt}</div>`;
+  };
+
+  const body = units
+    .map((u) => {
+      const lessonRows = u.lessons
+        .map(
+          (l) => `<div class="sch-mx-row" style="grid-template-columns:${cols}">
+            <div class="sch-mx-cell sch-mx-lesson" title="${esc(l.title)}">${esc(l.title)}</div>
+            ${classes.map((c) => cell(c.groupCourseId, l.id)).join('')}
+          </div>`,
+        )
+        .join('');
+      return `<div class="sch-mx-unit">${esc(u.title || 'Untitled unit')}</div>${lessonRows || '<p class="muted sch-mx-emptyunit">no lessons</p>'}`;
+    })
+    .join('');
+
+  const legend = `<p class="sch-mx-legend">
+    <span class="sch-mx-key sch-mx-taught">▦</span> taught (date) ·
+    <span class="sch-mx-key sch-mx-today">▦</span> today ·
+    <span class="sch-mx-key sch-mx-planned">▦</span> planned ·
+    <span class="sch-mx-key sch-mx-na">·</span> not placed ·
+    <span class="sch-mx-adapt">△</span> adapted for class</p>`;
+
+  return `<div id="scheme-tree" class="sch-matrix-wrap"><div class="sch-matrix">${headRow}${body}</div>${legend}</div>`;
+}
+
 export interface SchemesNextData {
   courseId: number;
   currentCourseName: string;
@@ -384,7 +446,9 @@ export interface SchemesNextData {
   versions: Array<{ id: number; version: number; active: boolean }>;
   unitCount: number;
   lessonCount: number;
+  lens: 'spine' | 'classes';
   treeHtml: string;
+  matrixHtml: string;
   teachingCtxHtml: string;
   allSchemesHtml: string;
   convertPanelHtml: string;
@@ -400,7 +464,9 @@ export function renderSchemesNext(data: SchemesNextData): string {
     versions,
     unitCount,
     lessonCount,
+    lens,
     treeHtml,
+    matrixHtml,
     teachingCtxHtml,
     allSchemesHtml,
     convertPanelHtml,
@@ -434,8 +500,8 @@ export function renderSchemesNext(data: SchemesNextData): string {
           <div class="sch-stat"><span class="sch-stat-k">Versions</span><span class="sch-stat-v">${versions.length}</span></div>
         </div>
         <div class="sch-lens" role="group" aria-label="Scheme view">
-          <span class="seg is-on" aria-current="true">Spine</span>
-          <span class="seg seg-soon" title="Classes matrix — coming in a follow-up" aria-disabled="true">Classes</span>
+          <a class="seg${lens === 'spine' ? ' is-on' : ''}"${lens === 'spine' ? ' aria-current="true"' : ''} href="${paths.schemesLens(courseId, 'spine', scheme.id)}">Spine</a>
+          <a class="seg${lens === 'classes' ? ' is-on' : ''}"${lens === 'classes' ? ' aria-current="true"' : ''} href="${paths.schemesLens(courseId, 'classes', scheme.id)}">Classes</a>
         </div>
         <div class="sch-header-actions">
           ${scheme.active ? '' : `<button type="button" class="button small" hx-post="${paths.schemesActivate(scheme.id)}" hx-confirm="Make v${scheme.version} the live version for this course? Lessons, coverage and AI adapt will use it from now on; the current live version becomes a draft.">⬆ Make live</button>`}
@@ -466,7 +532,7 @@ export function renderSchemesNext(data: SchemesNextData): string {
       <p class="sch-spot"><button type="button" class="chip chip-btn" title="Spot-check one random lesson from across your whole curriculum — a single AI review, to catch issues without reviewing everything (only when the reviewer is on in Settings → AI)"
         hx-post="${paths.schemesSpotCheck()}" hx-target="#spot-check-slot" hx-swap="innerHTML" hx-disabled-elt="this">🎲 Spot-check a random lesson (AI)</button></p>
       <div id="spot-check-slot"></div>
-      ${treeHtml}
+      ${lens === 'classes' ? matrixHtml : treeHtml}
       <h2 class="sch-divider">Add or import content</h2>
       ${convertPanelHtml}
       <details class="scheme-import">

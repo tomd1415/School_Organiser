@@ -322,9 +322,23 @@ Full gate green throughout (typecheck · 946 unit · 377 integration · E2E; gal
   deliberately not taken (it would rework the live step-marking JS) — the additive control delivers the
   mode + scope semantics safely.
 
-**Remaining (data wiring only — not layout):** Schemes **Classes-matrix** lens · Pupils §11
-**cohort-analytics** layer (class chips · level chips · completion % · ATL trend). Both need new
-per-class/per-pupil data plumbing; the lens toggle / roster grid are already in place for them.
+### Schemes Classes-matrix lens (done)
+- **Classes matrix (`/schemes?lens=classes`, `renderClassesMatrix`)** — the deferred lens, now built. The
+  header **Spine | Classes** toggle is now real links (`paths.schemesLens`); the Classes lens renders a
+  **units × classes grid**, each cell that lesson's delivery status **for that class** — **taught** (date,
+  green) · **today** (teal) · **planned** (date, plain) · **not placed** (dashed) — with **△** when the
+  class has its own adaptation, plus a legend. Data wired from existing repos: classes from
+  `listSlotsForCourse`, per-class placements (date + `adapted`) from `classSchedule` over a ±~year window,
+  keyed `gc:planId`; the route builds it only when the lens is selected (one `buildSchemeTree`, reused).
+  Read-only — placement/editing stay on the Map + lesson. New `paths.schemesLens` builder (+ oracle). CSS:
+  `.sch-matrix*` (sticky header, tone cells, △, legend; scrolls in its wrapper). **Tests:** `scheme.test.ts`
+  (+5: columns/rows, cell classification, adapted △, empty state, lens links) + `e2e/schemes.spec.ts` lens
+  toggle. Gallery fixture + item (now 17). Verified: typecheck · 952 unit · 377 integration · gallery +
+  schemes E2E · screenshot.
+
+**Remaining (data wiring only — not layout):** Pupils §11 **cohort-analytics** layer (class chips · level
+chips · completion % · ATL trend) — needs per-class/per-pupil level + completion + ATL data; the roster grid
+is already in place for it.
 
 **Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
 **cohort-analytics** layer (class chips · level chips · completion % · ATL trend).

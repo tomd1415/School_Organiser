@@ -52,6 +52,8 @@ export const paths = {
   lessonPrint: (lesson: number, date: string): string => `/lesson/print?lesson=${lesson}&amp;date=${esc(date)}`,
   todayPrint: (date: string): string => `/today/print?date=${esc(date)}`,
   schemesCourse: (course?: number | null): string => `/schemes?course=${course ?? ''}`,
+  schemesLens: (course: number, lens: 'spine' | 'classes', scheme?: number | null): string =>
+    `/schemes?course=${course}${scheme ? `&amp;scheme=${scheme}` : ''}&amp;lens=${lens}`,
   coverage: (): string => '/coverage',
   coverageFiltered: (course: number, cov: 'all' | 'covered' | 'gaps'): string => `/coverage?course=${course}&amp;cov=${cov}`,
   mapSlot: (lesson: number, gc: number): string => `/map?slot=${lesson}:${gc}`,

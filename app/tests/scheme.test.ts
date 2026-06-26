@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildSchemeTree, type PlanRow, type UnitRow, type SchemeHeader } from '../src/services/scheme';
-import { renderPlan, renderSchemeTree, renderSchemesNext } from '../src/lib/schemeView';
+import { renderPlan, renderSchemeTree, renderSchemesNext, renderClassesMatrix } from '../src/lib/schemeView';
+import { GALLERY_SCHEME_MATRIX } from '../src/lib/uiFixtures';
 
 const units: UnitRow[] = [
   { id: 2, title: 'B', displayOrder: 1 },
@@ -117,9 +118,38 @@ describe('renderSchemesNext — scheme meta header (UI rebuild)', () => {
     expect(html).toContain('<span class="sch-stat-v">2</span>');  // versions
   });
 
-  it('shows the Spine lens active and Classes deferred', () => {
-    expect(html).toContain('class="seg is-on"');
-    expect(html).toContain('class="seg seg-soon"');
-    expect(html).toContain('coming in a follow-up');
+  it('the lens toggle links to both Spine and Classes', () => {
+    expect(html).toContain('lens=spine');
+    expect(html).toContain('lens=classes');
+  });
+});
+
+describe('renderClassesMatrix — Classes lens (UI rebuild)', () => {
+  const html = renderClassesMatrix(GALLERY_SCHEME_MATRIX);
+
+  it('renders a column per class and a row per lesson', () => {
+    expect(html).toContain('class="sch-matrix"');
+    expect(html).toContain('>9X<');
+    expect(html).toContain('>9Y<');
+    expect(html).toContain('>9Z<');
+    expect(html).toContain('LANs and WANs');
+  });
+
+  it('classifies cells: taught (date) · today · planned · not-placed', () => {
+    expect(html).toContain('sch-mx-taught'); // 1:10 in the past
+    expect(html).toContain('>today<'); // 1:11 == 2026-06-23
+    expect(html).toContain('sch-mx-today');
+    expect(html).toContain('sch-mx-planned'); // 2:11 future
+    expect(html).toContain('sch-mx-na'); // e.g. 3:11 not placed
+    expect(html).toContain('9 Jun'); // 1:10 date formatted
+  });
+
+  it('marks an adapted placement with △', () => {
+    expect(html).toContain('sch-mx-adapt'); // 2:10 adapted
+  });
+
+  it('falls back to a message when no classes are timetabled', () => {
+    const empty = renderClassesMatrix({ classes: [], units: [], placements: {}, today: '2026-06-23' });
+    expect(empty).toContain('No classes are timetabled');
   });
 });
