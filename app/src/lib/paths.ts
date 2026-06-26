@@ -295,6 +295,7 @@ export const paths = {
 
   // ── Cross-cutting page links ────────────────────────────────────────────────────────────────────
   pupils: (): string => '/pupils',
+  pupilsClass: (groupCourseId: number): string => `/pupils?class=${groupCourseId}`,
   setupRollover: (): string => '/setup/rollover',
   welcome: (): string => '/welcome',
 } as const;

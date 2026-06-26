@@ -757,6 +757,22 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .roster-actions > summary { list-style: none; cursor: pointer; color: var(--muted); padding: 0 0.3rem; }
 .roster-actions > summary::-webkit-details-marker { display: none; }
 .roster-menu { position: absolute; right: 0; top: 1.6rem; z-index: 5; display: flex; flex-direction: column; gap: 0.3rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.7rem; min-width: 9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+/* §11 cohort analytics: class chips select the roster; each card adds a level chip · completion % · ATL trend. */
+.pupil-classchips { margin: 0 0 1rem; }
+.cohort-head { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.8rem; }
+.cohort-head h2 { margin: 0; font-size: 1.05rem; }
+.cohort-anchor { font-size: 0.78rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+.cohort-meta { display: flex; align-items: center; gap: 0.45rem; margin-top: 0.2rem; flex-wrap: wrap; }
+.lvl-chip { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--line); }
+.lvl-chip.lvl-support { color: var(--good); border-color: color-mix(in srgb, var(--good) 55%, transparent); background: color-mix(in srgb, var(--good) 12%, transparent); }
+.lvl-chip.lvl-core { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.lvl-chip.lvl-challenge { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 55%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.lvl-chip.lvl-none { color: var(--muted); }
+.cohort-pct { font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.atl-arrow { font-size: 0.95rem; font-weight: 700; }
+.atl-arrow.atl-up { color: var(--good); }
+.atl-arrow.atl-down { color: var(--error); }
+.atl-arrow.atl-flat { color: var(--muted); }
 
 /* AI draft-lesson (Phase 4.3) */
 .plan-ai { display: flex; align-items: center; gap: 0.6rem; margin: 0.25rem 0 0.6rem; }

@@ -336,9 +336,28 @@ Full gate green throughout (typecheck · 946 unit · 377 integration · E2E; gal
   toggle. Gallery fixture + item (now 17). Verified: typecheck · 952 unit · 377 integration · gallery +
   schemes E2E · screenshot.
 
-**Remaining (data wiring only — not layout):** Pupils §11 **cohort-analytics** layer (class chips · level
-chips · completion % · ATL trend) — needs per-class/per-pupil level + completion + ATL data; the roster grid
-is already in place for it.
+### Pupils §11 cohort-analytics (done — the final piece)
+- **Cohort analytics (`/pupils?class=`, `src/repos/cohort.ts`)** — the last deferred item, now built. **Class
+  chips** select the roster (All = the flat management roster; a class = its cohort); the selected class
+  shows a **header** (name · pupil count · course · **ability midpoint** level chip) over the avatar grid,
+  each card now carrying a **level chip** (Support green · Core teal · Challenge amber), a **completion %**
+  (pupil's `pupil_done` ÷ the class's delivered, non-test lessons), and an **ATL-trend arrow** (↗ improving ·
+  → steady · ↘ slipping, from `pupil_atl` recent-vs-older halves). All from existing tables
+  (`enrolments`/`group_courses`/`pupil_levels`/`pupil_done`/`pupil_atl`); the GDPR ⋯ menu is shared with the
+  flat roster. New `paths.pupilsClass` (+ oracle). CSS: `.pupil-classchips`/`.cohort-head`/`.lvl-chip`(tones)/
+  `.cohort-pct`/`.atl-arrow`(tones). **Tests:** `tests/cohort.test.ts` (trend + midpoint derivation) +
+  `tests/integration/cohort.int.test.ts` (full SQL path on a crafted class: support/core/challenge ·
+  100/50/0% · up/flat/down · midpoint core) + `e2e/pupils.spec.ts` chip→cohort. The **Test-Lab guard** caught
+  an unguarded ATL scan — added `AND NOT o.is_test` so sandbox scores never leak into a real cohort trend.
+  Verified: typecheck · 960 unit · 379 integration · pupils E2E · screenshot.
+
+## ✅ The "Rail & Stage" UI rebuild is complete
+
+Every screen, the pupil surface, the cockpit (layout + mode control + scope strip), and **both** former
+data-wiring deferrals (Schemes Classes-matrix · Pupils cohort-analytics) are rebuilt to the design and
+verified. Nothing in the SPEC remains outstanding. Full gate green: typecheck · **960 unit** · **379
+integration** · E2E (gallery 17 views + per-screen specs) · screenshots in both orientations where layout
+mattered.
 
 **Deferred (need data wiring, lens/affordance already stubbed):** Schemes **Classes-matrix** lens · Pupils §11
 **cohort-analytics** layer (class chips · level chips · completion % · ATL trend).

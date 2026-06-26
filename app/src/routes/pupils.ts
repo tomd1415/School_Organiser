@@ -19,6 +19,9 @@ import { createNote } from '../repos/notes';
 import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
 import { importRoster } from '../services/misImport';
+import { listRosterClasses, classCohort, type CohortPupil, type Level, type AtlTrend } from '../repos/cohort';
+import { getClockContext } from '../repos/clock';
+import { localParts } from '../lib/time';
 
 // §11 roster card: initials avatar · name · token, with the GDPR actions (archive / SAR export /
 // anonymise / erase) tucked into a ⋯ disclosure so the grid stays calm.
@@ -27,25 +30,57 @@ function pupilInitials(name: string): string {
   if (!parts.length) return '?';
   return (parts[0]![0]! + (parts.length > 1 ? parts[parts.length - 1]![0]! : '')).toUpperCase();
 }
+// The GDPR action menu (archive / SAR export / anonymise / erase) — shared by the flat roster and the
+// per-class cohort card.
+function pupilActionsMenu(id: number, name: string, token: string, active: boolean): string {
+  return `<details class="roster-actions">
+      <summary title="manage this pupil" aria-label="manage this pupil">⋯</summary>
+      <div class="roster-menu">
+        <button type="button" class="link" hx-post="/pupils/${id}/${active ? 'deactivate' : 'activate'}" hx-target="#pupil-${id}" hx-swap="outerHTML">${active ? 'archive' : 'restore'}</button>
+        <a class="link" href="/pupils/${id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
+        <button type="button" class="link" title="leaver: remove name + login, keep cohort data"
+          hx-post="/pupils/${id}/anonymise" hx-target="#pupil-${id}" hx-swap="outerHTML"
+          hx-confirm="Anonymise ${esc(name)}? Their name, login and 'what works for me' profile are removed; their answers/marks stay but no longer named. This cannot be undone.">anonymise…</button>
+        <button type="button" class="link danger" title="permanently erase ALL of this pupil's data"
+          hx-post="/pupils/${id}/erase" hx-target="#pupil-${id}" hx-swap="outerHTML"
+          hx-prompt="PERMANENT erasure of ${esc(name)} — every answer, mark, feedback, profile and login. Type ${esc(token)} to confirm.">erase…</button>
+      </div>
+    </details>`;
+}
+
+const LEVEL_CHIP: Record<Level, [string, string]> = { support: ['lvl-support', 'Support'], core: ['lvl-core', 'Core'], challenge: ['lvl-challenge', 'Challenge'] };
+function levelChip(level: Level | null): string {
+  if (!level) return '<span class="lvl-chip lvl-none">no level</span>';
+  const [cls, label] = LEVEL_CHIP[level];
+  return `<span class="lvl-chip ${cls}">${label}</span>`;
+}
+const ATL_ARROW: Record<AtlTrend, [string, string, string]> = { up: ['atl-up', '↗', 'improving'], down: ['atl-down', '↘', 'slipping'], flat: ['atl-flat', '→', 'steady'], none: ['', '', ''] };
+function atlArrow(trend: AtlTrend): string {
+  const [cls, glyph, label] = ATL_ARROW[trend];
+  return glyph ? `<span class="atl-arrow ${cls}" title="attitude to learning — ${label}">${glyph}</span>` : '';
+}
+
 function renderPupil(p: RosterEntry): string {
   return `<li class="roster-card${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
     <a class="roster-main" href="/pupils/${p.id}">
       <span class="roster-avatar" aria-hidden="true">${esc(pupilInitials(p.displayName))}</span>
       <span class="roster-id"><span class="pupil-name">${esc(p.displayName)}</span><span class="muted pupil-token">${esc(p.aiToken)}</span></span>
     </a>
-    <details class="roster-actions">
-      <summary title="manage this pupil" aria-label="manage this pupil">⋯</summary>
-      <div class="roster-menu">
-        <button type="button" class="link" hx-post="/pupils/${p.id}/${p.active ? 'deactivate' : 'activate'}" hx-target="#pupil-${p.id}" hx-swap="outerHTML">${p.active ? 'archive' : 'restore'}</button>
-        <a class="link" href="/pupils/${p.id}/export" title="download this pupil's full record (subject-access request)">⬇ data</a>
-        <button type="button" class="link" title="leaver: remove name + login, keep cohort data"
-          hx-post="/pupils/${p.id}/anonymise" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
-          hx-confirm="Anonymise ${esc(p.displayName)}? Their name, login and 'what works for me' profile are removed; their answers/marks stay but no longer named. This cannot be undone.">anonymise…</button>
-        <button type="button" class="link danger" title="permanently erase ALL of this pupil's data"
-          hx-post="/pupils/${p.id}/erase" hx-target="#pupil-${p.id}" hx-swap="outerHTML"
-          hx-prompt="PERMANENT erasure of ${esc(p.displayName)} — every answer, mark, feedback, profile and login. Type ${esc(p.aiToken)} to confirm.">erase…</button>
-      </div>
-    </details>
+    ${pupilActionsMenu(p.id, p.displayName, p.aiToken, p.active)}
+  </li>`;
+}
+
+// §11 cohort card: avatar · name · level chip · completion % · ATL trend arrow, plus the GDPR menu.
+function renderCohortPupil(p: CohortPupil): string {
+  return `<li class="roster-card${p.active ? '' : ' inactive'}" id="pupil-${p.id}">
+    <a class="roster-main" href="/pupils/${p.id}">
+      <span class="roster-avatar" aria-hidden="true">${esc(pupilInitials(p.displayName))}</span>
+      <span class="roster-id">
+        <span class="pupil-name">${esc(p.displayName)}</span>
+        <span class="cohort-meta">${levelChip(p.level)}${p.completionPct != null ? `<span class="cohort-pct" title="lessons completed this class">${p.completionPct}%</span>` : ''}${atlArrow(p.atlTrend)}</span>
+      </span>
+    </a>
+    ${pupilActionsMenu(p.id, p.displayName, p.aiToken, p.active)}
   </li>`;
 }
 
@@ -114,34 +149,62 @@ export function registerPupilRoutes(app: FastifyInstance): void {
   const guard = { preHandler: [requireAuth, app.csrfProtection] };
   const idParam = z.object({ id: z.coerce.number().int().positive() });
 
-  app.get('/pupils', { preHandler: requireAuth }, async (_req, reply) => {
+  app.get('/pupils', { preHandler: requireAuth }, async (req, reply) => {
     const csrf = reply.generateCsrf();
+    const q = z.object({ class: z.coerce.number().int().positive().optional() }).safeParse(req.query);
     let body: string;
     try {
-      const pupils = await listPupils();
       const keyNote = (await aiKeyConfigured())
         ? ''
         : ' <strong>No AI key is configured yet</strong>, so nothing is sent anywhere regardless.';
+      const privacyBanner = `<p class="privacy-banner">⚑ Individual pupils are <strong>never named or described to any AI service</strong> — only cohort-level prose. Each name maps to a stable token (<code>PUPIL_1</code>…), the only thing any AI feature ever sees.${keyNote}</p>`;
+
+      // §11 class chips select the roster. "All" = the flat management roster; a class = its cohort
+      // (level · completion % · ATL trend + ability midpoint).
+      const classes = await listRosterClasses();
+      const selected = q.success && q.data.class ? classes.find((c) => c.groupCourseId === q.data.class) : undefined;
+      const chip = (href: string, label: string, on: boolean, count?: number) =>
+        `<a class="chip${on ? ' active' : ''}" href="${href}">${esc(label)}${count != null ? ` <span class="chip-count">${count}</span>` : ''}</a>`;
+      const classChips = `<div class="pupil-classchips task-chips">
+        ${chip('/pupils', 'All', !selected)}
+        ${classes.map((c) => chip(`/pupils?class=${c.groupCourseId}`, `${c.groupName} · ${c.courseName}`, selected?.groupCourseId === c.groupCourseId, c.pupilCount)).join('')}
+      </div>`;
+
+      let rosterSection: string;
+      if (selected) {
+        const today = localParts(new Date(), (await getClockContext()).tz).isoDate;
+        const cohort = await classCohort(selected.groupCourseId, today);
+        rosterSection = `<div class="cohort-head">
+            <h2>${esc(selected.groupName)} <span class="muted">· ${cohort.pupils.length} pupil${cohort.pupils.length === 1 ? '' : 's'} · ${esc(selected.courseName)}</span></h2>
+            ${cohort.abilityMidpoint ? `<span class="cohort-anchor">ability midpoint ${levelChip(cohort.abilityMidpoint)}</span>` : ''}
+          </div>
+          <ul class="pupil-list roster-grid" id="pupil-list">${cohort.pupils.map(renderCohortPupil).join('') || '<li class="muted">No pupils enrolled in this class.</li>'}</ul>`;
+      } else {
+        const pupils = await listPupils();
+        rosterSection = `<form class="pupil-add" hx-post="/pupils" hx-target="#pupil-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
+            <input type="text" name="name" placeholder="Pupil name…" autocomplete="off" required>
+            <button type="submit" class="btn-secondary">Add</button>
+          </form>
+          <ul class="pupil-list roster-grid" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
+          <details class="mis-import">
+            <summary>⬆ Import from MIS (CSV)</summary>
+            <p class="muted">Paste a SIMS/Arbor export (or any CSV). Needs a <strong>name</strong> column (or
+              Forename + Surname) and a <strong>class/group</strong> column. Re-importing a corrected file is safe —
+              pupils and classes are matched by name, never duplicated. Names stay local; nothing is sent anywhere.</p>
+            <form hx-post="/pupils/import" hx-target="#mis-result" hx-swap="innerHTML">
+              <textarea name="csv" rows="6" placeholder="Name,Class&#10;Alex Smith,8B&#10;Sam Jones,8B" style="width:100%"></textarea>
+              <button type="submit" class="btn-secondary">Import</button>
+            </form>
+            <div id="mis-result"></div>
+          </details>
+          ${renderDisposals(await listDisposals())}`;
+      }
+
       body = `<section class="card" hx-headers='{"x-csrf-token":"${csrf}"}'>
         <h1>Pupils (roster)</h1>
-        <p class="privacy-banner">⚑ Individual pupils are <strong>never named or described to any AI service</strong> — only cohort-level prose. Each name maps to a stable token (<code>PUPIL_1</code>…), the only thing any AI feature ever sees.${keyNote}</p>
-        <form class="pupil-add" hx-post="/pupils" hx-target="#pupil-list" hx-swap="afterbegin" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
-          <input type="text" name="name" placeholder="Pupil name…" autocomplete="off" required>
-          <button type="submit" class="btn-secondary">Add</button>
-        </form>
-        <ul class="pupil-list roster-grid" id="pupil-list">${pupils.map(renderPupil).join('')}</ul>
-        <details class="mis-import">
-          <summary>⬆ Import from MIS (CSV)</summary>
-          <p class="muted">Paste a SIMS/Arbor export (or any CSV). Needs a <strong>name</strong> column (or
-            Forename + Surname) and a <strong>class/group</strong> column. Re-importing a corrected file is safe —
-            pupils and classes are matched by name, never duplicated. Names stay local; nothing is sent anywhere.</p>
-          <form hx-post="/pupils/import" hx-target="#mis-result" hx-swap="innerHTML">
-            <textarea name="csv" rows="6" placeholder="Name,Class&#10;Alex Smith,8B&#10;Sam Jones,8B" style="width:100%"></textarea>
-            <button type="submit" class="btn-secondary">Import</button>
-          </form>
-          <div id="mis-result"></div>
-        </details>
-        ${renderDisposals(await listDisposals())}
+        ${privacyBanner}
+        ${classChips}
+        ${rosterSection}
       </section>`;
 
       // Phase 8.2: pupil logins, grouped by class. Shown once pupil access is enabled in Settings.
