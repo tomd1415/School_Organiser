@@ -1463,6 +1463,31 @@ body[data-shell="next"] button[type="submit"] {
   border-color: var(--teal) !important;
 }
 
+/* Experience toggle (rail foot): these submit buttons must NOT take the blanket teal fill above — only the
+   ACTIVE mode is filled, so the toggle clearly shows which mode you're in. Compact (the segmented pair sits
+   beside Settings/Accessibility). Higher specificity + !important to beat the rule directly above. */
+body[data-shell="next"] .rail-exp .rail-exp-btn {
+  flex: 1 1 0; min-width: 0;
+  min-height: 0 !important;
+  padding: 4px 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--line-strong) !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+}
+body[data-shell="next"] .rail-exp .rail-exp-btn:hover {
+  color: var(--text) !important;
+  border-color: var(--text) !important;
+  background: var(--surface-2) !important;
+}
+body[data-shell="next"] .rail-exp .rail-exp-btn.is-on {
+  background: var(--teal) !important;
+  color: #0b1320 !important;
+  border-color: var(--teal) !important;
+}
+
 body[data-shell="next"] .button.primary:hover,
 body[data-shell="next"] .btn-primary:hover,
 body[data-shell="next"] button.primary:hover,

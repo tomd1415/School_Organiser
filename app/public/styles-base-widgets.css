@@ -88,7 +88,10 @@ body {
 .rail-sec > summary.active-within { color: var(--accent); }
 
 .rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
-.rail-exp { text-align: left; font-size: var(--fs-meta); font-weight: 600; padding: 0.4rem 0.6rem; min-height: var(--tap); }
+/* Experience toggle in the rail foot (Everyday | Power) — a compact two-button segmented control. The
+   button colours/sizes are set in styles.css under body[data-shell="next"] (they must override the global
+   !important submit-button accent fill). Here: just the row layout. */
+.rail-exp { display: flex; gap: 4px; padding: 0.1rem 0.5rem 0.35rem; }
 .rail-foot .inline { display: block; }
 .rail-foot .inline button { min-height: var(--tap); padding: 0.4rem 0.6rem; }
 /* a11y toolbar (text size · contrast · font) in the rail footer. */

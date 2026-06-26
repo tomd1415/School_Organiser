@@ -36,6 +36,10 @@ export function nextShell({ title, body, authed = false, csrfToken, width }: Lay
   const railFootNext =
     authed && csrfToken
       ? `<div class="ribbon-tier tier-foot"${csrfHdr}>
+          <form class="rail-exp" role="group" aria-label="Experience level" hx-post="/settings/experience" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
+            <button type="submit" name="experience" value="everyday" class="rail-exp-btn${exp === 'everyday' ? ' is-on' : ''}"${exp === 'everyday' ? ' aria-current="true"' : ''} title="Everyday: the daily core">Everyday</button>
+            <button type="submit" name="experience" value="power" class="rail-exp-btn${exp === 'power' ? ' is-on' : ''}"${exp === 'power' ? ' aria-current="true"' : ''} title="Power: reveal planning, authoring &amp; admin">⚡ Power</button>
+          </form>
           <a class="ribbon-link rail-gear" href="/settings" title="Settings">
             <span class="icon">⚙️</span>
             <span class="lbl-txt">Settings</span>
