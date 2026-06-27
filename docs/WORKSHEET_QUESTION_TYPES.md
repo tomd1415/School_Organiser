@@ -21,6 +21,10 @@
 | **Fill-in-the-blank** | types into an inline gap | `[[ ]]` in the text (one per gap) | objective (auto) |
 | **Code** | writes/edits code (monospaced box) | cell/header names code: `Type your code here`, "program", "script", "pseudocode", "algorithm" | open |
 | **Parsons** *(order CODE)* | drags jumbled **code** lines into order | a fenced ```` ```parsons ```` block with the lines | objective (correct order) |
+| **Order** *(sequence, non-code)* | drags plain-language **steps** into order | a fenced ```` ```order ```` block, one step per line in CORRECT order | self-marked (modal: correct order + ✓ badge) |
+| **Card-sort** *(group into categories)* | drags items into category columns | a fenced ```` ```sort ```` block, one `Category: item, item` line per group | self-marked (modal: correct group + ✓ badge per item) |
+| **Label a diagram** | drags labels onto spots on an image | a fenced ```` ```label ```` block: `image: {{res:file}}` then `zoneId (x%, y%): correct label` per spot | self-marked (modal: correct label + ✓ badge per zone) |
+| **Slider / rating** | drags a 1–N scale | an answer cell `[scale 1-5]` or `[scale 1-5: low … high]` | uncredited self-assessment |
 | **Screenshot / upload** | pastes or drops an image of their work | cell with `📷`/`🖼` or "paste … screenshot/image/work …" or "screenshot … here" | teacher view (PII) |
 | **Checklist** | self-ticks success criteria | `- [ ] …` lines (usually under `## ✅ I can…`) | self-assessment (not credited) |
 
@@ -47,8 +51,17 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
   real multi-select).
 - **Matching (term ↔ definition)** — **already available** (a 2-column choice grid; `detectMatching`) — was
   never actually missing.
+- **Order / sequence (non-code)** — **BUILT 2026-06-27** (§2.3) — ```` ```order ```` block, see §1.
+- **Card sort / group into categories** — **BUILT 2026-06-27** (§2.5) — ```` ```sort ```` block, see §1.
+- **Label a diagram / image hotspot** — **BUILT 2026-06-27** (§2.4) — ```` ```label ```` block, see §1.
+  (Coordinates are hand-set for now — a `/ui-gallery` click-to-capture picker is the recommended next helper
+  before mass-authoring labels.)
+- **Slider / rating scale** — **BUILT 2026-06-27** (§2.6) — `[scale 1-5: low … high]` cell, see §1.
 
-### 2.3 Order / sequence (non-code)  — **NOT BUILT**
+All four backlog types below are now built; the sub-sections are kept only as the design record. Storage +
+build detail: [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTATION_PLAN.md).
+
+### 2.3 Order / sequence (non-code)  — **BUILT 2026-06-27 (see §1)**
 - **What.** Drag plain-text steps into the right order (Parsons but for **words/steps**, not code).
 - **Why.** "order" is in the teaching context; e.g. order the steps of an algorithm in plain English, or a
   process (boot sequence, the data-packet journey).
@@ -59,7 +72,7 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
   steps). (Code ordering is already covered by Parsons — this is for prose/process steps.)
 - **Likely build.** Generalise the `parsons` block to a `steps`/`order` block over prose lines.
 
-### 2.4 Label a diagram / image hotspot  — **NOT BUILT**
+### 2.4 Label a diagram / image hotspot  — **BUILT 2026-06-27 (see §1)**
 - **What.** Drag labels onto a picture (or click hotspots): label the parts of a computer / the micro:bit.
 - **Why.** "label" is in the teaching context; strongly visual, near-zero writing — ideal for SEND.
 - **Example.** Label the micro:bit: *button A · button B · LED display · USB · pins*.
@@ -69,7 +82,7 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 - **Likely build.** An image block with positioned drop-zones + a label bank; mark = label in the right zone.
   (Biggest build — needs an image-coordinate authoring step.)
 
-### 2.5 Card sort / group into categories  — **NOT BUILT**
+### 2.5 Card sort / group into categories  — **BUILT 2026-06-27 (see §1)**
 - **What.** Drag items into named groups/columns.
 - **Why.** "drag" is in the teaching context; classic CS activity (input vs output vs storage; hardware vs
   software).
@@ -80,7 +93,7 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
   **Y7 Using media** L2/L3 (licence types, credible-vs-not sources).
 - **Likely build.** A `sort` block: items + category columns; mark = each item in the right column.
 
-### 2.6 Slider / rating scale  — **NOT BUILT** (low priority)
+### 2.6 Slider / rating scale  — **BUILT 2026-06-27 (see §1)** (low priority)
 - **What.** Drag a slider on a scale (e.g. confidence 1–5, or estimate a value).
 - **Why.** Low-stakes self-rating / estimation; minimal writing.
 - **Example.** *"How confident are you with loops?"* 1–5.

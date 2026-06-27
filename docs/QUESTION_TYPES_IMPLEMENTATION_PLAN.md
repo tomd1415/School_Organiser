@@ -1,5 +1,12 @@
 # Implementation plan — the 4 unbuilt worksheet question types
 
+> **STATUS: all four BUILT 2026-06-27** (order → card-sort → slider → label), each gate-green and live in
+> §1 of `WORKSHEET_QUESTION_TYPES.md`. This doc is kept as the design+storage record; the build matched the
+> plan except sort/label are **self-marked in the mark modal** (correct answer carried on the field, ✓/✗
+> badge) rather than auto-scored via the AI scheme — `markObjective` is already kind-agnostic, so promoting
+> them to deterministic `choice` auto-marking is a ready follow-up. Outstanding helper: a `/ui-gallery`
+> click-to-capture coordinate picker before mass-authoring labels.
+>
 > **Why this doc.** Six Y7 units wanted four question types the engine can't render yet
 > (`WORKSHEET_QUESTION_TYPES.md` §2). This plans building them **and** — the important half — pins the
 > **storage spec** so lesson conversion can author them and every answer is stored in the correct, markable
