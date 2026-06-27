@@ -53,6 +53,6 @@ CREATE TABLE pupil_resource_edits (
   lesson_plan_id BIGINT,                              -- the lesson context (soft ref), nullable
   body           TEXT,                                -- the pupil's edited content
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (pupil_id, resource_id, lesson_plan_id)
+  UNIQUE NULLS NOT DISTINCT (pupil_id, resource_id, lesson_plan_id)  -- one edit per (pupil, resource, lesson); NULL lesson = the lesson-less copy
 );
 CREATE INDEX idx_pre_pupil ON pupil_resource_edits (pupil_id);

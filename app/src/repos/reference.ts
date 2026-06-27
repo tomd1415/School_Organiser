@@ -98,6 +98,27 @@ export async function referencesForCriterion(criterionId: number): Promise<Refer
   return rows;
 }
 
+// ── 17.4: a pupil's own saved edit of an editable (worksheet/doc) reference file (PII) ──────────────────
+
+/** Save (upsert) a pupil's edited copy of a resource for a lesson context. The master is untouched. */
+export async function savePupilResourceEdit(pupilId: number, resourceId: number, lessonPlanId: number | null, body: string): Promise<void> {
+  await pool.query(
+    `INSERT INTO pupil_resource_edits (pupil_id, resource_id, lesson_plan_id, body, updated_at)
+     VALUES ($1,$2,$3,$4, now())
+     ON CONFLICT (pupil_id, resource_id, lesson_plan_id)
+       DO UPDATE SET body = EXCLUDED.body, updated_at = now()`,
+    [pupilId, resourceId, lessonPlanId, body.slice(0, 200_000)],
+  );
+}
+
+export async function getPupilResourceEdit(pupilId: number, resourceId: number, lessonPlanId: number | null): Promise<string | null> {
+  const { rows } = await pool.query<{ body: string | null }>(
+    `SELECT body FROM pupil_resource_edits WHERE pupil_id = $1 AND resource_id = $2 AND lesson_plan_id IS NOT DISTINCT FROM $3`,
+    [pupilId, resourceId, lessonPlanId],
+  );
+  return rows[0]?.body ?? null;
+}
+
 export interface ReviewQueueRow {
   resourceId: number;
   title: string;

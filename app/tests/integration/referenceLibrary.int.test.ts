@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool';
 import { importReferenceFiles } from '../../src/services/referenceLibrary';
-import { confirmResourceCriterion, linkResourceCriterion, listActivityTypes, referencesForCriterion, reviewQueue, seedActivityTypes } from '../../src/repos/reference';
+import { confirmResourceCriterion, getPupilResourceEdit, linkResourceCriterion, listActivityTypes, referencesForCriterion, reviewQueue, savePupilResourceEdit, seedActivityTypes } from '../../src/repos/reference';
+import { createPupil, disposePupil } from '../../src/repos/pupils';
 
 // Phase 17.1/17.2/17.3 — import reference files (in-memory fixtures mirroring the TeachComputing tree), then
 // link to a criterion and exercise the library lookup + review queue. Self-contained; tears down its rows.
@@ -62,5 +63,16 @@ describe('Phase 17 — reference-lesson library', () => {
     await confirmResourceCriterion(resId, criterionId, 'teacher', 'confirmed');
     expect((await reviewQueue()).some((q) => q.resourceId === resId)).toBe(false);
     expect((await referencesForCriterion(criterionId)).some((r) => r.resourceId === resId && r.verifyState === 'confirmed')).toBe(true);
+  });
+
+  it('17.4 — a pupil edit upserts (lesson-less) and is cleared by erasure', async () => {
+    const pupil = await createPupil('ZZREF Edit Pupil');
+    const resId = resourceIds[0]!;
+    await savePupilResourceEdit(pupil.id, resId, null, 'my first draft');
+    await savePupilResourceEdit(pupil.id, resId, null, 'my second draft'); // upsert, not a duplicate
+    expect(await getPupilResourceEdit(pupil.id, resId, null)).toBe('my second draft');
+    const result = await disposePupil(pupil.id, 'erase');
+    expect(result!.counts.resourceEdits).toBe(1);
+    expect(await getPupilResourceEdit(pupil.id, resId, null)).toBeNull();
   });
 });
