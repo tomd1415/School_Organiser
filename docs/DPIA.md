@@ -78,6 +78,18 @@
   guidance + answers and is structurally unreachable by pupils; a **fictitious test pupil** (`is_test`,
   no personal data, excluded from the roster/redaction/marking) lets the teacher preview the pupil
   surface without a real child. No new sub-processor exposure; the §5 controls are unchanged.
+- **Built 2026-06-27 (Phase 16A — Stages & strands progression), delta:** a **new per-pupil data
+  category** — *progression evidence*: which "I can…" criteria a pupil has met
+  (`pupil_criteria_evidence`), the year-end overall anchor (`pupil_year_assessment`), and (later in the
+  phase) the start-of-year placement (`pupil_baseline`) and per-unit placement (`pupil_unit_placement`).
+  These are **attainment records, server-side only**, shown to the **teacher only** (every progression
+  screen carries a "teacher only — never sent to AI" banner). **No new sub-processor exposure:** the
+  progression services/repos/routes/views make **no AI call at all** (locked by a static guard,
+  `tests/progressionNoAi.test.ts`); the 16A.4 auto-suggest reads **already-computed in-app spec-point
+  results** and sends nothing new out. **Retention/disposal:** covered by the Phase-10 path —
+  `disposePupil` **erase** explicitly deletes (and counts) the evidence + year-assessment rows (the rest
+  cascade); **anonymise** keeps them as nameless attainment under the token, exactly like marks
+  (`tests/integration/progressionErasure.int.test.ts`). The §5 controls are otherwise unchanged.
 
 Follows [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) §"GDPR / data protection". It
 cross-references rather than duplicates [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) and
@@ -187,6 +199,12 @@ identity), marking sends only **redacted, slot-lettered** answers via the one wr
 answers are **withheld from AI** (and surface in the safeguarding register), and all marking is behind the
 `pupil_marks_enabled` DPIA gate. Test-Lab attempts (`is_test`) are excluded from analytics and never
 AI-marked, and `wipeTestAttempts` clears them.
+
+**Progression (Stages & strands).** Per-pupil progression evidence (`pupil_criteria_evidence`,
+`pupil_year_assessment`, and later `pupil_baseline` / `pupil_unit_placement`) is teacher-only attainment
+that **never reaches AI** (no AI call on any progression path — guarded). On **erasure** `disposePupil`
+deletes and counts the evidence + year-assessment rows (the rest cascade from `pupils`); on **anonymise**
+they remain as nameless attainment under the token, like marks.
 
 ## 8. Outcome and sign-off
 

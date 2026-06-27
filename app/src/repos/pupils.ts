@@ -193,6 +193,10 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
       // safeguarding_review has a polymorphic (FK-less) source_id, so the answer cascade won't clear
       // its 'answer' rows — do it explicitly here, while the answers still exist to resolve the ids.
       counts.sgReviews = await rowsAffected(client, `DELETE FROM safeguarding_review WHERE source_type = 'answer' AND source_id IN (SELECT id FROM pupil_answers WHERE pupil_id = $1)`, [id]);
+      // 16A.6: progression evidence is a new pupil-data category — clear it EXPLICITLY (and count it for the
+      // audit) on a full erasure, rather than relying on the silent ON DELETE CASCADE alone.
+      counts.progressionEvidence = await rowsAffected(client, `DELETE FROM pupil_criteria_evidence WHERE pupil_id = $1`, [id]);
+      counts.yearAssessments = await rowsAffected(client, `DELETE FROM pupil_year_assessment WHERE pupil_id = $1`, [id]);
       counts.deleted = await rowsAffected(client, `DELETE FROM pupils WHERE id = $1`, [id]); // CASCADE clears the rest
     }
 
