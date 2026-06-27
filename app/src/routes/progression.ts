@@ -22,6 +22,7 @@ import {
   pupilClassesWithScheme,
   schemeGrid,
   unbindClassScheme,
+  yearAnchorsForScheme,
 } from '../repos/progression';
 import { currentStagePerStrand, overallRollUp } from '../services/progression';
 
@@ -78,14 +79,19 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
           listStages(schemeId),
           enrolledPupilsForClass(gc),
         ]);
-        const evidence = await evidencedForPupils(pupils.map((x) => x.id));
+        const [evidence, anchors] = await Promise.all([
+          evidencedForPupils(pupils.map((x) => x.id)),
+          yearAnchorsForScheme(pupils.map((x) => x.id), schemeId),
+        ]);
         const labelByOrdinal: Record<number, string> = {};
         for (const s of stages) labelByOrdinal[s.ordinal] = s.label;
         const heatPupils: HeatPupil[] = pupils.map((pu) => {
           const perStrandArr = currentStagePerStrand(criteria, evidence.get(pu.id) ?? new Set());
           const perStrand: Record<number, number | null> = {};
           for (const ps of perStrandArr) perStrand[ps.strandId] = ps.stageOrdinal;
-          return { id: pu.id, name: pu.displayName, perStrand, overall: overallRollUp(perStrandArr).overallOrdinal };
+          // 16A.5: a recorded year-end overall anchors the overall (else the computed cross-strand mean).
+          const overall = overallRollUp(perStrandArr, { yearAssessmentOrdinal: anchors.get(pu.id) ?? null }).overallOrdinal;
+          return { id: pu.id, name: pu.displayName, perStrand, overall };
         });
         const schemeName = (await listSchemes()).find((s) => s.id === schemeId)?.name ?? '';
         body = renderClassHeatMap({ schemeName, className, strands: strands.map((s) => ({ id: s.id, code: s.code, name: s.name })), labelByOrdinal, pupils: heatPupils });
@@ -109,7 +115,12 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
       const ev = await evidencedCriterionIds(p.data.id);
       const built = [];
       for (const cl of classes) {
-        const [criteria, strands, stages] = await Promise.all([criteriaForScheme(cl.schemeId), listStrands(cl.schemeId), listStages(cl.schemeId)]);
+        const [criteria, strands, stages, anchors] = await Promise.all([
+          criteriaForScheme(cl.schemeId),
+          listStrands(cl.schemeId),
+          listStages(cl.schemeId),
+          yearAnchorsForScheme([p.data.id], cl.schemeId),
+        ]);
         const perStrandArr = currentStagePerStrand(criteria, ev);
         const ordById = new Map(perStrandArr.map((ps) => [ps.strandId, ps.stageOrdinal]));
         const labelByOrdinal: Record<number, string> = {};
@@ -119,7 +130,7 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
           className: cl.label,
           schemeName: cl.schemeName,
           strands: strands.map((s) => ({ id: s.id, code: s.code, name: s.name, ordinal: ordById.get(s.id) ?? null })),
-          overall: overallRollUp(perStrandArr).overallOrdinal,
+          overall: overallRollUp(perStrandArr, { yearAssessmentOrdinal: anchors.get(p.data.id) ?? null }).overallOrdinal,
           labelByOrdinal,
         });
       }

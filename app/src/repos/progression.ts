@@ -262,3 +262,38 @@ export async function getPupilName(pupilId: number): Promise<string | null> {
   const { rows } = await pool.query<{ display_name: string }>(`SELECT display_name FROM pupils WHERE id = $1`, [pupilId]);
   return rows[0]?.display_name ?? null;
 }
+
+/**
+ * 16A.5 — the year-end overall ANCHOR per pupil for a scheme: the stage ordinal recorded in
+ * pupil_year_assessment (a year-end overall paper / teacher confirmation). Fed to overallRollUp so the
+ * overall is the confirmed year-end stage rather than the computed mean. Returns pupilId → stage ordinal.
+ */
+export async function yearAnchorsForScheme(pupilIds: number[], schemeId: number): Promise<Map<number, number>> {
+  const out = new Map<number, number>();
+  if (!pupilIds.length) return out;
+  const { rows } = await pool.query<{ pupil_id: number; ordinal: number }>(
+    `SELECT ya.pupil_id, st.ordinal
+     FROM pupil_year_assessment ya
+     JOIN prog_stages st ON st.id = ya.stage_id
+     WHERE st.scheme_id = $1 AND ya.pupil_id = ANY($2::bigint[])`,
+    [schemeId, pupilIds],
+  );
+  // a pupil could (in principle) have anchors at several stages of a scheme — take the highest ordinal.
+  for (const r of rows) {
+    const pid = Number(r.pupil_id);
+    const ord = Number(r.ordinal);
+    if (!out.has(pid) || ord > out.get(pid)!) out.set(pid, ord);
+  }
+  return out;
+}
+
+/** Record (or update) a pupil's year-end overall anchor at a stage. One row per (pupil, stage). */
+export async function recordYearAssessment(input: { pupilId: number; stageId: number; assessmentId?: number | null; overallLabel?: string | null }): Promise<void> {
+  await pool.query(
+    `INSERT INTO pupil_year_assessment (pupil_id, stage_id, assessment_id, overall_label)
+     VALUES ($1,$2,$3,$4)
+     ON CONFLICT (pupil_id, stage_id)
+       DO UPDATE SET assessment_id = EXCLUDED.assessment_id, overall_label = EXCLUDED.overall_label, recorded_at = now()`,
+    [input.pupilId, input.stageId, input.assessmentId ?? null, input.overallLabel ?? null],
+  );
+}

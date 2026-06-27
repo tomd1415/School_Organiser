@@ -204,6 +204,8 @@ finished), do a final pass:
 - 16A.1 — progression schema (migration 0066) + pure roll-up (currentStagePerStrand/overallRollUp, 10 tests) + repo + integration test.
 - 16A.2 — year-ladder parser (pure, 5 tests) + idempotent seed of 3 schemes (full ladder: 9 stages/120 units/~936 criteria, GCSE structure, blank Post-16); admin UI (list/grid/assign) + paths + gallery + route test.
 - 16A.3 — class heat-map + per-pupil ladder (routes compute via pure roll-up) + Pupils-screen link + gallery + integration test.
+- 16A.6 — DPIA delta + erasure (explicit + counted) + anonymise-keeps-nameless + no-AI static guard + integration test.
+- 16A.5 — year-end overall anchor wired into the roll-up (yearAnchorsForScheme/recordYearAssessment) + integration test.
 
 ## FINAL STATUS
 *(Fill in at the very end.)*
