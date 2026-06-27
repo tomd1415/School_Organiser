@@ -620,7 +620,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
   const answerCol = header.map((c) => PROMPT.test(c) || SCREENSHOT.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c)));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c) || isMultiCell(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {

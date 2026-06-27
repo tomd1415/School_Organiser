@@ -38,6 +38,15 @@ describe('multiple-select ("tick all that apply")', () => {
     expect(fields.map((f) => f.kind)).toEqual(['multichoice', 'choice']);
     expect(fields[0]!.options).toEqual(['buttons', 'light sensor', 'the screen']);
   });
+  it('a table whose ONLY answer cells are multi-select is still an interactive answer table', () => {
+    const multiOnly = `## Q
+| Question | Tick all the inputs |
+|---|---|
+| Which are inputs? | [ ] buttons [ ] microphone [ ] the screen |
+`;
+    const fields = renderWorksheet(multiOnly, { mode: 'review' }).fields;
+    expect(fields.map((f) => f.kind)).toEqual(['multichoice']);
+  });
   it('does NOT mistake a "[[ ]]" fill-in-blank for multi-select', () => {
     const blanks = renderWorksheet('Fill: a [[ ]] repeats and needs a [[ ]] value.\n', { mode: 'review' }).fields;
     expect(blanks.every((f) => f.kind !== 'multichoice')).toBe(true);
