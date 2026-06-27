@@ -1,0 +1,275 @@
+{
+  "unitTitle": "Y7 Clear messaging in digital media (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Get the message across — search, screenshot, good posters",
+      "objectives": "I can choose search terms relating to a topic\nI can use tools to screenshot an image into another application\nI can identify key features of a good poster",
+      "outline": "Routine first (same every lesson). Vocabulary on board: search term · screenshot · annotate. TA: everyone has a browser + slides/doc open. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the “one way” road sign (think–pair–share). What is the message? How do you know? Pupils CHOOSE on the worksheet (no writing).\n   • Support: pick the message from 3 choices.  • Core: name a place they have seen public messaging.  • Challenge: why a picture beats a long sentence.\n2. (5–15) What makes a good poster? (I do). Build a class list — clear message, matching picture, easy-to-read text. Pupils TICK ALL good features (multi-select). Keep the list for Lesson 2.\n3. (15–25) Search for an online safety poster (we do). Choose search terms; search; pick one good poster. Likely error: vague terms (“stuff”) → fix-words “say WHAT and WHERE — online safety poster.”  • Support: word-bank of terms.  • Core: write 3 terms + why.  • Challenge: refine terms when a search fails. Play the search-image video as a teacher hook.\n4. (25–45) You-do — screenshot the poster, paste it into slides/a doc, ADD LABELS on the good features. Play the screenshot video as a hook.  • Support: printed “press these keys” card.  • Core: label features.  • Challenge: label AND say why each helps. TA: “prompt, do not do it for them.”\n5. (45–50) Plenary — self-tick the 3 “I can…”; show the labelled screenshot.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. Videos have motion/sound — teacher-played, the teacher’s choice; otherwise no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Get the message across — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-the-message-across-starter-worksheet.md"
+        },
+        {
+          "title": "Get the message across — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-the-message-across-activity-worksheet.md"
+        },
+        {
+          "title": "Get the message across — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-the-message-across-slides.md"
+        },
+        {
+          "title": "one way road sign (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-one-way-road-sign-teach-computing.jpg"
+        },
+        {
+          "title": "taking a screenshot video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-capture-image-teach-computing.mp4"
+        },
+        {
+          "title": "searching for an image video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-searching-google-images-teach-computing.mp4"
+        }
+      ]
+    },
+    {
+      "title": "Poster making — plan, image, create",
+      "objectives": "I can plan a poster to clearly convey a message\nI can choose and download a suitable image\nI can create a poster using a publishing application",
+      "outline": "Routine first. Vocabulary on board: portrait · landscape · download · heading · body text. TA: publishing app (e.g. Canva) + a policy-checked image site open; the L1 “good poster” list on the board. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the Mobile Threats poster: good or not so good? Pupils TICK ALL the good features (multi-select); design is personal so answers vary if explained.\n   • Support: choose the poster’s main message.  • Core: name one thing that could be better.  • Challenge: why the light→dark background helps the reader.\n2. (5–20) Plan first (I do). Model main message → main colour → portrait/landscape → image theme on the activity worksheet. Stress: everything serves the message.\n3. (20–30) Choosing colours (we do). Use a colour tool for companion colours; black/white text is a safe default. Pupils note colour codes.\n4. (30–40) You-do — find and DOWNLOAD a licensed image that matches the theme; start building the poster. Play the paste-an-image video as a hook. Likely error: re-uses the chosen poster’s image → fix-words “find your OWN licensed image.”  • Support: “black/white text” default.  • Core: portrait/landscape with a reason.  • Challenge: check the image licence; pick two companion colours.\n5. (40–45) Plenary — self-tick the 3 “I can…”; screenshot the poster so far. Keep the plan for Lesson 3.\nDifferentiation on the SAME task; minimal writing (tick/choose/screenshot); no flashing/sound on slides (the image video is teacher-played).",
+      "resources": [
+        {
+          "title": "Poster making — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-poster-making-starter-worksheet.md"
+        },
+        {
+          "title": "Poster making — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-poster-making-activity-worksheet.md"
+        },
+        {
+          "title": "Poster making — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-poster-making-slides.md"
+        },
+        {
+          "title": "mobile threats poster (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-mobile-threats-poster-teach-computing.png"
+        },
+        {
+          "title": "paste an image video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-paste-image-to-canva-teach-computing.mp4"
+        }
+      ]
+    },
+    {
+      "title": "Brand — recolour a logo, build a slide, give feedback",
+      "objectives": "I can modify a logo using a graphic editing program\nI can choose how to combine text and graphics on a slide\nI can use digital tools to provide feedback on design choices",
+      "outline": "Routine first. Vocabulary on board: brand · logo · slide · comment. TA: a paint/graphics app + slides software with comments; the three logo files where pupils can open them. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the social-media “brand cube”: what tells you which brand it is? Pupils TICK ALL brand cues (multi-select): logo shape, colours, symbol/letter.\n   • Support: what is a logo? (choose).  • Core: a brand you know by colour.  • Challenge: why repeat the logo/colours on many products.\n2. (5–18) Choose + recolour a logo (I do). Pick the eye/laptop/webcam logo; use ONLY the fill tool; Save As a new name. Play the recolour video as a hook. Likely error: forgets to rename → fix-words “Save As, new name.”\n3. (18–35) Build a slide (we do). Set background colour (play the background-colour video); add the logo, charity name, key message; set font type/size/colour. Use a SIMPLE template so the design is theirs; reuse L2 colour codes.\n4. (35–48) You-do — swap with a partner; add ONE positive comment + ONE improvement.  • Support: fill tool / comment = choose.  • Core: colour + message with reasons.  • Challenge: background + text colours that are easy to read. Pupils screenshot their slide.\n5. (48–55) Plenary — self-tick the 3 “I can…”; show the slide and the partner’s comment.\nDifferentiation on the SAME task; minimal writing; videos are teacher-played hooks (motion/sound) — otherwise no flashing/sound.",
+      "resources": [
+        {
+          "title": "Brand — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-brand-starter-worksheet.md"
+        },
+        {
+          "title": "Brand — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-brand-activity-worksheet.md"
+        },
+        {
+          "title": "Brand — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-brand-slides.md"
+        },
+        {
+          "title": "social media brand cube (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-social-media-brand-cube-teach-computing.jpg"
+        },
+        {
+          "title": "eye logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-logo-eye-teach-computing.png"
+        },
+        {
+          "title": "laptop logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-logo-laptop-teach-computing.png"
+        },
+        {
+          "title": "webcam logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-logo-webcam-teach-computing.png"
+        },
+        {
+          "title": "recolour a logo video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-recolour-logo-teach-computing.mp4"
+        },
+        {
+          "title": "set slide background colour video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-set-slide-background-colour-teach-computing.mp4"
+        }
+      ]
+    },
+    {
+      "title": "Creating a brand — plan a style, make three slides",
+      "objectives": "I can plan a consistent layout for a set of slides\nI can modify a logo so it fits the planned slide style\nI can create a styled set of slides based on a plan",
+      "outline": "Routine first. Vocabulary on board: brand · logo. TA: graphics app, the blank three-slide set, the logo files, and the rubric where pupils can see it. Read the 3 “I can…” aloud. This lesson is STYLE, not content.\n1. (0–5) Starter — branding or content? Pupils TICK ALL the branding parts (multi-select): logo, colours, shapes (NOT titles/text).\n   • Support: branding stays the same (choose).  • Core: an example of content.  • Challenge: why branding should match on all three slides.\n2. (5–12) The task (I do). A charity wants three blank branded slides with a unified look + a logo. Read the three missions: Our Identity · No to Bullies! · Age Appropriate; pupils pick one.\n3. (12–25) Plan your style (we do). Choose logo, colours, font on the activity worksheet; check against the rubric. Colour tool again; black/white text is safe.\n4. (25–35) Recolour the logo (you do). Open the chosen logo, recolour to the plan, Save As. Likely error: colours don’t match the slides → fix-words “use your plan’s main colour.”\n5. (35–50) Make three slides (you do). Style the blanks to the plan; add the logo (same spot each time); add example text to set the font.  • Support: keep the logo in the same place.  • Core: one main colour across all three.  • Challenge: consistent shades. Pupils screenshot all three.\n6. (50–55) Plenary — self-tick the 3 “I can…”; check work against the rubric.\nDifferentiation on the SAME task; minimal writing; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Creating a brand — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-brand-starter-worksheet.md"
+        },
+        {
+          "title": "Creating a brand — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-brand-activity-worksheet.md"
+        },
+        {
+          "title": "Creating a brand — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-brand-slides.md"
+        },
+        {
+          "title": "safety logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-logo-safety-teach-computing.png"
+        },
+        {
+          "title": "stranger-danger logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-logo-stranger-teach-computing.png"
+        },
+        {
+          "title": "warning logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-logo-warning-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Adding content — text, image, evaluate",
+      "objectives": "I can search for suitable text for slides\nI can search for and add a suitable image\nI can evaluate content against a rubric",
+      "outline": "Routine first. Vocabulary on board: content · licence · source. TA: a search engine + a policy-checked image site + slides software with comments; the rubric to hand. Read the 3 “I can…” aloud. Keep a BLANK copy of the styled slides.\n1. (0–5) Starter — what would you change? The styled slides are empty. Pupils TICK ALL the content still needed (multi-select): name, key message, facts, a matching image.\n   • Support: what is “content”? (choose).  • Core: one thing to add.  • Challenge: why no animations for a safety message.\n2. (5–15) The task (I do). Slide 1 the charity name; slide 2 a key message; slide 3 two or three facts + a matching image. Show the content rows of the rubric.\n3. (15–25) Find + write the text (we do). Search for facts; write them in OWN words; add a source for any statistic/quote. Likely error: copies word-for-word → fix-words “in your own words, then add the source.”  • Support: sentence starters.\n4. (25–35) Find + add an image (you do). A licensed image that MATCHES the text; resize from a corner to keep proportions. “Appropriate” = age + theme + permission. Pupils screenshot their slides.\n5. (35–48) Evaluate (you do). Review a partner’s slides with the rubric: start positive, be specific, suggest one improvement; reply to a comment if you disagree, with a reason.  • Challenge: own-words facts + three-way “appropriate” image.\n6. (48–55) Plenary — self-tick the 3 “I can…”.\nDifferentiation on the SAME task; minimal writing; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Adding content — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-adding-content-starter-worksheet.md"
+        },
+        {
+          "title": "Adding content — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-adding-content-activity-worksheet.md"
+        },
+        {
+          "title": "Adding content — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-adding-content-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Presenting — plan, present, evaluate",
+      "objectives": "I can plan how to deliver a presentation\nI can explain my work to others through a presentation\nI can evaluate my work against a rubric",
+      "outline": "Routine first. Vocabulary on board: present · design choices. TA: the rubric and the planning rows on the worksheet; agree calm grouping for presenting. Read the 3 “I can…” aloud.\n1. (0–5) Starter — a good presentation. Pupils TICK ALL the things a good presenter does (multi-select): speaks clearly, looks up, practises (NOT reads every word).\n   • Support: a good presentation is simple/planned/practised (choose).  • Core: one thing a good presenter does with their voice.  • Challenge: why plan rather than read off the slide.\n2. (5–18) Plan your talk (I do → we do). One sentence per slide; explain a design choice. Pupils fill the plan, then practise with a partner. Support: one sentence per slide.\n3. (18–38) Present (you do). Present to a small group as if to the charity. Offer a CALM option (present to one peer or the TA) for anyone who finds the class too much; supervise.\n4. (38–48) Evaluate (you do). Mark the rubric statements met — branding (blank slides) then content (example slides).  • Core: one design choice + why.  • Challenge: how the choices serve the safety message.\n5. (48–55) Plenary — “working between applications”: name the apps used (browser, publishing, graphics, presentation) and how text/images moved (copy-paste, save-load). Self-tick the 3 “I can…”.\nDifferentiation on the SAME task; minimal writing; movement/regulation is routine; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Presenting — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-starter-worksheet.md"
+        },
+        {
+          "title": "Presenting — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-activity-worksheet.md"
+        },
+        {
+          "title": "Presenting — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-slides.md"
+        }
+      ]
+    }
+  ]
+}

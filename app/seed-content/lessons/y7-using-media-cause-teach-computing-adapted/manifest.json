@@ -1,0 +1,233 @@
+{
+  "unitTitle": "Y7 Using media — gaining support for a cause (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Features of a word processor",
+      "objectives": "I can choose the right software for a task\nI can name key features (tools) of a word processor\nI can use the tools to format a document\nI can explain why we format documents",
+      "outline": "Routine first (same every lesson). Vocabulary on board: application software · word processor · formatting · font · icon. TA: everyone has the word-processing software open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — the right software for the job (think–pair–share). On the starter worksheet pupils CHOOSE the best software for each job (single best answer; no writing).\n   • Support: tick-box options.  • Core: name a tool from memory.  • Challenge: say why a word processor beats presentation software for an essay. Likely error: “any software will do” → fix-words “we pick the tool that fits the job.”\n2. (10–25) I-do → we-do — Features of a word processor. Teacher opens the software, hovers over each icon, shows bold/font/colour/alignment/bulleted list (I do). Pairs find the tools on the A1 activity sheet (we do).\n   • Support: word-bank of tool names to match.  • Core: identify each tool.  • Challenge: find one extra tool and add a row.\n3. (25–45) You-do — open the poorly formatted “Help save the Earth” document and format it with the tools. Keep a screenshot of the finished document.\n   • Support: fewer items to fix, less writing.  • Core: format the whole document.  • Challenge: investigate a new tool. Success = the document is clear and easy to read. TA: “prompt, do not do it for them.”\n4. (45–55) Plenary — pupils self-tick the 4 “I can…”; quick recap (software choice / name a tool / why we format).\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Features of a word processor — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-features-word-processor-starter-worksheet.md"
+        },
+        {
+          "title": "Features of a word processor — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-features-word-processor-activity-worksheet.md"
+        },
+        {
+          "title": "poorly formatted document (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-poorly-formatted-document.png"
+        },
+        {
+          "title": "Features of a word processor — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-features-word-processor-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Licensing appropriate images",
+      "objectives": "I can choose an image that suits the document\nI can explain the copyright rule\nI can choose the right Creative Commons licence\nI can credit the source of an image",
+      "outline": "Routine first. Vocabulary on board: copyright · licensing · Creative Commons · text wrapping · cropping · credit. TA: pupils reopen their formatted document from last lesson. Read the 4 “I can…” aloud.\n1. (0–5) Starter — is this image a good choice? On the starter worksheet pupils CHOOSE the image that suits the purpose/audience (single best answer; no writing).\n   • Support: one-word description of a good image.  • Core: say why an image must suit the purpose.  • Challenge: choose between two similar images and justify.\n2. (5–20) I-do → we-do — Copyright and Creative Commons. Teacher states the rule: you cannot use an image without permission (I do). Play the 3-minute copyright video as a teacher-played hook (motion + sound — teacher’s choice). Together work a Creative Commons licence scenario using the licence-chooser image (we do).\n   • Support: tick what you must do with a CC image.  • Core: explain why we credit a source.  • Challenge: pick the right licence for a “use/edit/share but no money” scenario. Likely error: “anything online is free” → fix-words “check the licence first.”\n3. (20–38) You-do — find a Creative-Commons image (Tools → Usage Rights), insert it into the document, format it (crop / text wrap / recolour) and write the credit. Screenshot the credited image.\n   • Support: printed insert→crop→wrap step strip.  • Core: insert and credit one image.  • Challenge: recolour and add a second image. TA: prompt, do not do it for them.\n4. (38–50) Peer feedback — swap seats; one supportive comment + one improvement on a classmate’s work, then respond to feedback.\n5. (50–55) Plenary — self-tick the 4 “I can…”; exit question on copyright/licensing.\nDifferentiation on the SAME task; movement built in as routine; no flashing/sound on slides (the video is the teacher’s deliberate choice).",
+      "resources": [
+        {
+          "title": "Licensing appropriate images — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-licensing-images-starter-worksheet.md"
+        },
+        {
+          "title": "Licensing appropriate images — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-licensing-images-activity-worksheet.md"
+        },
+        {
+          "title": "Creative Commons image search (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-creative-commons-image-search.png"
+        },
+        {
+          "title": "Creative Commons licence chooser (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-cc-licence-chooser.png"
+        },
+        {
+          "title": "Licensing appropriate images — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-licensing-images-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "The credibility of sources",
+      "objectives": "I can explain that not all information online is reliable\nI can use checks to judge a source\nI can decide if a source is credible and say why\nI can choose a cause to support",
+      "outline": "Routine first. Vocabulary on board: credibility · source · audience. TA: have the fake-news starter on the board as pupils enter. Read the 4 “I can…” aloud.\n1. (0–10) Starter — real or fake? Show a story; pupils CHOOSE on the starter worksheet whether a source with no author/date is credible (single best answer).\n   • Support: tick what helps you trust a source.  • Core: define “credible”.  • Challenge: why “I saw it on a website” is not proof. (The “fifteen sheep” story is actually TRUE — checked on the real town site.)\n2. (10–40) I-do → we-do — Who can put information online? Teacher: anyone can, so we must check (I do); discuss Wikipedia. Together work the four checks — who wrote it, when, does anywhere else agree, are there links (we do), using the question-words image.\n   • Support: multi-select the questions that help.  • Core: why we cannot always trust Wikipedia.  • Challenge: a recent date but no author — trust it? Likely error: “Wikipedia is always right/always wrong” → fix-words “check who wrote it and where the facts come from.”\n3. (40–50) You-do — write a short real or deliberately fake story; swap and hunt for the clues. Pupils then write the CAUSE they want to support.\n4. (50–55) Plenary — self-tick the 4 “I can…”; name one credibility check.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "The credibility of sources — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-credibility-sources-starter-worksheet.md"
+        },
+        {
+          "title": "The credibility of sources — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-credibility-sources-activity-worksheet.md"
+        },
+        {
+          "title": "fake news newspaper (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-fake-news-newspaper.png"
+        },
+        {
+          "title": "credibility question words (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-credibility-questions.png"
+        },
+        {
+          "title": "The credibility of sources — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-credibility-sources-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Research and plan your blog",
+      "objectives": "I can explain plagiarism, citation and paraphrase\nI can reference a source correctly\nI can judge whether a source is reliable\nI can record my research and credit the sources",
+      "outline": "Routine first. Vocabulary on board: plagiarism · referencing · citation · paraphrase · blog. TA: check the research blogs are not filter-blocked. Read the 4 “I can…” aloud.\n1. (0–10) Starter — match the word to its meaning (citation / paraphrase / plagiarism) on the starter worksheet (drag-and-drop matching; no writing).\n   • Support: single-choice “copying and saying it is yours = ?”.  • Core: why we reference.  • Challenge: a poem with a few words changed and shared as your own — is it OK? Likely error: mixing paraphrase and plagiarism → fix-words “paraphrase still needs a credit.”\n2. (10–20) We-do — Is this plagiarism? A paraphrased poem shared as your own. Answer: yes — too similar and no credit. Look at a real blog together and notice headings, images and how sources are cited.\n3. (20–50) You-do — research the chosen cause; record sources in the table and EVALUATE the credibility of each.\n   • Support: use the worked example row.  • Core: record one credible source.  • Challenge: find a second source and compare. TA: prompt, do not do it for them.\n4. (50–55) Plenary — exit ticket: citation / paraphrase / plagiarism; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Research and plan your blog — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-research-plan-blog-starter-worksheet.md"
+        },
+        {
+          "title": "Research and plan your blog — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-research-plan-blog-activity-worksheet.md"
+        },
+        {
+          "title": "example climate blog (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-climate-blog-example.png"
+        },
+        {
+          "title": "Research and plan your blog — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-research-plan-blog-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Promoting your cause",
+      "objectives": "I can set success criteria for my blog\nI can build a blog using the software\nI can add credible, referenced content\nI can lay out my blog to suit my audience",
+      "outline": "Routine first. Vocabulary on board: success criteria · audience · blog · feedback. TA: blog software (Google Sites / Microsoft Sway) ready, cheat sheets printed; pupils reopen their research. Read the 4 “I can…” aloud.\n1. (0–10) Starter — success criteria. On the starter worksheet pupils CHOOSE the good (not opinion-based) criterion and write their own.\n   • Support: tick what a good blog should have.  • Core: write two criteria.  • Challenge: explain why “must be useful” is weak and improve it. Likely error: vague/opinion criteria → fix-words “could two people agree it was met?”\n2. (10–40) I-do → we-do → you-do — Show the assessment rubric (audience/sources/formatting/images) and give pupils a copy. Demonstrate the blog software with the cheat sheet (I do/we do). Pupils build their blog from their researched, referenced content (you do).\n   • Support: follow the cheat-sheet steps.  • Core: build a page with referenced content.  • Challenge: add a second page or extra feature. TA: prompt, do not do it for them.\n3. (40–52) We-do — Helpful feedback. Compare example comments; A is best (positive, specific, suggests a change). Swap seats and give a classmate one positive comment + one improvement, then respond.\n4. (52–55) Plenary — self-tick the 4 “I can…”; blog finished next lesson.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Promoting your cause — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-promoting-cause-starter-worksheet.md"
+        },
+        {
+          "title": "Promoting your cause — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-promoting-cause-activity-worksheet.md"
+        },
+        {
+          "title": "assessment rubric (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-assessment-rubric.png"
+        },
+        {
+          "title": "Promoting your cause — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-promoting-cause-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Project completion and assessment",
+      "objectives": "I can finish and share my blog\nI can check my blog against the assessment criteria\nI can answer questions about using media\nI can reflect on what I have learned",
+      "outline": "Routine first. Vocabulary on board: blog · assessment criteria · feedback · summative. TA: pupils open their blog, peer feedback and research. Read the 4 “I can…” aloud.\n1. (0–10) Starter — share your blog. Demonstrate publish/share links; pupils record their share link on the starter worksheet, then view classmates’ blogs for ideas. CHOOSE: what you do before others can see an online blog.\n2. (10–40) You-do — finish the blog using the peer feedback; show the rubric (audience/sources/formatting/images) and check each row.\n   • Support: tick what a finished blog should have.  • Core: name the strongest rubric row and why.  • Challenge: which row to improve with more time. TA: gather a small group at the board if a common software question arises.\n3. (40–52) Summative assessment — the end-of-unit multiple-choice quiz (activity worksheet): software, formatting, copyright, credibility. Single best answer each time; calm and low-pressure.\n4. (52–55) Plenary — “I didn’t know how to… but now I can.” Pupils write one thing they can now do and add it to the board; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Project completion and assessment — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-project-assessment-starter-worksheet.md"
+        },
+        {
+          "title": "End-of-unit assessment — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-project-assessment-activity-worksheet.md"
+        },
+        {
+          "title": "assessment rubric (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-assessment-rubric.png"
+        },
+        {
+          "title": "Project completion and assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-project-assessment-slides.md"
+        }
+      ]
+    }
+  ]
+}

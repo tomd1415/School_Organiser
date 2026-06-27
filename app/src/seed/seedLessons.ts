@@ -96,7 +96,9 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const newOnly = args.includes('--new-only'); // provision-on-boot / cron: add missing units, never clobber an instance's edits
   const only = args.find((a) => !a.startsWith('--'));
-  const dirs = readdirSync(BUNDLES, { withFileTypes: true }).filter((d) => d.isDirectory() && (!only || d.name === only));
+  const dirs = readdirSync(BUNDLES, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && (!only || d.name === only))
+    .filter((d) => existsSync(join(BUNDLES, d.name, 'manifest.json'))); // skip non-bundle dirs (e.g. _notes/)
   for (const d of dirs) {
     const r = await seedBundle(join(BUNDLES, d.name), newOnly);
     console.log((r.ok ? '✓ ' : '✗ ') + r.msg);
