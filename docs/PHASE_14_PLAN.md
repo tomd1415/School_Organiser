@@ -1,5 +1,15 @@
 # Phase 14 — Hardening Phase 13: settle the planner, edit & preview before building on them
 
+> **Status (2026-06-27): NOT BUILT — deferred, now folded into [Phase 15](PHASE_15_PLAN.md).** This plan
+> was written on 2026-06-18 but never executed: the work that actually happened next was the *content-rich
+> worksheets* (Phase 12), the *Rail & Stage UI rebuild*, and the *per-unit assessment subsystem*. None of
+> 14.1–14.6 has landed — confirmed in code: there is no `resolvePlannerDrop` module (14.1), no
+> cascade-overflow warning in [/planner/place](../app/src/routes/planner.ts) (14.2), and no click-to-place /
+> ARIA path (14.3); the only planner test is [planner.int.test.ts](../app/tests/integration/planner.int.test.ts).
+> The debt it describes is **still real and still the highest-priority hardening**, so it has been pulled
+> verbatim into [Phase 15](PHASE_15_PLAN.md) §15.2. Keep this document as the detailed design for those
+> items; track *status* in the Phase 15 plan.
+
 > **Status (2026-06-18): planned.** Phase 13 shipped a large amount of new surface — per-class
 > multi-slot delivery, the unified lesson card, the tri-state inline edit, the new-tab pupil preview,
 > and the **drag-drop planner** ([/planner](../app/src/routes/planner.ts)) with insert/cascade, move,

@@ -5,6 +5,12 @@ A living checklist of the follow-ups suggested while building the setup/deploy a
 [../CHANGELOG.md](../CHANGELOG.md); the longer-horizon idea backlog (Wave 6+) is in
 [FUTURE_WAVES.md](FUTURE_WAVES.md). Items are ticked here as they land.
 
+> **Note (2026-06-27):** this list predates Phases 12–13 and the assessment subsystem. The items still
+> open below remain genuinely outstanding, but the big ones now have a home: the **"Stages & strands"**
+> feature → [PHASE_16_PLAN.md](PHASE_16_PLAN.md); the **KS4/GCSE import finish** and **external-reference
+> links** → [PHASE_15_PLAN.md](PHASE_15_PLAN.md) §15.5; the **deploy / first-year-setup** items in §A are
+> **operator actions** (code is shipped — they need running on the Proxmox box), not coding work.
+
 ## ★ Feature request — "Stages" & strands (raised 2026-06-20)
 
 A new progression model to build. The teacher's words:

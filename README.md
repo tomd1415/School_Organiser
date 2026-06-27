@@ -35,7 +35,21 @@ the school's internal Debian server, accessed from the teacher's desktop and lap
 > official course documents, per-feature model choice, and an opt-in **advisory AI lesson reviewer**
 > (off by default). The whole app now wears a **Rail & Stage** UI — a persistent grouped left rail
 > beside one content stage, an everyday/power experience toggle, a command palette and an
-> accessibility toolbar (see [docs/UX_FLOWS.md](docs/UX_FLOWS.md)). Beyond: the parked
+> accessibility toolbar (see [docs/UX_FLOWS.md](docs/UX_FLOWS.md)). **Phase 12 — zero-friction pupils
+> & content-rich worksheets** ([docs/PHASE_12_PLAN.md](docs/PHASE_12_PLAN.md)) and **Phase 13 — multi-
+> lesson weeks, one unified lesson card, tri-state inline editing & the drag-drop planner**
+> ([docs/PHASE_13_PLAN.md](docs/PHASE_13_PLAN.md)) are both built: a unit now sequences across **all**
+> a class's weekly slots, the same lesson card is reused on the timetable and the Schemes spine, a
+> 👁/✏-this-class/✏-master toggle inline-edits the lesson or its per-class adaptation, the pupil view
+> previews in a new tab, and [/planner](app/src/routes/planner.ts) drags lessons/whole-units into a
+> holiday-aware class timeline (insert/cascade, move, pull-forward, lock, undo). Most recently, a
+> **per-unit summative assessment subsystem** ([docs/PHASE_15_PLAN.md](docs/PHASE_15_PLAN.md) tracks
+> what remains): AI **generates** a paper covering what *this class* was taught (GCSE groups →
+> OCR-J277 exam style), the teacher reviews/marks-it-ready and **assigns** it with an availability
+> window, pupils **take** it behind the pupil gate (the answer key never reaches them), objective
+> parts **auto-mark** and open answers are **AI-marked** in anonymous, redacted, slot-lettered batches
+> for the teacher to confirm, and **results** release per-pupil + per-spec-point — all behind the same
+> redaction/withholding/audit wrapper and the `is_test` Test-Lab partition. Beyond: the parked
 > **multi-teacher** v2 ([docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md)).
 
 ## The one-sentence pitch

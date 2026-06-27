@@ -4,14 +4,20 @@ Phased delivery. Each phase is independently useful and shippable to the school 
 tool earns its keep early and we learn before building more. Priorities reference the user
 stories in [SPECIFICATION.md](SPECIFICATION.md).
 
-> **Status (2026-06-15):** Phases **0–6 and 8–10 built** and in daily use (Phase 4's optional 4.6/4.8
-> extras aside); **Phase 7** (polish) is an ongoing pick-by-pain list, much of it absorbed into Phase
-> 10. **Phase 11** — the teacher's idea backlog — is **largely built** (Waves 0–5; see
-> [MORE_IDEAS.md](MORE_IDEAS.md)). The app now wears the **Rail & Stage** UI
-> ([UX_FLOWS.md](UX_FLOWS.md)) and has had a project-wide review + remediation
-> ([CHANGELOG.md](../CHANGELOG.md)). Pupil logins (Phase 8) and auto-marking (Phase 9) ship **off by
-> default** behind DPIA gates. Beyond: the deferred idea-4 reviewer tail and the parked multi-teacher
-> v2 — both gated on real-use proof.
+> **Status (2026-06-27):** Phases **0–13 built** and in daily use (Phase 4's optional 4.6/4.8 extras
+> aside); **Phase 7** (polish) is an ongoing pick-by-pain list, much of it absorbed into Phase 10.
+> **Phase 11** — the teacher's idea backlog — is **largely built** (Waves 0–5; see
+> [MORE_IDEAS.md](MORE_IDEAS.md)). **Phase 12** (zero-friction pupils + content-rich worksheets) and
+> **Phase 13** (multi-lesson weeks, the unified lesson card, tri-state inline edit and the drag-drop
+> [/planner](../app/src/routes/planner.ts)) are complete. A **per-unit summative assessment subsystem**
+> (AI generation → review → assign → pupil take → AI-assisted marking → results/release) shipped on
+> 2026-06-26. The app wears the **Rail & Stage** UI ([UX_FLOWS.md](UX_FLOWS.md)) and has had a
+> project-wide review + remediation ([CHANGELOG.md](../CHANGELOG.md)). Pupil logins (Phase 8),
+> auto-marking (Phase 9) and the assessment take-flow ship **off by default** behind DPIA gates.
+> **Next up — [Phase 15](PHASE_15_PLAN.md)** pays down the debt the recent fast builds left (the
+> unbuilt [Phase 14](PHASE_14_PLAN.md) planner-hardening, the assessment live-AI smoke, query perf),
+> then **[Phase 16](PHASE_16_PLAN.md)** is the next feature wave (the *Stages & strands* progression
+> model + the homework loop). Beyond: the deferred idea-4 reviewer tail and the parked multi-teacher v2.
 
 ## Sequencing principle
 

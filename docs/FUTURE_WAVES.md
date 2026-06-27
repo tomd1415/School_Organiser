@@ -1,9 +1,12 @@
 # Future waves — beyond Phase 11 (Wave 6+)
 
-> **Status (2026-06-19): Wave 7 complete; Wave 6 started (6.1 cover-pack built); Waves 8, 9 proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md));
-> the numbered Phase plans (12 worksheets, 13 planner, 14 hardening) run on a parallel track. This is
-> the next idea backlog — strategic feature directions grounded in what the app now holds and two fresh
-> unlocks. Near-term operational follow-ups live in [NEXT_STEPS.md](NEXT_STEPS.md).
+> **Status (updated 2026-06-27): Wave 7 complete; Wave 6 partial (6.1 cover-pack built; 6.2/6.3 open);
+> Waves 8, 9 proposed.** Phase 11's Waves 0–5 are complete ([MORE_IDEAS.md](MORE_IDEAS.md)). On the
+> numbered-Phase track, **12 (worksheets) and 13 (planner) are built**, but **14 (planner hardening) was
+> never built** — it is deferred into [Phase 15](PHASE_15_PLAN.md). Several waves here are now scheduled:
+> the homework loop (9.1) and progress views feed [Phase 16](PHASE_16_PLAN.md); 6.2/6.3, 8.x stay backlog.
+> This is the next idea backlog — strategic feature directions grounded in what the app now holds and two
+> fresh unlocks. Near-term operational follow-ups live in [NEXT_STEPS.md](NEXT_STEPS.md).
 
 Two unlocks make these cheap now:
 

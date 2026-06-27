@@ -30,9 +30,23 @@ describe('dark-shell secondary/ghost buttons stay readable', () => {
     expect(secondaryRule).toContain('color: var(--text) !important');
   });
 
-  it('keeps link-styled buttons on the teal accent (like <a class="link">)', () => {
+  it('drops the inherited teal primary border so the button reads as secondary, not a CTA', () => {
+    // button[type="submit"] also forces border-color:var(--teal); a secondary button must reset it.
+    expect(secondaryRule).toContain('border-color: var(--line-strong) !important');
+  });
+
+  it('keeps the hover neutral (the primary submit :hover would otherwise force teal fill)', () => {
     expect(styles).toMatch(
-      /body\[data-shell="next"\] button\.link \{\s*color: var\(--accent\) !important;\s*\}/,
+      /body\[data-shell="next"\] \.btn-secondary:hover[\s\S]*?background: var\(--surface-2\) !important/,
     );
+  });
+
+  it('keeps link-styled buttons flat on the teal accent (like <a class="link">), no box', () => {
+    const linkRule =
+      styles.match(
+        /body\[data-shell="next"\] button\.link,\s*body\[data-shell="next"\] button\.link:hover \{[\s\S]*?\}/,
+      )?.[0] ?? '';
+    expect(linkRule).toContain('color: var(--accent) !important');
+    expect(linkRule).toContain('border-color: transparent !important');
   });
 });

@@ -1505,15 +1505,31 @@ body[data-shell="next"] .btn-secondary,
 body[data-shell="next"] button.ghost,
 body[data-shell="next"] button.link {
   background: transparent !important;
-  /* A secondary/ghost button that is also type="submit" inherited color:#0b1320 !important from the
-     blanket button[type="submit"] primary rule above. With the fill now transparent that dark text sits
-     on the dark surface and is invisible — so reset it back to readable light ink here. */
+  /* A secondary/ghost button that is also type="submit" inherited the full primary treatment from the
+     blanket button[type="submit"] rule above (line ~1463): dark ink (#0b1320), teal fill AND a teal
+     border. With the fill now transparent the dark text is invisible on the dark surface, and the teal
+     border makes it read as a primary CTA. Reset ink to readable light text and the border to a neutral
+     line so these read as genuinely secondary. */
   color: var(--text) !important;
+  border-color: var(--line-strong) !important;
+}
+/* …and don't let the primary :hover (line ~1497, button[type="submit"]:hover → teal fill) take over when
+   you hover a secondary/ghost submit button: keep the hover neutral too. */
+body[data-shell="next"] .button.ghost:hover,
+body[data-shell="next"] .btn-secondary:hover,
+body[data-shell="next"] button.ghost:hover,
+body[data-shell="next"] button.link:hover {
+  background: var(--surface-2) !important;
+  border-color: var(--text) !important;
+  box-shadow: none !important;
 }
 /* A link-styled button should read as a flat text link (teal accent), like its <a class="link"> siblings —
-   not white body text. Same transparent background from the rule above. */
-body[data-shell="next"] button.link {
+   not white body text, and with no box/border. */
+body[data-shell="next"] button.link,
+body[data-shell="next"] button.link:hover {
   color: var(--accent) !important;
+  border-color: transparent !important;
+  background: transparent !important;
 }
 
 body[data-shell="next"] input[type="text"],

@@ -1,5 +1,11 @@
 # Phase 12 — Content-rich worksheets, zero-friction pupils, and the deferred tail
 
+> **Status: COMPLETE (2026-06-17).** All workstreams A–E shipped (migrations `0040`–`0042`; 446 unit /
+> 267 integration green at the time) — see [CHANGELOG.md](../CHANGELOG.md) 2026-06-17 ("Phase 12 is done
+> (A–E)"). Any "deferred tail" items below that did *not* ship in Phase 12 are carried forward in
+> [FUTURE_WAVES.md](FUTURE_WAVES.md) / [PHASE_15_PLAN.md](PHASE_15_PLAN.md). The original in-flight
+> checklist is kept verbatim below for the build record.
+>
 > **Status (2026-06-17): in progress.** ✅ A1–A3 (save confirmation, live saving state, narrow-screen
 > Slides/Worksheet toggle); ✅ B1–B4 (the lesson's prepared materials now feed worksheet generation +
 > per-class adaptation + unit conversion, with a default-on consent toggle that lists which files are

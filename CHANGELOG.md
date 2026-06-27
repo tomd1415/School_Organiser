@@ -7,6 +7,28 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-27 — Dark-shell secondary-button colour fix + documentation reconciliation
+
+- **Fix: invisible/mis-coloured secondary buttons in the dark shell.** A `<button type="submit"
+  class="btn-secondary">` inherited the blanket `button[type="submit"]` primary treatment (dark
+  `#0b1320` ink, teal fill **and** teal border); the `.btn-secondary` override only reset the *background*
+  to transparent, leaving dark text on the dark surface (invisible) and a teal border (read as a primary
+  CTA). Reaches ~17 confirmed buttons across **resources/worksheet, settings, setup, tasks, safeguarding,
+  TA and the two assessment views** — including the worksheet/resource actions reported from the lab
+  lesson cockpit. Fixed in [styles.css](app/public/styles.css) by resetting ink + border + hover for
+  secondary/ghost submit buttons (and giving `button.link` the flat teal-link treatment of its
+  `<a class="link">` siblings). Guarded by [btnSecondaryColor.test.ts](app/tests/btnSecondaryColor.test.ts)
+  (proven to fail pre-fix). The deeper smell — a bare `button[type="submit"]` force-filling *every* submit
+  button — is noted for Phase 15 (scope the teal fill to explicit `.primary`/`.btn-primary`).
+- **Docs reconciled with reality.** Several status docs lagged the code by ~10 days. Corrected the build
+  state to **Phases 0–13 built + the assessment subsystem shipped** across [README.md](README.md),
+  [ROADMAP.md](docs/ROADMAP.md), [HANDOVER_2026-06-26.md](docs/HANDOVER_2026-06-26.md) (the "Phase 0 of 7"
+  / "merge ui-rebuild" instructions are now marked superseded — that work is on `main`; `origin/ui-rebuild`
+  is a stale duplicate line, safe to delete), [PHASE_12_PLAN.md](docs/PHASE_12_PLAN.md) (complete, not "in
+  progress"), [PHASE_14_PLAN.md](docs/PHASE_14_PLAN.md) (never built — deferred into Phase 15),
+  [NEXT_STEPS.md](docs/NEXT_STEPS.md) and [FUTURE_WAVES.md](docs/FUTURE_WAVES.md). Added the forward plans
+  [PHASE_15_PLAN.md](docs/PHASE_15_PLAN.md) and [PHASE_16_PLAN.md](docs/PHASE_16_PLAN.md).
+
 ### 2026-06-26 — Per-unit summative assessments (Phases 1–7) built
 
 The full assessment subsystem on top of the Phase-0 schema/repos: AI generation → teacher review/Mark-ready
