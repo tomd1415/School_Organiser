@@ -23,16 +23,24 @@ Built on branch `phase-15-17-unattended`, on top of Phase 15.
   Admin UI: scheme catalogue, the Stage × Strand grid, and per-class scheme assignment.
 - **16A.3 — per-pupil ladder + class heat-map**, computed live from the pure roll-up; teacher-only with a PII
   banner. Linked from the Pupils cohort screen.
+- **16A.4 — auto-suggested evidence from marking** (no AI): a pure `suggestEvidence`, a teacher-editable
+  criterion↔spec-point mapping editor, and a "suggested evidence" block on the per-pupil view where the
+  teacher confirms a suggestion to tick a criterion (`source_kind='assessment'`).
 - **16A.5 — year-end overall anchor** wired into the roll-up (a recorded `pupil_year_assessment` overrides the
   computed cross-strand mean).
 - **16A.6 — privacy.** A DPIA delta for the new progression-evidence category; the Phase-10 erasure path now
-  explicitly clears + counts the evidence/year-assessment rows (anonymise keeps them nameless); a static guard
-  proves the progression paths never touch AI.
+  explicitly clears + counts the evidence/year-assessment/unit-placement/baseline rows (anonymise keeps the
+  nameless attainment); a static guard proves the progression paths never touch AI.
+- **16A.8 core — assessments as stage evidence.** Migration 0067 (`assessments.purpose`,
+  `assessment_question_criteria`, `pupil_unit_placement`) + the deterministic marks→criterion-evidence +
+  per-unit placement wiring.
+- **16A.7 foundation — start-of-year baseline.** Migration 0068 (`pupil_baseline`) + the pure baseline logic
+  (random-click guard, adaptive stop, placement, stage band) + repo.
 - **Rule-7 live-AI smoke (Phase 15 assessment path): PASSED.** One real generation against the teacher's key
   confirmed the audit stores a redacted request and no pupil name egresses; self-cleaned.
 
-Not yet built: 16A.4 (auto-suggest evidence), 16A.7 (baseline AI), 16A.8 (stage-anchored AI assessments), 16B
-(homework), Phase 17 (reference library). See PLAN.md FINAL STATUS.
+Remaining: the AI-generation tails of 16A.7/16A.8 (the probe + stage-anchored paper generators + baseline
+take-flow UI), 16B (homework as data), and Phase 17 (reference library). See PLAN.md FINAL STATUS.
 
 ### 2026-06-27 — Phase 15: debt paydown (planner hardening, button system, perf) + test-fixture fix
 

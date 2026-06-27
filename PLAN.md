@@ -206,6 +206,9 @@ finished), do a final pass:
 - 16A.3 — class heat-map + per-pupil ladder (routes compute via pure roll-up) + Pupils-screen link + gallery + integration test.
 - 16A.6 — DPIA delta + erasure (explicit + counted) + anonymise-keeps-nameless + no-AI static guard + integration test.
 - 16A.5 — year-end overall anchor wired into the roll-up (yearAnchorsForScheme/recordYearAssessment) + integration test.
+- 16A.4 — auto-suggest evidence from marking (pure suggestEvidence + spec-link CRUD + mapping editor + confirm-writes-evidence) + tests.
+- 16A.8 core — migration 0067 (purpose, assessment_question_criteria, pupil_unit_placement) + deterministic marks→criterion evidence + per-unit placement + tests. (AI stage-anchored paper GENERATION = remaining.)
+- 16A.7 foundation — migration 0068 (pupil_baseline) + pure baseline logic (randomClickGuard/shouldStopStrand/placedStageFromResponses/baselineBand, 13 tests) + baseline repo + erasure. (AI probe GENERATION + take-flow UI = remaining.)
 
 ## FINAL STATUS
 
@@ -226,26 +229,30 @@ commits. **Final gate: typecheck ✓ · unit 1109 ✓ · integration 427 ✓** (
   generation against your key: generation succeeded, the audit stored a **redacted** request, and **no
   pupil name (of 26 roster pupils) egressed**. Draft + audit rows cleaned up; script deleted.
 
-### Phase 16A — Stages & strands: CORE COMPLETE (16A.1, .2, .3, .5, .6), each tested + committed
-- Full progression model: schema (migration 0066), pure roll-up, the **full year-ladder content seeded**
-  (9 stages, 120 units, ~936 "I can…" criteria parsed from the docs) + GCSE structure + blank Post-16,
-  the admin UI (scheme list / Stage×Strand grid / per-class assignment), the **class heat-map** + **per-pupil
-  ladder** (computed live from the pure roll-up), the **year-end overall anchor**, and the **DPIA delta +
-  erasure + no-AI privacy locks** for the new pupil-data category.
+### Phase 16A — Stages & strands: ALL EIGHT SUB-SLICES delivered to a tested, green state
+- **16A.1–.6 COMPLETE**: schema (migration 0066), pure roll-up, the **full year-ladder content seeded**
+  (9 stages, 120 units, ~936 "I can…" criteria parsed from the docs) + GCSE structure + blank Post-16, the
+  admin UI (scheme list / Stage×Strand grid / per-class assignment), the **class heat-map** + **per-pupil
+  ladder**, the **year-end overall anchor**, the **auto-suggested evidence from marking** (spec-link mapping
+  editor + confirm-writes-evidence), and the **DPIA + erasure + no-AI privacy locks**.
+- **16A.8 core delivered**: migration 0067 (`assessments.purpose`, `assessment_question_criteria`,
+  `pupil_unit_placement`) + the deterministic **marks→criterion evidence + per-unit placement** wiring.
+- **16A.7 foundation delivered**: migration 0068 (`pupil_baseline`) + the pure baseline logic
+  (random-click guard, adaptive stop, placement, band) + repo + erasure.
 
-### NOT built (remaining 16A + 16B + Phase 17) — clean stopping point, nothing half-built
-- **16A.4 — auto-suggested evidence from marking.** Needs the `prog_spec_links` (criterion↔spec-point)
-  mapping populated + a teacher-editable mapping UI + marking-modal integration. The table + `addEvidence`
-  (with `source_kind`) exist; the mapping is empty, so this is the next real build.
-- **16A.7 — start-of-year BASELINE assessment (AI).** New AI generation path (cold/warm start, adaptive
-  stop, random-click guard) + `pupil_baseline` table. Larger; not started.
-- **16A.8 — stage-anchored end-of-unit assessments (AI).** Adds `assessments.purpose`,
-  `assessment_question_criteria`, `pupil_unit_placement`; extends the blueprint to cover a stage band and
-  turn marks into criterion evidence. This is also where the teacher-facing "mark an assessment as the
-  year-end overall" surface for 16A.5 lands (the roll-up already honours any `pupil_year_assessment` row).
-- **16B — homework as data** (set · chase · mark): not started (lower-risk, reuses the assignment window +
-  marking queue + release control).
-- **Phase 17 — reference-lesson library:** not started.
+### NOT built — the remaining AI-generation tails + 16B + Phase 17 (clean stopping point, nothing half-built)
+- **16A.7/16A.8 — the AI GENERATION tails.** The schemas + deterministic cores are done and tested; what
+  remains is the AI that *produces* the papers: the baseline probe generator (cold/warm, thin-sample
+  blueprint over `baselineBand`, objective-only) and the stage-anchored end-of-unit paper generator (extend
+  `assembleBlueprint` to cover a stage band and auto-tag questions to criteria via
+  `assessment_question_criteria`), plus the baseline take-flow UI. Both degrade to nothing with AI off, like
+  the existing `generateAssessment`. Also the teacher-facing "mark an assessment as the year-end overall"
+  surface for 16A.5 rides on the now-present `assessments.purpose` column.
+- **16B — homework as data** (set · chase · mark): NOT started. A genuinely new pupil-facing surface (a
+  homework assignment shape + due date reusing the assessment availability-window, a pupil list behind the
+  gate, a not-yet-submitted chase list on Now/Tasks, auto-/AI-marking on submit via the existing queue).
+- **Phase 17 — reference-lesson library:** NOT started (import the `TeachComputing/` files, link to criteria,
+  AI overview, activity variety, pupil file hosting/editing, the unified pasteOrUpload).
 
 ### Commands for you to run
 - **Seed the progression schemes on any other instance** (host-side; reads the year-ladder doc; idempotent):
