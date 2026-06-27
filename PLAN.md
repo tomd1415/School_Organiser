@@ -181,6 +181,14 @@ finished), do a final pass:
   migration 0008's one-off backfill); (3) testData seeds a few **imported reference units** so the
   convert-a-downloaded-unit search has folders to find; (4) the clock test's term-date count updated to the
   fixture's (15). Result: the integration suite is **green (413 passed, 0 failed)** from a fresh DB.
+- **15.5 deferred (the plan marks it optional — "pick up if time allows").** Two items, both low code-value:
+  (1) *External reference link on lessons/units* — the infra already exists (`kind='link'` resources with
+  `external_url`, migration 0006, attachable to a plan via the existing resource-attach), so this is a UX
+  convenience over working primitives, not new capability. (2) *Finish the KS4/GCSE import (units 9–16)* —
+  pure data-entry/mapping against `RESOURCE_INGEST.md`, "no new code shape," needing the source material.
+  Deferred to keep depth on the high-value Phase 16/17 builds. Neither blocks anything.
+- **Live-AI smokes (rule 7)** for Phase 15 (assessment generate→mark) and the Phase 16/17 AI paths are batched
+  to the very end, ≤2 attempts each, per rule 7.
 
 ## PROGRESS LOG
 *(Append one line per completed slice: `<slice> — <commit> — gate green`.)*
@@ -190,6 +198,9 @@ finished), do a final pass:
 - 15.2b — planner silent-data-loss guard (lostOffWindow + year-end refusal + window-to-year-end + Undo disable) — gate green (typecheck, unit, integration).
 - 15.1 — principled dark-shell button system (teal scoped to .primary; contract test; ~40 call sites audited; gallery showcase) — gate green (typecheck, unit 1069, integration 413).
 - 15.2a/15.2c — pure resolvePlannerDrop/Act module (13 tests) + click-to-place & keyboard + ARIA — gate green (typecheck, unit 1082, integration 413).
+- 15.3 — assessment privacy/edge locks AUDITED: all 12 checklist invariants already covered by standing tests (no new tests needed); live-AI smoke deferred to rule 7 (end).
+- 15.4 — applyPlacements N+1 batched (ensureOccurrenceCoursesForClass + set-based UPDATE) — gate green (typecheck, unit 1082, integration 413).
+- 15.6 — CHANGELOG + classic-shell removal verified (none remain); docs updated. **Phase 15 complete.**
 
 ## FINAL STATUS
 *(Fill in at the very end.)*

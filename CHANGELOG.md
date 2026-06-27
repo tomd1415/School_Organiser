@@ -7,6 +7,41 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-27 — Phase 15: debt paydown (planner hardening, button system, perf) + test-fixture fix
+
+Built on branch `phase-15-17-unattended`.
+
+- **Test infra — integration suite green from a fresh seed.** The documented run path (`./start.sh` →
+  `npm run test:integration`) only seeded the base timetable, so a fresh dev DB failed ~14 integration
+  tests for want of the test-data fixture. Added a vitest `globalSetup` that seeds it once when absent
+  (idempotent), made the school-default course teaching context apply at course creation + base seed (not
+  only migration 0008's backfill), seeded a few imported reference units for the convert-search, and fixed
+  the clock test's term-date count. Integration now **413 pass / 0 fail** from a clean DB.
+- **15.2b — no silent data loss in the planner.** A cascade / whole-unit drop that would push a lesson past
+  year-end now returns a clear message (mirroring `/map/shift`) instead of vanishing it; the operational
+  window spans to year-end so room is never falsely reported full; Undo is disabled when empty. New pure
+  `lostOffWindow` guard, unit-tested against the real cascade primitives.
+- **15.1 — principled dark-shell button system.** Removed the blanket `button[type="submit"]` teal fill
+  (the latent root of the 2026-06-27 cascade bug); teal is now scoped to explicit `.primary`/`.btn-primary`.
+  Audited ~40 submit call sites, marking the genuine single-action CTAs `.primary` and leaving search/
+  add-row/re-do actions neutral. `btnSecondaryColor.test.ts` grown into a button-contract test; a
+  Button-contract showcase added to `/ui-gallery`.
+- **15.2a/15.2c — tested planner resolver + touch/keyboard.** Extracted the drag gesture→op branching into a
+  pure, unit-tested `lib/plannerDrop.ts` (13 tests); the page script injects it via `.toString()` and is now
+  a thin adapter. Added click-to-place + keyboard (pick up → drop, Escape to cancel), a ✥ move affordance on
+  placed lessons, focusable ARIA-labelled cells/tray items and an aria-live status — the planner now works
+  by touch and keyboard, not just mouse.
+- **15.3 — assessment privacy/edge locks audited.** All twelve checklist invariants (take projection strips
+  the answer key, generation/marking route through `context[]` with no pupil name, disclosure withheld +
+  surfaced in the safeguarding register, confirm-all skips needs_review, assignment dedupe, analytics
+  `NOT is_test`, `wipeTestAttempts`, AI-off degrade, blueprint edges, release gating) are already locked by
+  standing tests. The remaining DoD item — the live-AI smoke — is the one-shot rule-7 check.
+- **15.4 — planner cascade N+1 killed.** Batched `applyPlacements` occurrence resolution into ~5 set-based
+  queries (new `ensureOccurrenceCoursesForClass`) instead of ~4 per position, with a single set-based binding
+  UPDATE inside the same atomic, advisory-locked transaction. The pure cascade maths is untouched; all new
+  scans carry `NOT o.is_test`.
+- Verified the classic-shell flag removal is complete (no `getUiShell` / `data-shell="classic"` paths remain).
+
 ### 2026-06-27 — Dark-shell secondary-button colour fix + documentation reconciliation
 
 - **Fix: invisible/mis-coloured secondary buttons in the dark shell.** A `<button type="submit"
