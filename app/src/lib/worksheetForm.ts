@@ -618,6 +618,62 @@ function orderingControl(key: string, solution: string[], opts: WorksheetOptions
   return `<div class="ws-parsons-wrap${prose ? ' ws-ordering-prose' : ''}${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, key))}"`}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
 }
 
+// ── Card sort (group items into named categories) ───────────────────────────────────────────────
+// A ```sort block lists each category and its members: "Category: item, item". It expands to ONE
+// per-item field (kind 'sort', options = the categories, solution = the item's correct category) so
+// each item stores the category it's dropped in — a `choice` value. Items are pooled + shuffled so
+// position never reveals the grouping; the correct membership never reaches form-mode HTML.
+const SORT_FENCE = /^\s*(?:```|~~~)\s*sort\b/i;
+interface SortSpec { before: string[]; categories: string[]; items: { text: string; cat: string }[]; after: string[] }
+function extractSort(lines: string[]): SortSpec | null {
+  let open = -1;
+  for (let i = 0; i < lines.length; i++) if (SORT_FENCE.test(lines[i]!)) { open = i; break; }
+  if (open === -1) return null;
+  let close = -1;
+  for (let i = open + 1; i < lines.length; i++) if (FENCE_ANY.test(lines[i]!)) { close = i; break; }
+  const end = close === -1 ? lines.length : close;
+  const categories: string[] = [];
+  const items: { text: string; cat: string }[] = [];
+  for (const raw of lines.slice(open + 1, end)) {
+    const line = raw.trim();
+    const ci = line.indexOf(':');
+    if (ci <= 0) continue;
+    const cat = line.slice(0, ci).trim();
+    const its = line.slice(ci + 1).split(',').map((s) => s.trim()).filter(Boolean);
+    if (!cat || its.length === 0) continue;
+    if (!categories.includes(cat)) categories.push(cat);
+    for (const it of its) items.push({ text: it, cat });
+  }
+  if (categories.length < 2 || items.length < 2) return null;
+  return { before: lines.slice(0, open), categories, items, after: close === -1 ? [] : lines.slice(close + 1) };
+}
+
+/** Render a card-sort: a tray of shuffled item tiles + a labelled drop-zone per category. pupil.js
+ * (.ws-sort) wires drag + tap-place and autosaves each item's chosen category to its `sort.{n}.i{m}`
+ * field via /me/answer. In review, items show grouped under the category the pupil chose. */
+function renderSort(idx: number, fields: WorksheetField[], categories: string[], opts: WorksheetOptions): string {
+  const placedOf = (f: WorksheetField): string => (opts.values?.get(f.key) ?? '').trim();
+  const inCat = (c: string): WorksheetField[] => fields.filter((f) => placedOf(f).toLowerCase() === c.toLowerCase());
+  if (opts.mode === 'review') {
+    const cats = categories
+      .map((c) => `<div class="ws-sort-cat"><h4 class="ws-sort-cat-h">${esc(c)}</h4><ul class="ws-sort-list">${inCat(c).map((f) => `<li class="ws-sort-item">${esc(f.label)}</li>`).join('') || '<li class="ws-sort-empty">—</li>'}</ul></div>`)
+      .join('');
+    return `<div class="ws-sort ws-sort-review"><div class="ws-sort-cats">${cats}</div></div>`;
+  }
+  const inert = opts.mode === 'preview';
+  const tile = (f: WorksheetField): string =>
+    `<li class="ws-sort-item" ${inert ? 'aria-disabled="true"' : 'draggable="true" tabindex="0" role="button"'} data-item-key="${esc(f.key)}" data-item="${esc(f.label)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, f.key))}"`}><span class="ws-sort-grip" aria-hidden="true">⋮⋮</span><span class="ws-sort-text">${esc(f.label)}</span></li>`;
+  const unsorted = fields.filter((f) => placedOf(f) === '');
+  const trayItems = shuffleStable(unsorted.map((f) => f.label)).map((lbl) => unsorted.find((f) => f.label === lbl)).filter((f): f is WorksheetField => !!f);
+  const tray = `<ul class="ws-sort-tray" data-sort-tray aria-label="Items to sort">${trayItems.map(tile).join('')}</ul>`;
+  const cats = categories
+    .map((c) => `<div class="ws-sort-cat"${inert ? ' aria-disabled="true"' : ` data-cat="${esc(c)}" role="group"`} aria-label="${esc(c)}"><h4 class="ws-sort-cat-h">${esc(c)}</h4><ul class="ws-sort-list">${inCat(c).map(tile).join('')}</ul></div>`)
+    .join('');
+  const help = inert ? '' : '<p class="ws-sort-help">Drag each item into a group — or tap an item, then tap a group.</p>';
+  const saved = inert ? '' : '<span class="ws-saved ws-sort-saved" aria-hidden="true"></span>';
+  return `<div class="ws-sort" data-sort="${idx}">${help}${tray}<div class="ws-sort-cats">${cats}</div>${saved}</div>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -818,6 +874,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
   let blankIdx = 0;
   let parsonsIdx = 0;
   let orderIdx = 0;
+  let sortIdx = 0;
 
   for (const block of blocks) {
     const shown = include === null || include.has(block.level);
@@ -853,6 +910,28 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         const afterHtml = ord.after.some((l) => l.trim() !== '') ? renderMarkdown(ord.after.join('\n')) : '';
         const spk = opts.mode === 'form' ? speakBtn(ord.before.join(' ')) : '';
         out.push(`<div class="ws-block ws-parsons-block">${spk}${beforeHtml}${orderingControl(key, ord.solution, opts, !isParsons)}${afterHtml}</div>`);
+        continue;
+      }
+
+      // A card-sort fence (```sort) → one `sort` field per item (its chosen category is a choice value).
+      // sortIdx + the per-item index are bumped even when not shown, so keys stay stable across slices.
+      const srt = extractSort(block.lines);
+      if (srt) {
+        sortIdx += 1;
+        const sortFields: WorksheetField[] = srt.items.map((it, m) => ({
+          key: `${opts.keyPrefix ?? ''}sort.${sortIdx}.i${m + 1}`,
+          kind: 'sort',
+          level: block.level,
+          label: it.text,
+          options: srt.categories,
+          solution: [it.cat],
+        }));
+        if (!shown) continue;
+        fields.push(...sortFields);
+        const beforeHtml = srt.before.some((l) => l.trim() !== '') ? renderMarkdown(srt.before.join('\n')) : '';
+        const afterHtml = srt.after.some((l) => l.trim() !== '') ? renderMarkdown(srt.after.join('\n')) : '';
+        const spk = opts.mode === 'form' ? speakBtn(srt.before.join(' ')) : '';
+        out.push(`<div class="ws-block ws-sort-block">${spk}${beforeHtml}${renderSort(sortIdx, sortFields, srt.categories, opts)}${afterHtml}</div>`);
         continue;
       }
 

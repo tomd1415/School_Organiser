@@ -65,6 +65,14 @@ Run the program
 Test it and fix any errors
 \`\`\`
 
+## Sort the parts
+Drag each part into the right group.
+
+\`\`\`sort
+Input: keyboard, microphone
+Output: monitor, speaker
+\`\`\`
+
 ## ✅ Success checklist
 - [ ] I typed my name
 - [ ] I answered every question

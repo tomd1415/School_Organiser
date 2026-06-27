@@ -178,7 +178,8 @@
       var blanks = card.querySelectorAll('.ws-blank');
       var slots = card.querySelectorAll('.ws-match-slot[data-key]');
       var parsons = card.querySelectorAll('.ws-parsons-wrap[data-save-url]');
-      var total = texts.length + checks.length + choices.length + blanks.length + slots.length + parsons.length;
+      var sortItems = card.querySelectorAll('.ws-sort-item[data-item-key]');
+      var total = texts.length + checks.length + choices.length + blanks.length + slots.length + parsons.length + sortItems.length;
       if (total === 0) { chip.textContent = ''; return; }
       var done = 0;
       texts.forEach(function (t) { if ((t.value || '').trim()) done++; });
@@ -187,6 +188,7 @@
       blanks.forEach(function (b) { if ((b.value || '').trim()) done++; });
       slots.forEach(function (s) { if (s.querySelector('.ws-match-placed')) done++; });
       parsons.forEach(function (p) { if (p.classList.contains('is-ordered')) done++; });
+      sortItems.forEach(function (it) { if (it.closest('.ws-sort-cat[data-cat]')) done++; });
       chip.textContent = done >= total ? 'All done — great work! (' + done + ' of ' + total + ') ✓' : "You've done " + done + ' of ' + total + ' — keep going!';
       chip.classList.toggle('ws-progress-done', done >= total);
     });
@@ -621,5 +623,46 @@
       }
     });
     main.addEventListener('drop', function (e) { if (pDrag) { e.preventDefault(); pSave(pWrap(pDrag)); } });
+  }
+
+  // ── Card sort: drag (or tap-place / Enter) items into category groups; autosave each item's chosen
+  //    category to its OWN field (back to the tray saves ''). Same csrf + saved-flash as matching. ──
+  if (main) {
+    var sPicked = null;
+    function sWidget(el) { return el && el.closest ? el.closest('.ws-sort') : null; }
+    function sSetPicked(li) { if (sPicked) sPicked.classList.remove('is-picked'); sPicked = li; if (li) li.classList.add('is-picked'); }
+    function sZone(el) { return el && el.closest ? (el.closest('.ws-sort-cat[data-cat]') || el.closest('.ws-sort-tray')) : null; }
+    function sSave(li, cat) {
+      var url = li.getAttribute('data-save-url'); if (!url) return;
+      var w = sWidget(li); var span = w ? w.querySelector('.ws-sort-saved') : null;
+      if (span) { span.textContent = 'saving…'; span.classList.add('show'); }
+      fetch(url, { method: 'POST', headers: { 'x-csrf-token': csrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'value=' + encodeURIComponent(cat), credentials: 'same-origin' })
+        .then(function (r) { if (span) { span.textContent = r.ok ? 'saved ✓' : 'could not save — try again'; span.classList.add('show'); } })
+        .catch(function () { if (span) { span.textContent = 'could not save — try again'; span.classList.add('show'); } });
+      updateProgress();
+    }
+    function sMove(li, zone) {
+      var isCat = zone.classList.contains('ws-sort-cat');
+      var list = isCat ? zone.querySelector('.ws-sort-list') : zone; if (!list) return;
+      list.appendChild(li);
+      sSave(li, isCat ? (zone.getAttribute('data-cat') || '') : '');
+    }
+    main.addEventListener('click', function (e) {
+      var item = e.target.closest && e.target.closest('.ws-sort-item[data-item-key]');
+      if (item) { e.preventDefault(); sSetPicked(sPicked === item ? null : item); return; }
+      if (!sPicked) return;
+      var zone = sZone(e.target);
+      if (zone && sWidget(zone) === sWidget(sPicked)) { e.preventDefault(); var p = sPicked; sSetPicked(null); sMove(p, zone); }
+    });
+    main.addEventListener('keydown', function (e) {
+      var item = e.target.closest && e.target.closest('.ws-sort-item[data-item-key]');
+      if (item && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); sSetPicked(sPicked === item ? null : item); }
+    });
+    var sDrag = null;
+    main.addEventListener('dragstart', function (e) { var li = e.target.closest && e.target.closest('.ws-sort-item[data-item-key]'); if (li) { sDrag = li; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', ''); } catch (x) {} li.classList.add('is-dragging'); } });
+    main.addEventListener('dragend', function () { if (sDrag) sDrag.classList.remove('is-dragging'); sDrag = null; });
+    main.addEventListener('dragover', function (e) { var z = sZone(e.target); if (z && sDrag && sWidget(z) === sWidget(sDrag)) { e.preventDefault(); z.classList.add('is-drop'); } });
+    main.addEventListener('dragleave', function (e) { var z = sZone(e.target); if (z) z.classList.remove('is-drop'); });
+    main.addEventListener('drop', function (e) { var z = sZone(e.target); if (z && sDrag && sWidget(z) === sWidget(sDrag)) { e.preventDefault(); z.classList.remove('is-drop'); var p = sDrag; sDrag = null; sMove(p, z); } });
   }
 })();

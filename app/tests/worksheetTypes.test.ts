@@ -144,6 +144,43 @@ describe('Order / sequence (non-code)', () => {
   });
 });
 
+describe('Card sort (group items into categories)', () => {
+  const md = `Sort each device into the right group.\n\n\`\`\`sort\nInput: button, microphone\nOutput: LED display, speaker\n\`\`\`\n`;
+  it('a ```sort block becomes one `sort` field per item (options = categories, solution = correct group)', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields.map((f) => [f.key, f.kind, f.label, f.solution?.[0]])).toEqual([
+      ['sort.1.i1', 'sort', 'button', 'Input'],
+      ['sort.1.i2', 'sort', 'microphone', 'Input'],
+      ['sort.1.i3', 'sort', 'LED display', 'Output'],
+      ['sort.1.i4', 'sort', 'speaker', 'Output'],
+    ]);
+    expect(fields[0]!.options).toEqual(['Input', 'Output']);
+  });
+  it('form mode shows the tray + a drop-zone per category, with per-item save URLs', () => {
+    const html = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    expect(html).toMatch(/ws-sort-tray/);
+    expect(html).toMatch(/data-cat="Input"/);
+    expect(html).toMatch(/data-cat="Output"/);
+    expect(html).toContain('key=sort.1.i1');
+    // the correct grouping is NOT revealed: items live in the shuffled tray, category lists are empty
+    expect(html).not.toMatch(/data-cat="Input"[^>]*>[\s\S]*?button/); // button isn't pre-placed in Input
+  });
+  it('review groups each item under the category the pupil chose', () => {
+    const values = new Map([['sort.1.i1', 'Input'], ['sort.1.i3', 'Output']]);
+    const html = renderWorksheet(md, { mode: 'review', values }).html;
+    expect(html).toMatch(/ws-sort-review/);
+    expect(html).toContain('button');
+    expect(html).toContain('LED display');
+  });
+  it('sort respects level slices and keeps stable per-item keys', () => {
+    const lvl = `## 🟢 Support\n\n\`\`\`sort\nFruit: apple\nVeg: carrot\n\`\`\`\n\n## 🔴 Challenge\n\n\`\`\`sort\nHardware: CPU\nSoftware: browser\n\`\`\`\n`;
+    const full = renderWorksheet(lvl, { mode: 'review' }).fields.map((f) => f.key);
+    expect(full).toEqual(['sort.1.i1', 'sort.1.i2', 'sort.2.i1', 'sort.2.i2']);
+    const chl = renderWorksheet(lvl, { mode: 'preview', level: 'challenge' }).fields.map((f) => f.key);
+    expect(chl).toEqual(['sort.2.i1', 'sort.2.i2']); // Challenge's keys unchanged, not renumbered to .1
+  });
+});
+
 describe('per-worksheet key prefix (multiple worksheets)', () => {
   const md = `## Q
 | Question | Your answer |

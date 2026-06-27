@@ -2008,6 +2008,21 @@ html[data-textscale="3"] { font-size: 142%; }
 .ws-ordering-prose .ws-parsons-line { cursor: grab; }
 .ws-parsons-review .ws-order-text { font-family: inherit; white-space: normal; }
 
+/* Card sort: a tray of item tiles + a drop-zone per category. Reuses the parsons tile look. */
+.ws-sort-help { color: var(--muted); font-size: 0.9rem; margin: 0.2rem 0; }
+.ws-sort-tray { list-style: none; margin: 0.3rem 0; padding: 0.4rem; display: flex; flex-wrap: wrap; gap: 0.35rem; min-height: 2.4rem; border: 1px dashed var(--line); border-radius: 8px; }
+.ws-sort-cats { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+.ws-sort-cat { flex: 1 1 12rem; border: 1px solid var(--line); border-radius: 10px; padding: 0.4rem; background: #fbfcfe; }
+.ws-sort-cat.is-drop { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ws-sort-cat-h { margin: 0 0 0.3rem; font-size: 0.95rem; }
+.ws-sort-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; min-height: 1.6rem; }
+.ws-sort-item { display: inline-flex; align-items: center; gap: 0.4rem; background: #f6f8fb; border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.5rem; cursor: grab; }
+.ws-sort-item:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ws-sort-item.is-picked { outline: 2px solid var(--accent); outline-offset: 1px; background: #eef3ff; }
+.ws-sort-item.is-dragging { opacity: 0.5; }
+.ws-sort-empty { color: var(--muted); font-size: 0.85rem; list-style: none; }
+.ws-sort-tray.is-drop { outline: 2px solid var(--accent); }
+
 /* marking modal: code / Parson's answers shown monospaced; a small kind tag on the question */
 .mm-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; white-space: pre; overflow-x: auto; margin: 0; background: rgba(0,0,0,0.04); padding: 0.35rem 0.5rem; border-radius: 6px; }
 .mm-ans .mm-code { background: rgba(37,99,235,0.06); }
