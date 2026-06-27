@@ -43,10 +43,31 @@ function runSeed(script: string): void {
   if (res.status !== 0) throw new Error(`integration fixture seed failed: ${script} (exit ${res.status})`);
 }
 
+async function progressionEmpty(): Promise<boolean> {
+  const c = new Client({ connectionString: DATABASE_URL });
+  try {
+    await c.connect();
+    const { rows } = await c.query<{ n: number }>(`SELECT count(*)::int AS n FROM progression_schemes`);
+    return (rows[0]?.n ?? 0) === 0;
+  } catch {
+    return false; // table missing / DB down — let the tests surface it
+  } finally {
+    await c.end().catch(() => {});
+  }
+}
+
 export async function setup(): Promise<void> {
-  if (await fixturePresent()) return;
-  // eslint-disable-next-line no-console
-  console.log('[integration] seeding fixture (base timetable + test data) — first run on this DB…');
-  runSeed('src/seed/run.ts');
-  runSeed('src/seed/testData.ts');
+  if (!(await fixturePresent())) {
+    // eslint-disable-next-line no-console
+    console.log('[integration] seeding fixture (base timetable + test data) — first run on this DB…');
+    runSeed('src/seed/run.ts');
+    runSeed('src/seed/testData.ts');
+  }
+  // The Stages & strands schemes seed separately (it reads the year-ladder doc from docs/, host-side only).
+  // Idempotent — only run it when the progression tables are empty.
+  if (await progressionEmpty()) {
+    // eslint-disable-next-line no-console
+    console.log('[integration] seeding progression schemes (year ladder + GCSE structure)…');
+    runSeed('src/seed/progressionSeed.ts');
+  }
 }

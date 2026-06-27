@@ -20,6 +20,79 @@ export async function listSchemes(): Promise<SchemeRow[]> {
   return rows;
 }
 
+export interface SchemeWithCounts extends SchemeRow {
+  strands: number;
+  stages: number;
+  units: number;
+  criteria: number;
+}
+
+/** Every scheme with its content counts — for the progression admin list. */
+export async function listSchemesWithCounts(): Promise<SchemeWithCounts[]> {
+  const { rows } = await pool.query<SchemeWithCounts>(
+    `SELECT s.id, s.name, s.kind, s.exam_board AS "examBoard", s.is_active AS "isActive",
+            (SELECT count(*)::int FROM prog_strands  WHERE scheme_id = s.id) AS strands,
+            (SELECT count(*)::int FROM prog_stages   WHERE scheme_id = s.id) AS stages,
+            (SELECT count(*)::int FROM prog_units    WHERE scheme_id = s.id) AS units,
+            (SELECT count(*)::int FROM prog_criteria c JOIN prog_stages st ON st.id = c.stage_id WHERE st.scheme_id = s.id) AS criteria
+     FROM progression_schemes s ORDER BY s.is_active DESC, s.name`,
+  );
+  return rows;
+}
+
+export interface GridCell {
+  stageOrdinal: number;
+  stageLabel: string;
+  strandId: number;
+  strandCode: string;
+  strandName: string;
+  strandOrder: number;
+  units: number;
+  criteria: number;
+}
+
+/** The Stage × Strand grid for a scheme: unit + criteria counts per cell (the course-planning view). */
+export async function schemeGrid(schemeId: number): Promise<GridCell[]> {
+  const { rows } = await pool.query<GridCell>(
+    `SELECT st.ordinal AS "stageOrdinal", st.label AS "stageLabel",
+            sd.id AS "strandId", sd.code AS "strandCode", sd.name AS "strandName", sd.display_order AS "strandOrder",
+            count(DISTINCT u.id)::int AS units,
+            count(c.id)::int AS criteria
+     FROM prog_stages st
+     JOIN prog_strands sd ON sd.scheme_id = st.scheme_id
+     LEFT JOIN prog_units u    ON u.stage_id = st.id AND u.strand_id = sd.id
+     LEFT JOIN prog_criteria c ON c.stage_id = st.id AND c.strand_id = sd.id
+     WHERE st.scheme_id = $1
+     GROUP BY st.ordinal, st.label, sd.id, sd.code, sd.name, sd.display_order
+     ORDER BY st.ordinal, sd.display_order`,
+    [schemeId],
+  );
+  return rows;
+}
+
+export interface ClassSchemeRow {
+  groupCourseId: number;
+  label: string;
+  schemeId: number | null;
+  schemeName: string | null;
+}
+
+/** Each teaching class (group_course) with the progression scheme it's bound to (or none) — for assigning. */
+export async function listClassesWithScheme(): Promise<ClassSchemeRow[]> {
+  const { rows } = await pool.query<ClassSchemeRow>(
+    `SELECT gc.id AS "groupCourseId", g.name || ' · ' || co.name AS label,
+            gcs.scheme_id AS "schemeId", s.name AS "schemeName"
+     FROM group_courses gc
+     JOIN groups g  ON g.id = gc.group_id
+     JOIN courses co ON co.id = gc.course_id
+     LEFT JOIN group_course_scheme gcs ON gcs.group_course_id = gc.id
+     LEFT JOIN progression_schemes s   ON s.id = gcs.scheme_id
+     WHERE gc.active
+     ORDER BY g.name, co.name`,
+  );
+  return rows;
+}
+
 export async function getSchemeForClass(groupCourseId: number): Promise<number | null> {
   const { rows } = await pool.query<{ scheme_id: number }>(
     `SELECT scheme_id FROM group_course_scheme WHERE group_course_id = $1`,
@@ -35,6 +108,11 @@ export async function bindClassToScheme(groupCourseId: number, schemeId: number)
      ON CONFLICT (group_course_id) DO UPDATE SET scheme_id = EXCLUDED.scheme_id, assigned_at = now()`,
     [groupCourseId, schemeId],
   );
+}
+
+/** Clear a class's scheme binding (the "— none —" choice). */
+export async function unbindClassScheme(groupCourseId: number): Promise<void> {
+  await pool.query(`DELETE FROM group_course_scheme WHERE group_course_id = $1`, [groupCourseId]);
 }
 
 export interface StrandRow {

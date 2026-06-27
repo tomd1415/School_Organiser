@@ -46,6 +46,13 @@ export const paths = {
   pedagogy: (): string => '/pedagogy',
   kitPanel: (): string => '/kit/panel',
 
+  // ── Progression (Stages & strands — Phase 16A) ──────────────────────────────────────────────────
+  progression: (): string => '/progression',
+  progressionScheme: (schemeId: number): string => `/progression/scheme/${schemeId}`,
+  progressionAssign: (): string => '/progression/assign',
+  progressionPupil: (pupilId: number): string => `/progression/pupil/${pupilId}`,
+  progressionClass: (groupCourseId: number): string => `/progression/class/${groupCourseId}`,
+
   // ── Query-string routes (HTML-attribute form; see header) ───────────────────────────────────────
   lessonOpen: (lesson: number, date: string, opts: { oc?: number; lab?: boolean } = {}): string =>
     `/lesson?lesson=${lesson}&amp;date=${esc(date)}` + (opts.oc ? `&amp;oc=${opts.oc}` : '') + (opts.lab ? '&amp;lab=1' : ''),

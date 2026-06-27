@@ -8,6 +8,7 @@ import { renderTimelineCard, renderNowHero } from '../lib/nowView';
 import { renderToggle } from '../lib/components';
 import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
+import { renderProgressionAdmin, renderSchemeGrid } from '../lib/progressionView';
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
@@ -137,6 +138,27 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
 
     const worksheetHtml = `<div class="ws-doc ws-doc-preview">${renderWorksheet(SAMPLE_WORKSHEET_MD, { mode: 'preview', level: 'core', autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`;
 
+    const progressionAdminHtml = renderProgressionAdmin({
+      schemes: [
+        { id: 1, name: 'Computing year ladder (Stages 6–14)', kind: 'year_ladder', examBoard: null, isActive: true, strands: 10, stages: 9, units: 120, criteria: 936 },
+        { id: 2, name: 'GCSE Computer Science (OCR J277)', kind: 'gcse_grades', examBoard: 'OCR J277', isActive: true, strands: 2, stages: 9, units: 0, criteria: 0 },
+      ],
+      classes: [
+        { groupCourseId: 31, label: '8PFA · Computing', schemeId: 1, schemeName: 'Computing year ladder (Stages 6–14)' },
+        { groupCourseId: 32, label: '11GCSE · Computer Science', schemeId: null, schemeName: null },
+      ],
+      csrf: 'gallery',
+    });
+    const schemeGridHtml = renderSchemeGrid({
+      schemeName: 'Computing year ladder (Stages 6–14)',
+      grid: [
+        { stageOrdinal: 12, stageLabel: 'Year 7 · KS3', strandId: 1, strandCode: 'CS', strandName: 'Computing systems', strandOrder: 0, units: 1, criteria: 12 },
+        { stageOrdinal: 12, stageLabel: 'Year 7 · KS3', strandId: 3, strandCode: 'PG', strandName: 'Programming', strandOrder: 2, units: 0, criteria: 0 },
+        { stageOrdinal: 13, stageLabel: 'Year 8 · KS3', strandId: 1, strandCode: 'CS', strandName: 'Computing systems', strandOrder: 0, units: 1, criteria: 9 },
+        { stageOrdinal: 13, stageLabel: 'Year 8 · KS3', strandId: 3, strandCode: 'PG', strandName: 'Programming', strandOrder: 2, units: 2, criteria: 18 },
+      ],
+    });
+
     const body = `<section class="card workspace-width">
       <div class="card-head"><div><p class="eyebrow">dev</p><h1>UI gallery</h1></div></div>
       <p class="muted">Every showcased view, rendered with fixture data — no DB, no live state. Redesign the
@@ -177,6 +199,8 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Teacher — results dashboard (Phase 5)', 'renderTeacherResults — per-pupil score table (RAG by %, flag counts linking to the marking grid), a per-spec-point mastery heatmap (objective-only, RAG by %), and per-class Release controls (on-release held vs instant).', renderTeacherResults(GALLERY_TEACHER_RESULTS))}
       ${item('Pupil — my results (Phase 5)', 'renderPupilResults — the gated, confirmed-only pupil panel: overall score, per-part feedback, and a by-topic (spec-point) breakdown. No mark-points / model answers — only confirmed marks + feedback.', renderPupilResults(GALLERY_PUPIL_RESULTS))}
       ${item('Unit assessments panel (Phase 6)', 'renderAssessmentUnitPanel — the lazy “Assessments” panel under each unit on the Schemes spine: each assessment’s title · style · status · marks/questions/classes, with Review-edit · Assign (ready) · Results actions, plus “Generate an assessment for a class”.', renderAssessmentUnitPanel(9, GALLERY_UNIT_ASSESSMENTS))}
+      ${item('Stages & strands — admin (16A.2)', 'renderProgressionAdmin — the progression scheme catalogue (kind + strand/stage/unit/criteria counts) and per-class scheme assignment (one scheme per class).', progressionAdminHtml)}
+      ${item('Stages & strands — scheme grid (16A.2)', 'renderSchemeGrid — a scheme’s Stage × Strand course-planning view; each cell shows the “I can…” criteria count (empty cells aren’t taught at that stage).', schemeGridHtml)}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}
