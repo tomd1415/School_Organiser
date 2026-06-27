@@ -69,8 +69,8 @@ describe an individual pupil**.
 > reframe to a supported type *or* leave a text box, **and log it** under
 > [WORKSHEET_QUESTION_TYPES.md §2](WORKSHEET_QUESTION_TYPES.md) (with the worksheet name) so it's fixed when
 > the type lands. **Never use a single-radio `choice` for a multi-correct question** — it can't be answered
-> (a `(  ) a (  ) b (  ) c` cell lets the pupil pick exactly one). For "tick all that apply", use separate
-> single-radio yes/no rows until multi-select exists.
+> (a `(  ) a (  ) b (  ) c` cell lets the pupil pick exactly one). For "tick all that apply", use the
+> **multi-select** type (`[  ] a [  ] b`, now built). Prefer building a missing type over reducing variety.
 
 Generate **every** worksheet the plan mentions (typically **starter** + **activity**; add others if named).
 A worksheet is Markdown stored as a `kind='worksheet'` resource. Format (the renderer = `worksheetForm.ts`):
@@ -119,6 +119,41 @@ are **silently invisible** — this was the pilot's main bug. Format (`slideDeck
   the likely error/fix-words and the S/C/C cues.
 - *(Level-specific slides, optional)*: divide with depth-1 `# Support` / `# Core` / `# Challenge` (NOT `## `,
   which is a slide). Usually leave the deck shared.
+
+## 4a. Images & videos from the source — INCLUDE them
+
+The teacher wants the source **videos included** and the **images carried over** where the lesson refers to
+them (and is worried about a lack of images). Both become resources linked to the plan; images embed in
+slides/worksheets, the renderer accepts the `/resources/:id/view` URL.
+
+**Extract** (from `app/`, using the app's helpers — there's no `unzip` on the box):
+
+```ts
+import AdmZip from 'adm-zip';
+import { extractOfficeImages } from './src/lib/officeImages'; // ppt/media, word/media, …
+const lessonZip = new AdmZip('<abs path Lesson N ….zip>');
+const pptx = new AdmZip(lessonZip.getEntries().find(e => /Slides.*\.pptx$/i.test(e.entryName))!.getData());
+const imgs = extractOfficeImages(pptx.getEntries().find(e => /\.pptx$/i.test(e.entryName))?.getData() ?? pptx.toBuffer(), 'slides.pptx');
+// NOTE: extractOfficeImages gates on the .pptx/.docx EXTENSION — pass a filename that ends in it, or it
+// returns []. If it still finds 0, read the inner zip's `ppt/media/*` entries directly.
+const videos = lessonZip.getEntries().filter(e => /\.(mp4|webm|mov)$/i.test(e.entryName));
+```
+
+**Identify the right image** — extract the candidates to files and **view them** (the Read tool renders
+images) to find the one the lesson refers to (e.g. the micro:bit board for an "inputs" slide). Don't embed
+all 28 deck images — pick the ones the plan/slide actually points at.
+
+**Materialise + embed:**
+- Image → `createResourceWithVersion({ kind:'image', mimeType, source:'imported', sourceAttribution: OGL }, …)`
+  then `linkResourceToPlan`. Embed in the slide/worksheet markdown: `![alt](/resources/<id>/view)`.
+- Video → a resource (`kind:'document'`, `mimeType:'video/mp4'`, source `imported`, OGL attribution) +
+  `linkResourceToPlan`. Reference it on a slide: `[▶ Play the … video](/resources/<id>/view)` with a `> 🧑‍🏫`
+  note that it's a teacher-played hook. (Videos have motion/sound — flag it as the teacher's choice, given
+  the low-arousal default; the teacher decides.)
+
+**If no suitable image is found** but a slide/worksheet would benefit from one, **record it** in
+[WORKSHEET_QUESTION_TYPES.md §4 (image-gap log)](WORKSHEET_QUESTION_TYPES.md) with lesson + where + what's
+wanted — so it can be sourced/made later.
 
 ## 5. Materialise + link (idempotent-ish; run from `app/`)
 
@@ -207,6 +242,7 @@ Record the table in the conversion notes / PR so the alignment is reviewable.
 - [ ] Only supported question types used (WORKSHEET_QUESTION_TYPES.md §1); any missing type logged to §2; no single-radio multi-correct.
 - [ ] **Alignment table built** (§7a): every objective is on a slide + a worksheet Q; no orphan question; choices are single-correct.
 - [ ] Show-your-work area present (MakeCode link field + `📷` screenshot field).
+- [ ] **Source videos included** (attached + referenced on a slide); **relevant source images embedded** (viewed to confirm); any **image gap logged** (WORKSHEET_QUESTION_TYPES.md §4).
 - [ ] Slide deck: `# title`, one `## ` per slide, `> 🧑‍🏫` teacher notes — **resource title ends `.md`**.
 - [ ] Materialised onto the right scheme; all resources linked to their plans.
 - [ ] Verified: worksheets + slides resolve, screenshot field present, teacher notes present, levels slice.
@@ -235,5 +271,7 @@ Record the table in the conversion notes / PR so the alignment is reviewable.
 | measure the strength of a throw | S5–S6 | activity: *My data* + *Show your work* + ✅ checklist |
 
 **Defect found & fixed in this check:** L1 starter "*which of these are inputs?*" was multi-correct on a
-single-radio control (unanswerable) → reframed to three single-radio *input / not an input* rows; the missing
-**multi-select** type logged at WORKSHEET_QUESTION_TYPES.md §2.1. L2 had no type/alignment defects.
+single-radio control (unanswerable). Rather than reduce it, the **multi-select** question type was **built**
+(`[  ] buttons [  ] light sensor [  ] microphone [  ] the LED screen`) and the starter now uses it, with the
+**micro:bit v2 board image** embedded above it and the **countdown video** linked on a slide. L2 had no
+type/alignment defects (its image is in the §4 gap log to source next pass).

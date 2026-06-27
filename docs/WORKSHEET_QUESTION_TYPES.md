@@ -16,6 +16,8 @@
 |---|---|---|---|
 | **Text** | types a short/long answer | cell text `Type your answer here` (or any non-marker cell) | open / AI or keyword |
 | **Multiple choice** *(single-select)* | picks **one** option (radio) | cell with **≥2** `(  )` markers: `(  ) loop (  ) input (  ) button` | objective (auto) |
+| **Multi-select** *(tick all that apply)* | ticks **several** options (checkboxes) | cell with **≥2** `[  ]` markers: `[  ] buttons [  ] microphone [  ] the screen` | objective (the SET, auto) |
+| **Matching** *(term ↔ definition)* | picks the match per row | a 2-column table where **every** answer cell is the SAME `(  )`-choice over the option pool | objective (per row) |
 | **Fill-in-the-blank** | types into an inline gap | `[[ ]]` in the text (one per gap) | objective (auto) |
 | **Code** | writes/edits code (monospaced box) | cell/header names code: `Type your code here`, "program", "script", "pseudocode", "algorithm" | open |
 | **Parsons** *(order CODE)* | drags jumbled **code** lines into order | a fenced ```` ```parsons ```` block with the lines | objective (correct order) |
@@ -29,28 +31,19 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 
 ## 2. Backlog — question types a lesson wanted but the system can't do yet
 
-> Status legend: **NOT BUILT**. When you build one: change status to **BUILT (date)**, then update each
-> worksheet under "wants it" and re-run the alignment check (LESSON_CONVERSION_GUIDE.md §7a).
+> **Teacher's steer: prefer ADDING a type over reducing question variety.** When a lesson wants a type that
+> isn't built, build it (it keeps the variety) rather than dumbing the question down. Until it's built, see
+> the §3 stop-gap — but the default is *add the type*.
+>
+> Status legend: **NOT BUILT** / **BUILT (date)**. When you build one: flip the status, move it up to §1,
+> then update each worksheet under "wants it" and re-run the alignment check (LESSON_CONVERSION_GUIDE.md §7a).
 
-### 2.1 Multiple-select ("choose ALL that apply")  — **NOT BUILT**  ⭐ highest priority
-- **What.** Tick **several** correct options in one question (checkboxes that are *marked*, unlike the
-  self-assessment checklist). The current `choice` cell is single-radio only.
-- **Why.** The teaching context favours "tick/choose"; many recall questions have multiple right answers.
-- **Example.** *"Which of these are micro:bit inputs?"* → buttons ✓, light sensor ✓, temperature sensor ✓,
-  the screen ✗.
-- **Wants it:** `micro:bit countdown — starter worksheet` (the inputs question — currently reworded to a
-  single-answer "which is NOT an input?" as a stop-gap).
-- **Likely build.** A cell marker like `[  ]` (square, ≥2) → multi-select; mark = the set of ticked == the
-  expected set. Mirror `choice` in `worksheetForm.ts` + `deterministicMarker`.
-
-### 2.2 Match / pair (term ↔ definition)  — **NOT BUILT**
-- **What.** Draw lines / pick the matching pair: left column of terms, right column of definitions.
-- **Why.** "match" is in the teaching context; ideal low-writing vocabulary practice.
-- **Example.** Match: *iteration · variable · input* ↔ *a repeating loop · a stored value · data the
-  micro:bit receives*.
-- **Wants it:** both micro:bit lessons (vocabulary), most KS3 theory lessons.
-- **Likely build.** A two-column table block kind `match` with a drag-to-pair (or dropdown-per-row) control;
-  mark = each row's chosen right == expected.
+### ✅ Built / already-available (moved to §1)
+- **Multi-select ("tick all that apply")** — **BUILT 2026-06-27** (`[  ] a [  ] b` cell → checkboxes,
+  set-marked). *Updated worksheet:* `micro:bit countdown — starter worksheet` (the inputs question is now a
+  real multi-select).
+- **Matching (term ↔ definition)** — **already available** (a 2-column choice grid; `detectMatching`) — was
+  never actually missing.
 
 ### 2.3 Order / sequence (non-code)  — **NOT BUILT**
 - **What.** Drag plain-text steps into the right order (Parsons but for **words/steps**, not code).
@@ -85,9 +78,27 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 
 ---
 
-## 3. Stop-gap rule (until a type exists)
+## 3. Stop-gap rule (only until you build the type)
 
-When a lesson needs a missing type, **don't** fake it badly. Either (a) reframe to a supported type that's
-still pedagogically sound (e.g. multi-select → a single-answer "which is NOT…", or several yes/no rows), or
-(b) leave a plain text/answer box — **and add an entry/worksheet to the relevant §2 item** so it's fixed once
-the type lands. Never use a single-radio `choice` for a multi-correct question (it can't be answered).
+**Default = build the type** (§2 steer). The stop-gap is only for when you can't build it in the same pass:
+(a) reframe to a supported type that's still pedagogically sound (e.g. several yes/no rows), or (b) leave a
+plain text/answer box — **and add the worksheet to the relevant §2 item** so it's revisited once the type
+lands. Never use a single-radio `choice` for a multi-correct question (it can't be answered) — use the
+multi-select type instead (now built).
+
+---
+
+## 4. Image-gap log — places an image would help but none was found
+
+The teacher is concerned about a **lack of images**. When converting a lesson, if a slide/worksheet **would
+benefit from an image** and you can't find a suitable one (no usable image in the source `.pptx`/`.docx`, or
+the source image is too specific/low-quality), **record it here** so an image can be sourced or made later.
+Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION_GUIDE.md).
+
+| Lesson / scheme | Where (slide / worksheet section) | What image is wanted | Source had one? |
+|---|---|---|---|
+| KS3 Y7 U1 L1 micro:bit countdown | starter slide + worksheet | the micro:bit v2 board (inputs) | ✅ used `image12.png` from the source deck |
+| KS3 Y7 U1 L1 micro:bit countdown | "for loop" slide | a side-by-side "many blocks vs one for-loop" diagram | ✅ in source deck (not yet embedded — candidate) |
+| KS3 Y7 U1 L2 basketball throw | starter + investigate slides | a basketball-throw / accelerometer-axes diagram | ⚠️ **not yet checked / sourced** — record on next pass |
+
+> Keep this table growing as lessons are converted — it's the worklist for sourcing/creating missing images.
