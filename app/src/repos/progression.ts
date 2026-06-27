@@ -2,7 +2,7 @@
 // services/progression.ts; writes are the teacher's manual ticks / scheme binding. Pupil evidence is PII
 // — never sent to AI; cleared by the Phase-10 erasure path. See docs/LEVEL_SYSTEM_DB_DESIGN.md.
 import { pool } from '../db/pool';
-import type { ProgCriterion } from '../services/progression';
+import type { ProgCriterion, SpecLink } from '../services/progression';
 
 export interface SchemeRow {
   id: number;
@@ -261,6 +261,123 @@ export async function pupilClassesWithScheme(pupilId: number): Promise<PupilClas
 export async function getPupilName(pupilId: number): Promise<string | null> {
   const { rows } = await pool.query<{ display_name: string }>(`SELECT display_name FROM pupils WHERE id = $1`, [pupilId]);
   return rows[0]?.display_name ?? null;
+}
+
+// ── 16A.4: auto-suggest evidence from marking (no AI) ───────────────────────────────────────────────────
+
+/** Link a criterion to a course spec point (teacher-editable). Idempotent. */
+export async function addSpecLink(criterionId: number, specPointId: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO prog_spec_links (criterion_id, spec_point_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+    [criterionId, specPointId],
+  );
+}
+
+export async function removeSpecLink(criterionId: number, specPointId: number): Promise<void> {
+  await pool.query(`DELETE FROM prog_spec_links WHERE criterion_id = $1 AND spec_point_id = $2`, [criterionId, specPointId]);
+}
+
+/** The scheme a criterion belongs to (for redirecting back to its map after an edit). */
+export async function schemeIdForCriterion(criterionId: number): Promise<number | null> {
+  const { rows } = await pool.query<{ scheme_id: number }>(
+    `SELECT st.scheme_id FROM prog_criteria c JOIN prog_stages st ON st.id = c.stage_id WHERE c.id = $1`,
+    [criterionId],
+  );
+  return rows[0] ? Number(rows[0].scheme_id) : null;
+}
+
+/** Every criterion↔spec-point link in a scheme — the input to the pure suggest. */
+export async function specLinksForScheme(schemeId: number): Promise<SpecLink[]> {
+  const { rows } = await pool.query<{ criterionId: number; specPointId: number }>(
+    `SELECT sl.criterion_id AS "criterionId", sl.spec_point_id AS "specPointId"
+     FROM prog_spec_links sl
+     JOIN prog_criteria c ON c.id = sl.criterion_id
+     JOIN prog_stages st  ON st.id = c.stage_id
+     WHERE st.scheme_id = $1`,
+    [schemeId],
+  );
+  return rows;
+}
+
+/** The spec points a pupil has MASTERED — aggregate score across their (non-test) attempts ≥ threshold. */
+export async function masteredSpecPointsForPupil(pupilId: number, thresholdPct = 70): Promise<Set<number>> {
+  const { rows } = await pool.query<{ spec_point_id: number }>(
+    `SELECT r.spec_point_id
+     FROM assessment_spec_point_results r
+     JOIN assessment_attempts at ON at.id = r.attempt_id AND at.pupil_id = $1 AND NOT at.is_test
+     GROUP BY r.spec_point_id
+     HAVING sum(r.marks_total) > 0 AND (100.0 * sum(r.marks_awarded) / sum(r.marks_total)) >= $2`,
+    [pupilId, thresholdPct],
+  );
+  return new Set(rows.map((r) => Number(r.spec_point_id)));
+}
+
+export interface CriterionDetail {
+  id: number;
+  descriptor: string;
+  stageOrdinal: number;
+  stageLabel: string;
+  strandCode: string;
+}
+
+/** Display detail for a set of criterion ids (descriptor + stage + strand). */
+export async function criteriaDetails(criterionIds: number[]): Promise<CriterionDetail[]> {
+  if (!criterionIds.length) return [];
+  const { rows } = await pool.query<CriterionDetail>(
+    `SELECT c.id, c.descriptor, st.ordinal AS "stageOrdinal", st.label AS "stageLabel", sd.code AS "strandCode"
+     FROM prog_criteria c
+     JOIN prog_stages st  ON st.id = c.stage_id
+     JOIN prog_strands sd ON sd.id = c.strand_id
+     WHERE c.id = ANY($1::bigint[])
+     ORDER BY st.ordinal, sd.display_order, c.display_order`,
+    [criterionIds],
+  );
+  return rows;
+}
+
+export interface CourseRef {
+  courseId: number;
+  courseName: string;
+}
+
+/** The distinct courses taught by classes bound to a scheme — whose spec points can map to its criteria. */
+export async function coursesForScheme(schemeId: number): Promise<CourseRef[]> {
+  const { rows } = await pool.query<CourseRef>(
+    `SELECT DISTINCT co.id AS "courseId", co.name AS "courseName"
+     FROM group_course_scheme gcs
+     JOIN group_courses gc ON gc.id = gcs.group_course_id
+     JOIN courses co ON co.id = gc.course_id
+     WHERE gcs.scheme_id = $1
+     ORDER BY co.name`,
+    [schemeId],
+  );
+  return rows;
+}
+
+export interface SchemeCriterionWithLinks {
+  id: number;
+  descriptor: string;
+  stageOrdinal: number;
+  stageLabel: string;
+  strandCode: string;
+  specPointIds: number[];
+}
+
+/** A scheme's criteria with their current spec-point links — for the mapping editor. */
+export async function schemeCriteriaWithLinks(schemeId: number): Promise<SchemeCriterionWithLinks[]> {
+  const { rows } = await pool.query<SchemeCriterionWithLinks & { specPointIds: number[] | null }>(
+    `SELECT c.id, c.descriptor, st.ordinal AS "stageOrdinal", st.label AS "stageLabel", sd.code AS "strandCode",
+            coalesce(array_agg(sl.spec_point_id) FILTER (WHERE sl.spec_point_id IS NOT NULL), '{}') AS "specPointIds"
+     FROM prog_criteria c
+     JOIN prog_stages st  ON st.id = c.stage_id
+     JOIN prog_strands sd ON sd.id = c.strand_id
+     LEFT JOIN prog_spec_links sl ON sl.criterion_id = c.id
+     WHERE st.scheme_id = $1
+     GROUP BY c.id, c.descriptor, st.ordinal, st.label, sd.code, sd.display_order, c.display_order
+     ORDER BY st.ordinal, sd.display_order, c.display_order`,
+    [schemeId],
+  );
+  return rows.map((r) => ({ ...r, specPointIds: (r.specPointIds ?? []).map(Number) }));
 }
 
 /**

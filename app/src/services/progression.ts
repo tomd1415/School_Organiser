@@ -48,6 +48,33 @@ export function currentStagePerStrand(criteria: ProgCriterion[], evidenced: Read
   return out;
 }
 
+export interface SpecLink {
+  criterionId: number;
+  specPointId: number;
+}
+
+/**
+ * 16A.4 — auto-suggest evidence from marking (NO AI; reads only already-computed in-app spec-point results).
+ * Given the spec points a pupil has MASTERED, the criterion↔spec-point links, and what they've already
+ * evidenced, return the criterion ids to SUGGEST (deduped, excluding already-evidenced). The teacher
+ * confirms before any of these is written — never auto-applied.
+ */
+export function suggestEvidence(
+  masteredSpecPointIds: ReadonlySet<number>,
+  links: SpecLink[],
+  evidenced: ReadonlySet<number>,
+): number[] {
+  const out: number[] = [];
+  const seen = new Set<number>();
+  for (const l of links) {
+    if (!masteredSpecPointIds.has(l.specPointId)) continue;
+    if (evidenced.has(l.criterionId) || seen.has(l.criterionId)) continue;
+    seen.add(l.criterionId);
+    out.push(l.criterionId);
+  }
+  return out;
+}
+
 export interface OverallRollUp {
   overallOrdinal: number | null;
   source: 'computed' | 'year_assessment';

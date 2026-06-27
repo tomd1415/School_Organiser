@@ -1142,6 +1142,17 @@ body.deck {
 .prog-overall { font-weight: 600; }
 .prog-privacy { color: var(--danger, #dc2626); font-size: 0.85rem; margin: 0.2rem 0 0.6rem; }
 .prog-pupil-class { margin-bottom: 1.4rem; }
+/* 16A.4 — suggested evidence + spec-point mapping */
+.prog-suggest { margin: 0.6rem 0; padding: 0.6rem 0.8rem; border: 1px dashed var(--line-strong, #cbd5e1); border-radius: 8px; }
+.prog-suggest h3 { margin: 0 0 0.2rem; font-size: 0.95rem; }
+.prog-suggest-list { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.prog-suggest-item { display: flex; gap: 0.6rem; align-items: center; padding: 0.25rem 0; flex-wrap: wrap; }
+.prog-suggest-where { font-size: 0.75rem; color: var(--muted, #94a3b8); white-space: nowrap; }
+.prog-suggest-desc { flex: 1; min-width: 12rem; }
+.prog-suggest-form { margin: 0; }
+.prog-map-links { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.prog-map-chip { display: inline-flex; gap: 0.2rem; align-items: center; padding: 0.1rem 0.4rem; border: 1px solid var(--line-strong, #cbd5e1); border-radius: 999px; font-size: 0.8rem; }
+.prog-map-rm, .prog-map-add { display: inline-flex; gap: 0.3rem; align-items: center; margin: 0; }
 .pl-lesson { font-size: 0.85rem; }
 .pl-adapted, .pl-kit { font-size: 0.75rem; }
 .pl-acts { float: right; }

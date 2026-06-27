@@ -5,9 +5,13 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { layout } from '../lib/html';
 import { paths } from '../lib/paths';
-import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid, type HeatPupil } from '../lib/progressionView';
+import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid, renderSchemeMap, type HeatPupil, type SuggestedEvidence } from '../lib/progressionView';
 import {
+  addEvidence,
+  addSpecLink,
   bindClassToScheme,
+  coursesForScheme,
+  criteriaDetails,
   criteriaForScheme,
   enrolledPupilsForClass,
   evidencedCriterionIds,
@@ -19,12 +23,18 @@ import {
   listSchemesWithCounts,
   listStages,
   listStrands,
+  masteredSpecPointsForPupil,
   pupilClassesWithScheme,
+  removeSpecLink,
+  schemeCriteriaWithLinks,
+  schemeIdForCriterion,
   schemeGrid,
+  specLinksForScheme,
   unbindClassScheme,
   yearAnchorsForScheme,
 } from '../repos/progression';
-import { currentStagePerStrand, overallRollUp } from '../services/progression';
+import { listSpecPoints } from '../repos/specPoints';
+import { currentStagePerStrand, overallRollUp, suggestEvidence } from '../services/progression';
 
 export function registerProgressionRoutes(app: FastifyInstance): void {
   app.get('/progression', { preHandler: requireAuth }, async (_req, reply) => {
@@ -50,7 +60,7 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
       if (!scheme) {
         body = `<section class="card"><p class="muted">No such scheme. <a class="link" href="${paths.progression()}">← all schemes</a></p></section>`;
       } else {
-        body = renderSchemeGrid({ schemeName: scheme.name, grid: await schemeGrid(p.data.id) });
+        body = renderSchemeGrid({ schemeId: p.data.id, schemeName: scheme.name, grid: await schemeGrid(p.data.id) });
       }
     } catch (err) {
       app.log.error({ err }, 'progression scheme grid render failed');
@@ -112,19 +122,24 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
       if (!p.success) throw new Error('bad id');
       const pupilName = (await getPupilName(p.data.id)) ?? `Pupil ${p.data.id}`;
       const classes = await pupilClassesWithScheme(p.data.id);
-      const ev = await evidencedCriterionIds(p.data.id);
+      const [ev, mastered] = await Promise.all([evidencedCriterionIds(p.data.id), masteredSpecPointsForPupil(p.data.id)]);
       const built = [];
       for (const cl of classes) {
-        const [criteria, strands, stages, anchors] = await Promise.all([
+        const [criteria, strands, stages, anchors, links] = await Promise.all([
           criteriaForScheme(cl.schemeId),
           listStrands(cl.schemeId),
           listStages(cl.schemeId),
           yearAnchorsForScheme([p.data.id], cl.schemeId),
+          specLinksForScheme(cl.schemeId),
         ]);
         const perStrandArr = currentStagePerStrand(criteria, ev);
         const ordById = new Map(perStrandArr.map((ps) => [ps.strandId, ps.stageOrdinal]));
         const labelByOrdinal: Record<number, string> = {};
         for (const s of stages) labelByOrdinal[s.ordinal] = s.label;
+        // 16A.4: suggest criteria linked to spec points the pupil has mastered (not yet evidenced).
+        const suggestIds = suggestEvidence(mastered, links, ev);
+        const details = await criteriaDetails(suggestIds);
+        const suggestions: SuggestedEvidence[] = details.map((d) => ({ criterionId: d.id, descriptor: d.descriptor, stageLabel: d.stageLabel, strandCode: d.strandCode }));
         built.push({
           groupCourseId: cl.groupCourseId,
           className: cl.label,
@@ -132,14 +147,71 @@ export function registerProgressionRoutes(app: FastifyInstance): void {
           strands: strands.map((s) => ({ id: s.id, code: s.code, name: s.name, ordinal: ordById.get(s.id) ?? null })),
           overall: overallRollUp(perStrandArr, { yearAssessmentOrdinal: anchors.get(p.data.id) ?? null }).overallOrdinal,
           labelByOrdinal,
+          suggestions,
         });
       }
-      body = renderPupilLadder({ pupilName, classes: built });
+      body = renderPupilLadder({ pupilId: p.data.id, pupilName, classes: built, csrf });
     } catch (err) {
       app.log.error({ err }, 'progression pupil ladder render failed');
       body = '<section class="card"><p class="muted">Unavailable — the database is not reachable.</p></section>';
     }
     return reply.type('text/html').send(layout({ title: 'Stages & strands', body, authed: true, csrfToken: csrf, width: 'wide' }));
+  });
+
+  // 16A.4 — the criterion ↔ spec-point mapping editor (drives the auto-suggest). No AI.
+  app.get('/progression/scheme/:id/map', { preHandler: requireAuth }, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive() }).safeParse(req.params);
+    const csrf = reply.generateCsrf();
+    let body: string;
+    try {
+      if (!p.success) throw new Error('bad id');
+      const scheme = (await listSchemes()).find((s) => s.id === p.data.id);
+      if (!scheme) {
+        body = `<section class="card"><p class="muted">No such scheme. <a class="link" href="${paths.progression()}">← all schemes</a></p></section>`;
+      } else {
+        const [criteria, courses] = await Promise.all([schemeCriteriaWithLinks(p.data.id), coursesForScheme(p.data.id)]);
+        // spec points come from the scheme's bound course(s); use the first course that has any.
+        let specPoints: Array<{ id: number; code: string; title: string }> = [];
+        let courseName: string | null = null;
+        for (const c of courses) {
+          const sp = await listSpecPoints(c.courseId);
+          if (sp.length) {
+            specPoints = sp.map((s) => ({ id: s.id, code: s.code, title: s.title }));
+            courseName = c.courseName;
+            break;
+          }
+        }
+        body = renderSchemeMap({ schemeId: p.data.id, schemeName: scheme.name, courseName, criteria, specPoints, csrf });
+      }
+    } catch (err) {
+      app.log.error({ err }, 'progression scheme map render failed');
+      body = '<section class="card"><p class="muted">Unavailable — the database is not reachable.</p></section>';
+    }
+    return reply.type('text/html').send(layout({ title: 'Stages & strands', body, authed: true, csrfToken: csrf, width: 'wide' }));
+  });
+
+  app.post('/progression/spec-link', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z
+      .object({ action: z.enum(['add', 'remove']), criterion: z.coerce.number().int().positive(), spec: z.coerce.number().int().positive() })
+      .safeParse(req.body);
+    if (!b.success) return reply.code(400).send('Bad request.');
+    if (b.data.action === 'add') await addSpecLink(b.data.criterion, b.data.spec);
+    else await removeSpecLink(b.data.criterion, b.data.spec);
+    // back to the map for the scheme the criterion belongs to
+    const schemeId = await schemeIdForCriterion(b.data.criterion);
+    const to = schemeId ? paths.progressionSchemeMap(schemeId) : paths.progression();
+    reply.header('HX-Redirect', to);
+    return reply.redirect(to);
+  });
+
+  // 16A.4 — confirm a suggested criterion as evidence (teacher action; never auto-applied).
+  app.post('/progression/evidence/confirm', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {
+    const b = z.object({ pupil: z.coerce.number().int().positive(), criterion: z.coerce.number().int().positive() }).safeParse(req.body);
+    if (!b.success) return reply.code(400).send('Bad request.');
+    await addEvidence({ pupilId: b.data.pupil, criterionId: b.data.criterion, sourceKind: 'assessment', note: 'confirmed from marking suggestion' });
+    const to = paths.progressionPupil(b.data.pupil);
+    reply.header('HX-Redirect', to);
+    return reply.redirect(to);
   });
 
   app.post('/progression/assign', { preHandler: [requireAuth, app.csrfProtection] }, async (req, reply) => {

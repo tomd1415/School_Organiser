@@ -52,6 +52,9 @@ export const paths = {
   progressionAssign: (): string => '/progression/assign',
   progressionPupil: (pupilId: number): string => `/progression/pupil/${pupilId}`,
   progressionClass: (groupCourseId: number): string => `/progression/class/${groupCourseId}`,
+  progressionSchemeMap: (schemeId: number): string => `/progression/scheme/${schemeId}/map`,
+  progressionSpecLink: (): string => '/progression/spec-link',
+  progressionEvidenceConfirm: (): string => '/progression/evidence/confirm',
 
   // ── Query-string routes (HTML-attribute form; see header) ───────────────────────────────────────
   lessonOpen: (lesson: number, date: string, opts: { oc?: number; lab?: boolean } = {}): string =>

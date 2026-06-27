@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentStagePerStrand, overallRollUp, type ProgCriterion } from '../src/services/progression';
+import { currentStagePerStrand, overallRollUp, suggestEvidence, type ProgCriterion } from '../src/services/progression';
 
 // 16A.1 — the pure Stages & strands roll-up. A criterion is reached when evidenced; a stage is reached for
 // a strand when ALL its criteria are; the current stage is the top of the contiguous completed run.
@@ -80,5 +80,28 @@ describe('overallRollUp', () => {
   it('null overall when nothing is reached and no anchor', () => {
     expect(overallRollUp([{ strandId: 1, stageOrdinal: null }]).overallOrdinal).toBeNull();
     expect(overallRollUp([]).overallOrdinal).toBeNull();
+  });
+});
+
+describe('suggestEvidence (16A.4 — auto-suggest from mastered spec points)', () => {
+  const links = [
+    { criterionId: 10, specPointId: 100 },
+    { criterionId: 11, specPointId: 100 }, // same spec point → both criteria candidates
+    { criterionId: 12, specPointId: 200 },
+    { criterionId: 13, specPointId: 300 },
+  ];
+  it('suggests criteria linked to mastered spec points', () => {
+    expect(suggestEvidence(new Set([100]), links, new Set()).sort()).toEqual([10, 11]);
+  });
+  it('excludes already-evidenced criteria', () => {
+    expect(suggestEvidence(new Set([100, 200]), links, new Set([10])).sort()).toEqual([11, 12]);
+  });
+  it('ignores spec points that were not mastered', () => {
+    expect(suggestEvidence(new Set([300]), links, new Set())).toEqual([13]);
+    expect(suggestEvidence(new Set([999]), links, new Set())).toEqual([]);
+  });
+  it('dedupes a criterion linked to several mastered spec points', () => {
+    const multi = [{ criterionId: 20, specPointId: 1 }, { criterionId: 20, specPointId: 2 }];
+    expect(suggestEvidence(new Set([1, 2]), multi, new Set())).toEqual([20]);
   });
 });

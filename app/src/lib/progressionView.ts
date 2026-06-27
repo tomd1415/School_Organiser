@@ -111,6 +111,12 @@ export function renderClassHeatMap(data: ClassHeatMapData): string {
   </section>`;
 }
 
+export interface SuggestedEvidence {
+  criterionId: number;
+  descriptor: string;
+  stageLabel: string;
+  strandCode: string;
+}
 export interface PupilLadderClass {
   groupCourseId: number;
   className: string;
@@ -118,10 +124,37 @@ export interface PupilLadderClass {
   strands: Array<{ id: number; code: string; name: string; ordinal: number | null }>;
   overall: number | null;
   labelByOrdinal: Record<number, string>;
+  suggestions: SuggestedEvidence[];
 }
 export interface PupilLadderData {
+  pupilId: number;
   pupilName: string;
   classes: PupilLadderClass[];
+  csrf: string;
+}
+
+/** The "suggested evidence from marking" block for one class — confirm-before-commit (16A.4). */
+function renderSuggestions(pupilId: number, c: PupilLadderClass, csrf: string): string {
+  if (!c.suggestions.length) return '';
+  const rows = c.suggestions
+    .map(
+      (s) => `<li class="prog-suggest-item">
+        <span class="prog-suggest-where">${esc(s.stageLabel)} · ${esc(s.strandCode)}</span>
+        <span class="prog-suggest-desc">${esc(s.descriptor)}</span>
+        <form method="post" action="${paths.progressionEvidenceConfirm()}" class="prog-suggest-form">
+          <input type="hidden" name="_csrf" value="${esc(csrf)}">
+          <input type="hidden" name="pupil" value="${pupilId}">
+          <input type="hidden" name="criterion" value="${s.criterionId}">
+          <button type="submit" class="primary prog-suggest-go" title="confirm this as evidence">✓ confirm</button>
+        </form>
+      </li>`,
+    )
+    .join('');
+  return `<div class="prog-suggest">
+    <h3>Suggested evidence from marking <span class="muted">(${c.suggestions.length})</span></h3>
+    <p class="muted">From spec points this pupil has mastered, mapped to this scheme's criteria. Confirm to tick — never auto-applied.</p>
+    <ul class="prog-suggest-list">${rows}</ul>
+  </div>`;
 }
 
 /** The per-pupil ladder: per-strand current stage + overall, per class the pupil is in. PII (teacher-only). */
@@ -138,6 +171,7 @@ export function renderPupilLadder(data: PupilLadderData): string {
                 <td class="prog-cell prog-overall">${stageLabel(c.labelByOrdinal, c.overall)}</td>
               </tr></tbody>
             </table>
+            ${renderSuggestions(data.pupilId, c, data.csrf)}
             <p class="muted"><a class="link" href="${paths.progressionClass(c.groupCourseId)}">class heat-map →</a></p>
           </div>`,
         )
@@ -151,8 +185,77 @@ export function renderPupilLadder(data: PupilLadderData): string {
   </section>`;
 }
 
+export interface MapCriterion {
+  id: number;
+  descriptor: string;
+  stageLabel: string;
+  strandCode: string;
+  specPointIds: number[];
+}
+export interface MapSpecPoint {
+  id: number;
+  code: string;
+  title: string;
+}
+export interface SchemeMapData {
+  schemeId: number;
+  schemeName: string;
+  courseName: string | null;
+  criteria: MapCriterion[];
+  specPoints: MapSpecPoint[];
+  csrf: string;
+}
+
+/** The criterion ↔ spec-point mapping editor (16A.4) — drives the auto-suggest. Teacher-editable. */
+export function renderSchemeMap(data: SchemeMapData): string {
+  const spLabel = new Map(data.specPoints.map((s) => [s.id, s.code]));
+  const spOptions = data.specPoints.map((s) => `<option value="${s.id}">${esc(s.code)} — ${esc(s.title)}</option>`).join('');
+  const rows = data.criteria.length
+    ? data.criteria
+        .map(
+          (c) => `<tr>
+            <td class="prog-map-where">${esc(c.stageLabel)} · ${esc(c.strandCode)}</td>
+            <td>${esc(c.descriptor)}</td>
+            <td class="prog-map-links">
+              ${c.specPointIds
+                .map(
+                  (id) => `<span class="prog-map-chip">${esc(spLabel.get(id) ?? `#${id}`)}
+                    <form method="post" action="${paths.progressionSpecLink()}" class="prog-map-rm">
+                      <input type="hidden" name="_csrf" value="${esc(data.csrf)}"><input type="hidden" name="action" value="remove">
+                      <input type="hidden" name="criterion" value="${c.id}"><input type="hidden" name="spec" value="${id}">
+                      <button type="submit" class="link" title="unlink">✕</button>
+                    </form></span>`,
+                )
+                .join('')}
+              ${
+                data.specPoints.length
+                  ? `<form method="post" action="${paths.progressionSpecLink()}" class="prog-map-add">
+                      <input type="hidden" name="_csrf" value="${esc(data.csrf)}"><input type="hidden" name="action" value="add">
+                      <input type="hidden" name="criterion" value="${c.id}">
+                      <select name="spec"><option value="">+ link spec point…</option>${spOptions}</select>
+                      <button type="submit" class="primary">link</button>
+                    </form>`
+                  : ''
+              }
+            </td>
+          </tr>`,
+        )
+        .join('')
+    : '<tr><td colspan="3" class="muted">No criteria in this scheme.</td></tr>';
+  return `<section class="card">
+    <p><a class="link" href="${paths.progressionScheme(data.schemeId)}">← scheme grid</a></p>
+    <h1>${esc(data.schemeName)} <span class="muted">— spec-point mapping</span></h1>
+    <p class="muted">Map each “I can…” criterion to the course spec points it evidences${data.courseName ? ` (${esc(data.courseName)})` : ''}. Marking a pupil well on a mapped spec point then SUGGESTS that criterion as evidence (you confirm).</p>
+    ${data.specPoints.length ? '' : '<p class="error">No spec points found for this scheme\'s course — import some on the Coverage page first.</p>'}
+    <table class="prog-table">
+      <thead><tr><th>Stage · Strand</th><th>Criterion</th><th>Linked spec points</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </section>`;
+}
+
 /** The Stage × Strand grid for one scheme (course-planning view): unit + criteria counts per cell. */
-export function renderSchemeGrid(data: { schemeName: string; grid: GridCell[] }): string {
+export function renderSchemeGrid(data: { schemeId: number; schemeName: string; grid: GridCell[] }): string {
   // strands (columns) in display order; stages (rows) by ordinal.
   const strands = new Map<number, { code: string; name: string; order: number }>();
   const stages = new Map<number, string>();
@@ -183,6 +286,7 @@ export function renderSchemeGrid(data: { schemeName: string; grid: GridCell[] })
     <p><a class="link" href="${paths.progression()}">← all schemes</a></p>
     <h1>${esc(data.schemeName)}</h1>
     <p class="muted">Stage × strand — each cell shows the number of “I can…” criteria (hover for units). Empty cells aren’t taught at that stage.</p>
+    <p><a class="link" href="${paths.progressionSchemeMap(data.schemeId)}">spec-point mapping (for auto-suggested evidence) →</a></p>
     <table class="prog-grid">
       <thead>${head}</thead>
       <tbody>${rows}</tbody>

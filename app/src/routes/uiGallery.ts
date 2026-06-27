@@ -8,7 +8,7 @@ import { renderTimelineCard, renderNowHero } from '../lib/nowView';
 import { renderToggle } from '../lib/components';
 import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
-import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid } from '../lib/progressionView';
+import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid, renderSchemeMap } from '../lib/progressionView';
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
@@ -150,6 +150,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       csrf: 'gallery',
     });
     const schemeGridHtml = renderSchemeGrid({
+      schemeId: 1,
       schemeName: 'Computing year ladder (Stages 6–14)',
       grid: [
         { stageOrdinal: 12, stageLabel: 'Year 7 · KS3', strandId: 1, strandCode: 'CS', strandName: 'Computing systems', strandOrder: 0, units: 1, criteria: 12 },
@@ -201,6 +202,14 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Unit assessments panel (Phase 6)', 'renderAssessmentUnitPanel — the lazy “Assessments” panel under each unit on the Schemes spine: each assessment’s title · style · status · marks/questions/classes, with Review-edit · Assign (ready) · Results actions, plus “Generate an assessment for a class”.', renderAssessmentUnitPanel(9, GALLERY_UNIT_ASSESSMENTS))}
       ${item('Stages & strands — admin (16A.2)', 'renderProgressionAdmin — the progression scheme catalogue (kind + strand/stage/unit/criteria counts) and per-class scheme assignment (one scheme per class).', progressionAdminHtml)}
       ${item('Stages & strands — scheme grid (16A.2)', 'renderSchemeGrid — a scheme’s Stage × Strand course-planning view; each cell shows the “I can…” criteria count (empty cells aren’t taught at that stage).', schemeGridHtml)}
+      ${item('Stages & strands — spec-point mapping (16A.4)', 'renderSchemeMap — link each “I can…” criterion to the course spec points it evidences; this drives the auto-suggest. Teacher-editable, no AI.', renderSchemeMap({
+        schemeId: 1, schemeName: 'Computing year ladder (Stages 6–14)', courseName: 'KS3 Computing', csrf: 'gallery',
+        criteria: [
+          { id: 555, descriptor: 'I can explain how data is transmitted across networks', stageLabel: 'Year 8', strandCode: 'NW', specPointIds: [10] },
+          { id: 556, descriptor: 'I can define a protocol', stageLabel: 'Year 8', strandCode: 'NW', specPointIds: [] },
+        ],
+        specPoints: [{ id: 10, code: '1.3.1', title: 'Networks and topologies' }, { id: 11, code: '1.3.2', title: 'Protocols' }],
+      }))}
       ${item('Stages & strands — class heat-map (16A.3)', 'renderClassHeatMap — each pupil’s current stage per strand + overall roll-up (computed from evidence). PII, teacher-only, never sent to AI.', renderClassHeatMap({
         schemeName: 'Computing year ladder (Stages 6–14)', className: '8PFA · Computing',
         strands: [{ id: 1, code: 'CS', name: 'Computing systems' }, { id: 3, code: 'PG', name: 'Programming' }, { id: 5, code: 'DI', name: 'Data & information' }],
@@ -210,12 +219,14 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
           { id: 102, name: 'B. Pupil', perStrand: { 1: 12, 3: null, 5: 12 }, overall: 12 },
         ],
       }))}
-      ${item('Stages & strands — per-pupil ladder (16A.3)', 'renderPupilLadder — one pupil’s per-strand current stage + overall, per scheme-bound class. PII, teacher-only.', renderPupilLadder({
+      ${item('Stages & strands — per-pupil ladder + suggested evidence (16A.3/16A.4)', 'renderPupilLadder — one pupil’s per-strand current stage + overall, plus the “suggested evidence from marking” block (criteria linked to mastered spec points; teacher confirms). PII, teacher-only.', renderPupilLadder({
+        pupilId: 101, csrf: 'gallery',
         pupilName: 'A. Pupil',
         classes: [{
           groupCourseId: 31, className: '8PFA · Computing', schemeName: 'Computing year ladder (Stages 6–14)',
           strands: [{ id: 1, code: 'CS', name: 'Computing systems', ordinal: 13 }, { id: 3, code: 'PG', name: 'Programming', ordinal: 12 }],
           overall: 13, labelByOrdinal: { 12: 'Year 7', 13: 'Year 8' },
+          suggestions: [{ criterionId: 555, descriptor: 'I can explain how data is transmitted across networks', stageLabel: 'Year 8', strandCode: 'NW' }],
         }],
       }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}

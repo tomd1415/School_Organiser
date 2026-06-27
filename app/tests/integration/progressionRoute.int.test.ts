@@ -50,6 +50,12 @@ describe('progression admin route (integration)', () => {
     expect(r.body).toContain('Stage');
   });
 
+  it('renders the spec-point mapping editor for a scheme', async () => {
+    const r = await app.inject({ method: 'GET', url: `/progression/scheme/${yearLadderId}/map`, headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    expect(r.body).toContain('spec-point mapping');
+  });
+
   it('assigns a scheme to a class (and the binding round-trips)', async () => {
     const r = await app.inject({
       method: 'POST',
