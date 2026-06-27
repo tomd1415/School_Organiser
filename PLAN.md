@@ -187,6 +187,8 @@ finished), do a final pass:
 
 - _(start)_ — re-seeded dev DB clean; baseline gate: typecheck ✓, unit 1062 ✓, integration 14 pre-existing failures (data-fixture gaps).
 - test-infra — integration fixture now auto-seeded (globalSetup) + teaching-context default + imported-units fixture → integration **413 pass / 0 fail**. (addresses user's "fix failing tests" request)
+- 15.2b — planner silent-data-loss guard (lostOffWindow + year-end refusal + window-to-year-end + Undo disable) — gate green (typecheck, unit, integration).
+- 15.1 — principled dark-shell button system (teal scoped to .primary; contract test; ~40 call sites audited; gallery showcase) — gate green (typecheck, unit 1069, integration 413).
 
 ## FINAL STATUS
 *(Fill in at the very end.)*

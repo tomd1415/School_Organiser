@@ -21,6 +21,7 @@ import {
   type GroupCourseSlot,
 } from '../repos/delivery';
 import { cascadeInsert, layUnit, lostOffWindow, pullForward, upcomingClassSlots, weekdayName, type Placement } from '../services/delivery';
+import { resolvePlannerAct, resolvePlannerDrop } from '../lib/plannerDrop';
 import { getActiveScheme, listPlansForUnit, listUnits, unitIdByPlan } from '../repos/schemes';
 
 const WEEKS = 16; // how many school weeks of timeline to show
@@ -81,10 +82,11 @@ function renderCell(date: string, col: GroupCourseSlot, entry: ClassScheduleEntr
   const tll = col.timetabledLessonId;
   const planned = entry?.lessonPlanId != null;
   const locked = planned && entry!.locked;
+  // ✥ pick-up gives placed lessons a click/keyboard "move" affordance (15.2c) — drag is mouse-only.
   const acts = planned
     ? locked
       ? `<span class="pl-acts"><button type="button" class="pl-mini" data-pl-act="unlock" title="unpin — let it move again">🔒</button></span>`
-      : `<span class="pl-acts"><button type="button" class="pl-mini" data-pl-act="lock" title="pin to this date — cascades flow around it">🔓</button><button type="button" class="pl-mini" data-pl-act="pull" title="remove &amp; pull the rest forward">✕</button></span>`
+      : `<span class="pl-acts"><button type="button" class="pl-mini" data-pl-act="pickup" title="pick up to move — then choose a slot" aria-label="Pick up ${esc(entry!.planTitle ?? 'lesson')} to move">✥</button><button type="button" class="pl-mini" data-pl-act="lock" title="pin to this date — cascades flow around it">🔓</button><button type="button" class="pl-mini" data-pl-act="pull" title="remove &amp; pull the rest forward">✕</button></span>`
     : '';
   const inner = planned
     ? `<a class="pl-lesson" href="/lesson?lesson=${tll}&amp;date=${esc(date)}" draggable="false">${esc(entry!.planTitle ?? 'lesson')}</a>${
@@ -93,7 +95,13 @@ function renderCell(date: string, col: GroupCourseSlot, entry: ClassScheduleEntr
         entry!.kitNeeded ? `<span class="pl-kit" title="kit needed">🔧</span>` : ''
       } ${acts}${unitEnds ? '<span class="pl-unit-end" title="last lesson of its unit">— unit ends —</span>' : ''}`
     : `<span class="pl-empty">+ drop a lesson</span>`;
-  return `<td class="pl-cell${planned ? ' is-placed' : ' is-empty'}${locked ? ' is-locked' : ''}${unitEnds ? ' is-unit-end' : ''}" data-date="${esc(date)}" data-tll="${tll}"${
+  // Every real slot is a keyboard/touch drop target (15.2c): focusable + a clear label of what's there and
+  // what dropping does. (Pinned slots still describe themselves but a cascade flows around them server-side.)
+  const where = `${weekdayName(col.weekday)} ${col.periodLabel}, ${date}`;
+  const ariaCell = planned
+    ? `${where}: ${entry!.planTitle ?? 'lesson'}${locked ? ', pinned' : ''}. Press Enter to drop a picked-up lesson here.`
+    : `${where}: empty. Press Enter to drop a picked-up lesson here.`;
+  return `<td class="pl-cell${planned ? ' is-placed' : ' is-empty'}${locked ? ' is-locked' : ''}${unitEnds ? ' is-unit-end' : ''}" tabindex="0" aria-label="${esc(ariaCell)}" data-date="${esc(date)}" data-tll="${tll}"${
     planned && !locked ? ` data-plan="${entry!.lessonPlanId}" draggable="true"` : ''
   }>${inner}</td>`;
 }
@@ -107,10 +115,13 @@ async function renderTray(courseId: number, placed: Set<number>): Promise<string
     const lessons = (await listPlansForUnit(u.id)).filter((l) => !placed.has(l.id));
     if (!lessons.length) continue;
     const chips = lessons
-      .map((l) => `<li class="pl-tray-lesson" draggable="true" data-plan="${l.id}" title="drag onto a slot to place">${esc(l.title)}</li>`)
+      .map(
+        (l) =>
+          `<li class="pl-tray-lesson" draggable="true" tabindex="0" role="button" data-pl-pick data-plan="${l.id}" title="drag — or tap/Enter to pick up — then choose a slot" aria-label="Pick up lesson ${esc(l.title)} to place">${esc(l.title)}</li>`,
+      )
       .join('');
     blocks.push(
-      `<div class="pl-tray-unit"><h3 class="pl-tray-unit-h" draggable="true" data-unit="${u.id}" title="drag the whole unit onto a slot to lay every lesson from there">⠿ ${esc(u.title)}</h3><ul class="pl-tray-lessons">${chips}</ul></div>`,
+      `<div class="pl-tray-unit"><h3 class="pl-tray-unit-h" draggable="true" tabindex="0" role="button" data-pl-pick data-unit="${u.id}" title="drag — or tap/Enter to pick up — then choose a slot to lay every lesson from there" aria-label="Pick up whole unit ${esc(u.title)} to lay down">⠿ ${esc(u.title)}</h3><ul class="pl-tray-lessons">${chips}</ul></div>`,
     );
   }
   if (!blocks.length) return '<p class="muted pl-tray-done">Every lesson in this scheme is placed. 🎉 Drag a placed lesson to move it.</p>';
@@ -154,50 +165,96 @@ function renderTimeline(
   return `<table class="pl-grid"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
+// The page script is now a THIN ADAPTER over the pure, unit-tested resolvers (15.2a): it reads the DOM
+// into plain state and calls resolvePlannerDrop / resolvePlannerAct (injected verbatim via .toString()).
+// It also adds a click-to-place + keyboard path (15.2c) so the planner works by touch and keyboard, not
+// just mouse drag — the same resolver drives drag, tap and Enter.
 const DRAG_SCRIPT = `
 (function(){
+  ${resolvePlannerDrop.toString()}
+  ${resolvePlannerAct.toString()}
   var grid = document.getElementById('planner');
   if(!grid) return;
   var csrf = grid.getAttribute('data-pl-csrf');
   var gc = grid.getAttribute('data-pl-gc');
-  var dragPlan = null, dragUnit = null, fromDate = null, fromTll = null;
-  function post(params){
-    params.gc = gc;
-    var body = Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  var status = document.getElementById('pl-status');
+  function announce(msg){ if(status) status.textContent = msg; }
+  function post(op, params){
+    var all = {}; for(var k in params) all[k] = params[k]; all.op = op; all.gc = gc;
+    var body = Object.keys(all).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(all[k]);}).join('&');
     fetch('/planner/place', {method:'POST', headers:{'content-type':'application/x-www-form-urlencoded','x-csrf-token':csrf}, body:body})
       .then(function(r){ if(r.ok){ location.reload(); } else { r.text().then(function(t){ alert(t||'Could not place the lesson.'); }); } });
   }
-  // the tray sits outside the grid element, so listen for tray dragstarts on the document
+  function cellTarget(c){ return { date:c.getAttribute('data-date'), tll:c.getAttribute('data-tll'), isNone:c.classList.contains('pl-none') }; }
+  function dragStateOf(el){ return { dragPlan:el.getAttribute('data-plan'), dragUnit:el.getAttribute('data-unit'), fromDate:el.getAttribute('data-date'), fromTll:el.getAttribute('data-tll') }; }
+  function submitDrop(state, c){ var p = resolvePlannerDrop(state, cellTarget(c)); if(p){ post(p.op, p.params); return true; } return false; }
+
+  // ── mouse drag-and-drop ─────────────────────────────────────────────────────────────────────
+  var drag = null; // {dragPlan,dragUnit,fromDate,fromTll}
   document.addEventListener('dragstart', function(e){
     var t = e.target.closest('[draggable=true]'); if(!t) return;
-    dragPlan = t.getAttribute('data-plan');
-    dragUnit = t.getAttribute('data-unit');
-    fromDate = t.getAttribute('data-date'); fromTll = t.getAttribute('data-tll');
+    drag = dragStateOf(t);
     e.dataTransfer.effectAllowed = 'move';
   });
   grid.addEventListener('dragover', function(e){ var c = e.target.closest('.pl-cell'); if(c && !c.classList.contains('pl-none')){ e.preventDefault(); c.classList.add('pl-over'); } });
   grid.addEventListener('dragleave', function(e){ var c = e.target.closest('.pl-cell'); if(c) c.classList.remove('pl-over'); });
   grid.addEventListener('drop', function(e){
-    var c = e.target.closest('.pl-cell'); if(!c || c.classList.contains('pl-none')) return;
+    var c = e.target.closest('.pl-cell'); if(!c) return;
     e.preventDefault(); c.classList.remove('pl-over');
-    var date = c.getAttribute('data-date'), tll = c.getAttribute('data-tll');
-    var p = null;
-    if(dragUnit){ p = {op:'unit', unit:dragUnit, date:date, tll:tll}; }
-    else if(dragPlan!=null){
-      p = {date:date, tll:tll, plan:dragPlan};
-      if(fromDate){ p.op='move'; p.fromDate=fromDate; p.fromTll=fromTll; } else { p.op='insert'; }
+    if(drag) submitDrop(drag, c);
+    drag = null;
+  });
+
+  // ── click-to-place + keyboard (touch / no-mouse friendly) ───────────────────────────────────
+  var picked = null;     // {dragPlan,dragUnit,fromDate,fromTll}
+  var pickedEl = null;
+  function clearPick(){ if(pickedEl) pickedEl.classList.remove('pl-picked'); picked = null; pickedEl = null; grid.classList.remove('pl-placing'); announce(''); }
+  function pickUp(el, state, label){ clearPick(); picked = state; pickedEl = el; el.classList.add('pl-picked'); grid.classList.add('pl-placing'); announce('Picked up ' + label + ' — choose a slot to place it, or press Escape to cancel.'); }
+  function dropOn(c){ if(!picked) return; var ok = submitDrop(picked, c); if(!ok) clearPick(); }
+
+  function handleActivate(target){
+    // an in-cell action button (✥ pick up / ✕ pull / 🔓 / 🔒)
+    var actBtn = target.closest('[data-pl-act]');
+    if(actBtn){
+      var cell = actBtn.closest('.pl-cell');
+      var act = actBtn.getAttribute('data-pl-act');
+      if(act === 'pickup'){ pickUp(cell, dragStateOf(cell), cell.getAttribute('data-plan') ? 'this lesson' : 'lesson'); return true; }
+      var r = resolvePlannerAct(act, { date:cell.getAttribute('data-date'), tll:cell.getAttribute('data-tll') });
+      if(r){ post(r.op, r.params); return true; }
+      return true;
     }
-    dragPlan=dragUnit=fromDate=fromTll=null;
-    if(p) post(p);
+    // a tray pick-up source (lesson chip or unit header)
+    var src = target.closest('[data-pl-pick]');
+    if(src){
+      if(pickedEl === src){ clearPick(); }
+      else { pickUp(src, dragStateOf(src), src.getAttribute('data-unit') ? 'a whole unit' : 'a lesson'); }
+      return true;
+    }
+    // a target cell to drop a picked-up item onto
+    if(picked){
+      var c = target.closest('.pl-cell');
+      if(c && !c.classList.contains('pl-none')){ dropOn(c); return true; }
+    }
+    return false;
+  }
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest('a.pl-lesson')) return; // let the "open lesson" link work normally
+    handleActivate(e.target);
   });
-  grid.addEventListener('click', function(e){
-    var b = e.target.closest('[data-pl-act]'); if(!b) return;
-    var cell = b.closest('.pl-cell');
-    var op = b.getAttribute('data-pl-act');
-    post({op:op, date:cell.getAttribute('data-date'), tll:cell.getAttribute('data-tll')});
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){ if(picked){ clearPick(); e.preventDefault(); } return; }
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var el = e.target;
+    // only intercept on our interactive elements, so normal controls keep working
+    if(el.closest('[data-pl-act]') || el.closest('[data-pl-pick]') || (picked && el.closest('.pl-cell'))){
+      e.preventDefault();
+      handleActivate(el);
+    }
   });
+
   var undo = document.getElementById('pl-undo');
-  if(undo) undo.addEventListener('click', function(){ post({op:'undo'}); });
+  if(undo) undo.addEventListener('click', function(){ post('undo', {}); });
 })();
 `;
 
@@ -246,7 +303,8 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
                 <noscript><button type="submit">Go</button></noscript>
                 <button type="button" id="pl-undo" class="btn-secondary"${canUndo ? '' : ' disabled'} title="${canUndo ? 'undo the last drop (one step deep, this class only)' : 'nothing to undo yet'}">↶ Undo last</button>
               </form>
-              <p class="muted">Drag a lesson from the tray onto a slot to place it — dropping onto a filled slot pushes that lesson and everything after it along one (holidays skipped). Drag a whole unit (⠿) to lay all its lessons from that slot. Drag a placed lesson to move it; ✕ removes it and pulls the rest forward; 🔓 pins a lesson to its date so cascades flow around it. The next ${WEEKS} school weeks; history is fixed.</p>
+              <p class="muted">Drag a lesson from the tray onto a slot to place it — or, without a mouse, <strong>tap (or focus + Enter) a lesson to pick it up, then a slot to drop it</strong> (Escape cancels). Dropping onto a filled slot pushes that lesson and everything after it along one (holidays skipped). Drag/tap a whole unit (⠿) to lay all its lessons from that slot. ✥ picks up a placed lesson to move it; ✕ removes it and pulls the rest forward; 🔓 pins a lesson to its date so cascades flow around it. The next ${WEEKS} school weeks; history is fixed.</p>
+              <div id="pl-status" class="pl-status" role="status" aria-live="polite"></div>
               <div class="pl-layout">
                 <div id="planner" class="pl-grid-wrap" data-pl-gc="${chosen.groupCourseId}" data-pl-csrf="${csrf}">${timeline}</div>
                 <aside class="pl-tray"><h2>Lessons to place</h2>${tray}</aside>
