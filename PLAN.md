@@ -208,4 +208,55 @@ finished), do a final pass:
 - 16A.5 — year-end overall anchor wired into the roll-up (yearAnchorsForScheme/recordYearAssessment) + integration test.
 
 ## FINAL STATUS
-*(Fill in at the very end.)*
+
+**Branch:** `phase-15-17-unattended` (NOT pushed — review locally). All work committed in small per-slice
+commits. **Final gate: typecheck ✓ · unit 1109 ✓ · integration 427 ✓** (from a clean fresh seed).
+
+### Phase 15 — COMPLETE ✅ (all slices + the rule-7 live-AI smoke)
+- **Test infra fix (your "fix the failing tests" request):** the integration suite was red on a fresh seed
+  (~14 failures) because the documented run path never seeded the `testData` fixture. Fixed at root: a vitest
+  `globalSetup` seeds the fixture (base timetable + testData + progression schemes) idempotently; the
+  school-default course teaching context now applies at course creation + base seed; testData seeds imported
+  reference units for the convert-search; the clock term-date count matches the fixture. **Integration: 0
+  failures from a clean DB.**
+- 15.2b silent-data-loss guard · 15.1 principled button system · 15.2a/15.2c pure planner resolver +
+  click-to-place/keyboard/ARIA · 15.3 privacy/edge locks (audited — all 12 invariants already locked) ·
+  15.4 planner cascade N+1 batched · 15.6 docs/close-out.
+- **Rule-7 live-AI smoke: PASSED on attempt 1.** A throwaway self-cleaning script ran ONE real assessment
+  generation against your key: generation succeeded, the audit stored a **redacted** request, and **no
+  pupil name (of 26 roster pupils) egressed**. Draft + audit rows cleaned up; script deleted.
+
+### Phase 16A — Stages & strands: CORE COMPLETE (16A.1, .2, .3, .5, .6), each tested + committed
+- Full progression model: schema (migration 0066), pure roll-up, the **full year-ladder content seeded**
+  (9 stages, 120 units, ~936 "I can…" criteria parsed from the docs) + GCSE structure + blank Post-16,
+  the admin UI (scheme list / Stage×Strand grid / per-class assignment), the **class heat-map** + **per-pupil
+  ladder** (computed live from the pure roll-up), the **year-end overall anchor**, and the **DPIA delta +
+  erasure + no-AI privacy locks** for the new pupil-data category.
+
+### NOT built (remaining 16A + 16B + Phase 17) — clean stopping point, nothing half-built
+- **16A.4 — auto-suggested evidence from marking.** Needs the `prog_spec_links` (criterion↔spec-point)
+  mapping populated + a teacher-editable mapping UI + marking-modal integration. The table + `addEvidence`
+  (with `source_kind`) exist; the mapping is empty, so this is the next real build.
+- **16A.7 — start-of-year BASELINE assessment (AI).** New AI generation path (cold/warm start, adaptive
+  stop, random-click guard) + `pupil_baseline` table. Larger; not started.
+- **16A.8 — stage-anchored end-of-unit assessments (AI).** Adds `assessments.purpose`,
+  `assessment_question_criteria`, `pupil_unit_placement`; extends the blueprint to cover a stage band and
+  turn marks into criterion evidence. This is also where the teacher-facing "mark an assessment as the
+  year-end overall" surface for 16A.5 lands (the roll-up already honours any `pupil_year_assessment` row).
+- **16B — homework as data** (set · chase · mark): not started (lower-risk, reuses the assignment window +
+  marking queue + release control).
+- **Phase 17 — reference-lesson library:** not started.
+
+### Commands for you to run
+- **Seed the progression schemes on any other instance** (host-side; reads the year-ladder doc; idempotent):
+  `cd app && DATABASE_URL='postgres://organiser:organiser@localhost:5434/organiser' npx tsx src/seed/progressionSeed.ts`
+  (Already run on this dev DB. The integration `globalSetup` also auto-seeds it when empty.)
+- **Run the gate:** `cd app && npm run typecheck && npm test && npm run test:integration` (the integration
+  suite self-seeds its fixture on first run against a fresh DB).
+- **Phase 17 bulk import** (when you build 17.1 + the `TeachComputing/` upload finishes): the importer will
+  be a host-side command over `/home/duguid/School_Organiser/TeachComputing/` — see PHASE_17_PLAN.md.
+
+### Note on the dev DB
+I wiped + re-seeded the dev DB at the start (it was drifted and the integration suite was red). It now holds:
+the clean base timetable + the full testData fixture + the seeded progression schemes (year ladder + GCSE +
+Post-16). The `0066_progression` migration auto-applies on boot.

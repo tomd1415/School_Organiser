@@ -7,6 +7,33 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-27 — Phase 16A (core): Stages & strands progression model
+
+Built on branch `phase-15-17-unattended`, on top of Phase 15.
+
+- **16A.1 — schema + pure roll-up.** Migration `0066`: the progression content tree
+  (`progression_schemes → prog_strands/prog_stages → prog_units → prog_lessons → prog_criteria`, stage+strand
+  denormalised onto criteria), class binding (`group_course_scheme`), the spec-point bridge
+  (`prog_spec_links`), and the PII evidence tables (`pupil_criteria_evidence`, `pupil_year_assessment`).
+  Pure `services/progression.ts`: `currentStagePerStrand` (top of the contiguous completed run, independent
+  strands) + `overallRollUp` (rounded mean; a year-end paper anchors/overrides).
+- **16A.2 — the schemes seed + admin.** A pure parser for the year-ladder source doc (handles KS1/2 `**To…**`
+  and KS3 `*Lesson N:*` forms) drives an idempotent seed of three schemes: the **full year ladder** (9 stages,
+  120 units, ~936 "I can…" criteria), GCSE OCR J277 (2 strands × grades 1–9, structure), and a blank Post-16.
+  Admin UI: scheme catalogue, the Stage × Strand grid, and per-class scheme assignment.
+- **16A.3 — per-pupil ladder + class heat-map**, computed live from the pure roll-up; teacher-only with a PII
+  banner. Linked from the Pupils cohort screen.
+- **16A.5 — year-end overall anchor** wired into the roll-up (a recorded `pupil_year_assessment` overrides the
+  computed cross-strand mean).
+- **16A.6 — privacy.** A DPIA delta for the new progression-evidence category; the Phase-10 erasure path now
+  explicitly clears + counts the evidence/year-assessment rows (anonymise keeps them nameless); a static guard
+  proves the progression paths never touch AI.
+- **Rule-7 live-AI smoke (Phase 15 assessment path): PASSED.** One real generation against the teacher's key
+  confirmed the audit stores a redacted request and no pupil name egresses; self-cleaned.
+
+Not yet built: 16A.4 (auto-suggest evidence), 16A.7 (baseline AI), 16A.8 (stage-anchored AI assessments), 16B
+(homework), Phase 17 (reference library). See PLAN.md FINAL STATUS.
+
 ### 2026-06-27 — Phase 15: debt paydown (planner hardening, button system, perf) + test-fixture fix
 
 Built on branch `phase-15-17-unattended`.
