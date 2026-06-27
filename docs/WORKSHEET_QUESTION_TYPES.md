@@ -61,6 +61,10 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 All four backlog types below are now built; the sub-sections are kept only as the design record. Storage +
 build detail: [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTATION_PLAN.md).
 
+> **Validation (2026-06-27):** the whole Year-8 batch (6 units / 36 lessons) converted with **zero new
+> type-gaps** — the four types above covered all the demand the Y7 batch had logged (Y8 used order=15,
+> card-sort=142 items, label=22 zones, slider=10). The backlog is, for now, **empty**.
+
 ### 2.3 Order / sequence (non-code)  — **BUILT 2026-06-27 (see §1)**
 - **What.** Drag plain-text steps into the right order (Parsons but for **words/steps**, not code).
 - **Why.** "order" is in the teaching context; e.g. order the steps of an algorithm in plain English, or a
@@ -131,6 +135,12 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 | KS3 Y7 U5 Spreadsheets | L1 cell grid; L2 formula bar; L4/L5 function results; L6 conditional formatting | real spreadsheet **screenshots** (source decks are mostly clipart) | ⚠️ only 1 genuine screenshot in source; embedded analogy visuals instead |
 | KS3 Y7 U6 Scratch II | L11/L12 translate blocks; L8/L9 minor | clean `translate`-block code screenshot | ⚠️ none clean in source — wrote the blocks as Parsons + reused languages photo |
 | KS3 Y7 U7 Using media | L1 before/after formatting; L2 CC-licences chart; L6 finished blog | formatting comparison, all-6-CC-licences chart, example finished blog | ⚠️ embedded 7 OGL images; 3 still wanted |
+| KS3 Y8 U1 Vector graphics | L1–L5 editor stills | annotated handles/nodes, align before/after, markup↔preview | ⚠️ source = animated Inkscape GIFs (excluded per no-animation) — re-shoot as stills |
+| KS3 Y8 U2 Computing systems | L1–L5 | Antikythera still, system-monitor still, logic-gate symbols chart, AI-examples strip | ⚠️ embedded OGL alternatives + 3 system-monitor videos |
+| KS3 Y8 U3 Web | L3 inline-vs-CSS; L5 AND/OR/NOT | comparison + boolean-operator diagram | ⚠️ source had only PPT shapes / decorative photos |
+| KS3 Y8 U4 Representations | L4 blank place-value grid (for a **label** widget); L3 doubling; L6 puzzle art | a CLEAN unlabelled binary place-value grid | ⚠️ source coins have values pre-printed — a blank grid would unlock a label-the-place-values task |
+| KS3 Y8 U5 Mobile app | L6 second-screen; L3 phone internals | a phone-internals diagram + a 2nd-screen still | ⚠️ used a generic circuit-board photo + reused L5 |
+| KS3 Y8 U6 Python | L1–L6 | flow-chart / variable-trace / TypeError stills | ⚠️ source diagrams are non-rasterisable PPT shapes/animations |
 
 > Keep this table growing as lessons are converted — it's the worklist for sourcing/creating missing images.
 > **Per-unit detail** (full §7a alignment tables + every gap) lives beside each bundle in
