@@ -74,6 +74,55 @@ overall.
 - **16A.5 — Year-end overall assessment hook *(S)*.** Let the end-of-year **overall assessment** (an
   existing assessment marked as the year-end overall for a group_course) feed `overallRollUp` as the anchor.
   Reuses the assessment subsystem — no new AI path.
+- **16A.7 — Start-of-year BASELINE assessment *(M)*.** The mirror of 16A.5 at the *start* of the year: a
+  short placement assessment per class that **establishes each pupil's starting stage per strand**, seeding
+  the progression so the year's planning (the ⭐ "+1 stage" principle) has a floor to build from. Two modes:
+  - **Cold start (typically Year 7 / Stage 12):** no prior data. Generate a **broad, low-resolution** probe
+    that spans several stages either side of the expected age stage (e.g. a few items each from Stages
+    10–13) to *locate* each pupil's level quickly, not to test exhaustively. The blueprint is the
+    age-expected stage ± a band; reuse `assessmentBlueprint`/generation with a new `purpose='baseline'`
+    blueprint that pulls a **thin sample** of criteria across the band rather than full unit coverage.
+  - **Warm start (other years with history):** read the pupil's **prior-year end stage** (`pupil_year_assessment`
+    / the roll-up) and generate a **tighter** baseline centred on *just* the boundary criteria around that
+    stage — confirm-and-nudge rather than re-discover. Far fewer items because the prior evidence guides it.
+  - **Keep it SHORT (hard constraint).** Pupils have little assessment experience, dislike long papers, and
+    **click randomly when overwhelmed** — which corrupts the placement. So: cap length aggressively (a
+    target of ~8–12 items, fewer for younger pupils), prefer **objective, fast** widgets (multiple-choice /
+    tick-box that auto-mark instantly — no AI marking needed for a baseline), and **stop early** where the
+    signal is clear (a simple **adaptive stop**: once a pupil has missed N in a row below a stage or aced a
+    band, end that strand — don't make them grind on). Optionally show a short, low-stakes framing ("this
+    just helps me pitch your lessons — it doesn't count").
+  - **Random-clicking guard.** Detect implausibly fast / patterned responses (e.g. all-same option, answers
+    faster than readable) and **flag the baseline as low-confidence** so the teacher reviews rather than
+    trusting a placement the pupil clicked through. Don't auto-commit a low-confidence baseline to evidence.
+  - **Outcome → evidence.** A passed baseline item ticks its mapped criteria (`source_kind='baseline'`),
+    establishing the pupil's starting per-strand stage. Marking is objective/auto only; **no pupil name to
+    AI** (generation is cohort/band-level, same wrapper). One baseline per (pupil, group_course, year).
+- **16A.8 — Stage-anchored end-of-unit assessments (+ optional individualised papers) *(M)*.** Make the
+  existing per-unit assessment subsystem (`assessmentBlueprint` → generation → marking → results) **measure
+  the stages**, so an end-of-unit paper says *which stage most accurately reflects each pupil's ability*,
+  not just a raw mark.
+  - **Stage-anchored blueprint.** Extend `assembleBlueprint`/`blueprintForUnit` so a unit's assessment is
+    built around the **stage criteria / learning objectives** the unit delivers (the `prog_criteria` at the
+    unit's stage × strand — already linked via `prog_units`/`prog_lessons`), alongside the existing
+    spec-point partition. Each question maps to the **criterion (and therefore the stage)** it evidences, so
+    marking attributes results to stages. This generalises the current "covered/uncovered spec point" split
+    to "criteria for *this* stage" plus a few from the **stage above/below** to confirm the boundary.
+  - **Accurate placement.** Cover criteria from a **band around the unit's stage** (mostly the unit's stage,
+    a few from ±1) so a strong pupil can demonstrate the next stage and a struggling one is still placed
+    correctly — the result is a **per-strand stage**, not a percentage. Results feed `pupil_criteria_evidence`
+    (`source_kind='assessment'`) and the per-strand roll-up; this is the regular evidence the year builds on.
+  - **Optional individualised papers.** Where the teacher opts in, generate a **per-pupil** end-of-unit
+    paper centred on **that pupil's boundary criteria** (their current stage ± 1, from query (h)) — so the
+    paper concentrates where it actually discriminates *that* pupil's ability, and stays short. Reuses the
+    baseline's adaptive-length / random-click guard ideas. Default stays a **single class paper** (cheaper,
+    simpler); individualised is the opt-in for classes with a wide spread. **Privacy:** generation is still
+    cohort/criterion-level prose — **no pupil name to AI**; "individualised" means *which criteria*, chosen
+    server-side from the pupil's own stage, never the pupil's identity sent out.
+  - **Degrade & reuse.** With AI off, degrade to writing nothing (as today). Marking reuses the existing
+    objective auto-mark + anonymous/redacted AI marking for open parts; the only new thing is the
+    **criterion↔question mapping** that turns marks into stage evidence (via `prog_spec_links` where a
+    criterion already maps to a spec point, else a direct question→criterion tag).
 - **16A.6 — DPIA delta + privacy tests *(S)*.** A new pupil-data category (progression evidence) → a DPIA
   update and retention/erasure coverage (the Phase-10 erasure path must clear evidence + year-assessment
   rows). The auto-suggest in 16A.4 reads **already-computed, in-app** spec-point results — it sends nothing
@@ -107,12 +156,23 @@ lower-risk and reuses shipped machinery almost entirely (assignment window + the
 control), so it lands fast — a good warm-up. **16A** is the bigger, more-requested build: do **16A.1
 (schema + pure roll-up)** before any UI (the per-strand-with-roll-up and multi-scheme shape drive every
 column), then the editor (16A.2) before the views (16A.3), then wire auto-suggested evidence (16A.4) once
-there are marks to suggest from, and the year-end anchor (16A.5) last. Both features add a **per-pupil data
-category**, so neither ships without its DPIA delta and erasure coverage (16A.6 / mirror for 16B).
+there are marks to suggest from, and the year-end anchor (16A.5). The **start-of-year baseline (16A.7)** is
+what makes the model *useful from September* — it seeds each pupil's starting stage so per-pupil planning
+has a floor — so build it **right after 16A.3** (you need the schemes + evidence model + the pupil view to
+land and review baselines), ahead of or alongside 16A.4. Its cold-start mode (Year 7) and warm-start mode
+(other years, guided by prior evidence) share one generator. The **stage-anchored end-of-unit assessments
+(16A.8)** come **after 16A.4** (they reuse the criterion↔spec-point mapping) and complete the
+**evidence loop across the year — baseline (start) → per-unit assessments (throughout) → year-end anchor
+(end)** — all feeding the same per-strand stage roll-up; the individualised-paper variant is an opt-in on
+top. Both features add a **per-pupil data category**, so neither ships without its DPIA delta and erasure
+coverage (16A.6 / mirror for 16B).
 
 ## Out of scope (stays backlog / parked)
 
-The class risk board (Wave 8.1), where-my-time-goes (8.2), parents'-evening prep (8.3 — needs its own
-privacy design pass), richer worksheet block types (9.3), the swappable-themes stretch, the idea-4 reviewer
-tail, and multi-provider LLM all remain in [FUTURE_WAVES.md](FUTURE_WAVES.md) / [MORE_IDEAS.md](MORE_IDEAS.md).
-The multi-teacher v2 rearchitecture stays unnumbered and parked.
+The **reference-lesson library** (importing the Teach Computing files, linking them to these criteria,
+activity variety, pupil file hosting/editing, copy-paste/upload) is its own follow-on —
+**[Phase 17](PHASE_17_PLAN.md)** — and depends on the criteria built here. The class risk board (Wave 8.1),
+where-my-time-goes (8.2), parents'-evening prep (8.3 — needs its own privacy design pass), richer worksheet
+block types (9.3), the swappable-themes stretch, the idea-4 reviewer tail, and multi-provider LLM all remain
+in [FUTURE_WAVES.md](FUTURE_WAVES.md) / [MORE_IDEAS.md](MORE_IDEAS.md). The multi-teacher v2 rearchitecture
+stays unnumbered and parked.

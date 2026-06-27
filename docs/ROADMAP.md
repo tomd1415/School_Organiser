@@ -17,7 +17,10 @@ stories in [SPECIFICATION.md](SPECIFICATION.md).
 > **Next up — [Phase 15](PHASE_15_PLAN.md)** pays down the debt the recent fast builds left (the
 > unbuilt [Phase 14](PHASE_14_PLAN.md) planner-hardening, the assessment live-AI smoke, query perf),
 > then **[Phase 16](PHASE_16_PLAN.md)** is the next feature wave (the *Stages & strands* progression
-> model + the homework loop). Beyond: the deferred idea-4 reviewer tail and the parked multi-teacher v2.
+> model + per-pupil tracking, baseline & stage-anchored assessments, + the homework loop), and
+> **[Phase 17](PHASE_17_PLAN.md)** builds the *reference-lesson library* (bulk-import the Teach Computing
+> files, link them to objectives/"I can…" criteria, drive activity variety, host & edit pupil files, and
+> unify copy-paste + upload). Beyond: the deferred idea-4 reviewer tail and the parked multi-teacher v2.
 
 ## Sequencing principle
 

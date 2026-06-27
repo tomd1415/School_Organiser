@@ -31,6 +31,12 @@ Thumbs.db
 # Hosted resource store (large; bind-mounted into the app)
 data/resources/
 
+# Teach Computing source lesson FILES (~4.8GB+, being uploaded) — too large to commit, and may include
+# hand-edited / pupil-data-adjacent material. Keep LOCAL ONLY. NB: the importer (Phase 17) still reads this
+# directory from disk — git-ignored ≠ off-limits to the app/agent. (The small curriculum-map xlsx in
+# docs/TeachComputing_docs/ are separate and ARE tracked.)
+/TeachComputing/
+
 # Reconcile manifests — regenerable output from `npm run reconcile`; list paths from the
 # pupil-data-sensitive old_lesson_plan folder, so keep them local.
 data/reconcile-report/
