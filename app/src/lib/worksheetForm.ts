@@ -14,7 +14,7 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image' | 'choice' | 'blank' | 'code' | 'parsons';
+  kind: 'text' | 'check' | 'image' | 'choice' | 'multichoice' | 'blank' | 'code' | 'parsons';
   level: BlockLevel;
   label: string;
   options?: string[]; // choice fields only — the selectable options, in source order
@@ -77,6 +77,18 @@ const SCREENSHOT = /📷|🖼|\bpaste\b[^|]*\b(?:screenshot|image|picture|photo|
 const CHOICE_MARK = /\(\s*\)/g;
 function isChoiceCell(s: string): boolean {
   return (s.match(CHOICE_MARK) ?? []).length >= 2;
+}
+// A MULTIPLE-SELECT ("tick all that apply") answer cell: ≥2 square markers "[ ]" each preceding an option,
+// e.g. "[ ] buttons [ ] light sensor [ ] the screen". The pupil ticks SEVERAL (checkboxes), unlike a
+// single-radio choice. The marker is a lone "[ ]" (NOT the "[[ ]]" fill-in-blank, nor a "- [ ]" checklist
+// item, which is a list line, not a table cell).
+const MULTI_MARK = /(?<!\[)\[\s*\](?!\])/g;
+function isMultiCell(s: string): boolean {
+  return (s.match(MULTI_MARK) ?? []).length >= 2;
+}
+/** Split a multi-select cell into its options (the text after each "[ ]" marker), in source order. */
+function multiOptions(s: string): string[] {
+  return s.split(MULTI_MARK).map((o) => o.trim()).filter((o) => o !== '');
 }
 // A CODE-WRITING answer cell: the pupil types code, so the box is monospaced and roomier. The cell (or
 // its column header) names code, e.g. "Type your code here", "Write your program here". Pedagogy P11
@@ -437,6 +449,34 @@ function choiceControl(key: string, label: string, options: string[], opts: Work
   return `<form class="ws-choice-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none">${group}<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></form>`;
 }
 
+/** A MULTIPLE-SELECT ("tick all that apply") answer: the pupil ticks SEVERAL options (checkboxes). The
+ * saved value is the chosen options' TEXT joined by ", " (so marking compares the SET against a
+ * `multichoice` scheme's expected). An inline aggregator updates a hidden `value` from the ticked boxes,
+ * then the same /me/answer autosave (hx-trigger=change) posts it — no endpoint change, like the radio form. */
+function multiChoiceControl(key: string, label: string, options: string[], opts: WorksheetOptions): string {
+  const value = (opts.values?.get(key) ?? '').trim();
+  const chosen = new Set(value.split(/\s*,\s*/).map((s) => s.toLowerCase()).filter(Boolean));
+  const isChosen = (o: string): boolean => chosen.has(o.trim().toLowerCase());
+  if (opts.mode === 'review') {
+    if (value === '') return `<div class="ws-answer ws-empty">—</div>`;
+    const items = options.map((o) => `<li class="ws-choice-opt${isChosen(o) ? ' chosen' : ''}">${isChosen(o) ? '☑' : '☐'} ${esc(o)}</li>`).join('');
+    return `<ul class="ws-choice ws-choice-review">${items}</ul>`;
+  }
+  const disabled = opts.mode === 'preview' ? ' disabled' : '';
+  const items = options
+    .map(
+      (o, i) =>
+        `<li class="ws-choice-opt"><label><input type="checkbox" class="ws-multi-box" id="ws-${esc(key)}-${i}" value="${esc(o)}"${isChosen(o) ? ' checked' : ''}${disabled}> <span>${esc(o)}</span></label></li>`,
+    )
+    .join('');
+  const group = `<fieldset class="ws-choice ws-multi"><legend class="ws-sr-only">${esc(label || 'Choose all that apply')}</legend><ul class="ws-choice-opts">${items}</ul></fieldset>`;
+  if (opts.mode === 'preview') return group;
+  // form: ticking a box aggregates ALL ticked boxes into the hidden `value`, then htmx (hx-trigger=change)
+  // autosaves it — exactly the radio form's save path, so marking/keys are unchanged.
+  const agg = "this.querySelector('input[name=value]').value=[].slice.call(this.querySelectorAll('.ws-multi-box:checked')).map(function(b){return b.value}).join(', ')";
+  return `<form class="ws-choice-form ws-multi-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none" oninput="${agg}"><input type="hidden" name="value" value="${esc(value)}">${group}<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span></form>`;
+}
+
 /** A MATCHING table is a 2-column table whose every answer cell is a choice over the SAME option set:
  * the left column is the prompt to match, the right is the (repeated) pool of answers. Returns the row
  * prompts + the shared options, or null if it isn't that shape. Each row stays a normal t.r.c choice
@@ -602,7 +642,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
     isA &&
     bodyRows.some((r) => {
       const v = (r[c] ?? '').trim();
-      return v === '' || SCREENSHOT.test(v) || isChoiceCell(v);
+      return v === '' || SCREENSHOT.test(v) || isChoiceCell(v) || isMultiCell(v);
     }),
   );
   const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasFillBody;
@@ -638,7 +678,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // A cell is an input when it's an answer-column blank/placeholder, or itself a placeholder/screenshot/choice.
   const cellIsInput = (c: number, cell: string): boolean => {
     const ph = PLACEHOLDER_CELL.test(cell);
-    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell);
+    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell);
   };
   const renderRow = (row: string[], rowNo: number): string => {
     // A4: a row that has an input is a question — give its prompt cell a 🔊 read-aloud button.
@@ -653,7 +693,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // a reference column that merely shares an answer column's table never loses its content.
       const shot = SCREENSHOT.test(cell);
       const cho = isChoiceCell(cell);
-      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho)) || placeholder || shot || cho;
+      const multi = isMultiCell(cell);
+      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho || multi)) || placeholder || shot || cho || multi;
       if (!isInput) {
         // The question prompt for this row (its first non-empty text cell) gets the read-aloud button.
         if (opts.mode === 'form' && rowHasInput && !promptSpoken && cell.trim() !== '') {
@@ -694,6 +735,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // "( ) a ( ) b" cell becomes a multiple-choice field; everything else is a typed answer. Same
       // key scheme for all → marking is unaffected.
       const isShot = shot || SCREENSHOT.test(theadCells?.[c] ?? '') || SCREENSHOT.test(label);
+      if (multi && !isShot) {
+        const options = multiOptions(cell);
+        if (options.length >= 2) {
+          localFields.push({ key, kind: 'multichoice', level: block.level, label, options });
+          return `<td class="ws-answer-cell ws-choice-cell ws-multi-cell">${multiChoiceControl(key, label, options, opts)}</td>`;
+        }
+      }
       if (cho && !isShot) {
         const options = choiceOptions(cell);
         if (options.length >= 2) {

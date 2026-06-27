@@ -3,7 +3,7 @@
 // word forms carried as listed alternatives; anything genuinely fuzzy is classified 'open' at
 // scheme time and left to the AI, never guessed here.
 
-export type MarkKind = 'tick' | 'choice' | 'exact' | 'numeric' | 'keyword' | 'open';
+export type MarkKind = 'tick' | 'choice' | 'multichoice' | 'exact' | 'numeric' | 'keyword' | 'open';
 
 export interface MarkPoint {
   id: number;
@@ -61,6 +61,12 @@ function pointMatch(point: MarkPoint, answer: string): string | null {
     case 'exact': {
       const na = norm(a);
       return candidates.some((c) => norm(c) === na) && na !== '' ? a.trim() : null;
+    }
+    case 'multichoice': {
+      // "tick all that apply": the chosen SET (comma-joined) must equal an expected SET, order-independent.
+      const set = (s: string): string => [...new Set(s.split(',').map((x) => norm(x)).filter((x) => x !== ''))].sort().join('|');
+      const as = set(a);
+      return as !== '' && candidates.some((c) => set(c) === as) ? a.trim() : null;
     }
     case 'numeric': {
       const an = parseNum(a);

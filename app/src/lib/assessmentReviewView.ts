@@ -152,7 +152,7 @@ export function renderAssignmentsPanel(assessmentId: number, eligible: EligibleC
 }
 
 const KIND_ORDER: MarkKind[] = ['exact', 'numeric', 'keyword', 'choice', 'tick', 'open'];
-const KIND_LABEL: Record<MarkKind, string> = { exact: 'exact', numeric: 'numeric', keyword: 'keyword', choice: 'choice', tick: 'tick', open: 'open (AI)' };
+const KIND_LABEL: Record<MarkKind, string> = { exact: 'exact', numeric: 'numeric', keyword: 'keyword', choice: 'choice', multichoice: 'multi-select', tick: 'tick', open: 'open (AI)' };
 
 function kindBadge(kind: MarkKind): string {
   return kind === 'open' ? '<span class="badge ai">AI-marked</span>' : '<span class="badge good">auto</span>';

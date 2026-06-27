@@ -26,6 +26,35 @@ describe('code-writing answer box', () => {
   });
 });
 
+describe('multiple-select ("tick all that apply")', () => {
+  const md = `## Questions
+| Question | Tick all the inputs |
+|---|---|
+| Which are micro:bit inputs? | [ ] buttons [ ] light sensor [ ] the screen |
+| Pick one | ( ) yes ( ) no |
+`;
+  it('a "[ ] a [ ] b" cell becomes a multichoice field; "( ) a ( ) b" stays a single choice', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields.map((f) => f.kind)).toEqual(['multichoice', 'choice']);
+    expect(fields[0]!.options).toEqual(['buttons', 'light sensor', 'the screen']);
+  });
+  it('does NOT mistake a "[[ ]]" fill-in-blank for multi-select', () => {
+    const blanks = renderWorksheet('Fill: a [[ ]] repeats and needs a [[ ]] value.\n', { mode: 'review' }).fields;
+    expect(blanks.every((f) => f.kind !== 'multichoice')).toBe(true);
+  });
+  it('form mode renders checkboxes + a hidden value the aggregator fills, and autosaves', () => {
+    const html = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=5' }).html;
+    expect(html).toContain('ws-multi-box');
+    expect(html).toContain('type="checkbox"');
+    expect(html).toContain('input[name=value]'); // the inline aggregator targets the hidden value
+    expect(html).toContain('/me/answer?oc=5');
+  });
+  it('review mode shows the pupil\'s ticked set', () => {
+    const html = renderWorksheet(md, { mode: 'review', values: new Map([['t1.r1.c2', 'buttons, light sensor']]) }).html;
+    expect(html).toContain('☑'); // ticked
+  });
+});
+
 describe("Parson's Problems", () => {
   const md = `Put the lines in order to count to 3.
 

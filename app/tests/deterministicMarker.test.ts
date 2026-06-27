@@ -18,6 +18,19 @@ describe('deterministicMarker — exact', () => {
   });
 });
 
+describe('deterministicMarker — multichoice (tick all that apply: set equality)', () => {
+  const p = [pt({ kind: 'multichoice', expected: 'buttons, light sensor, temperature sensor' })];
+  it('matches the exact chosen set, order-independent + case/space-insensitive', () => {
+    expect(markField(p, 'buttons, light sensor, temperature sensor').marksAwarded).toBe(1);
+    expect(markField(p, 'Temperature Sensor,  buttons ,light sensor').marksAwarded).toBe(1);
+  });
+  it('rejects a partial or wrong set', () => {
+    expect(markField(p, 'buttons, light sensor').marksAwarded).toBe(0); // missing one
+    expect(markField(p, 'buttons, light sensor, temperature sensor, the screen').marksAwarded).toBe(0); // extra wrong one
+    expect(markField(p, '').marksAwarded).toBe(0);
+  });
+});
+
 describe('deterministicMarker — numeric (strict after parsing)', () => {
   const p = [pt({ kind: 'numeric', expected: '4', alternatives: ['four'] })];
   it('matches 4 / 4.0 / " 4 " / "4 items"', () => {
