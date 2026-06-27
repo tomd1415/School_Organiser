@@ -1505,6 +1505,15 @@ body[data-shell="next"] .btn-secondary,
 body[data-shell="next"] button.ghost,
 body[data-shell="next"] button.link {
   background: transparent !important;
+  /* A secondary/ghost button that is also type="submit" inherited color:#0b1320 !important from the
+     blanket button[type="submit"] primary rule above. With the fill now transparent that dark text sits
+     on the dark surface and is invisible — so reset it back to readable light ink here. */
+  color: var(--text) !important;
+}
+/* A link-styled button should read as a flat text link (teal accent), like its <a class="link"> siblings —
+   not white body text. Same transparent background from the rule above. */
+body[data-shell="next"] button.link {
+  color: var(--accent) !important;
 }
 
 body[data-shell="next"] input[type="text"],
