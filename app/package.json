@@ -10,6 +10,8 @@
     "start": "node dist/server.js",
     "migrate": "tsx src/db/migrate.ts",
     "seed": "tsx src/seed/run.ts",
+    "seed:lessons": "tsx src/seed/seedLessons.ts",
+    "export-lesson-unit": "tsx scripts/export-lesson-unit.ts",
     "generate-recurring": "tsx src/jobs/generateRecurring.ts",
     "import-resources": "tsx src/jobs/importResources.ts",
     "reconcile": "tsx src/jobs/reconcileOldPlans.ts",

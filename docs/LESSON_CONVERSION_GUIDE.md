@@ -183,6 +183,22 @@ as `/data/resources`). If the store isn't host-writable, run the script **inside
 (`docker exec school_organiser-app-1 npx tsx src/<script>.ts`, with the script under `src/` so it's mounted).
 Throwaway scripts: prefix `_` and **delete after running** (don't commit them).
 
+## 5a. Persist — export the bundle + commit (so it's in git AND transferable)
+
+A converted unit is DB rows + resource files; to version-control it and move it to other instances, export
+it to a committed **bundle** and commit (curriculum content, no pupil data — safe to commit):
+
+```bash
+cd app && DATABASE_URL=… RESOURCE_STORE_PATH=… npm run export-lesson-unit -- <unitId>   # → seed-content/lessons/<slug>/
+git add app/seed-content/lessons/<slug>
+```
+
+Transfer / restore on any instance (idempotent — replaces a same-title unit on the target scheme):
+`cd app && … npm run seed:lessons`. The export rewrites embedded `/resources/<id>/view` → `{{res:<file>}}`
+placeholders and the seed re-resolves them, so images/videos survive the move. Round-trip is lossless. See
+[../app/seed-content/lessons/README.md](../app/seed-content/lessons/README.md) (incl. the git-LFS-at-scale
+note for the binary assets).
+
 ## 6. Map TCC unit → course / scheme
 
 A converted unit materialises onto **one** course's active scheme. Current dev mapping (KS3):
@@ -246,6 +262,7 @@ Record the table in the conversion notes / PR so the alignment is reviewable.
 - [ ] Slide deck: `# title`, one `## ` per slide, `> 🧑‍🏫` teacher notes — **resource title ends `.md`**.
 - [ ] Materialised onto the right scheme; all resources linked to their plans.
 - [ ] Verified: worksheets + slides resolve, screenshot field present, teacher notes present, levels slice.
+- [ ] **Exported to a committed bundle** (`npm run export-lesson-unit -- <unitId>`) and `git add`ed.
 - [ ] Throwaway scripts deleted; nothing from `TeachComputing/` committed.
 
 ---

@@ -1,0 +1,72 @@
+{
+  "unitTitle": "Y7 micro:bit transition (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "micro:bit countdown — count-controlled iteration",
+      "objectives": "I can name different micro:bit inputs\nI can explain what iteration (a loop) means\nI can change a count-controlled loop to count down\nI can make a countdown program using a loop",
+      "outline": "Routine first (same every lesson). Vocabulary on board: iteration · loop · count-controlled · efficiency. TA: everyone has MakeCode open + 1 micro:bit per pair. Read the 4 “I can…” aloud.\n1. (0–5) Starter — micro:bit inputs (think–pair–share). Pupils TICK inputs on the worksheet (no writing).\n   • Support: word-bank/tick boxes to choose from.  • Core: list inputs from memory.  • Challenge: name a v2-only input (touch / sound).\n2. (5–20) I-do → we-do (PRIMM Predict–Run). Teacher predicts the count-UP code aloud (I do); class predicts the next block (we do). Pairs open the shared link, drag comments to blocks, fill blank comments.\n   • Support: comments pre-written — match them to blocks.  • Core: fill the blank comments from a word-bank.  • Challenge: explain why “index” is a sensible variable name. Likely error: no start value → fix-words “every loop needs a starting number.”\n3. (20–35) You-do — modify the program to count DOWN from 9 (change +1 → −1; one block).\n   • Support: printed “change THIS block” arrow card.  • Core: edit the block unaided.  • Challenge: update the comments to match. Success = the micro:bit shows 9…0. TA: “prompt, do not do it for them.”\n4. (35–50) Count-controlled iteration — the “for index from 0 to N” block replaces many blocks. Worked example (I do), pairs swap to the for-loop (you do). Keep a screenshot of the working countdown.\n5. (50–55) Plenary — pupils self-tick the 4 “I can…”; each pair shows their counting micro:bit. TA notes who met all four.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "micro:bit countdown — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-micro-bit-countdown-activity-worksheet.md"
+        },
+        {
+          "title": "micro:bit v2 board (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-micro-bit-v2-board-teach-computing.png"
+        },
+        {
+          "title": "countdown video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-countdown-video-teach-computing.mp4"
+        },
+        {
+          "title": "micro:bit countdown — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-micro-bit-countdown-starter-worksheet.md"
+        },
+        {
+          "title": "micro:bit countdown — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-micro-bit-countdown-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Basketball throw strength — functions & data logging",
+      "objectives": "I can explain what a function is and why it makes a program efficient\nI can read accelerometer (strength) data on the micro:bit\nI can change a program to log and show data\nI can make a program that measures the strength of a throw",
+      "outline": "Routine first. Vocabulary on board: function · efficiency · called · data logging · visualisation. TA: 1 micro:bit + battery + arm-strap per group; a ball/target. Read the 4 “I can…” aloud.\n1. (0–5) Starter — basketball think–pair–share: how do you score, why does throw strength matter? Pupils CHOOSE from picture prompts (no writing). Link strength → force → accelerometer.\n2. (5–20) I-do → we-do — Functions (PRIMM). Teacher: a function is “a named helper you can call again and again” + worked example (I do). Pairs predict what “call basket” does, then run it (we do).\n   • Support: a 2-line “what a function is” sentence with the keyword to circle.  • Core: predict + explain in the worksheet.  • Challenge: say why a function is more efficient than copying blocks. Likely error: thinks it runs on its own → “a function only runs when it is CALLED.”\n3. (20–38) You-do — modify the program to LOG the accelerometer strength and SHOW it (drag blocks, no typing).\n   • Support: a printed block-order strip to follow.  • Core: log + show one value.  • Challenge: log a second value and compare two throws. Success = a value changes when the micro:bit is shaken.\n4. (38–52) Investigate — strap the micro:bit on, throw at the target (groups; a calm read-only “record the data” role for pupils who prefer not to throw). Write ONE number (strongest throw) on the worksheet.\n5. (52–55) Plenary — self-tick the 4 “I can…”; “why is a function more efficient than copying the blocks?” TA notes groups who logged + showed data.\nDifferentiation on the SAME task; movement built in as routine, not reward; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Basketball throw strength — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-basketball-throw-strength-activity-worksheet.md"
+        },
+        {
+          "title": "Basketball throw strength — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-basketball-throw-strength-slides.md"
+        }
+      ]
+    }
+  ]
+}
