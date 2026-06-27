@@ -31,6 +31,9 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 
 ## 2. Backlog — question types a lesson wanted but the system can't do yet
 
+> **Implementation plan + storage spec for all four below:** [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTATION_PLAN.md)
+> — authoring syntax, the per-field storage encoding (no DB change), marking, render/client, build order.
+>
 > **Teacher's steer: prefer ADDING a type over reducing question variety.** When a lesson wants a type that
 > isn't built, build it (it keeps the variety) rather than dumbing the question down. Until it's built, see
 > the §3 stop-gap — but the default is *add the type*.
