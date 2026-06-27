@@ -63,6 +63,15 @@ describe an individual pupil**.
 
 ## 3. Generate the DOCUMENTS the plan refers to (worksheets)
 
+> **Use only the question types the engine supports** — the reference + the markdown for each is in
+> [WORKSHEET_QUESTION_TYPES.md §1](WORKSHEET_QUESTION_TYPES.md). If a lesson really wants a type that isn't
+> built (multi-select, match, order-non-code, label-a-diagram, card sort, …), **do not fake it badly**:
+> reframe to a supported type *or* leave a text box, **and log it** under
+> [WORKSHEET_QUESTION_TYPES.md §2](WORKSHEET_QUESTION_TYPES.md) (with the worksheet name) so it's fixed when
+> the type lands. **Never use a single-radio `choice` for a multi-correct question** — it can't be answered
+> (a `(  ) a (  ) b (  ) c` cell lets the pupil pick exactly one). For "tick all that apply", use separate
+> single-radio yes/no rows until multi-select exists.
+
 Generate **every** worksheet the plan mentions (typically **starter** + **activity**; add others if named).
 A worksheet is Markdown stored as a `kind='worksheet'` resource. Format (the renderer = `worksheetForm.ts`):
 
@@ -171,13 +180,60 @@ Also spot-check level slicing: a `support` render shows the Support questions an
 (and never the labels). Then open the lesson in the app (Schemes → the unit → the lesson; and the cockpit /
 lab) and eyeball the worksheet (S/C/C, screenshot box) and the slides + presenter notes.
 
+### 7a. Alignment check — worksheet ↔ slides ↔ plan  (REQUIRED)
+
+The three artefacts must tell **one** story. Build a quick mapping table per lesson and fix any gap:
+
+| Plan objective ("I can…") | Taught on slide(s) | Asked on worksheet (which Q / level) |
+|---|---|---|
+
+- **Every objective** is on a slide **and** has at least one worksheet question (or the show-your-work
+  artefact for a "make/create" objective). No orphan objective.
+- **Every worksheet question** maps to something on a slide / in the plan — no question about a topic the
+  lesson never teaches. The starter question matches the starter slide; the predict question matches the
+  predict slide; the vocabulary matches the plan's key vocabulary.
+- **Levels are coherent:** Support = recognition (tick/choose), Core = recall/explain, Challenge = reason/
+  apply — on the **same** objective.
+- **Type sanity:** each multiple-choice question has exactly **one** correct option (else it's the §3
+  multi-correct trap → reframe + log to WORKSHEET_QUESTION_TYPES.md §2.1).
+
+Record the table in the conversion notes / PR so the alignment is reviewable.
+
 ## 8. Checklist per lesson
 
 - [ ] Read the lesson plan docx + worksheet docx text from the zip.
 - [ ] Plan authored: 3–4 "I can…" objectives + a routine outline with S/C/C, vocab, likely error, TA cues.
 - [ ] **Every** referenced worksheet generated (starter + activity + others), with level sections.
+- [ ] Only supported question types used (WORKSHEET_QUESTION_TYPES.md §1); any missing type logged to §2; no single-radio multi-correct.
+- [ ] **Alignment table built** (§7a): every objective is on a slide + a worksheet Q; no orphan question; choices are single-correct.
 - [ ] Show-your-work area present (MakeCode link field + `📷` screenshot field).
 - [ ] Slide deck: `# title`, one `## ` per slide, `> 🧑‍🏫` teacher notes — **resource title ends `.md`**.
 - [ ] Materialised onto the right scheme; all resources linked to their plans.
 - [ ] Verified: worksheets + slides resolve, screenshot field present, teacher notes present, levels slice.
 - [ ] Throwaway scripts deleted; nothing from `TeachComputing/` committed.
+
+---
+
+## Appendix — worked example: the Y7 micro:bit pilot alignment (§7a)
+
+**Lesson 1 — micro:bit countdown** (plan 1209)
+
+| Objective | Slide | Worksheet question |
+|---|---|---|
+| name a micro:bit input | S2 starter | starter: "input / not an input" (×3, Support recall, Challenge: v2-only) |
+| explain iteration (a loop) | S3 predict, S5 for-loop | activity: Support word-choice, Core "what does iteration mean / why a start value" |
+| change a loop to count down | S4 | activity: Predict (the count-up code) → then *show your work* (the count-down artefact) |
+| make a countdown program | S5–S6 | activity: *Show your work* (MakeCode link + screenshot) + ✅ checklist |
+
+**Lesson 2 — basketball throw strength** (plan 1210)
+
+| Objective | Slide | Worksheet question |
+|---|---|---|
+| explain what a function is | S3 | activity: Support "a function is / runs when", Challenge "why more efficient" |
+| read accelerometer (strength) data | S4 | activity: Core "what does the accelerometer measure" |
+| log and show data | S4–S5 | activity: Core "why do we log", *My data* (strongest value) |
+| measure the strength of a throw | S5–S6 | activity: *My data* + *Show your work* + ✅ checklist |
+
+**Defect found & fixed in this check:** L1 starter "*which of these are inputs?*" was multi-correct on a
+single-radio control (unanswerable) → reframed to three single-radio *input / not an input* rows; the missing
+**multi-select** type logged at WORKSHEET_QUESTION_TYPES.md §2.1. L2 had no type/alignment defects.
