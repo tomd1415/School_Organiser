@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentStagePerStrand, overallRollUp, suggestEvidence, type ProgCriterion } from '../src/services/progression';
+import { currentStagePerStrand, overallRollUp, placedPerStrand, suggestEvidence, type ProgCriterion } from '../src/services/progression';
 
 // 16A.1 — the pure Stages & strands roll-up. A criterion is reached when evidenced; a stage is reached for
 // a strand when ALL its criteria are; the current stage is the top of the contiguous completed run.
@@ -103,5 +103,16 @@ describe('suggestEvidence (16A.4 — auto-suggest from mastered spec points)', (
   it('dedupes a criterion linked to several mastered spec points', () => {
     const multi = [{ criterionId: 20, specPointId: 1 }, { criterionId: 20, specPointId: 2 }];
     expect(suggestEvidence(new Set([1, 2]), multi, new Set())).toEqual([20]);
+  });
+});
+
+describe('placedPerStrand (16A.8 — per-unit stage placement record)', () => {
+  const unit: ProgCriterion[] = [
+    { id: 1, stageOrdinal: 12, strandId: 7 }, { id: 2, stageOrdinal: 12, strandId: 7 },
+    { id: 3, stageOrdinal: 12, strandId: 8 },
+  ];
+  it('reshapes the roll-up into {strandId: ordinal|null}', () => {
+    expect(placedPerStrand(unit, new Set([1, 2, 3]))).toEqual({ 7: 12, 8: 12 });
+    expect(placedPerStrand(unit, new Set([1, 3]))).toEqual({ 7: null, 8: 12 }); // strand 7 incomplete
   });
 });

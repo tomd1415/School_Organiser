@@ -75,6 +75,17 @@ export function suggestEvidence(
   return out;
 }
 
+/**
+ * 16A.8 — the per-strand stage placement an end-of-unit assessment yields, as a {strandId: stageOrdinal}
+ * record for `pupil_unit_placement.placed_per_strand`. Just `currentStagePerStrand` reshaped — the same
+ * "all criteria for a stage met" rule, over the unit's band of criteria.
+ */
+export function placedPerStrand(criteria: ProgCriterion[], evidenced: ReadonlySet<number>): Record<number, number | null> {
+  const out: Record<number, number | null> = {};
+  for (const ps of currentStagePerStrand(criteria, evidenced)) out[ps.strandId] = ps.stageOrdinal;
+  return out;
+}
+
 export interface OverallRollUp {
   overallOrdinal: number | null;
   source: 'computed' | 'year_assessment';

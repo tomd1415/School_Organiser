@@ -354,6 +354,76 @@ export async function coursesForScheme(schemeId: number): Promise<CourseRef[]> {
   return rows;
 }
 
+// ── 16A.8: assessments as stage evidence (direct question→criterion tags + per-unit placement) ──────────
+
+/** Tag an assessment question to the stage criterion it evidences (the direct path, vs prog_spec_links). */
+export async function tagQuestionCriterion(questionId: number, criterionId: number): Promise<void> {
+  await pool.query(`INSERT INTO assessment_question_criteria (question_id, criterion_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [questionId, criterionId]);
+}
+
+export async function untagQuestionCriterion(questionId: number, criterionId: number): Promise<void> {
+  await pool.query(`DELETE FROM assessment_question_criteria WHERE question_id = $1 AND criterion_id = $2`, [questionId, criterionId]);
+}
+
+/**
+ * Criteria a pupil EVIDENCED in one attempt: those tagged to questions the pupil scored ≥ threshold on
+ * (sum of the question's parts' awarded ÷ total). The deterministic "marks → stage evidence" path that
+ * turns an end-of-unit paper into per-criterion ticks. Excludes nothing about test attempts here — the
+ * caller passes a real attempt id.
+ */
+export async function criteriaEvidencedByAttempt(attemptId: number, thresholdPct = 70): Promise<Set<number>> {
+  const { rows } = await pool.query<{ criterion_id: number }>(
+    `SELECT aqc.criterion_id
+     FROM assessment_question_criteria aqc
+     JOIN assessment_question_parts p ON p.question_id = aqc.question_id
+     JOIN assessment_answers ans ON ans.part_id = p.id AND ans.attempt_id = $1
+     LEFT JOIN assessment_awarded_marks am ON am.answer_id = ans.id
+     GROUP BY aqc.criterion_id
+     HAVING sum(p.marks) > 0 AND (100.0 * sum(coalesce(am.marks_awarded, 0)) / sum(p.marks)) >= $2`,
+    [attemptId, thresholdPct],
+  );
+  return new Set(rows.map((r) => Number(r.criterion_id)));
+}
+
+/** The criteria of a unit (its stage × strand band) — input to a per-unit placement computation. */
+export async function criteriaForUnit(unitId: number): Promise<ProgCriterion[]> {
+  const { rows } = await pool.query<{ id: number; stageOrdinal: number; strandId: number }>(
+    `SELECT c.id, st.ordinal AS "stageOrdinal", c.strand_id AS "strandId"
+     FROM prog_criteria c
+     JOIN prog_lessons l ON l.id = c.lesson_id
+     JOIN prog_stages  st ON st.id = c.stage_id
+     WHERE l.unit_id = $1`,
+    [unitId],
+  );
+  return rows;
+}
+
+/** Record the per-strand stage an end-of-unit assessment placed a pupil at (one row per pupil+unit). */
+export async function recordUnitPlacement(input: {
+  pupilId: number;
+  unitId: number;
+  assessmentId?: number | null;
+  individualised?: boolean;
+  placedPerStrand: Record<number, number | null>;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO pupil_unit_placement (pupil_id, unit_id, assessment_id, individualised, placed_per_strand)
+     VALUES ($1,$2,$3,$4,$5::jsonb)
+     ON CONFLICT (pupil_id, unit_id)
+       DO UPDATE SET assessment_id = EXCLUDED.assessment_id, individualised = EXCLUDED.individualised,
+                     placed_per_strand = EXCLUDED.placed_per_strand, taken_at = now()`,
+    [input.pupilId, input.unitId, input.assessmentId ?? null, input.individualised ?? false, JSON.stringify(input.placedPerStrand)],
+  );
+}
+
+export async function getUnitPlacement(pupilId: number, unitId: number): Promise<{ placedPerStrand: Record<number, number | null>; individualised: boolean } | null> {
+  const { rows } = await pool.query<{ placed_per_strand: Record<number, number | null>; individualised: boolean }>(
+    `SELECT placed_per_strand, individualised FROM pupil_unit_placement WHERE pupil_id = $1 AND unit_id = $2`,
+    [pupilId, unitId],
+  );
+  return rows[0] ? { placedPerStrand: rows[0].placed_per_strand, individualised: rows[0].individualised } : null;
+}
+
 export interface SchemeCriterionWithLinks {
   id: number;
   descriptor: string;
