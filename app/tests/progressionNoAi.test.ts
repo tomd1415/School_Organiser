@@ -11,7 +11,9 @@ const SRC = join(__dirname, '..', 'src');
 const FILES = [
   'services/progression.ts',
   'services/progressionParse.ts',
+  'services/baseline.ts',
   'repos/progression.ts',
+  'repos/baseline.ts',
   'routes/progression.ts',
   'lib/progressionView.ts',
 ];
