@@ -63,7 +63,7 @@ async function docsSection(courseId: number): Promise<string> {
       <select name="role">${roleOpts}</select>
       <input type="text" name="title" placeholder="title… e.g. OCR J277 specification" required maxlength="200">
       <input type="file" name="file" accept=".pdf,.docx,.doc,.txt,.md,.odt,.rtf,.pptx" required>
-      <button type="submit" class="btn-secondary">Upload &amp; extract</button>
+      <button type="submit" class="primary">Upload &amp; extract</button>
     </form>
     ${renderDocList(await listCourseDocs(courseId))}
   </div>`;
@@ -134,7 +134,7 @@ function renderSuggestions(courseId: number, suggestions: CoverageSuggestion[]):
     <p class="muted">Suggested mappings — untick any that are wrong, then apply:</p>
     ${rows}
     ${news}
-    ${applicable.length ? '<div class="note-modal-actions"><button type="submit" class="btn-secondary">Apply ticked ✓</button></div>' : ''}
+    ${applicable.length ? '<div class="note-modal-actions"><button type="submit" class="primary">Apply ticked ✓</button></div>' : ''}
   </form>`;
 }
 
@@ -166,7 +166,7 @@ export function registerCoverageRoutes(app: FastifyInstance): void {
             <form hx-post="/coverage/import" hx-target="#cov-body" hx-swap="outerHTML">
               <input type="hidden" name="course" value="${courseId}">
               <textarea name="text" rows="6" placeholder="One per line, e.g.&#10;1.1.1 The purpose of the CPU&#10;1.1.2 Von Neumann architecture&#10;1.2 Memory and storage"></textarea>
-              <button type="submit" class="btn-secondary">Import</button>
+              <button type="submit" class="primary">Import</button>
             </form>
             <p class="muted">Re-importing updates titles and order without duplicating (matched by code). A line keeps its code (e.g. <code>1.1.1</code>) if it has one.</p>
           </details>

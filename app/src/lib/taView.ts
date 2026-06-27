@@ -70,7 +70,7 @@ export function renderLessonBlock(
             <label class="adapt-l">How were the pupils?<textarea name="pupils" rows="2" placeholder="settled after the starter, two needed movement breaks…"></textarea></label>
             <label class="adapt-l">Thoughts on the lesson<textarea name="lesson" rows="2" placeholder="the card sort worked well; the typing task ran long…"></textarea></label>
             <label class="ta-sg"><input type="checkbox" name="safeguarding" value="true"> safeguarding concern (also tell the teacher in person — flagged items are kept out of AI)</label>
-            <button type="submit" class="btn-secondary">Send feedback</button>
+            <button type="submit" class="primary">Send feedback</button>
           </form>
         </div>
       </section>`);

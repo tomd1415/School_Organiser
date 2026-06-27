@@ -33,7 +33,7 @@ function renderConfirm(text: string, destinations: NoteDestination[]): string {
     <p class="muted">I'll file this in ${destinations.length} place${destinations.length === 1 ? '' : 's'} — untick anything you don't want:</p>
     ${cards}
     <div class="note-modal-actions">
-      <button type="submit" class="btn-secondary">Create ✓</button>
+      <button type="submit" class="primary">Create ✓</button>
       <button type="button" class="link" hx-post="/note/route/plain" hx-vals='${esc(JSON.stringify({ text }))}' hx-target="#note-modal-body" hx-swap="innerHTML">just add to general notes instead</button>
     </div>
   </form>`;

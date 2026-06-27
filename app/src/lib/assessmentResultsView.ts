@@ -36,7 +36,7 @@ export function renderReleaseSection(d: ReleaseSectionData): string {
           const btn =
             a.resultsMode === 'instant'
               ? '<span class="muted">shown as marks are confirmed</span>'
-              : `<button type="submit" class="btn-secondary">${released ? 'Un-release' : 'Release results'}</button>`;
+              : `<button type="submit" class="primary">${released ? 'Un-release' : 'Release results'}</button>`;
           return `<form class="asmt-rel-row" hx-post="${paths.assessmentRelease(d.assessmentId, a.groupCourseId)}" hx-target="#asmt-release" hx-swap="outerHTML">
             <input type="hidden" name="released" value="${released ? 'false' : 'true'}">
             <span><strong>${name}</strong> ${mode} ${released ? '<span class="badge good">released</span>' : '<span class="badge warn">held</span>'}</span>

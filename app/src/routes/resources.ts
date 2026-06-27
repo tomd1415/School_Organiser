@@ -104,7 +104,7 @@ function renderEditor(id: number, r: { title: string; kind: string; versionNo: n
         <div id="md-prev" class="md-edit-preview">${previewForKind(r.kind, r.title, text)}</div>
       </div>
       <div class="md-edit-actions">
-        <button type="submit" class="btn">💾 Save new version</button>
+        <button type="submit" class="btn primary">💾 Save new version</button>
         <span id="edit-status" class="note-status" aria-live="polite"></span>
         <span class="muted edit-hint">Edits are saved as a new version — the old one is kept.</span>
       </div>
@@ -211,7 +211,7 @@ function renderReview(result: ExtractResult, unitMeta: Map<string, UnitMeta>, ti
       <input type="hidden" name="count" value="${fi}">
       ${groupsHtml}
       <label class="imp-attrib"><input type="checkbox" name="tc_ogl" value="1"> These are <strong>Teach Computing Curriculum</strong> resources — add the Open Government Licence credit to each (required when reusing them).</label>
-      <p class="imp-actions"><button type="submit" class="btn-secondary">Import ticked files →</button>
+      <p class="imp-actions"><button type="submit" class="primary">Import ticked files →</button>
       <button type="button" class="link" hx-post="/resources/import/${result.batchId}/cancel" hx-target="closest section" hx-swap="outerHTML">cancel</button></p>
     </form>
   </section>`;
@@ -258,7 +258,7 @@ export function registerResourceRoutes(app: FastifyInstance): void {
       <form class="setup-add imp-upload" hx-post="/resources/import" hx-encoding="multipart/form-data" hx-target="closest section" hx-swap="outerHTML" hx-disabled-elt="find button">
         <label class="imp-pick">📁 A whole folder<br><input type="file" name="folder" webkitdirectory directory multiple></label>
         <label class="imp-pick">🗜️ …or a single .zip<br><input type="file" name="archive" accept=".zip,application/zip"></label>
-        <button type="submit" class="btn-secondary">Upload &amp; review →</button>
+        <button type="submit" class="primary">Upload &amp; review →</button>
       </form>
       <p class="muted imp-limit">Maximum upload size: <strong>500 MB per file</strong>, and about <strong>400 MB or 3,000 files</strong> per import (larger uploads are capped — import in batches).</p>
     </section>`;

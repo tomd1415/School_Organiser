@@ -193,7 +193,7 @@ export function registerPupilRoutes(app: FastifyInstance): void {
               pupils and classes are matched by name, never duplicated. Names stay local; nothing is sent anywhere.</p>
             <form hx-post="/pupils/import" hx-target="#mis-result" hx-swap="innerHTML">
               <textarea name="csv" rows="6" placeholder="Name,Class&#10;Alex Smith,8B&#10;Sam Jones,8B" style="width:100%"></textarea>
-              <button type="submit" class="btn-secondary">Import</button>
+              <button type="submit" class="primary">Import</button>
             </form>
             <div id="mis-result"></div>
           </details>

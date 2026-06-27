@@ -98,7 +98,7 @@ export function renderKitPage(options: KitPageOptions): string {
           <p class="muted">Paste a CSV with a <strong>name</strong> column (optionally category, total, working, location, notes, tags). Existing items are matched by name and updated — re-importing never duplicates.</p>
           <textarea name="csv" rows="5" placeholder="name,category,total,working,location&#10;micro:bit v2,physical-computing,16,14,cupboard B" style="width: 100%; box-sizing: border-box;"></textarea>
           <div style="margin-top: 10px;">
-            <button type="submit" class="btn-secondary">Import</button>
+            <button type="submit" class="primary">Import</button>
           </div>
         </form>
         ${importStatus}

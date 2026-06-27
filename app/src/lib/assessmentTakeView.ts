@@ -84,7 +84,7 @@ export function renderTakePage(paper: TakePaper, answers: Map<number, string>): 
     </div>
     ${questions}
     <form class="asmt-take-submit" hx-post="${paths.meAssessmentSubmit(paper.id)}" hx-target="#asmt-take-root" hx-swap="innerHTML" hx-confirm="Submit your answers? You can’t change them after this.">
-      <button type="submit" class="pupil-go">Submit my answers ✓</button>
+      <button type="submit" class="pupil-go primary">Submit my answers ✓</button>
     </form>
   </section>`;
 }

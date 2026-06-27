@@ -33,7 +33,7 @@ export function renderTasksPage(options: TasksPageOptions): string {
         <summary>✉ Paste an email</summary>
         <form hx-post="${paths.tasksPaste()}" hx-target="#tasks-list-inbox" hx-swap="beforeend" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
           <textarea name="email" rows="5" placeholder="Paste the email — its Subject (or first line) becomes the task title…"></textarea>
-          <div style="margin-top: 10px;"><button type="submit" class="btn-secondary">Make task</button></div>
+          <div style="margin-top: 10px;"><button type="submit" class="primary">Make task</button></div>
         </form>
       </details>`
     : '';

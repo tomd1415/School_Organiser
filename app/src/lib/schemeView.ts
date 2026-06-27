@@ -218,7 +218,7 @@ export function renderLayForm(unitId: number, slots: CourseSlot[], lessonCount: 
   return `<form class="lay-form" hx-post="${paths.schemesUnitLayDown(unitId)}" hx-target="#unit-${unitId}-lay-result" hx-swap="innerHTML" hx-disabled-elt="find button">
       <label>Group &amp; weekly slot<select name="slot">${opts}</select></label>
       <label>Start from<input type="date" name="start" value="${esc(defaultStart)}"></label>
-      <button type="submit" class="btn-secondary">Lay down ${lessonCount} lesson${lessonCount === 1 ? '' : 's'} →</button>
+      <button type="submit" class="primary">Lay down ${lessonCount} lesson${lessonCount === 1 ? '' : 's'} →</button>
       <p class="muted lay-note">Binds each lesson to that slot's upcoming weeks, skipping holidays. Re-laying overwrites those weeks.</p>
     </form>
     <div id="unit-${unitId}-lay-result"></div>`;
@@ -304,7 +304,7 @@ export function renderConvertPanel(courseId: number, slots: CourseSlot[], defaul
         <label>…and lay into<select name="assign_slot">${slotOpts}</select></label>
         <label>starting from<input type="date" name="assign_start" value="${esc(defaultStart)}"></label>
       </div>
-      <button type="submit" class="btn-secondary">✨ Convert the selected unit (AI)</button>
+      <button type="submit" class="primary">✨ Convert the selected unit (AI)</button>
       <p class="muted lay-note">Adds the adapted lessons as a new unit on this course's scheme — the downloaded files are untouched and get linked as sources. If a slot is chosen, the lessons are laid into its upcoming weeks (holidays skipped) and you land on the Map to review.</p>
     </form>
   </details>`;
@@ -334,7 +334,7 @@ export function renderSchemeEmpty(courseId: number, error?: string, courseName?:
       <label>Author a scheme of work${forCourse} with AI — describe the aims, topics and level
         <textarea name="brief" rows="4" required placeholder="e.g. A KS3 scheme on using computers effectively in school: logging in and file management, online safety, word processing, spreadsheets, presentations, and finding and evaluating information…"></textarea>
       </label>
-      <button type="submit" class="btn-secondary">✨ Author scheme with AI</button>
+      <button type="submit" class="primary">✨ Author scheme with AI</button>
       <span class="muted scheme-author-hint">a full scheme can take ~20s</span>
     </form>
     <p class="muted">…or <button type="button" class="link" hx-post="${paths.schemesCreate(courseId)}">create an empty one</button> to build by hand.</p>
@@ -566,7 +566,7 @@ export function renderSchemesNext(data: SchemesNextData): string {
         <form hx-post="${paths.schemesImport()}" hx-target="#scheme-import-result" hx-swap="innerHTML">
           <input type="hidden" name="course" value="${courseId}">
           <textarea name="json" rows="5" placeholder='{"version":1,"schemeTitle":"…","units":[…]}' style="width:100%"></textarea>
-          <button type="submit" class="btn-secondary">Import scheme</button>
+          <button type="submit" class="primary">Import scheme</button>
         </form>
         <div id="scheme-import-result"></div>
       </details>

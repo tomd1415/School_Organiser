@@ -54,7 +54,7 @@ function identityForm(csrf: string, error?: string): string {
           <label>School name <input type="text" name="school" required maxlength="200"></label>
           <label>Choose a password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
           <label>…and again <input type="password" name="password2" required minlength="8" autocomplete="new-password"></label>
-          <button type="submit">Create my instance →</button>
+          <button type="submit" class="primary">Create my instance →</button>
         </form>
       </section>`,
   });
@@ -96,7 +96,7 @@ export function registerWelcomeRoutes(app: FastifyInstance): void {
             ? '<p class="muted">Setup is marked complete — this page stays available from the Setup tab.</p>'
             : `<form method="post" action="/welcome/finish">
                 <input type="hidden" name="_csrf" value="${csrf}">
-                <button type="submit" ${coreDone ? '' : 'disabled title="finish steps 1–7 first"'}>Finish setup → go to the Now screen</button>
+                <button type="submit" class="primary" ${coreDone ? '' : 'disabled title="finish steps 1–7 first"'}>Finish setup → go to the Now screen</button>
               </form>`
         }
       </section>`;

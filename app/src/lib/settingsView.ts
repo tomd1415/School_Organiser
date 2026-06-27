@@ -144,7 +144,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
         "⚙ Setup &amp; admin" menu. Default: Now, Focus, Timetable, Tasks, Captured.</p>
       <form class="setup-add nav-config" hx-post="${paths.settingsNav()}" hx-target="#nav-status" hx-swap="innerHTML">
         ${NAV_MODEL.map((i) => `<label class="nav-config-item"><input type="checkbox" name="daily" value="${esc(i.href)}"${navDailySet.has(i.href) ? ' checked' : ''}> ${esc(i.label)}</label>`).join('')}
-        <button type="submit" class="btn-secondary">Save navigation</button>
+        <button type="submit" class="primary">Save navigation</button>
         <span class="note-status" id="nav-status"></span>
       </form>
 
@@ -160,7 +160,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
               <input type="password" name="current" placeholder="current password" required autocomplete="current-password">
               <input type="password" name="next" placeholder="new password (8+)" required minlength="8" autocomplete="new-password">
               <input type="password" name="next2" placeholder="new password again" required autocomplete="new-password">
-              <button type="submit" class="btn-secondary">Change password</button>
+              <button type="submit" class="primary">Change password</button>
             </form><div id="pw-result"></div>`
       }
       <div class="setup-add">
@@ -182,7 +182,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
           ? '<p class="muted">The API key is managed by <code>ANTHROPIC_API_KEY</code> in this instance\'s <code>.env</code>. Remove that variable to set the key here instead.</p>'
           : `<form class="setup-add" hx-post="${paths.settingsAiKey()}" hx-target="#ai-key-result" hx-swap="innerHTML" hx-on::after-request="if(window.htmxSaved(event))this.reset()">
               <input type="password" name="key" placeholder="${aiKeyFromSettings ? 'replace stored Anthropic API key' : 'paste your Anthropic API key (sk-ant-…)'}" autocomplete="off">
-              <button type="submit" class="btn-secondary">${aiKeyFromSettings ? 'Update key' : 'Save key'}</button>
+              <button type="submit" class="primary">${aiKeyFromSettings ? 'Update key' : 'Save key'}</button>
               ${aiKeyFromSettings ? '<button type="submit" class="link danger" name="clear" value="1" formnovalidate>remove key</button>' : ''}
             </form>
             <p class="muted">Stored in this instance's database (LAN-only), like the email password. Get a key from <code>console.anthropic.com</code>.</p>
@@ -251,7 +251,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
           ${staffRows.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
         </select>
         <input type="password" name="password" placeholder="their password (8+)" minlength="8" required autocomplete="new-password">
-        <button type="submit" class="btn-secondary">Add TA account</button>
+        <button type="submit" class="primary">Add TA account</button>
       </form>
       <div id="ta-pw-result">${
         taLegacy && taLegacy.trim() !== ''
@@ -280,7 +280,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
                     hx-on::after-request="if(event.detail.successful)location.reload()">
                 <input type="hidden" name="enable" value="true">
                 <label><input type="checkbox" name="ack" value="yes" required> the DPIA has been signed off by the DPO and SLT</label>
-                <button type="submit" class="btn-secondary">Enable pupil access</button>
+                <button type="submit" class="primary">Enable pupil access</button>
               </form>
               <div id="pupil-access-result"></div>
             </div>`
@@ -313,7 +313,7 @@ export function renderSettingsPage(options: SettingsPageOptions): string {
                     hx-on::after-request="if(event.detail.successful)location.reload()">
                 <input type="hidden" name="enable" value="true">
                 <label><input type="checkbox" name="ack" value="yes" required> the DPIA addendum has been signed off by the DPO and SLT</label>
-                <button type="submit" class="btn-secondary">Enable auto-marking</button>
+                <button type="submit" class="primary">Enable auto-marking</button>
               </form>
               <div id="marks-access-result"></div>
             </div>`

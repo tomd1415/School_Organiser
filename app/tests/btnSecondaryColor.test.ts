@@ -10,6 +10,25 @@ import { join } from 'node:path';
 // and the Schemes convert/lay-down/author/import buttons. Guard the cascade fix.
 const styles = readFileSync(join(__dirname, '..', 'public', 'styles.css'), 'utf8');
 
+describe('dark-shell button contract (15.1 — teal fill is scoped to explicit .primary intent)', () => {
+  it('does NOT force-fill a bare button[type="submit"] teal (the latent cascade bug)', () => {
+    // The principled inversion: a button is primary only when it says so (.primary/.btn-primary), never
+    // by being a submit. So the blanket shell-scoped selectors must be gone.
+    expect(styles).not.toContain('body[data-shell="next"] button[type="submit"] {');
+    expect(styles).not.toContain('body[data-shell="next"] button[type="submit"]:hover');
+  });
+
+  it('the teal CTA fill rule lists only explicit .primary selectors', () => {
+    const primaryFill =
+      styles.match(
+        /body\[data-shell="next"\] \.button\.primary,[\s\S]*?background: var\(--teal\) !important;[\s\S]*?\}/,
+      )?.[0] ?? '';
+    expect(primaryFill, 'the primary teal-fill rule must exist').toContain('background: var(--teal) !important');
+    // It must NOT scope teal onto bare submit buttons.
+    expect(primaryFill).not.toContain('button[type="submit"]');
+  });
+});
+
 describe('dark-shell secondary/ghost buttons stay readable', () => {
   // The override block that resets the fill to transparent for secondary/ghost/link buttons. We pin on the
   // whole rule so the test breaks if someone re-adds the transparent reset without the colour reset.

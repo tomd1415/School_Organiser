@@ -1457,10 +1457,14 @@ body[data-shell="next"] button:hover {
   border-color: var(--text);
 }
 
+/* The teal CTA fill is scoped to EXPLICIT intent only (15.1): a button is primary when it SAYS so
+   (.primary / .btn-primary), never merely by being a submit. The old blanket `button[type="submit"]`
+   here force-filled every submit teal, which made every secondary/ghost submit need a counter-rule and
+   re-bit as the 2026-06-27 invisible-button bug. With it gone, a bare submit takes the neutral default
+   `body[data-shell="next"] button` styling above; mark genuine single-action CTAs `.primary`. */
 body[data-shell="next"] .button.primary,
 body[data-shell="next"] .btn-primary,
-body[data-shell="next"] button.primary,
-body[data-shell="next"] button[type="submit"] {
+body[data-shell="next"] button.primary {
   color: #0b1320 !important;
   background: var(--teal) !important;
   border-color: var(--teal) !important;
@@ -1493,8 +1497,7 @@ body[data-shell="next"] .rail-exp .rail-exp-btn.is-on {
 
 body[data-shell="next"] .button.primary:hover,
 body[data-shell="next"] .btn-primary:hover,
-body[data-shell="next"] button.primary:hover,
-body[data-shell="next"] button[type="submit"]:hover {
+body[data-shell="next"] button.primary:hover {
   background: #7dffed !important;
   box-shadow: 0 0 12px rgba(93, 224, 208, 0.25) !important;
   border-color: #7dffed !important;
@@ -1505,16 +1508,13 @@ body[data-shell="next"] .btn-secondary,
 body[data-shell="next"] button.ghost,
 body[data-shell="next"] button.link {
   background: transparent !important;
-  /* A secondary/ghost button that is also type="submit" inherited the full primary treatment from the
-     blanket button[type="submit"] rule above (line ~1463): dark ink (#0b1320), teal fill AND a teal
-     border. With the fill now transparent the dark text is invisible on the dark surface, and the teal
-     border makes it read as a primary CTA. Reset ink to readable light text and the border to a neutral
-     line so these read as genuinely secondary. */
+  /* Secondary/ghost/link buttons read as genuinely secondary: transparent fill, readable light ink, a
+     neutral border. (Historically these also had to UNDO a blanket `button[type="submit"]` teal fill —
+     removed in 15.1 — but they keep their own explicit treatment so the contract is self-evident.) */
   color: var(--text) !important;
   border-color: var(--line-strong) !important;
 }
-/* …and don't let the primary :hover (line ~1497, button[type="submit"]:hover → teal fill) take over when
-   you hover a secondary/ghost submit button: keep the hover neutral too. */
+/* Keep the secondary/ghost hover neutral too (no teal CTA fill). */
 body[data-shell="next"] .button.ghost:hover,
 body[data-shell="next"] .btn-secondary:hover,
 body[data-shell="next"] button.ghost:hover,

@@ -622,7 +622,7 @@ export function renderNowNext(data: NowNextData): string {
         <span class="exp-nudge-text">✨ You've taught 20+ lessons — ready for the planning &amp; AI tools?</span>
         <form hx-post="${paths.settingsExperience()}" hx-swap="none" hx-on::after-request="if(event.detail.successful)location.reload()">
           <input type="hidden" name="experience" value="power">
-          <button type="submit" class="btn-secondary">Turn on advanced tools</button>
+          <button type="submit" class="primary">Turn on advanced tools</button>
         </form>
         <button type="button" class="link" hx-post="${paths.settingsExperienceNudgeDismiss()}" hx-target="#exp-nudge" hx-swap="outerHTML">not now</button>
       </div>`

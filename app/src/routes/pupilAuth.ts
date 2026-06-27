@@ -108,7 +108,7 @@ function codeForm(csrf: string, note?: string): string {
       <label class="pupil-label">Class code
         <input name="code" class="pupil-code" autocomplete="off" autocapitalize="characters" autofocus required placeholder="e.g. 8PFA-31">
       </label>
-      <button type="submit" class="pupil-go">Next →</button>
+      <button type="submit" class="pupil-go primary">Next →</button>
     </form>
   </section>`;
 }
@@ -135,7 +135,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
             `<section class="pupil-card"><h1>Continue as ${esc(who)} 👋</h1>
               <form hx-post="/pupil/resume" hx-target="#pupil-step" hx-swap="outerHTML">
                 <input type="hidden" name="_csrf" value="${esc(csrf)}">
-                <button type="submit" class="pupil-go" id="pupil-step">Continue →</button>
+                <button type="submit" class="pupil-go primary" id="pupil-step">Continue →</button>
               </form>
               <p><a class="link" href="/pupil/forget">Not me — someone else</a></p></section>`,
             csrf,
@@ -287,7 +287,7 @@ export function registerPupilAuthRoutes(app: FastifyInstance): void {
       <label class="pupil-label">Class code
         <input name="code" class="pupil-code" autocomplete="off" autocapitalize="characters" autofocus required placeholder="e.g. 8PFA-31">
       </label>
-      <button type="submit" class="pupil-go">Next →</button>
+      <button type="submit" class="pupil-go primary">Next →</button>
     </form>`);
   });
 }
@@ -309,7 +309,7 @@ function pinForm(csrf: string, pupilId: number, groupId: number, name: string, e
       <input type="hidden" name="pupil" value="${pupilId}">
       <input type="hidden" name="group" value="${groupId}">
       <input name="pin" class="pupil-pin" inputmode="numeric" autocomplete="off" pattern="[0-9]*" autofocus required placeholder="PIN">
-      <button type="submit" class="pupil-go">Go →</button>
+      <button type="submit" class="pupil-go primary">Go →</button>
       ${pinKeypad()}
     </form>
     <button type="button" class="link" hx-get="/pupil/restart" hx-target="#pupil-step" hx-swap="outerHTML">← not me</button>

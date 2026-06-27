@@ -61,7 +61,7 @@ async function tasksPanel(date: string, lesson: number): Promise<string> {
       <summary>＋ Add a task</summary>
       <form class="free-new" ${vals} hx-post="/free/new" hx-target="#free-tasks" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful)this.reset()">
         <input type="text" name="title" placeholder="New task for this period…" maxlength="200" required autocomplete="off">
-        <button type="submit" class="button small">Add</button>
+        <button type="submit" class="button small primary">Add</button>
       </form>
       <p class="muted">…or pull in an existing task:</p>
       ${pick}

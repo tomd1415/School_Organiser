@@ -23,7 +23,7 @@ export function renderItem(i: SafeguardingItem): string {
     <form class="sg-action" hx-post="${paths.safeguardingSource(i.sourceType, i.sourceId)}" hx-target="#${rowId(i)}" hx-swap="outerHTML">
       <select name="status">${sel(i.status === 'new' ? 'recorded' : i.status)}</select>
       <input type="text" name="note" maxlength="500" placeholder="what was done (e.g. spoke to DSL, logged on CPOMS)" value="${esc(i.actionNote)}">
-      <button type="submit" class="btn-secondary">Record</button>
+      <button type="submit" class="primary">Record</button>
     </form>
   </li>`;
 }

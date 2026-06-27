@@ -30,7 +30,7 @@ function loginPage(csrfToken: string, error?: string): string {
           <label>Password
             <input type="password" name="password" autocomplete="current-password" autofocus required>
           </label>
-          <button type="submit">Log in</button>
+          <button type="submit" class="primary">Log in</button>
         </form>
       </section>`,
   });

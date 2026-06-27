@@ -1182,7 +1182,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         <form hx-post="/lesson/group-context/${gc}/intake" hx-target="#group-ctx-frag-${gc}" hx-swap="outerHTML" hx-disabled-elt="find button"
           hx-confirm="Fill this class's context, ability and access from this description? It replaces the current values.">
           <textarea name="text" rows="5" placeholder="e.g. Year 9 set 3, 8 pupils. Covered binary and the CPU last term; found hexadecimal hard. Mostly Entry Level 3; a couple need larger font; short attention — keep tasks to ~10 min…"></textarea>
-          <button type="submit" class="btn-secondary">Process with AI</button>
+          <button type="submit" class="primary">Process with AI</button>
           <span class="note-status" id="intake-${gc}-status">${intakeStatus}</span>
         </form>
       </details>
@@ -1453,7 +1453,7 @@ export function registerLessonRoutes(app: FastifyInstance): void {
         <form hx-post="/lesson/plan/${lp}/apply-improvement" hx-target="closest .improve-prop" hx-swap="outerHTML">
           <textarea name="objectives" hidden>${esc(d.objectives)}</textarea>
           <textarea name="outline" hidden>${esc(d.outline)}</textarea>
-          <button type="submit" class="btn-secondary">⬆ Apply to master</button>
+          <button type="submit" class="primary">⬆ Apply to master</button>
           <button type="button" class="link" onclick="this.closest('.improve-prop').remove()">✕ discard</button>
         </form>
       </div>`);

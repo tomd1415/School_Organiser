@@ -102,7 +102,7 @@ export function nextShell({ title, body, authed = false, csrfToken, width }: Lay
         <textarea name="text" rows="4" placeholder="Jot anything — I'll work out where it goes…"></textarea>
         <label class="note-private"><input type="checkbox" name="private" value="on"> 🔒 keep private (safeguarding — don't send to AI)</label>
         <div class="note-modal-actions">
-          <button type="submit" class="btn-secondary">File it ✨</button>
+          <button type="submit" class="primary">File it ✨</button>
           <button type="button" class="link" hx-post="/note/route/plain" hx-include="#note-modal-form" hx-target="#note-modal-body" hx-swap="innerHTML">just add to notes</button>
         </div>
       </form>

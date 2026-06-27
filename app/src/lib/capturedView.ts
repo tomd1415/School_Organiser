@@ -32,7 +32,7 @@ export function renderCaptureBar(): string {
             hx-on::after-request="if(window.htmxSaved(event)){this.reset();this.querySelector('input').focus();}">
       <input class="capture-input" type="text" name="body" autocomplete="off" required
         placeholder="Tell me later… e.g. B14 projector being replaced over half term">
-      <button type="submit" class="button capture-go">Capture +</button>
+      <button type="submit" class="button capture-go primary">Capture +</button>
     </form>
     <p class="capture-help muted">One line is enough — it resurfaces on the day it matters. Re-file to change the category, make it a task, or archive. ⚑ Safeguarding stays out of AI entirely.</p>`;
 }

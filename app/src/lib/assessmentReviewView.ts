@@ -65,7 +65,7 @@ export function renderUnitAssessments(d: UnitAssessmentsData): string {
         </label>
         <label>Questions <input type="number" name="questionCount" min="1" max="40" placeholder="auto" inputmode="numeric"></label>
         <label>Total marks <input type="number" name="totalMarks" min="1" max="200" placeholder="auto" inputmode="numeric"></label>
-        <button type="submit" class="btn-secondary">✨ Generate assessment</button>
+        <button type="submit" class="primary">✨ Generate assessment</button>
       </form>
       <div id="gen-result" aria-live="polite"></div>`
     : '<p class="muted">No timetabled class teaches this course yet — add one to generate an assessment for it.</p>';
@@ -134,7 +134,7 @@ function assignRow(assessmentId: number, c: EligibleClass): string {
         <option value="instant"${mode === 'instant' ? ' selected' : ''}>instant</option>
       </select>
     </label>
-    <div class="asmt-assign-actions"><button type="submit" class="btn-secondary">${submitLabel}</button> ${unassign}</div>
+    <div class="asmt-assign-actions"><button type="submit" class="primary">${submitLabel}</button> ${unassign}</div>
   </form>`;
 }
 

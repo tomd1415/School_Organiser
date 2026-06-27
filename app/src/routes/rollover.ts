@@ -78,7 +78,7 @@ export function registerRolloverRoutes(app: FastifyInstance): void {
               <thead><tr><th>This year</th><th>New name in ${toName}</th><th></th><th>Courses</th></tr></thead>
               <tbody>${groupRows || '<tr><td colspan="4" class="muted">no active groups in the source year</td></tr>'}</tbody>
             </table></div>
-            ${groups.some((g) => !g.successorId) ? '<button type="submit" class="btn-secondary">Move the ticked classes up →</button>' : '<p class="muted">All classes are moved. ✓</p>'}
+            ${groups.some((g) => !g.successorId) ? '<button type="submit" class="primary">Move the ticked classes up →</button>' : '<p class="muted">All classes are moved. ✓</p>'}
           </form>
 
           <h2>3 · New intake &amp; pupil moves</h2>

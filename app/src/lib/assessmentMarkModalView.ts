@@ -32,7 +32,7 @@ function markRow(assessmentId: number, attemptId: number, r: MarkingRow): string
     ? `<form class="asmt-mark-controls" hx-post="${paths.assessmentMarkAnswer(assessmentId, attemptId, r.answerId)}" hx-target="#asmt-marking" hx-swap="outerHTML">
         <label class="asmt-mark-l">Mark <input type="number" name="marks" value="${r.marksAwarded ?? 0}" min="0" max="${r.partMarks}"> / ${r.partMarks}</label>
         <label class="asmt-mark-l asmt-mark-fb">Feedback <input type="text" name="feedback" value="${esc(r.feedback ?? '')}" maxlength="200"></label>
-        <button type="submit" class="btn-secondary">Save + confirm</button>
+        <button type="submit" class="primary">Save + confirm</button>
       </form>`
     : '';
   return `<div class="asmt-mark-part">

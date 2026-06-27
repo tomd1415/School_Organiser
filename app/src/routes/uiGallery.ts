@@ -92,6 +92,17 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         <span class="badge warn">badge · warn</span>
       </p>`;
 
+    // 15.1 — the dark-shell button contract, eyeballable in isolation: teal fill is scoped to explicit
+    // .primary intent; a bare submit and a .btn-secondary/.ghost/.link submit all read as readable,
+    // non-CTA chrome (no invisible dark-on-dark, no accidental teal CTA).
+    const buttonContract = `<form onsubmit="return false" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button type="submit" class="primary">Primary submit (CTA · teal)</button>
+        <button type="submit">Bare submit (neutral default)</button>
+        <button type="submit" class="btn-secondary">Secondary submit</button>
+        <button type="submit" class="button ghost">Ghost submit</button>
+        <button type="submit" class="link">Link submit</button>
+      </form>`;
+
     // The shared component vocabulary for the Rail & Stage rebuild (docs/new-ui). Build screens from these.
     const kitRow = (cap: string, html: string): string =>
       `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
@@ -133,6 +144,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         <code>docs/UI_SEPARATION_PLAN.md</code>.</p>
       ${item('Component kit (Rail & Stage rebuild)', 'The shared vocabulary every redesigned screen is built from — badges in the SPEC category tones (Logistics→teal · Pupil→amber · Admin→grey · Curriculum→green · Safeguarding→red), filter chips, segmented tabs, the pill+knob toggle, status dots, the saved affordance, stat grid, and tone-left-border cards.', componentKit)}
       ${item('Primitives', 'Shared chrome: card header (eyebrow + title + badge), buttons, links, badges.', primitives)}
+      ${item('Button contract (dark shell · 15.1)', 'Teal fill is scoped to explicit .primary intent — never a bare button[type="submit"]. A bare submit takes the neutral default; .btn-secondary/.ghost/.link submits stay readable and non-CTA. (Was: a blanket button[type="submit"] rule force-filled every submit teal, the root of the invisible-button cascade bug.)', buttonContract)}
       ${item('Slide deck', 'renderPslide via renderSlideDeck — one per-slide renderer shared by pupil / preview / presenter / board / cockpit (note the table + blockquote framing).', renderSlideDeck(SAMPLE_SLIDES_MD, 'gallery', 'core'))}
       ${item('Captured (SPEC §1)', 'renderCaptureBar + renderCapturedChips + renderCapturedList — the capture bar, category-filter chips with counts, and tone-left-border triage cards. The safeguarding-flagged card is withheld from AI and routes to the register (Open register), never "Make a task".', renderCaptureBar() + renderCapturedChips(GALLERY_CAPTURED_COUNTS, undefined) + renderCapturedList(GALLERY_CAPTURED, GALLERY_GROUPS))}
       ${item('Notes (SPEC §2)', 'renderNotesSearch + renderNotesChips + renderNotesGrid — a searchable knowledge-base grid; each card has a kind badge (by what it links to: Course green · Group teal · Pupil amber · General grey), the date, the editable body, and link chips. Pupil shown as a PUPIL_n token.', renderNotesSearch('', '') + renderNotesChips(GALLERY_NOTES_COUNTS, '', '') + renderNotesGrid(GALLERY_NOTES))}
