@@ -1,0 +1,89 @@
+{
+  "unitTitle": "Y8 Media — vector graphics (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Get into shapes — drawing and ordering vector shapes",
+      "objectives": "I can name vector graphics and the software used to make them\nI can use the shape tools to draw and change shapes\nI can change a shape's fill and outline\nI can move, rotate, and reorder shapes using z-order",
+      "outline": "Routine first (same every lesson). Vocabulary on board: vector · fill · stroke · rotate · z-order · handle · open source · cross-platform. TA: everyone has Inkscape open and a saved .svg. Read the 4 “I can…” aloud.\n1. (0–5) Starter — a picture made of shapes (the house image). Pupils TICK the shapes they see (multi-select, no writing).\n   • Support: tick-box choice.  • Core: estimate shapes in a robot.  • Challenge: a picture from only circles + triangles.\n2. (5–10) I-do — what is a vector graphic + the software (Inkscape logo). Plain meaning of open source / cross-platform.\n3. (10–25) You-do — draw shapes with the three tools (rectangle, ellipse, star/polygon). Worksheet label-a-diagram names the shapes; the order block sequences “draw then colour a shape”.\n   • Support: word-bank/tick.  • Core: name the shapes.  • Challenge: explorer task — what the handles do. Likely error: tool stays selected → fix-words “switch to the black arrow to select.” TA: prompt, do not do it for them.\n4. (25–40) Change fill and outline (Fill/Stroke tabs image). fill = inside colour, stroke = the edge line.\n   • Support: choose fill vs stroke.  • Core: explain z-order/handles.  • Challenge: change the dash style.\n5. (40–50) Move, rotate, and order — z-order (which shape is in front). Pupils save their .svg and screenshot it on the activity worksheet.\n6. (50–55) Plenary — self-tick the 4 “I can…”. Differentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Get into shapes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-get-into-shapes-starter-worksheet.md" },
+        { "title": "Get into shapes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-get-into-shapes-activity-worksheet.md" },
+        { "title": "Get into shapes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-get-into-shapes-slides.md" },
+        { "title": "a house built from simple shapes.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-shapes-house-teach-computing.png" },
+        { "title": "the Inkscape logo.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-inkscape-logo-teach-computing.png" },
+        { "title": "a square, ellipse and polygon.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-three-shapes-teach-computing.png" },
+        { "title": "shapes with different fills and outlines.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-fills-outlines-teach-computing.png" },
+        { "title": "the Fill and Stroke tabs.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-fill-stroke-tabs-teach-computing.png" }
+      ]
+    },
+    {
+      "title": "Working with multiple objects — align, group, combine",
+      "objectives": "I can select more than one object at once\nI can align and distribute objects to line them up\nI can group and ungroup objects to work with them together\nI can combine shapes using union, difference, and intersection",
+      "outline": "Routine first. Vocabulary on board: object · align · distribute · group · combine · union · difference · intersection. TA: Inkscape open, last lesson's skills recalled. Read the 4 “I can…” aloud.\n1. (0–5) Starter — stacks of shapes (a 3-stripe flag = rectangles). Pupils CHOOSE the count (no writing). Recap “object”.\n2. (5–10) I-do — why work with many objects (saves time, neat, move parts together).\n3. (10–20) You-do — align and distribute. Select-many first (rubber-band or Shift-click), then line up / space evenly.\n   • Support: choose what align/group do.  • Core: explain distribute.  • Challenge: reason about z-order. Likely error: only one object selected → fix-words “drag a box around them all first.”\n4. (20–30) Group and ungroup (grouped-objects image). A group can be ungrouped any time.\n5. (30–45) Combine — union/difference/intersection (the crescent image). The worksheet card-sort (group vs combine) and the matching grid (which combine does what). Combining makes ONE object that cannot be ungrouped. Pupils screenshot a result.\n6. (45–55) Plenary — hands-up: name what union/difference/intersection do; self-tick the 4 “I can…”. Same task, low floor/high ceiling; no flashing/sound; movement breaks routine. TA: prompt, do not do it for them.",
+      "resources": [
+        { "title": "Working with multiple objects — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-multiple-objects-starter-worksheet.md" },
+        { "title": "Working with multiple objects — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-multiple-objects-activity-worksheet.md" },
+        { "title": "Working with multiple objects — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-multiple-objects-slides.md" },
+        { "title": "two objects grouped and selected.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-grouped-objects-teach-computing.png" },
+        { "title": "a crescent made by difference.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-difference-crescent-teach-computing.png" }
+      ]
+    },
+    {
+      "title": "Paths — nodes, lines, and editing",
+      "objectives": "I can explain that vector graphics are made of paths and nodes\nI can draw and edit straight, curved, and freehand paths\nI can convert a shape into a path and edit its nodes\nI can use paths and shapes to make a superhero face",
+      "outline": "Routine first. Vocabulary on board: path · node · freehand · object · convert. TA: Inkscape open; exit-ticket slips ready for the plenary. Read the 4 “I can…” aloud.\n1. (0–5) Starter — combining shapes recap (the square+triangle set: union/difference/intersection results). Pupils CHOOSE which combine made each result (no writing).\n2. (5–10) I-do — what is a path (a route between points; nodes mark the start, end, and each turn).\n3. (10–25) You-do — draw straight, curved, and freehand paths; edit by dragging nodes. The worksheet order block sequences “draw a closed path”.\n   • Support: name node/path/freehand.  • Core: straight vs curved; why convert first.  • Challenge: what the curve handles do. Likely error: path not closed → fix-words “click back on the first node.”\n4. (25–35) Convert a shape to a path (Path ▷ Object to Path), then edit its nodes — make the head outline, send it to the back.\n5. (35–50) Make a superhero face (the worked-example image) using paths + converted shapes. Pupils save and screenshot it.\n6. (50–55) Plenary — exit ticket (one key word + meaning) collected for L4's starter; self-tick the 4 “I can…”. Same task, low floor/high ceiling; no flashing/sound. TA: prompt, do not draw it for them.",
+      "resources": [
+        { "title": "Paths — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-paths-starter-worksheet.md" },
+        { "title": "Paths — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-paths-activity-worksheet.md" },
+        { "title": "Paths — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-paths-slides.md" },
+        { "title": "two shapes to combine — a square and a triangle.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-combine-shapes-teach-computing.png" },
+        { "title": "combine result — union.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-combine-union-teach-computing.png" },
+        { "title": "combine result — difference.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-combine-difference-teach-computing.png" },
+        { "title": "combine result — intersection.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-combine-intersection-teach-computing.png" },
+        { "title": "a superhero face made from paths.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-superhero-face-teach-computing.png" }
+      ]
+    },
+    {
+      "title": "What will you make? — plan and create a vector project",
+      "objectives": "I can describe logos, icons, and illustrations\nI can choose a project and plan a design\nI can combine my tools and techniques to create a vector image\nI can evaluate my project against its purpose",
+      "outline": "Routine first. Vocabulary on board: logo · icon · illustration · plan · purpose · rubric. TA: pairs decided; activity sheet + rubric ready. Read the 4 “I can…” aloud.\n1. (0–5) Starter — exit tickets from L3. Pupils MATCH key words to meanings (no long writing). Agree / disagree / add.\n2. (5–10) I-do — logos, icons, illustrations (three example images). The worksheet card-sort groups examples into the three types.\n3. (10–25) Plan — choose a project (zoo icons / theme-park logo / book illustration); sketch a design idea; read the rubric (what is the purpose?).\n   • Support: choose what a logo/icon is.  • Core: state the purpose + one fitting feature.  • Challenge: why a vector suits “works large or small”; name two techniques to use.\n4. (25–50) Create — paired making in Inkscape using Lessons 1–3 skills. Apply a few skills well. Pupils screenshot progress.\n5. (50–55) Plenary — share with another pair (one easy, one tricky, one tip); confidence slider on the worksheet; self-tick the 4 “I can…”. Same task, low floor/high ceiling; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "What will you make — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-will-you-make-starter-worksheet.md" },
+        { "title": "What will you make — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-will-you-make-activity-worksheet.md" },
+        { "title": "What will you make — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-will-you-make-slides.md" },
+        { "title": "a logo — Treasure Island.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-logo-treasure-island-teach-computing.png" },
+        { "title": "an illustration — a whale.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-illustration-whale-teach-computing.png" },
+        { "title": "an icon — an elephant.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-icon-elephant-teach-computing.png" }
+      ]
+    },
+    {
+      "title": "Behind the scenes — how a vector is stored (SVG markup)",
+      "objectives": "I can explain that a vector is stored as markup (text)\nI can change an object by editing its markup\nI can explain what SVG and “scalable” mean\nI can plan and make improvements to my project",
+      "outline": "Routine first. Vocabulary on board: markup · scalable · SVG · path. TA: Inkscape open; projects from L4 ready. Read the 4 “I can…” aloud.\n1. (0–5) Starter — spot the difference: MATCH each rubric statement to icon/illustration/logo (no writing).\n2. (5–20) I-do — inside an SVG. A vector is stored as readable text (markup). Show <rect x y width height /> (the shapes image). x,y = position; width,height = size. The worksheet fill-in-the-blank captures this.\n   • Support: markup = text that describes the image; scalable = bigger/smaller without losing quality.  • Core: what SVG stands for; what x/y do.  • Challenge: edit markup to double a square (code answer); why vectors scale but photos blur.\n3. (20–25) Scalable — double the numbers, double the square. Because it is numbers, it scales perfectly.\n4. (25–30) Edit markup in Inkscape — change a value, the shape changes (draw a square, set 80×80, duplicate half-size and double-size).\n5. (30–50) Review + develop the project against the rubric and last lesson's feedback; pupils screenshot progress.\n6. (50–55) Plenary — two recall questions; self-tick the 4 “I can…”. Same task, low floor/high ceiling; no flashing/sound. TA: prompt, do not do it for them.",
+      "resources": [
+        { "title": "Behind the scenes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-starter-worksheet.md" },
+        { "title": "Behind the scenes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-activity-worksheet.md" },
+        { "title": "Behind the scenes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-slides.md" },
+        { "title": "shapes drawn from SVG markup.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-svg-shapes-teach-computing.png" }
+      ]
+    },
+    {
+      "title": "Showcase — vector vs bitmap, evaluate and share",
+      "objectives": "I can explain the key differences between vector and bitmap images\nI can say which image type suits which use\nI can evaluate my image against a rubric\nI can share a finished project",
+      "outline": "Routine first. Vocabulary on board: vector · bitmap · pixel · scalable. TA: rubric + finished projects ready. Read the 4 “I can…” aloud.\n1. (0–5) Starter — good, or could be better? Judge the Treasure Island logo against the rubric (CHOOSE yes/no + one improvement).\n2. (5–20) I-do — vectors vs bitmaps (clownfish vector vs photo; the pixels-zoom image). bitmap = pixels (fine detail, blurs when enlarged); vector = paths (stays sharp). Fonts are vectors.\n   • Support: what each is made of.  • Core: one difference; why fonts scale.  • Challenge: characteristics + SVG quiz; pick the right type for a scenario and justify.\n3. (20–25) Which type suits which use — the worksheet card-sort (vector-best vs bitmap-best). Some uses fit both.\n4. (25–45) Improve + evaluate — small final changes, then self/peer-assess against the rubric. Pupils screenshot the finished project.\n5. (45–50) Quick quiz — worksheet questions (or the source 14-question assessment for a formal mark). Confidence slider on the worksheet.\n6. (50–55) Showcase — share projects; what works well, what could improve; self-tick the 4 “I can…”. Same task, low floor/high ceiling; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Showcase — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-showcase-starter-worksheet.md" },
+        { "title": "Showcase — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-showcase-activity-worksheet.md" },
+        { "title": "Showcase — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-showcase-slides.md" },
+        { "title": "the Treasure Island logo.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-logo-treasure-island-teach-computing.png" },
+        { "title": "a vector graphic of a clownfish.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-vector-clownfish-teach-computing.png" },
+        { "title": "a photograph of a clownfish.jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-photo-clownfish-teach-computing.jpg" },
+        { "title": "a photo zoomed in to show pixels.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-bitmap-pixels-butterfly-teach-computing.png" }
+      ]
+    }
+  ]
+}
