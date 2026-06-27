@@ -143,6 +143,81 @@ export async function setOccurrenceCoursePlan(occurrenceCourseId: number, planId
   await db.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [occurrenceCourseId, planId]);
 }
 
+/**
+ * 15.4 — batched mirror of `findOrCreateOccurrence` + `getOccurrenceCourses` for a WHOLE change-set of
+ * one class, in a fixed number of set-based queries instead of ~4 per position (the planner cascade's
+ * N+1). Idempotent and additive, exactly like the per-position path: upsert the occurrences, create the
+ * occurrence_courses for active courses, materialise their prep, then resolve THIS class's
+ * occurrence_course id per position. Returns a map `${timetabledLessonId}#${date}` → occurrence_course id
+ * (positions the class no longer teaches are simply absent). No transaction — these writes are safe to
+ * repeat; the caller applies the plan bindings atomically afterwards.
+ */
+export async function ensureOccurrenceCoursesForClass(
+  groupCourseId: number,
+  positions: Array<{ timetabledLessonId: number; date: string }>,
+): Promise<Map<string, number>> {
+  const k = (tll: number, date: string): string => `${tll}#${date}`;
+  const seen = new Map<string, { tll: number; date: string }>();
+  for (const p of positions) seen.set(k(p.timetabledLessonId, p.date), { tll: p.timetabledLessonId, date: p.date });
+  const distinct = [...seen.values()];
+  if (!distinct.length) return new Map();
+  const tlls = distinct.map((d) => d.tll);
+  const dates = distinct.map((d) => d.date);
+
+  // 1) Upsert every occurrence in one query; RETURNING gives us each (tll,date) → occurrence id.
+  const occRes = await pool.query<{ id: number; tll: number; date: string }>(
+    `INSERT INTO lesson_occurrences (timetabled_lesson_id, date, is_test)
+     SELECT t.tll, t.d::date, false
+     FROM unnest($1::bigint[], $2::date[]) AS t(tll, d)
+     ON CONFLICT (timetabled_lesson_id, date, is_test)
+       DO UPDATE SET timetabled_lesson_id = EXCLUDED.timetabled_lesson_id
+     RETURNING id, timetabled_lesson_id AS tll, to_char(date, 'YYYY-MM-DD') AS date`,
+    [tlls, dates],
+  );
+  const occIds = occRes.rows.map((r) => r.id);
+  const occByPos = new Map<string, number>(occRes.rows.map((r) => [k(Number(r.tll), r.date), Number(r.id)]));
+
+  // 2) Create the occurrence_courses for every active course on those occurrences (idempotent).
+  await pool.query(
+    `INSERT INTO occurrence_courses (occurrence_id, group_course_id)
+     SELECT o.id, tlc.group_course_id
+     FROM lesson_occurrences o
+     JOIN timetabled_lesson_courses tlc ON tlc.timetabled_lesson_id = o.timetabled_lesson_id
+     JOIN group_courses gc ON gc.id = tlc.group_course_id
+     WHERE o.id = ANY($1::bigint[]) AND gc.active AND NOT o.is_test
+     ON CONFLICT (occurrence_id, group_course_id) DO NOTHING`,
+    [occIds],
+  );
+
+  // 3) Materialise the global prep checklist for any of those occurrences that has none yet (once each).
+  await pool.query(
+    `INSERT INTO occurrence_prep (occurrence_id, text, source, template_id)
+     SELECT o.id, pt.text, 'template', pt.id
+     FROM lesson_occurrences o
+     CROSS JOIN prep_templates pt
+     WHERE o.id = ANY($1::bigint[]) AND NOT o.is_test AND pt.active AND pt.scope = 'global'
+       AND NOT EXISTS (SELECT 1 FROM occurrence_prep op WHERE op.occurrence_id = o.id)`,
+    [occIds],
+  );
+
+  // 4) Resolve THIS class's occurrence_course id per occurrence, in one query.
+  const ocRes = await pool.query<{ occurrence_id: number; oc_id: number }>(
+    `SELECT oc.occurrence_id, oc.id AS oc_id
+     FROM occurrence_courses oc
+     JOIN lesson_occurrences o ON o.id = oc.occurrence_id
+     WHERE oc.occurrence_id = ANY($1::bigint[]) AND oc.group_course_id = $2 AND NOT o.is_test`,
+    [occIds, groupCourseId],
+  );
+  const ocByOcc = new Map<number, number>(ocRes.rows.map((r) => [Number(r.occurrence_id), Number(r.oc_id)]));
+
+  const out = new Map<string, number>();
+  for (const [pos, occId] of occByPos) {
+    const ocId = ocByOcc.get(occId);
+    if (ocId != null) out.set(pos, ocId);
+  }
+  return out;
+}
+
 /** The in-lesson marker: which step we're on, also written as the textual stopping point so the
  * existing "last time → resume" machinery picks it up unchanged. */
 export async function setOccurrenceProgress(occurrenceCourseId: number, step: number, label: string): Promise<void> {

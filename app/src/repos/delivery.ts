@@ -2,7 +2,7 @@
 // exists (timetabled_lesson_courses → group_courses); this binds a unit's lessons to the upcoming
 // dated occurrences of one slot, for one group_course.
 import { pool, withTransaction } from '../db/pool';
-import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
+import { ensureOccurrenceCoursesForClass, findOccurrence, findOrCreateOccurrence, getOccurrenceCourses, setOccurrenceCoursePlan } from './occurrence';
 import type { Placement } from '../services/delivery'; // pure type only — the cascade maths lives in the service
 
 export interface CourseSlot {
@@ -224,23 +224,32 @@ export async function setPlannerLock(groupCourseId: number, timetabledLessonId: 
  *  lock — so a cascade can never be left half-applied (a crash/error rolls the whole shift back), and two
  *  concurrent planner writes for the same class queue rather than interleave. */
 export async function applyPlacements(groupCourseId: number, changes: Placement[]): Promise<number> {
-  // Phase 1 (idempotent): ensure each target occurrence_course exists and resolve its id.
+  if (!changes.length) return 0;
+  // Phase 1 (idempotent, set-based — 15.4): create/resolve every target occurrence_course for the whole
+  // change-set in a fixed number of queries instead of ~4 per position (the old cascade N+1).
+  const ocByPos = await ensureOccurrenceCoursesForClass(
+    groupCourseId,
+    changes.map((c) => ({ timetabledLessonId: c.timetabledLessonId, date: c.date })),
+  );
   const updates: Array<{ ocId: number; planId: number | null }> = [];
   for (const c of changes) {
-    const occId = await findOrCreateOccurrence(c.timetabledLessonId, c.date);
-    const oc = (await getOccurrenceCourses(occId)).find((o) => Number(o.groupCourseId) === Number(groupCourseId));
-    if (!oc) continue; // that slot no longer teaches this class
-    updates.push({ ocId: oc.occurrenceCourseId, planId: c.lessonPlanId });
+    const ocId = ocByPos.get(`${c.timetabledLessonId}#${c.date}`);
+    if (ocId == null) continue; // that slot no longer teaches this class
+    updates.push({ ocId, planId: c.lessonPlanId });
   }
   if (!updates.length) return 0;
-  // Phase 2 (atomic): apply every binding change in one transaction.
+  // Phase 2 (atomic): apply every binding change in ONE transaction, serialised per class, as a single
+  // set-based UPDATE — so the whole cascade commits or rolls back together (BUG-021) in one round-trip.
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`planner:${groupCourseId}`]);
-    for (const u of updates) {
-      await client.query(`UPDATE occurrence_courses SET lesson_plan_id = $2 WHERE id = $1`, [u.ocId, u.planId]);
-    }
+    await client.query(
+      `UPDATE occurrence_courses oc SET lesson_plan_id = v.plan
+       FROM unnest($1::bigint[], $2::bigint[]) AS v(oc_id, plan)
+       WHERE oc.id = v.oc_id`,
+      [updates.map((u) => u.ocId), updates.map((u) => u.planId)],
+    );
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
