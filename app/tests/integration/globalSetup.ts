@@ -70,4 +70,28 @@ export async function setup(): Promise<void> {
     console.log('[integration] seeding progression schemes (year ladder + GCSE structure)…');
     runSeed('src/seed/progressionSeed.ts');
   }
+  // The activity-type catalogue (Phase 17.3) — tiny reference data, idempotent on code.
+  await seedActivityTypesOnce();
+}
+
+async function seedActivityTypesOnce(): Promise<void> {
+  // run inline (no subprocess needed) via a fresh client so it doesn't close the test pool
+  const { Client } = await import('pg');
+  const c = new Client({ connectionString: DATABASE_URL });
+  try {
+    await c.connect();
+    const mod = await import('../../src/services/referenceImport');
+    for (let i = 0; i < mod.ACTIVITY_TYPES.length; i++) {
+      const a = mod.ACTIVITY_TYPES[i]!;
+      await c.query(
+        `INSERT INTO activity_types (code, name, description, display_order) VALUES ($1,$2,$3,$4)
+         ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, display_order = EXCLUDED.display_order`,
+        [a.code, a.name, a.description, i],
+      );
+    }
+  } catch {
+    // table missing / DB down — tests will surface it
+  } finally {
+    await c.end().catch(() => {});
+  }
 }

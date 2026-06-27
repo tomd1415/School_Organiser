@@ -199,6 +199,7 @@ export async function disposePupil(id: number, mode: DisposalMode): Promise<Disp
       counts.yearAssessments = await rowsAffected(client, `DELETE FROM pupil_year_assessment WHERE pupil_id = $1`, [id]);
       counts.unitPlacements = await rowsAffected(client, `DELETE FROM pupil_unit_placement WHERE pupil_id = $1`, [id]);
       counts.baselines = await rowsAffected(client, `DELETE FROM pupil_baseline WHERE pupil_id = $1`, [id]);
+      counts.resourceEdits = await rowsAffected(client, `DELETE FROM pupil_resource_edits WHERE pupil_id = $1`, [id]);
       counts.deleted = await rowsAffected(client, `DELETE FROM pupils WHERE id = $1`, [id]); // CASCADE clears the rest
     }
 
