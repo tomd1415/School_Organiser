@@ -102,9 +102,9 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
   const ws = await getLessonWorksheet(oc.groupCourseId, oc.lessonPlanId);
   if (!ws) return { ok: false, message: 'No worksheet to build a scheme from.' };
   // Screenshot (image) fields aren't auto-marked — the teacher reviews them — so keep them out of the
-  // mark scheme. Parson's (parsons) carry their own correct order in the worksheet and are checked
-  // against it (in the marking modal), so they're left out of the AI scheme too.
-  const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => f.kind !== 'image' && f.kind !== 'parsons');
+  // mark scheme. Parson's (parsons) and plain-language sequences (order) carry their own correct order in
+  // the worksheet and are checked against it (in the marking modal), so they're left out of the AI scheme.
+  const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => f.kind !== 'image' && f.kind !== 'parsons' && f.kind !== 'order');
   if (fields.length === 0) return { ok: false, message: 'This worksheet has no answerable fields.' };
   const answersMd = await getLessonDocMarkdown(oc.groupCourseId, oc.lessonPlanId, 'answers');
 

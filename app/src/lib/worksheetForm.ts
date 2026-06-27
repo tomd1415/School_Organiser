@@ -14,13 +14,15 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image' | 'choice' | 'multichoice' | 'blank' | 'code' | 'parsons';
+  kind: 'text' | 'check' | 'image' | 'choice' | 'multichoice' | 'blank' | 'code' | 'parsons' | 'order' | 'sort' | 'label' | 'scale';
   level: BlockLevel;
   label: string;
-  options?: string[]; // choice fields only — the selectable options, in source order
-  // Parson's Problems only: the code lines in their CORRECT order. Used to mark the pupil's ordering
-  // and to show the model answer — never emitted into the form-mode HTML (it must not reveal the order).
+  options?: string[]; // choice/multichoice/sort/label fields — the selectable options/categories/labels, in source order
+  // Parson's (`parsons`) / sequence (`order`) only: the lines/steps in their CORRECT order. Used to mark the
+  // ordering and show the model answer — never emitted into the form-mode HTML (it must not reveal the order).
   solution?: string[];
+  // Slider (`scale`) only: the numeric range + optional end labels for the range input.
+  scale?: { min: number; max: number; minLabel?: string; maxLabel?: string };
 }
 
 export interface WorksheetRender {
@@ -549,23 +551,29 @@ function blankInput(key: string, opts: WorksheetOptions): string {
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
 }
 
-// ── Parson's Problems (P6 — program comprehension) ──────────────────────────────────────────────
-// A ```parsons fenced block lists the code lines in their CORRECT order; the pupil drags the jumbled
-// lines back into order. The solution never reaches form-mode HTML.
+// ── Ordering widgets: Parson's Problems (P6) + plain-language sequencing ─────────────────────────
+// A ```parsons fenced block lists CODE lines in correct order (the pupil drags the jumble back); a
+// ```order block does the same for plain-language STEPS/events (a packet's journey, the steps of an
+// algorithm). Same machinery, separate key namespace; the solution never reaches form-mode HTML.
 const PARSONS_FENCE = /^\s*(?:```|~~~)\s*parsons\b/i;
+const ORDER_FENCE = /^\s*(?:```|~~~)\s*order\b/i;
 const FENCE_ANY = /^\s*(?:```|~~~)/;
 
-/** Pull a ```parsons … ``` region out of an md block: prose before, the solution lines (correct
- * order), prose after. Null when there's no parsons fence. */
-function extractParsons(lines: string[]): { before: string[]; solution: string[]; after: string[] } | null {
+/** Pull a ```parsons / ```order region out of an md block: which tag, prose before, the solution lines
+ * (correct order), prose after. Null when neither fence is present. */
+function extractOrdering(lines: string[]): { tag: 'parsons' | 'order'; before: string[]; solution: string[]; after: string[] } | null {
   let open = -1;
-  for (let i = 0; i < lines.length; i++) if (PARSONS_FENCE.test(lines[i]!)) { open = i; break; }
-  if (open === -1) return null;
+  let tag: 'parsons' | 'order' | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (PARSONS_FENCE.test(lines[i]!)) { open = i; tag = 'parsons'; break; }
+    if (ORDER_FENCE.test(lines[i]!)) { open = i; tag = 'order'; break; }
+  }
+  if (open === -1 || tag === null) return null;
   let close = -1;
   for (let i = open + 1; i < lines.length; i++) if (FENCE_ANY.test(lines[i]!)) { close = i; break; }
   const end = close === -1 ? lines.length : close;
   const solution = lines.slice(open + 1, end).map((l) => l.replace(/\s+$/, '')).filter((l) => l.trim() !== '');
-  return { before: lines.slice(0, open), solution, after: close === -1 ? [] : lines.slice(close + 1) };
+  return { tag, before: lines.slice(0, open), solution, after: close === -1 ? [] : lines.slice(close + 1) };
 }
 
 /** A stable, NON-identity jumble: order lines by a hash of their text — the same on every render, yet
@@ -583,13 +591,16 @@ function parsonsLabel(before: string[]): string {
   return (txt[txt.length - 1] ?? 'Put the code lines in the correct order').slice(0, 200);
 }
 
-/** Render a Parson's Problem: jumbled draggable code lines (form/preview) or the pupil's order
- * (review). pupil.js wires drag + ▲▼ and autosaves the order (lines joined by "\n") to the field. */
-function parsonsControl(key: string, solution: string[], opts: WorksheetOptions): string {
+/** Render an ordering widget (Parson's code, or a plain-language sequence): jumbled draggable tiles
+ * (form/preview) or the pupil's order (review). `prose` ⇒ steps shown as plain text, else monospaced
+ * code. Reuses the `ws-parsons*` classes/keys so pupil.js wires drag + ▲▼ and autosaves the order
+ * (tiles joined by "\n") with NO client change. */
+function orderingControl(key: string, solution: string[], opts: WorksheetOptions, prose: boolean): string {
   const saved = (opts.values?.get(key) ?? '').split('\n').filter((l) => l.trim() !== '');
+  const tile = (l: string): string => (prose ? `<span class="ws-order-text">${esc(l)}</span>` : `<code>${esc(l)}</code>`);
   if (opts.mode === 'review') {
     return saved.length
-      ? `<ol class="ws-parsons ws-parsons-review">${saved.map((l) => `<li><code>${esc(l)}</code></li>`).join('')}</ol>`
+      ? `<ol class="ws-parsons ws-parsons-review">${saved.map((l) => `<li>${tile(l)}</li>`).join('')}</ol>`
       : `<div class="ws-answer ws-empty">— (not ordered yet)</div>`;
   }
   const display = saved.length ? saved : shuffleStable(solution); // the pupil's order, else a stable jumble — never the solution
@@ -598,13 +609,13 @@ function parsonsControl(key: string, solution: string[], opts: WorksheetOptions)
     .map(
       (l) =>
         `<li class="ws-parsons-line" ${inert ? 'aria-disabled="true"' : 'draggable="true" tabindex="0" role="button"'} data-line="${esc(l)}">` +
-        `<span class="ws-parsons-grip" aria-hidden="true">⋮⋮</span><code>${esc(l)}</code>` +
+        `<span class="ws-parsons-grip" aria-hidden="true">⋮⋮</span>${tile(l)}` +
         `${inert ? '' : '<span class="ws-parsons-btns"><button type="button" class="ws-parsons-up" aria-label="move up">▲</button><button type="button" class="ws-parsons-down" aria-label="move down">▼</button></span>'}</li>`,
     )
     .join('');
-  const help = inert ? '' : '<p class="ws-parsons-help">Drag the lines into the right order — or use ▲ ▼.</p>';
+  const help = inert ? '' : `<p class="ws-parsons-help">Drag the ${prose ? 'steps' : 'lines'} into the right order — or use ▲ ▼.</p>`;
   const savedSpan = inert ? '' : `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
-  return `<div class="ws-parsons-wrap${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, key))}"`}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
+  return `<div class="ws-parsons-wrap${prose ? ' ws-ordering-prose' : ''}${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, key))}"`}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
 }
 
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
@@ -806,6 +817,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
   let taskIdx = 0;
   let blankIdx = 0;
   let parsonsIdx = 0;
+  let orderIdx = 0;
 
   for (const block of blocks) {
     const shown = include === null || include.has(block.level);
@@ -826,18 +838,21 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         out.push(html);
       }
     } else {
-      // A Parson's Problem fence (```parsons) in this md block → the reorder widget. parsonsIdx is bumped
-      // even when the block isn't in the shown slice, so keys stay stable across level slices (like tasks).
-      const par = extractParsons(block.lines);
-      if (par) {
-        parsonsIdx += 1;
-        const key = `${opts.keyPrefix ?? ''}parsons.${parsonsIdx}`;
+      // An ordering fence (```parsons code / ```order steps) in this md block → the reorder widget. The
+      // per-tag counter is bumped even when the block isn't in the shown slice, so keys stay stable across
+      // level slices (like tasks).
+      const ord = extractOrdering(block.lines);
+      if (ord) {
+        const isParsons = ord.tag === 'parsons';
+        let key: string;
+        if (isParsons) { parsonsIdx += 1; key = `${opts.keyPrefix ?? ''}parsons.${parsonsIdx}`; }
+        else { orderIdx += 1; key = `${opts.keyPrefix ?? ''}order.${orderIdx}`; }
         if (!shown) continue;
-        fields.push({ key, kind: 'parsons', level: block.level, label: parsonsLabel(par.before), solution: par.solution });
-        const beforeHtml = par.before.some((l) => l.trim() !== '') ? renderMarkdown(par.before.join('\n')) : '';
-        const afterHtml = par.after.some((l) => l.trim() !== '') ? renderMarkdown(par.after.join('\n')) : '';
-        const spk = opts.mode === 'form' ? speakBtn(par.before.join(' ')) : '';
-        out.push(`<div class="ws-block ws-parsons-block">${spk}${beforeHtml}${parsonsControl(key, par.solution, opts)}${afterHtml}</div>`);
+        fields.push({ key, kind: ord.tag, level: block.level, label: parsonsLabel(ord.before), solution: ord.solution });
+        const beforeHtml = ord.before.some((l) => l.trim() !== '') ? renderMarkdown(ord.before.join('\n')) : '';
+        const afterHtml = ord.after.some((l) => l.trim() !== '') ? renderMarkdown(ord.after.join('\n')) : '';
+        const spk = opts.mode === 'form' ? speakBtn(ord.before.join(' ')) : '';
+        out.push(`<div class="ws-block ws-parsons-block">${spk}${beforeHtml}${orderingControl(key, ord.solution, opts, !isParsons)}${afterHtml}</div>`);
         continue;
       }
 

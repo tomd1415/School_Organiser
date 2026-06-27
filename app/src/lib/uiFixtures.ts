@@ -55,6 +55,16 @@ Type your answers in the boxes. Save as you go.
 
 > Tip: read each step aloud before you answer.
 
+## Put the steps in order
+Drag these steps of writing a program into the right order.
+
+\`\`\`order
+Write the algorithm as plain-English steps
+Turn each step into code
+Run the program
+Test it and fix any errors
+\`\`\`
+
 ## ✅ Success checklist
 - [ ] I typed my name
 - [ ] I answered every question

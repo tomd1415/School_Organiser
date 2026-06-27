@@ -2003,6 +2003,10 @@ html[data-textscale="3"] { font-size: 142%; }
 .ws-parsons-review li { counter-increment: pr; }
 .ws-parsons-review li::before { content: counter(pr) ". "; color: var(--muted); font-family: ui-monospace, monospace; }
 .ws-parsons-review code { font-family: ui-monospace, Menlo, Consolas, monospace; white-space: pre; }
+/* Plain-language sequencing (```order) reuses the parsons widget, but the tiles are prose not code. */
+.ws-order-text { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+.ws-ordering-prose .ws-parsons-line { cursor: grab; }
+.ws-parsons-review .ws-order-text { font-family: inherit; white-space: normal; }
 
 /* marking modal: code / Parson's answers shown monospaced; a small kind tag on the question */
 .mm-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; white-space: pre; overflow-x: auto; margin: 0; background: rgba(0,0,0,0.04); padding: 0.35rem 0.5rem; border-radius: 6px; }

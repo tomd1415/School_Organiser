@@ -93,6 +93,57 @@ for i in range(1, 4):
   });
 });
 
+describe('Order / sequence (non-code)', () => {
+  const steps = [
+    'The message is split into packets',
+    'Each packet gets the destination address',
+    'The packets travel across the network',
+    'The packets are reassembled in order',
+  ];
+  const md = `Put the packet's journey in order.\n\n\`\`\`order\n${steps.join('\n')}\n\`\`\`\n`;
+  it('an ```order block becomes an order field carrying the correct sequence', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields).toHaveLength(1);
+    expect(fields[0]!.kind).toBe('order');
+    expect(fields[0]!.key).toBe('order.1');
+    expect(fields[0]!.solution).toEqual(steps);
+  });
+  it('form mode shows a PROSE reorder widget, jumbled (never the solution order, never <code>)', () => {
+    const html = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    expect(html).toMatch(/ws-ordering-prose/);
+    expect(html).toMatch(/ws-order-text/);
+    expect(html).not.toMatch(/<code>/); // prose tiles, not monospaced code
+    const shown = [...html.matchAll(/data-line="([^"]+)"/g)].map((m) => m[1]);
+    expect(shown).toHaveLength(4);
+    expect(shown).not.toEqual(steps); // shuffleStable guarantees a non-identity jumble
+  });
+  it("review mode shows the pupil's saved order as prose", () => {
+    const values = new Map([['order.1', 'b\na']]);
+    const html = renderWorksheet(md, { mode: 'review', values }).html;
+    expect(html).toMatch(/ws-parsons-review/);
+    expect(html).toContain('ws-order-text');
+    expect(html).not.toContain('<code>'); // not code
+  });
+  it('parsons and order keep INDEPENDENT key counters (no renumber)', () => {
+    const both = `## Order the code\n\n\`\`\`parsons\nx = 1\ny = 2\n\`\`\`\n\n| Q | A |\n|---|---|\n| name a step | Type your answer here |\n\n## Order the steps\n\n\`\`\`order\nfirst\nsecond\n\`\`\`\n`;
+    const fields = renderWorksheet(both, { mode: 'review' }).fields;
+    expect(fields.map((f) => [f.kind, f.key])).toEqual([
+      ['parsons', 'parsons.1'],
+      ['text', 't1.r1.c2'],
+      ['order', 'order.1'],
+    ]);
+  });
+  it('an order block respects level slices (and keys stay stable across slices)', () => {
+    const lvl = `## 🟢 Support\n\n\`\`\`order\nstep one\nstep two\n\`\`\`\n\n## 🔴 Challenge\n\n\`\`\`order\nhard one\nhard two\nhard three\n\`\`\`\n`;
+    const full = renderWorksheet(lvl, { mode: 'review' }).fields;
+    expect(full.map((f) => f.key)).toEqual(['order.1', 'order.2']);
+    const sup = renderWorksheet(lvl, { mode: 'preview', level: 'support' }).fields;
+    expect(sup.map((f) => f.key)).toEqual(['order.1']); // only Support's, key unchanged
+    const chl = renderWorksheet(lvl, { mode: 'preview', level: 'challenge' }).fields;
+    expect(chl.map((f) => f.key)).toEqual(['order.2']); // Challenge's key is still .2, not renumbered to .1
+  });
+});
+
 describe('per-worksheet key prefix (multiple worksheets)', () => {
   const md = `## Q
 | Question | Your answer |
