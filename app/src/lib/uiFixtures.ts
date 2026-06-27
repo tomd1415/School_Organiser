@@ -73,6 +73,17 @@ Input: keyboard, microphone
 Output: monitor, speaker
 \`\`\`
 
+## Label the board
+Drag each label onto the right part of the board.
+
+\`\`\`label
+image: /sample-diagram.svg
+USB (50%, 9%): USB connector
+LED (50%, 48%): LED display
+A (20%, 60%): button A
+B (80%, 60%): button B
+\`\`\`
+
 ## How did you find it?
 | Question | Your rating |
 |----------|-------------|

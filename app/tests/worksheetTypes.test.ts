@@ -218,6 +218,40 @@ describe('Slider / rating scale', () => {
   });
 });
 
+describe('Label a diagram', () => {
+  const md = `Label the board.\n\n\`\`\`label\nimage: /resources/42/view\nA (20%, 60%): button A\nB (80%, 60%): button B\nUSB (50%, 8%): USB connector\n\`\`\`\n`;
+  it('a ```label block becomes one `label` field per zone (options = the bank, solution = correct)', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields.map((f) => [f.key, f.kind, f.label, f.solution?.[0]])).toEqual([
+      ['label.1.z1', 'label', 'A', 'button A'],
+      ['label.1.z2', 'label', 'B', 'button B'],
+      ['label.1.z3', 'label', 'USB', 'USB connector'],
+    ]);
+    expect(fields[0]!.options).toEqual(['button A', 'button B', 'USB connector']); // sorted bank (localeCompare)
+  });
+  it('form mode positions a matching-slot per zone over the image, with per-zone save URLs', () => {
+    const html = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    expect(html).toMatch(/ws-label-stage/);
+    expect(html).toContain('src="/resources/42/view"');
+    expect(html).toMatch(/ws-match-slot[^>]*style="left:20%;top:60%"/);
+    expect(html).toContain('key=label.1.z1');
+    expect(html).toMatch(/ws-match-tile/); // the shuffled label bank reuses matching tiles
+  });
+  it('review shows each placed label at its spot; nothing reveals the answer in form mode', () => {
+    const html = renderWorksheet(md, { mode: 'review', values: new Map([['label.1.z1', 'button A']]) }).html;
+    expect(html).toMatch(/ws-label-review/);
+    expect(html).toContain('button A');
+    // form mode must NOT pre-place the correct label inside a slot
+    const formHtml = renderWorksheet(md, { mode: 'form', action: '/me/answer' }).html;
+    const stage = formHtml.slice(formHtml.indexOf('ws-label-stage'), formHtml.indexOf('ws-match-tray'));
+    expect(stage).not.toContain('ws-match-placed');
+  });
+  it('a label block with <2 zones or no image is ignored (renders inert markdown, no fields)', () => {
+    const noImg = `\`\`\`label\nA (10%, 10%): one\nB (20%, 20%): two\n\`\`\`\n`;
+    expect(renderWorksheet(noImg, { mode: 'review' }).fields).toHaveLength(0);
+  });
+});
+
 describe('per-worksheet key prefix (multiple worksheets)', () => {
   const md = `## Q
 | Question | Your answer |

@@ -718,6 +718,81 @@ function renderSort(idx: number, fields: WorksheetField[], categories: string[],
   return `<div class="ws-sort" data-sort="${idx}">${help}${tray}<div class="ws-sort-cats">${cats}</div>${saved}</div>`;
 }
 
+// ── Label a diagram (drag labels onto positioned spots on an image) ─────────────────────────────
+// A ```label block names an image then one "zoneId (x%, y%): correct label" per drop-spot. It expands
+// to one field per zone (kind 'label', options = the label bank, solution = the correct label) — each
+// stores the label dropped on it, a `choice` value. Renders with the MATCHING widget's classes so the
+// existing pupil.js drag/tap engine drives it; only the slots are positioned over the image.
+const LABEL_FENCE = /^\s*(?:```|~~~)\s*label\b/i;
+const LABEL_ZONE_RE = /^(.+?)\s*\(\s*(\d+(?:\.\d+)?)\s*%?\s*,\s*(\d+(?:\.\d+)?)\s*%?\s*\)\s*:\s*(.+)$/;
+interface LabelZone { id: string; x: number; y: number; correct: string }
+interface LabelSpec { before: string[]; image: string; zones: LabelZone[]; after: string[] }
+function extractLabel(lines: string[]): LabelSpec | null {
+  let open = -1;
+  for (let i = 0; i < lines.length; i++) if (LABEL_FENCE.test(lines[i]!)) { open = i; break; }
+  if (open === -1) return null;
+  let close = -1;
+  for (let i = open + 1; i < lines.length; i++) if (FENCE_ANY.test(lines[i]!)) { close = i; break; }
+  const end = close === -1 ? lines.length : close;
+  let image = '';
+  const zones: LabelZone[] = [];
+  for (const raw of lines.slice(open + 1, end)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const im = line.match(/^image\s*:\s*(.+)$/i);
+    if (im) { image = im[1]!.trim(); continue; }
+    const z = line.match(LABEL_ZONE_RE);
+    if (z) {
+      const x = Number(z[2]);
+      const y = Number(z[3]);
+      if (Number.isFinite(x) && Number.isFinite(y) && x >= 0 && x <= 100 && y >= 0 && y <= 100) {
+        zones.push({ id: z[1]!.trim(), x, y, correct: z[4]!.trim() });
+      }
+    }
+  }
+  if (!image || zones.length < 2) return null;
+  return { before: lines.slice(0, open), image, zones, after: close === -1 ? [] : lines.slice(close + 1) };
+}
+
+/** Render a label-the-diagram widget: an image with a drop-slot positioned at each zone's (x%,y%) +
+ * a tray of shuffled labels. Reuses the matching widget's classes (.ws-match / .ws-match-slot /
+ * .ws-match-tile) so pupil.js drives the drag/tap/save with no new client code; each slot autosaves
+ * the dropped label to its `label.{n}.z{m}` field. */
+function renderLabel(idx: number, fields: WorksheetField[], spec: LabelSpec, opts: WorksheetOptions): string {
+  const bank = [...new Set(spec.zones.map((z) => z.correct))].sort((a, b) => a.localeCompare(b));
+  const valueOf = (f: WorksheetField): string => (opts.values?.get(f.key) ?? '').trim();
+  const imgTag = `<img class="ws-label-img" src="${esc(spec.image)}" alt="diagram to label" loading="lazy">`;
+  if (opts.mode === 'review') {
+    const slots = spec.zones
+      .map((z, i) => {
+        const v = valueOf(fields[i]!);
+        const placed = v !== '' ? `<span class="ws-match-placed">${esc(v)}</span>` : `<span class="ws-match-empty">—</span>`;
+        return `<div class="ws-label-slot ws-match-slot" style="left:${z.x}%;top:${z.y}%">${placed}</div>`;
+      })
+      .join('');
+    return `<div class="ws-match ws-label ws-label-review"><div class="ws-label-stage">${imgTag}${slots}</div></div>`;
+  }
+  const inert = opts.mode === 'preview';
+  const slots = spec.zones
+    .map((z, i) => {
+      const f = fields[i]!;
+      const v = valueOf(f);
+      const inside = v !== ''
+        ? `<span class="ws-match-placed">${esc(v)}</span>${inert ? '' : '<button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>'}`
+        : `<span class="ws-match-empty">?</span>`;
+      const attrs = inert ? 'aria-disabled="true"' : `tabindex="0" role="button" data-key="${esc(f.key)}" data-save-url="${esc(saveUrl(opts.action, f.key))}"`;
+      return `<div class="ws-label-slot ws-match-slot" style="left:${z.x}%;top:${z.y}%" ${attrs} aria-label="${esc(z.id)}">${inside}</div>`;
+    })
+    .join('');
+  const tiles = bank
+    .map((o) => `<li class="ws-match-tile" ${inert ? 'aria-disabled="true"' : 'tabindex="0" role="button" draggable="true"'} data-label="${esc(o)}">${esc(o)}</li>`)
+    .join('');
+  const help = inert ? '' : '<p class="ws-match-help">Drag each label onto the right spot — or tap a label, then tap a spot.</p>';
+  const live = inert ? '' : '<span class="ws-sr-only" aria-live="polite" data-match-live></span>';
+  const saved = inert ? '' : '<span class="ws-saved ws-match-saved" aria-hidden="true"></span>';
+  return `<div class="ws-match ws-label" data-match="${idx}">${help}<div class="ws-label-stage">${imgTag}${slots}</div><ul class="ws-match-tray" aria-label="Labels to place">${tiles}</ul>${live}${saved}</div>`;
+}
+
 const SEP_CELL = /^:?-+:?$/; // one-or-more dashes — matches TABLE_SEP's detection so a single-dash separator row is stripped, not turned into a fillable row
 const isSepRow = (row: string[]): boolean => row.length > 0 && row.every((c) => c === '' || SEP_CELL.test(c));
 
@@ -927,6 +1002,7 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
   let parsonsIdx = 0;
   let orderIdx = 0;
   let sortIdx = 0;
+  let labelIdx = 0;
 
   for (const block of blocks) {
     const shown = include === null || include.has(block.level);
@@ -984,6 +1060,29 @@ export function renderWorksheet(src: string, opts: WorksheetOptions): WorksheetR
         const afterHtml = srt.after.some((l) => l.trim() !== '') ? renderMarkdown(srt.after.join('\n')) : '';
         const spk = opts.mode === 'form' ? speakBtn(srt.before.join(' ')) : '';
         out.push(`<div class="ws-block ws-sort-block">${spk}${beforeHtml}${renderSort(sortIdx, sortFields, srt.categories, opts)}${afterHtml}</div>`);
+        continue;
+      }
+
+      // A label-the-diagram fence (```label) → one `label` field per zone (its dropped label is a choice
+      // value). labelIdx + the per-zone index are bumped even when not shown, so keys stay stable.
+      const lbl = extractLabel(block.lines);
+      if (lbl) {
+        labelIdx += 1;
+        const bank = [...new Set(lbl.zones.map((z) => z.correct))].sort((a, b) => a.localeCompare(b));
+        const labelFields: WorksheetField[] = lbl.zones.map((z, m) => ({
+          key: `${opts.keyPrefix ?? ''}label.${labelIdx}.z${m + 1}`,
+          kind: 'label',
+          level: block.level,
+          label: z.id,
+          options: bank,
+          solution: [z.correct],
+        }));
+        if (!shown) continue;
+        fields.push(...labelFields);
+        const beforeHtml = lbl.before.some((l) => l.trim() !== '') ? renderMarkdown(lbl.before.join('\n')) : '';
+        const afterHtml = lbl.after.some((l) => l.trim() !== '') ? renderMarkdown(lbl.after.join('\n')) : '';
+        const spk = opts.mode === 'form' ? speakBtn(lbl.before.join(' ')) : '';
+        out.push(`<div class="ws-block ws-label-block">${spk}${beforeHtml}${renderLabel(labelIdx, labelFields, lbl, opts)}${afterHtml}</div>`);
         continue;
       }
 
