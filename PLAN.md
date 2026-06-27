@@ -209,11 +209,19 @@ finished), do a final pass:
 - 16A.4 — auto-suggest evidence from marking (pure suggestEvidence + spec-link CRUD + mapping editor + confirm-writes-evidence) + tests.
 - 16A.8 core — migration 0067 (purpose, assessment_question_criteria, pupil_unit_placement) + deterministic marks→criterion evidence + per-unit placement + tests. (AI stage-anchored paper GENERATION = remaining.)
 - 16A.7 foundation — migration 0068 (pupil_baseline) + pure baseline logic (randomClickGuard/shouldStopStrand/placedStageFromResponses/baselineBand, 13 tests) + baseline repo + erasure. (AI probe GENERATION + take-flow UI = remaining.)
+- 16B — homework as data: migration 0069 + repo (set/chase/pupil-list) + teacher /homework page + pupil /me list + ?hw open + tests. **Phase 16 complete.**
+- 17.1/17.2/17.3/17.5 — reference library: migration 0070 + pure parseTccPath/inferActivityType (7 tests) + importReferenceFiles (idempotent) + reference repo (links/lookup/review queue) + activity catalogue + integration test.
+- 17.4 data — pupil_resource_edits save/get + erasure + test.
+- 17.6 — reusable paste-or-upload component (render + shared script) + contract test + gallery. **Phase 17 cores done.**
 
 ## FINAL STATUS
 
 **Branch:** `phase-15-17-unattended` (NOT pushed — review locally). All work committed in small per-slice
-commits. **Final gate: typecheck ✓ · unit 1109 ✓ · integration 427 ✓** (from a clean fresh seed).
+commits. **Final gate: typecheck ✓ · unit 1149 ✓ · integration 444 ✓** (from a clean fresh seed).
+
+**Headline: Phase 15 COMPLETE; Phase 16 COMPLETE (16A all eight sub-slices + 16B); Phase 17 cores built
+(17.1/17.2/17.3/17.4/17.5/17.6).** The only things deliberately left are three AI-generation paths and some
+UI surfacing — all degrade cleanly and are listed precisely below. Migrations 0066–0070 added.
 
 ### Phase 15 — COMPLETE ✅ (all slices + the rule-7 live-AI smoke)
 - **Test infra fix (your "fix the failing tests" request):** the integration suite was red on a fresh seed
@@ -229,30 +237,48 @@ commits. **Final gate: typecheck ✓ · unit 1109 ✓ · integration 427 ✓** (
   generation against your key: generation succeeded, the audit stored a **redacted** request, and **no
   pupil name (of 26 roster pupils) egressed**. Draft + audit rows cleaned up; script deleted.
 
-### Phase 16A — Stages & strands: ALL EIGHT SUB-SLICES delivered to a tested, green state
-- **16A.1–.6 COMPLETE**: schema (migration 0066), pure roll-up, the **full year-ladder content seeded**
-  (9 stages, 120 units, ~936 "I can…" criteria parsed from the docs) + GCSE structure + blank Post-16, the
-  admin UI (scheme list / Stage×Strand grid / per-class assignment), the **class heat-map** + **per-pupil
-  ladder**, the **year-end overall anchor**, the **auto-suggested evidence from marking** (spec-link mapping
-  editor + confirm-writes-evidence), and the **DPIA + erasure + no-AI privacy locks**.
-- **16A.8 core delivered**: migration 0067 (`assessments.purpose`, `assessment_question_criteria`,
-  `pupil_unit_placement`) + the deterministic **marks→criterion evidence + per-unit placement** wiring.
-- **16A.7 foundation delivered**: migration 0068 (`pupil_baseline`) + the pure baseline logic
-  (random-click guard, adaptive stop, placement, band) + repo + erasure.
+### Phase 16 — COMPLETE ✅
+- **16A (Stages & strands) — all eight sub-slices, tested + committed:** schema (0066) + pure roll-up; the
+  **full year-ladder seeded** (9 stages, 120 units, ~936 "I can…" criteria) + GCSE structure + blank Post-16;
+  admin UI (scheme list / Stage×Strand grid / assignment); **class heat-map** + **per-pupil ladder**;
+  **auto-suggested evidence from marking** (spec-link mapping editor + confirm-writes-evidence);
+  **year-end anchor**; **DPIA + erasure + no-AI guard**; **16A.8 core** (0067: `assessments.purpose`,
+  `assessment_question_criteria`, `pupil_unit_placement` + deterministic marks→criterion-evidence +
+  per-unit placement); **16A.7 foundation** (0068: `pupil_baseline` + the pure random-click guard / adaptive
+  stop / placement / band logic).
+- **16B (homework as data) — COMPLETE:** 0069 `homework`; set/clear + the teacher chase page (+ nav); the
+  pupil `/me` homework list that opens a specific worksheet (`?hw=`, enrolment-gated) and completes via the
+  existing pupil-work + redacted-AI-marking pipeline. Integration-tested.
 
-### NOT built — the remaining AI-generation tails + 16B + Phase 17 (clean stopping point, nothing half-built)
-- **16A.7/16A.8 — the AI GENERATION tails.** The schemas + deterministic cores are done and tested; what
-  remains is the AI that *produces* the papers: the baseline probe generator (cold/warm, thin-sample
-  blueprint over `baselineBand`, objective-only) and the stage-anchored end-of-unit paper generator (extend
-  `assembleBlueprint` to cover a stage band and auto-tag questions to criteria via
-  `assessment_question_criteria`), plus the baseline take-flow UI. Both degrade to nothing with AI off, like
-  the existing `generateAssessment`. Also the teacher-facing "mark an assessment as the year-end overall"
-  surface for 16A.5 rides on the now-present `assessments.purpose` column.
-- **16B — homework as data** (set · chase · mark): NOT started. A genuinely new pupil-facing surface (a
-  homework assignment shape + due date reusing the assessment availability-window, a pupil list behind the
-  gate, a not-yet-submitted chase list on Now/Tasks, auto-/AI-marking on submit via the existing queue).
-- **Phase 17 — reference-lesson library:** NOT started (import the `TeachComputing/` files, link to criteria,
-  AI overview, activity variety, pupil file hosting/editing, the unified pasteOrUpload).
+### Phase 17 — reference-lesson library: CORES BUILT (tested + committed)
+- **17.5 schema (0070):** `resources.is_reference/tcc_unit_key/tcc_lesson_no/activity_type`,
+  `resource_prog_unit`, `resource_criteria` (with the AI-overview advisory `verify_state`), `activity_types`,
+  `pupil_resource_edits` (PII, erasure-covered).
+- **17.1 import:** `importReferenceFiles` — one reference resource per file, stamped with TCC coords +
+  inferred activity type + OGL attribution, idempotent on the store's SHA-256. Pure `parseTccPath` parser
+  (7 tests vs fixtures mirroring the real tree).
+- **17.2 link infra:** criterion/unit link CRUD with origin + verify_state, `referencesForCriterion` (the
+  core library lookup), `reviewQueue`, confirm/correct.
+- **17.3 activity variety:** the `activity_types` catalogue + `inferActivityType` (lesson name → activity).
+- **17.4 pupil edits (data):** `savePupilResourceEdit`/`getPupilResourceEdit` + erasure.
+- **17.6 paste-or-upload:** the reusable `renderPasteOrUpload` component + shared client script + tests.
+
+### NOT built — three AI-generation paths + some UI surfacing (clean stopping point, nothing half-built)
+- **16A.7/16A.8 AI GENERATION tails:** the baseline probe generator (thin-sample blueprint over
+  `baselineBand`, objective-only) + its take-flow UI, and the stage-anchored end-of-unit paper generator
+  (extend `assembleBlueprint` to a stage band + auto-tag questions to criteria). **Design note:** these
+  bridge the existing assessment subsystem (which keys off `schemes_of_work` units) to the progression
+  `prog_units`/stages — a mapping the plan leaves open; resolve that first. Both degrade to nothing with AI
+  off, like `generateAssessment`. The "mark an assessment as the year-end overall" surface (16A.5) also rides
+  on the now-present `assessments.purpose`.
+- **17.2 AI overview pass:** the only AI in Phase 17 — reads a lesson's extracted text and advises
+  confirm/partial/mismatch on the structural links. The infra (`resource_criteria.verify_state` + review
+  queue) is built; with AI off, links stay `unverified` (as now). Wrapper-only, cohort content, audited.
+- **17.1 real bulk import + 17.2 structure auto-link + 17.4 editor UI + 17.6 cross-surface wiring + the
+  "Reference lessons for these objectives" surfacing.** The engines are built and tested against fixtures;
+  these are the operator-run import, the TCC-unit→`prog_unit` matching (needs the `docs/TeachComputing_docs/`
+  curriculum-map bridge), the pupil online editor UI, wiring `pasteOrUpload` into the existing inputs, and
+  the planner/schemes surfacing.
 
 ### Commands for you to run
 - **Seed the progression schemes on any other instance** (host-side; reads the year-ladder doc; idempotent):
@@ -260,8 +286,11 @@ commits. **Final gate: typecheck ✓ · unit 1109 ✓ · integration 427 ✓** (
   (Already run on this dev DB. The integration `globalSetup` also auto-seeds it when empty.)
 - **Run the gate:** `cd app && npm run typecheck && npm test && npm run test:integration` (the integration
   suite self-seeds its fixture on first run against a fresh DB).
-- **Phase 17 bulk import** (when you build 17.1 + the `TeachComputing/` upload finishes): the importer will
-  be a host-side command over `/home/duguid/School_Organiser/TeachComputing/` — see PHASE_17_PLAN.md.
+- **Phase 17 bulk import of the real ~7.3 GB tree** (host-side; idempotent on checksum): the
+  `importReferenceFiles` engine is built + tested. To run it over the real files, write a tiny driver that
+  walks `/home/duguid/School_Organiser/TeachComputing/TeachComputing/` (KS*/year_*/unit_*/…), reads each
+  file to a Buffer and calls `importReferenceFiles([{relPath, buf}, …])` (relPath = the path under that
+  root). Stream large files; nothing from `TeachComputing/` is committed.
 
 ### Note on the dev DB
 I wiped + re-seeded the dev DB at the start (it was drifted and the integration suite was red). It now holds:

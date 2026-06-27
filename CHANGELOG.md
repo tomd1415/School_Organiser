@@ -7,6 +7,27 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-27 — Phase 16B (homework) + Phase 17 cores (reference-lesson library)
+
+Built on branch `phase-15-17-unattended`, continuing the same run.
+
+- **16B — homework as data (set · chase · mark).** Migration 0069 `homework` (occurrence-anchored, due date).
+  A lesson's worksheet is flagged as homework: pupils see an outstanding list on `/me` and open a specific
+  homework worksheet (`?hw=`, enrolment-gated) to complete it via the existing pupil-work + redacted AI
+  marking pipeline; the teacher gets a `/homework` set-picker + chase (submitted/total). No new AI path.
+  **Phase 16 is now complete.**
+- **Phase 17 cores — the reference-lesson library** (extends the resource store, no rebuild). Migration 0070:
+  `resources.is_reference/tcc_unit_key/tcc_lesson_no/activity_type`, `resource_prog_unit`, `resource_criteria`
+  (with the AI-overview advisory `verify_state`), `activity_types`, `pupil_resource_edits` (PII, erasure-
+  covered). A pure `parseTccPath` + `inferActivityType` (vs fixtures mirroring the real tree); an idempotent
+  `importReferenceFiles` (one reference resource per file, TCC coords + activity + OGL attribution, SHA-256
+  dedupe); the criterion/unit link CRUD + `referencesForCriterion` lookup + review queue; the activity-type
+  catalogue; pupil resource-edit save/get; and the reusable `renderPasteOrUpload` component (17.6).
+- **Remaining (documented in PLAN.md FINAL STATUS):** three AI-generation paths (the 16A.7 baseline probe +
+  16A.8 stage-anchored paper generators, and the 17.2 AI overview pass — all degrade with AI off), the real
+  ~7.3 GB host-side bulk import, the TCC→prog_unit auto-link, the pupil online-editor UI, and the cross-
+  surface wiring + planner/schemes surfacing.
+
 ### 2026-06-27 — Phase 16A (core): Stages & strands progression model
 
 Built on branch `phase-15-17-unattended`, on top of Phase 15.
