@@ -10,6 +10,7 @@ import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../li
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
 import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid, renderSchemeMap } from '../lib/progressionView';
 import { renderHomeworkChase, renderPupilHomework } from '../lib/homeworkView';
+import { renderPasteOrUpload } from '../lib/pasteOrUpload';
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
@@ -239,6 +240,7 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
         ],
       }))}
       ${item('Homework — pupil list (16B)', 'renderPupilHomework — the pupil’s outstanding homework behind the gate; each opens the worksheet to complete (answer key never reaches them).', `<div class="pupil-main">${renderPupilHomework([{ occurrenceCourseId: 11, dueAt: '2026-06-25T23:59:00Z', lessonDate: '2026-06-24', course: 'Computing' }], '2026-06-27')}</div>`)}
+      ${item('Paste-or-upload (17.6)', 'renderPasteOrUpload — one reusable drop zone (paste image/text · drag-drop · file-pick) used everywhere a file comes in (email intake, worksheet/marking screenshots, reference import). Vendored-HTMX friendly, no new deps.', `<form onsubmit="return false">${renderPasteOrUpload({ name: 'archive', accept: '.zip,.docx,.pptx,.pdf', label: 'Drop a unit folder or zip', hint: 'or paste a screenshot, or click to choose', multiple: true })}</form>`)}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}
