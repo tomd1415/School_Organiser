@@ -16,6 +16,7 @@ import {
 } from '../repos/pupilCredentials';
 import { revokeAllDevices } from '../repos/pupilDevices';
 import { createNote } from '../repos/notes';
+import { paths } from '../lib/paths';
 import { renderNoteItem, renderNotesList } from '../lib/notesView';
 import { listPupilNotes, pupilMarksHistory, pupilUnits, setUnitSignal, type PupilUnitRow, type UnitSignal } from '../repos/pupilProgress';
 import { importRoster } from '../services/misImport';
@@ -80,6 +81,7 @@ function renderCohortPupil(p: CohortPupil): string {
         <span class="cohort-meta">${levelChip(p.level)}${p.completionPct != null ? `<span class="cohort-pct" title="lessons completed this class">${p.completionPct}%</span>` : ''}${p.assessmentPct != null ? `<span class="cohort-asmt" title="average assessment score">📝 ${p.assessmentPct}%</span>` : ''}${atlArrow(p.atlTrend)}</span>
       </span>
     </a>
+    <a class="link cohort-prog" href="${paths.progressionPupil(p.id)}" title="Stages & strands progression">📊 Stages</a>
     ${pupilActionsMenu(p.id, p.displayName, p.aiToken, p.active)}
   </li>`;
 }

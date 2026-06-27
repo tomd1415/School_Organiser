@@ -8,7 +8,7 @@ import { renderTimelineCard, renderNowHero } from '../lib/nowView';
 import { renderToggle } from '../lib/components';
 import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
-import { renderProgressionAdmin, renderSchemeGrid } from '../lib/progressionView';
+import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid } from '../lib/progressionView';
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
@@ -201,6 +201,23 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
       ${item('Unit assessments panel (Phase 6)', 'renderAssessmentUnitPanel — the lazy “Assessments” panel under each unit on the Schemes spine: each assessment’s title · style · status · marks/questions/classes, with Review-edit · Assign (ready) · Results actions, plus “Generate an assessment for a class”.', renderAssessmentUnitPanel(9, GALLERY_UNIT_ASSESSMENTS))}
       ${item('Stages & strands — admin (16A.2)', 'renderProgressionAdmin — the progression scheme catalogue (kind + strand/stage/unit/criteria counts) and per-class scheme assignment (one scheme per class).', progressionAdminHtml)}
       ${item('Stages & strands — scheme grid (16A.2)', 'renderSchemeGrid — a scheme’s Stage × Strand course-planning view; each cell shows the “I can…” criteria count (empty cells aren’t taught at that stage).', schemeGridHtml)}
+      ${item('Stages & strands — class heat-map (16A.3)', 'renderClassHeatMap — each pupil’s current stage per strand + overall roll-up (computed from evidence). PII, teacher-only, never sent to AI.', renderClassHeatMap({
+        schemeName: 'Computing year ladder (Stages 6–14)', className: '8PFA · Computing',
+        strands: [{ id: 1, code: 'CS', name: 'Computing systems' }, { id: 3, code: 'PG', name: 'Programming' }, { id: 5, code: 'DI', name: 'Data & information' }],
+        labelByOrdinal: { 12: 'Year 7', 13: 'Year 8', 14: 'Year 9' },
+        pupils: [
+          { id: 101, name: 'A. Pupil', perStrand: { 1: 13, 3: 12, 5: 13 }, overall: 13 },
+          { id: 102, name: 'B. Pupil', perStrand: { 1: 12, 3: null, 5: 12 }, overall: 12 },
+        ],
+      }))}
+      ${item('Stages & strands — per-pupil ladder (16A.3)', 'renderPupilLadder — one pupil’s per-strand current stage + overall, per scheme-bound class. PII, teacher-only.', renderPupilLadder({
+        pupilName: 'A. Pupil',
+        classes: [{
+          groupCourseId: 31, className: '8PFA · Computing', schemeName: 'Computing year ladder (Stages 6–14)',
+          strands: [{ id: 1, code: 'CS', name: 'Computing systems', ordinal: 13 }, { id: 3, code: 'PG', name: 'Programming', ordinal: 12 }],
+          overall: 13, labelByOrdinal: { 12: 'Year 7', 13: 'Year 8' },
+        }],
+      }))}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}

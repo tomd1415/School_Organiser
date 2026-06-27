@@ -194,3 +194,71 @@ export async function addEvidence(e: EvidenceInput): Promise<boolean> {
 export async function removeEvidence(pupilId: number, criterionId: number): Promise<void> {
   await pool.query(`DELETE FROM pupil_criteria_evidence WHERE pupil_id = $1 AND criterion_id = $2`, [pupilId, criterionId]);
 }
+
+export interface PupilRow {
+  id: number;
+  displayName: string;
+}
+
+/** The active pupils enrolled in a class (group_course → its group). */
+export async function enrolledPupilsForClass(groupCourseId: number): Promise<PupilRow[]> {
+  const { rows } = await pool.query<PupilRow>(
+    `SELECT p.id, p.display_name AS "displayName"
+     FROM group_courses gc
+     JOIN enrolments en ON en.group_id = gc.group_id AND en.active
+     JOIN pupils p ON p.id = en.pupil_id
+     WHERE gc.id = $1
+     ORDER BY p.display_name`,
+    [groupCourseId],
+  );
+  return rows;
+}
+
+/** Evidence sets for several pupils at once (one query) — for the class heat-map. */
+export async function evidencedForPupils(pupilIds: number[]): Promise<Map<number, Set<number>>> {
+  const out = new Map<number, Set<number>>();
+  if (!pupilIds.length) return out;
+  const { rows } = await pool.query<{ pupil_id: number; criterion_id: number }>(
+    `SELECT pupil_id, criterion_id FROM pupil_criteria_evidence WHERE pupil_id = ANY($1::bigint[])`,
+    [pupilIds],
+  );
+  for (const r of rows) {
+    const pid = Number(r.pupil_id);
+    let set = out.get(pid);
+    if (!set) {
+      set = new Set();
+      out.set(pid, set);
+    }
+    set.add(Number(r.criterion_id));
+  }
+  return out;
+}
+
+export interface PupilClassRow {
+  groupCourseId: number;
+  label: string;
+  schemeId: number;
+  schemeName: string;
+}
+
+/** The classes a pupil is in that have a progression scheme bound — for the per-pupil ladder view. */
+export async function pupilClassesWithScheme(pupilId: number): Promise<PupilClassRow[]> {
+  const { rows } = await pool.query<PupilClassRow>(
+    `SELECT gc.id AS "groupCourseId", g.name || ' · ' || co.name AS label, gcs.scheme_id AS "schemeId", s.name AS "schemeName"
+     FROM enrolments en
+     JOIN group_courses gc ON gc.group_id = en.group_id AND gc.active
+     JOIN groups g  ON g.id = gc.group_id
+     JOIN courses co ON co.id = gc.course_id
+     JOIN group_course_scheme gcs ON gcs.group_course_id = gc.id
+     JOIN progression_schemes s   ON s.id = gcs.scheme_id
+     WHERE en.pupil_id = $1 AND en.active
+     ORDER BY g.name, co.name`,
+    [pupilId],
+  );
+  return rows;
+}
+
+export async function getPupilName(pupilId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ display_name: string }>(`SELECT display_name FROM pupils WHERE id = $1`, [pupilId]);
+  return rows[0]?.display_name ?? null;
+}

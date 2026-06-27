@@ -1137,6 +1137,11 @@ body.deck {
 .prog-grid th.prog-stage { text-align: left; white-space: nowrap; }
 .prog-cell { font-variant-numeric: tabular-nums; }
 .prog-cell.empty { color: var(--muted, #94a3b8); }
+.prog-heat th, .prog-heat td { padding: 0.3rem 0.55rem; }
+.prog-pupil { text-align: left; white-space: nowrap; }
+.prog-overall { font-weight: 600; }
+.prog-privacy { color: var(--danger, #dc2626); font-size: 0.85rem; margin: 0.2rem 0 0.6rem; }
+.prog-pupil-class { margin-bottom: 1.4rem; }
 .pl-lesson { font-size: 0.85rem; }
 .pl-adapted, .pl-kit { font-size: 0.75rem; }
 .pl-acts { float: right; }

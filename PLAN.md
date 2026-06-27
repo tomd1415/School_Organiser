@@ -201,6 +201,9 @@ finished), do a final pass:
 - 15.3 — assessment privacy/edge locks AUDITED: all 12 checklist invariants already covered by standing tests (no new tests needed); live-AI smoke deferred to rule 7 (end).
 - 15.4 — applyPlacements N+1 batched (ensureOccurrenceCoursesForClass + set-based UPDATE) — gate green (typecheck, unit 1082, integration 413).
 - 15.6 — CHANGELOG + classic-shell removal verified (none remain); docs updated. **Phase 15 complete.**
+- 16A.1 — progression schema (migration 0066) + pure roll-up (currentStagePerStrand/overallRollUp, 10 tests) + repo + integration test.
+- 16A.2 — year-ladder parser (pure, 5 tests) + idempotent seed of 3 schemes (full ladder: 9 stages/120 units/~936 criteria, GCSE structure, blank Post-16); admin UI (list/grid/assign) + paths + gallery + route test.
+- 16A.3 — class heat-map + per-pupil ladder (routes compute via pure roll-up) + Pupils-screen link + gallery + integration test.
 
 ## FINAL STATUS
 *(Fill in at the very end.)*
