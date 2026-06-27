@@ -51,7 +51,8 @@ CREATE TABLE prog_units (
   title         TEXT NOT NULL,
   display_order INTEGER NOT NULL DEFAULT 0,
   nc_refs       TEXT[],
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (scheme_id, stage_id, strand_id, title)        -- natural key for an idempotent seed
 );
 CREATE INDEX idx_prog_units_stage  ON prog_units (stage_id, display_order);
 CREATE INDEX idx_prog_units_strand ON prog_units (strand_id);
@@ -63,7 +64,10 @@ CREATE TABLE prog_lessons (
   lesson_no     INTEGER,
   objective     TEXT,
   display_order INTEGER NOT NULL DEFAULT 0,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- natural key for an idempotent seed; NULLS NOT DISTINCT so a KS1/2 objective (lesson_no NULL) or a KS3
+  -- "Lesson N" (objective NULL) can't duplicate on re-run (PostgreSQL 15+).
+  UNIQUE NULLS NOT DISTINCT (unit_id, lesson_no, objective)
 );
 CREATE INDEX idx_prog_lessons_unit ON prog_lessons (unit_id, display_order);
 
@@ -76,7 +80,8 @@ CREATE TABLE prog_criteria (
   descriptor    TEXT NOT NULL,
   display_order INTEGER NOT NULL DEFAULT 0,
   also_strands  TEXT[],
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (lesson_id, descriptor)                        -- natural key for an idempotent seed
 );
 CREATE INDEX idx_prog_criteria_lesson ON prog_criteria (lesson_id, display_order);
 CREATE INDEX idx_prog_criteria_stage  ON prog_criteria (stage_id);
