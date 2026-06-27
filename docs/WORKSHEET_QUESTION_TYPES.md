@@ -50,14 +50,19 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 - **Why.** "order" is in the teaching context; e.g. order the steps of an algorithm in plain English, or a
   process (boot sequence, the data-packet journey).
 - **Example.** Order: *set a start value → repeat → show the number → change the value → stop*.
-- **Wants it:** `micro:bit countdown` (sequence the countdown steps), KS3 networks/algorithms lessons.
+- **Wants it:** `micro:bit countdown` (sequence the countdown steps); **Y7 Networks** L1 (semaphore/relay
+  message order), L4 (the packet's journey); **Y7 Clear messaging** L2/L6 (poster-making / presenting steps);
+  **Y7 Spreadsheets** (make-a-chart / autofill steps); **Y7 Using media** L1/L2 (word-processing / licensing
+  steps). (Code ordering is already covered by Parsons — this is for prose/process steps.)
 - **Likely build.** Generalise the `parsons` block to a `steps`/`order` block over prose lines.
 
 ### 2.4 Label a diagram / image hotspot  — **NOT BUILT**
 - **What.** Drag labels onto a picture (or click hotspots): label the parts of a computer / the micro:bit.
 - **Why.** "label" is in the teaching context; strongly visual, near-zero writing — ideal for SEND.
 - **Example.** Label the micro:bit: *button A · button B · LED display · USB · pins*.
-- **Wants it:** `micro:bit countdown — starter` (label the inputs), any hardware/parts lesson.
+- **Wants it:** `micro:bit countdown — starter` (label the inputs); **Y7 Networks** L2/L4 (label network
+  hardware / a labelled packet); **Y7 Clear messaging** L1/L3 (label parts of a good poster / a logo);
+  **Y7 Using media** L1 (label the word-processor toolbar); any hardware/parts lesson.
 - **Likely build.** An image block with positioned drop-zones + a label bank; mark = label in the right zone.
   (Biggest build — needs an image-coordinate authoring step.)
 
@@ -66,14 +71,18 @@ Support` / `## 🟡 Core` / `## 🔴 Challenge` sections (auto-sliced per pupil;
 - **Why.** "drag" is in the teaching context; classic CS activity (input vs output vs storage; hardware vs
   software).
 - **Example.** Sort into **Input / Output**: button, LED, microphone, speaker.
-- **Wants it:** KS3 computing-systems lessons; the micro:bit inputs/outputs idea.
+- **Wants it:** KS3 computing-systems lessons; the micro:bit inputs/outputs idea; **Y7 Networks** L3
+  (wired-vs-wireless scenarios, bandwidth bands); **Y7 Clear messaging** L4 (branding-vs-content);
+  **Y7 Spreadsheets** L3 (primary-vs-secondary data); **Y7 Scratch II** L9/L10 (choose-the-loop / list ops);
+  **Y7 Using media** L2/L3 (licence types, credible-vs-not sources).
 - **Likely build.** A `sort` block: items + category columns; mark = each item in the right column.
 
 ### 2.6 Slider / rating scale  — **NOT BUILT** (low priority)
 - **What.** Drag a slider on a scale (e.g. confidence 1–5, or estimate a value).
 - **Why.** Low-stakes self-rating / estimation; minimal writing.
 - **Example.** *"How confident are you with loops?"* 1–5.
-- **Wants it:** plenaries / self-assessment across lessons.
+- **Wants it:** plenaries / self-assessment across lessons; **Y7 Scratch I** L6 ("you're hired" 3-point skill
+  rating); **Y7 Scratch II** & **Y7 Using media** plenaries (currently stop-gapped with the ✅ checklist).
 - **Likely build.** A `scale` field (range input), stored as a number; uncredited or compared to a range.
 
 ---
@@ -100,5 +109,15 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 | KS3 Y7 U1 L1 micro:bit countdown | starter slide + worksheet | the micro:bit v2 board (inputs) | ✅ used `image12.png` from the source deck |
 | KS3 Y7 U1 L1 micro:bit countdown | "for loop" slide | a side-by-side "many blocks vs one for-loop" diagram | ✅ in source deck (not yet embedded — candidate) |
 | KS3 Y7 U1 L2 basketball throw | starter + investigate slides | a basketball-throw / accelerometer-axes diagram | ⚠️ **not yet checked / sourced** — record on next pass |
+| KS3 Y7 U2 Clear messaging | L5 content slide; L6 plenary; L3/L4 logo | before/after content, apps-used icon strip, logo before/after still | ⚠️ design lessons — source had no clean still |
+| KS3 Y7 U3 Networks | L1–L6 diagram slides | relay/semaphore, network topology, **labelled packet**, router-mesh, internet-vs-WWW contrast, URL anatomy | ⚠️ source diagrams are PowerPoint **shapes**, not extractable rasters — embedded the available photos/icons |
+| KS3 Y7 U4 Scratch I | L1 Frère Jacques block-stack; L5 Grace Hopper | clean Scratch block-stack still (source was animated GIF, omitted per no-animation); moth/bug photo | ⚠️ 8 of 9 source screenshots embedded; 2 soft gaps |
+| KS3 Y7 U5 Spreadsheets | L1 cell grid; L2 formula bar; L4/L5 function results; L6 conditional formatting | real spreadsheet **screenshots** (source decks are mostly clipart) | ⚠️ only 1 genuine screenshot in source; embedded analogy visuals instead |
+| KS3 Y7 U6 Scratch II | L11/L12 translate blocks; L8/L9 minor | clean `translate`-block code screenshot | ⚠️ none clean in source — wrote the blocks as Parsons + reused languages photo |
+| KS3 Y7 U7 Using media | L1 before/after formatting; L2 CC-licences chart; L6 finished blog | formatting comparison, all-6-CC-licences chart, example finished blog | ⚠️ embedded 7 OGL images; 3 still wanted |
 
 > Keep this table growing as lessons are converted — it's the worklist for sourcing/creating missing images.
+> **Per-unit detail** (full §7a alignment tables + every gap) lives beside each bundle in
+> `app/seed-content/lessons/_notes/<slug>.md`. Recurring theme from the Y7 batch: TCC network/spreadsheet
+> diagrams are **vector shapes inside the .pptx**, so `extractOfficeImages` (raster-only) can't pull them —
+> these need re-drawing or a render step to embed.
