@@ -134,6 +134,28 @@ export function pullForward(positions: Placement[], targetIndex: number): Placem
 }
 
 /**
+ * 15.2b — silent-data-loss guard. A cascade (`cascadeInsert`/`move`) or a whole-unit lay-down can push
+ * a real lesson PAST the end of the plannable window, where the old code simply dropped it. Given the
+ * plan ids the op was obliged to keep placed (`mustRemain` — everything placed before, plus the
+ * lesson(s) the op brings in) and the post-op board (`after`), return the plan ids that vanished — i.e.
+ * fell off the end. Empty when nothing was lost. Pure; the route uses it to refuse the drop with a
+ * clear message rather than losing the lesson. (Ops that remove a lesson BY DESIGN — pull/clear — must
+ * not be checked through here, or their intended removal would read as a loss.)
+ */
+export function lostOffWindow(mustRemain: number[], after: Array<number | null>): number[] {
+  const onBoard = new Set<number>();
+  for (const id of after) if (id != null) onBoard.add(id);
+  const seen = new Set<number>();
+  const lost: number[] = [];
+  for (const id of mustRemain) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    if (!onBoard.has(id)) lost.push(id);
+  }
+  return lost;
+}
+
+/**
  * BUG-014: lay a whole unit's lessons into the stream from `targetIndex`, flowing AROUND locked
  * positions (a pinned lesson keeps its plan; the next unit lesson takes the next FREE position). One
  * lesson per writable position; stops when lessons or positions run out. This is the lock-aware

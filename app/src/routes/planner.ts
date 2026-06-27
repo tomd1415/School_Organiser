@@ -20,7 +20,7 @@ import {
   type ClassScheduleEntry,
   type GroupCourseSlot,
 } from '../repos/delivery';
-import { cascadeInsert, layUnit, pullForward, upcomingClassSlots, weekdayName, type Placement } from '../services/delivery';
+import { cascadeInsert, layUnit, lostOffWindow, pullForward, upcomingClassSlots, weekdayName, type Placement } from '../services/delivery';
 import { getActiveScheme, listPlansForUnit, listUnits, unitIdByPlan } from '../repos/schemes';
 
 const WEEKS = 16; // how many school weeks of timeline to show
@@ -63,7 +63,11 @@ async function loadWindow(
   terms: Awaited<ReturnType<typeof getClockContext>>['terms'],
   yearEnd: string | null,
 ): Promise<{ stream: Array<{ date: string; timetabledLessonId: number }>; positions: Placement[]; bound: Map<string, ClassScheduleEntry> }> {
-  const want = cols.length * (WEEKS + OP_BUFFER_WEEKS);
+  // The operational window must reach year-end so a cascade has every remaining school slot to absorb
+  // a shift — otherwise a drop near a too-short window's end reads as overflow when room actually exists
+  // later in the year (15.2b). When year-end is known, span a comfortable full year (the yearEnd filter
+  // trims it); with no year configured, keep the conservative view+buffer.
+  const want = cols.length * (yearEnd ? 56 : WEEKS + OP_BUFFER_WEEKS);
   const slots = cols.map((c) => ({ timetabledLessonId: c.timetabledLessonId, weekday: c.weekday, slotOrder: c.slotOrder }));
   const stream = upcomingClassSlots(slots, today, want, terms).filter((s) => !yearEnd || s.date <= yearEnd);
   const positions = await classPlacements(groupCourseId, stream);
@@ -230,6 +234,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
             if (cur != null && cur !== next) unitEnds.add(key(placedSeq[i]!.s.date, placedSeq[i]!.s.timetabledLessonId));
           }
           const [timeline, tray] = [renderTimeline(cols, stream, bound, today, unitEnds), await renderTray(chosen.courseId, placed)];
+          const canUndo = lastPlacement.has(chosen.groupCourseId);
           const opts = classes
             .map((c) => `<option value="${c.groupCourseId}"${c.groupCourseId === chosen.groupCourseId ? ' selected' : ''}>${esc(c.label)}</option>`)
             .join('');
@@ -239,7 +244,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
               <form method="get" action="/planner" class="pl-pick">
                 <label>Class <select name="gc" onchange="this.form.submit()">${opts}</select></label>
                 <noscript><button type="submit">Go</button></noscript>
-                <button type="button" id="pl-undo" class="btn-secondary" title="undo the last drop (one step)">↶ Undo last</button>
+                <button type="button" id="pl-undo" class="btn-secondary"${canUndo ? '' : ' disabled'} title="${canUndo ? 'undo the last drop (one step deep, this class only)' : 'nothing to undo yet'}">↶ Undo last</button>
               </form>
               <p class="muted">Drag a lesson from the tray onto a slot to place it — dropping onto a filled slot pushes that lesson and everything after it along one (holidays skipped). Drag a whole unit (⠿) to lay all its lessons from that slot. Drag a placed lesson to move it; ✕ removes it and pulls the rest forward; 🔓 pins a lesson to its date so cascades flow around it. The next ${WEEKS} school weeks; history is fixed.</p>
               <div class="pl-layout">
@@ -332,9 +337,15 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
     const fold = (changes: Placement[]) => {
       for (const c of changes) work[indexOf.get(key(c.date, c.timetabledLessonId))!]!.lessonPlanId = c.lessonPlanId;
     };
+    // The plan ids a pushing op (insert/move/unit) is obliged to keep on the board — used after the op to
+    // detect any lesson the cascade silently dropped past year-end (15.2b). Removing ops (pull/clear) and
+    // in-place ops (replace/swap) leave it null: they never overflow the window.
+    const beforePlans = positions.map((p) => p.lessonPlanId).filter((id): id is number => id != null);
+    let mustRemain: number[] | null = null;
 
     if (op === 'insert') {
       if (plan == null) return reply.code(400).send('No lesson to place.');
+      mustRemain = [...beforePlans, plan];
       fold(cascadeInsert(work, tIdx, plan));
     } else if (op === 'replace') {
       if (plan == null) return reply.code(400).send('No lesson to place.');
@@ -348,6 +359,7 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
       if (unit == null) return reply.code(400).send('No unit to place.');
       const lessons = await listPlansForUnit(unit);
       if (!lessons.length) return reply.code(400).send('That unit has no lessons.');
+      mustRemain = lessons.map((l) => l.id); // every unit lesson must land somewhere in the window
       fold(layUnit(work, tIdx, lessons.map((l) => l.id)));
     } else if (op === 'pull') {
       fold(pullForward(work, tIdx));
@@ -363,8 +375,24 @@ export function registerPlannerRoutes(app: FastifyInstance): void {
       if (positions[fIdx]!.locked) return reply.code(400).send('That lesson is pinned — unpin it first (🔒).');
       const moving = work[fIdx]!.lessonPlanId;
       if (moving == null) return reply.code(400).send('Nothing bound on the source slot.');
+      mustRemain = beforePlans; // the moving lesson is lifted then re-inserted — none may fall off
       fold(pullForward(work, fIdx)); // lift it out, closing the gap
       fold(cascadeInsert(work, tIdx, moving)); // drop it in at the target, pushing as needed
+    }
+
+    // 15.2b — refuse a drop that would push a real lesson off the end of the year rather than vanishing
+    // it (mirrors /map/shift's year-end overflow message). The window already spans to year-end, so this
+    // fires only when the remaining year is genuinely full.
+    if (mustRemain) {
+      const lost = lostOffWindow(mustRemain, work.map((p) => p.lessonPlanId));
+      if (lost.length) {
+        const n = lost.length;
+        return reply
+          .code(409)
+          .send(
+            `No room: that would push ${n === 1 ? 'a lesson' : `${n} lessons`} past the end of the school year, so nothing was moved. Pin or remove a lesson to make space, or lay the overflow next year.`,
+          );
+      }
     }
 
     const changes = positions

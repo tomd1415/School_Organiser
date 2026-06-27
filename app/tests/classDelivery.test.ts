@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cascadeInsert, layUnit, pullForward, upcomingClassSlots, type ClassSlot, type Placement } from '../src/services/delivery';
+import { cascadeInsert, layUnit, lostOffWindow, pullForward, upcomingClassSlots, type ClassSlot, type Placement } from '../src/services/delivery';
 import type { TermDate } from '../src/services/clock';
 
 // Build a stream of positions from a compact spec: a plan id, or null for an empty slot, or
@@ -153,5 +153,43 @@ describe('layUnit (13.5 / BUG-014 — lock-aware whole-unit lay-down)', () => {
   it('is a no-op for an out-of-range target', () => {
     const p = positions([1, 2]);
     expect(layUnit(p, 5, [71])).toEqual([]);
+  });
+});
+
+describe('lostOffWindow (15.2b — detect lessons pushed past the window end)', () => {
+  it('returns nothing when a cascade has a downstream gap to absorb the shift', () => {
+    const p = positions([1, 2, null]); // a gap at the end soaks up the cascade
+    const after = applied(p, cascadeInsert(p, 0, 7)); // [7,1,2]
+    const mustRemain = [1, 2, 7]; // everything placed before + the inserted lesson
+    expect(lostOffWindow(mustRemain, after)).toEqual([]);
+  });
+
+  it('flags the lesson a full-window cascadeInsert silently drops off the end', () => {
+    const p = positions([1, 2, 3]); // FULL window — no gap downstream
+    const after = applied(p, cascadeInsert(p, 0, 7)); // [7,1,2] — 3 fell off the end
+    const mustRemain = [1, 2, 3, 7];
+    expect(lostOffWindow(mustRemain, after)).toEqual([3]);
+  });
+
+  it('flags unit lessons that did not fit when positions ran out', () => {
+    const p = positions([null, null]);
+    const after = applied(p, layUnit(p, 0, [71, 72, 73, 74])); // only 71,72 fit
+    expect(lostOffWindow([71, 72, 73, 74], after)).toEqual([73, 74]);
+  });
+
+  it('is clean for a move that stays within the window', () => {
+    const p = positions([1, 2, 3, null]);
+    // lift 1 (pull forward), then re-insert at index 2
+    const lifted = applied(p, pullForward(p, 0)); // [2,3,null,null]
+    const moved = lifted.slice();
+    // simulate cascadeInsert of plan 1 at index 2 on the lifted board
+    const lp = positions(lifted as Array<number | null>);
+    const after = applied(lp, cascadeInsert(lp, 2, 1)); // [2,3,1,null]
+    void moved;
+    expect(lostOffWindow([1, 2, 3], after)).toEqual([]);
+  });
+
+  it('dedupes and preserves first-seen order of the lost ids', () => {
+    expect(lostOffWindow([5, 5, 6, 7, 6], [7, null])).toEqual([5, 6]);
   });
 });
