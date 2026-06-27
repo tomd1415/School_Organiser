@@ -242,6 +242,38 @@ async function attachSlides(planId: number, title: string, bullets: string[]): P
   await linkResourceToPlan(resId, planId);
 }
 
+// A handful of IMPORTED reference-unit files, recorded with the original folder path in the version's
+// change_note (`imported from <relpath>`) exactly as the bulk importer does — so the "convert a
+// downloaded unit" search (which scans those paths for folders holding ≥2 "Lesson N" subfolders) has
+// real candidates to find. Two units, each with ≥2 lessons; tiny placeholder bodies (the convert flow
+// reads the PATHS, not the file contents).
+async function seedImportedUnits(): Promise<void> {
+  const lessons: Array<{ unit: string; folder: string; year: string; lesson: number }> = [
+    { unit: 'Unit 1 — Programming essentials', folder: 'KS3/year_7/Unit 1 — Programming essentials', year: 'Year 7', lesson: 1 },
+    { unit: 'Unit 1 — Programming essentials', folder: 'KS3/year_7/Unit 1 — Programming essentials', year: 'Year 7', lesson: 2 },
+    { unit: 'Unit 1 — Programming essentials', folder: 'KS3/year_7/Unit 1 — Programming essentials', year: 'Year 7', lesson: 3 },
+    { unit: 'Unit 2 — Networks', folder: 'KS3/year_8/Unit 2 — Networks', year: 'Year 8', lesson: 1 },
+    { unit: 'Unit 2 — Networks', folder: 'KS3/year_8/Unit 2 — Networks', year: 'Year 8', lesson: 2 },
+  ];
+  for (const l of lessons) {
+    const rel = `${l.folder}/Lesson ${l.lesson}/slides.pptx`;
+    const buf = Buffer.from(`placeholder for ${rel}`, 'utf8');
+    await createResourceWithVersion(
+      {
+        title: `${l.unit} — Lesson ${l.lesson}`,
+        kind: 'slides',
+        mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        source: 'imported',
+        unit: l.unit,
+        yearGroup: l.year,
+        sourceAttribution: 'Teach Computing / NCCE (OGL)',
+      },
+      { filename: 'slides.pptx', buf, checksum: checksum(buf), author: 'teacher', changeNote: `imported from ${rel}` },
+    );
+  }
+  log(`  imported units: 2 reference units (${lessons.length} lesson files) for convert-search`);
+}
+
 // ── 4. lay each scheme across each class, mark past lessons taught, generate work ────────────────
 const STOP_TEMPLATES = [
   (t: string) => `Covered "${t}" — most of the class finished the questions; recap misconceptions next lesson.`,
@@ -451,6 +483,7 @@ async function main(): Promise<void> {
 
   const { pupilsByGroup, levelByPupilGc, total } = await makePupils(groups, gcs);
   const { plansByCourse } = await makeSchemes(courseByName);
+  await seedImportedUnits();
   const counts = await deliverAndWork(gcs, plansByCourse, pupilsByGroup, levelByPupilGc, terms);
 
   // settings: turn on the pupil-facing features (with their DPIA acks) so the work/marks panels are

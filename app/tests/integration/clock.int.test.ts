@@ -8,10 +8,12 @@ describe('clock repo (integration — needs the dev DB up)', () => {
     await pool.end();
   });
 
-  it('loads the clock context: 65 periods, 14 term dates, tz, minutes', async () => {
+  it('loads the clock context: 65 periods, 15 term dates, tz, minutes', async () => {
     const ctx = await getClockContext();
     expect(ctx.periods.length).toBe(65);
-    expect(ctx.terms.length).toBe(14);
+    // 15 = the 14 base-seed term dates + the summer half-term the test-data fixture (testData.ts) adds
+    // for a realistic mid-term gap. The integration suite runs against that fixture (see globalSetup).
+    expect(ctx.terms.length).toBe(15);
     expect(ctx.tz).toBe('Europe/London');
     const l1 = ctx.periods.find((p) => p.lessonIndex === 1);
     expect(l1?.startMin).toBe(9 * 60 + 10); // 09:10

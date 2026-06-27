@@ -16,6 +16,7 @@ import {
   buildPeriodDefinitions,
 } from './data';
 import { PREP_TEMPLATE_DEFAULTS } from '../services/prep';
+import { DEFAULT_TEACHING_CONTEXT } from '../config/teachingContext';
 
 function req<T>(v: T | undefined, what: string): T {
   if (v === undefined) throw new Error(`seed: missing reference: ${what}`);
@@ -110,6 +111,9 @@ async function main(): Promise<void> {
         ),
       );
     }
+    // Backfill the school-wide default teaching context on any course missing one (migration 0008
+    // only backfilled courses existing when it ran; freshly-seeded courses need it too).
+    await client.query(`UPDATE courses SET teaching_context = $1 WHERE teaching_context IS NULL`, [DEFAULT_TEACHING_CONTEXT]);
 
     // ── period definitions ── (key by L:weekday:lessonIndex and S:weekday:slotType)
     const periodId = new Map<string, number>();

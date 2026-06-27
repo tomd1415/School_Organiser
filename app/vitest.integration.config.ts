@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/integration/**/*.test.ts'],
+    // Ensure the test-data fixture (enrolled pupils, authored schemes, lessons-on-calendar, occurrences,
+    // resources) is seeded before the suite — `./start.sh` only seeds the base timetable, so without this
+    // a fresh dev DB failed ~14 tests for want of that fixture. Idempotent; fast-skips when already present.
+    globalSetup: ['tests/integration/globalSetup.ts'],
     // All integration files hit the ONE shared dev DB, and some assert on global row counts
     // (e.g. "converting without a key materialises nothing"). Run files serially so concurrent
     // scratch-data churn in another file can't race those assertions.

@@ -3,6 +3,7 @@
 // Year-scoped editors always take an explicit academic_year_id so next September can be built
 // as a draft alongside the live year.
 import { pool } from '../db/pool';
+import { DEFAULT_TEACHING_CONTEXT } from '../config/teachingContext';
 
 // ── academic years ───────────────────────────────────────────────────────────────────────────
 
@@ -323,7 +324,12 @@ export async function listAllCourses(): Promise<CourseRow[]> {
 }
 
 export async function createCourse(name: string): Promise<void> {
-  await pool.query(`INSERT INTO courses (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`, [name.slice(0, 100)]);
+  // Seed the school-wide default teaching context on a new course so the "every course has a teaching
+  // context" invariant holds for courses created after migration 0008's one-off backfill.
+  await pool.query(`INSERT INTO courses (name, teaching_context) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING`, [
+    name.slice(0, 100),
+    DEFAULT_TEACHING_CONTEXT,
+  ]);
 }
 
 export async function updateCourseField(id: number, field: string, value: string | null): Promise<boolean> {
