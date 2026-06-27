@@ -29,12 +29,32 @@ carries no instance-specific resource ids; the seed re-resolves them to fresh id
 - **Seed / transfer** every committed bundle onto an instance (idempotent — re-running REPLACES a unit of
   the same title on its target scheme; the target course must exist):
   ```bash
-  cd app && DATABASE_URL=… RESOURCE_STORE_PATH=… npm run seed:lessons        # all bundles
+  cd app && DATABASE_URL=… RESOURCE_STORE_PATH=… npm run seed:lessons        # all bundles (REPLACE)
   cd app && … npm run seed:lessons -- <unit-slug>                            # just one
+  cd app && … npm run seed:lessons -- --new-only                             # provision: only units NOT already here
   ```
+  Use **`--new-only`** for unattended provisioning (boot hook / cron / a freshly-set-up instance): it creates
+  any unit that's missing and **never touches one that already exists**, so a teacher's local edits on that
+  instance are never clobbered. Plain `seed:lessons` (replace) is the deliberate "push my updated master" path.
 
 Round-trip is **lossless** (proven): export → wipe → re-seed yields byte-identical plans + resources, with
 embedded media re-linked.
+
+## Transferring to a future instance over the internet
+
+The bundles live in git, so **git is the transfer channel** — no extra service needed:
+
+1. Push this repo to a private remote (GitHub / GitLab / self-hosted Gitea).
+2. A future instance clones/pulls it as part of its normal deploy (the deploy already does `git pull`).
+3. Provision the lessons — pick one:
+   - **On first deploy** add `npm run seed:lessons -- --new-only` to the deploy/boot step (right after
+     migrations). A brand-new instance then materialises every committed lesson with zero manual steps.
+   - **Ongoing**, to pull future conversions automatically, a cron on the instance:
+     `git pull --ff-only && npm run seed:lessons -- --new-only` (the `--new-only` guard keeps it safe to run
+     on a schedule). Promoting an *updated* master is the deliberate plain `seed:lessons` (replace) instead.
+
+Curriculum content only (no pupil data, no AI) → safe to transmit over the internet. For the binaries at
+scale, see git-LFS below (the remote then serves the images/videos over HTTPS too).
 
 ## Binary assets at scale (git-LFS)
 

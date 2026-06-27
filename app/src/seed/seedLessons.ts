@@ -3,7 +3,9 @@
 // (its plans + their resources removed first), so re-seeding converges. Resolves {{res:<file>}} placeholders
 // in the markdown to this instance's freshly-created /resources/<id>/view URLs, so embedded images/videos
 // work after transfer. Curriculum content only (no pupil data, no AI).
-//   cd app && DATABASE_URL=… RESOURCE_STORE_PATH=… npx tsx src/seed/seedLessons.ts [slug]
+//   cd app && DATABASE_URL=… RESOURCE_STORE_PATH=… npx tsx src/seed/seedLessons.ts [slug] [--new-only]
+// --new-only = provision-on-boot / cron mode: create units that aren't here yet, never replace one that is
+// (so a teacher's edits on a deployed instance are never clobbered). Default replaces same-title units.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pool } from '../db/pool';
@@ -40,11 +42,20 @@ async function removeExistingUnit(schemeId: number, title: string): Promise<void
   await pool.query(`DELETE FROM units WHERE id = $1`, [u.id]); // cascades lesson_plans
 }
 
-async function seedBundle(dir: string): Promise<{ ok: boolean; msg: string }> {
+async function unitExists(schemeId: number, title: string): Promise<boolean> {
+  return (await pool.query(`SELECT 1 FROM units WHERE scheme_id = $1 AND title = $2`, [schemeId, title])).rowCount! > 0;
+}
+
+async function seedBundle(dir: string, newOnly: boolean): Promise<{ ok: boolean; msg: string }> {
   const manifest: Manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
   const schemeId = await schemeForCourse(manifest.course.name, manifest.course.keyStage);
   if (!schemeId) return { ok: false, msg: `SKIP "${manifest.unitTitle}" — no active scheme for course "${manifest.course.name}" (${manifest.course.keyStage})` };
 
+  // --new-only (safe for auto-provisioning / cron): never touch a unit that's already here, so a teacher's
+  // edits on an instance are never clobbered. Default (deliberate update) REPLACES the same-title unit.
+  if (newOnly && (await unitExists(schemeId, manifest.unitTitle))) {
+    return { ok: true, msg: `kept existing "${manifest.unitTitle}" (--new-only)` };
+  }
   await removeExistingUnit(schemeId, manifest.unitTitle);
   const unitId = await materialiseUnit(schemeId, manifest.unitTitle, manifest.lessons.map((l) => ({ title: l.title, objectives: l.objectives, outline: l.outline })));
   if (!unitId) return { ok: false, msg: `FAIL "${manifest.unitTitle}" — materialiseUnit returned null` };
@@ -82,10 +93,12 @@ async function seedBundle(dir: string): Promise<{ ok: boolean; msg: string }> {
 
 async function main(): Promise<void> {
   if (!existsSync(BUNDLES)) { console.log('no seed-content/lessons/ — nothing to seed'); return; }
-  const only = process.argv[2];
+  const args = process.argv.slice(2);
+  const newOnly = args.includes('--new-only'); // provision-on-boot / cron: add missing units, never clobber an instance's edits
+  const only = args.find((a) => !a.startsWith('--'));
   const dirs = readdirSync(BUNDLES, { withFileTypes: true }).filter((d) => d.isDirectory() && (!only || d.name === only));
   for (const d of dirs) {
-    const r = await seedBundle(join(BUNDLES, d.name));
+    const r = await seedBundle(join(BUNDLES, d.name), newOnly);
     console.log((r.ok ? '✓ ' : '✗ ') + r.msg);
   }
 }
