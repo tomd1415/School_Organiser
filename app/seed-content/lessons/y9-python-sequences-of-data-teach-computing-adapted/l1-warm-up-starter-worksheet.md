@@ -5,38 +5,34 @@
 | Date | Type the date here |
 
 ## Starter — let me check
-A quick warm-up to remember Python from last year. Drag each answer into its box.
+Match each Python word to what it does. Drag each answer to its word.
 
-| Python word | What I use it for |
+| Python word | What it does |
 |---|---|
-| input | (  ) read from the keyboard (  ) show on the screen (  ) repeat actions (  ) choose what happens (  ) give a value to a variable |
-| print | (  ) read from the keyboard (  ) show on the screen (  ) repeat actions (  ) choose what happens (  ) give a value to a variable |
-| while | (  ) read from the keyboard (  ) show on the screen (  ) repeat actions (  ) choose what happens (  ) give a value to a variable |
-| if | (  ) read from the keyboard (  ) show on the screen (  ) repeat actions (  ) choose what happens (  ) give a value to a variable |
-| = | (  ) read from the keyboard (  ) show on the screen (  ) repeat actions (  ) choose what happens (  ) give a value to a variable |
+| `input` | (  ) read from the keyboard (  ) display to the screen (  ) repeat actions (  ) check a condition (  ) assign a value |
+| `print` | (  ) read from the keyboard (  ) display to the screen (  ) repeat actions (  ) check a condition (  ) assign a value |
+| `while` | (  ) read from the keyboard (  ) display to the screen (  ) repeat actions (  ) check a condition (  ) assign a value |
+| `if` | (  ) read from the keyboard (  ) display to the screen (  ) repeat actions (  ) check a condition (  ) assign a value |
+| `=` | (  ) read from the keyboard (  ) display to the screen (  ) repeat actions (  ) check a condition (  ) assign a value |
 
 ## 🟢 Support
+Read this program carefully.
+
+`a = int(input())`
+`b = int(input())`
+`if b > a:`
+`  print(b)`
+
 | Question | Choose |
 |---|---|
-| Which word READS a value the user types in? | (  ) input (  ) print (  ) if |
+| If the user types 12 then 2, what does this program display? | (  ) nothing (  ) 12 (  ) 2 |
 
 ## 🟡 Core
-Read the program on the board:
-
-```python
-a = int(input())   # the user types 12
-b = int(input())   # the user types 2
-avg = b + a / 2
-print(avg)
-```
-
-| Question | Choose |
+| Question | Your answer |
 |---|---|
-| What number will this program print? | (  ) 7 (  ) 8 (  ) 13 |
-
-> Tip: work out `a / 2` first, then add `b`.
+| In `avg = a + b / 2`, which is worked out first: the `+` or the `/`? | Type your answer here |
 
 ## 🔴 Challenge
-| Question | Choose |
+| Question | Your answer |
 |---|---|
-| A program has the line `if day = 4:` — what is the mistake? | (  ) it should be `==` (  ) it should be a full stop (  ) there is no mistake |
+| Why does `if b > a` need a colon `:` at the end of the line? | Type your answer here |
