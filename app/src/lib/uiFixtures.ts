@@ -73,6 +73,11 @@ Input: keyboard, microphone
 Output: monitor, speaker
 \`\`\`
 
+## How did you find it?
+| Question | Your rating |
+|----------|-------------|
+| How confident are you with sequences now? | [scale 1-5: not sure … very confident] |
+
 ## ✅ Success checklist
 - [ ] I typed my name
 - [ ] I answered every question

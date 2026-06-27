@@ -101,10 +101,10 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
   if (!oc || oc.lessonPlanId == null) return { ok: false, message: 'No worksheet is bound to this lesson.' };
   const ws = await getLessonWorksheet(oc.groupCourseId, oc.lessonPlanId);
   if (!ws) return { ok: false, message: 'No worksheet to build a scheme from.' };
-  // Screenshot (image) fields aren't auto-marked — the teacher reviews them — so keep them out of the
-  // mark scheme. Ordering (parsons/order) and grouping (sort/label) fields carry their own correct answer
-  // in the worksheet and are checked against it in the marking modal, so they're left out of the AI scheme.
-  const SELF_MARKED = new Set(['image', 'parsons', 'order', 'sort', 'label']);
+  // Not auto-marked by the AI scheme: screenshots (image, teacher reviews); ordering (parsons/order) and
+  // grouping (sort/label) carry their own correct answer and are checked in the marking modal; slider
+  // (scale) is uncredited self-assessment.
+  const SELF_MARKED = new Set(['image', 'parsons', 'order', 'sort', 'label', 'scale']);
   const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => !SELF_MARKED.has(f.kind));
   if (fields.length === 0) return { ok: false, message: 'This worksheet has no answerable fields.' };
   const answersMd = await getLessonDocMarkdown(oc.groupCourseId, oc.lessonPlanId, 'answers');

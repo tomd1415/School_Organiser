@@ -100,6 +100,28 @@ const CODE_CELL = /\b(?:code|program|programme|script|pseudocode|algorithm)\b/i;
 function choiceOptions(s: string): string[] {
   return s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
 }
+// A SLIDER / RATING-SCALE answer cell: "[scale 1-5]" or "[scale 1-5: not sure … very confident]" — a range
+// input storing the chosen NUMBER. Distinct from choice/multi/blank (it has content between single brackets,
+// not an empty "[ ]"). Default uncredited self-assessment (a plenary "how confident are you?").
+const SCALE_RE = /^\[scale\s+(-?\d+)\s*[-–—]\s*(-?\d+)\s*(?::\s*(.+?))?\]$/i;
+function isScaleCell(s: string): boolean {
+  return SCALE_RE.test(s.trim());
+}
+function parseScale(s: string): { min: number; max: number; minLabel?: string; maxLabel?: string } | null {
+  const m = s.trim().match(SCALE_RE);
+  if (!m) return null;
+  const min = Number(m[1]);
+  const max = Number(m[2]);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+  let minLabel: string | undefined;
+  let maxLabel: string | undefined;
+  if (m[3]) {
+    const parts = m[3].split(/\s*(?:…|\.{2,})\s*/).map((p) => p.trim()).filter(Boolean);
+    minLabel = parts[0];
+    maxLabel = parts.length > 1 ? parts[parts.length - 1] : undefined;
+  }
+  return { min, max, minLabel, maxLabel };
+}
 
 // A FILL-IN-THE-BLANK marker inside instruction prose ("The CPU does [[ ]]."): each "[[ ]]" becomes an
 // inline input keyed blank.{n} — a global counter across the document, like task.{n}, so keys are
@@ -551,6 +573,28 @@ function blankInput(key: string, opts: WorksheetOptions): string {
     hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="input changed delay:600ms, blur" hx-swap="none"><span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
 }
 
+/** A slider / rating-scale answer: a range input storing the chosen number. Autosaves on change like a
+ * choice (same /me/answer path). Uncredited self-assessment by default. `<output>` shows the live value. */
+function scaleControl(key: string, label: string, sc: { min: number; max: number; minLabel?: string; maxLabel?: string }, opts: WorksheetOptions): string {
+  const value = (opts.values?.get(key) ?? '').trim();
+  if (opts.mode === 'review') {
+    return value !== ''
+      ? `<div class="ws-answer ws-scale-review">${esc(value)} <span class="muted">(${sc.min}–${sc.max})</span></div>`
+      : `<div class="ws-answer ws-empty">—</div>`;
+  }
+  const al = esc(label || 'rating');
+  const v = value !== '' ? value : String(Math.round((sc.min + sc.max) / 2));
+  const ends = sc.minLabel || sc.maxLabel
+    ? `<div class="ws-scale-ends"><span>${esc(sc.minLabel ?? String(sc.min))}</span><span>${esc(sc.maxLabel ?? String(sc.max))}</span></div>`
+    : '';
+  if (opts.mode === 'preview') {
+    return `<div class="ws-scale">${ends}<div class="ws-scale-row"><input class="ws-scale-range" type="range" min="${sc.min}" max="${sc.max}" value="${esc(v)}" disabled aria-label="${al}"><output class="ws-scale-out">${esc(v)}</output></div></div>`;
+  }
+  const saved = `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
+  // The range autosaves on change (htmx); an inline oninput keeps the visible <output> in step.
+  return `<div class="ws-scale"><form class="ws-scale-form" hx-post="${esc(saveUrl(opts.action, key))}" hx-trigger="change" hx-swap="none">${ends}<div class="ws-scale-row"><input class="ws-scale-range" type="range" name="value" min="${sc.min}" max="${sc.max}" value="${esc(v)}" aria-label="${al}" oninput="this.parentNode.querySelector('output').value=this.value"><output class="ws-scale-out">${esc(v)}</output></div></form>${saved}</div>`;
+}
+
 // ── Ordering widgets: Parson's Problems (P6) + plain-language sequencing ─────────────────────────
 // A ```parsons fenced block lists CODE lines in correct order (the pupil drags the jumble back); a
 // ```order block does the same for plain-language STEPS/events (a packet's journey, the steps of an
@@ -687,7 +731,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
   const answerCol = header.map((c) => PROMPT.test(c) || SCREENSHOT.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c) || isMultiCell(c)));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c) || isMultiCell(c) || isScaleCell(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {
@@ -709,7 +753,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
     isA &&
     bodyRows.some((r) => {
       const v = (r[c] ?? '').trim();
-      return v === '' || SCREENSHOT.test(v) || isChoiceCell(v) || isMultiCell(v);
+      return v === '' || SCREENSHOT.test(v) || isChoiceCell(v) || isMultiCell(v) || isScaleCell(v);
     }),
   );
   const headerIsData = bodyRows.length === 0 ? answerCol.some(Boolean) : headerHasPlaceholder && !answerColHasFillBody;
@@ -745,7 +789,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // A cell is an input when it's an answer-column blank/placeholder, or itself a placeholder/screenshot/choice.
   const cellIsInput = (c: number, cell: string): boolean => {
     const ph = PLACEHOLDER_CELL.test(cell);
-    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell);
+    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell);
   };
   const renderRow = (row: string[], rowNo: number): string => {
     // A4: a row that has an input is a question — give its prompt cell a 🔊 read-aloud button.
@@ -761,7 +805,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       const shot = SCREENSHOT.test(cell);
       const cho = isChoiceCell(cell);
       const multi = isMultiCell(cell);
-      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho || multi)) || placeholder || shot || cho || multi;
+      const scl = isScaleCell(cell);
+      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho || multi || scl)) || placeholder || shot || cho || multi || scl;
       if (!isInput) {
         // The question prompt for this row (its first non-empty text cell) gets the read-aloud button.
         if (opts.mode === 'form' && rowHasInput && !promptSpoken && cell.trim() !== '') {
@@ -802,6 +847,13 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // "( ) a ( ) b" cell becomes a multiple-choice field; everything else is a typed answer. Same
       // key scheme for all → marking is unaffected.
       const isShot = shot || SCREENSHOT.test(theadCells?.[c] ?? '') || SCREENSHOT.test(label);
+      if (scl && !isShot) {
+        const sc = parseScale(cell);
+        if (sc) {
+          localFields.push({ key, kind: 'scale', level: block.level, label, scale: sc });
+          return `<td class="ws-answer-cell ws-scale-cell">${scaleControl(key, label, sc, opts)}</td>`;
+        }
+      }
       if (multi && !isShot) {
         const options = multiOptions(cell);
         if (options.length >= 2) {

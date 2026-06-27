@@ -181,6 +181,43 @@ describe('Card sort (group items into categories)', () => {
   });
 });
 
+describe('Slider / rating scale', () => {
+  const md = `| Question | Your rating |\n|---|---|\n| How confident are you with loops? | [scale 1-5: not sure … very confident] |\n`;
+  it('a [scale a-b] cell becomes a scale field on the normal table-cell key', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields).toHaveLength(1);
+    expect(fields[0]!.kind).toBe('scale');
+    expect(fields[0]!.key).toBe('t1.r1.c2');
+    expect(fields[0]!.scale).toEqual({ min: 1, max: 5, minLabel: 'not sure', maxLabel: 'very confident' });
+  });
+  it('form mode renders a range input with the min/max + end labels and autosaves', () => {
+    const html = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    expect(html).toMatch(/type="range"/);
+    expect(html).toMatch(/min="1"/);
+    expect(html).toMatch(/max="5"/);
+    expect(html).toContain('key=t1.r1.c2');
+    expect(html).toContain('not sure');
+    expect(html).toContain('very confident');
+  });
+  it('review shows the saved number', () => {
+    const html = renderWorksheet(md, { mode: 'review', values: new Map([['t1.r1.c2', '4']]) }).html;
+    expect(html).toMatch(/ws-scale-review/);
+    expect(html).toContain('4');
+  });
+  it('a bare [scale 1-3] (no end labels) parses in a body row', () => {
+    const m2 = `| Question | Answer |\n|---|---|\n| Rate the lesson | [scale 1-3] |\n`;
+    const f = renderWorksheet(m2, { mode: 'review' }).fields;
+    expect(f).toHaveLength(1);
+    expect(f[0]!.kind).toBe('scale');
+    expect(f[0]!.scale).toEqual({ min: 1, max: 3, minLabel: undefined, maxLabel: undefined });
+  });
+  it('a malformed [scale 5-5] (max<=min) is not treated as a scale', () => {
+    const bad = `| Question | Answer |\n|---|---|\n| Rate it | [scale 5-5] |\n`;
+    const f = renderWorksheet(bad, { mode: 'review' }).fields;
+    expect(f.every((x) => x.kind !== 'scale')).toBe(true);
+  });
+});
+
 describe('per-worksheet key prefix (multiple worksheets)', () => {
   const md = `## Q
 | Question | Your answer |

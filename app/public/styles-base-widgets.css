@@ -2023,6 +2023,14 @@ html[data-textscale="3"] { font-size: 142%; }
 .ws-sort-empty { color: var(--muted); font-size: 0.85rem; list-style: none; }
 .ws-sort-tray.is-drop { outline: 2px solid var(--accent); }
 
+/* Slider / rating scale: a range input + a live value bubble, with optional end labels. */
+.ws-scale { display: flex; flex-direction: column; gap: 0.2rem; }
+.ws-scale-ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.8rem; }
+.ws-scale-row { display: flex; align-items: center; gap: 0.6rem; }
+.ws-scale-range { flex: 1; min-width: 6rem; accent-color: var(--accent); }
+.ws-scale-out { min-width: 1.6rem; text-align: center; font-weight: 600; border: 1px solid var(--line); border-radius: 6px; padding: 0.05rem 0.3rem; }
+.ws-scale-review { font-weight: 600; }
+
 /* marking modal: code / Parson's answers shown monospaced; a small kind tag on the question */
 .mm-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; white-space: pre; overflow-x: auto; margin: 0; background: rgba(0,0,0,0.04); padding: 0.35rem 0.5rem; border-radius: 6px; }
 .mm-ans .mm-code { background: rgba(37,99,235,0.06); }
