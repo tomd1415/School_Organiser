@@ -9,6 +9,7 @@ import { renderToggle } from '../lib/components';
 import { renderCaptureBar, renderCapturedChips, renderCapturedList } from '../lib/capturedView';
 import { renderNotesSearch, renderNotesChips, renderNotesGrid } from '../lib/notesView';
 import { renderClassHeatMap, renderProgressionAdmin, renderPupilLadder, renderSchemeGrid, renderSchemeMap } from '../lib/progressionView';
+import { renderHomeworkChase, renderPupilHomework } from '../lib/homeworkView';
 import { renderEventsGrouped } from '../lib/eventView';
 import { renderTaskList } from '../lib/taskView';
 import { renderOverseePage } from '../lib/overseeView';
@@ -229,6 +230,15 @@ export function registerUiGalleryRoutes(app: FastifyInstance): void {
           suggestions: [{ criterionId: 555, descriptor: 'I can explain how data is transmitted across networks', stageLabel: 'Year 8', strandCode: 'NW' }],
         }],
       }))}
+      ${item('Homework — teacher chase (16B)', 'renderHomeworkChase — set a lesson’s worksheet as homework (due date) + chase who has submitted. Outstanding rows highlighted; marking reuses the worksheet pipeline.', renderHomeworkChase({
+        todayIso: '2026-06-27', csrf: 'gallery',
+        options: [{ occurrenceCourseId: 12, date: '2026-06-26', label: '8PFA · Computing', planTitle: 'Binary addition', isHomework: false }],
+        rows: [
+          { occurrenceCourseId: 11, dueAt: '2026-06-25T23:59:00Z', lessonDate: '2026-06-24', className: '8PFA · Computing', notDone: 4, total: 12 },
+          { occurrenceCourseId: 10, dueAt: '2026-06-30T23:59:00Z', lessonDate: '2026-06-23', className: '9GCSE · CS', notDone: 0, total: 18 },
+        ],
+      }))}
+      ${item('Homework — pupil list (16B)', 'renderPupilHomework — the pupil’s outstanding homework behind the gate; each opens the worksheet to complete (answer key never reaches them).', `<div class="pupil-main">${renderPupilHomework([{ occurrenceCourseId: 11, dueAt: '2026-06-25T23:59:00Z', lessonDate: '2026-06-24', course: 'Computing' }], '2026-06-27')}</div>`)}
       ${item('Worksheet (read-only preview)', 'renderWorksheet, preview mode.', worksheetHtml)}
       ${item('Resources (SPEC §10)', 'renderSearchBar + renderResourceListPaged — search + filter pills (All · per-kind, as radios so the kind survives live search) over a card grid (auto-fill minmax 290px): each card a kind badge (Slides teal · Worksheet green · Quiz amber · others grey) · version (mono) · title · meta (🔗 linked-lesson count · size · source) · Open / Present↗ (slides) / download.', renderSearchBar([...new Set(GALLERY_RESOURCES.rows.map((r) => r.kind))], '', '') + renderResourceListPaged(GALLERY_RESOURCES))}
       ${item('Coverage (SPEC §9)', 'renderCoverageReport — the spec-point backbone as cards per spec area with a % bar; each point row is a status dot (✓ covered green · ○ gap red) · code (mono) · label · meta (the covering lesson ↗ or “not yet” in red). The All · Covered · Gaps filter hides points and drops emptied areas.', renderCoverageReport(GALLERY_COVERAGE))}

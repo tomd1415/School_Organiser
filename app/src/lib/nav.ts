@@ -55,6 +55,7 @@ export const NAV_MODEL: readonly NavItem[] = [
   { href: '/concepts', label: 'Concepts', group: 'CURRICULUM', tier: 'power' },
   { href: '/progression', label: 'Stages', group: 'CURRICULUM', tier: 'power' },
   { href: '/oversee', label: 'Oversee', group: 'CLASSES', tier: 'everyday' },
+  { href: '/homework', label: 'Homework', group: 'CLASSES', tier: 'power' },
   { href: '/pupils', label: 'Pupils', key: 'p', group: 'CLASSES', tier: 'power' },
   { href: '/settings', label: 'Settings', group: 'SETUP', tier: 'everyday' },
   { href: '/kit', label: 'Kit', group: 'SETUP', tier: 'power' },

@@ -56,6 +56,12 @@ export const paths = {
   progressionSpecLink: (): string => '/progression/spec-link',
   progressionEvidenceConfirm: (): string => '/progression/evidence/confirm',
 
+  // ── Homework (Phase 16B) ────────────────────────────────────────────────────────────────────────
+  me: (): string => '/me',
+  homework: (): string => '/homework',
+  homeworkSet: (): string => '/homework/set',
+  homeworkClear: (): string => '/homework/clear',
+
   // ── Query-string routes (HTML-attribute form; see header) ───────────────────────────────────────
   lessonOpen: (lesson: number, date: string, opts: { oc?: number; lab?: boolean } = {}): string =>
     `/lesson?lesson=${lesson}&amp;date=${esc(date)}` + (opts.oc ? `&amp;oc=${opts.oc}` : '') + (opts.lab ? '&amp;lab=1' : ''),

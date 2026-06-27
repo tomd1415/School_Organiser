@@ -140,11 +140,12 @@ interface MePageOptions {
   head: string;
   lesson: { lessonId: number; date: string } | null;
   blocks: string[];
+  homeworkHtml?: string; // 16B — the pupil's outstanding-homework list, above the lesson blocks
 }
 
 export function renderMePage(options: MePageOptions): string {
-  const { head, blocks } = options;
-  return `${head}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
+  const { head, blocks, homeworkHtml } = options;
+  return `${head}${homeworkHtml ?? ''}${blocks.join('') || '<section class="pupil-card"><p class="pupil-note">Nothing set for this lesson yet.</p></section>'}`;
 }
 
 export async function buildOccurrenceBlock(

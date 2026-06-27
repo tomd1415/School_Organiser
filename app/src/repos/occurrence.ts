@@ -121,6 +121,24 @@ export async function getOccurrenceHeader(occurrenceId: number): Promise<Occurre
   return rows[0] ?? null;
 }
 
+/** A single occurrence_course's section row by its id — for opening one specific lesson's worksheet (16B). */
+export async function getOccurrenceCourseById(occurrenceCourseId: number): Promise<OccurrenceCourseRow | null> {
+  const { rows } = await pool.query<OccurrenceCourseRow>(
+    `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId", gc.course_id AS "courseId",
+            c.name AS "courseName", c.colour,
+            oc.stopping_point AS "stoppingPoint", oc.progress_step AS "progressStep", oc.lesson_plan_id AS "lessonPlanId",
+            lp.title AS "planTitle", lp.objectives AS "planObjectives", lp.outline AS "planOutline",
+            lp.kit_needed AS "planKitNeeded"
+     FROM occurrence_courses oc
+     JOIN group_courses gc ON gc.id = oc.group_course_id
+     JOIN courses c        ON c.id  = gc.course_id
+     LEFT JOIN lesson_plans lp ON lp.id = oc.lesson_plan_id
+     WHERE oc.id = $1`,
+    [occurrenceCourseId],
+  );
+  return rows[0] ?? null;
+}
+
 export async function getOccurrenceCourses(occurrenceId: number): Promise<OccurrenceCourseRow[]> {
   const { rows } = await pool.query<OccurrenceCourseRow>(
     `SELECT oc.id AS "occurrenceCourseId", oc.group_course_id AS "groupCourseId", gc.course_id AS "courseId",

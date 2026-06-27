@@ -18,7 +18,7 @@ const ALL_HREFS = NAV_MODEL.map((i) => i.href);
 // Rail & Stage rebuild: the TODAY group is the daily default; power = expert-setup + Coverage (Settings
 // moved to everyday). Kept in NAV_MODEL order for the group assertion below.
 const DEFAULT_DAILY = ['/', '/timetable', '/focus', '/tasks', '/marking', '/planner'];
-const ADVANCED = ['/recurring', '/coverage', '/concepts', '/progression', '/pupils', '/kit', '/time', '/setup'];
+const ADVANCED = ['/recurring', '/coverage', '/concepts', '/progression', '/homework', '/pupils', '/kit', '/time', '/setup'];
 
 // renderRail reads module-level override + experience state; always reset both.
 afterEach(() => {

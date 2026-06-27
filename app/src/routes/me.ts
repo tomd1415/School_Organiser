@@ -7,7 +7,10 @@ import { esc } from '../lib/html';
 import { pool, withTransaction } from '../db/pool';
 import { resolveNow } from '../services/clock';
 import { getClockContext } from '../repos/clock';
-import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourses } from '../repos/occurrence';
+import { findOccurrence, findOrCreateOccurrence, getOccurrenceCourseById, getOccurrenceCourses } from '../repos/occurrence';
+import { localParts } from '../lib/time';
+import { listPupilHomework } from '../repos/homework';
+import { renderPupilHomework } from '../lib/homeworkView';
 import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
 import { getLessonSlidesMarkdown, getLessonWorksheets } from '../services/worksheet';
@@ -24,6 +27,7 @@ import {
   isDone,
   getPupilFeedback,
   upsertPupilFeedback,
+  pupilCanAccessOc,
 } from '../repos/pupilWork';
 import { getSlideState } from '../repos/slideSync';
 import { subscribe, sseFrame } from '../services/slideSync';
@@ -162,10 +166,35 @@ export function registerMeRoutes(app: FastifyInstance): void {
         ${remember}
         <form method="post" action="/logout" class="inline"><input type="hidden" name="_csrf" value="${esc(csrf)}"><button class="pupil-logout">Log out</button></form></header>`;
 
+      // 16B — open one specific homework worksheet from the pupil's list (?hw=oc), gated by enrolment.
+      const hwParam = z.object({ hw: z.coerce.number().int().positive().optional() }).safeParse(req.query);
+      const hwOc = !isTest && hwParam.success ? hwParam.data.hw : undefined;
+      if (hwOc && (await pupilCanAccessOc(pupilId, hwOc))) {
+        const section = await getOccurrenceCourseById(hwOc);
+        if (section) {
+          const marksOn = await marksEnabled();
+          const block = await buildOccurrenceBlock(
+            section, pupilId, false, testLevel, name, todayLabel, marksOn,
+            () => getPupilLevel(pupilId, Number(section.groupCourseId)),
+            (oc) => getAnswers(pupilId, oc),
+            (oc) => isDone(pupilId, oc),
+            (oc) => getPupilFeedback(pupilId, oc),
+            (gc, lp) => getLessonWorksheets(gc, lp),
+            (gc, lp) => getLessonSlidesMarkdown(gc, lp),
+            (oc) => pupilLessonResults(pupilId, oc),
+          );
+          body = `${head}<section class="pupil-card"><p class="pupil-note"><a class="link" href="${'/me'}">← back</a> · Homework</p></section>${block}`;
+          return reply.type('text/html').send(pupilLayout(body, csrf));
+        }
+      }
+
+      // 16B — the pupil's outstanding-homework list, shown above today's lesson.
+      const homeworkHtml = isTest ? '' : renderPupilHomework(await listPupilHomework(pupilId), localParts(new Date(), ctx.tz).isoDate);
+
       if (!lesson) {
         body = isTest
           ? `${head}<section class="pupil-card"><h1>No lesson chosen</h1><p class="pupil-note">Open a lesson on any date, then tap “🧪 Test as pupil”.</p></section>`
-          : `${head}<section class="pupil-card"><h1>No lesson right now</h1>
+          : `${head}${homeworkHtml}<section class="pupil-card"><h1>No lesson right now</h1>
           <p class="pupil-note">${state.isSchoolDay ? 'Check back when your lesson starts.' : 'No school today.'}</p></section>`;
       } else {
         // Read-first: only create+materialise the occurrence if it doesn't exist yet (avoids a
@@ -209,6 +238,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
             head,
             lesson,
             blocks,
+            homeworkHtml,
           });
         }
       }

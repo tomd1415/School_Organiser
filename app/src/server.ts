@@ -40,6 +40,7 @@ import { registerConceptRoutes } from './routes/concepts';
 import { registerNoteCaptureRoutes } from './routes/noteCapture';
 import { registerCoverageRoutes } from './routes/coverage';
 import { registerProgressionRoutes } from './routes/progression';
+import { registerHomeworkRoutes } from './routes/homework';
 import { registerSetupRoutes } from './routes/setup';
 import { registerRolloverRoutes } from './routes/rollover';
 import { registerWelcomeRoutes } from './routes/welcome';
@@ -265,6 +266,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerNoteCaptureRoutes(app);
   registerCoverageRoutes(app);
   registerProgressionRoutes(app);
+  registerHomeworkRoutes(app);
   registerSetupRoutes(app);
   registerRolloverRoutes(app);
   registerWelcomeRoutes(app);
