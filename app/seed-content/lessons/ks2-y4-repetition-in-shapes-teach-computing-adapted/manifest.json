@@ -1,0 +1,76 @@
+{
+  "unitTitle": "KS2 Y4 Repetition in shapes (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Programming a screen turtle",
+      "objectives": "I can type Logo commands to move the turtle\nI can explain what happens when I change a number in a command\nI can write a code snippet to draw something",
+      "outline": "Routine first (same every lesson). Vocabulary on board: program · turtle · command · value · FD · BK · RT · LT · CS · PU · PD. TA: everyone has the starter worksheet; Logo software open and projected. Read the 3 “I can…” aloud.\n1. (0–8) Starter — what is a turtle? On the starter worksheet pupils label the Logo screen (drag: drawing area, turtle, command box, Execute) and choose what the turtle does.\n   • Support: match command to meaning (FD/BK/RT/LT).  • Core: what does FD 100 / CS do.  • Challenge: multi-select which commands take a number.\n2. (8–20) I-do → we-do — basic commands. Demonstrate LIVE: FD 100 then FD 200 (longer line = bigger value); CS to clear; RT 90 / LT 90 (turns use degrees); PU/PD (move without drawing). Likely error: forgetting the number after a command → fix-words “every move and turn needs a number.”\n3. (20–35) We-do — read FD 100 RT 90 FD 200 and draw it on the board: it makes the digit 7. Pupils order the same commands on the activity worksheet, then type them in Logo.\n4. (35–50) You-do — pupils type commands to draw a shape or digit; save a screenshot to the show-your-work box.\n   • Support: one command at a time.  • Core: a short snippet.  • Challenge: draw a digit.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows one command and says what it does.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Programming a screen turtle — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-screen-turtle-starter-worksheet.md" },
+        { "title": "Programming a screen turtle — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-screen-turtle-activity-worksheet.md" },
+        { "title": "Programming a screen turtle — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-screen-turtle-slides.md" },
+        { "title": "FMSLogo screen — drawing area, turtle and command box (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-fmslogo-interface.png" }
+      ]
+    },
+    {
+      "title": "Programming letters",
+      "objectives": "I can plan an algorithm for a letter\nI can write my algorithm as Logo code\nI can test my code and debug it",
+      "outline": "Routine first. Vocabulary on board: algorithm · debug · bug · template. TA: everyone has the starter worksheet; Logo open. Read the 3 “I can…” aloud.\n1. (0–8) Starter — debug the digit 7. Show broken code FD 100 RT 9 FD 200 (turn too small). Pupils choose the mistake on the starter worksheet (RT 9 should be RT 90). Introduce “debug” = find and fix.\n   • Support: match bug/debug/algorithm to meaning.  • Core: which is the correct 90° turn.  • Challenge: multi-select all the mistakes in a worse snippet.\n2. (8–18) I-do — an algorithm is an ordered plan. Show squared-off letters (L, T, E, H) that use 90° turns. Model the letter L: FD 200 RT 90 FD 100 (line, turn, line).\n3. (18–35) You-do — pupils plan an algorithm for their initial (activity worksheet), then write it in Logo. Use home and PU to start fresh. Likely error: forgetting a turn → fix-words “line, turn, line, turn.”\n4. (35–50) Test and debug — run the code, fix mistakes, screenshot the finished letter.\n   • Support: draw the letter L.  • Core: a 3–4 line letter.  • Challenge: their own initial.\n5. (50–55) Plenary — self-tick; each pupil shows their letter and one thing they debugged.\nSame task S/C/C; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Programming letters — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-letters-starter-worksheet.md" },
+        { "title": "Programming letters — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-letters-activity-worksheet.md" },
+        { "title": "Programming letters — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-letters-slides.md" },
+        { "title": "Typing a command into the Logo command box (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-fmslogo-typing.png" }
+      ]
+    },
+    {
+      "title": "Patterns and repeats",
+      "objectives": "I can spot the repeated part of a pattern\nI can say how many times a pattern repeats\nI can use a count-controlled loop to draw a square",
+      "outline": "Routine first. Vocabulary on board: pattern · repeat · repetition · count-controlled loop · algorithm. TA: everyone has the starter worksheet; Logo open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — patterns around us. Bunting (red, yellow, blue, green) and piano keys (groups of 2 and 3) on the starter worksheet: which part repeats, what comes next, how many times. “Repeat” = do something again.\n   • Support: tick the repeating part.  • Core: count the repeats.  • Challenge: sort things into repeats / no pattern.\n2. (10–20) I-do — a square the long way: type FD 100 RT 90 four times. Ask: is there a quicker way? Spot the repeated chunk.\n3. (20–35) We-do — a square the short way: repeat 4 [FD 100 RT 90]. The number = how many times; the commands go in [square brackets]. Run both versions — same square, shorter code.\n4. (35–50) You-do — pupils draw a square with the loop, then change the numbers (activity worksheet). Spot → count → write the loop. Likely error: missing brackets → fix-words “the repeat code goes in square brackets.”\n   • Support: copy the square loop.  • Core: change the size.  • Challenge: rewrite a long snippet as a loop.\n5. (50–55) Plenary — self-tick; each pupil shows a loop and says what the number means.\nSame task S/C/C; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Patterns and repeats — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-patterns-repeats-starter-worksheet.md" },
+        { "title": "Patterns and repeats — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-patterns-repeats-activity-worksheet.md" },
+        { "title": "Patterns and repeats — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-patterns-repeats-slides.md" },
+        { "title": "Bunting flags repeating pattern (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-bunting-pattern.png" },
+        { "title": "Piano keys repeating pattern (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-piano-keys.png" }
+      ]
+    },
+    {
+      "title": "Using loops to create shapes",
+      "objectives": "I can say what changing the repeat number does\nI can trace a loop and predict the shape\nI can choose which numbers to change to draw a shape",
+      "outline": "Routine first. Vocabulary on board: count-controlled loop · trace · value · sides · angle. TA: everyone has the starter worksheet; Logo open and the shapes table to hand. Read the 3 “I can…” aloud.\n1. (0–8) Starter — what does the repeat number do? A loop draws a tower; to double the height, double the number (answer 8). Starter worksheet.\n   • Support: match loop to number of sides.  • Core: what shape will this loop draw.  • Challenge: order a code trace.\n2. (8–18) I-do — tracing code. Read repeat 4 [FD 100 LT 90] one step at a time on the board: line, turn, line, turn — a square. Pupils trace on whiteboards.\n3. (18–30) We-do — shapes all follow repeat (sides) [FD 100 RT (angle)]. Use the shapes table for the angle (triangle 120, pentagon 72, hexagon 60, octagon 45). Don’t labour the 360÷sides maths — give the angle.\n4. (30–50) You-do — pupils start from the square loop and change the numbers for a triangle, then a hexagon (activity worksheet). Likely error: wrong angle → fix-words “check the table.”\n   • Support: match shape to loop.  • Core: change one shape / make it bigger.  • Challenge: write an octagon loop.\n5. (50–55) Plenary — self-tick; each pupil shows a loop and says what shape it draws.\nSame task S/C/C; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Using loops to create shapes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-loops-shapes-starter-worksheet.md" },
+        { "title": "Using loops to create shapes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-loops-shapes-activity-worksheet.md" },
+        { "title": "Using loops to create shapes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-loops-shapes-slides.md" },
+        { "title": "Regular shapes with their turn angles and loop code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-shapes-angles.png" }
+      ]
+    },
+    {
+      "title": "Breaking things down",
+      "objectives": "I can break a real task into smaller steps (decompose)\nI can make and use a procedure in Logo\nI can explain that the computer can call a procedure many times",
+      "outline": "Routine first. Vocabulary on board: decompose · procedure · call · loop. TA: everyone has the starter worksheet; Logo open. Read the 3 “I can…” aloud.\n1. (0–8) Recap — a hexagon is repeat 6 [FD 100 RT 60]; one repeated chunk, six times.\n2. (8–18) Starter — decompose a task. “Decompose” = break into smaller parts. Build a class list for “get ready for PE”; pupils order the steps on the starter worksheet.\n   • Support: order four PE steps.  • Core: match a big task to a small step.  • Challenge: sort a house drawing into square + triangle chunks.\n3. (18–35) I-do → we-do — a procedure is a named chunk. Demonstrate live: to square / repeat 4 [fd 100 rt 90] / end. The name is for us; the computer just calls it. Pupils order the procedure (Parsons) on the activity worksheet. Likely error: missing end → fix-words “every procedure needs an end.”\n4. (35–50) You-do — make the square procedure, then call it: repeat 20 [square rt 18] for a pattern; try a triangle procedure.\n   • Support: match the parts of a procedure.  • Core: build the procedure (Parsons).  • Challenge: write a triangle procedure.\n5. (50–55) Plenary — self-tick; each pupil shows their procedure and the pattern it made.\nSame task S/C/C; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Breaking things down — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-breaking-down-starter-worksheet.md" },
+        { "title": "Breaking things down — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-breaking-down-activity-worksheet.md" },
+        { "title": "Breaking things down — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-breaking-down-slides.md" },
+        { "title": "Logo procedure editor — to square, repeat, end (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-procedure-editor.png" }
+      ]
+    },
+    {
+      "title": "Creating a program",
+      "objectives": "I can design a program that uses count-controlled loops\nI can use my design to write a program\nI can debug my program to improve it",
+      "outline": "Routine first (project lesson — pull all the skills together). Vocabulary on board: design · program · count-controlled loop · procedure · debug · evaluate. TA: everyone has the starter worksheet; Logo open. Read the 3 “I can…” aloud.\n1. (0–8) Starter — matching designs. Show a repeated-square pattern; pupils choose which code made it (e.g. repeat 9 [square rt 40]). Starter worksheet.\n   • Support: match pattern to loop.  • Core: what makes a good loop pattern / setpc.  • Challenge: order the steps of making a program.\n2. (8–20) I-do — the brief: wrapping paper using more than one shape and at least one count-controlled loop. Model a simple plan (a row of squares, a row of triangles). Keep choices small for low load.\n3. (20–35) Step 1 design — pupils sketch and label their pattern on the activity worksheet BEFORE coding.\n4. (35–50) Step 2 program — turn the plan into Logo code; use procedures and setpc for colour; home/PU/PD to move without drawing.\n5. (50–58) Step 3 debug + evaluate — run it, check it matches the plan, fix mistakes (trace / read aloud / chunk it). Likely error: wrong angle or missing bracket → fix-words “check it against your plan.” Complete the evaluate section + confidence scale.\n   • Support: tick shapes + one loop.  • Core: full plan + code.  • Challenge: procedure + colour + describe a debug.\n6. (58–60) Plenary — self-tick; celebrate/display the finished patterns.\nSame task S/C/C; no flashing/sound; movement breaks routine.",
+      "resources": [
+        { "title": "Creating a program — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-program-starter-worksheet.md" },
+        { "title": "Creating a program — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-program-activity-worksheet.md" },
+        { "title": "Creating a program — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-program-slides.md" },
+        { "title": "Repeated rotated-squares pattern (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-rotated-squares-pattern.png" }
+      ]
+    }
+  ]
+}

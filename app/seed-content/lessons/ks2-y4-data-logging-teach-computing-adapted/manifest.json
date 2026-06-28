@@ -1,0 +1,81 @@
+{
+  "unitTitle": "KS2 Y4 Data logging (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Answering questions — data over time",
+      "objectives": "I can say what data is\nI can choose the right table to answer a question\nI can think of a question a table could answer\nI can spot data that is collected over time",
+      "outline": "Routine first (same every lesson). Vocabulary on board: data · table · heading · over time. TA: everyone has the starter + activity worksheet. Read the four \"I can…\" aloud.\n1. (0–5) Starter — data around us. Pupils look at the school register example and CHOOSE that it is data collected over time, and what it can tell us.\n   • Support: what is data?  • Core: one thing the register shows.  • Challenge: why collect it over time.\n2. (5–15) I-do → we-do — three tables (A weather, B fitness tracker, C sport). Headings tell you what each holds. Pupils CHOOSE which table answers each question (A/B/C, or X if none can). Likely error: pick any table → fix-words \"check the headings first; if it's not a heading the answer is X.\"\n3. (15–20) Classroom data — what could we ask if we recorded temperature, sound and light in the room? Build a class list (kept for Lesson 5).\n4. (20–35) You-do — count the cars. Teacher plays a 1-minute road video (motion only). Each pupil counts ONE car colour and tallies. This is collecting data over time. Card-sort: collected over time vs one-off.\n   • Support: do the first sort together.  • Core: which question has no answer (X).  • Challenge: write a new question Table B could answer.\n5. (35–40) Plenary — self-tick the four \"I can…\"; each pupil names a question their tally could answer.\nDifferentiation on the SAME task, low floor / high ceiling — nobody's screen looks less done. No flashing/sound; movement breaks are routine. NOTE: the source A/B/C tables are PowerPoint tables (not rasters) — recreated as small markdown tables in the worksheet; a clean combined image is logged as an image-gap.",
+      "resources": [
+        { "title": "Answering questions — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-answering-questions-starter-worksheet.md" },
+        { "title": "Answering questions — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-answering-questions-activity-worksheet.md" },
+        { "title": "Answering questions — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-answering-questions-slides.md" },
+        { "title": "Cars on a road (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-vehicles.png" }
+      ]
+    },
+    {
+      "title": "Data collection — sensors and data loggers",
+      "objectives": "I can say what a sensor is\nI can name the sensors on a data logger\nI can read the data logger display\nI can say that sensors can record data automatically",
+      "outline": "Routine first. Vocabulary on board: input device · sensor · data logger. TA: everyone has the worksheets; a data logger to handle if available. Read the four \"I can…\" aloud.\n1. (0–10) Starter — senses to sensors. People use ears/eyes; a computer uses SENSORS. A microphone can be a SOUND sensor. Pupils CHOOSE what a microphone senses, and match each sensor to its job. Stress: a sensor is an INPUT.\n   • Support: what are ears for.  • Core: match sensor to job.  • Challenge: explain what a sound sensor does.\n2. (10–25) I-do → we-do — the data logger. It has sound, light and temperature sensors. Pupils LABEL the data logger (drag labels onto the icons + screen + buttons). TA: point at each icon.\n3. (25–35) Read the display — sound in dBA, light in lx, temperature in °C. Pupils read values off the screen (choose + fill-blank). Likely error: muddling units → fix-words \"dBA = sound, lx = light, °C = temperature.\"\n4. (35–50) You-do — recording automatically. Connect a logger; the computer records readings and makes a graph. Card-sort the sensors to their jobs. Challenge: why is leaving a logger on its own useful?\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil points to one sensor.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Data collection — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-data-collection-starter-worksheet.md" },
+        { "title": "Data collection — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-data-collection-activity-worksheet.md" },
+        { "title": "Data collection — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-data-collection-slides.md" },
+        { "title": "Data logger with sensors (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-data-logger.png" },
+        { "title": "A microphone (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-microphone.png" },
+        { "title": "EasySense live readings (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-easysense-live.png" }
+      ]
+    },
+    {
+      "title": "Logging — data points and intervals",
+      "objectives": "I can say what a data point is\nI can say what an interval is\nI can read a value from a data table\nI can read a value from a line graph",
+      "outline": "Routine first. Vocabulary on board: logging · data point · interval. TA: everyone has the worksheets; set a logger recording at the start so there is data to download later. Read the four \"I can…\" aloud.\n1. (0–10) Starter — be the data logger. Pupils watch a day clip and write the temperature every hour. Each number is a DATA POINT; the gap between them is the INTERVAL.\n   • Support: logging = writing numbers over time.  • Core: what was the interval.  • Challenge: why a logger (50/sec) beats a person.\n2. (10–25) I-do → we-do — reading a data table. Each row is a data point; the time counts up in small steps (0.1 s). Pupils read a value (fill-blank: sound at 00.000 = 41.2 dBA). Likely error: muddling data point and interval → fix-words \"a data point is a NUMBER; the interval is the GAP.\"\n3. (25–40) Reading a line graph — the data points join into a line. Pupils find the lowest dip and describe the change. ORDER block: the steps of logging then downloading.\n   • Support: one row = one data point.  • Core: when was light lowest.  • Challenge: describe the change between two times.\n4. (40–50) You-do — download the data the logger has collected since the start; find a data point.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil shows one data point on the graph.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Logging — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-logging-starter-worksheet.md" },
+        { "title": "Logging — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-logging-activity-worksheet.md" },
+        { "title": "Logging — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-logging-slides.md" },
+        { "title": "Data table of readings (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-data-table.png" },
+        { "title": "Light line graph over time (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-light-graph.png" }
+      ]
+    },
+    {
+      "title": "Analysing data — graphs, tables and sorting",
+      "objectives": "I can open and view saved data\nI can read a value from a graph and a table\nI can sort data to find the highest and lowest\nI can say there are different ways to view data",
+      "outline": "Routine first. Vocabulary on board: analyse · sort · highest · lowest. TA: the cooling data file open in the logger software + a spreadsheet ready. Read the four \"I can…\" aloud.\n1. (0–5) Starter — predict. Hot water is left out and a sensor records its temperature for 5 hours. Pupils predict the temperature falls and the line goes down.\n   • Support: hot water gets colder.  • Core: why save data to share.  • Challenge: why a computer makes analysing easier.\n2. (5–25) I-do → we-do — the cooling graph. Read the highest value (≈50°C), see the line fall, fill-blank the value at 60 minutes (≈38°C). Support: trace the line with a finger.\n3. (25–35) The same data as a table — graph vs table show the SAME data. Pupils choose which shows change at a glance (graph) and say which they prefer.\n4. (35–50) You-do — sort in a spreadsheet. SORT puts numbers in order; smallest-to-largest puts the lowest at the top. Pupils find the highest and lowest. Likely error: thinking sort changes the data → fix-words \"sorting just re-orders it; the numbers stay the same.\" TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names the highest and lowest temperature.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Analysing data — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-analysing-data-starter-worksheet.md" },
+        { "title": "Analysing data — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-analysing-data-activity-worksheet.md" },
+        { "title": "Analysing data — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-analysing-data-slides.md" },
+        { "title": "Cooling graph — temperature over time (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-cooling-graph.png" },
+        { "title": "Cooling data in a table (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-data-table.png" },
+        { "title": "Sorting data in a spreadsheet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-sort-spreadsheet.png" }
+      ]
+    },
+    {
+      "title": "Data for answers — plan a data logging experiment",
+      "objectives": "I can write a question a data logger could answer\nI can choose the right sensor\nI can plan where to put the logger and how long to log for\nI can set up a data logger to collect data",
+      "outline": "Routine first. Vocabulary on board: question · sensor · plan · collect. TA: data loggers ready to set going; the worksheets open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — which sensor? Match each question to the right sensor (brightest → light, loudest → sound, coldest → temperature). Likely error: choosing a sensor that can't answer the question → fix-words \"match the sensor to the question word.\"\n   • Support: warm = temperature sensor.  • Core: write a sound-sensor question.  • Challenge: why choose the sensor first.\n2. (10–25) I-do → we-do — asking a question. A good question can be answered with data. Pupils write their own question (use the class list from Lesson 1). Choose the sensor.\n3. (25–40) You-do — make a plan. ORDER the set-up steps, then fill the plan: where the logger goes, when it starts/stops, how long, and a prediction. Agree a common start/stop time to manage devices.\n4. (40–50) Test it — set the logger going for a minute and check it works. Loggers then collect data until next lesson.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil states their question and sensor.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Data for answers — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-data-for-answers-starter-worksheet.md" },
+        { "title": "Data for answers — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-data-for-answers-activity-worksheet.md" },
+        { "title": "Data for answers — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-data-for-answers-slides.md" },
+        { "title": "Data logger (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-data-logger.png" }
+      ]
+    },
+    {
+      "title": "Answering my question — drawing conclusions",
+      "objectives": "I can find and review my collected data\nI can use my data to answer my question\nI can write a conclusion from my data\nI can say why a data logger is useful",
+      "outline": "Routine first. Vocabulary on board: review · analyse · conclusion · benefit. TA: each pupil's data file open (or downloaded ready); the report worksheet open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — read a graph to draw a conclusion. A light graph dips twice; pupils read that the room got darker at those times and that it mostly stayed ≈280 lx.\n   • Support: line down = darker.  • Core: write a conclusion the graph shows.  • Challenge: what could have caused a dip.\n2. (10–25) Review your data — open the data your logger collected; check it is YOUR data; find the highest and lowest. TA: remind them how to hide/zoom.\n3. (25–45) You-do — write your report. Question, prediction, highest/lowest, the answer to your question, and whether it matched your prediction. Calm independent work; prompt, do not do it for them.\n4. (45–52) Why use a data logger? Multi-select the benefits (collects on its own; works when you're not there; same way each time) — NOT \"does your writing for you.\" Think-pair-share.\n5. (52–55) End of unit — recap the journey: question → choose sensor → log over time → analyse → conclusion. Self-tick the four \"I can…\".\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Answering my question — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-my-question-starter-worksheet.md" },
+        { "title": "Answering my question — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-my-question-activity-worksheet.md" },
+        { "title": "Answering my question — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-my-question-slides.md" },
+        { "title": "Light graph with two dips (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-light-graph.png" },
+        { "title": "Data logger (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-data-logger.png" }
+      ]
+    }
+  ]
+}

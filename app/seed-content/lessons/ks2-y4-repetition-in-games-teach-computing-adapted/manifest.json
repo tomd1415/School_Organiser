@@ -1,0 +1,76 @@
+{
+  "unitTitle": "KS2 Y4 Repetition in games (Teach Computing — adapted)",
+  "course": { "name": "KS2 Computing", "keyStage": "KS2" },
+  "lessons": [
+    {
+      "title": "Using loops to create shapes",
+      "objectives": "I can list an everyday job as steps that repeat\nI can read a loop in Scratch and predict what it will draw\nI can change a loop to draw a different shape",
+      "outline": "Routine first (same every lesson). Vocabulary on the board: repeat · loop · count-controlled loop · predict · code · block. TA: everyone has the starter worksheet; Scratch open on the same starter project. Read the three “I can…” aloud.\n1. (0–10) Starter — things that repeat. Look at the clock image. Pupils SORT everyday jobs into ‘repeats’ / ‘happens once’ on the starter worksheet. Idea: a loop means ‘do it again’.\n2. (10–20) I-do — name the parts of the Scratch screen. Use the screen image: Code area · Blocks · Stage · green flag · Sprite. Pupils LABEL the screen on the activity worksheet.\n3. (20–35) We-do — read the repeat block. Show ‘repeat 4 → move 50, turn 90’. Count the sides: 4 = a square. PREDICT what ‘repeat 3’ would draw. Likely error: thinking the number is the size → fix-words “the number is how many times, not how big.”\n4. (35–50) You-do — change the loop. Pupils change the repeat number and the turn to draw a new shape, then screenshot it on the activity worksheet.\n   • Support: choose the shape a loop draws.  • Core: match each repeat number to its shape.  • Challenge: work out the turn for a triangle.\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil shows one shape. TA: prompt, do not do it for them. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Using loops to create shapes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-using-loops-shapes-starter-worksheet.md" },
+        { "title": "Using loops to create shapes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-using-loops-shapes-activity-worksheet.md" },
+        { "title": "Using loops to create shapes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-using-loops-shapes-slides.md" },
+        { "title": "Clock — things that repeat (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-clock.png" },
+        { "title": "The Scratch screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-scratch-interface.png" },
+        { "title": "Repeat 4 — a square (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-repeat-square.png" }
+      ]
+    },
+    {
+      "title": "Different loops",
+      "objectives": "I can tell a forever loop from a count-controlled loop\nI can change a loop to make a given outcome\nI can choose the right loop for a job",
+      "outline": "Routine first. Vocabulary on the board: forever loop · infinite loop · count-controlled loop · repeat · at the same time. TA: everyone has the starter worksheet; Scratch open. Read the three “I can…” aloud.\n1. (0–8) Starter — two kinds of loop. Show the forever block and the repeat block side by side. A forever loop never stops; a count-controlled loop stops after a number. Pupils MATCH each loop to what it does on the starter worksheet.\n2. (8–20) I-do → we-do — when to use each. ‘Flap wings forever’ = forever loop. ‘Draw 4 sides’ = repeat 4. Pupils SORT jobs into ‘forever’ / ‘count a number’ on the activity worksheet. Likely error: using forever when you want it to stop → fix-words “if it must stop, count it.”\n3. (20–40) You-do — change a loop. Pupils swap a forever loop for repeat 10 (or back) and watch the change, then screenshot it.\n   • Support: choose which loop never stops.  • Core: fill the repeat number for a given job.  • Challenge: explain why a flashing star uses a forever loop.\n4. (40–50) Two things at once — two sprites can each run their own loop at the same time. Show it; name it.\n5. (50–55) Plenary — self-tick the three “I can…”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Different loops — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-different-loops-starter-worksheet.md" },
+        { "title": "Different loops — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-different-loops-activity-worksheet.md" },
+        { "title": "Different loops — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-different-loops-slides.md" },
+        { "title": "Forever loop block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-forever-loop.png" },
+        { "title": "Repeat (count-controlled) loop block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-repeat-loop.png" }
+      ]
+    },
+    {
+      "title": "Animate your name",
+      "objectives": "I can choose an action to repeat for each letter\nI can say what the repeated action should do\nI can say how well my animation worked",
+      "outline": "Routine first. Vocabulary on the board: animation · costume · sprite · loop · at the same time · evaluate. TA: everyone has the starter worksheet; a name project with letter sprites ready in Scratch. Read the three “I can…” aloud.\n1. (0–8) Starter — what is an animation? Show the animated name. An animation changes the look again and again — a loop. Pupils CHOOSE what an animation does on the starter worksheet.\n2. (8–20) I-do → we-do — repeat an action on each letter. Use the Looks blocks (next costume / change colour) inside a forever loop. Every letter sprite runs its own loop, all started by the green flag, so they animate at the same time.\n3. (20–30) Design — pupils plan their name on the activity worksheet: ORDER the steps to build one letter, then choose the repeated action per letter.\n4. (30–48) You-do — build and run. Pupils add a loop to each letter, click the green flag, then screenshot the running animation.\n   • Support: choose the block that repeats.  • Core: match each action to its outcome.  • Challenge: explain why all letters move together.\n5. (48–55) Evaluate — rate how well your animation worked and write one change. Self-tick the three “I can…”. Likely error: forgetting the loop so it runs once → fix-words “no loop, it happens once.” No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Animate your name — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-animate-your-name-starter-worksheet.md" },
+        { "title": "Animate your name — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-animate-your-name-activity-worksheet.md" },
+        { "title": "Animate your name — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-animate-your-name-slides.md" },
+        { "title": "Animated name on the stage (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-animate-name-stage.png" },
+        { "title": "Looks blocks for animation (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-scratch-looks.png" }
+      ]
+    },
+    {
+      "title": "Modifying a game",
+      "objectives": "I can find the parts of a loop I can change\nI can say what my change does\nI can re-use code on a new sprite",
+      "outline": "Routine first. Vocabulary on the board: game · sprite · forever loop · modify (change) · re-use. TA: everyone has the starter worksheet; the shark game open in Scratch. Read the three “I can…” aloud.\n1. (0–8) Starter — match the game to its design. Show the shark game. Pupils MATCH each sprite to what it does on the starter worksheet (the shark swims forever; the fish moves).\n2. (8–20) I-do → we-do — find what can change in a loop. Inside a forever loop you can change the number, the block, or the sprite. Change ‘change x by 10’ to ‘change x by 5’ → it moves slower. Pupils SORT changes into ‘makes it faster’ / ‘makes it slower’ on the activity worksheet. Likely error: deleting the forever block → fix-words “keep the loop, change what is inside.”\n3. (20–35) You-do — make a change. Pupils change one number inside the loop and screenshot the before and after.\n4. (35–48) Re-use code on a new sprite. Add a new sprite and copy the loop onto it so it moves too.\n   • Support: choose what a smaller number does.  • Core: fill the effect of a change.  • Challenge: explain why re-using code saves time.\n5. (48–55) Plenary — self-tick the three “I can…”; each pupil shows one change they made. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Modifying a game — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-modifying-a-game-starter-worksheet.md" },
+        { "title": "Modifying a game — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-modifying-a-game-activity-worksheet.md" },
+        { "title": "Modifying a game — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-modifying-a-game-slides.md" },
+        { "title": "Shark game on the stage (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-shark-game.png" }
+      ]
+    },
+    {
+      "title": "Designing a game",
+      "objectives": "I can say where repetition is used in a game\nI can pick parts of a model game to use in my own\nI can write a simple design for my game",
+      "outline": "Routine first. Vocabulary on the board: design · algorithm · model project · repetition · sprite · plan. TA: everyone has the starter worksheet and the design (activity) worksheet; the model bat game open in Scratch. Read the three “I can…” aloud.\n1. (0–10) Starter — find the repetition. Play the model bat game. Pupils CHOOSE which parts repeat on the starter worksheet (the bats keep flapping; they keep moving down).\n2. (10–20) I-do → we-do — what makes a good plan. A design says: the sprites, what each one does, and which action repeats. ORDER the design steps on the design worksheet.\n3. (20–45) You-do — design your own game. Pupils fill the design worksheet: name the sprites, draw/describe the stage, and write the algorithm for one sprite (with a loop). Screenshot or photo the plan.\n   • Support: choose which action will repeat.  • Core: fill the algorithm for one sprite.  • Challenge: explain what your game will do and why the loop is needed.\n4. (45–52) Share — swap with a partner; say one thing that is clear and one to add. Update the design.\n5. (52–55) Plenary — self-tick the three “I can…”. Reassure: you build this next lesson. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Designing a game — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-game-starter-worksheet.md" },
+        { "title": "Designing a game — design worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-game-activity-worksheet.md" },
+        { "title": "Designing a game — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-game-slides.md" },
+        { "title": "Model bat game (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-bat-game.png" }
+      ]
+    },
+    {
+      "title": "Creating our games",
+      "objectives": "I can follow my design to build my game\nI can find and fix a mistake in my code\nI can say how well my game works",
+      "outline": "Routine first. Vocabulary on the board: build · algorithm · loop · fix (debug) · test · evaluate. TA: everyone has the starter worksheet, their design from last lesson, and the evaluation (activity) worksheet; Scratch open. Read the three “I can…” aloud.\n1. (0–8) Starter — read your design. Pupils ORDER the build steps on the starter worksheet (open project → add sprites → add the loops → run → fix → save).\n2. (8–15) I-do → we-do — follow the algorithm. Build one sprite from a design together, including its loop. Click green flag and test. Likely error: code runs once, no loop → fix-words “add the loop to repeat it.”\n3. (15–45) You-do — build your game. Pupils follow their own design, add the loops, test, and fix. Calm independent work. TA: prompt, do not do it for them.\n   • Support: choose what to do when the sprite does not move.  • Core: fill what you changed to fix a bug.  • Challenge: explain one improvement you made.\n4. (45–52) Test and evaluate — screenshot the finished game; rate how well it works and write one thing that went well and one to improve on the evaluation worksheet.\n5. (52–55) Showcase — each pupil shows their game; self-tick the three “I can…”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Creating our games — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-our-games-starter-worksheet.md" },
+        { "title": "Creating our games — evaluation worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-our-games-activity-worksheet.md" },
+        { "title": "Creating our games — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-creating-our-games-slides.md" },
+        { "title": "Bat game in the Scratch editor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-bat-game-editor.png" }
+      ]
+    }
+  ]
+}
