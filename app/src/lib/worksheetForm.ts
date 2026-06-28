@@ -42,6 +42,10 @@ export interface WorksheetOptions {
   // Online the pupil's name and the date are known — auto-fill those header cells read-only instead
   // of asking the pupil to type them. Applies in form/preview only.
   autofill?: { name?: string; date?: string };
+  // 'preview' is normally inert. With `interactive`, the DRAG widgets (card-sort, matching, Parsons,
+  // order, label) render draggable so a teacher can TRY them in a preview — but NO save URL is emitted,
+  // so nothing is persisted (pupil.js places/moves the DOM, then skips the save). Bug #1.
+  interactive?: boolean;
   // Multiple worksheets per lesson: a per-worksheet prefix prepended to every field key so two sheets
   // bound to the same lesson never collide on a shared key (e.g. both starting at `t1.r1.c2`). The
   // first/only worksheet uses '' (unprefixed) so all existing answers, schemes and marks are untouched.
@@ -536,19 +540,19 @@ function renderMatching(tableIdx: number, rows: WorksheetField[], options: strin
         const placed = value !== '' ? `<span class="ws-match-placed">${esc(value)}</span>` : `<span class="ws-match-empty">—</span>`;
         return `<li class="ws-match-row">${prompt}<span class="ws-match-slot">${placed}</span></li>`;
       }
-      const inert = opts.mode === 'preview';
+      const inert = opts.mode === 'preview' && !opts.interactive; // interactive preview: droppable but non-saving (#1)
       const inside =
         value !== ''
           ? `<span class="ws-match-placed">${esc(value)}</span>${inert ? '' : '<button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>'}`
           : `<span class="ws-match-empty">drop an answer here</span>`;
       const attrs = inert
         ? 'aria-disabled="true"'
-        : `tabindex="0" role="button" data-key="${esc(f.key)}" data-save-url="${esc(saveUrl(opts.action, f.key))}"`;
+        : `tabindex="0" role="button" data-key="${esc(f.key)}"${opts.mode === 'form' ? ` data-save-url="${esc(saveUrl(opts.action, f.key))}"` : ''}`;
       return `<li class="ws-match-row">${prompt}<div class="ws-match-slot" ${attrs} aria-labelledby="${pid}">${inside}</div></li>`;
     })
     .join('');
   if (opts.mode === 'review') return `<div class="ws-match ws-match-review"><ol class="ws-match-slots">${slots}</ol></div>`;
-  const inert = opts.mode === 'preview';
+  const inert = opts.mode === 'preview' && !opts.interactive;
   const tiles = sorted
     .map((o) => `<li class="ws-match-tile" ${inert ? 'aria-disabled="true"' : 'tabindex="0" role="button" draggable="true"'} data-label="${esc(o)}">${esc(o)}</li>`)
     .join('');
@@ -648,7 +652,7 @@ function orderingControl(key: string, solution: string[], opts: WorksheetOptions
       : `<div class="ws-answer ws-empty">— (not ordered yet)</div>`;
   }
   const display = saved.length ? saved : shuffleStable(solution); // the pupil's order, else a stable jumble — never the solution
-  const inert = opts.mode === 'preview';
+  const inert = opts.mode === 'preview' && !opts.interactive; // interactive preview: draggable but non-saving (#1)
   const tiles = display
     .map(
       (l) =>
@@ -659,7 +663,7 @@ function orderingControl(key: string, solution: string[], opts: WorksheetOptions
     .join('');
   const help = inert ? '' : `<p class="ws-parsons-help">Drag the ${prose ? 'steps' : 'lines'} into the right order — or use ▲ ▼.</p>`;
   const savedSpan = inert ? '' : `<span class="ws-saved" id="ws-sv-${esc(key)}" aria-live="polite"></span>`;
-  return `<div class="ws-parsons-wrap${prose ? ' ws-ordering-prose' : ''}${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, key))}"`}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
+  return `<div class="ws-parsons-wrap${prose ? ' ws-ordering-prose' : ''}${saved.length ? ' is-ordered' : ''}" data-parsons-key="${esc(key)}"${opts.mode === 'form' ? ` data-save-url="${esc(saveUrl(opts.action, key))}"` : ''}>${help}<ol class="ws-parsons">${tiles}</ol>${savedSpan}</div>`;
 }
 
 // ── Card sort (group items into named categories) ───────────────────────────────────────────────
@@ -704,9 +708,9 @@ function renderSort(idx: number, fields: WorksheetField[], categories: string[],
       .join('');
     return `<div class="ws-sort ws-sort-review"><div class="ws-sort-cats">${cats}</div></div>`;
   }
-  const inert = opts.mode === 'preview';
+  const inert = opts.mode === 'preview' && !opts.interactive; // interactive preview: draggable but non-saving (#1)
   const tile = (f: WorksheetField): string =>
-    `<li class="ws-sort-item" ${inert ? 'aria-disabled="true"' : 'draggable="true" tabindex="0" role="button"'} data-item-key="${esc(f.key)}" data-item="${esc(f.label)}"${inert ? '' : ` data-save-url="${esc(saveUrl(opts.action, f.key))}"`}><span class="ws-sort-grip" aria-hidden="true">⋮⋮</span><span class="ws-sort-text">${esc(f.label)}</span></li>`;
+    `<li class="ws-sort-item" ${inert ? 'aria-disabled="true"' : 'draggable="true" tabindex="0" role="button"'} data-item-key="${esc(f.key)}" data-item="${esc(f.label)}"${opts.mode === 'form' ? ` data-save-url="${esc(saveUrl(opts.action, f.key))}"` : ''}><span class="ws-sort-grip" aria-hidden="true">⋮⋮</span><span class="ws-sort-text">${esc(f.label)}</span></li>`;
   const unsorted = fields.filter((f) => placedOf(f) === '');
   const trayItems = shuffleStable(unsorted.map((f) => f.label)).map((lbl) => unsorted.find((f) => f.label === lbl)).filter((f): f is WorksheetField => !!f);
   const tray = `<ul class="ws-sort-tray" data-sort-tray aria-label="Items to sort">${trayItems.map(tile).join('')}</ul>`;
@@ -772,7 +776,7 @@ function renderLabel(idx: number, fields: WorksheetField[], spec: LabelSpec, opt
       .join('');
     return `<div class="ws-match ws-label ws-label-review"><div class="ws-label-stage">${imgTag}${slots}</div></div>`;
   }
-  const inert = opts.mode === 'preview';
+  const inert = opts.mode === 'preview' && !opts.interactive; // interactive preview: droppable but non-saving (#1)
   const slots = spec.zones
     .map((z, i) => {
       const f = fields[i]!;
@@ -780,7 +784,7 @@ function renderLabel(idx: number, fields: WorksheetField[], spec: LabelSpec, opt
       const inside = v !== ''
         ? `<span class="ws-match-placed">${esc(v)}</span>${inert ? '' : '<button type="button" class="ws-match-clear" aria-label="clear this answer">✕</button>'}`
         : `<span class="ws-match-empty">?</span>`;
-      const attrs = inert ? 'aria-disabled="true"' : `tabindex="0" role="button" data-key="${esc(f.key)}" data-save-url="${esc(saveUrl(opts.action, f.key))}"`;
+      const attrs = inert ? 'aria-disabled="true"' : `tabindex="0" role="button" data-key="${esc(f.key)}"${opts.mode === 'form' ? ` data-save-url="${esc(saveUrl(opts.action, f.key))}"` : ''}`;
       return `<div class="ws-label-slot ws-match-slot" style="left:${z.x}%;top:${z.y}%" ${attrs} aria-label="${esc(z.id)}">${inside}</div>`;
     })
     .join('');

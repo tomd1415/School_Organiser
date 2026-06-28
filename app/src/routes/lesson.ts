@@ -849,7 +849,10 @@ export function registerLessonRoutes(app: FastifyInstance): void {
       `<a class="ws-tab${l === level ? ' is-on' : ''}" href="/lesson/pupil-preview?${scopeQ}&amp;lp=${lp}&amp;level=${l}">${label}</a>`;
     const deck = slidesMd ? renderSlideDeck(slidesMd, `preview-${gcKey}-${lp}`, level) : '';
     const wsHtml = ws
-      ? `<div class="ws-doc ws-doc-preview">${renderWorksheet(ws.markdown, { mode: 'preview', level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`
+      // interactive:true → the drag widgets (sort/match/parsons/order/label) are draggable here so the
+      // teacher can TRY them; pupilLayout loads pupil.js, and no save URL is emitted so nothing persists
+      // ("answers are NOT saved"). Works for a master lesson with no class (gc omitted). Bugs #1 + #4.
+      ? `<div class="ws-doc ws-doc-preview">${renderWorksheet(ws.markdown, { mode: 'preview', interactive: true, level, autofill: { name: '(pupil’s name — auto)', date: '(today — auto)' } }).html}</div>`
       : '<p class="pupil-note">No worksheet for this lesson yet — generate or upload one, then preview.</p>';
     const header = `<div class="pv-bar">
         <div><strong>${esc(master?.title ?? 'Lesson')}</strong> <span class="muted">${isMaster ? 'master lesson' : 'this class'} · 👁 preview as a pupil — answers are NOT saved</span></div>

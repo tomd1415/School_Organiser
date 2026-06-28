@@ -19,7 +19,15 @@ Legend: **Status** = OPEN / IN PROGRESS / FIXED. Each entry has the **root cause
 resolution**, and the **regression test** that locks it. Items 1–4 are being implemented now; 5–7 are larger
 features that need their own design doc (and #7 needs the cut-off requirement finished).
 
-## Bug 1 — drag questions show nothing to drag  ·  Status: IN PROGRESS
+## Bug 1 — drag questions show nothing to drag  ·  Status: FIXED (2026-06-28)
+**Resolution shipped:** added `WorksheetOptions.interactive`; in `mode:'preview' && interactive` the drag
+widgets (card-sort, matching, Parsons, order, label) render **draggable with their `data-key`/`data-item-key`
+hooks but with NO `data-save-url`** (save URLs are emitted only in `mode:'form'`). pupil.js places/moves the
+DOM first and skips the save when there's no URL, so the teacher can fully try the drag and nothing persists.
+The `/lesson/pupil-preview` worksheet now renders with `interactive:true` (its `pupilLayout` loads pupil.js).
+Regression test: `tests/worksheetTypes.test.ts` → "interactive preview — drag widgets draggable but
+non-saving" (inert plain-preview, draggable+no-save interactive-preview, save-url still present in form).
+
 **Where:** the card-sort starter in `gcse-impacts-of-technology …/l8-end-of-unit-quiz-starter-worksheet.md`
 (`Drag each description under the right area of impact…`). The user's "Putting it all together" is this
 end-of-unit lesson.
@@ -46,7 +54,12 @@ them in the lab/preview without a pupil:
 `draggable="true"` + `data-item-key` (sort) / `ws-match-tile` (match) and **no** `data-save-url`; and that
 plain `mode:'preview'` stays inert. (Keeps both behaviours pinned.)
 
-## Bug 2 — schemes/planning: scroll units independently + wider unit-title  ·  Status: IN PROGRESS
+## Bug 2 — schemes/planning: scroll units independently + wider unit-title  ·  Status: FIXED (2026-06-28)
+**Resolution shipped:** `.sch-units` navigator is now `position:sticky` with `max-height + overflow-y:auto`
+(scrolls within the panel, not the page); the column widened to 300px, unit names wrap, and the title input
+gets `min-width:16rem`. CSS in `styles-base-widgets.css` (theme vars carry dark mode). Structure pinned by
+`tests/schemeUnitNumber.test.ts` (navigator container present).
+
 **Where:** `src/lib/schemeView.ts` — units render as `<section class="unit">` with an editable
 `<input class="unit-title">`; the unit list sits in `#scheme-tree` / the `.sch-spine` navigator.
 
@@ -63,7 +76,12 @@ ownership rule in CLAUDE.md).
 **Regression test:** a `tests/pathsGuard`/view test is overkill for pure CSS; add a render assertion that the
 unit list container carries the new scroll class, so the structure can't silently regress.
 
-## Bug 3 — unit title should start with the unit number  ·  Status: IN PROGRESS
+## Bug 3 — unit title should start with the unit number  ·  Status: FIXED (2026-06-28)
+**Resolution shipped:** `renderUnit` now takes the 1-based position and renders a non-editable `Unit N` badge
+before the title input (and `N.` in the navigator), numbered by position so it tracks reordering; the stored
+title value is untouched. Regression test: `tests/schemeUnitNumber.test.ts` (number by position, raw title
+value preserved).
+
 **Where:** `src/lib/schemeView.ts` `renderUnit` (the `<input class="unit-title">`), called at L274 with the
 0-based index `i` in `.map((u,i)=>…)`.
 
@@ -80,7 +98,17 @@ reordering (▲▼).
 before the first unit's title and that the title `<input value>` is still the raw stored title (no number in
 the saved value).
 
-## Bug 4 — view a lesson in the lab without a class assignment  ·  Status: PLANNED (this pass)
+## Bug 4 — view a lesson in the lab without a class assignment  ·  Status: ADDRESSED (2026-06-28)
+**Resolution:** `/lesson/pupil-preview` already serves a **master lesson with no class** (`gc` omitted →
+master copy) and is linked from every plan row as "👁 Preview as pupil (worksheet)" + "🖥 Board" +
+"▶ Preview live lesson". With Bug 1's fix that preview is now **interactive** — so any unassigned master
+lesson can be opened AND its drag activities tried, with nothing saved. So "view a lesson regardless of class"
+works today via these no-class previews.
+**Remaining (optional follow-up):** the **Test Lab** (`/test-lab`) is still timetable-driven (it lists
+lessons laid into a class calendar), so it can't open a never-assigned lesson. If the teacher specifically
+wants the *interactive sandbox cockpit* on an unassigned lesson, that's a larger route change (create an
+ephemeral no-class occurrence) — flagged, not done.
+
 **Where:** the interactive cockpit is `/lesson` (`src/routes/lesson.ts`), which resolves a **lesson
 occurrence on a `group_course`** (a class). Read-only previews that already work **without** a class exist:
 `/lesson/preview` (`lessonPreview`), `/lesson/pupil-preview` (`pupilPreview(null,…)`), `boardView(null,…)`.

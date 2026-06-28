@@ -252,6 +252,36 @@ describe('Label a diagram', () => {
   });
 });
 
+describe('interactive preview — drag widgets draggable but non-saving (bug #1)', () => {
+  // Each fenced widget needs its own md block (a fence + the next fence in one block → the 2nd renders as
+  // prose), so a matching TABLE separates the order fence from the sort fence.
+  const md = [
+    '```order', 'first step', 'second step', '```', '',
+    '| Term | Match |', '|---|---|', '| HTTP | (  ) web (  ) mail |', '| SMTP | (  ) web (  ) mail |', '',
+    '```sort', 'Input: keyboard', 'Output: monitor', '```', '',
+  ].join('\n');
+  it('plain preview is INERT (not draggable, no save URL)', () => {
+    const h = renderWorksheet(md, { mode: 'preview' }).html;
+    expect(h).not.toMatch(/draggable="true"/);
+    expect(h).toMatch(/aria-disabled="true"/);
+    expect(h).not.toContain('data-save-url');
+  });
+  it('interactive preview is DRAGGABLE but emits NO save URL (nothing persists)', () => {
+    const h = renderWorksheet(md, { mode: 'preview', interactive: true }).html;
+    expect(h).toMatch(/draggable="true"/);     // pieces can be picked up
+    expect(h).toMatch(/data-item-key=/);       // card-sort items wired
+    expect(h).toMatch(/data-parsons-key=/);    // order widget wired
+    expect(h).toMatch(/ws-match-slot[^>]*data-key=/); // matching slots droppable
+    expect(h).not.toContain('data-save-url');  // but no save endpoint → local only
+    expect(h).not.toMatch(/aria-disabled="true"/);
+  });
+  it('form mode still emits the save URL (unchanged)', () => {
+    const h = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    expect(h).toContain('data-save-url');
+    expect(h).toMatch(/draggable="true"/);
+  });
+});
+
 describe('per-worksheet key prefix (multiple worksheets)', () => {
   const md = `## Q
 | Question | Your answer |
