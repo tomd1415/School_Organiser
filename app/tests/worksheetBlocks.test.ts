@@ -86,6 +86,32 @@ Type your answers in the boxes.
     expect((fieldSig(md).match(/:blank/g) ?? []).length).toBe(2);
   });
 
+  it('multi-select [ ] cells round-trip as multichoice rows with stable keys', () => {
+    const md = `| Question | Tick all that apply |\n|---|---|\n| Which are inputs? | [ ] mouse [ ] screen [ ] mic |\n`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect(fieldSig(md)).toContain(':multichoice');
+    const qt = parseBlocks(md).find((b) => b.type === 'qtable') as Extract<Block, { type: 'qtable' }>;
+    expect(qt.rows[0]!.kind).toBe('multichoice');
+    expect(qt.rows[0]!.options).toEqual(['mouse', 'screen', 'mic']);
+  });
+
+  it('a [scale] slider cell round-trips as a scale row (min/max + end labels)', () => {
+    const md = `| Question | Your rating |\n|---|---|\n| How confident now? | [scale 1-5: not sure … very sure] |\n`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect(fieldSig(md)).toContain(':scale');
+    const qt = parseBlocks(md).find((b) => b.type === 'qtable') as Extract<Block, { type: 'qtable' }>;
+    expect(qt.rows[0]!.kind).toBe('scale');
+    expect(qt.rows[0]!.scale).toEqual({ min: 1, max: 5, minLabel: 'not sure', maxLabel: 'very sure' });
+  });
+
+  it('the new fenced types (order/sort) round-trip verbatim as raw blocks (a table separates the fences)', () => {
+    const md = `\`\`\`sort\nInput: mouse\nOutput: screen\n\`\`\`\n\n| Q | Type your answer here |\n|---|---|\n| name one | |\n\n\`\`\`order\nfirst\nsecond\n\`\`\`\n`;
+    expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));
+    expect(fieldSig(md)).toContain(':sort');
+    expect(fieldSig(md)).toContain(':order');
+    expect(parseBlocks(md).filter((b) => b.type === 'raw')).toHaveLength(2); // both fences kept verbatim
+  });
+
   it('a matching table (shared-option choice rows) round-trips with stable choice keys', () => {
     const md = `| Match | Type your answer here |\n|---|---|\n| CPU | ( ) calc ( ) store |\n| RAM | ( ) calc ( ) store |\n`;
     expect(fieldSig(roundTrip(md))).toBe(fieldSig(md));

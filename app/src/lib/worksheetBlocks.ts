@@ -7,12 +7,14 @@
 // kept verbatim in a `raw`/`rawtable` block, so the round-trip is lossless even when parsing is coarse.
 import * as z from 'zod/v4';
 
-// A Q&A table row: a typed answer, a screenshot paste, or a multiple-choice pick (options carried so
-// the editor can edit them and serialise round-trips the cell). `options` is present only on choice rows.
+// A Q&A table row: a typed answer, a screenshot paste, a single-/multi-choice pick, or a 1–N slider.
+// `options` is present on choice/multichoice rows; `scale` only on scale rows — so the editor can edit
+// them and serialise round-trips the cell exactly (the round-trip oracle guards drift vs worksheetForm).
 export interface QRow {
   q: string;
-  kind: 'text' | 'screenshot' | 'choice';
+  kind: 'text' | 'screenshot' | 'choice' | 'multichoice' | 'scale';
   options?: string[];
+  scale?: { min: number; max: number; minLabel?: string; maxLabel?: string };
 }
 
 export type Block =
@@ -31,7 +33,14 @@ export const blockSchema: z.ZodType<Block> = z.union([
   z.object({ type: z.literal('text'), text: z.string() }),
   z.object({
     type: z.literal('qtable'),
-    rows: z.array(z.object({ q: z.string(), kind: z.enum(['text', 'screenshot', 'choice']), options: z.array(z.string()).optional() })),
+    rows: z.array(
+      z.object({
+        q: z.string(),
+        kind: z.enum(['text', 'screenshot', 'choice', 'multichoice', 'scale']),
+        options: z.array(z.string()).optional(),
+        scale: z.object({ min: z.number(), max: z.number(), minLabel: z.string().optional(), maxLabel: z.string().optional() }).optional(),
+      }),
+    ),
   }),
   z.object({ type: z.literal('rawtable'), md: z.string() }),
   z.object({ type: z.literal('checklist'), items: z.array(z.string()) }),
@@ -56,6 +65,28 @@ const PROMPT = /^\s*(?:type|write|paste|draw|sketch|enter|fill)\b|\b(?:your|my)\
 const CHOICE_MARK = /\(\s*\)/g;
 const isChoiceCell = (s: string): boolean => (s.match(CHOICE_MARK) ?? []).length >= 2;
 const choiceOptions = (s: string): string[] => s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
+// Multi-select cell "[  ] a [  ] b" and slider cell "[scale 1-5: low … high]" — kept in sync with
+// worksheetForm.ts (the round-trip oracle guards drift).
+const MULTI_MARK = /(?<!\[)\[\s*\](?!\])/g;
+const isMultiCell = (s: string): boolean => (s.match(MULTI_MARK) ?? []).length >= 2;
+const multiOptions = (s: string): string[] => s.split(MULTI_MARK).map((o) => o.trim()).filter((o) => o !== '');
+const SCALE_RE = /^\[scale\s+(-?\d+)\s*[-–—]\s*(-?\d+)\s*(?::\s*(.+?))?\]$/i;
+const isScaleCell = (s: string): boolean => SCALE_RE.test(s.trim());
+function parseScaleCell(s: string): { min: number; max: number; minLabel?: string; maxLabel?: string } | null {
+  const m = s.trim().match(SCALE_RE);
+  if (!m) return null;
+  const min = Number(m[1]);
+  const max = Number(m[2]);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+  let minLabel: string | undefined;
+  let maxLabel: string | undefined;
+  if (m[3]) {
+    const parts = m[3].split(/\s*(?:…|\.{2,})\s*/).map((p) => p.trim()).filter(Boolean);
+    minLabel = parts[0];
+    maxLabel = parts.length > 1 ? parts[parts.length - 1] : undefined;
+  }
+  return { min, max, minLabel, maxLabel };
+}
 
 const splitCells = (row: string): string[] => row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
 
@@ -75,20 +106,25 @@ function asQTable(tableLines: string[]): QRow[] | null {
   // pre-filled with a "type … here" placeholder is the name/date layout-A shape (header-as-data) — NOT
   // a Q&A table — so it must NOT be captured here (that would drop the header row + change the field
   // keys); it stays a verbatim rawtable.
+  const marked = (a: string): boolean => SCREENSHOT.test(a) || isChoiceCell(a) || isMultiCell(a) || isScaleCell(a);
   const okRows = body.every((r) => {
     const q = (r[0] ?? '').trim();
     const a = (r[1] ?? '').trim();
-    return q !== '' && (a === '' || SCREENSHOT.test(a) || isChoiceCell(a));
+    return q !== '' && (a === '' || marked(a));
   });
-  // A screenshot/choice answer column is self-identifying, so it qualifies even when the header isn't
-  // the canonical "type your answer here" — but an all-empty (typed) column still needs that header so
+  // A screenshot/choice/multi/scale answer column is self-identifying, so it qualifies even when the header
+  // isn't the canonical "type your answer here" — but an all-empty (typed) column still needs that header so
   // a 2-col reference table isn't mistaken for Q&A.
-  const bodyMarked = body.every((r) => SCREENSHOT.test(r[1] ?? '') || isChoiceCell(r[1] ?? ''));
+  const bodyMarked = body.every((r) => marked(r[1] ?? ''));
   if (!(headerAnswerLast || bodyMarked) || !okRows) return null;
-  return body.map((r) => {
+  return body.map((r): QRow => {
     const a = (r[1] ?? '').trim();
-    if (isChoiceCell(a)) return { q: r[0]!.trim(), kind: 'choice', options: choiceOptions(a) };
-    return { q: r[0]!.trim(), kind: SCREENSHOT.test(a) ? 'screenshot' : 'text' };
+    const q = r[0]!.trim();
+    if (isChoiceCell(a)) return { q, kind: 'choice', options: choiceOptions(a) };
+    if (isMultiCell(a)) return { q, kind: 'multichoice', options: multiOptions(a) };
+    const sc = isScaleCell(a) ? parseScaleCell(a) : null;
+    if (sc) return { q, kind: 'scale', scale: sc };
+    return { q, kind: SCREENSHOT.test(a) ? 'screenshot' : 'text' };
   });
 }
 
@@ -203,6 +239,12 @@ export function serialiseBlocks(blocks: Block[]): string {
         const answerCell = (r: QRow): string => {
           if (r.kind === 'screenshot') return '📷 Paste a screenshot here';
           if (r.kind === 'choice') return (r.options ?? []).map((o) => `( ) ${o}`).join(' ');
+          if (r.kind === 'multichoice') return (r.options ?? []).map((o) => `[ ] ${o}`).join(' ');
+          if (r.kind === 'scale' && r.scale) {
+            const { min, max, minLabel, maxLabel } = r.scale;
+            const lbl = minLabel || maxLabel ? `: ${minLabel ?? ''} … ${maxLabel ?? ''}` : '';
+            return `[scale ${min}-${max}${lbl}]`;
+          }
           return '';
         };
         parts.push(['| Question | Type your answer here |', '|---|---|', ...b.rows.map((r) => `| ${r.q} | ${answerCell(r)} |`)].join('\n'));

@@ -147,14 +147,15 @@
     top.appendChild(inputFor(function () { return b.rows[k].q; }, function (v) { b.rows[k].q = v; }, 'question / instruction for the answer'));
     // kind selector: a typed answer, a paste-a-screenshot answer, or multiple-choice options.
     var kindSel = el('select', 'ws-ed-kind');
-    [['✍️ typed', 'text'], ['◉ multiple choice', 'choice'], ['📷 screenshot', 'screenshot']].forEach(function (o) {
+    [['✍️ typed', 'text'], ['◉ multiple choice', 'choice'], ['☑ multi-select', 'multichoice'], ['🎚 slider', 'scale'], ['📷 screenshot', 'screenshot']].forEach(function (o) {
       var op = document.createElement('option'); op.value = o[1]; op.textContent = o[0]; if (b.rows[k].kind === o[1]) op.selected = true; kindSel.appendChild(op);
     });
     kindSel.title = 'How the pupil answers this question';
     kindSel.addEventListener('change', function () {
-      b.rows[k].kind = kindSel.value;
-      if (b.rows[k].kind === 'choice') { if (!(b.rows[k].options && b.rows[k].options.length)) b.rows[k].options = ['', '']; }
-      else { delete b.rows[k].options; }
+      var r = b.rows[k]; r.kind = kindSel.value;
+      if (r.kind === 'choice' || r.kind === 'multichoice') { if (!(r.options && r.options.length)) r.options = ['', '']; delete r.scale; }
+      else if (r.kind === 'scale') { if (!r.scale) r.scale = { min: 1, max: 5 }; delete r.options; }
+      else { delete r.options; delete r.scale; }
       render(); markDirty();
     });
     top.appendChild(kindSel);
@@ -162,13 +163,14 @@
     rm.addEventListener('click', function () { b.rows.splice(k, 1); render(); markDirty(); });
     top.appendChild(rm);
     row.appendChild(top);
-    // Multiple-choice: an option list the pupil picks ONE of. The correct answer goes in the answers
-    // doc, not here — so there is no "mark correct" control on the pupil-facing worksheet.
-    if (b.rows[k].kind === 'choice') {
+    // Single-choice (pick ONE) or multi-select (tick SEVERAL): an option list. The correct answer goes in
+    // the mark scheme, not the pupil-facing worksheet, so there's no "mark correct" control here.
+    if (b.rows[k].kind === 'choice' || b.rows[k].kind === 'multichoice') {
+      var mark = b.rows[k].kind === 'multichoice' ? '☐' : '○';
       var opts = el('div', 'ws-ed-opts');
       (b.rows[k].options || []).forEach(function (o, oi) {
         var orow = el('div', 'ws-ed-optrow');
-        orow.appendChild(el('span', 'ws-ed-optmark', '○'));
+        orow.appendChild(el('span', 'ws-ed-optmark', mark));
         orow.appendChild(inputFor(function () { return b.rows[k].options[oi]; }, function (v) { b.rows[k].options[oi] = v; }, 'option ' + (oi + 1)));
         var orm = el('button', 'link ws-ed-rm', '✕'); orm.type = 'button';
         orm.addEventListener('click', function () { b.rows[k].options.splice(oi, 1); render(); markDirty(); });
@@ -178,10 +180,22 @@
       var addOpt = el('button', 'btn-soft ws-ed-addopt', '+ option'); addOpt.type = 'button';
       addOpt.addEventListener('click', function () { b.rows[k].options.push(''); render(); markDirty(); });
       opts.appendChild(addOpt);
-      var tf = el('button', 'btn-soft', 'True / False'); tf.type = 'button'; tf.title = 'Set the options to True and False';
-      tf.addEventListener('click', function () { b.rows[k].options = ['True', 'False']; render(); markDirty(); });
-      opts.appendChild(tf);
+      if (b.rows[k].kind === 'choice') {
+        var tf = el('button', 'btn-soft', 'True / False'); tf.type = 'button'; tf.title = 'Set the options to True and False';
+        tf.addEventListener('click', function () { b.rows[k].options = ['True', 'False']; render(); markDirty(); });
+        opts.appendChild(tf);
+      }
       row.appendChild(opts);
+    } else if (b.rows[k].kind === 'scale') {
+      // Slider: a 1–N rating with optional end labels.
+      var sc = b.rows[k].scale || (b.rows[k].scale = { min: 1, max: 5 });
+      var sb = el('div', 'ws-ed-scale');
+      var numIn = function (get, set, ph) { var x = el('input', 'ws-ed-num'); x.type = 'number'; x.value = get(); x.placeholder = ph; x.style.width = '4rem'; x.addEventListener('input', function () { set(parseInt(x.value, 10)); markDirty(); }); return x; };
+      sb.appendChild(el('span', 'muted', 'from ')); sb.appendChild(numIn(function () { return sc.min; }, function (v) { sc.min = isNaN(v) ? 1 : v; }, 'min'));
+      sb.appendChild(el('span', 'muted', ' to ')); sb.appendChild(numIn(function () { return sc.max; }, function (v) { sc.max = isNaN(v) ? 5 : v; }, 'max'));
+      sb.appendChild(inputFor(function () { return sc.minLabel || ''; }, function (v) { sc.minLabel = v; }, 'low-end label (optional)'));
+      sb.appendChild(inputFor(function () { return sc.maxLabel || ''; }, function (v) { sc.maxLabel = v; }, 'high-end label (optional)'));
+      row.appendChild(sb);
     }
     return row;
   }
@@ -259,13 +273,21 @@
     ['+ Instructions', function () { addBlock({ type: 'text', text: '' }); }],
     ['+ Question', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'text' }] }); }],
     ['+ Multiple choice', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['', '', ''] }] }); }],
+    ['+ Multi-select', function () { addBlock({ type: 'qtable', rows: [{ q: 'Tick ALL that apply', kind: 'multichoice', options: ['', '', ''] }] }); }],
     ['+ True / False', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'choice', options: ['True', 'False'] }] }); }],
+    ['+ Slider (rating)', function () { addBlock({ type: 'qtable', rows: [{ q: 'How confident are you?', kind: 'scale', scale: { min: 1, max: 5, minLabel: 'not sure', maxLabel: 'very sure' } }] }); }],
     ['+ Fill the blanks', function () { addBlock({ type: 'text', text: 'The [[ ]] does calculations.' }); }],
     ['+ Matching', function () { addBlock({ type: 'qtable', rows: [
       { q: 'Item 1', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
       { q: 'Item 2', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
       { q: 'Item 3', kind: 'choice', options: ['Answer A', 'Answer B', 'Answer C'] },
     ] }); }],
+    // The drag widgets are fenced blocks — insert a friendly skeleton (edit it inline; saving renders it).
+    ['+ Order steps', function () { addBlock({ type: 'raw', md: '```order\nfirst step\nsecond step\nthird step\n```' }); }],
+    ['+ Card sort', function () { addBlock({ type: 'raw', md: '```sort\nGroup A: item, item\nGroup B: item, item\n```' }); }],
+    ['+ Order code (Parsons)', function () { addBlock({ type: 'raw', md: '```parsons\nline 1 of the program\nline 2 of the program\n```' }); }],
+    ['+ Label a diagram', function () { addBlock({ type: 'raw', md: '```label\nimage: (add an image above, then put its /resources/<id>/view URL here)\nA (50%, 40%): first label\nB (50%, 70%): second label\n```' }); }],
+    ['+ Code answer', function () { addBlock({ type: 'qtable', rows: [{ q: 'Write your code', kind: 'text' }] }); }],
     ['+ Screenshot task', function () { addBlock({ type: 'qtable', rows: [{ q: '', kind: 'screenshot' }] }); }],
     ['+ Checklist', function () { addBlock({ type: 'checklist', items: [''] }); }],
     ['+ Heading', function () { addBlock({ type: 'heading', depth: 2, text: '' }); }],
