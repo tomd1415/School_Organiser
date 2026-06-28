@@ -64,6 +64,10 @@ build detail: [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTAT
 > **Validation (2026-06-27):** the whole Year-8 batch (6 units / 36 lessons) converted with **zero new
 > type-gaps** — the four types above covered all the demand the Y7 batch had logged (Y8 used order=15,
 > card-sort=142 items, label=22 zones, slider=10). Years 9 + GCSE then surfaced ONE new wanted type (§2.7).
+>
+> **Validation (2026-06-28):** the whole **KS2 Year-6 batch (7 units / 38 lessons)** converted with **zero new
+> type-gaps** — used order/sort/label/parsons/multi-select/matching/fill-blank/scale throughout. Only §2.7
+> (interactive trace table) remains wanted (not needed at KS2). This completes the full TCC catalogue (KS1→KS4 + GCSE).
 
 ### 2.7 Interactive trace table  — **NOT BUILT**
 - **What.** A fillable GRID where the pupil records how variables change as code runs (line | var1 | var2 |
@@ -157,6 +161,12 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 | KS3 Y8 U6 Python | L1–L6 | flow-chart / variable-trace / TypeError stills | ⚠️ source diagrams are non-rasterisable PPT shapes/animations |
 | GCSE U2 Computer systems pt2 | L10 logic gates — activity/slides | a CLEAN unlabelled AND/OR/NOT **gate-symbol** image (to unlock a `label` drag-the-name task) | ⚠️ source draws the symbols as **PPT vector shapes**, not rasters — `extractOfficeImages` gets none; stop-gapped with matching + card-sort + truth-table tick grids |
 | GCSE U2 Computer systems pt2 | L8 specifications — activity/slides | a clean 1.5GHz-vs-3GHz CPU spec comparison | ⚠️ only a worksheet screenshot in source; used a clock photo (analogy) + PC-tower clipart instead |
+| KS2 Y6 U1 Communication & collaboration | L2 packet structure; L1 DNS-lookup result; L6 public-vs-private | a labelled header/payload **packet diagram** | ⚠️ packet diagram is PPT **vector shapes** (not extractable) → built as card-sort + envelope analogy; DNS carried by an address-book photo; L6 reused the communicating photo |
+| KS2 Y6 U2 Web page creation | L1/L5 build-up design; L5 site-map; Sites add-subpage/hyperlink/preview demos | breadcrumb/site-map diagrams; a CC-in-search still | ⚠️ design/breadcrumb diagrams are PPT animations/vector; the Sites demos are source **videos** (omitted per no-animation — teacher plays live); embedded 13 OGL stills |
+| KS2 Y6 U4 Introduction to spreadsheets | L4 AVERAGE result; L6 conditional formatting | an AVERAGE-result still; a conditional-formatting screenshot | ⚠️ AVERAGE is video-only in source; conditional formatting not in this unit's source; embedded 14 real Sheets screenshots |
+| KS2 Y6 U5 3D modelling | L5 famous-buildings stills; L6 standalone pupil-model shot | clean Pyramids/Taj Mahal/Burj Khalifa stills; a clean lone Tinkercad model | ⚠️ source famous-building shots low-quality/busy; exploded-car + 3D-printer are **videos** (omitted); used stadium/towers + reused stills |
+| KS2 Y6 U6 Sensing | L1/L3/L5 micro:bit board; L4 compass rose | a CLEAN **unlabelled** micro:bit board (for a `label` task) and unlabelled compass rose | ⚠️ source board has parts pre-printed → used choice/multi-select + matching grid instead; checking-variables/compass/debug are **videos** (omitted) |
+| KS2 Y6 U7 Microbits | L1/L2 board; L2 LED bar-graph mid-countdown | a clean physical micro:bit board photo (for a label task); an LED-graph-mid-countdown still | ⚠️ none clean in source → relied on MakeCode program screenshots (board photo would unlock a label-the-parts task) |
 
 > Keep this table growing as lessons are converted — it's the worklist for sourcing/creating missing images.
 > **Per-unit detail** (full §7a alignment tables + every gap) lives beside each bundle in

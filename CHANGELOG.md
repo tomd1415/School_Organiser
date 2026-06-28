@@ -7,6 +7,23 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-28 — KS2 Year 6 lesson conversion (7 units / 38 lessons) — TCC catalogue complete
+
+Built on branch `phase-15-17-unattended`, continuing the same run.
+
+- **Converted all of KS2 Year 6** (Teach Computing → native bundles) under `app/seed-content/lessons/`:
+  U1 Communication and collaboration, U2 Web page creation, U3 Variables in games, U4 Introduction to
+  spreadsheets, U5 3D modelling, U6 Sensing (6 lessons each), U7 Microbits (2 lessons). Each lesson =
+  plan (objectives + S/C/C routine outline) + starter & activity worksheets (every activity has a 📷
+  show-your-work field) + a `.md` slide deck with `> 🧑‍🏫` teacher notes, plus embedded OGL images
+  (≈115 across the batch). Genuine Support/Core/Challenge on the same task; SEND/low-arousal framing.
+- **Zero new question-type gaps** — order/sort/label/parsons/multi-select/matching/fill-blank/scale covered
+  all demand (see `docs/WORKSHEET_QUESTION_TYPES.md` §2 validation 2026-06-28). Per-unit §7a alignment tables
+  and image-gap notes live in `app/seed-content/lessons/_notes/ks2-y6-*`; image gaps logged to §4.
+- **This completes the full TCC catalogue conversion: KS1 → KS2 → KS3 → KS4 non-GCSE → GCSE.**
+- All 7 bundles seed cleanly (`npm run seed:lessons`) and pass DB verification (worksheets resolve with
+  screenshot fields, slides non-null with teacher notes, S/C/C levels slice).
+
 ### 2026-06-27 — Phase 16B (homework) + Phase 17 cores (reference-lesson library)
 
 Built on branch `phase-15-17-unattended`, continuing the same run.
