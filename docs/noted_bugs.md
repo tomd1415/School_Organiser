@@ -9,4 +9,128 @@
 4. I want to be able to view lessons in the lab regardless of weather they are assigned to a class or not.
 5. I want the editing of the lessons to be much easier. I want it to literly be in place editing as it is seen in the browser when editing is selected. I need the same to happen for the worksheets as well. Also the worksheets nedd to have the ability to add and remove questions. When adding a question the option of different types of question should be given and then allow the user to add the details for the question (and possible answer if multiple choice or similar). Then allow the user to show the correct or model answers.
 6. I would like the opportunity to select 'recreate/adjus twit AI' that allows the user to write a few sentences about what is wrong with the worksheets/slide/lesson that needs improving and the AI will then improve that lesson either for the class it is assigned to or to the master copy (as choosen by the user)
-7. I would like a lesson creator 'wizard' that improves on the current way of creating lessons and schemes by making it easier and a more accurate representation of the 
+7. I would like a lesson creator 'wizard' that improves on the current way of creating lessons and schemes by making it easier and a more accurate representation of the
+
+---
+
+# Triage & resolution plan (added 2026-06-28)
+
+Legend: **Status** = OPEN / IN PROGRESS / FIXED. Each entry has the **root cause**, the **planned
+resolution**, and the **regression test** that locks it. Items 1–4 are being implemented now; 5–7 are larger
+features that need their own design doc (and #7 needs the cut-off requirement finished).
+
+## Bug 1 — drag questions show nothing to drag  ·  Status: IN PROGRESS
+**Where:** the card-sort starter in `gcse-impacts-of-technology …/l8-end-of-unit-quiz-starter-worksheet.md`
+(`Drag each description under the right area of impact…`). The user's "Putting it all together" is this
+end-of-unit lesson.
+
+**Root cause (confirmed by rendering the worksheet):** the markdown + engine are correct — in `mode:'form'`
+the widget renders 5 draggable item tiles + 5 drop-zones. But the **lab / lesson preview renders worksheets
+in `mode:'preview'`** (`src/routes/lesson.ts` `renderWorksheetPreview` ~L322 and the inline preview ~L852,
+and `/lesson/pupil-preview`). In preview mode every drag widget (card-sort, matching, Parsons, label) is
+emitted **inert** — `draggable` removed, `aria-disabled="true"`, no `data-save-url` — so the pieces are
+visible but cannot be picked up. The teacher reads "Drag each item…" but nothing drags. This is a
+preview-mode limitation, not a per-worksheet defect; card-sort just made it obvious.
+
+**Planned resolution:** add a **non-saving interactive preview** for the drag widgets so the teacher can try
+them in the lab/preview without a pupil:
+- `worksheetForm.ts`: add `WorksheetOptions.interactive?: boolean`. When `mode:'preview' && interactive`, render
+  the drag widgets (sort/match/parsons/label) as **draggable with their client hooks but WITHOUT a
+  `data-save-url`** (and not `aria-disabled`). The pupil.js handlers already early-return when there is no
+  save URL (`if (!url) return;`), so dragging works locally and nothing is persisted.
+- Ensure the drag handlers run on the preview page: load `pupil.js` (or its widget block) on the lesson
+  preview / pupil-preview pages. Confirm the cockpit/preview shell includes it; add the `<script>` if absent.
+- Pass `interactive:true` from `renderWorksheetPreview` and `/lesson/pupil-preview`.
+
+**Regression test:** unit test asserting that `renderWorksheet(md,{mode:'preview',interactive:true})` emits
+`draggable="true"` + `data-item-key` (sort) / `ws-match-tile` (match) and **no** `data-save-url`; and that
+plain `mode:'preview'` stays inert. (Keeps both behaviours pinned.)
+
+## Bug 2 — schemes/planning: scroll units independently + wider unit-title  ·  Status: IN PROGRESS
+**Where:** `src/lib/schemeView.ts` — units render as `<section class="unit">` with an editable
+`<input class="unit-title">`; the unit list sits in `#scheme-tree` / the `.sch-spine` navigator.
+
+**Root cause:** the unit column has no own scroll region (the whole page scrolls), and `.unit-title` /
+`.sch-unit-name` are too narrow to read long titles (e.g. "KS1 Y2 Programming quizzes (Teach Computing —
+adapted)").
+
+**Planned resolution (CSS/layout, no logic change):** give the unit list / spine a constrained-height
+**scroll container** (`overflow:auto; max-height: …`) so units scroll within the panel, and **widen** the
+`.unit-title` input and `.sch-unit-name` (flex/min-width) so titles are legible. Structure in
+`styles-base-widgets.css`, dark-theme tweaks in `styles.css`'s `body[data-shell="next"]` block (per the CSS
+ownership rule in CLAUDE.md).
+
+**Regression test:** a `tests/pathsGuard`/view test is overkill for pure CSS; add a render assertion that the
+unit list container carries the new scroll class, so the structure can't silently regress.
+
+## Bug 3 — unit title should start with the unit number  ·  Status: IN PROGRESS
+**Where:** `src/lib/schemeView.ts` `renderUnit` (the `<input class="unit-title">`), called at L274 with the
+0-based index `i` in `.map((u,i)=>…)`.
+
+**Root cause:** the unit shows only `u.title`; there is no positional number. The title is an **editable
+input bound to the DB value**, so the number must NOT be baked into the editable text (that would corrupt the
+stored title on save).
+
+**Planned resolution:** thread the 1-based ordinal into `renderUnit(u, i+1, …)` and render a **non-editable
+`Unit N` badge** before the title input (and prefix the `.sch-unit-name` spine label with `N. `). The stored
+title is untouched; the number is presentation, derived from `display_order`, so it stays correct after
+reordering (▲▼).
+
+**Regression test:** unit test on `renderUnit` (or the tree) asserting the rendered HTML shows `Unit 1`/`1.`
+before the first unit's title and that the title `<input value>` is still the raw stored title (no number in
+the saved value).
+
+## Bug 4 — view a lesson in the lab without a class assignment  ·  Status: PLANNED (this pass)
+**Where:** the interactive cockpit is `/lesson` (`src/routes/lesson.ts`), which resolves a **lesson
+occurrence on a `group_course`** (a class). Read-only previews that already work **without** a class exist:
+`/lesson/preview` (`lessonPreview`), `/lesson/pupil-preview` (`pupilPreview(null,…)`), `boardView(null,…)`.
+
+**Root cause:** the *interactive* lab is built around a real class occurrence; there is no "drive this master
+lesson live with no class" mode. The existing no-class views are read-only previews.
+
+**Planned resolution:** surface + extend the no-class path. Minimum: ensure every lesson plan (master, even
+unassigned) is reachable in a lab-style view from the scheme page — the plan row already links
+`▶ Preview live lesson`, `🧪 Test in Test Lab`, `👁 Preview as pupil`, `🖥 Board`. Make the **pupil-preview
+interactive** (shares Bug 1's `interactive` flag) so an unassigned lesson can be *tried*, and confirm the
+Test Lab works for a plan with no class. If a fuller "interactive master cockpit with no occurrence" is
+wanted, that's a larger route change — flagged for a follow-up if the previews aren't enough.
+
+**Regression test:** integration test hitting `/lesson/pupil-preview?lp=<masterPlanId>` (no group) returns 200
+and renders the worksheet; plus the Bug 1 interactivity assertion covers the "can actually drag" part.
+
+## Bug 5 — in-place WYSIWYG lesson/worksheet editing + add/remove questions  ·  Status: NEEDS DESIGN DOC (large)
+**Foundation that already exists:** `src/lib/worksheetBlocks.ts` is a typed **block model** with
+`parseBlocks`/`serialiseBlocks` and a round-trip guarantee (`serialiseBlocks(parseBlocks(md))` yields markdown
+whose `renderWorksheet().fields` are identical — the oracle is `tests/worksheetBlocks.test.ts`); and
+`public/worksheetEditor.js` exists. So the data model for editing worksheets as discrete typed blocks is
+there.
+
+**Scope:** (a) in-place edit of plan objectives/outline as rendered (the scheme page already has textarea
+editing — "in place as seen" means a contenteditable/inline surface); (b) a worksheet editor that lists the
+blocks, lets you **add a question** via a **type palette** (text / single-choice / multi-select / matching /
+fill-blank / code / parsons / order / sort / label / slider / screenshot), capture the question + options +
+**correct/model answer**, and **remove** questions; (c) show model answers. This is a multi-step feature — it
+should get its own `docs/` implementation plan (like `QUESTION_TYPES_IMPLEMENTATION_PLAN.md`) before building:
+block-editor UI, per-type authoring forms, answer/model-answer storage (mark-scheme via `upsertScheme`),
+serialise back to markdown, and round-trip tests.
+
+**Recommendation:** write the design doc next; do NOT start ad-hoc.
+
+## Bug 6 — "adjust with AI": describe what's wrong → AI improves (class copy or master)  ·  Status: NEEDS DESIGN DOC (medium–large)
+**Foundation:** the privacy-safe LLM wrapper `app/src/llm/client.ts` (all AI egress; redaction + audit) and
+the existing draft/convert/review flows on the scheme/plan rows.
+
+**Scope:** a UI entry point on a lesson/worksheet/slide ("✨ Adjust with AI") with a free-text box ("what's
+wrong / what to improve"), a **target selector (this class's copy vs master)**, a confirm-gate, then a wrapped
+LLM call that rewrites the artefact and stores it as the class adaptation or the master version.
+**Privacy-critical:** the instruction text + artefact go through the wrapper's `context[]` (never the system
+string), so redaction/withholding/audit apply; safeguarding-flagged content is withheld entirely.
+
+**Recommendation:** short design doc (entry points, prompt, target routing, confirm-gate, audit) then build.
+
+## Bug 7 — lesson creator "wizard"  ·  Status: BLOCKED — needs the requirement finished
+The requirement sentence is **cut off** in the source list ("…a more accurate representation of the"). I
+can't scope a wizard without the rest. **Question for the user:** what should the wizard do that the current
+scheme/lesson creation doesn't — e.g. guided steps (course → scheme → units → lessons), import-from-document,
+template picker, AI-assisted outline-to-lessons? Once defined it likely overlaps with #5/#6 and gets one
+combined design doc.
