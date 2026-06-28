@@ -1,0 +1,86 @@
+{
+  "unitTitle": "GCSE Cyber security (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "The cost of cybercrime and hacker motivation",
+      "objectives": "I can describe how cybercrime affects people and businesses\nI can tell cybersecurity and network security apart\nI can describe why a network can be attacked\nI can name types of hacker and what motivates them",
+      "outline": "Routine first (same every lesson). Vocabulary on board: cybersecurity · network security · hacker · ethical hacker · hacktivist. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — the UK breaches-survey image on the slide; pupils CHOOSE what it shows and TICK who cybercrime harms (no writing).\n   • Support: tick from given options.  • Core: write one money cost.  • Challenge: why a hospital attack is worse than a games-site attack.\n2. (8–20) I-do → we-do. Teacher defines cybersecurity vs network security (I do); class matches the terms (we do) on the activity sheet. Likely error: swapping the two terms — fix-words “cyber = everything, network = the network.”\n3. (20–38) You-do — card-sort short attacker stories into malicious hacker / hacktivist / ethical hacker.\n   • Support: word-choice for hacktivist.  • Core: one reason a network is vulnerable.  • Challenge: explain the cybersecurity vs network-security difference. TA: “prompt, do not do it for them.”\n4. (38–50) Consolidate — pupils keep a photo of their finished sheet (show-your-work) and rate their confidence on the slider.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names one hacker type and a motive.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "The cost of cybercrime — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-cost-of-cybercrime-starter-worksheet.md" },
+        { "title": "The cost of cybercrime — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-cost-of-cybercrime-activity-worksheet.md" },
+        { "title": "The cost of cybercrime — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-cost-of-cybercrime-slides.md" },
+        { "title": "UK cyber security breaches survey.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-cyber-breaches-survey.png" }
+      ]
+    },
+    {
+      "title": "Non-automated cybercrime — social engineering",
+      "objectives": "I can explain what social engineering is\nI can spot the warning signs of a phishing email\nI can put the steps of a phishing attack in order\nI can sort types of social engineering",
+      "outline": "Routine first. Vocabulary on board: social engineering · phishing · pharming · shoulder surfing · tailgating · blagging. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — the shoulder-surfing image; pupils CHOOSE what the person is doing and RECAP last lesson (no writing).\n2. (8–20) I-do → we-do. Teacher defines social engineering as tricking PEOPLE (I do); class works the phishing warning-signs multi-select together (we do). Likely error: thinking a known logo means it is safe — fix-words “scammers copy logos too; look at the address and the spelling.”\n3. (20–38) You-do — ORDER the four steps of a phishing attack, then card-sort tricks into ‘in person’ vs ‘from far away’.\n   • Support: term↔definition matching.  • Core: one difference between phishing and pharming.  • Challenge: two pieces of phishing-safety advice. TA: prompt, do not supply the answer.\n4. (38–50) Consolidate — best safety tip written + photo of the finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil gives one way to stay safe from phishing.\nKeep the tone calm — about being careful, not scared. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Non-automated cybercrime — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-non-automated-cybercrime-starter-worksheet.md" },
+        { "title": "Non-automated cybercrime — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-non-automated-cybercrime-activity-worksheet.md" },
+        { "title": "Non-automated cybercrime — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-non-automated-cybercrime-slides.md" },
+        { "title": "Shoulder surfing.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-shoulder-surfing.png" }
+      ]
+    },
+    {
+      "title": "Automated cybercrime — malware and network attacks",
+      "objectives": "I can name types of malware\nI can sort malware from network attacks\nI can put the steps of a DDoS attack in order\nI can explain a weakness that let a real attack happen",
+      "outline": "Routine first. Vocabulary on board: malware · virus · worm · trojan · spyware · ransomware · DoS · DDoS · zombie · botnet. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — a risky-download scenario; pupils CHOOSE the safest option and RECAP phishing (no writing).\n2. (8–20) I-do → we-do. Teacher defines malware and the family (I do); class ticks which items are malware (we do). Likely error: virus vs worm — fix-words “a worm needs no help to spread.”\n3. (20–40) You-do — card-sort threats into malware vs network attack; ORDER the four steps of a DDoS attack. Optional active demo: the paper-ball / maths-sum DoS game (movement break, supervised).\n   • Support: malware term↔definition matching.  • Core: WannaCry image — name the malware type (ransomware/worm).  • Challenge: why updating software is a defence.\n4. (40–50) Real case — short WannaCry news clip (teacher-played hook, external link, kept calm) + photo of finished sheet.\n5. (50–55) Plenary — self-tick the 4 “I can…”; name one malware type and what it does. TA notes who can explain why updates matter.\nDifferentiation on the SAME task; no flashing/sound; movement built in as routine, not reward.",
+      "resources": [
+        { "title": "Automated cybercrime — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-automated-cybercrime-starter-worksheet.md" },
+        { "title": "Automated cybercrime — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-automated-cybercrime-activity-worksheet.md" },
+        { "title": "Automated cybercrime — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-automated-cybercrime-slides.md" },
+        { "title": "WannaCry ransomware screen.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-wannacry-ransomware.png" }
+      ]
+    },
+    {
+      "title": "Protecting systems with software",
+      "objectives": "I can use a Caesar cipher to encrypt letters\nI can put the steps of encrypting a message in order\nI can name ways software protects a system\nI can explain one software defence in my own words",
+      "outline": "Routine first. Vocabulary on board: encryption · key · public key · private key · software update · input sanitisation · code review. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — describe-the-word recap game (no taboo words); pupils CHOOSE the word and RECAP what a worm is.\n2. (8–26) I-do → we-do. Teacher demonstrates the Caesar cipher wheel, encrypting HELLO with +1 → IFMMP (I do); class encrypts a word (we do). Likely error: forgetting Z wraps to A — fix-words “after Z, go back to A.”\n3. (26–42) You-do — fill-in-the-blank Caesar cipher, ORDER the encrypt steps, card-sort software defences.\n   • Support: defence term↔definition matching.  • Core: asymmetric encryption single-choice (two keys).  • Challenge: explain how input sanitisation stops SQL injection.\n4. (42–50) Consolidate — encrypted message written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the 4 “I can…”; name one way software protects a system.\nLink back: WannaCry got in through software that was not updated. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Protecting systems with software — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-software-as-defence-starter-worksheet.md" },
+        { "title": "Protecting systems with software — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-software-as-defence-activity-worksheet.md" },
+        { "title": "Protecting systems with software — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-software-as-defence-slides.md" },
+        { "title": "Caesar cipher wheel.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-caesar-cipher-wheel.png" }
+      ]
+    },
+    {
+      "title": "Network design as defence",
+      "objectives": "I can decide what a firewall should allow or block\nI can put the steps a firewall takes in order\nI can name ways to keep a network safe\nI can explain why a network needs more than one defence",
+      "outline": "Routine first. Vocabulary on board: firewall · packet · network policy · MAC address filtering · user access levels · backup policy · antivirus. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — blocked-websites discussion; pupils CHOOSE why a site is blocked and RECAP encryption.\n2. (8–22) I-do → we-do. Teacher explains a firewall as a gate that checks traffic both ways (I do); class works one allow + one block example (we do). Likely error: thinking a firewall only checks incoming traffic — fix-words “it checks in AND out.”\n3. (22–40) You-do — card-sort requests into firewall-allow vs firewall-block using the school rule; ORDER the four firewall steps; tick-all network defences.\n   • Support: method↔definition matching.  • Core: what a network policy is + one rule.  • Challenge: why a network needs antivirus and access levels as well as a firewall.\n4. (40–50) Consolidate — best access rule written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the 4 “I can…”; name one way a network stays safe.\nKey idea: no single defence is enough. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Network design as defence — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-network-as-defence-starter-worksheet.md" },
+        { "title": "Network design as defence — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-network-as-defence-activity-worksheet.md" },
+        { "title": "Network design as defence — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-network-as-defence-slides.md" },
+        { "title": "Laptop on a network.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-network-laptop.png" }
+      ]
+    },
+    {
+      "title": "Where is the danger? — penetration testing",
+      "objectives": "I can plan different types of test for a company\nI can put the steps of a penetration test in order\nI can name ways to find weak spots in a network\nI can explain what makes hacking ethical",
+      "outline": "Routine first. Vocabulary on board: penetration testing · ethical hacking · network forensics · commercial analysis tool · network policy · user policy. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — ‘think like a hacker’ with the bitcoin/chip image; pupils CHOOSE the safe, legal way to earn money (a penetration tester) and RECAP firewalls.\n2. (8–20) I-do → we-do. Teacher explains a penetration tester is an ethical hacker WITH permission (I do); class discusses what they look for (we do). Likely error: confusing ethical with malicious — fix-words “ethical = permission + a report to fix it.”\n3. (20–40) You-do — card-sort Ranter test ideas into physical / software / social-engineering attacks; ORDER the four penetration-test steps.\n   • Support: method↔definition matching.  • Core: single-choice on what makes hacking ethical (permission).  • Challenge: why test the people as well as the computers.\n4. (40–50) Consolidate — strongest planned test written + photo of finished plan (show-your-work).\n5. (50–55) Plenary — self-tick the 4 “I can…”; name one thing that makes hacking ethical.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Where is the danger? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-where-is-the-danger-starter-worksheet.md" },
+        { "title": "Where is the danger? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-where-is-the-danger-activity-worksheet.md" },
+        { "title": "Where is the danger? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-where-is-the-danger-slides.md" },
+        { "title": "Cybercrime payoff (bitcoin and chip).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-cybercrime-payoff.png" }
+      ]
+    },
+    {
+      "title": "Being part of the solution — end-of-unit assessment",
+      "objectives": "I can name threats: malware, social engineering and network attacks\nI can name defences: encryption, firewalls and access levels\nI can explain how companies find their weak spots\nI can name a cyber security career I could do",
+      "outline": "Routine first. Vocabulary on board (recap): threat · defence · cyberespionage. TA: hand out the starter then the quiz; read the 3 “I can…” aloud.\n1. (0–12) Starter — the live threat map; pupils CHOOSE what it shows, sort words into threat vs defence, and (Support) match key terms. Recaps the whole unit before the quiz.\n   • Support: term↔definition matching.  • Core: one threat + one defence.  • Challenge: why the threat map may not be accurate (zombies / botnets).\n2. (12–42) End-of-unit quiz — the folded summative, sat independently and quietly. 15 single-choice questions (one per topic), one tick-all-that-apply, a careers question, and a confidence slider. A TA may read questions aloud WITHOUT giving answers. Pupils keep a photo of the finished quiz (show-your-work).\n3. (42–55) Plenary — careers in cyber security. Teacher-played hook: the CyberFirst careers clips (external links). Pupils self-tick the “I can…” and name a job they might like.\nThe quiz is a SHARED assessment (no Support/Core/Challenge slices — everyone sits the same quiz); the starter carries the differentiation. Keep it calm and reassuring — it shows what they have learned. No flashing/sound.",
+      "resources": [
+        { "title": "Being part of the solution — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-being-part-of-the-solution-starter-worksheet.md" },
+        { "title": "Cyber security — end-of-unit quiz.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-end-of-unit-quiz-worksheet.md" },
+        { "title": "Being part of the solution — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-being-part-of-the-solution-slides.md" },
+        { "title": "Live cyber threat map.png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l7-cyber-threat-map.png" }
+      ]
+    }
+  ]
+}
