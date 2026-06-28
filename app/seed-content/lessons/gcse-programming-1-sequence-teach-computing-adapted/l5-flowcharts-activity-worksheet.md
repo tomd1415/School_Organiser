@@ -7,6 +7,10 @@
 ## What we are learning
 A **flowchart** uses shapes to plan a program. Today I will follow a flowchart and design my own.
 
+This flowchart uses the main shapes — the rounded **terminators** (Start/End), a **subroutine** box (welcome) and an input/output **parallelogram**:
+
+![A worked flowchart with the code beside it]({{res:l5-flowchart-example.png}})
+
 ## Pair programming
 Work in a pair. One person is the **driver** (types). One is the **navigator** (reads and checks). Swap every 5 minutes.
 

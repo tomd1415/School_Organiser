@@ -22,7 +22,11 @@ column = randint(0, 7)
 - **Flowchart** = a picture of the algorithm (boxes and arrows).
 - TCC pseudocode: `<-` for assign, `OUTPUT`, `USERINPUT`, `IF/ELSE`, `FOR`, `WHILE`, `SUBROUTINE`.
 
-> 🧑‍🏫 I-do. Match a few Python lines to their pseudocode. Designs do NOT need to be perfect — plan the main parts now, refine when coding. Encourage reusing old programs for ideas.
+A flowchart looks like this (rounded boxes = start/end, a parallelogram = input/output):
+
+![An example flowchart with the code beside it]({{res:l9-flowchart-example.png}})
+
+> 🧑‍🏫 I-do. Match a few Python lines to their pseudocode. Point to the example flowchart's shapes. Designs do NOT need to be perfect — plan the main parts now, refine when coding.
 
 ## Use your success criteria  (we do)
 1. Read your success criteria.

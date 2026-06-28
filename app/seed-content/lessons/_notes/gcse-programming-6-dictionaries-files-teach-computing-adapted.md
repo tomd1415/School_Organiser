@@ -216,3 +216,6 @@ image exists — logged in the image-gap table above rather than as a type gap.)
   Battle Boats use the player-vs-computer framing, no real names.
 - DB note: per the task brief this conversion **wrote bundle files only** — it did **not** materialise onto the
   dev DB. Run `npm run seed:lessons` to import (idempotent — replaces a same-title unit on course 3's scheme).
+
+## Sweep (2026-06-28)
+- L9 Battle Boats design: 'a flowchart is a picture (boxes and arrows)' with no picture → added a flowchart example (reused from Programming-1).

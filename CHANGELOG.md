@@ -26,6 +26,14 @@ Built on branch `phase-15-17-unattended`, continuing the same run. Plan: `docs/R
   **note-1** gap — L4 topologies was missing **ring + mesh** diagrams (recovered by rasterising source slides
   23/31) — and added **note-4** visible "▶ Your turn" activity-start cues to all 11 teaching decks. Re-seeded
   + verified. Vector-diagram fix recorded in `WORKSHEET_QUESTION_TYPES.md` §4.
+- **Note-1 (concept visuals) sweep COMPLETE corpus-wide.** A corpus-wide audit (`_audit.ts`) found every acute
+  "the lesson tells pupils to read/recognise a diagram that isn't there" gap; all fixed by rasterising the
+  source vector slides: GCSE Computer Systems **logic-gate symbols** (AND/OR/NOT), GCSE Data Representations
+  **Huffman tree**, GCSE Programming-1 **flowchart**, Programming-4 **structure chart**, Programming-6 Battle
+  Boats flowchart. Stayed disciplined about NOT padding already-complete lessons (TCP/IP+OSI label-backdrops,
+  bubble sort, textual binary calc, FDE order-task all confirmed fine). Corpus `_vfile.ts` = 69/77 bundles
+  clean (8 false-positives). The one remaining genuine gap is the **§2.7 trace-table question type** — an
+  engine build, not an image fix. Per-unit detail in `app/seed-content/lessons/_notes/*`.
 
 ### 2026-06-28 — KS2 Year 6 lesson conversion (7 units / 38 lessons) — TCC catalogue complete
 

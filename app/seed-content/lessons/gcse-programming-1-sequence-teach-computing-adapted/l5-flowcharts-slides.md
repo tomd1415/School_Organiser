@@ -18,7 +18,9 @@ This flowchart is the first program from Lesson 2. The shapes are new.
 - process (rectangle): a step or calculation
 - subroutine (rectangle with side bars): named code
 
-> 🧑‍🏫 I-do. Step through each symbol with the starter flowchart. Slide 14 in the source recaps each symbol with an example.
+![A flowchart for the welcome subroutine, with the code beside it — terminators, a subroutine box and an input/output parallelogram]({{res:l5-flowchart-example.png}})
+
+> 🧑‍🏫 I-do. Point to each shape in the flowchart: the rounded Start/End are terminators, "welcome" with side bars is a subroutine, the slanted box is input/output. Step through with the starter flowchart.
 
 ## Watch — drawing a flowchart in Flowgorithm
 *(teacher demo video — play it live; not embedded, to keep the repo light)*

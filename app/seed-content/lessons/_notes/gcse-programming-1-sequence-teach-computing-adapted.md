@@ -66,3 +66,6 @@ None. All demand was met by built types (order, card-sort, parsons, matching, fi
 screenshot). A **label-a-diagram** task was *desirable* for L5 flowchart symbols but is blocked by the
 missing flowchart raster (see image-gap log), not by a missing type — so it is logged as an image gap, not
 a type gap. WORKSHEET_QUESTION_TYPES.md §2 backlog remains empty.
+
+## Sweep (2026-06-28)
+- L5 Flowcharts: taught the flowchart shapes but only had a pair-programming photo. Added a worked flowchart (source slide 10: terminators, subroutine box, parallelogram) to slide + worksheet via the rasteriser.

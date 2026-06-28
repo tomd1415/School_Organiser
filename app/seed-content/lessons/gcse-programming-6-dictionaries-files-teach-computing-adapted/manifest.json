@@ -95,7 +95,8 @@
       "resources": [
         { "title": "Battle Boats design — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-battle-boats-design-starter-worksheet.md" },
         { "title": "Battle Boats design — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-battle-boats-design-activity-worksheet.md" },
-        { "title": "Battle Boats design — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-battle-boats-design-slides.md" }
+        { "title": "Battle Boats design — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-battle-boats-design-slides.md" },
+        { "title": "An example flowchart with code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l9-flowchart-example.png" }
       ]
     },
     {

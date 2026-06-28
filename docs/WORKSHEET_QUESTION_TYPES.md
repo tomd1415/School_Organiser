@@ -176,8 +176,24 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 >
 > **RESOLVED (2026-06-28) — the vector-diagram blocker now has a fix.** The resource-completeness sweep
 > deployed the Gotenberg sidecar and a rasteriser (`Office → PDF → pdf-to-img PNG`) that captures the
-> **vector-shape diagrams** `extractOfficeImages` never could. Proven on the GCSE Networks **topologies**
-> lesson (recovered the ring + mesh stack diagrams from source slides 23/31 — see
-> `_notes/gcse-computer-networks-teach-computing-adapted.md`). Most of the ⚠️ rows above that say "PPT vector
-> shapes / non-rasterisable" can now be re-captured this way during the sweep (see
-> `docs/RESOURCE_COMPLETENESS_SWEEP.md` §3).
+> **vector-shape diagrams** `extractOfficeImages` never could (see `docs/RESOURCE_COMPLETENESS_SWEEP.md` §3).
+>
+> **SWEEP — note-1 (concept visuals) COMPLETE corpus-wide (2026-06-28).** A corpus-wide automated audit
+> (`_audit.ts`: every lesson whose objective/text teaches a VISUAL concept but lacks an image of it) found the
+> full set of acute "the lesson tells pupils to read/recognise a diagram that isn't there" gaps. All fixed by
+> rasterising the source vector slides:
+> - **GCSE Networks** L4 topologies — ring + mesh diagrams (slides 23/31).
+> - **GCSE Computer Systems** L10 logic gates — AND/OR/NOT symbols (slides 18/37/40).
+> - **GCSE Data Representations** L17 Huffman coding — the MISSISSIPPI tree (slide 36).
+> - **GCSE Programming 1** L5 flowcharts — a worked flowchart (shapes) (slide 10).
+> - **GCSE Programming 4** L22 structured programming — the dog-walking **structure chart** (slide 26).
+> - **GCSE Programming 6** L9 Battle Boats design — a flowchart example (reused).
+>
+> Confirmed NOT gaps (don't-pad discipline): TCP/IP + OSI "blank box" stacks are correct `label`-task
+> backdrops; Bubble sort already shows the pass it labels; binary add/subtract/shift, signed binary and the
+> `< > =` operators are textual; FDE cycle is taught via an order task; Y8 Boolean logic is operators-via-truth-
+> tables, not symbols. A corpus-wide `_vfile.ts` pass = **69/77 bundles clean**, the 8 warnings all
+> verifier false-positives (project/assessment worksheets named design/evaluation/testing, or the word "ALL").
+>
+> **Remaining genuine gap = the §2.7 interactive trace-table TYPE** (6 GCSE algorithms/programming lessons) —
+> that's an **engine build**, not an image fix; a trace-table picture wouldn't help (pupils must FILL it).

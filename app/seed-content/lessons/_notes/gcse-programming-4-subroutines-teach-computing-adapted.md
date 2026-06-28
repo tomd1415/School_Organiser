@@ -120,3 +120,6 @@ No other type-gaps — order/sort/label/slider/multi-select all covered the dema
 - TCC live-coding `.webm` videos (L19) were NOT bundled: large (18 MB + 59 MB) teacher demonstrations, not
   pupil-facing hooks, and contain on-screen typing only. Logged here as a deliberate omission (the lesson's
   live-code is reproduced as a worked example on the slide + worksheet instead).
+
+## Sweep (2026-06-28)
+- L22 Structured programming: said 'use the structure chart' but showed a decorative dogs photo. Added the dog-walking **structure chart** (source slide 26) to slide + worksheet.

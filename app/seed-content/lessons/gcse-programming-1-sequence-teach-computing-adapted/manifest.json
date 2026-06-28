@@ -198,6 +198,13 @@
           "mimeType": "image/png",
           "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
           "file": "l5-pair-programming-teach-computing.png"
+        },
+        {
+          "title": "A worked flowchart with code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-flowchart-example.png"
         }
       ]
     }

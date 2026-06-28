@@ -41,9 +41,9 @@ print(multiple_five(12))
 ## Structure charts
 A **structure chart** plans the subroutines (blocks) of a program before you write it. Each block has an **identifier**, **parameters**, and a **return** value.
 
-![Three dogs on a walk — the dog-walking invoice program]({{res:l5-dog-walking-teach-computing.png}})
+A dog walker wants a **weekly invoice** program: enter the number of dogs and days, work out the walks and cost, then display the invoice. This is its structure chart:
 
-A dog walker wants a **weekly invoice** program: enter the number of dogs and days, work out the walks and cost, then display the invoice.
+![Structure chart for the dog-walking weekly invoice — the main program splits into number of dogs, days walked, total number of walks, total charge and invoice, with one subroutine's identifier/parameters/return shown]({{res:l5-structure-chart.png}})
 
 | Subroutine | What it returns |
 |---|---|

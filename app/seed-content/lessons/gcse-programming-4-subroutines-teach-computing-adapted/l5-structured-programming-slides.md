@@ -34,11 +34,11 @@ def and_function(a, b):
 > 🧑‍🏫 We-do. Keep it concrete: each subroutine is a tidy box with a known job (its interface = parameters in, return out).
 
 ## Structure charts
-![Three dogs on a walk — the dog-walking invoice program]({{res:l5-dog-walking-teach-computing.png}})
-
 A **structure chart** plans the subroutines before you code. Each shows: identifier · parameters · return.
 
-> 🧑‍🏫 We-do. Walk through the dog-walking invoice chart: num_dogs, num_days, num_walks, total_charge, invoice. Explain what an invoice is — some pupils will not know.
+![Structure chart for the dog-walking weekly invoice — the main program splits into number of dogs, days walked, total walks, total charge and invoice]({{res:l5-structure-chart.png}})
+
+> 🧑‍🏫 We-do. Walk through the dog-walking invoice chart: num_dogs, num_days, num_walks, total_charge, invoice. The box underneath shows one subroutine's interface (identifier · parameters · return). Explain what an invoice is — some pupils will not know.
 
 ## Your turn — complete the program  (you do)
 Use the structure chart to finish the dog-walking invoice program.
