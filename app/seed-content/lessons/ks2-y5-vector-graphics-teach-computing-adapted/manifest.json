@@ -1,0 +1,87 @@
+{
+  "unitTitle": "KS2 Y5 Introduction to vector graphics (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "The drawing tools",
+      "objectives": "I can recognise that vector drawings are made from shapes and lines\nI can name the main drawing tools\nI can use the shape and line tools to make a picture\nI can say one way a vector drawing is different from a paper drawing",
+      "outline": "Routine first (same every lesson). Vocabulary on the board: vector · shape · line · object · toolbar · tool. TA: everyone has the starter worksheet; the drawing software (Google Drawings or PowerPoint) open on each screen. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what is a vector drawing? On the starter worksheet pupils CHOOSE that a vector drawing is made from shapes and lines, and look at a logo.\n   • Support: choose what a vector is made from.  • Core: choose that it is made on a computer.  • Challenge: name a place they see vector drawings.\n2. (10–20) I-do — open the shape menu, draw a rectangle; each shape is an object. Show the toolbar tools: select, line, shape, zoom. Likely error: clicking empty space deselects the shape → fix-words \"click the shape once; the blue handles show it is selected.\"\n3. (20–35) We-do — on the activity worksheet pupils LABEL the toolbar tools (label-a-diagram) and answer which shape is selected.\n4. (35–50) You-do — pupils use the shape and line tools to make a simple picture (a house or robot) and save it for next lesson, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one drawing tool.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "The drawing tools — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-drawing-tools-starter-worksheet.md" },
+        { "title": "The drawing tools — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-drawing-tools-activity-worksheet.md" },
+        { "title": "The drawing tools — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-drawing-tools-slides.md" },
+        { "title": "The drawing software toolbar (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-toolbar.png" },
+        { "title": "The shapes menu (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-shapes-menu.png" },
+        { "title": "A selected shape with handles (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-rect-circle-selected.png" },
+        { "title": "A logo made from shapes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-logo-globe.png" }
+      ]
+    },
+    {
+      "title": "Creating images",
+      "objectives": "I can identify the shapes used to make a vector drawing\nI can explain that each shape in a vector drawing is an object\nI can move, resize and rotate an object\nI can duplicate an object to save time",
+      "outline": "Routine first. Vocabulary on the board: object · move · resize · rotate · duplicate/copy. TA: everyone has the starter worksheet; the drawing software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — spot the shapes. On the starter worksheet pupils CHOOSE which shape was copied and that each shape is an object.\n   • Support: choose the copied shape.  • Core: tick the tools that change one object.  • Challenge: say why copying is quicker.\n2. (10–20) I-do — copy and paste a shape (Ctrl+C / Ctrl+V); duplicate makes more without re-drawing. Likely error: dragging a side handle stretches the shape out of shape → fix-words \"use a corner handle to keep it neat.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the steps to copy a shape, then SORT each tool (move/resize/rotate/duplicate) to what it does.\n4. (35–50) You-do — pupils build a simple picture, duplicating a shape instead of redrawing it, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one tool they used.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Creating images — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-creating-images-starter-worksheet.md" },
+        { "title": "Creating images — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-creating-images-activity-worksheet.md" },
+        { "title": "Creating images — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-creating-images-slides.md" },
+        { "title": "Many circles made by copying (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-nine-circles.png" },
+        { "title": "A selected object with resize handles (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-resize-handles.png" }
+      ]
+    },
+    {
+      "title": "Making effective drawings",
+      "objectives": "I can use the zoom tool to add detail to my drawings\nI can use alignment guides to line objects up\nI can use resize handles to change an object's size\nI can change an object's colour or border to make a new look",
+      "outline": "Routine first. Vocabulary on the board: zoom · align · alignment guide · resize · border · modify. TA: everyone has the starter worksheet; the drawing software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what does zoom do? On the starter worksheet pupils CHOOSE that zoom makes the view bigger without changing the object's real size.\n   • Support: choose what zoom does.  • Core: choose why zoom is helpful.  • Challenge: say why you zoom in then back to Fit.\n2. (10–20) I-do — zoom in to place a small detail; show the red alignment guide and the blue size guide. Likely error: dragging a side handle squashes the shape → fix-words \"corner handle keeps it the right shape.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the zoom steps and SORT each guide (alignment / size) to what it tells them.\n4. (35–50) You-do — pupils build a picture using zoom and guides, then modify a colour or border, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says which guide helped.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Making effective drawings — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-effective-drawings-starter-worksheet.md" },
+        { "title": "Making effective drawings — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-effective-drawings-activity-worksheet.md" },
+        { "title": "Making effective drawings — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-effective-drawings-slides.md" },
+        { "title": "A red alignment guide between shapes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-align-guide.png" },
+        { "title": "Blue size guides while resizing (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-resize-guide.png" },
+        { "title": "Circles with different fills and borders (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-three-circles.png" }
+      ]
+    },
+    {
+      "title": "Layers and objects",
+      "objectives": "I can identify that each added object creates a new layer\nI can put a layer at the front or the back\nI can change the order of layers in a vector drawing\nI can use layering to create an image",
+      "outline": "Routine first. Vocabulary on the board: layer · object · order · front · back · arrange. TA: everyone has the starter worksheet; the drawing software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what is a layer? On the starter worksheet pupils CHOOSE that a new object goes on top and the first object is at the back.\n   • Support: choose where a new object goes.  • Core: choose which menu moves layers (Arrange).  • Challenge: say why layer order matters.\n2. (10–20) I-do — stack three shapes; the newest is on top. Show Arrange → Order → Send to back. Likely error: deleting a hidden object instead of re-ordering → fix-words \"do not delete it — send the front shape to the back.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the Send-to-back steps and SORT front/back, using the emoji layering image.\n4. (35–50) You-do — pupils build a layered picture (a face, a flower, a tree), order the layers, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one shape they sent to the back.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine. (Source layering video is 9 MB — referenced as a teacher-played hook only, not embedded.)",
+      "resources": [
+        { "title": "Layers and objects — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-layers-objects-starter-worksheet.md" },
+        { "title": "Layers and objects — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-layers-objects-activity-worksheet.md" },
+        { "title": "Layers and objects — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-layers-objects-slides.md" },
+        { "title": "Each object is placed on a new layer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-new-layer.png" },
+        { "title": "Emoji faces made by layering (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-emoji-layering.png" }
+      ]
+    },
+    {
+      "title": "Manipulating objects",
+      "objectives": "I can select more than one object at a time\nI can group objects so they move together\nI can ungroup objects to change one part\nI can copy and reuse a group of objects",
+      "outline": "Routine first. Vocabulary on the board: select · group · ungroup · duplicate · reuse. TA: everyone has the starter worksheet; the drawing software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what does group do? On the starter worksheet pupils CHOOSE that grouped objects move together and that you ungroup to change one part.\n   • Support: choose how grouped objects move.  • Core: choose what to do first to change one part (ungroup).  • Challenge: say why grouping helps when copying lots.\n2. (10–20) I-do — drag a box to select many objects (or Shift+click); right-click → Group; a group acts as one object. Likely error: trying to recolour one part while still grouped → fix-words \"ungroup first, change it, then group again.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the group steps and SORT each job into group / ungroup, using the bouquet and the Ungroup menu image.\n4. (35–50) You-do — pupils make one object, group it, then copy and reuse it to build a bigger picture, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one thing they grouped.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Manipulating objects — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-manipulating-objects-starter-worksheet.md" },
+        { "title": "Manipulating objects — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-manipulating-objects-activity-worksheet.md" },
+        { "title": "Manipulating objects — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-manipulating-objects-slides.md" },
+        { "title": "A bunch of flowers made from grouped objects (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-bouquet.png" },
+        { "title": "The right-click menu showing Ungroup (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-ungroup-menu.png" },
+        { "title": "A real flower photo for a background (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-flower-photo.png" }
+      ]
+    },
+    {
+      "title": "Becoming a graphic designer",
+      "objectives": "I can use my vector skills to create a logo for a purpose\nI can name the skills I used and why I used them\nI can say what a graphic designer does\nI can say one difference between a vector drawing and a paint drawing",
+      "outline": "Routine first. Vocabulary on the board: graphic designer · logo · purpose · vector · paint · pixel. TA: everyone has the starter worksheet; the drawing software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — vector drawings have a job. On the starter worksheet pupils CHOOSE what a graphic designer does and TICK everywhere they see vector drawings (multi-select).\n   • Support: choose who designs logos.  • Core: tick all the places (badge, label, sign).  • Challenge: say why a logo must be simple.\n2. (10–20) I-do — vectors are used in documents, on signs, and printed on vans (they stay sharp at any size). Likely error: thinking vector and paint are the same → fix-words \"vector = shapes you can move; paint = dots you colour in.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the logo steps, SORT each skill to what it does, then SORT vector vs paint.\n4. (35–50) You-do — pupils design a logo for a purpose using their unit skills, group it, then photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one vector skill they used this unit.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Becoming a graphic designer — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-graphic-designer-starter-worksheet.md" },
+        { "title": "Becoming a graphic designer — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-graphic-designer-activity-worksheet.md" },
+        { "title": "Becoming a graphic designer — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-graphic-designer-slides.md" },
+        { "title": "A team logo made from shapes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-logo-shield.png" },
+        { "title": "A tin label logo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-logo-beans.png" },
+        { "title": "Vectors used in a presentation (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-presentation.png" },
+        { "title": "A design printed on a car (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-race-car.jpg" }
+      ]
+    }
+  ]
+}

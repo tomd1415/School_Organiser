@@ -1,0 +1,268 @@
+{
+  "unitTitle": "KS2 Y5 Flat-file databases (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Creating a paper-based database",
+      "objectives": "I can say what data, a record and a field are\nI can fill in a record card with fields\nI can sort my cards into order\nI can group my cards to answer a question",
+      "outline": "Routine first (same every lesson). Vocabulary on board: data · database · record · field · sort · group. TA: everyone has the starter worksheet and a set of blank record cards (two sheets each); the scaffolded animal-facts sheet ready for support. Read the 3 “I can…” aloud.\n1. (0–5) Starter — what is data? Pupils CHOOSE what a database is, then on the starter worksheet name a record and a field. • Support: choose record vs field. • Core: fill the blanks. • Challenge: multi-select which items are fields.\n2. (5–20) I-do → we-do — make record cards. Model one card (bat: can fly ✓). Each pupil makes 8 cards on a theme (animals). The whole card = a record; each ticked box = a field. Likely error: “a field is the whole card” → fix-words “a field is ONE fact, a record is ALL the facts.” Keep cards for Lesson 3.\n3. (20–30) Sort — pupils mix and sort cards A–Z by name, timed with a partner. On the activity worksheet they drag the steps into order. Likely error: sorting by colour → fix-words “sort by the NAME.” Sort your own set and make a deliberate mistake; ask what went wrong.\n4. (30–50) You-do — group to answer a question. Pose “which animals can fly?” Pupils pull out the matching cards (a group), then “how many have six legs?” TA: prompt, do not sort it for them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows a record and a field.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Record cards — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-record-cards-starter-worksheet.md"
+        },
+        {
+          "title": "Record cards — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-record-cards-activity-worksheet.md"
+        },
+        {
+          "title": "Record cards — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-record-cards-slides.md"
+        },
+        {
+          "title": "One record from a database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-minibeast-card.png"
+        }
+      ]
+    },
+    {
+      "title": "Computer databases",
+      "objectives": "I can name a field and a record in a database\nI can find data in form view and table view\nI can sort a database by clicking a field",
+      "outline": "Routine first. Vocabulary on board: database · record · field · form view · table view · sort. TA: the J2e Minibeasts and Countries databases open for everyone; the starter worksheet ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the same words on a computer. Pupils recall that a row is a record and a column heading is a field. • Support: choose field vs record. • Core: fill the blanks (field=column, record=row). • Challenge: what a second click on a heading does.\n2. (5–15) I-do → we-do — the parts of a table. Point at the heading row (fields) and one row (a record); a value is one box. Pupils LABEL the table on the activity worksheet (drag field / record / value). Likely error: “a column box is a record” → fix-words “a record is the WHOLE row.”\n3. (15–25) Form view vs table view. Switch tabs live so they see the SAME data two ways. Pupils MATCH each view to what it shows (form = one record; table = all rows).\n4. (25–50) You-do — sort by a field. Play the sorting demo video (teacher hook), then pupils sort the Minibeasts table to answer “most legs?” and “first A–Z?”, and screenshot the sorted table. Likely error: clicking a row not the heading → fix-words “click the HEADING to sort.” TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; compare paper vs computer sorting.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Computer databases — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-computer-databases-starter-worksheet.md"
+        },
+        {
+          "title": "Computer databases — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-computer-databases-activity-worksheet.md"
+        },
+        {
+          "title": "Computer databases — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-computer-databases-slides.md"
+        },
+        {
+          "title": "Minibeast database in table view (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-minibeast-table.png"
+        },
+        {
+          "title": "A record in form view (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-countries-form.png"
+        }
+      ]
+    },
+    {
+      "title": "Using a database",
+      "objectives": "I can group records that share a value\nI can sort a group into order\nI can use group-then-sort to answer a question",
+      "outline": "Routine first. Vocabulary on board: group · search · sort · value · field. TA: the paper animal cards from Lesson 1 and scissors out; the J2e Countries database open; the starter worksheet ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — group and sort. Pupils tell grouping (a search) from sorting (ordering). • Support: choose sort vs group. • Core: fill the blanks (group first, then sort). • Challenge: why group-then-sort is quicker.\n2. (5–20) Grouping the paper cards. We-do: cut off the corners with no tick; shake to keep a group (e.g. “lives in large groups”). Link this to a computer search. TA: help them cut safely.\n3. (20–35) Grouping on the computer (a search). Live-demo Language = German → Germany, Austria, Switzerland. Show the red cross clears it. Pupils name a field they could search on the activity worksheet.\n4. (35–50) You-do — group THEN sort. Play the searching-and-sorting demo video (teacher hook). Pupils drag the group-then-sort steps into order, then answer questions (largest German-speaking population; smallest Chinese-speaking population). Likely error: sorting before searching → fix-words “group FIRST, then sort.” TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; one pupil explains group-then-sort.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Using a database — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-database-starter-worksheet.md"
+        },
+        {
+          "title": "Using a database — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-database-activity-worksheet.md"
+        },
+        {
+          "title": "Using a database — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-database-slides.md"
+        },
+        {
+          "title": "Countries database in table view (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-countries-table.png"
+        },
+        {
+          "title": "Countries table sorted by population (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-countries-sorted.png"
+        }
+      ]
+    },
+    {
+      "title": "Using search tools (AND and OR)",
+      "objectives": "I can choose a field and a value to answer a question\nI can use AND to make a search narrower\nI can use OR to make a search wider",
+      "outline": "Routine first. Vocabulary on board: search · criteria · field · value · AND · OR. TA: the J2e Titanic database (1,317 records) open for everyone; the starter worksheet ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — one thing or two? Pupils see a search needs a field and a value, joined by AND or OR. • Support: choose a real search rule. • Core: fill the blanks (field + value). • Challenge: why searching beats reading 1,317 records.\n2. (5–15) Simple search. Unplugged Simon Says (“stand up if you ate toast”) = one rule. Then live-search Age = 16. Point at fields and values on a record.\n3. (15–25) AND makes it narrower. Unplugged “brown eyes AND toast” — fewer stand up. Pupils SORT facts into AND (fewer) vs OR (more). Misconception: “AND gives more” → fix-words “AND means BOTH, so FEWER match.”\n4. (25–50) You-do — AND and OR searches. Pupils drag the steps to build an OR search into order, then use the AND tool for the worksheet questions (males in first class = 180; females who died = 143). Likely error: wrong spelling/capital → fix-words “match the data exactly.” TA: prompt, do not type it for them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; pupils write their own AND/OR question for a partner.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Search tools — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-search-tools-starter-worksheet.md"
+        },
+        {
+          "title": "Search tools — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-search-tools-activity-worksheet.md"
+        },
+        {
+          "title": "Search tools — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-search-tools-slides.md"
+        },
+        {
+          "title": "Titanic database in table view (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-titanic-table.png"
+        },
+        {
+          "title": "An OR search being built (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-or-search.png"
+        },
+        {
+          "title": "One Titanic passenger record (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-titanic-record.png"
+        }
+      ]
+    },
+    {
+      "title": "Comparing data visually",
+      "objectives": "I can choose a chart that answers a question\nI can make a chart from a database\nI can say why a computer is good at making charts",
+      "outline": "Routine first. Vocabulary on board: chart · bar chart · pie chart · axis · filter · compare. TA: the J2e Titanic database open; the starter worksheet ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — what is a chart for? A chart turns data into a picture to compare. • Support: name a bar chart and a pie chart. • Core: fill the blanks (picture, compare, axis). • Challenge: how to tell a chart is NOT useful.\n2. (5–20) Is the chart useful? Show two charts of the same data; one answers “largest area”, one (count-per-country) tells us nothing. Pupils CHOOSE the clearer chart and MATCH question type to chart type (bar = compare; pie = parts of a whole).\n3. (20–40) Make a chart. Play the making-a-chart demo video (teacher hook). Pupils drag the chart-making steps into order, then use the chart tab to answer “more males or females?” and “fewest boarded where?” Likely error: wrong field on the x axis → fix-words “put the field your question is about on the bottom.” TA: prompt, do not do it for them.\n4. (40–50) Self-rate confidence on the slider, then screenshot the chart they made.\n5. (50–55) Plenary — self-tick the 3 “I can…”; why is a computer better than drawing by hand?\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Comparing data visually — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-data-visually-starter-worksheet.md"
+        },
+        {
+          "title": "Comparing data visually — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-data-visually-activity-worksheet.md"
+        },
+        {
+          "title": "Comparing data visually — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-data-visually-slides.md"
+        },
+        {
+          "title": "Two charts of the same data (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-which-chart.png"
+        },
+        {
+          "title": "A bar chart made from the database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-gender-chart.png"
+        }
+      ]
+    },
+    {
+      "title": "Databases in real life",
+      "objectives": "I can name fields in a real-world database\nI can search and filter to answer a question\nI can sort results to find the best flight\nI can present my findings to others",
+      "outline": "Routine first. Vocabulary on board: real-world database · field · search · filter · sort · present. TA: a flight-finder website (Expedia or similar) open for everyone; the starter worksheet ready; mini whiteboards out. Read the 4 “I can…” aloud.\n1. (0–5) Starter — databases everywhere. A flight site is a huge database. • Support: choose field vs record on a flight. • Core: fill the blanks (records, fields). • Challenge: why millions of flights need a database, not paper.\n2. (5–15) Fields on a flight. Show a flight record; ask for field NAMES (departure time, airline, price) not values. The departure-board photo is a real view of a flight database.\n3. (15–40) You-do — travel agents. Play the flight-finder demo video (teacher hook). Pupils drag the search steps into order and LABEL the parts of a flight result (time / how long / price), then search Birmingham → New York (1 Dec, return 15 Dec). They SORT by price and FILTER by stops. Likely error: reading the first flight as “the best” → fix-words “sort or filter FIRST, then read the top.” TA: prompt, do not type it for them.\n4. (40–53) Refine and present. Pupils pick a flight to recommend (price, time, stops) and screenshot it; short, supportive group presentations.\n5. (53–55) End of unit — recap the journey: data → record/field → search/sort → chart → real-world database. Self-tick the 4 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Databases in real life — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-databases-in-real-life-starter-worksheet.md"
+        },
+        {
+          "title": "Databases in real life — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-databases-in-real-life-activity-worksheet.md"
+        },
+        {
+          "title": "Databases in real life — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-databases-in-real-life-slides.md"
+        },
+        {
+          "title": "An airport departure board (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-departure-board.png"
+        },
+        {
+          "title": "A flight search website (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-expedia-search.png"
+        },
+        {
+          "title": "A list of flight results with filters (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-flight-results.png"
+        }
+      ]
+    }
+  ]
+}

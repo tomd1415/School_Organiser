@@ -1,0 +1,84 @@
+{
+  "unitTitle": "KS2 Y5 Selection in quizzes (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Exploring conditions",
+      "objectives": "I can say what a condition is\nI can find the condition in a Scratch program\nI can change a condition and see what happens",
+      "outline": "Routine first (same every lesson). Vocabulary on board: selection · condition · true · false. TA: everyone has the starter + activity worksheet; Scratch open with the 'Modifying selection' project. Read the 3 “I can…” aloud.\n1. (0–5) Starter — true or false. Pupils sort statements into true/false on the starter worksheet to meet the idea that a condition is checked and is either true or false.\n2. (5–20) I-do → we-do — what is a condition. Show the 'key r pressed' program: the condition is the part the computer CHECKS; the action runs when it is true. Likely error: pupils point at the action → fix-words “the condition is the part the computer checks.”\n   • Support: choose which block is the condition.  • Core: write an action that runs when true.  • Challenge: write their own true condition.\n3. (20–35) You-do — change a condition. Pupils open the Scratch project, change a condition (e.g. the key), run it, and screenshot onto the activity worksheet. TA: prompt, do not do it for them.\n4. (35–45) Plenary — self-tick the 3 “I can…”; each pupil points at a condition on screen.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Exploring conditions — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-exploring-conditions-starter-worksheet.md" },
+        { "title": "Exploring conditions — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-exploring-conditions-activity-worksheet.md" },
+        { "title": "Exploring conditions — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-exploring-conditions-slides.md" },
+        { "title": "Condition: key r pressed (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-condition-key-r.png" },
+        { "title": "Condition: colour touching (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-condition-touching.png" },
+        { "title": "Condition: key up arrow (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-condition-arrow.png" }
+      ]
+    },
+    {
+      "title": "Selecting outcomes",
+      "objectives": "I can use a forever loop so the condition is checked again and again\nI can find the condition and the two outcomes in if… then… else…\nI can make a program that uses selection to produce different outcomes",
+      "outline": "Routine first. Vocabulary on board: condition · true · false · outcome · if… then… else…. TA: starter + activity worksheet; Scratch open with the 'Using repeats' project. Read the 3 “I can…” aloud.\n1. (0–5) Starter — why a forever loop. Pupils compare the with-loop and no-loop images on the starter worksheet and choose which keeps checking. Likely error: thinking a key press always works → fix-words “no loop = checked once.”\n2. (5–20) I-do → we-do — two outcomes. Introduce if… then… else…: THEN = the true outcome, ELSE = the false outcome. Act it out (touch nose → thumbs up, else thumbs down). Read the two outcomes in the key-a program.\n   • Support: choose when the else runs.  • Core: write what happens if the key is not pressed.  • Challenge: name their own two outcomes.\n3. (20–38) You-do — programming two outcomes. Pupils order the if/then/else structure, then build a program with a condition and TWO outcomes in Scratch (keeping the forever loop), and screenshot it. TA: prompt, do not do it for them.\n4. (38–45) Plenary — self-tick the 3 “I can…”; each pupil names their then and else outcomes.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Selecting outcomes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-selecting-outcomes-starter-worksheet.md" },
+        { "title": "Selecting outcomes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-selecting-outcomes-activity-worksheet.md" },
+        { "title": "Selecting outcomes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-selecting-outcomes-slides.md" },
+        { "title": "if then else: move or turn (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-if-else.png" },
+        { "title": "Condition with no loop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-no-loop.png" },
+        { "title": "Condition with a forever loop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-with-loop.png" }
+      ]
+    },
+    {
+      "title": "Asking questions",
+      "objectives": "I can ask a question in Scratch with ask and wait\nI can use the answer as the condition\nI can make the program go two ways (true and false)",
+      "outline": "Routine first. Vocabulary on board: question · answer · condition · true · false · outcome. TA: starter + activity worksheet; Scratch open with the 'Program flow' project. Read the 3 “I can…” aloud.\n1. (0–5) Starter — binary questions. Pupils sort questions into yes/no and not-yes/no on the starter worksheet; meet that the answer becomes the condition.\n2. (5–20) I-do → we-do — ask and wait. Model the ask () and wait block (no forever loop needed — ask waits). Read the 'Would you like me to grow?' program: yes → true outcome, anything else → false outcome.\n   • Support: who types the answer.  • Core: why “ten” is false when the condition is “answer = 10”.  • Challenge: write their own yes/no question.\n3. (20–25) Exact match — sort answers into TRUE/FALSE for “answer = 10”. Likely error: expecting “ten” to count → fix-words “the computer checks the exact letters and numbers.”\n4. (25–40) You-do — build a program that asks a question and goes two ways, then screenshot it. Support: the scaffolded 'Programming different outcomes (support)' project. TA: prompt, do not do it for them.\n5. (40–45) Plenary — self-tick the 3 “I can…”; each pupil shows their question and two outcomes.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Asking questions — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-asking-questions-starter-worksheet.md" },
+        { "title": "Asking questions — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-asking-questions-activity-worksheet.md" },
+        { "title": "Asking questions — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-asking-questions-slides.md" },
+        { "title": "ask: Would you like me to grow? (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-ask-grow.png" },
+        { "title": "ask: favourite number, answer = 10 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-ask-number.png" }
+      ]
+    },
+    {
+      "title": "Designing a quiz",
+      "objectives": "I can read the quiz task and say what it needs\nI can plan my quiz questions and answers on a design sheet\nI can work out which outcome each answer gives",
+      "outline": "Routine first. Vocabulary on board: task · design · question · answer · condition · outcome. TA: starter + activity worksheet; the design sheets ready. No code today — this is a planning lesson. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the parts of a quiz program. Pupils read the 'Is 56 in the eight times table?' quiz on the starter worksheet and name the question and the correct answer (the condition).\n2. (5–20) I-do → we-do — the task and the parts. Read the task: make an interactive quiz that uses selection. Label the quiz program parts (question · condition · TRUE outcome · FALSE outcome).\n   • Support: choose the outcome for a yes answer.  • Core: write the outcome for a wrong answer.  • Challenge: write a good question + answer.\n3. (20–38) You-do — plan the quiz. Pupils complete at least two questions on the design sheet (question, correct answer, correct outcome, wrong outcome) and screenshot/photograph their plan. Support: give a topic. TA: prompt, do not do it for them.\n4. (38–45) Plenary — follow given answers (6, 11, 24, 4) through a plan and choose the outcome each time; self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Designing a quiz — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-designing-a-quiz-starter-worksheet.md" },
+        { "title": "Designing a quiz — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-designing-a-quiz-activity-worksheet.md" },
+        { "title": "Designing a quiz — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-designing-a-quiz-slides.md" },
+        { "title": "Quiz: is 56 in the eight times table? (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-quiz-times-table.png" }
+      ]
+    },
+    {
+      "title": "Testing a quiz",
+      "objectives": "I can build the first question of my quiz in Scratch\nI can test my quiz with a right answer and a wrong answer\nI can share my quiz and give kind feedback",
+      "outline": "Routine first. Vocabulary on board: implement · program · test · run · debug. TA: pupils’ designs from last lesson; the starter + activity worksheet; Scratch open; sticky notes for feedback. Read the 3 “I can…” aloud.\n1. (0–5) Starter — both, one, or none. Pupils compare Program A (Paris, if… then… else…) and Program B (8×7, if-then only) on the starter worksheet.\n2. (5–25) I-do → we-do — build the first question. Model: welcome → ask the first question → check the answer with if… then… else… → add TRUE and FALSE outcomes. Watch the demo video first if useful. Stop and test before adding more.\n   • Support: a debugging tick-list (multi-select).  • Core: name one thing to check when a wrong answer misbehaves.  • Challenge: add and test a second question.\n3. (25–40) You-do — test and debug. Run with a right answer, then a wrong answer; the output must match the plan. Likely error: outcome in the wrong part of the block → fix-words “true goes in then, false goes in else.” Screenshot the working quiz. TA: prompt, do not do it for them.\n4. (40–45) Share — swap devices, try a partner’s quiz, leave one kind comment. Self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Testing a quiz — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-testing-a-quiz-starter-worksheet.md" },
+        { "title": "Testing a quiz — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-testing-a-quiz-activity-worksheet.md" },
+        { "title": "Testing a quiz — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-testing-a-quiz-slides.md" },
+        { "title": "Quiz: Is Paris the capital of France? (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-quiz-paris.png" },
+        { "title": "Quiz: 8 x 7 = answer = 56 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-quiz-maths.png" },
+        { "title": "Quiz running on the Scratch stage (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-quiz-stage.png" }
+      ]
+    },
+    {
+      "title": "Evaluating a quiz",
+      "objectives": "I can find a way my quiz could be improved\nI can add setup so the quiz starts the same every time\nI can improve my quiz in Scratch",
+      "outline": "Routine first. Vocabulary on board: evaluate · improve · setup · condition · outcome. TA: pupils’ quizzes from last lesson; the starter + activity worksheet; Scratch open. Read the 3 “I can…” aloud.\n1. (0–5) Starter — spot the difference. Pupils compare two near-identical programs (answer = no vs answer = yes) and name the single difference (the condition).\n2. (5–18) I-do → we-do — the matching problem. Users who knew the answers got them wrong because they typed them differently. The answer must match EXACTLY. Likely error: expecting “Correct!” to equal “correct” → fix-words “the computer checks the exact letters.”\n   • Support: when does setup run.  • Core: why “set colour effect to 0” must be in setup.  • Challenge: one more improvement.\n3. (18–35) You-do — add setup + improve. Pupils tick the setup blocks they need (multi-select), add a setup to their quiz so every user gets the same start, tell users how to answer, test as they go, and screenshot. TA: prompt, do not do it for them.\n4. (35–45) Evaluate (plenary) — how did you meet the task, what worked, what you improved, what could be better. A scoring system uses variables (Year 6). Recap the unit journey: condition → if… then… else… → ask → quiz. Self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Evaluating a quiz — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-a-quiz-starter-worksheet.md" },
+        { "title": "Evaluating a quiz — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-a-quiz-activity-worksheet.md" },
+        { "title": "Evaluating a quiz — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-a-quiz-slides.md" },
+        { "title": "Setup blocks for a quiz (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-setup-blocks.png" },
+        { "title": "Quiz condition: answer = no (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-condition-no.png" },
+        { "title": "Quiz condition: answer = yes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-condition-yes.png" }
+      ]
+    }
+  ]
+}
