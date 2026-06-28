@@ -2168,3 +2168,14 @@ html[data-textscale="3"] { font-size: 142%; }
 .asmt-unit-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
 .asmt-unit-gen { display: inline-block; margin-top: 8px; }
 .cohort-asmt { font-variant-numeric: tabular-nums; }
+
+/* "Adjust with AI" panel in the worksheet/slide editor (noted_bugs.md #6). */
+.ws-adjust { border: 1px solid var(--line); border-radius: 10px; padding: 0.4rem 0.7rem; margin: 0.5rem 0; background: var(--card); }
+.ws-adjust > summary { cursor: pointer; font-weight: 600; }
+.ws-adjust-form { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+.ws-adjust-l { display: flex; flex-direction: column; gap: 0.2rem; }
+.ws-adjust-form textarea { width: 100%; font: inherit; }
+.ws-adjust-result { margin-top: 0.6rem; border-top: 1px solid var(--line); padding-top: 0.5rem; }
+.ws-adjust-preview { max-height: 50vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem; margin: 0.4rem 0; }
+.ws-adjust-apply { display: flex; gap: 0.5rem; align-items: center; }
+.ws-adjust-msg { margin: 0.3rem 0; }

@@ -23,6 +23,7 @@ import { renderMarkdown } from '../lib/markdown';
 import { splitTeacherNotes } from '../lib/slideDeck';
 import { renderWorksheet, sliceWorksheetMarkdown, type Level } from '../lib/worksheetForm';
 import { parseBlocks, serialiseBlocks, blocksSchema } from '../lib/worksheetBlocks';
+import { proposeAdjustment, applyAdjustment } from '../services/adjustArtefact';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
 import { modelForFeature } from '../repos/settings';
@@ -128,6 +129,15 @@ function renderBlockEditor(id: number, r: { title: string; kind: string; version
         <a class="link" href="/resources/${id}/view">↩ back to view</a>
       </span>
     </div>
+    <details class="ws-adjust">
+      <summary>✨ Adjust with AI</summary>
+      <form class="ws-adjust-form" hx-post="/resources/${id}/adjust" hx-target="#ws-adjust-out" hx-swap="innerHTML" hx-headers='{"x-csrf-token":"${csrf}"}' hx-disabled-elt="find button">
+        <label class="ws-adjust-l">What should change? <span class="muted">(it shows you the result to approve — nothing changes until you apply)</span>
+          <textarea name="request" rows="3" required placeholder="e.g. make the Support level easier, and add a card-sort for the key words"></textarea></label>
+        <button type="submit" class="btn-secondary">✨ Suggest improvement</button>
+      </form>
+      <div id="ws-adjust-out" aria-live="polite"></div>
+    </details>
     <div class="ws-ed-bar">
       <span class="ws-ed-levels">Show: <button type="button" class="ws-ed-lvl on" data-lvl="all">All</button><button type="button" class="ws-ed-lvl" data-lvl="support">🟢 Support</button><button type="button" class="ws-ed-lvl" data-lvl="core">🟡 Core</button><button type="button" class="ws-ed-lvl" data-lvl="challenge">🔴 Challenge</button></span>
       <span class="ws-ed-acts">
@@ -489,6 +499,42 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const rel = relPathFor(id.data.id, nextNo, r.title);
     await withStagedFile(rel, buf, () => addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser (blocks)'));
     return reply.type('application/json').send(JSON.stringify({ ok: true, version: nextNo }));
+  });
+
+  // "Adjust with AI" — step 1: generate an improved version (saves nothing) and show it for approval.
+  app.post('/resources/:id/adjust', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const b = z.object({ request: z.string().trim().min(1).max(2000) }).safeParse(req.body);
+    if (!b.success) return reply.type('text/html').send('<p class="ws-adjust-msg">Type a sentence about what to improve.</p>');
+    const r = await getResource(id.data.id);
+    if (!r) return reply.code(404).send('');
+    const out = await proposeAdjustment(id.data.id, b.data.request, null);
+    if (out.status !== 'ok' || !out.markdown) {
+      return reply.type('text/html').send(`<p class="ws-adjust-msg">${esc(out.message ?? 'Could not adjust this right now.')}</p>`);
+    }
+    const csrf = reply.generateCsrf();
+    const preview = previewForKind(r.kind, r.title, out.markdown, undefined);
+    // The proposed Markdown is curriculum (no pupil data), so it's safe to round-trip through the apply form.
+    return reply.type('text/html').send(`<div class="ws-adjust-result">
+      <p class="ws-adjust-msg">Proposed improvement — review it, then apply or discard. Nothing is saved yet.</p>
+      <div class="ws-adjust-preview ws-doc">${preview}</div>
+      <form class="ws-adjust-apply" hx-post="/resources/${id.data.id}/adjust/apply" hx-target="#ws-adjust-out" hx-swap="innerHTML" hx-headers='{"x-csrf-token":"${csrf}"}' hx-disabled-elt="find button">
+        <input type="hidden" name="markdown" value="${esc(out.markdown)}">
+        <button type="submit" class="btn">✅ Apply to the master copy</button>
+        <button type="button" class="btn-soft" onclick="this.closest('#ws-adjust-out').innerHTML=''">Discard</button>
+      </form></div>`);
+  });
+
+  // "Adjust with AI" — step 2: apply the (teacher-approved) Markdown as a new master version.
+  app.post('/resources/:id/adjust/apply', guard, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const b = z.object({ markdown: z.string().min(1).max(200_000) }).safeParse(req.body);
+    if (!b.success) return reply.type('text/html').send('<p class="ws-adjust-msg">Nothing to apply.</p>');
+    const out = await applyAdjustment(id.data.id, b.data.markdown);
+    if (out.status !== 'ok') return reply.type('text/html').send(`<p class="ws-adjust-msg">${esc(out.message ?? 'Could not apply.')}</p>`);
+    return reply.type('text/html').send(`<p class="ws-adjust-msg">✅ Saved as version ${out.version}. <a class="link" href="/resources/${id.data.id}/edit">Reload the editor</a> to see it.</p>`);
   });
 
   // Live "as it appears" preview while typing — renders only, never saves.
