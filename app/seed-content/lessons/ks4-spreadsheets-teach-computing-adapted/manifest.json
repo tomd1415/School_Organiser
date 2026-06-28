@@ -1,0 +1,85 @@
+{
+  "unitTitle": "KS4 Spreadsheets (Teach Computing — adapted)",
+  "course": {
+    "name": "KS4 IT & Digital Skills",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Spreadsheet warm-up — formulae, relative and absolute",
+      "objectives": "I can name the parts of a spreadsheet (cell, column, row)\nI can use a formula to work things out\nI can explain the difference between a relative and an absolute formula\nI can format money cells as currency",
+      "outline": "Routine first (same every lesson). Vocabulary on board: formula · relative · absolute · ADD · SUM · MULTIPLY. TA: everyone has the starter worksheet; the RSC voting spreadsheet open. Read the 4 “I can…” aloud.\n1. (0–15) Starter — name the parts. Pupils label a column, a row and a cell on the voting spreadsheet (drag the words), then choose the right meaning.\n   • Support: matching word→meaning.  • Core: what does a formula start with / which row is B10.  • Challenge: spot the wrong currency formatting in column C.\n2. (15–25) I-do → we-do — a formula starts with =. Read formulae in cell order: “E9 equals D9 times B4”. Likely error: saying the numbers not the cells → fix-words “say the cell, not the number.”\n3. (25–40) Relative vs absolute. Demo: drag =D9*B4 down and watch it break, then lock it as =D9*$B$4. Pupils complete the activity worksheet (Support word-choice, Core write the locked formula + fill-blank $, Challenge the profit formula).\n4. (40–50) You-do — build the model. Add the formulae, total a column with SUM, format money cells as currency, then screenshot onto the activity worksheet. TA: “prompt, do not type it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows one formula that worked.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Spreadsheet warm-up — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-spreadsheet-warm-up-starter-worksheet.md" },
+        { "title": "Spreadsheet warm-up — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-spreadsheet-warm-up-activity-worksheet.md" },
+        { "title": "Spreadsheet warm-up — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-spreadsheet-warm-up-slides.md" },
+        { "title": "Voting spreadsheet — cell grid (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-voting-cell-grid.png" },
+        { "title": "Voting model — completed (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-voting-completed.png" }
+      ]
+    },
+    {
+      "title": "The RSC Live event — COUNTIF, formatting and data validation",
+      "objectives": "I can calculate discounted prices with a formula\nI can use COUNTIF to count sold seats\nI can use data validation to make a drop-down list\nI can use conditional formatting to highlight information",
+      "outline": "Routine first. Vocabulary on board: format · model · formula · COUNTIF · data validation · conditional format. TA: the RSC Live event seating spreadsheet open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — who uses spreadsheets? Pupils SORT tasks under teacher / shopkeeper / event planner.\n   • Support: what data validation / a drop-down does.  • Core: why a drop-down beats typing.  • Challenge: a useful rule for a sold seat.\n2. (10–20) I-do → we-do — prices from one place. Worked example =AB6*25% for students, =AB6*75% for over 60s; change one cell, all update.\n3. (20–35) COUNTIF. =COUNTIF(H8:Q9,\"A\") counts Premier adult seats. Pupils drag the COUNTIF parts into order (Parsons), then match seat codes (Support), write seats-remaining + fill-blank speech marks (Core). Likely error: missing speech marks → fix-words “text needs speech marks.”\n4. (35–50) You-do — data validation + conditional formatting. Add a drop-down list of seat codes; colour sold seats with an “is not empty” rule; explain how validation keeps the totals correct (Challenge). Screenshot onto the activity worksheet. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows a drop-down working.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "The RSC Live event — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rsc-live-event-starter-worksheet.md" },
+        { "title": "The RSC Live event — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rsc-live-event-activity-worksheet.md" },
+        { "title": "The RSC Live event — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rsc-live-event-slides.md" },
+        { "title": "Seating codes and prices (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-seating-codes-prices.png" },
+        { "title": "Seating plan with data validation (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-seating-validation.png" },
+        { "title": "Conditional format rule dialog (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-conditional-format-dialog.png" }
+      ]
+    },
+    {
+      "title": "RSC merchandise — profit model and conditional formatting",
+      "objectives": "I can calculate profit for each item with a formula\nI can total a column with SUM\nI can format money cells as currency\nI can use conditional formatting to show if a target is met",
+      "outline": "Routine first. Vocabulary on board: format · model · formula · calculate percentage · conditional format. TA: the RSC merchandise spreadsheet open. Read the 4 “I can…” aloud.\n1. (0–15) Starter — there’s always something to buy. Pupils SORT merch into cheaper / more expensive items.\n   • Support: what conditional formatting / currency is.  • Core: name the mark-up.  • Challenge: describe a rule to turn G5 green at target.\n2. (15–25) I-do → we-do — wholesale vs retail; the mark-up is the profit. Worked example =(C8-B8)*D8 read in cell order. Likely error: missing brackets → fix-words “brackets first.”\n3. (25–40) You-do — the model. Drag the profit formula parts into order (Parsons), choose the right format (Support), total with SUM + fill-blank (Core), write the row-8 profit formula. Then format money as currency.\n4. (40–50) Conditional formatting — set a rule so forecast profit shows red below target / green at target (Challenge). Screenshot onto the activity worksheet. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows their profit total.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "RSC merchandise — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-rsc-merchandise-starter-worksheet.md" },
+        { "title": "RSC merchandise — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-rsc-merchandise-activity-worksheet.md" },
+        { "title": "RSC merchandise — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-rsc-merchandise-slides.md" },
+        { "title": "Merchandise sheet — blank (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-merch-blank.png" },
+        { "title": "Merchandise model — completed (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-merch-model.png" },
+        { "title": "Conditional format rule dialog (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-conditional-format-dialog.png" }
+      ]
+    },
+    {
+      "title": "RSC data visualisation — charts, titles and labels",
+      "objectives": "I can make a column chart\nI can make a pie chart\nI can give a chart a clear title and labels\nI can choose the right chart for the data",
+      "outline": "Routine first. Vocabulary on board: chart · title · label · legend · axis. TA: the completed Lesson 1 and 2 spreadsheets open (or the completed copies). Read the 4 “I can…” aloud.\n1. (0–15) Starter — charts can mislead. Pupils critique a chart whose vertical axis does not start at zero.\n   • Support: a chart needs a title / pie shows parts of a whole.  • Core: why a truncated axis exaggerates.  • Challenge: two ways a chart misleads.\n2. (15–25) I-do → we-do — column vs pie. Column compares amounts; pie shows parts of a whole. Pupils SORT jobs to the right chart and ORDER the steps to make a chart.\n3. (25–40) You-do — make a column chart of votes and a pie chart of seat sales; give clear titles and labels; move each to its own sheet. Likely error: a vague/missing title → fix-words “the title says what the data is.”\n4. (40–50) Right chart for the job — a pie is the wrong choice to compare separate groups; use a column chart (Challenge). Screenshot one chart onto the activity worksheet. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows a chart and says why they chose it.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "RSC data visualisation — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-rsc-data-visualisation-starter-worksheet.md" },
+        { "title": "RSC data visualisation — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-rsc-data-visualisation-activity-worksheet.md" },
+        { "title": "RSC data visualisation — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-rsc-data-visualisation-slides.md" },
+        { "title": "Misleading bar chart (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-misleading-bar-chart.png" },
+        { "title": "Column chart — votes by week (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-column-chart.png" },
+        { "title": "Pie chart — seat sales (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-pie-chart.png" },
+        { "title": "Grouped column chart — income by seat type (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-grouped-column-chart.png" }
+      ]
+    },
+    {
+      "title": "RSC stock control — LOOKUP and IF functions",
+      "objectives": "I can use VLOOKUP to fetch item data\nI can lock a lookup range with $ signs\nI can use an IF function to warn when stock is low\nI can test a stock control model",
+      "outline": "Routine first. Vocabulary on board: LOOKUP · VLOOKUP · IF · absolute · conditional format. TA: the RSC merchandise database spreadsheet open. Read the 4 “I can…” aloud.\n1. (0–15) Starter — what happens after the beep? A barcode holds item data, not the price; the price lives in the database.\n   • Support: what LOOKUP / IF does.  • Core: an advantage of price-in-database.  • Challenge: what a QR code stores that a barcode cannot.\n2. (15–25) I-do → we-do — a till uses a LOOKUP. =VLOOKUP(A8,'Lookup sheet'!$A$2:$C$17,3,FALSE): A8 = item number, locked range, 3 = third column, FALSE = exact match.\n3. (25–40) You-do — the lookup. Drag the VLOOKUP parts into order (Parsons), choose what A8/FALSE mean (Support), then an IF to warn on low stock with fill-blank (Core). Likely error: an unlocked range that shifts when filled down → fix-words “lock the range with dollar signs.”\n4. (40–50) Test it — enter an item number, sell items until “Reorder” appears, write a CHECK INPUT IF (Challenge). Screenshot a working lookup onto the activity worksheet. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows a lookup that worked.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "RSC stock control — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-rsc-stock-control-starter-worksheet.md" },
+        { "title": "RSC stock control — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-rsc-stock-control-activity-worksheet.md" },
+        { "title": "RSC stock control — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-rsc-stock-control-slides.md" },
+        { "title": "QR code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-qr-code.png" },
+        { "title": "Till receipt (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-till-receipt.png" },
+        { "title": "VAT rate lookup cell (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-vat-lookup.png" }
+      ]
+    },
+    {
+      "title": "Spreadsheets assessment — end-of-unit quiz",
+      "objectives": "I can apply my spreadsheet skills to a new scenario\nI can write formulae from scratch\nI can explain what a computer model is\nI can choose the right function for a task",
+      "outline": "Routine first. Vocabulary on board: model · formula · function · format. TA: the assessment (fete) spreadsheet open; the end-of-unit quiz worksheet ready. Read the 4 “I can…” aloud.\n1. (0–10) Starter — read the formula. Pupils say what =SUM(D8:D22) does, then MATCH each function to its job (Support), explain a computer model (Core), give a real-life model use (Challenge). The starter carries today’s differentiation.\n2. (10–40) Assessment — the end-of-unit quiz worksheet (the folded summative). A new summer-fete spreadsheet: write formulae (D9, D24, J8, J15 as code), explain formats and a computer model (text), choose the right function (single-choice AVERAGE/COUNT/IF). Exam conditions. Fix-words on the board: “read the formula in cell order; lock with $ where a cell must stay.”\n3. (40–50) Finish + screenshot — calm independent work; look back at earlier lessons if stuck. Screenshot the finished spreadsheet onto the quiz worksheet. TA: prompt, do not do it for them.\n4. (50–55) End of unit — recap the journey: basics → formulae → formatting → models, charts, lookups and IF. Self-tick the “I can…”.\nDifferentiation: the starter is on the SAME task at three depths; the quiz is a shared assessment everyone sits. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Spreadsheets assessment — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-assessment-starter-worksheet.md" },
+        { "title": "End-of-unit quiz — worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-end-of-unit-quiz-worksheet.md" },
+        { "title": "Spreadsheets assessment — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-assessment-slides.md" },
+        { "title": "Summer fete planning spreadsheet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-fete-spreadsheet.png" }
+      ]
+    }
+  ]
+}

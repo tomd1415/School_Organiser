@@ -1,0 +1,81 @@
+{
+  "unitTitle": "KS4 IT and the world of work (Teach Computing — adapted)",
+  "course": {
+    "name": "KS4 IT & Digital Skills",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "The modern world of work",
+      "objectives": "I can describe how the workplace has changed with technology\nI can compare a traditional workplace and a modern workplace\nI can describe an advantage and a disadvantage of 24/7/365 availability\nI can explain what accessibility and inclusivity mean",
+      "outline": "Routine first (same every lesson). Vocabulary on board: stakeholder · organisation · accessibility · inclusivity · 24/7/365. TA: everyone has the starter worksheet. Read the four “I can…” aloud.\n1. (0–10) Starter — how work has changed. Pupils look at the typewriter image and CHOOSE what it was for, then card-sort tools into traditional vs modern.\n   • Support: matching — key word to meaning.  • Core: one good + one bad thing about 24/7/365.  • Challenge: multi-select what technology lets a modern workplace do.\n2. (10–20) I-do → we-do — three real workers (Carol, Chen, Ellie, case studies, not anyone in the room). Draw out changes over time. Likely error: “older = worse” → fix-words “it worked, it was just slower.”\n3. (20–35) Traditional vs modern workplace. Name the commute, fixed hours, slow post (traditional) vs flexible, instant, global (modern). Pupils SORT features into advantage vs disadvantage on the activity worksheet.\n4. (35–48) You-do — accessibility and inclusivity. Teacher defines both; pupils make a traditional-vs-modern table in a document and screenshot it. TA: “prompt, do not do it for them.”\n5. (48–55) Plenary — self-tick the four “I can…”; verbal exit ticket: what will YOU want from your future workplace?\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "The modern world of work — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-modern-world-of-work-starter-worksheet.md" },
+        { "title": "The modern world of work — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-modern-world-of-work-activity-worksheet.md" },
+        { "title": "The modern world of work — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-modern-world-of-work-slides.md" },
+        { "title": "Traditional workplace — typewriter (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-typewriter.png" },
+        { "title": "Modern, global online working (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-modern-global.png" }
+      ]
+    },
+    {
+      "title": "Accessibility",
+      "objectives": "I can name technology tools that help with accessibility\nI can match an access tool to the disability it helps\nI can explain what collaboration and communication mean\nI can judge advantages and disadvantages of working together online",
+      "outline": "Routine first. Vocabulary on board: accessibility · inclusivity · collaboration · communication. TA: starter worksheet out; a shared document ready for Activity 4. Read the four “I can…” aloud.\n1. (0–8) Starter — what is wrong with this web page? Pupils multi-select the accessibility problems (small text, crowded links, red/green clash, no alt text).\n   • Support: why red and green are a poor choice.  • Core: one change to improve the page.  • Challenge: explain who alt text helps.\n2. (8–20) I-do → we-do — access tools. Screen reader, alt text, specialist keyboard, switches, voice recognition. Pupils MATCH each tool to the disability it helps. Likely error: thinking only physical disability is supported → fix-words “tech helps vision and hearing too.”\n3. (20–35) Collaboration vs communication. Teacher defines both; pupils SORT examples. Then the Sean scenario (Core) — why home-working and the right equipment help him.\n4. (35–50) You-do — collaborate. In pairs, pupils both edit ONE shared document and screenshot it. Challenge: SORT advantages vs disadvantages of online collaboration. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the four “I can…”; name one accessibility tool.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Accessibility — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-accessibility-starter-worksheet.md" },
+        { "title": "Accessibility — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-accessibility-activity-worksheet.md" },
+        { "title": "Accessibility — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-accessibility-slides.md" },
+        { "title": "Inaccessible web page (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-web-accessibility.png" },
+        { "title": "Sharing ideas — collaboration (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-collaboration.png" }
+      ]
+    },
+    {
+      "title": "The skills required — communicating at work",
+      "objectives": "I can recall communication and collaboration platforms\nI can judge good and poor email etiquette\nI can explain why emojis are not used in work messages\nI can write a polite, clear work email",
+      "outline": "Routine first. New word on board: netiquette (manners online). TA: starter worksheet out; email or a document ready for Activity. Read the four “I can…” aloud.\n1. (0–8) Starter — recall platforms (multi-select, with a microwave as the silly distractor). Then the emoji image: why do we use emojis with friends?\n   • Support: are emojis ok in a formal email?  • Core: why emojis cause problems at work.  • Challenge: why ALL CAPITALS reads as shouting.\n2. (8–25) I-do → we-do — good vs poor email etiquette. Pupils SORT habits into good vs poor (subject line, greeting, short, sign-off vs caps, emojis, angry replies, silly address). Then a short choice quiz (address, sign-off, attachments, email address).\n3. (25–45) You-do — write a polite, clear email to a teacher. First ORDER the steps of writing an email, then write one and screenshot it. Likely error: no subject line → fix-words “a subject line tells the reader what it is about.” TA: “prompt, do not do it for them.”\n4. (45–55) Plenary — self-tick the four “I can…”; verbal exit ticket: your top tip for a work email.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "The skills required — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-skills-required-starter-worksheet.md" },
+        { "title": "The skills required — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-skills-required-activity-worksheet.md" },
+        { "title": "The skills required — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-skills-required-slides.md" },
+        { "title": "Emoji faces (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-emojis.jpg" },
+        { "title": "A team communicating (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-team-communication.png" }
+      ]
+    },
+    {
+      "title": "Why cloud computing?",
+      "objectives": "I can describe what cloud computing is\nI can sort the functions and features of the cloud\nI can judge advantages and disadvantages of the cloud\nI can choose the best use of cloud computing for a scenario",
+      "outline": "Routine first. Vocabulary on board: cloud · online software · server · scalability · security. TA: starter worksheet out; a cloud document service ready (Drive/OneDrive). Read the four “I can…” aloud.\n1. (0–8) Starter — what is the cloud? Pupils look at the cloud-and-devices image and CHOOSE where cloud files are kept, then card-sort functions (SaaS/IaaS/PaaS) vs features (easy access, cost, security, scalability).\n   • Support: what scalability means.  • Core: name a cloud service they use.  • Challenge: why “pay for what you need” is cost-effective.\n2. (8–25) I-do → we-do — advantages and disadvantages. Pupils SORT statements into advantage vs disadvantage; predict the problem for a rural worker with patchy internet. Likely error: thinking the cloud always works → fix-words “no internet, no cloud.”\n3. (25–45) You-do — fill-blank server/devices/internet, then the two-scenario challenge: which makes the best use of the cloud and why (security + access). Pupils save a document to the cloud and screenshot it. TA: “prompt, do not do it for them.”\n4. (45–55) Plenary — self-tick the four “I can…”; exit ticket: each pupil writes one multiple-choice question for next lesson.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Why cloud computing? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-cloud-computing-starter-worksheet.md" },
+        { "title": "Why cloud computing? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-cloud-computing-activity-worksheet.md" },
+        { "title": "Why cloud computing? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-cloud-computing-slides.md" },
+        { "title": "The cloud and many devices (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-cloud-devices.png" }
+      ]
+    },
+    {
+      "title": "Creating personal networks",
+      "objectives": "I can describe ways to make a network when mobile or remote\nI can judge advantages and disadvantages of ad hoc networks\nI can explain how a VPN keeps data safer\nI can give safe-connection advice for a scenario",
+      "outline": "Routine first. Vocabulary on board: ad hoc network · PAN · tethering · hotspot · VPN. TA: starter worksheet out; a device with Bluetooth/hotspot settings to show. Read the four “I can…” aloud.\n1. (0–8) Starter — no internet, what now? Pupils CHOOSE how to share a photo (Bluetooth), then read the tethering image and describe how the phone gives the laptop internet.\n   • Support: what an ad hoc network is.  • Core: name one way to make one.  • Challenge: what PAN stands for and why “personal”.\n2. (8–25) I-do → we-do — ways to connect. MATCH Bluetooth, tethering and VPN to what each does. Then SORT advantages vs disadvantages of ad hoc networks. Likely error: thinking ad hoc is fully secure → fix-words “open networks are easier for attackers.”\n3. (25–45) You-do — staying safe. Fill-blank temporary/public/VPN, then the Mia/Joe scenarios (advice using ad hoc + VPN). Pupils open (not change) Bluetooth/hotspot settings and screenshot. TA: “prompt, do not do it for them.”\n4. (45–55) Plenary — self-tick the four “I can…”; exit ticket: how are ad hoc networks and the cloud connected?\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Creating personal networks — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-personal-networks-starter-worksheet.md" },
+        { "title": "Creating personal networks — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-personal-networks-activity-worksheet.md" },
+        { "title": "Creating personal networks — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-personal-networks-slides.md" },
+        { "title": "Tethering a phone to a laptop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-tethering.png" },
+        { "title": "Working remotely (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-remote-working.png" }
+      ]
+    },
+    {
+      "title": "Remote working and end-of-unit assessment",
+      "objectives": "I can explain why mental and physical well-being matter\nI can judge a remote work space using ergonomics\nI can answer questions about the whole unit",
+      "outline": "Routine first. Vocabulary on board: well-being · ergonomics · mental health · physical health. TA: starter worksheet out; the end-of-unit quiz worksheet ready. Read the three “I can…” aloud.\n1. (0–10) Starter — well-being. Pupils CHOOSE the meaning of well-being, then SORT examples into mental vs physical.\n   • Support: which well-being a screen break helps.  • Core: how home-working affects mental well-being.  • Challenge: a good and a bad example of technology for well-being.\n2. (10–25) I-do → we-do — impacts of technology and ergonomics. Pupils SORT positive vs negative impacts; teacher explains a healthy work space. Then multi-select the problems in a poor work space. Likely error: a low laptop on the sofa → fix-words “screen at eye level stops neck strain.”\n3. (25–35) You-do — design a healthier work space and screenshot it. TA: “prompt, do not do it for them.”\n4. (35–53) Assessment — the end-of-unit quiz worksheet (exam-style, whole unit). Silent, individual work; some questions are “Tick ALL that apply”. Self- or peer-mark after.\n5. (53–55) End of unit — recap the journey: changing work → accessibility → communicating online → cloud → personal networks → well-being. Self-tick the three “I can…”.\nDifferentiation: the starter and activity are the SAME task at three depths; the quiz is a shared assessment everyone sits. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Remote working — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-remote-working-starter-worksheet.md" },
+        { "title": "Remote working — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-remote-working-activity-worksheet.md" },
+        { "title": "End-of-unit quiz — worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-end-of-unit-quiz-worksheet.md" },
+        { "title": "Remote working and end-of-unit quiz — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-remote-working-slides.md" },
+        { "title": "Well-being balance — mind and body (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-wellbeing-balance.png" },
+        { "title": "Multiple-choice answer sheet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-quiz-answers.png" }
+      ]
+    }
+  ]
+}

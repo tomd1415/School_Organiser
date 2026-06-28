@@ -1,0 +1,116 @@
+{
+  "unitTitle": "KS4 Using IT in project management (Teach Computing — adapted)",
+  "course": {
+    "name": "KS4 IT & Digital Skills",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "What is project management?",
+      "objectives": "I can say what project management is\nI can name four project management methods\nI can match each method to what it is like\nI can choose a sensible method for a project",
+      "outline": "Routine first (same every lesson). Vocabulary on board: project management · waterfall · agile · hybrid · critical path · project life cycle. TA: everyone has the starter and activity worksheets. Read the four “I can…” aloud.\n1. (0–10) Starter — what would you do? Pupils CHOOSE the best first step for a team advert (plan who does what). Support: choose what a project manager does. Core: define project management. Challenge: multi-select what good project management helps with.\n2. (10–20) I-do → we-do — what is project management? Planning, sharing tasks, checking it gets done on time. Three methods came from software; one (critical path) did not.\n3. (20–45) You-do — the four methods. Pupils MATCH each method to its description, then SORT facts into waterfall/agile, ORDER the waterfall stages, and fill the blanks. Likely error: thinking waterfall lets you jump back a step → fix-words “one step at a time, in order.”\n4. (45–50) Challenge — which method did NOT come from software? (critical path). Why choose hybrid?\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one method and what it is like.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "What is project management? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-project-management-starter-worksheet.md" },
+        { "title": "What is project management? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-project-management-activity-worksheet.md" },
+        { "title": "What is project management? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-project-management-slides.md" },
+        { "title": "The waterfall method (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-waterfall.png" },
+        { "title": "A project manager with a project board (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-project-manager.png" },
+        { "title": "A team planning a project (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-team.png" }
+      ]
+    },
+    {
+      "title": "Initiate a project",
+      "objectives": "I can analyse a project brief\nI can identify the user requirements of a project\nI can identify the constraints and risks of a project\nI can describe what a feasibility report is for",
+      "outline": "Routine first. Vocabulary on board: initiate · user requirements · constraints · mitigate · feasibility report. TA: the Delicious Desserts brief ready. Read the four “I can…” aloud.\n1. (0–10) Starter — the project life cycle. Pupils ORDER the four stages (initiate → plan → execute → evaluate). Support: pick the first stage. Core: define “initiate”. Challenge: multi-select what happens at initiation.\n2. (10–20) I-do → we-do — analyse the brief. Read the Delicious Desserts brief; highlight or list what is asked for (an integrated system, a dessert selector, two posters).\n3. (20–35) You-do — requirements vs constraints. Pupils MATCH the key words, then SORT items into user requirement / constraint, and fill the blanks. Likely error: mixing up requirement and constraint → fix-words “requirement = want; constraint = risk.”\n4. (35–50) Feasibility report — pupils start the report (intro + user requirements) and screenshot it onto the activity worksheet. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one requirement and one constraint.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Initiate a project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-initiate-a-project-starter-worksheet.md" },
+        { "title": "Initiate a project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-initiate-a-project-activity-worksheet.md" },
+        { "title": "Initiate a project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-initiate-a-project-slides.md" },
+        { "title": "Delicious Desserts logo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-delicious-desserts-logo.png" }
+      ]
+    },
+    {
+      "title": "Initiate and plan — SMART goals",
+      "objectives": "I can turn an aim into smaller objectives\nI can write a SMART goal\nI can say what each letter of SMART means\nI can explain iteration and interaction",
+      "outline": "Routine first. Vocabulary on board: objective · SMART goal · iteration · interaction. TA: the SMART goals worksheet ready. Read the four “I can…” aloud.\n1. (0–10) Starter — fill in the blanks. Pupils complete the initiation paragraph (initiation, analyse, requirements, constraints, feasibility, mitigate). Support: pick what a SMART goal is. Core: what does M stand for. Challenge: a repeated stage = iteration.\n2. (10–20) I-do → we-do — from aims to objectives. An aim is the big thing; objectives are the smaller tasks. Worked example on the integrated system.\n3. (20–40) You-do — SMART goals. Pupils MATCH each SMART letter to its meaning, SORT goals into SMART / not SMART, write one SMART goal, and fill the iteration/interaction blanks. Likely error: a vague goal like “do the spreadsheet” → fix-words “say WHAT, and by WHEN.”\n4. (40–50) Iteration and interaction — interaction = stages flow into each other; iteration = repeating a stage to improve it. Fix-words: “iteration = repeat; interaction = flow between.” Screenshot the SMART goals table.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil reads one SMART goal.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Initiate and plan — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-smart-goals-starter-worksheet.md" },
+        { "title": "Initiate and plan — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-smart-goals-activity-worksheet.md" },
+        { "title": "Initiate and plan — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-smart-goals-slides.md" }
+      ]
+    },
+    {
+      "title": "Tools for planning — Gantt and PERT charts",
+      "objectives": "I can say what a Gantt chart shows\nI can say what a PERT chart shows\nI can label the parts of a PERT chart\nI can choose a sensible planning tool",
+      "outline": "Routine first. Vocabulary on board: dependency · concurrent · contingency · milestone. TA: computers ready; a Gantt and a PERT template. Read the four “I can…” aloud.\n1. (0–10) Starter — match the planning word (dependency, concurrent, contingency, milestone). Support: what a Gantt chart shows. Core: what a PERT chart uses. Challenge: which tool is easier for a short project (Gantt).\n2. (10–20) I-do — Gantt chart. Each task is a bar across time; longer bar = more time; milestones and contingency. Show the bar graphic and a real Gantt chart photo.\n3. (20–35) PERT chart — circles (nodes) for tasks, arrows for the order with time on them. Pupils LABEL the PERT chart on the worksheet, then ORDER the steps to build one. Likely error: arrows pointing the wrong way → fix-words “arrows point the way the work flows.”\n4. (35–50) You-do — SORT Gantt-vs-PERT strengths, then make the plan and justify the choice. Screenshot the plan. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil points to a node and an arrow.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Tools for planning — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-tools-for-planning-starter-worksheet.md" },
+        { "title": "Tools for planning — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-tools-for-planning-activity-worksheet.md" },
+        { "title": "Tools for planning — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-tools-for-planning-slides.md" },
+        { "title": "A Gantt chart drawn as bars (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-gantt-graphic.png" },
+        { "title": "A real printed Gantt chart (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-gantt-photo.png" },
+        { "title": "A PERT chart with nodes and arrows (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-pert-chart.png" }
+      ]
+    },
+    {
+      "title": "Carrying out a project, part 1 — the integrated system",
+      "objectives": "I can say what an integrated system (workbook) is\nI can say what a formula and a function do\nI can build part of a spreadsheet workbook\nI can format it in the house style",
+      "outline": "Routine first. Vocabulary on board: formula · function · workbook · sheet. TA: the workbook template shared with everyone. Read the four “I can…” aloud.\n1. (0–10) Starter — match the formula (=SUM, =MIN, =A4*B4, =IF). Support: what a workbook is. Core: what =SUM does. Challenge: which one is a function.\n2. (10–20) I-do → we-do — the integrated system. One workbook = many sheets in one file. Formula = your own calculation; function = a built-in tool. Likely error: forgetting the = → fix-words “every formula starts with =.”\n3. (20–45) You-do — build it. Pupils SORT formula vs function, fill the workbook/sheet blanks, then open the template, format it in the house style, and add formulas one sheet at a time. Keep the pace up. TA: prompt, do not do it for them.\n4. (45–50) Check it — quick check after each sheet; screenshot the workbook.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil shows one working formula.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Carrying out a project, part 1 — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-carry-out-part-1-starter-worksheet.md" },
+        { "title": "Carrying out a project, part 1 — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-carry-out-part-1-activity-worksheet.md" },
+        { "title": "Carrying out a project, part 1 — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-carry-out-part-1-slides.md" }
+      ]
+    },
+    {
+      "title": "Carrying out a project, part 2 — visual media",
+      "objectives": "I can follow a design plan\nI can say what a hierarchy diagram is\nI can build the interactive dessert selector\nI can make visual media that fits the audience",
+      "outline": "Routine first. Vocabulary on board: hierarchy diagram · transition · house style · audience · purpose. TA: the build guide and image source shared. Read the four “I can…” aloud.\n1. (0–10) Starter — match the key term (hierarchy diagram, transition, house style, audience). Support: how the selector is built. Core: what a house style is. Challenge: what to plan first for a poster.\n2. (10–20) I-do — the dessert selector. A slide deck of either/or questions; buttons hyperlink to the next slide. A hierarchy diagram shows the links — plan before you build.\n3. (20–45) You-do — build it. Pupils ORDER the build steps, then build the selector (master slide for house style, buttons, hyperlinks). Likely error: linking a button to the wrong slide → fix-words “read the slide number before you link.” Then test every button. Screenshot the selector.\n4. (45–50) The posters — SORT what to plan (audience, purpose, house style) vs what not to; keep house style the same.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil shows one working button.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Carrying out a project, part 2 — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-carry-out-part-2-starter-worksheet.md" },
+        { "title": "Carrying out a project, part 2 — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-carry-out-part-2-activity-worksheet.md" },
+        { "title": "Carrying out a project, part 2 — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-carry-out-part-2-slides.md" }
+      ]
+    },
+    {
+      "title": "Evaluate a project",
+      "objectives": "I can recall the four stages of the project life cycle\nI can test a product using a testing table\nI can give and use peer feedback\nI can evaluate the success of a project",
+      "outline": "Routine first. Vocabulary on board: evaluation · testing table · feedback · recommendation. TA: the integrated workbook and the testing table worksheet open. Read the four “I can…” aloud.\n1. (0–10) Starter — ORDER the project life cycle (initiate → plan → execute → evaluate). Support: which stage checks the finished project. Core: what a testing table is for. Challenge: why feedback should be specific.\n2. (10–20) Has the project succeeded? Look back at the feasibility report and SMART goals; mark each product done / not done.\n3. (20–40) You-do — testing tables. Pupils SORT what goes in a testing table, MATCH the evaluation words, and fill the expected/actual blanks, then write ten tests. Likely error: writing only what happened → fix-words “expected first, then actual.” Screenshot the testing table.\n4. (40–50) Peer feedback — say what is good and why, what could be better and how. Use it to improve.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one improvement.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Evaluate a project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-evaluate-a-project-starter-worksheet.md" },
+        { "title": "Evaluate a project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-evaluate-a-project-activity-worksheet.md" },
+        { "title": "Evaluate a project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-evaluate-a-project-slides.md" }
+      ]
+    },
+    {
+      "title": "Start your own project",
+      "objectives": "I can find the user requirements of a new project\nI can spot the constraints of a project\nI can sort activities into the right stage\nI can start the planning documents",
+      "outline": "Routine first. Vocabulary on board: initiate · plan · feasibility report · Gantt chart · PERT chart. TA: the Team Outdoor Obstacles brief and templates ready. Read the four “I can…” aloud.\n1. (0–10) Starter — SORT activities into the four stages (initiate / plan / execute / evaluate). Support: which stage is first. Core: name a planning-stage task. Challenge: multi-select what happens at initiation.\n2. (10–20) I-do — the Team Outdoor Obstacles project. They want a sales sheet, a poster and a business card. Read the brief.\n3. (20–40) You-do — initiate it. Pupils SORT user requirement vs constraint, fill the analyse/requirements/feasibility blanks, and start the feasibility report. Likely error: jumping to making things → fix-words “initiate first — what do they want?” 25 minutes calm work. TA: prompt, do not do it for them.\n4. (40–50) Plan it — write a SMART goal; choose a Gantt or PERT chart. Screenshot the feasibility report.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one user requirement.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Start your own project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-start-your-own-project-starter-worksheet.md" },
+        { "title": "Start your own project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-start-your-own-project-activity-worksheet.md" },
+        { "title": "Start your own project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-start-your-own-project-slides.md" }
+      ]
+    },
+    {
+      "title": "Execute your own project",
+      "objectives": "I can finish my planning documents\nI can create the project products\nI can develop a testing table\nI can use feedback to improve my work",
+      "outline": "Routine first. Vocabulary on board: execute · sketch · testing table · feedback. TA: the sales sheet template, image source and tracking sheet ready. Read the four “I can…” aloud.\n1. (0–10) Starter — rate confidence with formulas (scale 1–5); recap the homework formulas. Support: what must happen before evaluation (test). Core: why sketch first. Challenge: why test before the final evaluation.\n2. (10–20) Sketch first — the poster and business card; think house style, audience, purpose.\n3. (20–45) You-do — execution. Pupils ORDER the execution steps, SORT products vs planning documents, fill the testing-table blanks, then build the sales sheet, poster and business card. Likely error: rushing and skipping a formula → fix-words “build one part, then check it.” Paced in 5-minute countdowns.\n4. (45–50) Test and feedback — write at least five tests; swap for peer feedback; screenshot products and testing table.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil shows one product and one test.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Execute your own project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-execute-your-own-project-starter-worksheet.md" },
+        { "title": "Execute your own project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-execute-your-own-project-activity-worksheet.md" },
+        { "title": "Execute your own project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l9-execute-your-own-project-slides.md" }
+      ]
+    },
+    {
+      "title": "Evaluate your project and end-of-unit assessment",
+      "objectives": "I can evaluate a completed project\nI can explain iteration and interaction\nI can answer quiz questions on project management",
+      "outline": "Routine first. Vocabulary on board: iteration · interaction · evaluation · recommendations. TA: all the project documents and products open; the end-of-unit quiz worksheet ready. Read the three “I can…” aloud.\n1. (0–5) Starter — MATCH iteration / interaction to their meanings, and rate confidence across the unit (scale 1–5). Support: which stage writes the final evaluation. Core: name two parts of a final evaluation. Challenge: explain iteration vs interaction with an example.\n2. (5–40) Final evaluation — scope → each stage → recommendations. Pupils need every document and product open. Calm, independent writing. TA: prompt, do not do it for them.\n3. (40–52) Assessment — the end-of-unit quiz worksheet (folded summative). 20 questions: mostly single-choice, with “tick all” multi-selects for the non-methods, visual-product planning, testing-table headings, and evaluation questions. Calm assessment conditions; read the multi-selects slowly.\n4. (52–55) End of unit — recap the journey: methods → life cycle → feasibility report, SMART goals, Gantt/PERT, testing tables. Self-tick the three “I can…”.\nDifferentiation: the starter is on the SAME task at three depths; the quiz is a shared assessment everyone sits. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Evaluate your project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l10-evaluate-and-assessment-starter-worksheet.md" },
+        { "title": "End-of-unit quiz — worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l10-end-of-unit-quiz-worksheet.md" },
+        { "title": "Evaluate your project and assessment — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l10-evaluate-and-assessment-slides.md" }
+      ]
+    }
+  ]
+}

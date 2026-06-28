@@ -21,13 +21,29 @@ interface Manifest { unitTitle: string; course: { name: string; keyStage: string
 
 const isText = (m: ManifestResource): boolean => /markdown|text\//i.test(m.mimeType ?? '') || /\.(md|markdown|txt)$/i.test(m.file);
 
-async function schemeForCourse(name: string, keyStage: string | null): Promise<number | null> {
+async function findScheme(name: string, keyStage: string | null): Promise<number | null> {
   const { rows } = await pool.query<{ id: number }>(
     `SELECT s.id FROM schemes_of_work s JOIN courses c ON c.id = s.course_id
      WHERE c.name = $1 AND ($2::text IS NULL OR c.key_stage = $2) AND s.active ORDER BY s.id LIMIT 1`,
     [name, keyStage],
   );
   return rows[0]?.id ?? null;
+}
+
+/** The active scheme for a manifest's course — SELF-PROVISIONING: if the course (or its active scheme)
+ * doesn't exist on this instance yet, create it, so a bundle can seed onto a fresh instance with no manual
+ * setup. (The course is a thin container; the teacher can rename/re-map it later.) */
+async function schemeForCourse(name: string, keyStage: string | null): Promise<number | null> {
+  let id = await findScheme(name, keyStage);
+  if (id != null) return id;
+  await pool.query(`INSERT INTO courses (name, key_stage, active) VALUES ($1, $2, true) ON CONFLICT (name) DO NOTHING`, [name, keyStage]);
+  const course = (await pool.query<{ id: number }>(`SELECT id FROM courses WHERE name = $1`, [name])).rows[0];
+  if (!course) return null;
+  const hasActive = (await pool.query(`SELECT 1 FROM schemes_of_work WHERE course_id = $1 AND active`, [course.id])).rowCount;
+  if (!hasActive) await pool.query(`INSERT INTO schemes_of_work (course_id, title, active) VALUES ($1, $2, true)`, [course.id, `${name} (Teach Computing)`]);
+  id = await findScheme(name, keyStage);
+  if (id != null) console.log(`  ↳ provisioned course "${name}" (${keyStage ?? 'no KS'}) + active scheme`);
+  return id;
 }
 
 /** Remove an existing unit of this title on the scheme + the resources its plans reference (clean replace). */

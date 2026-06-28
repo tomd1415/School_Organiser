@@ -1,0 +1,310 @@
+{
+  "unitTitle": "KS4 Online safety (Teach Computing — adapted)",
+  "course": {
+    "name": "KS4 IT & Digital Skills",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "An introduction to online safety",
+      "objectives": "I can name some online safety threats\nI can sort threats into data theft and data misuse\nI can match online safety words to their meaning\nI can say which threats are common",
+      "outline": "Routine first (same every lesson). Vocabulary on board: threat · phishing scam · malware · fake news · big data · targeted advertising. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. This is a discussion topic — keep it general, never ask anyone to share something personal.\n1. (0–10) Starter — what is a threat? Pupils choose which item is a threat, then match online safety words to their meaning on the starter worksheet.\n   • Support: matching word to meaning.  • Core: define a threat.  • Challenge: multi-select all the real threats.\n2. (10–20) I-do → we-do — the online safety words. Point at each word: phishing, malware, fake news, big data. Likely error: thinking an update or password tool is a threat → fix-words \"a threat tries to HARM you; tools PROTECT you.\"\n3. (20–35) You-do — sort the threats. On the activity worksheet, pupils card-sort threats into data theft vs data misuse, then fill the blanks. TA: prompt, do not do it for them.\n4. (35–48) Which threats are common? Challenge multi-select. Reassure the class: knowing threats keeps you safe, it is not meant to scare anyone.\n5. (48–55) Plenary — self-tick the four \"I can…\"; each pupil names one threat.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "An introduction to online safety — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-starter-worksheet.md"
+        },
+        {
+          "title": "An introduction to online safety — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-activity-worksheet.md"
+        },
+        {
+          "title": "An introduction to online safety — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Online reputation",
+      "objectives": "I can say what an online reputation is\nI can choose what adds to an online reputation\nI can describe how to build a positive online reputation\nI can match an attacker to how they damage a reputation",
+      "outline": "Routine first. Vocabulary on board: online reputation · digital footprint · privacy settings · attacker. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep it cohort-level — no one shares their own accounts.\n1. (0–10) Starter — what is an online reputation? Pupils choose the definition, then multi-select what adds to a reputation on the starter worksheet.\n   • Support: tick all that add to a reputation.  • Core: why a private message can still matter.  • Challenge: why others build your reputation too.\n2. (10–20) I-do → we-do — build a positive reputation. Post polite content, check privacy settings, think before you post. Likely error: \"only what I post counts\" → fix-words \"other people add to your reputation too.\"\n3. (20–45) You-do — builds vs harms card-sort, match the attacker (cyberbully / hacker / scammer), order the protection steps on the activity worksheet. Remind: if targeted, always REPORT, BLOCK, and tell a trusted adult.\n4. (45–55) Plenary — self-tick the four \"I can…\"; each pupil gives one way to build a good reputation.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Online reputation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-online-reputation-starter-worksheet.md"
+        },
+        {
+          "title": "Online reputation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-online-reputation-activity-worksheet.md"
+        },
+        {
+          "title": "Online reputation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-online-reputation-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Big data",
+      "objectives": "I can say what big data is\nI can name the three Vs (volume, variety, velocity)\nI can say why companies collect data\nI can give a good and a bad point about big data",
+      "outline": "Routine first. Vocabulary on board: big data · data analytics · the three Vs · targeted advertising. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what is big data? Pupils choose the definition, then card-sort the data websites collect into obvious vs less obvious on the starter worksheet.\n   • Support: why companies collect data.  • Core: an example of less-obvious data.  • Challenge: why data is valuable.\n2. (10–20) I-do → we-do — the three Vs. Volume, variety, velocity, each with one short example. Likely error: only listing obvious data → fix-words \"websites record what you LOOK at, not just what you buy.\"\n3. (20–45) You-do — match the three Vs, fill the blanks (analytics / advertising), card-sort helpful vs harmful uses, and rate an opinion on the slider, on the activity worksheet.\n4. (45–55) Plenary — self-tick the four \"I can…\"; each pupil names one of the three Vs.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Big data — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-big-data-starter-worksheet.md"
+        },
+        {
+          "title": "Big data — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-big-data-activity-worksheet.md"
+        },
+        {
+          "title": "Big data — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-big-data-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Right to privacy",
+      "objectives": "I can sort information by how private it is\nI can name UK privacy laws\nI can match a privacy law to what it does\nI can give an opinion on privacy",
+      "outline": "Routine first. Vocabulary on board: right to privacy · Human Rights Act · Data Protection Act · Investigatory Powers Act · terms and conditions. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep it general, not personal.\n1. (0–10) Starter — how private? Using the levels-of-privacy diagram, pupils card-sort information into keep-private vs okay-to-share on the starter worksheet. Stress: passwords are always private.\n   • Support: which item is always private.  • Core: why people choose differently.  • Challenge: why it is not a simple choice.\n2. (10–25) I-do → we-do — UK privacy laws. Human Rights Act (private life), Data Protection Act (how data is used), Investigatory Powers Act (state surveillance). Likely error: mixing them up → fix-words \"Data Protection = how DATA is used.\"\n3. (25–45) You-do — match the laws, fill the blanks, and rate an opinion on the slider, on the activity worksheet. Terms and conditions: a fair trade or not? Balanced view.\n4. (45–55) Plenary — self-tick the four \"I can…\"; each pupil names one UK privacy law.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Right to privacy — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-right-to-privacy-starter-worksheet.md"
+        },
+        {
+          "title": "Right to privacy — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-right-to-privacy-activity-worksheet.md"
+        },
+        {
+          "title": "Right to privacy — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-right-to-privacy-slides.md"
+        },
+        {
+          "title": "Levels of privacy diagram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-levels-of-privacy.png"
+        }
+      ]
+    },
+    {
+      "title": "Data protection",
+      "objectives": "I can name ways data can be stolen\nI can match an attack to what it does\nI can spot the signs of a phishing scam\nI can name ways to protect my data",
+      "outline": "Routine first. Vocabulary on board: phishing · malware · ransomware · hack · brute force · keylogging. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud.\n1. (0–10) Starter — match the attack. Pupils match phishing / malware / ransomware / brute force to what each does on the starter worksheet.\n   • Support: how phishing arrives.  • Core: why a password is a target.  • Challenge: how a strong password beats brute force.\n2. (10–22) I-do → we-do — spot the scam. Read the example message together; the warning signs are rush, asking for passwords/bank details, strange link and spelling. Likely error: thinking malware = phishing → fix-words \"phishing TRICKS you; malware is SOFTWARE.\"\n3. (22–48) You-do — multi-select the scam signs, order the what-to-do steps (Stop first), and card-sort safe vs risky actions on the activity worksheet. Reassure: receiving a scam is never your fault.\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil gives one sign of a phishing scam.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Data protection — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-data-protection-starter-worksheet.md"
+        },
+        {
+          "title": "Data protection — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-data-protection-activity-worksheet.md"
+        },
+        {
+          "title": "Data protection — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-data-protection-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Fake news",
+      "objectives": "I can say what fake news is\nI can tell the difference between fact and opinion\nI can spot signs that news might be fake\nI can name ways to check a story",
+      "outline": "Routine first. Vocabulary on board: fake news · disinformation · fact · opinion · source · reverse image search. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep examples neutral and non-political.\n1. (0–10) Starter — fact or opinion? Pupils choose the definition of fake news, then card-sort statements into fact vs opinion on the starter worksheet.\n   • Support: is a statement a fact or opinion.  • Core: why it helps to tell them apart.  • Challenge: fake news vs an honest mistake.\n2. (10–20) I-do → we-do — what is fake news? Spread ON PURPOSE to mislead. Likely error: calling a strong opinion a fact → fix-words \"can I check it? Then it's a fact.\"\n3. (20–48) You-do — multi-select the signs news might be fake, order the steps to check a story, card-sort trusted vs not-trusted sources on the activity worksheet. Model one check live if a device is available.\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil gives one sign of fake news.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Fake news — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-fake-news-starter-worksheet.md"
+        },
+        {
+          "title": "Fake news — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-fake-news-activity-worksheet.md"
+        },
+        {
+          "title": "Fake news — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-fake-news-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Illegal content",
+      "objectives": "I can say why some online content is harmful\nI can name some UK laws about online content\nI can match a law to the content it bans\nI can say why policing the internet is hard",
+      "outline": "Routine first. Vocabulary on board: illegal content · online crime · Computer Misuse Act · Copyright Designs and Patents Act · Malicious Communications Act. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep examples neutral and non-graphic; if a topic worries anyone, move on and speak privately.\n1. (0–10) Starter — legal or illegal? Pupils card-sort actions into against-the-law vs allowed on the starter worksheet.\n   • Support: is hacking legal.  • Core: why content is made illegal.  • Challenge: why \"it was online\" is no excuse.\n2. (10–25) I-do → we-do — the UK uses MANY laws. Computer Misuse Act (hacking/malware), Copyright Act (others' work), Malicious Communications Act (threatening messages). Likely error: thinking there is one \"internet law\" → fix-words \"lots of laws, each for a different crime.\"\n3. (25–48) You-do — match the laws, fill the blanks, and multi-select why policing is hard on the activity worksheet. Brief discussion: who is responsible — the user or the platform? Remind how to report content.\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil names one UK law.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Illegal content — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-illegal-content-starter-worksheet.md"
+        },
+        {
+          "title": "Illegal content — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-illegal-content-activity-worksheet.md"
+        },
+        {
+          "title": "Illegal content — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-illegal-content-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Right to access",
+      "objectives": "I can say what censorship is\nI can compare internet rules in different countries\nI can name privacy-enhancing technologies\nI can give an opinion on the right to access",
+      "outline": "Routine first. Vocabulary on board: censorship · VPN · Tor · encryption · privacy-enhancing technologies. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep the country comparison factual and balanced.\n1. (0–10) Starter — what is censorship? Pupils choose the definition, then card-sort what is sensible to block vs should stay allowed on a school computer.\n   • Support: is blocking harmful content sensible.  • Core: why a country or school blocks content.  • Challenge: when blocking is unfair.\n2. (10–22) I-do → we-do — rules around the world. The UK blocks some illegal content; some countries block much more; some block almost nothing. Keep it about systems, not naming individuals.\n3. (22–48) You-do — match the technologies (encryption / VPN / Tor) using the Tor screenshot, give good vs risky uses, and rate an opinion on the slider on the activity worksheet. Likely error: thinking the tools are only for criminals → fix-words \"they protect ordinary people's privacy too.\"\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil names one privacy-enhancing technology.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Right to access — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-right-to-access-starter-worksheet.md"
+        },
+        {
+          "title": "Right to access — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-right-to-access-activity-worksheet.md"
+        },
+        {
+          "title": "Right to access — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-right-to-access-slides.md"
+        },
+        {
+          "title": "Tor Browser start page (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-tor-browser.png"
+        }
+      ]
+    },
+    {
+      "title": "The bubble",
+      "objectives": "I can say what a filter bubble is\nI can say how a bubble is formed\nI can match a person to their search results\nI can give a downside of being in a bubble",
+      "outline": "Routine first. Vocabulary on board: filter bubble · social media bubble · echo chamber · algorithm. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud.\n1. (0–10) Starter — same search, different results. Pupils match each person (student / rugby fan / wildlife lover) to the results they would see on the starter worksheet.\n   • Support: why results differ.  • Core: define a filter bubble.  • Challenge: how big data creates a bubble.\n2. (10–20) I-do → we-do — what is a filter bubble? You mostly see content you already agree with; also called an echo chamber. Link back to Lesson 3 (big data). Likely error: thinking the website is \"broken\" → fix-words \"it learns what YOU like.\"\n3. (20–48) You-do — order how a bubble forms, fill the blanks (bubble / chamber), multi-select the downsides, and rate yourself on the slider on the activity worksheet. To burst a bubble: follow a range of sources.\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil gives one downside of a bubble.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "The bubble — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-the-bubble-starter-worksheet.md"
+        },
+        {
+          "title": "The bubble — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-the-bubble-activity-worksheet.md"
+        },
+        {
+          "title": "The bubble — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-the-bubble-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Protecting myself online and end-of-unit quiz",
+      "objectives": "I can name the main online safety threats from this unit\nI can match a situation to a safety tip\nI can choose safe actions online\nI can show what I have learned in the quiz",
+      "outline": "Routine first. Vocabulary on board: threat · phishing · fake news · filter bubble · privacy · safe action. TA: everyone has the starter worksheet; the end-of-unit quiz worksheet ready. Read the four \"I can…\" aloud. Last lesson — recap calmly; the aim is good habits, not fear.\n1. (0–10) Starter — name the threat. Pupils match clues to threats and multi-select the threats from the unit on the starter worksheet.\n   • Support: tick all the threats.  • Core: name two threats.  • Challenge: which threat matters most and why.\n2. (10–25) I-do → we-do — match the tip to the situation; card-sort safe vs unsafe; order the steps for a suspicious message (Stop first) on the activity worksheet. The strongest habit: STOP and check; a trusted adult is always a safe step.\n3. (25–50) Assessment — the end-of-unit quiz worksheet, in calm quiet conditions. It covers the whole unit: choose, match, spot-the-signs, sort, order, and short explain questions. Fix-words on the board: \"Stop and check; strong passwords; trusted sources.\" TA: prompt, do not give answers.\n4. (50–55) End of unit — recap the journey: threats → reputation → big data → privacy → scams → fake news → the law → access → bubbles → protecting yourself. Self-tick the four \"I can…\".\nDifferentiation: the starter and activity are on the SAME task at three depths; the quiz is a shared assessment everyone sits. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Protecting myself online — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-protecting-myself-starter-worksheet.md"
+        },
+        {
+          "title": "Protecting myself online — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-protecting-myself-activity-worksheet.md"
+        },
+        {
+          "title": "End-of-unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-end-of-unit-quiz-worksheet.md"
+        },
+        {
+          "title": "Protecting myself online — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-protecting-myself-slides.md"
+        }
+      ]
+    }
+  ]
+}
