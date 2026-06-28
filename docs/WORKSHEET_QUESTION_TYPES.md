@@ -155,6 +155,8 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 | KS3 Y8 U4 Representations | L4 blank place-value grid (for a **label** widget); L3 doubling; L6 puzzle art | a CLEAN unlabelled binary place-value grid | ⚠️ source coins have values pre-printed — a blank grid would unlock a label-the-place-values task |
 | KS3 Y8 U5 Mobile app | L6 second-screen; L3 phone internals | a phone-internals diagram + a 2nd-screen still | ⚠️ used a generic circuit-board photo + reused L5 |
 | KS3 Y8 U6 Python | L1–L6 | flow-chart / variable-trace / TypeError stills | ⚠️ source diagrams are non-rasterisable PPT shapes/animations |
+| GCSE U2 Computer systems pt2 | L10 logic gates — activity/slides | a CLEAN unlabelled AND/OR/NOT **gate-symbol** image (to unlock a `label` drag-the-name task) | ⚠️ source draws the symbols as **PPT vector shapes**, not rasters — `extractOfficeImages` gets none; stop-gapped with matching + card-sort + truth-table tick grids |
+| GCSE U2 Computer systems pt2 | L8 specifications — activity/slides | a clean 1.5GHz-vs-3GHz CPU spec comparison | ⚠️ only a worksheet screenshot in source; used a clock photo (analogy) + PC-tower clipart instead |
 
 > Keep this table growing as lessons are converted — it's the worklist for sourcing/creating missing images.
 > **Per-unit detail** (full §7a alignment tables + every gap) lives beside each bundle in

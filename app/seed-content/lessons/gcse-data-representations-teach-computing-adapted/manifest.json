@@ -1,0 +1,583 @@
+{
+  "unitTitle": "GCSE Data representations (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "What is representation?",
+      "objectives": "I can give an example of a representation\nI can explain that computers represent all data and instructions in binary\nI can explain how binary relates to two-state on/off signals\nI can work out how many things a group of switches can represent",
+      "outline": "Routine first (same every lesson). Vocabulary on board: data · instructions · binary · coding system · transistor. TA: this is lesson 1 — keep it calm and concrete. Read the 4 “I can…” aloud.\n1. (0–6) Starter — a representation is one thing standing for another; why writing mattered (think–write–pair–share, no writing for Support — tick boxes).\n   • Support: tick what a representation is.  • Core: the two states of a switch.  • Challenge: why agreement on meaning matters.\n2. (6–20) I-do → we-do — data (numbers/text with no meaning on their own) vs instructions (how to do a task). Card-sort the recipe parts; calculator image as the anchor. Likely mix-up: a number that says “how much” feels like an instruction; fix-words “a number on its own is data; a verb like mix or bake is an instruction.”\n3. (20–30) Two states — transistors are tiny switches, on (1) or off (0); everything is built from 1s and 0s.\n4. (30–50) You-do — how many things can a group of switches represent? Fill the gaps (1→2, 2→4, 3→8).\n   • Support: tick on/off meaning.  • Core: write the 4 combinations for 2 switches.  • Challenge: 10 switches → 2^10 = 1024. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — self-tick the 4 “I can…”; recap representation stands for something, computers use on/off, more switches = many more combinations (2^n).\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "What is representation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-representation-starter-worksheet.md"
+        },
+        {
+          "title": "What is representation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-representation-activity-worksheet.md"
+        },
+        {
+          "title": "What is representation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-representation-slides.md"
+        },
+        {
+          "title": "Calculator — data and instructions (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-calculator-data-instructions-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Number bases",
+      "objectives": "I can explain the difference between base-2 and base-10\nI can read the place values in a binary number\nI can convert a binary number to decimal\nI can convert a decimal number to binary",
+      "outline": "Routine first. Vocabulary on board: base 2 · base 10 · decimal · binary · place value. TA: everyone has the place-value grid in front of them. Read the 4 “I can…” aloud.\n1. (0–6) Starter — transistors are tiny on/off switches (hair image for scale); decimal uses 0–9, binary uses 0 and 1.\n   • Support: tick the digits each base uses.  • Core: how many digits binary uses.  • Challenge: binary columns multiply by 2 each time.\n2. (6–18) I-do — place value: decimal columns ×10, binary columns ×2 (128 64 32 16 8 4 2 1). Label-the-grid task (drag the place values). Card-sort digits by base.\n3. (18–28) We-do — binary → decimal: add the place values with a 1 (101 = 5; 1001 = 9; 1111 = 15). Common slip: reading binary as a decimal number; fix-words “say one-zero-one, not one hundred and one.”\n4. (28–50) You-do — decimal → binary: biggest place value that fits, put 1, subtract, repeat (10 = 1010).\n   • Support: which place values make 5.  • Core: convert 10.  • Challenge: 10110100 → 180; 68 → 01000100. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — quick-fire; self-tick the 4 “I can…”; recap columns double, add 1s for decimal, subtract place values for binary.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Number bases — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-number-bases-starter-worksheet.md"
+        },
+        {
+          "title": "Number bases — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-number-bases-activity-worksheet.md"
+        },
+        {
+          "title": "Number bases — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-number-bases-slides.md"
+        },
+        {
+          "title": "8-bit place-value grid.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted for this lesson (place-value grid). Based on Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-place-value-grid.png"
+        },
+        {
+          "title": "Transistor on a human hair (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-transistor-on-a-hair-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Binary addition",
+      "objectives": "I can count up in binary\nI can use the four golden rules of binary addition\nI can add two binary numbers\nI can add three binary numbers",
+      "outline": "Routine first. Vocabulary on board: binary · decimal · addition · carry. TA: always say “one, zero” not “ten”. Read the 4 “I can…” aloud.\n1. (0–6) Starter — convert decimal to binary (5 = 101; 9 = 1001); count up 0,1,10,11,100,101.\n   • Support: tick 5 = 101.  • Core: count 0 to 5 in binary.  • Challenge: why say “one, zero” not “ten”.\n2. (6–16) I-do — the four golden rules: 0+0=0, 0+1=1, 1+1=10, 1+1+1=11. Biggest misconception: reading 10 as ten; fix-words “one, zero means carry.”\n3. (16–26) We-do — add a column at a time, start at the right, two-digit answer → write the right digit and carry the left (101 + 11 = 1000 = 8). Order the column steps.\n4. (26–48) You-do — Core: 100+1, 110+11, 1010+1111. Challenge: add three numbers (111+111+111 = 10101).\n   • Support: order the steps; tick 1+1 = 10.  Likely error: forgetting the carry into the next column; fix-words “carry first, then add.” TA: “prompt, do not do it for them.” Screenshot the working.\n5. (48–55) Plenary — recall the four golden rules from memory; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Binary addition — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-binary-addition-starter-worksheet.md"
+        },
+        {
+          "title": "Binary addition — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-binary-addition-activity-worksheet.md"
+        },
+        {
+          "title": "Binary addition — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-binary-addition-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Binary subtraction",
+      "objectives": "I can use the rules of binary subtraction\nI can subtract without borrowing\nI can borrow from the next column\nI can borrow from further away",
+      "outline": "Routine first. Vocabulary on board: binary · decimal · subtraction · borrow. TA: borrowing is the hard part — go slowly. Read the 4 “I can…” aloud.\n1. (0–8) Starter — recap: convert 10110 → 22; add 101 + 1 = 110.\n   • Support: tick 1-1 and 1-0.  • Core: 10110 in decimal.  • Challenge: count down 101 to 0 in binary.\n2. (8–16) I-do — the rules: 0-0=0, 1-1=0, 1-0=1, 0-1=1 (only after borrowing).\n3. (16–28) We-do — borrowing: stuck on 0-1 → move left to a column with a 1, borrow it (it becomes two 1s because the place value halves), finish the column, remove leading 0s (1110 - 1101 = 1). Order the borrowing steps. Confusion: “why two 1s?”; fix-words “the place value halves, so one becomes two.”\n4. (28–50) You-do — Core (no borrow): 110-10, 111-100, 1111-101. Challenge (borrow further): 1110-1101, 1100-1001, 10000-1.\n   • Support: order the borrowing steps; tick when to borrow. Likely error: borrowing one 1 instead of two; fix-words “borrow, then it is two.” TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — recall the four rules from memory; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Binary subtraction — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-binary-subtraction-starter-worksheet.md"
+        },
+        {
+          "title": "Binary subtraction — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-binary-subtraction-activity-worksheet.md"
+        },
+        {
+          "title": "Binary subtraction — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-binary-subtraction-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Binary shifts",
+      "objectives": "I can shift left to multiply\nI can shift right to divide\nI can explain how an overflow error happens\nI can explain how underflow happens",
+      "outline": "Routine first. Vocabulary on board: shift · overflow · underflow · integer · real (floating-point) · truncated. TA: tie shifts to ×2 / ÷2. Read the 4 “I can…” aloud.\n1. (0–6) Starter — recap add/subtract (101+11 = 1000; 1000-1 = 111).\n   • Support: tick left=multiply, right=divide.  • Core: one left shift multiplies by 2.  • Challenge: why two left shifts ×4.\n2. (6–18) I-do — left shift = multiply: move bits left, fill right with 0 (1 shift ×2, 2 ×4). 101 × 100 → 10100 (5 × 4 = 20).\n3. (18–28) We-do — right shift = divide: move bits right (1 shift ÷2). 11000 ÷ 100 → 110 (24 ÷ 4 = 6); bits falling off the right are truncated.\n4. (28–45) Overflow/underflow — overflow = result too big for the bits; underflow = too small / too close to zero. Ariane 5 story as a hook (external video, not embedded — describe it). Sort overflow vs underflow.\n5. (45–55) You-do — Core: 1101×100, 11000÷100, 1010÷10. Challenge: 101÷100 = 1 (remainder truncated); explain underflow.\n   • Support: tick left/right and overflow. Likely error: shifting the wrong way; fix-words “left is bigger (×), right is smaller (÷).” TA: “prompt, do not do it for them.” Screenshot the working. Plenary true/false; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Binary shifts — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-binary-shifts-starter-worksheet.md"
+        },
+        {
+          "title": "Binary shifts — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-binary-shifts-activity-worksheet.md"
+        },
+        {
+          "title": "Binary shifts — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-binary-shifts-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Signed binary integers",
+      "objectives": "I can explain the difference between signed and unsigned integers\nI can find the most significant and least significant bits\nI can use sign and magnitude for positive and negative numbers\nI can use two's complement for positive and negative numbers",
+      "outline": "Routine first. Vocabulary on board: signed · unsigned · two's complement · sign and magnitude · MSB · LSB. TA: two new methods today — go slowly. Read the 4 “I can…” aloud.\n1. (0–8) Starter — recap quiz: 10011 = 19; too big for the bits = overflow.\n   • Support: tick MSB = left, LSB = right.  • Core: unsigned = always positive.  • Challenge: which bit shows the sign.\n2. (8–16) I-do — unsigned (all bits are value) vs signed (MSB carries the sign).\n3. (16–28) We-do — sign and magnitude: first bit = sign (1 = negative), rest = size (4-bit 1010 = -2). Common slip: counting the sign bit as value; fix-words “the first bit is the sign, not a number.”\n4. (28–45) We-do — two's complement: MSB has a negative place value (4-bit 1010 = -8+2 = -6). Decimal → binary: write the positive, flip the bits, add 1 (order task for the 3 steps).\n5. (45–55) You-do — Core: 10110000 in both methods (-48 and -80). Challenge: -4 and -5 to 4-bit two's complement.\n   • Support: tick sign-bit meaning and the -8 place value. Likely error: forgetting “add 1”; fix-words “flip, then add one.” TA: “prompt, do not do it for them.” Screenshot the working. Plenary; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Signed binary integers — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-signed-binary-integers-starter-worksheet.md"
+        },
+        {
+          "title": "Signed binary integers — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-signed-binary-integers-activity-worksheet.md"
+        },
+        {
+          "title": "Signed binary integers — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-signed-binary-integers-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Hexadecimal",
+      "objectives": "I can explain why and where hexadecimal is used\nI can convert between hexadecimal and decimal\nI can convert between hexadecimal and binary using nibbles\nI can use the nibble method for fast conversions",
+      "outline": "Routine first. Vocabulary on board: hexadecimal · base 16 · nibble · byte. TA: say “five, three” for 53, not “fifty-three”. Read the 4 “I can…” aloud.\n1. (0–8) Starter — recap signed integers (sign and magnitude 10110000 = -48; two's complement -5 = 1011).\n   • Support: tick base-16 and A = 10.  • Core: write the six letters A–F.  • Challenge: one hex digit = a nibble (4 bits).\n2. (8–18) I-do — hex is base-16: 0–9 then A–F (10–15); one hex digit = 4 bits, two = a byte. Where it is used: colour codes, MAC addresses (image), memory dumps (image).\n3. (18–30) We-do — nibble method: split the hex, turn each digit into a 4-bit nibble, join, add place values (A2 → 1010 0010 → 162). Order the nibble-method steps. Common slip: forgetting A = 1010; fix-words “A is ten, ten is 1010.”\n4. (30–50) You-do — Core: A1 = 161, B3 = 179, 11 → B. Challenge: 9D = 157; 255 → FF. Sort-the-facts card task fixes the three bases.\n   • Support: tick A = 10 and one digit = 4 bits. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — short “quiz of everything so far”; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Hexadecimal — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-hexadecimal-starter-worksheet.md"
+        },
+        {
+          "title": "Hexadecimal — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-hexadecimal-activity-worksheet.md"
+        },
+        {
+          "title": "Hexadecimal — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-hexadecimal-slides.md"
+        },
+        {
+          "title": "MAC address in hexadecimal (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-mac-address-hex-teach-computing.png"
+        },
+        {
+          "title": "Hexadecimal memory dump (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-hex-dump-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Representing text",
+      "objectives": "I can work out how many things n bits can represent\nI can explain what a character set is and how ASCII works\nI can explain a limitation of ASCII\nI can encode and decode text using the ASCII table",
+      "outline": "Routine first. Vocabulary on board: bit · to the power of · ASCII · character set. TA: everyone has the ASCII table to hand. Read the 4 “I can…” aloud.\n1. (0–6) Starter — are there enough bits? 4 bits = 16, not enough for 26 letters.\n   • Support: tick “2 to the power of n”.  • Core: 3 bits = 8.  • Challenge: ~100 keyboard characters need 7 bits.\n2. (6–18) I-do — number of combinations = 2^n (3 bits → 8; 7 → 128; 8 → 256). Two methods: next place-value heading, or the formula.\n3. (18–28) We-do — a character set lists each character and its binary code; ASCII A = 65, B = 66, C = 67 (in sequence). Predict D = 68.\n4. (28–40) 7 vs 8 bits — ASCII first used 7 bits (128 chars), now 8 bits (256). Limitation: English keyboard only (leads to Unicode). Fix-words “ASCII is English only.”\n5. (40–55) You-do — Core: 7 bits = 128; find D’s code. Challenge: 8 bits = 256; decode 01000011 01000001 01010100 = CAT.\n   • Support: tick A = 65 and steps of 1. Likely error: miscounting 8-bit groups; fix-words “8 bits = one character.” TA: “prompt, do not do it for them.” Screenshot the work. Plenary quiz; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Representing text — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-representing-text-starter-worksheet.md"
+        },
+        {
+          "title": "Representing text — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-representing-text-activity-worksheet.md"
+        },
+        {
+          "title": "Representing text — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-representing-text-slides.md"
+        },
+        {
+          "title": "ASCII character set (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-ascii-character-set-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Unicode and file size calculation",
+      "objectives": "I can explain why Unicode is needed\nI can state that Unicode matches ASCII for the first 128 codes\nI can calculate the file size of text in ASCII\nI can calculate the file size of text in Unicode",
+      "outline": "Routine first (last lesson of this half of the unit). Vocabulary on board: ASCII · Unicode · bit · byte. TA: keep the file-size formula visible. Read the 4 “I can…” aloud.\n1. (0–6) Starter — revisiting ASCII: it codes English keyboard characters only; it cannot do other alphabets or emoji.\n   • Support: tick “many languages and symbols”.  • Core: why more bits = more characters.  • Challenge: why backwards compatibility helps old files.\n2. (6–16) I-do — Unicode uses more bits per character → many languages, symbols, emoji (image); first 128 codes match ASCII (backwards compatible).\n3. (16–26) We-do — bytes per character: ASCII 1, 16-bit Unicode 2, 32-bit Unicode 4 (1 byte = 8 bits).\n4. (26–38) We-do — file size = characters × bytes per character (10 chars ASCII = 10 bytes). Common slip: forgetting Unicode uses more bytes each; fix-words “characters times bytes each.”\n5. (38–55) You-do — Core: 20 characters → ASCII 20 B, 16-bit 40 B, 32-bit 80 B. Challenge: the storage-vs-coverage trade-off.\n   • Support: tick “more bits per character”. TA: “prompt, do not do it for them.” Screenshot the calculations. Plenary + half-unit recap (bases, add/subtract, shifts, signed, hex, ASCII, Unicode); self-tick the 4 “I can…”. (Bitmaps, sound and compression come in the next set of lessons.)\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Unicode and file size — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-unicode-file-size-starter-worksheet.md"
+        },
+        {
+          "title": "Unicode and file size — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-unicode-file-size-activity-worksheet.md"
+        },
+        {
+          "title": "Unicode and file size — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-unicode-file-size-slides.md"
+        },
+        {
+          "title": "Emoji — characters Unicode can represent (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l9-emoji-unicode-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Representing bitmap images",
+      "objectives": "I can describe what a pixel is and how pixels make a bitmap image\nI can describe colour depth and image resolution\nI can say what metadata is\nI can give an example of metadata applied to an image",
+      "outline": "Routine first (same every lesson). Vocabulary on board: bitmap · pixel · colour depth · image resolution · metadata. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — a photo is made of tiny squares: what is each one called, and how many bits in a byte? Recap text/file size from last lesson. No writing beyond a tick.\n2. (8–22) I-do → we-do. Teacher shows a zoomed-in image so the pixels appear, then defines colour depth (bits per pixel; 2^n colours) (I do); class does the colour-depth card-sort 1/2/3/8 bit → 2/4/8/256 colours (we do). Embed the two puppy images (full colour vs 1-bit) to show colour depth changing quality. Likely error: confusing colour depth with resolution — fix-words “depth = colours, resolution = number of pixels.”\n3. (22–42) You-do — define pixel/colour depth/metadata by matching; fill-in 1-bit→2, 3-bit→8, 32 colours→5 bits; the ppi calculation (300×300 at 100ppi → 3×3 inches).\n   • Support: word↔meaning matching.  • Core: the colours/bits fill-in + define metadata.  • Challenge: the physical-size (ppi) calculation + why higher colour depth means a bigger file. TA: prompt, do not do it for them.\n4. (42–50) Consolidate — a way to remember 'colour depth' written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one piece of image metadata.\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Representing bitmap images — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-representing-bitmap-images-starter-worksheet.md"
+        },
+        {
+          "title": "Representing bitmap images — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-representing-bitmap-images-activity-worksheet.md"
+        },
+        {
+          "title": "Representing bitmap images — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-representing-bitmap-images-slides.md"
+        },
+        {
+          "title": "Two puppies — full colour depth.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-colour-depth-original.png"
+        },
+        {
+          "title": "Two puppies — 1 bit per pixel.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-colour-depth-1bit.png"
+        }
+      ]
+    },
+    {
+      "title": "Bitmap file size calculation",
+      "objectives": "I can calculate the file size of a bitmap image\nI can change bits into bytes by dividing by 8\nI can describe how the number of pixels changes the file size\nI can describe how the colour depth changes the file size",
+      "outline": "Routine first. Vocabulary on board: bitmap · colour depth · file size · bits · bytes. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap metadata (what it means, an example) and recall that you divide bits by 8 to get bytes.\n2. (8–22) I-do → we-do. Teacher gives the formula width × height × colour depth = bits, ÷8 = bytes, and works 8×8×2 = 16 bytes (I do); class works 16×16×2 = 64 bytes together (we do). Keep the formula on the board all lesson; numbers are small — no calculator.\n3. (22–42) You-do — order the steps of a file-size calculation; then calculate file sizes (8×8×4=32B, 16×16×2=64B, 80×80×1=800B); fill-in how more pixels/depth change the size.\n   • Support: order the calculation steps.  • Core: the two file-size calculations.  • Challenge: the 80×80×1 calculation + why the real file is a little bigger (metadata). Likely error: leaving the answer in bits — fix-words “bits to bytes, divide by eight.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — the formula written in the pupil's own words + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil says one thing that makes a bitmap file bigger.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Bitmap file size calculation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-bitmap-file-size-starter-worksheet.md"
+        },
+        {
+          "title": "Bitmap file size calculation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-bitmap-file-size-activity-worksheet.md"
+        },
+        {
+          "title": "Bitmap file size calculation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-bitmap-file-size-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Representing sound",
+      "objectives": "I can explain why analogue sound is converted into binary\nI can describe what sampling is\nI can describe sample rate\nI can describe sample resolution",
+      "outline": "Routine first. Vocabulary on board: analogue · digital · sampling · sample rate · sample resolution · amplitude · frequency · pitch. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap the bitmap file-size formula; sound travels as a wave; a computer can only store binary.\n2. (8–24) I-do → we-do. Teacher explains analogue sound is a continuous wave and must be turned into binary, then samples a wave by reading its height at each time (I do); class LABELS the sampling graph (amplitude axis, time axis, the wave, a sample point) on the worksheet (we do). The clean sampling-wave grid image is embedded for the label task; the audio-waveform image hooks the I-do.\n3. (24–44) You-do — sort analogue vs digital; match sampling/sample rate/sample resolution to their meanings; fill-in (rate in hertz, resolution in bits, more samples = more accurate).\n   • Support: analogue/digital card-sort.  • Core: term↔meaning match + fill-in.  • Challenge: why analogue must be converted, and why a redrawn wave differs from the original + how to improve it. Likely error: swapping sample rate and resolution — fix-words “rate = how often, resolution = how many bits.” TA: prompt, do not do it for them.\n4. (44–50) Consolidate — 'sampling' in the pupil's own words + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil says what sampling means.\nOptional calm demo: a microphone wave on screen — no sudden loud noise (the low-arousal default; teacher's choice). No flashing; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Representing sound — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-representing-sound-starter-worksheet.md"
+        },
+        {
+          "title": "Representing sound — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-representing-sound-activity-worksheet.md"
+        },
+        {
+          "title": "Representing sound — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-representing-sound-slides.md"
+        },
+        {
+          "title": "Sampling a sound wave — amplitude in binary against time.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-sampling-wave.png"
+        },
+        {
+          "title": "A sound waveform.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-sound-waveform.png"
+        }
+      ]
+    },
+    {
+      "title": "Sound file size calculation",
+      "objectives": "I can calculate the file size of a sound file\nI can describe how the sample rate changes size and quality\nI can describe how the sample resolution changes size and quality\nI can give an example of metadata applied to a sound file",
+      "outline": "Routine first. Vocabulary on board: sample rate · sample resolution · duration · bits · bytes. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap sample rate, sample resolution, and the unit (hertz). These three terms are used all lesson.\n2. (8–22) I-do → we-do. Teacher gives the formula sample rate (Hz) × sample resolution (bits) × duration (seconds), and works a 2-second clip 1,000×4×2 = 8,000 bits (I do); class works a 2-minute clip 1,000×4×120 = 480,000 bits (we do). Change minutes to seconds first.\n3. (22–42) You-do — order the steps; calculate file sizes (2-min 1,000Hz 4-bit = 480,000 bits; 1-min 2,000Hz 6-bit = 720,000 bits; 2-min 2,000Hz 4-bit = 960,000 bits); fill-in how rate/resolution/duration change the size.\n   • Support: order the calculation steps.  • Core: the two file-size calculations.  • Challenge: the 2,000Hz calculation + a sound-metadata example and how raising the sample rate changes quality and size. Likely error: using minutes not seconds — fix-words “seconds first — minutes times sixty.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — the sound file-size formula in the pupil's own words + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil says one thing that makes a sound file bigger.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Sound file size calculation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-sound-file-size-starter-worksheet.md"
+        },
+        {
+          "title": "Sound file size calculation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-sound-file-size-activity-worksheet.md"
+        },
+        {
+          "title": "Sound file size calculation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-sound-file-size-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Measurements of storage",
+      "objectives": "I can name the units of storage from bit to petabyte\nI can say how many of one unit are in the next\nI can convert between units of measurement\nI can compare the kibibyte, mebibyte and gibibyte to the kilobyte, megabyte and gigabyte",
+      "outline": "Routine first. Vocabulary on board: bit · nibble · byte · kilobyte · megabyte · gigabyte · terabyte · petabyte · kibibyte · mebibyte · gibibyte. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — how many bits in a byte / a nibble; ORDER bit→nibble→byte→kilobyte→megabyte→gigabyte (on the starter sheet).\n2. (8–22) I-do → we-do. Teacher gives the units (bit, nibble=4, byte=8, then each ×1,000) and an agreed class 'silly sentence' to remember the order (I do); class converts 2 GB → 2,000 MB → 2,000,000 kB (we do).\n3. (22–42) You-do — match units to sizes; fill-in 1,000 MB in a GB and 1,000 GB in a TB + convert 2 GB to MB; the ordering challenge (3 nibbles=12 bits, 14 bits, 2 bytes=16 bits, 1 MB → D, A, C, B).\n   • Support: unit↔size matching.  • Core: the fill-in + 2 GB conversion.  • Challenge: the A/B/C/D ordering (change all to bits) + why a “1 TB” drive shows less (1,024s vs 1,000s). Likely error: jumping two units in one step — fix-words “one unit at a time, times a thousand.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — a silly sentence written to remember the order + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil says how many megabytes are in a gigabyte.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Measurements of storage — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l14-measurements-of-storage-starter-worksheet.md"
+        },
+        {
+          "title": "Measurements of storage — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l14-measurements-of-storage-activity-worksheet.md"
+        },
+        {
+          "title": "Measurements of storage — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l14-measurements-of-storage-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Lossy and lossless compression",
+      "objectives": "I can explain what data compression is\nI can explain why data may be compressed\nI can define lossy compression\nI can define lossless compression",
+      "outline": "Routine first. Vocabulary on board: compression · lossy · lossless · algorithm. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap units of storage (MB in a GB, which is largest); a full phone of photos — why make files smaller? It is called compression.\n2. (8–22) I-do → we-do. Teacher defines compression (fewer bits; faster transfer; more files in the same space) and the two types — lossy permanently removes data, lossless loses none (I do); class names a lossy and a lossless file type (we do). Example: a 34.8 MB bitmap → a JPEG ~90% smaller.\n3. (22–42) You-do — the lossy-vs-lossless CARD-SORT (the strong fit); tick/choose lossy vs lossless facts; fill-in (fewer bits, faster, lossless).\n   • Support: lossy/lossless yes-no choices.  • Core: the fill-in.  • Challenge: two advantages of compression + why lossy is fine for a photo but not for text. Likely error: mixing up the two — fix-words “lossy LOSES data; lossless LOSES none.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — a way to remember lossy vs lossless written + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil gives one lossy and one lossless file type.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Lossy and lossless compression — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l15-lossy-lossless-compression-starter-worksheet.md"
+        },
+        {
+          "title": "Lossy and lossless compression — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l15-lossy-lossless-compression-activity-worksheet.md"
+        },
+        {
+          "title": "Lossy and lossless compression — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l15-lossy-lossless-compression-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Run length encoding",
+      "objectives": "I can explain how data is compressed using run length encoding\nI can write data as frequency/data pairs\nI can calculate a compression ratio\nI can work out the size of a compressed file from the ratio",
+      "outline": "Routine first. Vocabulary on board: lossless · run length encoding (RLE) · frequency/data pair · compression ratio. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap lossless (loses no data) and a lossless file type; spot a run of identical values; RLE works on long runs.\n2. (8–24) I-do → we-do. Teacher shows RLE on a row: 11 11 11 00 00 00 00 11 11 → 3 11 4 00 2 11 (I do); class compresses a short row together (we do). Then introduce binary counts (same bit length, from the longest run).\n3. (24–44) You-do — ORDER the steps of RLE; compress two rows with decimal counts; fill-in the binary-count rule; the compression-ratio calculations.\n   • Support: RLE multiple-choice (what it stands for, lossy/lossless, what a pair means).  • Core: compress two rows + the bits fill-in.  • Challenge: compression ratio 100→20 = 5:1, and a 50 MB file at 5:1 → 10 MB. Likely error: writing value then count, or a different bit length per count — fix-words “say how many, then what; same length for every count.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — why RLE suits a simple image with big colour blocks + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil compresses 00 00 11 out loud.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Run length encoding — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l16-run-length-encoding-starter-worksheet.md"
+        },
+        {
+          "title": "Run length encoding — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l16-run-length-encoding-activity-worksheet.md"
+        },
+        {
+          "title": "Run length encoding — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l16-run-length-encoding-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Huffman coding",
+      "objectives": "I can explain how Huffman coding compresses text\nI can read bit patterns from a Huffman tree\nI can calculate the size of the original file\nI can calculate the size of the compressed file",
+      "outline": "Routine first. Vocabulary on board: Huffman coding · Huffman tree · bit pattern · lossless · binary tree. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap text file size (8 bits per ASCII character; a 5-character word = 40 bits); common letters get the shortest codes; Huffman is lossless.\n2. (8–24) I-do → we-do. Teacher explains Huffman gives common characters short patterns and rare ones longer patterns, then reads a tree (left = 0, right = 1) for MISSISSIPPI: S=0, I=10, M=110, P=111 (I do); class reads S and I off the table (we do). Note: English exams only require READING trees.\n3. (24–44) You-do — ORDER the Huffman steps; read bit patterns (which is shortest, the pattern for I, why S is shortest); calculate the original size (11×8 = 88 bits) and the compressed size (S×4 + I×4×2 + M×3 + P×2×3 = 21 bits) and the bits saved.\n   • Support: read patterns from the table (shortest, I, why S).  • Core: write M-I-S patterns + original 88-bit size.  • Challenge: the 21-bit compressed size + bits saved (67). Likely error: reading the path the wrong way — fix-words “start at the top, left is zero.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — why short codes for common letters shrink the file + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil reads the bit pattern for M.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Huffman coding — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l17-huffman-coding-starter-worksheet.md"
+        },
+        {
+          "title": "Huffman coding — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l17-huffman-coding-activity-worksheet.md"
+        },
+        {
+          "title": "Huffman coding — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l17-huffman-coding-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Summative assessment",
+      "objectives": "I can describe how bitmap images and colour depth work\nI can describe how sound is sampled and stored\nI can name the units of storage and convert between them\nI can explain compression, run length encoding and Huffman coding",
+      "outline": "Routine first, then a calm assessment lesson — no new content. TA: hand out the end-of-unit quiz; read the four “I can…” aloud; reassure that every question links to something covered.\n1. (0–5) Settle — read the four “I can…” so pupils know what is being checked. Low-stakes, not a high-pressure exam.\n2. (5–50) The quiz — pupils work on their own through the folded summative: 15 single-choice questions (single-correct) across bitmap images, colour depth, sound sampling, sound file size, units of storage, compression, RLE and Huffman; a multi-select “true statements about compression”; a careers text question; and a confidence slider. Read any question aloud on request. Offer movement breaks as normal. The quiz is SHARED (everyone sits the same paper — the differentiation across this unit lives in the per-lesson activity sheets).\n3. (50–55) Plenary — pupils rate their confidence on the slider and take a photo of the finished quiz; a few share which topic they feel strongest on.\nClosed questions can be self- or teacher-marked using the answer key in the conversion notes. No flashing/sound; movement breaks are routine.\nANSWER KEY (Part 1): 1 smallest square of colour · 2 eight · 3 64 bytes · 4 five bits · 5 measuring the wave height at regular times · 6 hertz (Hz) · 7 sample rate × sample resolution × duration · 8 480,000 bits · 9 1,000 · 10 1 terabyte · 11 permanently removes some data · 12 PNG · 13 3 11 2 00 1 11 · 14 lossless · 15 the shortest bit patterns. Part 2 (Q16): compression reduces the file size + a smaller file is quicker to send + PNG is a lossless file type (distractor: lossy keeps all of the data).",
+      "resources": [
+        {
+          "title": "Data representations part 2 — end-of-unit quiz.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l18-end-of-unit-quiz-worksheet.md"
+        },
+        {
+          "title": "Summative assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l18-summative-assessment-slides.md"
+        }
+      ]
+    }
+  ]
+}

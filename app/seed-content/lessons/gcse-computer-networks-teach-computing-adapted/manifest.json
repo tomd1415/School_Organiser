@@ -1,0 +1,464 @@
+{
+  "unitTitle": "GCSE Computer networks (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "What is a computer network?",
+      "objectives": "I can define a computer network\nI can give an advantage and a disadvantage of a computer network\nI can describe how a computer behaves in a peer-to-peer network",
+      "outline": "Routine first (same every lesson). Vocabulary on board: network · graph · node · edge · computer network · client · server · peer-to-peer. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — networks are everywhere (friends messaging, a train map). Pupils CHOOSE on the starter sheet; no writing. This is lesson 1 so there is no recap.\n2. (8–22) I-do → we-do. Teacher defines a computer network as “two or more computers connected and sharing” (I do); class does the “is it a network?” card-sort and the node/edge graph questions (we do). Embed the network-of-people image. Likely error: calling one computer on its own a network — fix-words “connected AND sharing.”\n3. (22–42) You-do — tick-all the good points of a network, then term↔definition matching (Support), advantage + disadvantage in writing (Core), and ORDER the steps of a peer-to-peer file request (Challenge).\n   • Support: keyword↔definition matching.  • Core: one advantage + one disadvantage; what peer-to-peer means.  • Challenge: order the four P2P steps and explain “equal responsibility.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — the one thing they would most want to share written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil names one thing a network lets you share.\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "What is a computer network? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-a-network-starter-worksheet.md"
+        },
+        {
+          "title": "What is a computer network? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-a-network-activity-worksheet.md"
+        },
+        {
+          "title": "What is a computer network? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-a-network-slides.md"
+        },
+        {
+          "title": "A network of connected people.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-network-people.png"
+        }
+      ]
+    },
+    {
+      "title": "The client–server model",
+      "objectives": "I can describe the role of a client and a server\nI can compare client–server with peer-to-peer\nI can describe a PAN, a LAN and a WAN",
+      "outline": "Routine first. Vocabulary on board: client–server · client · server · peer-to-peer · PAN · LAN · WAN. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP last lesson (define a computer network; peer-to-peer = every computer equal). Pupils CHOOSE on the starter sheet.\n2. (8–22) I-do → we-do. Teacher defines client (asks) and server (answers) (I do); class sorts the “client / server” jobs (we do). Embed the server icon. Likely error: swapping client and server — fix-words “client asks, server answers.”\n3. (22–42) You-do — card-sort PAN/LAN/WAN examples, then differentiate.\n   • Support: term↔definition matching (client/server/peer-to-peer/PAN/LAN/WAN).  • Core: choose the right model for two scenarios (single-correct) + one disadvantage of client–server.  • Challenge: tick-all the disadvantages of client–server and explain “single point of failure.” TA: prompt, do not supply the answer.\n4. (42–50) Consolidate — is our school network a PAN, LAN or WAN, with a reason + photo of finished sheet.\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil names one job a server does.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "The client–server model — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-client-server-starter-worksheet.md"
+        },
+        {
+          "title": "The client–server model — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-client-server-activity-worksheet.md"
+        },
+        {
+          "title": "The client–server model — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-client-server-slides.md"
+        },
+        {
+          "title": "A server icon.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Cisco networking icon, supplied with the Teach Computing Curriculum © Raspberry Pi Foundation.",
+          "file": "l2-server.png"
+        }
+      ]
+    },
+    {
+      "title": "Network hardware",
+      "objectives": "I can describe what each piece of network hardware does\nI can define a MAC address\nI can choose the right hardware for a network",
+      "outline": "Routine first. Vocabulary on board: wireless access point (WAP) · router · switch · hub · NIC · bridge · MAC address. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP PAN/LAN/WAN. Pupils CHOOSE on the starter sheet.\n2. (8–24) I-do → we-do. Teacher introduces each device slowly, one at a time, pausing to check (I do); stress the switch-vs-hub pair (switch = one device, hub = all devices). Embed the router and switch icons. Then define a MAC address as a NIC’s built-in unique name tag. Likely error: confusing MAC with IP — fix-words “MAC is built in and stays.”\n3. (24–42) You-do — LABEL the laptop ports (find the network/NIC port) — very low writing, strong visual — then differentiate.\n   • Support: device↔job matching (router/switch/hub/NIC/WAP/bridge).  • Core: what a MAC address is; hub-vs-switch behaviour; what a router does.  • Challenge: pick the device for a scenario and explain a hub-vs-switch difference. TA: prompt, do not supply the answer.\n4. (42–50) Consolidate — the easiest device to remember + a memory trick + photo of finished sheet.\n5. (50–55) Plenary — “Who am I?” — self-tick the three “I can…”; each pupil names what a router does.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Network hardware — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-network-hardware-starter-worksheet.md"
+        },
+        {
+          "title": "Network hardware — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-network-hardware-activity-worksheet.md"
+        },
+        {
+          "title": "Network hardware — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-network-hardware-slides.md"
+        },
+        {
+          "title": "A router icon.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Cisco networking icon, supplied with the Teach Computing Curriculum © Raspberry Pi Foundation.",
+          "file": "l3-router.png"
+        },
+        {
+          "title": "A switch icon.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Cisco networking icon, supplied with the Teach Computing Curriculum © Raspberry Pi Foundation.",
+          "file": "l3-switch.png"
+        },
+        {
+          "title": "Ports on the side of a laptop (label the network port).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-laptop-ports.png"
+        }
+      ]
+    },
+    {
+      "title": "Network topologies",
+      "objectives": "I can describe the star, bus, mesh and ring topologies\nI can give an advantage and a disadvantage of a topology\nI can choose a topology for a scenario",
+      "outline": "Routine first. Vocabulary on board: topology · node · edge · terminator · star · bus · ring · mesh. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP network hardware (router, switch, MAC address). Pupils CHOOSE on the starter sheet.\n2. (8–24) I-do → we-do. Teacher defines topology as “the shape” and sketches each one slowly (I do); class meets star/bus then ring/mesh (we do). Embed the star-and-bus topology diagram. Terminator = stops the signal bouncing back. Likely error: thinking the bus terminators are nodes — fix-words “terminators are caps, not computers.”\n3. (24–42) You-do — differentiate.\n   • Support: topology↔description matching (star/bus/ring/mesh).  • Core: a terminators fill-in-the-blank; choose the topology for a small/cheap scenario; which topology has a single central node.  • Challenge: card-sort star-vs-mesh features and justify a topology for a busy office. TA: prompt with the advantages/disadvantages on the sheet, do not give the answer.\n4. (42–50) Consolidate — best topology for a small home + a reason + photo of finished sheet.\n5. (50–55) Plenary — “Which topology am I?” — self-tick the three “I can…”; each pupil names the four topologies.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Network topologies — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-network-topologies-starter-worksheet.md"
+        },
+        {
+          "title": "Network topologies — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-network-topologies-activity-worksheet.md"
+        },
+        {
+          "title": "Network topologies — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-network-topologies-slides.md"
+        },
+        {
+          "title": "Star and bus topologies.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-topologies.png"
+        }
+      ]
+    },
+    {
+      "title": "Wired and wireless transmission media",
+      "objectives": "I can define wired and wireless transmission media\nI can describe copper, fibre, WiFi and Bluetooth\nI can choose the right media for a scenario",
+      "outline": "Routine first. Vocabulary on board: transmission media · wired · wireless · copper cable · fibre optic · WiFi · Bluetooth. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP hardware and topologies (router, WAP, star). Pupils CHOOSE on the starter sheet.\n2. (8–22) I-do → we-do. Teacher defines transmission media as “how the data travels” — wired (a cable) vs wireless (through the air) (I do); class does the wired/wireless card-sort (we do). Embed the network-cable photo. All media carry the same 0s and 1s. Likely error: thinking fibre is wireless because it is fast — fix-words “fibre is a cable full of light.”\n3. (22–42) You-do — differentiate.\n   • Support: media↔description matching (copper/fibre/WiFi/Bluetooth).  • Core: a copper/fibre signals fill-in-the-blank; choose the media for the TV-studio and coffee-shop scenarios (single-correct).  • Challenge: tick-all the advantages of wireless and give one reason a studio chooses wired. TA: prompt, do not supply the answer.\n4. (42–50) Consolidate — which media reaches your home devices, and why + photo of finished sheet.\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil names one difference between copper and fibre.\nOptional: the Packet Tracer wired/wireless demo videos — motion/sound, the teacher’s choice given the low-arousal default. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Wired and wireless transmission media — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-transmission-media-starter-worksheet.md"
+        },
+        {
+          "title": "Wired and wireless transmission media — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-transmission-media-activity-worksheet.md"
+        },
+        {
+          "title": "Wired and wireless transmission media — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-transmission-media-slides.md"
+        },
+        {
+          "title": "A network cable with an RJ45 connector.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-ethernet-cable.png"
+        }
+      ]
+    },
+    {
+      "title": "Network performance and routing costs",
+      "objectives": "I can describe the factors that affect network performance\nI can calculate how long a file takes to send\nI can find the lowest-cost route across a network",
+      "outline": "Routine first. Vocabulary on board: bandwidth · latency · range · number of devices · transmission rate · routing cost. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP transmission media (wired = copper/fibre; fibre = light; Bluetooth = short range). Pupils CHOOSE on the starter sheet.\n2. (8–22) I-do → we-do. Teacher introduces the four performance factors (I do), using the concert photo for “number of devices share the bandwidth.” Then the transfer-time formula time = bits ÷ bits-per-second, worked slowly (we do). Likely error: dividing speed by size — fix-words “bits on top, speed underneath.” Calculators are fine.\n3. (22–44) You-do — differentiate.\n   • Support: factor↔definition matching (bandwidth/latency/range/number of devices).  • Core: two transfer-time choices + a fill-in-the-blank calculation.  • Challenge: add the link costs to pick the lowest-cost route, and explain why more devices slow a network. TA: prompt, do not supply the answer.\n4. (44–50) Consolidate — the trickiest step and what helped + photo of finished sheet.\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil names one thing that slows a network.\nOptional: the Packet Tracer “investigating routes” videos — motion/sound, the teacher’s choice. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Network performance and routing costs — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-network-performance-starter-worksheet.md"
+        },
+        {
+          "title": "Network performance and routing costs — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-network-performance-activity-worksheet.md"
+        },
+        {
+          "title": "Network performance and routing costs — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-network-performance-slides.md"
+        },
+        {
+          "title": "A crowd all using their phones at once.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-crowd-bandwidth.png"
+        }
+      ]
+    },
+    {
+      "title": "What is the internet?",
+      "objectives": "I can describe the internet as a network of networks\nI can describe what an IP address and DNS do\nI can describe what a web browser does",
+      "outline": "Routine first. Vocabulary on board: the internet · IP address · DNS · web browser · URL · WWW · HTML. TA: hand out both worksheets; read the three “I can…” aloud.\n1. (0–8) Starter — RECAP network performance (bandwidth, lowest-cost route, more devices = slower). Pupils CHOOSE on the starter sheet.\n2. (8–24) I-do → we-do. Teacher separates the internet (the network of networks) from the World Wide Web (the pages) (I do); class does the internet/Web card-sort (we do). Embed the world-network image. Brief history: ARPA built a distributed network to survive damage. Likely error: confusing IP with MAC — fix-words “MAC is built in; IP is given on the network.”\n3. (24–44) You-do — differentiate.\n   • Support: term↔definition matching (internet/IP/DNS/browser/URL/WWW).  • Core: what DNS does; what an IP address is; a “network of ___” fill-in-the-blank.  • Challenge: ORDER the six steps of visiting a website (URL → DNS → IP → request → HTML → build) and explain why each device needs a unique IP. TA: prompt with “what happens first?”, do not give the order.\n4. (44–50) Consolidate — the difference between the internet and the Web in their own words + photo of finished sheet.\n5. (50–55) Plenary — self-tick the three “I can…”; each pupil says what DNS does.\nOptional: the Packet Tracer “investigating DNS” video — motion/sound, the teacher’s choice. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "What is the internet? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-what-is-the-internet-starter-worksheet.md"
+        },
+        {
+          "title": "What is the internet? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-what-is-the-internet-activity-worksheet.md"
+        },
+        {
+          "title": "What is the internet? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-what-is-the-internet-slides.md"
+        },
+        {
+          "title": "The internet — networks linked around the world.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-internet-world.png"
+        }
+      ]
+    },
+    {
+      "title": "Hosting services",
+      "objectives": "I can describe how servers host services across the internet\nI can describe what a web server and a client do\nI can explain what cloud computing (software as a service) is\nI can list advantages and disadvantages of the cloud",
+      "outline": "Routine first (same every lesson). Vocabulary on board: web server · hosting · client · data centre · cloud computing · software as a service (SaaS). TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — “an internet minute” on the slide; pupils CHOOSE the scale of activity and RECAP last lesson (web browser, DNS). No writing.\n2. (8–22) I-do → we-do. Teacher defines web server vs client and a data centre (I do); class sorts “the web server / the client” on the activity sheet (we do). Likely error: swapping server and client — fix-words “server sends, client asks.” Embed the data-centre server photo.\n3. (22–40) You-do — card-sort “in the cloud” vs “only on this device”, then tick-all the advantages of the cloud.\n   • Support: term↔definition matching (web server / hosting / cloud / data centre).  • Core: name a SaaS app + one disadvantage.  • Challenge: is the cloud good or bad for the environment, with a reason. TA: prompt, do not do it for them.\n4. (40–50) Consolidate — best cloud-service answer written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil says one thing a web server does.\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Hosting services — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-hosting-services-starter-worksheet.md"
+        },
+        {
+          "title": "Hosting services — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-hosting-services-activity-worksheet.md"
+        },
+        {
+          "title": "Hosting services — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-hosting-services-slides.md"
+        },
+        {
+          "title": "Servers in a data centre.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-data-centre-servers.png"
+        }
+      ]
+    },
+    {
+      "title": "Protocols",
+      "objectives": "I can explain what a protocol is\nI can say why networks need agreed standards\nI can name what the common protocols are used for\nI can put the steps of a sending protocol in order",
+      "outline": "Routine first. Vocabulary on board: protocol · standard · Ethernet · WiFi · HTTP · HTTPS · FTP · POP · SMTP · IMAP. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — rules for everyday communication (answering the phone); pupils CHOOSE and RECAP last lesson (web server, cloud).\n2. (8–22) I-do → we-do. Teacher defines a protocol as agreed rules and why standards let different makers work together (I do); class sorts protocols into web / email / files / connecting (we do). Likely error: mixing up the email protocols — fix-words “SMTP Sends Mail To.”\n3. (22–40) You-do — protocol↔purpose matching (the strong fit), tick-all true statements, then an ORDER task: the steps a sending protocol follows to chunk and reassemble a long message (a gentle lead-in to TCP/IP next lesson).\n   • Support: protocol↔purpose matching.  • Core: the extra “S” in HTTPS; POP vs IMAP.  • Challenge: order the sending-protocol steps. TA: prompt, do not supply the answer.\n4. (40–50) Consolidate — easiest protocol + memory trick written + photo of finished sheet.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names a protocol and its job.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Protocols — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-protocols-starter-worksheet.md"
+        },
+        {
+          "title": "Protocols — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-protocols-activity-worksheet.md"
+        },
+        {
+          "title": "Protocols — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-protocols-slides.md"
+        },
+        {
+          "title": "An agreed greeting — both sides follow the same rule.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l9-agreed-greeting.png"
+        }
+      ]
+    },
+    {
+      "title": "The TCP/IP model",
+      "objectives": "I can name the four layers of the TCP/IP model in order\nI can label the layer stack\nI can match protocols to their layer\nI can explain the difference between TCP and UDP",
+      "outline": "Routine first. Vocabulary on board: TCP/IP model · application layer · transport layer · internet layer · link layer · TCP · UDP. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — quick questions (what is a protocol, which requests a web page) and RECAP last lesson (SMTP).\n2. (8–22) I-do → we-do. Teacher walks down the four layers once, like envelopes inside envelopes (I do); class ORDERS the four layers and LABELS the layer-stack diagram on the worksheet (we do). The clean unlabelled stack image is embedded for the label task.\n3. (22–42) You-do — card-sort each protocol into its layer, then fill-in-the-blank TCP = reliable / UDP = unreliable.\n   • Support: layer↔role matching.  • Core: the TCP/UDP fill-in-the-blank.  • Challenge: why a video call can use UDP and not resend lost packets. Likely error: thinking UDP is “broken” — fix-words “UDP trades a few lost bits for speed.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — a memory aid for the four layers written + photo of finished sheet.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names the four layers in order.\nOptional unplugged demo: pass an envelope through four pupils, each adding a label — kept calm and slow. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "The TCP/IP model — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-tcp-ip-model-starter-worksheet.md"
+        },
+        {
+          "title": "The TCP/IP model — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-tcp-ip-model-activity-worksheet.md"
+        },
+        {
+          "title": "The TCP/IP model — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-tcp-ip-model-slides.md"
+        },
+        {
+          "title": "The four-layer TCP/IP stack (unlabelled).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-tcpip-layer-stack.png"
+        }
+      ]
+    },
+    {
+      "title": "The OSI model",
+      "objectives": "I can name the seven OSI layers in order\nI can label the layer stack\nI can match OSI layers to the TCP/IP model\nI can say what each layer does",
+      "outline": "Routine first. This is a short, calm lesson. Vocabulary on board: OSI model · application · presentation · session · transport · network · data link · physical · encapsulation. TA: hand out both worksheets; read the “I can…” aloud.\n1. (0–8) Starter — RECAP the TCP/IP model (how many layers, which adds IP addresses, TCP is reliable).\n2. (8–22) I-do → we-do. Teacher reads the seven layers top to bottom (I do); class ORDERS the seven layers and LABELS the seven-band stack diagram on the worksheet (we do). The clean unlabelled OSI stack image is embedded for the label task.\n3. (22–40) You-do — card-sort the seven OSI layers into the four TCP/IP layers, then a multi-select “which TWO are NOT application-layer protocols” (Ethernet + TCP).\n   • Support: layer↔job matching.  • Core: which layer handles MAC addresses; what “conceptual” means.  • Challenge: why engineers use the more detailed OSI model to locate a fault. Likely error: thinking OSI replaces TCP/IP — fix-words “OSI is the map; TCP/IP is the road we drive.” TA: prompt, do not do it for them.\n4. (40–48) Consolidate — a memory aid for the seven layers + photo of finished sheet.\n5. (48–55) Plenary — self-tick the “I can…”; each pupil names a layer and what it does.\nNote: OSI appears on only one exam board — teachers of other specs may skip. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "The OSI model — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-osi-model-starter-worksheet.md"
+        },
+        {
+          "title": "The OSI model — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-osi-model-activity-worksheet.md"
+        },
+        {
+          "title": "The OSI model — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-osi-model-slides.md"
+        },
+        {
+          "title": "The seven-layer OSI stack (unlabelled).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l11-osi-layer-stack.png"
+        }
+      ]
+    },
+    {
+      "title": "Protecting a network",
+      "objectives": "I can say why network security matters\nI can name forms of attack on a network\nI can sort social engineering from malicious software\nI can explain ways to keep a network safe",
+      "outline": "Routine first. Vocabulary on board: phishing · pharming · social engineering · malicious software · anti-malware · DDoS · shouldering · blagging · brute force · user access rights. Keep the tone calm — about being careful, not scared. TA: hand out both worksheets; read the 4 “I can…” aloud.\n1. (0–8) Starter — what data the school holds about you and why it must be safe; pupils CHOOSE and RECAP last lesson (MAC addresses / link layer, TCP).\n2. (8–22) I-do → we-do. Teacher splits attacks into social engineering (tricking people) vs malicious software (harmful code) (I do); class sorts the attacks (we do). Embed the padlock-on-laptop photo. Likely error: filing a DDoS as social engineering — fix-words “DDoS attacks the machine, not the person.”\n3. (22–42) You-do — ORDER the four steps of a pharming attack, tick-all the protection methods, then attack↔definition matching.\n   • Support: attack↔definition matching.  • Core: what anti-malware does; why user access rights help.  • Challenge: a school rule to make users safer, and why. Optional: the Packet Tracer pharming simulation. TA: prompt, do not supply the answer.\n4. (40–50) Consolidate — the safety rule that matters most written + photo of finished sheet.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names one way to keep a network safe.\nNote: this is a brief overview — the KS4 Cybersecurity unit goes deeper. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Protecting a network — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-protecting-a-network-starter-worksheet.md"
+        },
+        {
+          "title": "Protecting a network — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-protecting-a-network-activity-worksheet.md"
+        },
+        {
+          "title": "Protecting a network — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-protecting-a-network-slides.md"
+        },
+        {
+          "title": "A padlock on a laptop keyboard.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-padlock-laptop.png"
+        }
+      ]
+    },
+    {
+      "title": "Summative assessment",
+      "objectives": "I can describe how servers and the cloud host services\nI can name protocols and what they are used for\nI can name the layers of the TCP/IP and OSI models\nI can name ways a network is attacked and kept safe",
+      "outline": "Routine first, then a calm assessment lesson — no new content. TA: hand out the end-of-unit quiz; read the 4 “I can…” aloud; reassure that every question links to something covered.\n1. (0–5) Settle — read the four “I can…” so pupils know what is being checked. Low-stakes, not a high-pressure exam.\n2. (5–50) The quiz — pupils work on their own through the folded summative: 15 single-choice questions (one per topic, single-correct) across hosting, protocols, TCP/IP, OSI and security; a multi-select “good ways to stay safe”; a careers text question; and a confidence slider. Read any question aloud on request. Offer movement breaks as normal. The quiz is SHARED (everyone sits the same paper — the differentiation across this unit lives in the per-lesson activity sheets).\n3. (50–55) Plenary — pupils rate their confidence on the slider and take a photo of the finished quiz; a few share which topic they feel strongest on.\nClosed questions can be self- or teacher-marked using the answer key in the conversion notes. No flashing/sound; movement breaks are routine.\nANSWER KEY (Part 1): 1 stores/sends pages · 2 software & storage via internet · 3 you control where data is stored (NOT an advantage) · 4 set of rules · 5 HTTPS · 6 SMTP · 7 four · 8 application · 9 internet layer · 10 checks/resends packets · 11 fast video & voice calls · 12 seven · 13 data link layer · 14 people · 15 user access rights. Part 2 (Q16): strong password + keep software updated + log out (distractor: sticky-note password).",
+      "resources": [
+        {
+          "title": "Computer networks part 2 — end-of-unit quiz.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-end-of-unit-quiz-worksheet.md"
+        },
+        {
+          "title": "Summative assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-summative-assessment-slides.md"
+        }
+      ]
+    }
+  ]
+}

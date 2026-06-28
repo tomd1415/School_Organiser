@@ -1,0 +1,534 @@
+{
+  "unitTitle": "GCSE Computer systems (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Computer systems and system software",
+      "objectives": "I can describe what a computer system is (input, process, output)\nI can compare a general purpose computer and an embedded system\nI can describe what system software does\nI can describe the role of the operating system and name utility software",
+      "outline": "Routine first (same every lesson). Vocabulary on board: computer system · embedded · general purpose · system software · operating system · utility software. TA: everyone has the starter worksheet. Read the 4 “I can…” aloud.\n1. (0–10) Starter — what is a computer? Pupils CHOOSE what a computer does to data (process it), then SORT everyday devices into general purpose vs embedded on the starter worksheet (devices illustration).\n   • Support: match general purpose / embedded to its meaning.  • Core: define an embedded system in a sentence.  • Challenge: multi-select what is usually true of an embedded system.\n2. (10–25) I-do → we-do — general purpose vs embedded. Phone (many apps) vs coffee maker (one job). Likely error: “a phone is embedded because it is small” → fix-words “embedded = ONE fixed job, not about size.”\n3. (25–40) Inside the computer + system software. Match the start-up hardware (CPU, RAM, ROM, hard drive) on the activity worksheet, then meet the operating system and utility software (antivirus, backup, compression).\n   • Support: choose the most important system software.  • Core: fill the blanks on OS jobs (devices, programs, user interface).  • Challenge: sort jobs into operating-system vs utility-software.\n4. (40–50) You-do — find the operating system on the school computers; spot one embedded system in the room; screenshot finished notes.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names one general purpose and one embedded device.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Computer systems and system software — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-systems-starter-worksheet.md"
+        },
+        {
+          "title": "Computer systems and system software — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-systems-activity-worksheet.md"
+        },
+        {
+          "title": "Computer systems and system software — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-systems-slides.md"
+        },
+        {
+          "title": "Everyday devices — general purpose and embedded (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-devices.png"
+        },
+        {
+          "title": "A computer chip — the CPU (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-cpu-chip.png"
+        },
+        {
+          "title": "RAM memory sticks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-ram.png"
+        }
+      ]
+    },
+    {
+      "title": "Introduction to the CPU",
+      "objectives": "I can name the main parts of the CPU\nI can describe the job of the ALU, control unit, registers and clock\nI can describe what von Neumann architecture means",
+      "outline": "Routine first. Vocabulary on board: CPU · ALU · control unit · register · clock · bus · von Neumann · architecture. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud.\n1. (0–10) Starter — utility software recap from last lesson. Pupils MATCH each utility tool (antivirus, compression, backup) to what it does.\n   • Support: choose which is system software, not an app.  • Core: state the job of the operating system.  • Challenge: why antivirus counts as system software.\n2. (10–20) I-do — von Neumann. Show the portrait and the room-sized ENIAC. His big idea: store the program AND data in memory as binary. Before this, computers were rewired by hand.\n3. (20–40) New knowledge — CPU components. Use the labelled CPU diagram. Pupils SORT each job onto the right part (ALU = maths, control unit = in charge, registers = fast stores) and fill the von Neumann blanks (instructions, serial). Likely error: “the ALU is in charge” → fix-words “the CONTROL UNIT is in charge; the ALU just does the sums.”\n   • Support: choose which part does the maths / is in charge.  • Core: explain a register and the clock.  • Challenge: explain why storing the program in memory was a big change.\n4. (40–50) You-do — finish the CPU notes; screenshot them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil points to one CPU part and gives its job.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Introduction to the CPU — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-cpu-starter-worksheet.md"
+        },
+        {
+          "title": "Introduction to the CPU — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-cpu-activity-worksheet.md"
+        },
+        {
+          "title": "Introduction to the CPU — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-cpu-slides.md"
+        },
+        {
+          "title": "The parts inside the CPU (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-cpu-diagram.png"
+        },
+        {
+          "title": "John von Neumann (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-von-neumann.png"
+        },
+        {
+          "title": "ENIAC — a room-sized early computer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-eniac.png"
+        }
+      ]
+    },
+    {
+      "title": "The fetch-decode-execute cycle",
+      "objectives": "I can name the three stages: fetch, decode, execute\nI can put the steps of the cycle in the right order\nI can describe what happens at each stage",
+      "outline": "Routine first. Vocabulary on board: fetch · decode · execute · instruction · RAM · cycle. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud.\n1. (0–5) Starter — retrieval of the CPU parts. Pupils MATCH each part (ALU, control unit, clock) to its job on the starter worksheet.\n   • Support: choose what a register is.  • Core: where the instructions are held (RAM).  • Challenge: why fast registers beat fetching from RAM each time.\n2. (5–20) I-do → we-do — the three stages. Fetch (get the instruction from RAM), decode (work out what it means), execute (carry it out), then repeat. Pupils ORDER the steps of the cycle on the activity worksheet. Likely error: “decode means run it” → fix-words “decode = WORK OUT, execute = DO.”\n3. (20–45) Observe the cycle — demo the Little Man Computer (LMC) “Adding 2 inputs” program; step through ONE instruction and point out fetch → decode → execute in the log. Pupils step through it and screenshot the LMC.\n   • Support: choose the first stage / the execute stage.  • Core: describe the fetch and decode stages.  • Challenge: fill the blanks describing the whole cycle.\n4. (45–55) Plenary — self-tick the 3 “I can…”; whole class says fetch → decode → execute out loud.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "The fetch-decode-execute cycle — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-fde-cycle-starter-worksheet.md"
+        },
+        {
+          "title": "The fetch-decode-execute cycle — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-fde-cycle-activity-worksheet.md"
+        },
+        {
+          "title": "The fetch-decode-execute cycle — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-fde-cycle-slides.md"
+        },
+        {
+          "title": "The Little Man Computer simulator (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-lmc-simulator.png"
+        }
+      ]
+    },
+    {
+      "title": "Main memory — RAM, ROM and cache",
+      "objectives": "I can describe what RAM does and that it is volatile\nI can describe what ROM does and that it is non-volatile\nI can compare RAM and ROM\nI can define cache and describe what it does",
+      "outline": "Routine first. Vocabulary on board: RAM · ROM · cache · main memory · volatile · non-volatile. TA: everyone has the starter worksheet. Read the 4 “I can…” aloud.\n1. (0–10) Starter — retrieval practice. Pupils answer multiple-choice questions on the CPU (register, ALU, bus, clock) on the starter worksheet.\n   • Support: name the third stage of the cycle.  • Core: state the control unit's job.  • Challenge: why a higher clock speed usually means a faster computer.\n2. (10–25) I-do → we-do — RAM and ROM. Teach “volatile” carefully and reuse it. Pupils SORT facts onto RAM vs ROM and fill the volatile / non-volatile blanks. Likely error: “RAM stores my files forever” → fix-words “RAM is emptied every time you switch off.”\n3. (25–45) Cache. Small, very fast memory between the CPU and RAM. Use the instruction-cards relay analogy (cache is close, RAM is far).\n   • Support: choose which memory is volatile / what cache is.  • Core: describe cache; give one RAM-vs-ROM difference.  • Challenge: explain how cache speeds the system up using fast, CPU and RAM.\n4. (45–52) You-do — finish the main memory notes; screenshot them.\n5. (52–55) Plenary — self-tick the 4 “I can…”; each pupil gives one difference between RAM and ROM.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Main memory — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-main-memory-starter-worksheet.md"
+        },
+        {
+          "title": "Main memory — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-main-memory-activity-worksheet.md"
+        },
+        {
+          "title": "Main memory — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-main-memory-slides.md"
+        },
+        {
+          "title": "RAM memory sticks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-ram.png"
+        },
+        {
+          "title": "Memory chips on a circuit board (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-cache-chips.png"
+        }
+      ]
+    },
+    {
+      "title": "Secondary storage and solid-state storage",
+      "objectives": "I can explain why a computer needs secondary storage\nI can name the three types of secondary storage\nI can describe how solid-state storage works and its characteristics",
+      "outline": "Routine first. Vocabulary on board: secondary storage · solid state · optical · magnetic · volatile · non-volatile. TA: everyone has the starter worksheet; the knowledge organiser ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — why not just use RAM? Pupils CHOOSE what happens to a file saved only in RAM, then multi-select which devices KEEP data with the power off (ROM, hard drive, USB stick).\n   • Support: what “volatile” means.  • Core: why RAM can't store files long term.  • Challenge: why we still need storage even though RAM is faster.\n2. (10–25) I-do → we-do — the three types. Show solid-state, hard drive and optical disc. Pupils SORT devices (USB/SSD/SD card; CD/DVD/Blu-ray; HDD/tape) into solid state / optical / magnetic.\n3. (25–50) Solid-state storage. No moving parts; stores data in flash circuits; fast, light, durable but costs more per GB. Pupils fill the blanks (moving, circuits, more) and note advantages/disadvantages. Likely error: “an SSD spins like a CD” → fix-words “solid state has NO spinning parts at all.” Screenshot the knowledge organiser.\n   • Support: which type a USB stick is / SSD has no moving parts.  • Core: one advantage and one disadvantage.  • Challenge: why no moving parts makes it faster AND more durable.\n4. (50–55) Plenary — self-tick the 3 “I can…”; name one solid-state device and one reason we need secondary storage.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Secondary storage — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-secondary-storage-starter-worksheet.md"
+        },
+        {
+          "title": "Secondary storage — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-secondary-storage-activity-worksheet.md"
+        },
+        {
+          "title": "Secondary storage — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-secondary-storage-slides.md"
+        },
+        {
+          "title": "Solid-state storage chip (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-solid-state.png"
+        },
+        {
+          "title": "A hard disk drive (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-hard-drive.png"
+        },
+        {
+          "title": "An optical disc (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-optical-disc.png"
+        }
+      ]
+    },
+    {
+      "title": "Optical and magnetic storage",
+      "objectives": "I can explain how optical storage stores data (pits, lands and a laser)\nI can explain how magnetic storage stores data (magnetised and demagnetised areas)\nI can compare solid-state, optical and magnetic storage",
+      "outline": "Routine first. Vocabulary on board: optical · laser · pit · land · magnetic · magnetised · platter. TA: everyone has the starter worksheet; the knowledge organiser from last lesson open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — data is binary. Using a small ASCII table, pupils read one letter and CHOOSE that data is stored as binary.\n   • Support: which two digits binary uses.  • Core: why text must become binary to be stored.  • Challenge: how a word like “CAB” is stored using only 1s and 0s.\n2. (10–25) Optical storage. A laser reads pits and lands on a CD/DVD. Pupils fill the blanks (laser, lands). Likely error: “the data is printed on the disc like a photo” → fix-words “the laser reads bumps (pits) and flats (lands).”\n3. (25–40) Magnetic storage. LABEL the open hard drive (platter, read/write arm, casing), then fill the blanks: magnetised = 1, demagnetised = 0, on a spinning platter. Point out the moving parts.\n   • Support: what reads an optical disc / which type a hard drive is.  • Core: how each type represents 1s and 0s.  • Challenge: SORT comparison statements onto solid-state / optical / magnetic.\n4. (40–52) You-do — finish the knowledge organiser; screenshot it.\n5. (52–55) Plenary — self-tick the 3 “I can…”; say what reads an optical disc and what stores a 1 on a hard drive.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Optical and magnetic storage — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-optical-magnetic-starter-worksheet.md"
+        },
+        {
+          "title": "Optical and magnetic storage — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-optical-magnetic-activity-worksheet.md"
+        },
+        {
+          "title": "Optical and magnetic storage — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-optical-magnetic-slides.md"
+        },
+        {
+          "title": "Open hard disk drive — platter and read/write arm (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-hard-drive-open.png"
+        },
+        {
+          "title": "The laser lens inside an optical drive (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-optical-laser.jpg"
+        },
+        {
+          "title": "An optical disc (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-optical-disc.png"
+        }
+      ]
+    },
+    {
+      "title": "Selecting a storage device and cloud storage",
+      "objectives": "I can recommend a storage device for a situation and give a reason\nI can describe the limits of secondary storage\nI can explain what cloud storage is and its advantages and disadvantages",
+      "outline": "Routine first. Vocabulary on board: capacity · portable · durable · cost · cloud storage. TA: everyone has the starter worksheet; the comparison table from last lesson to hand. Read the 3 “I can…” aloud.\n1. (0–5) Starter — the impact of data loss. Using a data-breach headline, pupils CHOOSE why losing personal data harms people.\n   • Support: name a second copy of data (backup).  • Core: one reason data loss hurts a business.  • Challenge: why losing children's data is even more serious.\n2. (5–30) I-do → we-do — choosing a device. Find the clues: capacity, portable, durable, cost. Model Scenario 1 (Jamie — post 2 GB of photos → USB stick or DVD) fully, then pupils try Scenario 2 (Maja — mass-distribute a game → DVDs). Likely error: “use the internal hard drive” → fix-words “it has to be POSTED, so it must be portable.”\n3. (30–50) Cloud storage. Files kept on servers over the internet. Pupils fill the blanks (internet, connection, safe) and SORT advantages vs disadvantages. Connect the disadvantages back to the starter (trusting a company with your data). Screenshot the recommendation.\n   • Support: where cloud storage keeps files.  • Core: sort cloud advantages / disadvantages.  • Challenge: explain why cloud storage has grown popular.\n4. (50–55) Plenary — self-tick the 3 “I can…”; give a device for Jamie plus one pro and one con of the cloud.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Selecting a storage device — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-selecting-a-device-starter-worksheet.md"
+        },
+        {
+          "title": "Selecting a storage device — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-selecting-a-device-activity-worksheet.md"
+        },
+        {
+          "title": "Selecting a storage device — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-selecting-a-device-slides.md"
+        },
+        {
+          "title": "Cloud storage in a data centre (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-cloud.png"
+        }
+      ]
+    },
+    {
+      "title": "Computer specifications",
+      "objectives": "I can name the factors that affect CPU performance: clock speed, cache and cores\nI can describe what clock speed, cache and the number of cores do\nI can say what a motherboard is for\nI can choose parts to build a computer to a budget",
+      "outline": "Routine first (same every lesson). Vocabulary on board: clock speed · cache · core · motherboard · specification. TA: everyone has the starter worksheet. Read the 4 “I can…” aloud.\n1. (0–5) Starter — the clock is ticking. Single-correct tick: what does the CPU clock do? (sends a steady pulse; an instruction runs on each pulse). Use the clock image as the metronome analogy.\n   • Support: choose the unit of clock speed (GHz).  • Core: state what one clock pulse triggers.  • Challenge: why a faster clock usually means a faster computer.\n2. (5–20) I-do → we-do — the three factors. Clock speed = instructions per second; cache = small fast store; cores = jobs at the same time. Compare a 1.5GHz/8MB/2-core CPU with a 3GHz/16MB/4-core CPU on the activity worksheet (match factor → effect). Likely error: “doubling cores = twice as fast” → fix-words “only if the job can be SPLIT.”\n3. (20–30) Define the motherboard — the main board everything plugs into.\n4. (30–50) You-do — be a custom PC builder. Use pcpartpicker.com to build a £400 computer, then a £1000 one with as much RAM as possible and a video card. Card-sort the parts into hardware vs software. Screenshot the build.\n   • Support: tick the faster CPU / bigger cache.  • Core: explain what cache does; name two must-have parts.  • Challenge: judge whether an expensive CPU is worth it for a documents-and-email computer.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names one factor that makes a CPU faster.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Computer specifications — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-specifications-starter-worksheet.md"
+        },
+        {
+          "title": "Computer specifications — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-specifications-activity-worksheet.md"
+        },
+        {
+          "title": "Computer specifications — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-specifications-slides.md"
+        },
+        {
+          "title": "A clock — the CPU keeps time with a steady pulse (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-clock.png"
+        },
+        {
+          "title": "A desktop computer you build from parts (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-computer-tower.png"
+        }
+      ]
+    },
+    {
+      "title": "Computer systems quiz",
+      "objectives": "I can predict what a short Python program does\nI can explain how the quiz reads questions from a file and splits each line\nI can add my own questions and run the quiz to revise",
+      "outline": "Routine first. Vocabulary on board: program · instructions · data · execution · embedded system. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud. This lesson revises Part 1 by building a revision quiz.\n1. (0–5) Starter — why an embedded system? Juan wants a greenhouse device that does ONE job. Multi-select what makes an embedded system a good choice (one fixed job, small, cheap, specialised — NOT runs any app).\n   • Support: choose embedded = one fixed job.  • Core: one reason embedded is cheaper.  • Challenge: why a laptop is a poor choice for the device.\n2. (5–20) Activity 1 — PRIMM the starter files (ncce.io/computer-systems-quiz). PREDICT what quiz.py does, do NOT confirm. Pupils run it, then explain the lines. Spot the `question,answer` pattern in questions.txt and how `line.split(\",\")` cuts it. Likely error: forgetting the comma → the split breaks.\n   • Support: match each line to what it does.  • Core: explain the for-loop and split.  • Challenge: add a score / shuffle.\n3. (20–45) You-do — add your own questions from the question log, test, then swap and play each other's quizzes; note feedback and new questions.\n4. (45–55) Plenary — self-tick the 3 “I can…”; each pupil says one thing their quiz does. Screenshot the quiz running.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Computer systems quiz — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-quiz-starter-worksheet.md"
+        },
+        {
+          "title": "Computer systems quiz — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-quiz-activity-worksheet.md"
+        },
+        {
+          "title": "Computer systems quiz — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-quiz-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Logic gates",
+      "objectives": "I can recognise the AND, OR and NOT logic gates and what they do\nI can complete a truth table for AND, OR and NOT\nI can describe how a CPU is built from logic gates using 1s and 0s",
+      "outline": "Routine first. Vocabulary on board: Boolean · AND · OR · NOT · logic gate · truth table · binary. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud.\n1. (0–10) Starter — remember binary. Binary→denary conversions (tick + a fill-blank), ending on the big question “Why do computers use binary?” (links to gates being on/off switches).\n   • Support: a bit is 0 or 1.  • Core: convert 0101 to denary.  • Challenge: why binary / on-off switches.\n2. (10–20) History + intro — George Boole (true/false logic) and Claude Shannon (logic as switches, 1937). A gate takes one or more inputs (1/0) and gives ONE output. Use the Boole and Shannon images.\n3. (20–45) The three gates — AND, OR, NOT. Match each gate to its rule, then complete truth tables by ticking the output (count inputs in binary order). Card-sort real-world examples into the right gate. Likely error: OR vs AND → fix-words “AND needs BOTH; OR needs at least one.” Build an AND gate in a simulator (logic.ly / CircuitVerse) and screenshot.\n   • Support: NOT-gate truth table.  • Core: AND-gate truth table.  • Challenge: OR-gate + a combined (NOT 0) AND 1.\n4. (45–55) Plenary — a CPU is millions of gates; everything is 1/0. Self-tick the 3 “I can…”; each pupil says the rule for one gate.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. (Gate-symbol label-a-diagram wanted but no clean symbol raster in source — see notes/§4 image-gap log.)",
+      "resources": [
+        {
+          "title": "Logic gates — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-logic-gates-starter-worksheet.md"
+        },
+        {
+          "title": "Logic gates — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-logic-gates-activity-worksheet.md"
+        },
+        {
+          "title": "Logic gates — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-logic-gates-slides.md"
+        },
+        {
+          "title": "George Boole, who turned logic into maths (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-george-boole.png"
+        },
+        {
+          "title": "Claude Shannon, who linked logic to electronic switches (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-claude-shannon.png"
+        }
+      ]
+    },
+    {
+      "title": "Logic problems",
+      "objectives": "I can complete a truth table for a three-input logic circuit\nI can write a Boolean expression for a logic circuit\nI can describe how logic gates combine to add binary numbers",
+      "outline": "Routine first. Vocabulary on board: Boolean · AND · OR · NOT · logic circuit · expression · truth table. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud.\n1. (0–15) Starter — recap and recall. Add single binary digits (with carry) and recall the three gates. Likely error: starting a truth table at 001 → fix-words “always start at 000.”\n   • Support: 1 AND 1 = 1.  • Core: 1 + 1 carries a 1.  • Challenge: why count inputs in binary order.\n2. (15–30) I-do — a bigger problem: “a picture is taken if motion OR proximity, AND the light is on.” Three inputs, one output. The new idea: it needs two gates and one gate's output feeds the next. Order the method (inputs → output → gates → circuit → truth table → expression). Pupils copy the circuit on PAPER (they draw gates in the exam).\n3. (30–50) You-do — the activity worksheet. Fill the Boolean expression Picture = (motion OR proximity) AND light; tick truth-table rows; then problem 2 adds a NOT gate: Siren = (pressure AND NOT valve) OR temperature. Build a circuit in a simulator and screenshot.\n   • Support: identify the output / count the inputs.  • Core: why brackets are used.  • Challenge: the three-gate NOT problem.\n4. (50–55) Plenary — gates combine to ADD binary (a half adder is just gates); links to the FDE cycle's arithmetic logic unit. Self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Logic problems — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-logic-problems-starter-worksheet.md"
+        },
+        {
+          "title": "Logic problems — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-logic-problems-activity-worksheet.md"
+        },
+        {
+          "title": "Logic problems — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-logic-problems-slides.md"
+        },
+        {
+          "title": "A circuit board built from logic chips (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l11-logic-chips.png"
+        }
+      ]
+    },
+    {
+      "title": "Assembly language programming I",
+      "objectives": "I can explain that assembly language has a 1:1 relationship with machine code\nI can describe the LMC commands INP, OUT, STA, LDA, ADD, SUB and BRP\nI can translate a Python program into LMC assembly",
+      "outline": "Routine first. Vocabulary on board: assembly language · mnemonic · accumulator · register · abstraction. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud.\n1. (0–10) Starter — high-level programming. Plan and write a Python program: input two numbers, add, output. Design first (pseudocode/Python).\n   • Support: which line gets input.  • Core: which line adds.  • Challenge: write two test inputs.\n2. (10–20) I-do — high level vs low level. One Python line does many jobs; one assembly line does ONE job. `num1 = input()` = input AND storage → two assembly lines (INP then STA). Assembly is 1:1 with machine code.\n3. (20–45) Build the LMC toolbox (INP, OUT, STA, LDA, ADD, SUB, BRP, HLT) using the LMC image and peterhigginson.co.uk/lmc. Match command → meaning, then translate the add program as a Parsons order (INP/STA NUM1/INP/STA NUM2/LDA NUM1/ADD NUM2/OUT/HLT). Likely error: forgetting STA after INP → the value is lost.\n   • Support: which command outputs; what STA does.  • Core: why one Python line needs two assembly lines.  • Challenge: explain the 1:1 relationship with machine code.\n4. (45–55) You-do — type the program into the LMC, step through it, watch the accumulator, screenshot it. Plenary — self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Assembly language programming I — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-assembly-1-starter-worksheet.md"
+        },
+        {
+          "title": "Assembly language programming I — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-assembly-1-activity-worksheet.md"
+        },
+        {
+          "title": "Assembly language programming I — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-assembly-1-slides.md"
+        },
+        {
+          "title": "The Little Man Computer and its commands (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-lmc-opcodes.png"
+        }
+      ]
+    },
+    {
+      "title": "Assembly language programming II",
+      "objectives": "I can translate a Python program into LMC assembly on my own\nI can use branching (BRP, BRA) to make a decision in assembly\nI can design and write my own assembly program",
+      "outline": "Routine first. Vocabulary on board: assembly language · accumulator · branch · BRP · BRA. TA: everyone has the starter worksheet. Read the 3 “I can…” aloud. Last lesson of the unit.\n1. (0–5) Starter — you are the translator now. Independently translate a Python program (input a max and two numbers, add, output if bigger) into assembly. Checks confidence before the project.\n   • Support: which command branches if positive (BRP).  • Core: what a positive SUB result tells you.  • Challenge: why a BRA is needed when the if has no else.\n2. (5–15) I-do — branching. SUB then BRP jumps if positive; BRA jumps no matter what (to skip an empty path). Use the LMC branching image. Three rules: data goes to the accumulator unless STA'd; ADD/SUB act on the accumulator; branches skip parts that do not apply.\n3. (15–40) You-do — the final project. Design (Python first) then write in assembly: input three numbers, add the first two, if the total is bigger than the third output the total else output the third. Order the decision steps, then code. Build it in the LMC, test, screenshot. TA: prompt with the toolbox/examples, do not write it for them — every pupil ends on a success.\n   • Support: which command always jumps (BRA).  • Core: which two numbers are added first.  • Challenge: write the full project in assembly.\n4. (40–55) Summative assessment under exam conditions, then round-up the unit: components → how the CPU runs instructions → high/low-level languages → wrote their own assembly. Self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Assembly language programming II — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-assembly-2-starter-worksheet.md"
+        },
+        {
+          "title": "Assembly language programming II — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-assembly-2-activity-worksheet.md"
+        },
+        {
+          "title": "Assembly language programming II — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l13-assembly-2-slides.md"
+        },
+        {
+          "title": "An LMC program that uses branching (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l13-lmc-branching.png"
+        }
+      ]
+    }
+  ]
+}
