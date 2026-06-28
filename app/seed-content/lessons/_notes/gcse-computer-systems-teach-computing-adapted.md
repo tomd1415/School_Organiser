@@ -91,3 +91,22 @@ support/core/challenge and has teacher notes.
   the reference-import half, not native lessons.
 - L9 starter files (quiz.py / questions.txt) live at ncce.io/computer-systems-quiz; LMC simulator at
   peterhigginson.co.uk/lmc — referenced in the worksheets/slides, not bundled.
+
+---
+
+## Resource-completeness sweep (2026-06-28)
+
+- **Note 1 — L10 Logic gates (the §4-logged gap, now RESOLVED).** The lesson taught "recognise the AND, OR and
+  NOT gates" and the slide said "I-do each gate with the symbol", but the only images were **portraits of Boole
+  and Shannon** — pupils never saw the gate symbols. Fixed by **rasterising the source deck** (Gotenberg →
+  pdf-to-img) and cropping the **AND** (source slide 18), **OR** (slide 37) and **NOT** (slide 40) symbols;
+  embedded as `l10-gate-{and,or,not}.png` on the "three gates" slide and the activity worksheet, with a plain-
+  language note on telling them apart (flat back / curved back / triangle-and-circle). Added a visible
+  "▶ Your turn" cue to the truth-tables slide.
+- **Note 4 — already largely met** for this unit: most decks (L1/L2/L4/L5/L6/L7) already carry a visible
+  "## Your turn" cue slide. Only L10 lacked one (added). L3/L8/L11 cue the activity in the we-do teacher note;
+  a visible cue could be added on a later pass if wanted.
+- Notes 2/3/5 needed nothing: every activity has the 📷 upload field; no separate documents handed out; the
+  assembly lessons (L12/L13) already carry their LMC code as Parsons + code blocks.
+
+Re-seeded + verified (file + DB). Gate-symbol images resolve in both the slide and the worksheet.

@@ -555,6 +555,13 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l17-huffman-coding-slides.md"
+        },
+        {
+          "title": "Huffman tree for MISSISSIPPI (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l17-huffman-tree.png"
         }
       ]
     },

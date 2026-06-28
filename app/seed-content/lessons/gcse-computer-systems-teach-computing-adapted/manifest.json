@@ -422,6 +422,27 @@
           "mimeType": "image/png",
           "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
           "file": "l10-claude-shannon.png"
+        },
+        {
+          "title": "AND gate symbol (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-gate-and.png"
+        },
+        {
+          "title": "OR gate symbol (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-gate-or.png"
+        },
+        {
+          "title": "NOT gate symbol (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-gate-not.png"
         }
       ]
     },

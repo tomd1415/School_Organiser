@@ -8,7 +8,13 @@
 Today I will learn the three logic gates — AND, OR and NOT — and complete their truth tables. Keep this sheet as a reference.
 
 ## The three gates
-A logic gate takes one or more inputs (each a 1 or a 0) and gives ONE output. There are three to know: AND, OR and NOT.
+A logic gate takes one or more inputs (each a 1 or a 0) and gives ONE output. There are three to know: AND, OR and NOT. Each one has its own symbol:
+
+| AND gate | OR gate | NOT gate |
+|---|---|---|
+| ![AND gate symbol]({{res:l10-gate-and.png}}) | ![OR gate symbol]({{res:l10-gate-or.png}}) | ![NOT gate symbol]({{res:l10-gate-not.png}}) |
+
+The **AND** symbol has a flat back, the **OR** symbol has a curved back, and the **NOT** symbol is a triangle with a small circle.
 
 ## Match the gate to its rule
 Pick the rule for each gate.

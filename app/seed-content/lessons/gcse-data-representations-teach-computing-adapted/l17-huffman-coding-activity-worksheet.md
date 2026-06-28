@@ -10,7 +10,11 @@ Today I will explain how Huffman coding works, read a Huffman tree, and calculat
 ## How to read a Huffman tree
 Huffman coding gives each character a bit pattern. Common characters get short patterns; rare characters get longer ones. To read a character's pattern, follow the path from the top of the tree: go **left = 0**, go **right = 1**.
 
-For the word **MISSISSIPPI**, the tree gives these bit patterns:
+This is the Huffman tree for the word **MISSISSIPPI**:
+
+![Huffman tree for MISSISSIPPI — S=0, I=10, M=110, P=111]({{res:l17-huffman-tree.png}})
+
+Following each path from the top gives these bit patterns:
 
 | Character | Bit pattern |
 |---|---|

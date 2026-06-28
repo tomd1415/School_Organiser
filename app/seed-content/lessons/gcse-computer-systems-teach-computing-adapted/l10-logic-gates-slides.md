@@ -32,9 +32,17 @@
 - AND — output is 1 only when BOTH inputs are 1
 - OR — output is 1 when AT LEAST ONE input is 1
 
-> 🧑‍🏫 I-do each gate with the symbol on the board and an everyday example. Likely error OR vs AND → fix-words "AND needs BOTH; OR needs at least one." Pupils have the gate sheet in front of them.
+This is what each one looks like:
+
+| AND | OR | NOT |
+|---|---|---|
+| ![AND gate symbol]({{res:l10-gate-and.png}}) | ![OR gate symbol]({{res:l10-gate-or.png}}) | ![NOT gate symbol]({{res:l10-gate-not.png}}) |
+
+> 🧑‍🏫 I-do each gate with its symbol and an everyday example. AND and OR have a flat vs curved back; NOT is a triangle with a small circle. Likely error OR vs AND → fix-words "AND needs BOTH; OR needs at least one." Pupils have the gate symbols on their worksheet too.
 
 ## Truth tables  (we do → you do)
+▶ **Your turn — open your activity worksheet now.** Tick the outputs for the NOT, AND and OR truth tables at your level.
+
 - a truth table lists every input combination and the output
 - count the inputs in binary: 00, 01, 10, 11
 

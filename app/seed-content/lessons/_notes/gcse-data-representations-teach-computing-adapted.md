@@ -214,3 +214,19 @@ shapes inside the `.pptx`, so `extractOfficeImages` (raster-only) can't pull the
 Nothing from `TeachComputing/` committed except OGL-licensed images re-saved into the bundle (attributed in the
 manifest). No DB writes — bundle files only. Throwaway extraction scripts under `app/src/_*.ts` were deleted
 after use. Not yet seeded; seed with `npm run seed:lessons -- gcse-data-representations-teach-computing-adapted__pt2`.
+
+---
+
+## Resource-completeness sweep (2026-06-28)
+
+- **Note 1 — L17 Huffman coding (acute gap, RESOLVED).** The lesson's objective is literally "**read a Huffman
+  tree**" and references the MISSISSIPPI codes (S=0, I=10, M=110, P=111), but **no tree was shown** — pupils
+  couldn't read a tree they couldn't see. Rasterised the complete MISSISSIPPI Huffman tree (source slide 36,
+  with frequencies + 0/1 edge labels) and embedded it as `l17-huffman-tree.png` on the "Reading a Huffman tree"
+  slide and the activity worksheet. Matches the lesson's codes exactly.
+- **Audited, no change (discipline = don't pad):** L16 Run length encoding is taught with **binary text rows**
+  (`11 11 11 00 00 00 00` → `3 11 4 00 2 11`), the GCSE exam style, and is self-contained — a pixel-grid image
+  would be a nice-to-have but is not an acute gap. The binary calculation lessons (L3–L6, L11, L13–L17) are
+  text/calculation based and don't need diagrams to be answerable.
+
+Re-seeded (unit 1530) + verified (file + DB). Huffman tree resolves on slide + worksheet.
