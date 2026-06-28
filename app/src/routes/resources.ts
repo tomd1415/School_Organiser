@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { isLimitedRole } from '../auth/lockdown';
-import { verifyImageSig } from '../lib/lessonImageSig';
+import { verifyImageSig, verifyDocSig } from '../lib/lessonImageSig';
 import { esc, layout } from '../lib/html';
 import {
   addVersion,
@@ -640,6 +640,53 @@ export function registerResourceRoutes(app: FastifyInstance): void {
         .header('X-Content-Type-Options', 'nosniff')
         .type(r.mimeType ?? 'application/octet-stream')
         .send(buf);
+    } catch {
+      return reply.code(404).send('Not found');
+    }
+  });
+
+  // A lesson DOCUMENT a pupil/TA may open from their lesson (note #3: provided docs are viewable). Same
+  // BUG-003 capability as /lesson-image: a limited role may only open a doc the server signed into one of
+  // their pages; teachers are unrestricted. Renders pupil-safe (markdown/text inline, PDF/Office as an
+  // inline PDF, images inline) WITHOUT any teacher chrome (no edit/present/scheme/download-as links).
+  app.get('/lesson-doc/:id', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const role = req.session.get('role');
+    const sq = req.query as { s?: string; e?: string };
+    if (isLimitedRole(role) && !verifyDocSig(id.data.id, sq.s, sq.e != null ? Number(sq.e) : undefined, Date.now())) {
+      return reply.code(404).send('Not found');
+    }
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v) return reply.code(404).send('Not found');
+    const pk = previewKind(r.mimeType, r.title);
+    try {
+      if (pk === 'markdown' || pk === 'text') {
+        const text = (await readStored(v.storagePath)).toString('utf8');
+        const inner = pk === 'markdown' ? renderMarkdown(text) : `<pre class="md-pre">${esc(text)}</pre>`;
+        const body = `<main class="pupil-main"><article class="pupil-card md-doc"><h1>${esc(r.title.replace(/\.[a-z0-9]+$/i, ''))}</h1>${inner}</article></main>`;
+        return reply.type('text/html').send(`<!doctype html><html lang="en"><head><meta charset="utf-8">`
+          + `<meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(r.title)}</title>`
+          + `<link rel="stylesheet" href="/static/styles.css"></head><body class="pupil-body" data-shell="next">${body}</body></html>`);
+      }
+      if (pk === 'pdf' || pk === 'image') {
+        const isSvg = /svg/i.test(r.mimeType ?? '') || /\.svg$/i.test(r.title);
+        return reply
+          .header('Content-Disposition', `${isSvg ? 'attachment' : 'inline'}; filename="${encodeURIComponent(r.title)}"`)
+          .header('X-Content-Type-Options', 'nosniff')
+          .type(r.mimeType ?? 'application/octet-stream')
+          .send(await readStored(v.storagePath));
+      }
+      if (pk === 'office') {
+        const pdf = await convertToPdf(await readStored(v.storagePath), r.title);
+        if (pdf) return reply.header('Content-Disposition', 'inline; filename="preview.pdf"').type('application/pdf').send(pdf);
+      }
+      // No inline preview (or Office preview unavailable) → serve the original file as a download.
+      return reply
+        .header('Content-Disposition', `attachment; filename="${encodeURIComponent(r.title)}"`)
+        .header('X-Content-Type-Options', 'nosniff')
+        .type(r.mimeType ?? 'application/octet-stream')
+        .send(await readStored(v.storagePath));
     } catch {
       return reply.code(404).send('Not found');
     }

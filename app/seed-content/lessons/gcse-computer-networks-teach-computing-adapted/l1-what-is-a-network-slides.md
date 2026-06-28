@@ -31,6 +31,8 @@ We draw a network as a **graph**. The dots are **nodes** (the connected things).
 > 🧑‍🏫 Pupils tick the advantages on the activity sheet, then write one advantage + one disadvantage (Core). Likely error: thinking a network is always free — fix-words "connecting costs money."
 
 ## Peer-to-peer  (you do)
+▶ **Your turn — open your activity worksheet now.** Put the peer-to-peer steps in order, then answer the questions for your level.
+
 In a **peer-to-peer** network every computer is **equal**. There is no main server — each computer can **ask for** files and **send** files.
 
 > 🧑‍🏫 Use the card-passing idea: one computer asks another for a file, that computer sends it back. Challenge pupils order the four steps. Next lesson: the client–server model.

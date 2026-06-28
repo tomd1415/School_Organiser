@@ -1329,6 +1329,13 @@ body.deck {
 @keyframes pupil-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pupil-work-card { animation: none; } }
 [data-motion="calm"] .pupil-work-card { animation: none; }
+
+/* Lesson documents — handouts/fact files the lesson provides, opened pupil-safe via /lesson-doc. */
+.lesson-docs { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
+.lesson-docs-h { font-size: 1rem; margin: 0 0 0.4rem; }
+.lesson-docs-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.lesson-docs-list li { display: flex; align-items: center; gap: 0.4rem; }
+.lesson-docs-list li::before { content: "📎"; }
 .ws-checklist { list-style: none; padding: 0; }
 .ws-checklist .md-task { font-size: 1.05rem; padding: 0.3rem 0; }
 /* Teacher "preview as pupil" — level tabs + an inert (disabled) rendering of the pupil sheet. */

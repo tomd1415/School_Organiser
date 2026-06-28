@@ -30,6 +30,8 @@ The browser (application) writes the request → transport adds ports → intern
 > 🧑‍🏫 Optional unplugged demo: pass an envelope through four pupils, each adding a label. Keep it calm and slow.
 
 ## TCP or UDP?  (you do)
+▶ **Your turn — open your activity worksheet now.** Do the TCP/UDP fill-in-the-blank, then sort the protocols into their layers.
+
 Both work in the transport layer.
 - TCP = reliable: checks every packet arrives, asks again for missing ones (web pages, emails).
 - UDP = unreliable: does not resend lost packets (fast video and voice calls).

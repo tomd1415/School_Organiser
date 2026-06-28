@@ -13,7 +13,7 @@ import { listPupilHomework } from '../repos/homework';
 import { renderPupilHomework } from '../lib/homeworkView';
 import { listExceptionsBetween } from '../repos/exceptions';
 import { indexDayExceptions, exceptionForLesson, describeException } from '../services/exceptions';
-import { getLessonSlidesMarkdown, getLessonWorksheets } from '../services/worksheet';
+import { getLessonSlidesMarkdown, getLessonWorksheets, getLessonDocuments } from '../services/worksheet';
 import { renderWorksheet, savedTick, type Level } from '../lib/worksheetForm';
 import { requireAuth } from '../auth/guard';
 import { ensureTestPupil } from '../repos/pupils';
@@ -182,6 +182,7 @@ export function registerMeRoutes(app: FastifyInstance): void {
             (gc, lp) => getLessonWorksheets(gc, lp),
             (gc, lp) => getLessonSlidesMarkdown(gc, lp),
             (oc) => pupilLessonResults(pupilId, oc),
+            (gc, lp) => getLessonDocuments(gc, lp),
           );
           body = `${head}<section class="pupil-card"><p class="pupil-note"><a class="link" href="${'/me'}">← back</a> · Homework</p></section>${block}`;
           return reply.type('text/html').send(pupilLayout(body, csrf));
@@ -222,7 +223,8 @@ export function registerMeRoutes(app: FastifyInstance): void {
                 (oc) => getPupilFeedback(pupilId, oc),
                 (gc, lp) => getLessonWorksheets(gc, lp),
                 (gc, lp) => getLessonSlidesMarkdown(gc, lp),
-                (oc) => pupilLessonResults(pupilId, oc)
+                (oc) => pupilLessonResults(pupilId, oc),
+                (gc, lp) => getLessonDocuments(gc, lp)
               )
             )
           );

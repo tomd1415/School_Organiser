@@ -92,3 +92,30 @@ TCC's network **topology diagrams** (star/bus/ring/mesh node graphs), the **pack
 
 ## Verification
 Validated with a throwaway script (now deleted): all 7 lessons' worksheets parse; every **activity** sheet has the 📷 show-your-work field; every deck title ends `.md` and has non-empty `> 🧑‍🏫` notes; `sliceSlidesForLevel`/`renderWorksheet` slice cleanly per level (Support/Core/Challenge isolated, shared blocks shown to all, no level-label leak into pupil view). Card-sort/order/label/multi-select/matching/blank fields all detected. DB untouched — bundle files only.
+
+---
+
+## Resource-completeness sweep (2026-06-28) — PILOT unit
+
+First unit swept under `docs/RESOURCE_COMPLETENESS_SWEEP.md` (v2). Audit finding: this unit was **already
+high-quality and largely complete** — each lesson carries its key diagram and the worksheets are rich
+(order/sort/label/matching/blank/multi-select + 📷 show-your-work on every activity). Two changes made:
+
+- **Note 1 (missing concept visuals) — L4 Network topologies.** The lesson taught + tested all four
+  topologies (star/bus/ring/mesh) but only embedded the **star+bus** image; **ring and mesh had no visual**
+  (the activity asks pupils to match all four). Fixed by **rasterising the source slides** (Gotenberg
+  Office→PDF → `pdf-to-img` PNG — this captures the PPT **vector** diagrams `extractOfficeImages` can't):
+  added `l4-ring-topology.png` (source slide 23) + `l4-mesh-topology.png` (source slide 31), cropped tight,
+  embedded on the "Ring and mesh" slide and in the activity worksheet (all four shapes now shown).
+- **Note 4 (activity-start cues).** Every teaching deck cued the activity only in the `> 🧑‍🏫` teacher notes.
+  Added a **visible** "▶ Your turn — open your activity worksheet now" line (with the specific task) to each
+  `(you do)` slide across L1–L12, so the board itself tells pupils what to start.
+
+Notes 2 (upload), 3 (documents), 5 (code) needed nothing here: every activity already had the 📷 upload
+field; the unit hands out no separate documents (Packet Tracer practicals stay optional teacher video hooks);
+it is non-programming so there is no code. The L10/L11 "blank coloured boxes" are **correct** — they are
+`label`-task backdrops (pupils drag the layer names onto the bands), not unfinished diagrams.
+
+Re-seeded + verified (file-level + DB): unit seeds clean, all activities keep the 📷 field, decks slice per
+level with teacher notes. **Key enabler proven here:** the Gotenberg rasteriser resolves the long-standing
+"TCC diagrams are vector shapes" image-gap — applicable to every future unit.

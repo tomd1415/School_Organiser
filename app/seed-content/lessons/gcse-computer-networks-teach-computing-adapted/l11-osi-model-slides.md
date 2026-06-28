@@ -28,6 +28,8 @@ The OSI model breaks the same job into seven layers, from the application at the
 > 🧑‍🏫 Class does the "group OSI into TCP/IP" sort. Stress: same journey, just split up more.
 
 ## Conceptual, not built that way  (you do)
+▶ **Your turn — open your activity worksheet now.** Do the matching, then pick which protocols are NOT application-layer.
+
 The OSI model is **conceptual** — engineers use it to understand and find faults, layer by layer. Real networks are built on the TCP/IP model.
 
 > 🧑‍🏫 Likely error: thinking OSI replaces TCP/IP. Fix-words: "OSI is the map; TCP/IP is the road we actually drive." Pairs do the matching and the "which are not application-layer" task.

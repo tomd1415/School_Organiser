@@ -26,6 +26,8 @@ Malware changes where a web address points, so a correct address sends you to a 
 > 🧑‍🏫 Optional: the Packet Tracer pharming simulation. Likely error: thinking the user typed the wrong address. Fix-words: "the address was right; the signpost was changed." Class orders the four steps.
 
 ## Keeping a network safe  (you do)
+▶ **Your turn — open your activity worksheet now.** Match each security method to what it does, then tick the ways to keep a network safe.
+
 - Anti-malware software — finds and removes harmful code.
 - Strong passwords — hard to guess or brute-force.
 - User access rights — each person gets only the access they need.

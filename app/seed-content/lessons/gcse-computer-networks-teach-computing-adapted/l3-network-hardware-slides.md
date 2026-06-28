@@ -31,6 +31,8 @@ Every **NIC** has a unique **MAC address** built in. It is used to find a device
 > 🧑‍🏫 Plain line: MAC address = a device's unique built-in name tag. Not a web address, not a password. Likely error: confusing MAC with IP — fix-words "MAC is built in and stays."
 
 ## Find the network port  (you do)
+▶ **Your turn — open your activity worksheet now.** Label the network port on the laptop, then match each device to its job.
+
 The **NIC** gives a computer a **network port** to plug a cable into.
 
 > 🧑‍🏫 Pupils label the laptop ports on the worksheet — find the network port (NIC), then HDMI and USB. Very low writing, strong visual.

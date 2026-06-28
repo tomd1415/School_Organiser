@@ -17,6 +17,30 @@ export interface ResolvedWorksheet extends WorksheetMeta {
   markdown: string;
 }
 
+export interface LessonDocument {
+  resourceId: number;
+  title: string;
+}
+
+/** The DOCUMENTS a lesson provides for pupils/teacher to read (kind='document') — class-adapted copies
+ * first, then the master plan's (de-duplicated by title). These are handouts / fact files / info sheets
+ * the lesson shows, surfaced in the pupil view via the pupil-safe /lesson-doc route. */
+export async function getLessonDocuments(groupCourseId: number, lessonPlanId: number): Promise<LessonDocument[]> {
+  const isDoc = (r: LinkedResource): boolean => r.kind === 'document';
+  const adaptation = await getAdaptation(groupCourseId, lessonPlanId);
+  const adapted = adaptation ? (await listResourcesForAdaptation(adaptation.id)).filter(isDoc) : [];
+  const master = (await listResourcesForPlan(lessonPlanId)).filter(isDoc);
+  const out: LessonDocument[] = [];
+  const seen = new Set<string>();
+  for (const r of [...adapted, ...master]) {
+    const key = r.title.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ resourceId: r.resourceId, title: r.title });
+  }
+  return out;
+}
+
 /** Resolve WHICH worksheet (resource + current version) a class works from — no file read.
  * Cheap enough to call on every autosave just to record answer provenance. */
 export async function getLessonWorksheetMeta(groupCourseId: number, lessonPlanId: number): Promise<WorksheetMeta | null> {

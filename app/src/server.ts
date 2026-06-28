@@ -64,7 +64,7 @@ import { registerAssessmentTakeRoutes } from './routes/assessmentTake';
 import { registerAssessmentMarkRoutes } from './routes/assessmentMark';
 import { runDueAttemptMarks } from './services/assessmentMarkQueue';
 import { isLimitedRole, roleAllows, ROLE_HOME } from './auth/lockdown';
-import { signLessonImages } from './lib/lessonImageSig';
+import { signLessonMedia } from './lib/lessonImageSig';
 import { pupilCfg } from './auth/pupilAccessCache';
 import { getPupilSessionState } from './repos/pupils';
 import { getTaAccountState } from './repos/taAccounts';
@@ -228,15 +228,15 @@ export async function buildApp(): Promise<FastifyInstance> {
     if (!roleAllows(role, req.url)) return reply.redirect(ROLE_HOME[role]);
   });
 
-  // BUG-003: sign every /lesson-image URL in the HTML we send a limited role, so their browser can only
-  // request images the server actually rendered for them — the route rejects an unsigned/forged id for
-  // pupils/TAs. Teachers are unrestricted, so their HTML is left untouched.
+  // BUG-003: sign every /lesson-image AND /lesson-doc URL in the HTML we send a limited role, so their
+  // browser can only request media the server actually rendered for them — the routes reject an
+  // unsigned/forged id for pupils/TAs. Teachers are unrestricted, so their HTML is left untouched.
   app.addHook('onSend', async (req, reply, payload) => {
     const role = req.session?.get?.('role');
     if (!isLimitedRole(role) || typeof payload !== 'string') return payload;
     const ct = reply.getHeader('content-type');
-    if (typeof ct === 'string' && ct.includes('text/html') && payload.includes('/lesson-image/')) {
-      return signLessonImages(payload, Date.now());
+    if (typeof ct === 'string' && ct.includes('text/html') && (payload.includes('/lesson-image/') || payload.includes('/lesson-doc/'))) {
+      return signLessonMedia(payload, Date.now());
     }
     return payload;
   });

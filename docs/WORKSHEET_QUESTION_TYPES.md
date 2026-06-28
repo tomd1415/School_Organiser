@@ -173,3 +173,11 @@ Embedding found images is in [LESSON_CONVERSION_GUIDE.md §3a](LESSON_CONVERSION
 > `app/seed-content/lessons/_notes/<slug>.md`. Recurring theme from the Y7 batch: TCC network/spreadsheet
 > diagrams are **vector shapes inside the .pptx**, so `extractOfficeImages` (raster-only) can't pull them —
 > these need re-drawing or a render step to embed.
+>
+> **RESOLVED (2026-06-28) — the vector-diagram blocker now has a fix.** The resource-completeness sweep
+> deployed the Gotenberg sidecar and a rasteriser (`Office → PDF → pdf-to-img PNG`) that captures the
+> **vector-shape diagrams** `extractOfficeImages` never could. Proven on the GCSE Networks **topologies**
+> lesson (recovered the ring + mesh stack diagrams from source slides 23/31 — see
+> `_notes/gcse-computer-networks-teach-computing-adapted.md`). Most of the ⚠️ rows above that say "PPT vector
+> shapes / non-rasterisable" can now be re-captured this way during the sweep (see
+> `docs/RESOURCE_COMPLETENESS_SWEEP.md` §3).

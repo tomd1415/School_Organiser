@@ -30,6 +30,8 @@ Router reaches the internet · WAP gives WiFi · star = one central node.
 > 🧑‍🏫 Class matches each media to its description (Support). Likely error: thinking fibre is wireless because it's "fast" — fix-words "fibre is a cable full of light."
 
 ## Choose the media  (you do)
+▶ **Your turn — open your activity worksheet now.** Choose the best transmission media for each scenario.
+
 - Big files, fast, stable → **fibre**.
 - Moving around, sharing internet → **WiFi**.
 - Tiny short-range gadgets (mouse, headset) → **Bluetooth**.

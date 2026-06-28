@@ -156,6 +156,20 @@
           "mimeType": "image/png",
           "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
           "file": "l4-topologies.png"
+        },
+        {
+          "title": "Ring topology.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-ring-topology.png"
+        },
+        {
+          "title": "Mesh topology.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-mesh-topology.png"
         }
       ]
     },

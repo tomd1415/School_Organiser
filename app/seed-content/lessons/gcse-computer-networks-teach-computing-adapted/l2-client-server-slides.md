@@ -27,6 +27,8 @@ A computer network = computers connected and sharing. Peer-to-peer = every compu
 > 🧑‍🏫 Class sorts "client / server" jobs, then chooses the right model for the two scenarios (Core). Likely error: thinking the server is the same as a client — fix-words "server serves."
 
 ## Three sizes of network  (you do)
+▶ **Your turn — open your activity worksheet now.** Sort the PAN, LAN and WAN examples, then answer your level’s questions.
+
 - **PAN** — around one person (a watch + phone).
 - **LAN** — one site or building (a school, a home).
 - **WAN** — a large area (the internet links networks between cities).

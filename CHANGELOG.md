@@ -7,6 +7,26 @@ is pre-release, so this logs planning and build progress. Decision detail lives 
 
 ## [Unreleased]
 
+### 2026-06-28 — Resource-completeness sweep: Phase 0 + pupil document visibility + Networks pilot
+
+Built on branch `phase-15-17-unattended`, continuing the same run. Plan: `docs/RESOURCE_COMPLETENESS_SWEEP.md` (v2).
+
+- **Pupil document visibility (note #3, a real feature).** A new pupil-safe **`/lesson-doc/:id`** route serves a
+  lesson's `document` resources to pupils/TAs (markdown/text inline, PDF/Office as an inline PDF via Gotenberg,
+  images inline) with **no teacher chrome**. It reuses the BUG-003 signed-capability model: the `onSend` hook
+  now signs `/lesson-image` **and** `/lesson-doc` URLs for limited roles (separate payload prefixes — no
+  cross-replay), so a pupil can only open a document the server rendered into their lesson. New
+  `getLessonDocuments` service + a "📎 Lesson documents" section in the pupil lesson view (`buildOccurrenceBlock`).
+  Teachers already saw documents via `renderLinkedResources`. Tests: `tests/lessonDocSig.test.ts` (+ paths
+  builder/guard). Full suite green (1195), typecheck clean.
+- **Phase 0 sweep tooling.** Deployed the **Gotenberg** sidecar (was defined-but-off; added a dev loopback
+  port) and built a **rasteriser** (`Office → PDF → pdf-to-img PNG`, devDep `pdf-to-img`) that captures the
+  **PPT vector-shape diagrams** `extractOfficeImages` never could — the long-standing image-gap blocker.
+- **Networks pilot swept (GCSE Computer networks).** Audit found the unit largely complete; fixed the genuine
+  **note-1** gap — L4 topologies was missing **ring + mesh** diagrams (recovered by rasterising source slides
+  23/31) — and added **note-4** visible "▶ Your turn" activity-start cues to all 11 teaching decks. Re-seeded
+  + verified. Vector-diagram fix recorded in `WORKSHEET_QUESTION_TYPES.md` §4.
+
 ### 2026-06-28 — KS2 Year 6 lesson conversion (7 units / 38 lessons) — TCC catalogue complete
 
 Built on branch `phase-15-17-unattended`, continuing the same run.

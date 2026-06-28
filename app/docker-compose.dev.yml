@@ -13,3 +13,11 @@ services:
       - ./src:/app/src
       - ./migrations:/app/migrations
       - ./public:/app/public
+
+  # Dev-only: publish Gotenberg on a loopback port so host-side tooling (the resource-completeness
+  # rasteriser, smoke tests) can reach it directly, in addition to the app's internal gotenberg:3000.
+  # Still gated by the `preview` profile — start it with:
+  #   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile preview up -d gotenberg
+  gotenberg:
+    ports:
+      - "127.0.0.1:3001:3000"

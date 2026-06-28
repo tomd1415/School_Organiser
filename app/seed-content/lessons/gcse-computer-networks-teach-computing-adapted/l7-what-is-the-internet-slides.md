@@ -32,6 +32,8 @@ You type a **URL** (www.example.com). The **DNS** looks it up and returns the **
 > 🧑‍🏫 Plain line: DNS turns the name you type into the number the network needs. Optional: the Packet Tracer "investigating DNS" video — motion/sound, your choice.
 
 ## The web browser  (you do)
+▶ **Your turn — open your activity worksheet now.** Put the six steps of visiting a website in order.
+
 A **web browser** asks for the page, downloads the **HTML**, and **builds the page** on your screen.
 
 > 🧑‍🏫 Challenge pupils order the six steps of visiting a website. TA: prompt with "what happens first?", do not give the order.

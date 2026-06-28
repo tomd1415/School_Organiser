@@ -29,6 +29,8 @@ Example: 50 bits ÷ 10 bits per second = **5 seconds**.
 > 🧑‍🏫 Work the example slowly on the board, then pupils do the Core questions. Likely error: dividing speed by size — fix-words "bits on top, speed underneath." Calculators are fine.
 
 ## Routing costs  (you do)
+▶ **Your turn — open your activity worksheet now.** Work out the transfer-time questions, then find the lowest-cost route.
+
 Every link has a **cost**. The network picks the **lowest-cost route** — the path with the smallest total cost, not always the one with fewest links.
 
 > 🧑‍🏫 Two routes on the board: 5+8+2 = 15 versus 4+5 = 9. Lowest = 9. Challenge pupils add up and choose. Optional: the Packet Tracer "investigating routes" videos — motion/sound, your choice.

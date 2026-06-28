@@ -31,6 +31,8 @@ Big companies keep thousands of servers together in a **data centre** — a buil
 > 🧑‍🏫 Examples pupils know: Google Docs, iCloud photos, Netflix. Class sorts "in the cloud" vs "only on this device" on the activity sheet.
 
 ## Good and bad points  (you do)
+▶ **Your turn — open your activity worksheet now.** Tick the advantages of cloud hosting, then give a disadvantage.
+
 - Good: reach your files from any device, automatic backups, no big install.
 - Bad: you need an internet connection, and someone else holds your data.
 

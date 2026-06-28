@@ -7,12 +7,16 @@
 ## What we are learning
 Today I will describe the star, bus, mesh and ring topologies, give an advantage and disadvantage of each, and choose a topology for a scenario.
 
-A **topology** is the *shape* — the way the nodes are arranged.
+A **topology** is the *shape* — the way the nodes are arranged. Here are the four shapes.
 
 ![Star and bus topologies, with their advantages and disadvantages]({{res:l4-topologies.png}})
 
+| Ring topology | Mesh topology |
+|---|---|
+| ![A ring topology — nodes joined in a circle]({{res:l4-ring-topology.png}}) | ![A mesh topology — many paths between nodes]({{res:l4-mesh-topology.png}}) |
+
 ## 🟢 Support
-Match each topology to how it is arranged. Drag the topology onto its description.
+Use the four shapes above. Match each topology to how it is arranged. Drag the topology onto its description.
 
 | How it is arranged | Match the topology |
 |---|---|

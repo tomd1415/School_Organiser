@@ -237,6 +237,8 @@ export const paths = {
   resourcesGenerate: (): string => '/resources/generate',
   resourceViewUrl: (id: number): string => `/resources/${id}/view`,
   resourceDownload: (id: number): string => `/resources/${id}/download`,
+  /** Pupil-safe lesson-document view (signed for limited roles by the onSend hook). */
+  lessonDoc: (id: number): string => `/lesson-doc/${id}`,
   resourcePresent: (id: number): string => `/resources/${id}/present`,
   resourceUsage: (id: number): string => `/resources/${id}/usage`,
   schemesPlanResourceDetach: (plan: number, res: number): string => `/schemes/plan/${plan}/resources/${res}/detach`,

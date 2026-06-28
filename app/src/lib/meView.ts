@@ -162,15 +162,24 @@ export async function buildOccurrenceBlock(
   fetchFeedback: (oc: number) => Promise<{ rating: number | null; liked: string; disliked: string; comment: string } | null>,
   fetchWorksheets: (gc: number, lp: number) => Promise<Array<{ index: number; markdown: string; title: string; keyPrefix: string; resourceId: number; versionNo: number }>>,
   fetchSlides: (gc: number, lp: number) => Promise<string | null>,
-  fetchResults: (oc: number) => Promise<PupilResults | null>
+  fetchResults: (oc: number) => Promise<PupilResults | null>,
+  fetchDocuments: (gc: number, lp: number) => Promise<Array<{ resourceId: number; title: string }>> = async () => []
 ): Promise<string> {
   const oc = Number(s.occurrenceCourseId);
   let inner = '';
+  let docsHtml = '';
   if (s.lessonPlanId != null) {
-    const [worksheets, slidesMd] = await Promise.all([
+    const [worksheets, slidesMd, documents] = await Promise.all([
       fetchWorksheets(Number(s.groupCourseId), Number(s.lessonPlanId)),
       fetchSlides(Number(s.groupCourseId), Number(s.lessonPlanId)),
+      fetchDocuments(Number(s.groupCourseId), Number(s.lessonPlanId)),
     ]);
+    if (documents.length) {
+      const items = documents
+        .map((d) => `<li><a class="link" href="${paths.lessonDoc(d.resourceId)}" target="_blank" rel="noopener">${esc(d.title.replace(/\.[a-z0-9]+$/i, ''))}</a></li>`)
+        .join('');
+      docsHtml = `<div class="lesson-docs"><h2 class="lesson-docs-h">📎 Lesson documents</h2><ul class="lesson-docs-list">${items}</ul></div>`;
+    }
     if (worksheets.length) {
       const [level, values, done, fb] = await Promise.all([
         isTest ? Promise.resolve(testLevel) : fetchLevel(),
@@ -204,6 +213,6 @@ export async function buildOccurrenceBlock(
         : work;
     }
   }
-  if (!inner) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
-  return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}</section>`;
+  if (!inner && !docsHtml) inner = '<p class="pupil-note">Nothing to do here yet — your teacher will add it.</p>';
+  return `<section class="pupil-card pupil-work-card"><h1>${esc(s.planTitle ?? s.courseName)}</h1>${inner}${docsHtml}</section>`;
 }

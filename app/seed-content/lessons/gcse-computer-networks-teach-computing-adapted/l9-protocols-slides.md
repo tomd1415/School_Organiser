@@ -34,6 +34,8 @@ Each protocol has a job: **web pages**, **email**, **files**, or **connecting th
 > 🧑‍🏫 Mnemonic help: "S in SMTP = Send." HTTPS adds the **S for Secure** (it encrypts the page). POP downloads and removes; IMAP keeps mail on the server across devices.
 
 ## Your turn — a sending protocol  (you do)
+▶ **Your turn — open your activity worksheet now.** Match each protocol to its job, then put the sending steps in order.
+
 A long message is split into small chunks that may arrive out of order. On the Challenge, put the rules of a good sending protocol in the right order.
 
 > 🧑‍🏫 This previews packet switching (next topics). Support = match protocol→job; Core = explain the extra S / POP vs IMAP; Challenge = order the sending steps. Pupils paste a photo of their finished sheet.
