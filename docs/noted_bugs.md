@@ -126,7 +126,11 @@ wanted, that's a larger route change — flagged for a follow-up if the previews
 **Regression test:** integration test hitting `/lesson/pupil-preview?lp=<masterPlanId>` (no group) returns 200
 and renders the worksheet; plus the Bug 1 interactivity assertion covers the "can actually drag" part.
 
-## Bug 5 — in-place WYSIWYG lesson/worksheet editing + add/remove questions  ·  Status: NEEDS DESIGN DOC (large)
+## Bug 5 — in-place WYSIWYG lesson/worksheet editing + add/remove questions  ·  Status: DESIGN DOC WRITTEN → [LESSON_WORKSHEET_EDITOR_PLAN.md](LESSON_WORKSHEET_EDITOR_PLAN.md)
+**Headline:** most of the editor already exists (`worksheetEditor.js` + the `worksheetBlocks.ts` model +
+`/resources/:id/edit` + add-question palette + live preview). The plan targets the three real gaps:
+(A) model the NEW question types as editable blocks, (B) edit correct/model answers (wire to the mark scheme),
+(C) in-place lesson-plan editing. No storage change; the round-trip oracle is the guard.
 **Foundation that already exists:** `src/lib/worksheetBlocks.ts` is a typed **block model** with
 `parseBlocks`/`serialiseBlocks` and a round-trip guarantee (`serialiseBlocks(parseBlocks(md))` yields markdown
 whose `renderWorksheet().fields` are identical — the oracle is `tests/worksheetBlocks.test.ts`); and
@@ -144,7 +148,10 @@ serialise back to markdown, and round-trip tests.
 
 **Recommendation:** write the design doc next; do NOT start ad-hoc.
 
-## Bug 6 — "adjust with AI": describe what's wrong → AI improves (class copy or master)  ·  Status: NEEDS DESIGN DOC (medium–large)
+## Bug 6 — "adjust with AI": describe what's wrong → AI improves (class copy or master)  ·  Status: DESIGN DOC WRITTEN → [ADJUST_WITH_AI_PLAN.md](ADJUST_WITH_AI_PLAN.md)
+**Headline:** a new AI feature on the existing wrapper (`llm/client.ts`) — free-text "what to improve" +
+class/master target + a confirm-gate, inputs via `context[]` (redaction/withholding/audit automatic), validate
+the result before applying, write to a master version or the class adaptation. No new AI plumbing.
 **Foundation:** the privacy-safe LLM wrapper `app/src/llm/client.ts` (all AI egress; redaction + audit) and
 the existing draft/convert/review flows on the scheme/plan rows.
 
