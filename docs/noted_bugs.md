@@ -126,7 +126,13 @@ wanted, that's a larger route change — flagged for a follow-up if the previews
 **Regression test:** integration test hitting `/lesson/pupil-preview?lp=<masterPlanId>` (no group) returns 200
 and renders the worksheet; plus the Bug 1 interactivity assertion covers the "can actually drag" part.
 
-## Bug 5 — in-place WYSIWYG lesson/worksheet editing + add/remove questions  ·  Status: DESIGN DOC WRITTEN → [LESSON_WORKSHEET_EDITOR_PLAN.md](LESSON_WORKSHEET_EDITOR_PLAN.md)
+## Bug 5 — in-place WYSIWYG lesson/worksheet editing + add/remove questions  ·  Status: PARTIAL → [LESSON_WORKSHEET_EDITOR_PLAN.md](LESSON_WORKSHEET_EDITOR_PLAN.md)
+**Done (2026-06-28) — Gap A (the "add a question by type" ask):** the block editor now offers every question
+type. Multi-select and slider are structured qtable rows (editable as cards); order / card-sort / Parsons /
+label / code get palette buttons that insert a friendly skeleton. Round-trip oracle extended.
+**Remaining:** Gap B (edit correct/model answers — wire to the mark scheme; the higher-value, more involved
+piece) and Gap C (in-place plan objectives/outline — the existing edit textareas already save live, so this
+is a polish). Both have concrete plans in the doc; not rushed at this depth.
 **Headline:** most of the editor already exists (`worksheetEditor.js` + the `worksheetBlocks.ts` model +
 `/resources/:id/edit` + add-question palette + live preview). The plan targets the three real gaps:
 (A) model the NEW question types as editable blocks, (B) edit correct/model answers (wire to the mark scheme),
@@ -148,7 +154,13 @@ serialise back to markdown, and round-trip tests.
 
 **Recommendation:** write the design doc next; do NOT start ad-hoc.
 
-## Bug 6 — "adjust with AI": describe what's wrong → AI improves (class copy or master)  ·  Status: DESIGN DOC WRITTEN → [ADJUST_WITH_AI_PLAN.md](ADJUST_WITH_AI_PLAN.md)
+## Bug 6 — "adjust with AI": describe what's wrong → AI improves (class copy or master)  ·  Status: DONE (v1) → [ADJUST_WITH_AI_PLAN.md](ADJUST_WITH_AI_PLAN.md)
+**Done (2026-06-28):** "✨ Adjust with AI" in the worksheet/slide editor — free-text "what to improve" →
+two-step confirm-gate (preview → Apply) → new **master** version. Privacy-safe (inputs via `context[]`/
+instruction through the one wrapper; static system; no pupil names); the result is rendered-validated before
+it can be saved. Service `adjustArtefact.ts`, prompts `adjustArtefact.ts`, routes `/resources/:id/adjust(/apply)`.
+**Follow-up:** apply to the **class copy** (the adaptation store) and adjusting a **lesson plan** artefact
+(both noted in the plan); v1 covers worksheet/slides → master.
 **Headline:** a new AI feature on the existing wrapper (`llm/client.ts`) — free-text "what to improve" +
 class/master target + a confirm-gate, inputs via `context[]` (redaction/withholding/audit automatic), validate
 the result before applying, write to a master version or the class adaptation. No new AI plumbing.
