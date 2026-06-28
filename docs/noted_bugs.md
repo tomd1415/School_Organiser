@@ -130,9 +130,14 @@ and renders the worksheet; plus the Bug 1 interactivity assertion covers the "ca
 **Done (2026-06-28) — Gap A (the "add a question by type" ask):** the block editor now offers every question
 type. Multi-select and slider are structured qtable rows (editable as cards); order / card-sort / Parsons /
 label / code get palette buttons that insert a friendly skeleton. Round-trip oracle extended.
-**Remaining:** Gap B (edit correct/model answers — wire to the mark scheme; the higher-value, more involved
-piece) and Gap C (in-place plan objectives/outline — the existing edit textareas already save live, so this
-is a polish). Both have concrete plans in the doc; not rushed at this depth.
+**Done (2026-06-28) — Gap B (correct/model answers, v1):** the editor now marks the correct answer on
+single-choice and multi-select questions (◉ / ☑ toggles), written to the version's mark scheme on save
+(mapped to field keys by document order, with a count-mismatch guard so a stray choice never corrupts the
+scheme) and reloaded from `GET /resources/:id/scheme`. So those questions now auto-mark. Bridge +
+null-on-mismatch guard tested in `tests/worksheetAnswers.test.ts`.
+**Remaining:** Gap B for text / fill-blank / numeric model answers (free-text, alignment includes the
+name/date fields — needs care), and Gap C (in-place plan objectives/outline — the existing edit textareas
+already save live, so this is polish). Plans in the doc; not rushed at this depth.
 **Headline:** most of the editor already exists (`worksheetEditor.js` + the `worksheetBlocks.ts` model +
 `/resources/:id/edit` + add-question palette + live preview). The plan targets the three real gaps:
 (A) model the NEW question types as editable blocks, (B) edit correct/model answers (wire to the mark scheme),
