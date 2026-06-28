@@ -1,0 +1,149 @@
+{
+  "unitTitle": "GCSE Algorithms part 1 — the essentials (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Computational thinking — decomposition, abstraction & algorithmic thinking",
+      "objectives": "I can define decomposition, abstraction and algorithmic thinking\nI can recognise where each computational thinking skill is used\nI can use decomposition, abstraction and algorithmic thinking to help solve a problem",
+      "outline": "Routine first (same every lesson). Vocabulary on board: computational thinking · decomposition · abstraction · algorithmic thinking · algorithm. Read the 3 “I can…” aloud.\n1. (0–5) Starter — “five sticks” (embedded on the slide + starter worksheet). Think–pair–share which shape can be made by moving ONE stick. Pupils WRITE one line on how they checked (minimal writing). Do not reveal the answer — revisit in the plenary.\n2. (5–8) I-do — what is computational thinking? A step-by-step way to solve any problem; three skills. Plain literal definitions on the board.\n3. (8–18) Decomposition + abstraction (I-do → we-do). Decomposition = break a big problem into smaller parts (trip-planning example, stay on the QUESTIONS not the solution). Abstraction = hide details you do not need (Paris street-map image embedded). Likely error: deleting needed detail → fix-words “keep what helps THIS problem.”\n4. (18–40) You-do — the activity worksheet “planning a game”. • Decomposition: CARD-SORT the player actions into Move / Item / Spell. • Abstraction: MULTI-SELECT which map details to keep to test movement (town-map image embedded). • Algorithmic thinking: ORDER the route steps. Support: tick/choose + word-bank. Core: explain choices. Challenge: justify keep/remove. TA: “prompt, do not do it for them.”\n5. (40–50) Plenary — self-tick the 3 “I can…”; revisit “five sticks” using the three skills. Pupils show their plan (📷 screenshot on the worksheet).\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Computational thinking — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computational-thinking-starter-worksheet.md"
+        },
+        {
+          "title": "Computational thinking — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computational-thinking-activity-worksheet.md"
+        },
+        {
+          "title": "Computational thinking — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computational-thinking-slides.md"
+        },
+        {
+          "title": "five sticks starter (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-five-sticks-starter.png"
+        },
+        {
+          "title": "Paris street map — abstraction (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-paris-street-map.png"
+        },
+        {
+          "title": "game town map — abstraction (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-game-town-map.png"
+        }
+      ]
+    },
+    {
+      "title": "Representing algorithms — flowcharts",
+      "objectives": "I can describe the difference between an algorithm and a computer program\nI can name the flowchart symbols and say what each is for\nI can use the flowchart symbols to build a flowchart from a description",
+      "outline": "Routine first. Vocabulary on board: algorithm · computer program · programming language · flowchart · written description. Read the 3 “I can…” aloud.\n1. (0–5) Starter — “building Lego” (image embedded). Why can anyone follow Lego instructions? Pupils CHOOSE the reason (clear, ordered, picture steps). Links to what makes a good algorithm.\n2. (5–12) I-do — algorithm vs computer program (class discussion); the SAME algorithm can be a written description, a flowchart, or code. A human needs less detail than a computer.\n3. (12–20) The flowchart symbols (I-do → we-do). Show the flowchart image; name Start/Stop · Process · Decision · Input/Output; a decision ALWAYS has two ways out. Predict the next part of a worked example through both branches.\n4. (20–45) You-do — the activity worksheet. • LABEL-A-DIAGRAM: drag the symbol names onto the flowchart image. • MATCHING: symbol ↔ its job. • ORDER: the dice-roll algorithm steps (dice image embedded). • Build the dice-roll flowchart in slides/Draw.io and 📷 screenshot it. Support: label + match (recognition). Core: order the steps. Challenge: store + show a score. Likely error: a decision with one exit → fix-words “a decision always has a yes AND a no.” TA: “prompt, do not do it for them.”\n5. (45–50) Plenary — self-tick the 3 “I can…”; peer-check the LOGIC of the flowchart, not the neatness. Homework: change it to odd-or-even.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Representing algorithms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-representing-algorithms-starter-worksheet.md"
+        },
+        {
+          "title": "Representing algorithms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-representing-algorithms-activity-worksheet.md"
+        },
+        {
+          "title": "Representing algorithms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-representing-algorithms-slides.md"
+        },
+        {
+          "title": "Lego instructions starter (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-lego-instructions.png"
+        },
+        {
+          "title": "flowchart symbols to label (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-flowchart-symbols.png"
+        },
+        {
+          "title": "two dice (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-dice.png"
+        }
+      ]
+    },
+    {
+      "title": "Tracing algorithms — trace tables",
+      "objectives": "I can use a trace table to walk through code with a while loop, a for loop and a list\nI can work out modulo (%) and integer division (//) in Python\nI can use a trace table to find and fix a logic error",
+      "outline": "Routine first. Vocabulary on board: trace table · modulo (MOD, %) · integer division (//) · while loop · for loop · list · condition. Read the 3 “I can…” aloud.\n1. (0–10) Starter — “what is the output?” (flowchart image embedded; loops while count < 5). Step through count and total together; pupils CHOOSE the output (10). Predict the next state to gauge understanding.\n2. (10–15) I-do — what a trace table is: it records each variable’s value, line by line. Used to understand an algorithm and to find logic errors.\n3. (15–22) Python maths (we-do): % gives the remainder, // the whole division. 14 % 4 = 2, 28 // 5 = 5 (FILL-BLANK on the starter worksheet). Integer division matters for binary search later.\n4. (22–45) You-do — the activity worksheet. • Task 1: trace the Russian-multiplication code (image embedded), then CHOOSE the printed result (77) and whether it loops forever (no). • Task 2: a “lowest number” program with a logic error — CHOOSE that it finds the highest, and CHOOSE the fix (items[current] < lowest). Complete the trace table in slides/on paper and 📷 screenshot it. Support: recognition MCQs + recap slides. Core: trace one full loop. Challenge: explain WHY the bug gives the highest value. Likely error: guessing instead of tracing → fix-words “trace every row, do not guess.” TA: “prompt, do not do it for them.”\n5. (45–50) Plenary — self-tick the 3 “I can…”; peer-check Task 2 (more than one valid fix). Note who found and fixed the error.\nNote: an interactive trace-table grid is not a built question type — pupils complete the trace in slides/on paper and upload a screenshot (logged in the notes). Differentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Tracing algorithms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-tracing-algorithms-starter-worksheet.md"
+        },
+        {
+          "title": "Tracing algorithms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-tracing-algorithms-activity-worksheet.md"
+        },
+        {
+          "title": "Tracing algorithms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-tracing-algorithms-slides.md"
+        },
+        {
+          "title": "starter flowchart — count loop (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-starter-flowchart.png"
+        },
+        {
+          "title": "Russian multiplication code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-russian-multiplication.png"
+        }
+      ]
+    }
+  ]
+}

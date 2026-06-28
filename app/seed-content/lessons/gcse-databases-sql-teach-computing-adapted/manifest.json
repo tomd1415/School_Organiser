@@ -1,0 +1,226 @@
+{
+  "unitTitle": "GCSE Databases and SQL (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Database essentials — tables, records, fields and keys",
+      "objectives": "I can describe what a database is\nI can name the parts of a database (table, record, field, primary key)\nI can describe a flat file database\nI can describe a relational database and why it is used",
+      "outline": "Routine first (same every lesson). Vocabulary on board: database · table · record · field · primary key · foreign key · redundancy. TA: everyone has the starter worksheet; a copy of dbMusic.db ready in DB Browser for SQLite. Read the 4 “I can…” aloud.\n1. (0–10) Starter — how is data stored? Pupils look at the DVLA vehicle data on the starter worksheet and CHOOSE how it is stored, then label the parts of a music table (drag Table/Field/Record onto A/B/C).\n   • Support: matching — term to meaning.  • Core: recall what a primary key is.  • Challenge: multi-select the properties of a primary key.\n2. (10–20) I-do → we-do — name the parts. Teacher points at a table: field = column, record = row, table = the grid, primary key = the unique field (TrackID). Likely error: “a table is a database” → fix-words “a table lives INSIDE a database.”\n3. (20–30) Flat file vs relational. Show the inefficient flat file (Sara Bibi repeated). Name the problems: data redundancy and data inconsistency. Pupils SORT facts into flat-file vs relational on the activity worksheet.\n   • Support: choose how many tables each has.  • Core: fill the blanks linking primary key to foreign key.  • Challenge: explain redundancy and inconsistency.\n4. (30–50) You-do — explore the DBMS. Play the DB Browser demo video (teacher hook), then pupils open a COPY of dbMusic.db, find the three tables, and screenshot the structure onto the activity worksheet. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names a table/record/field on screen.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Database essentials — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-database-essentials-starter-worksheet.md"
+        },
+        {
+          "title": "Database essentials — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-database-essentials-activity-worksheet.md"
+        },
+        {
+          "title": "Database essentials — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-database-essentials-slides.md"
+        },
+        {
+          "title": "DVLA vehicle details (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-dvla-vehicle-details.png"
+        },
+        {
+          "title": "Music table — key terms (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-table-key-terms.png"
+        },
+        {
+          "title": "DB Browser structure (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-db-browser-structure.png"
+        }
+      ]
+    },
+    {
+      "title": "SQL searches — SELECT, WHERE and ORDER BY",
+      "objectives": "I can describe what SQL is for\nI can use SQL to retrieve data from a table\nI can sort the results with ORDER BY\nI can use SQL to retrieve data from more than one table",
+      "outline": "Routine first. Vocabulary on board: SQL · SELECT · FROM · WHERE · ORDER BY · operator. TA: dbMusic.db open in DB Browser for everyone. Read the 4 “I can…” aloud.\n1. (0–5) Starter — fill in the database words from last lesson on the starter worksheet (database, table, relational, foreign key).\n   • Support: choose the right word.  • Core: define a foreign key.  • Challenge: why a relational database avoids repeated data.\n2. (5–20) I-do → we-do — what is SQL? SELECT (which columns), FROM (which table), WHERE (the condition). Read a query line by line, then live-code it; play the live-coding demo video as the hook. Pupils SORT operators into comparison vs logical.\n3. (20–40) You-do — retrieve data. Pupils write SELECT queries and drag the query lines into order (build the query). Then ORDER BY to sort.\n   • Support: match each comparison operator to its meaning.  • Core: complete and write a WHERE query.  • Challenge: a multi-table query. Likely error: missing speech marks / wrong spelling → fix-words “match the spelling in the table exactly.”\n4. (40–52) Retrieve from more than one table — name columns in SELECT, list tables in FROM, link primary key to foreign key in WHERE (book-shop example image). Second live-coding demo as the hook.\n5. (52–55) Plenary — self-tick the 4 “I can…”; each pupil shows one query that worked.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "SQL searches — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sql-searches-starter-worksheet.md"
+        },
+        {
+          "title": "SQL searches — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sql-searches-activity-worksheet.md"
+        },
+        {
+          "title": "SQL searches — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sql-searches-slides.md"
+        },
+        {
+          "title": "SQL operators (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-sql-operators.png"
+        },
+        {
+          "title": "Book shop relational database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-book-shop-database.png"
+        },
+        {
+          "title": "Multi-table query (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-multi-table-query.png"
+        }
+      ]
+    },
+    {
+      "title": "Insert, update, delete — data types and changing data",
+      "objectives": "I can describe what a data type is and name common ones\nI can choose a suitable data type for a field\nI can write INSERT, UPDATE and DELETE queries\nI can prove a query worked using SELECT",
+      "outline": "Routine first. Vocabulary on board: data type · INTEGER · TEXT · REAL · INSERT · UPDATE · DELETE. TA: dbMusic.db open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — data types. Pupils SORT a doctor-surgery’s fields into INTEGER / TEXT / REAL on the starter worksheet.\n   • Support: choose what an INTEGER/TEXT stores.  • Core: match each data type to what it stores.  • Challenge: why a date of birth is stored as TEXT in SQLite.\n2. (10–25) I-do → we-do — INSERT, UPDATE, DELETE. Worked example of each on the music database. Stress: text needs speech marks; ONE semicolon at the end; always WHERE. Likely error: semicolon on every line → fix-words “one semicolon, at the very end.”\n3. (25–45) You-do — pupils write queries on their music database. First drag the INSERT lines into order, then write an UPDATE (Angry Pete → Happy Pete) and a DELETE.\n   • Support: choose which query adds/removes/changes.  • Core: complete and write an UPDATE/INSERT.  • Challenge: a DELETE plus a SELECT to prove it.\n4. (45–52) Prove it worked — after every change, run a SELECT. Build the habit: change the data, then check it.\n5. (52–55) Plenary — self-tick the 4 “I can…”; each pupil shows one query that worked. TA notes who proved it with a SELECT.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Insert, update, delete — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-insert-update-delete-starter-worksheet.md"
+        },
+        {
+          "title": "Insert, update, delete — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-insert-update-delete-activity-worksheet.md"
+        },
+        {
+          "title": "Insert, update, delete — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-insert-update-delete-slides.md"
+        },
+        {
+          "title": "Music database schema (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-music-database-schema.png"
+        }
+      ]
+    },
+    {
+      "title": "Swim challenge (part 1) — build and interrogate a database",
+      "objectives": "I can identify the primary and foreign keys in linked tables\nI can complete a CREATE TABLE script with the right data types\nI can write SELECT queries to interrogate a database\nI can write UPDATE and DELETE queries to maintain a database",
+      "outline": "Routine first. Vocabulary on board: interrogate · CREATE · primary key · foreign key · one-to-many. TA: dbSwim.db ready in DB Browser; the swim challenge worksheet open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — recap keys and relationships. Pupils SORT the tblLessons fields into primary key / foreign key on the starter worksheet (LessonID is the PK; CourseID + MemberID are FKs).\n   • Support: choose what a primary/foreign key is.  • Core: explain one-to-many.  • Challenge: why a foreign key can repeat but a primary key cannot.\n2. (10–20) Set the scene — a leisure centre needs a database. Two tables already exist; pupils build tblLessons. Drag the plan steps into order (work out keys → CREATE with data types → INSERT → SELECT → UPDATE/DELETE).\n3. (20–50) You-do — the swim challenge. Complete the CREATE script (key fields are INTEGER), INSERT the test data, then SELECT to interrogate. Drag the multi-table SELECT lines into order first.\n   • Support: fill the data type + choose the read-only query.  • Core: write a SELECT for courses with > 6 sessions.  • Challenge: an UPDATE to move Ducklings into Dippers plus a SELECT to prove it. Likely error: forgetting WHERE → fix-words “no WHERE changes EVERY row.” TA: “prompt, do not type it for them.”\n4. (50–55) Plenary — three quick recap questions on mini-whiteboards (unique field? what links tables? which query removes?). Reassure: more time next lesson.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Swim challenge — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-swim-challenge-starter-worksheet.md"
+        },
+        {
+          "title": "Swim challenge — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-swim-challenge-activity-worksheet.md"
+        },
+        {
+          "title": "Swim challenge — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-swim-challenge-slides.md"
+        },
+        {
+          "title": "Swim database schema (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-swim-database-schema.png"
+        },
+        {
+          "title": "tblCourses in DB Browser (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-courses-table.png"
+        },
+        {
+          "title": "Swimmer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-swimmer.png"
+        }
+      ]
+    },
+    {
+      "title": "Swim challenge (part 2) and end-of-unit assessment",
+      "objectives": "I can read an SQL query and predict what it changes\nI can finish and test the swim database\nI can answer exam-style questions on databases and SQL",
+      "outline": "Routine first. Vocabulary on board: predict · interrogate · update · delete. TA: dbSwim.db + the swim challenge worksheet open; the end-of-unit quiz worksheet ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — read the query. Pupils read SQL queries on the starter worksheet and predict what each does to the data.\n   • Support: match each query word to what it does.  • Core: predict what an UPDATE changes.  • Challenge: explain exactly which records a DELETE…BETWEEN removes and why WHERE matters.\n2. (5–30) Finish the swim database — pupils continue the swim challenge tasks 1–4 from last lesson, looking back at earlier lessons for help. Calm independent work. TA: prompt, do not do it for them.\n3. (30–53) Assessment — the end-of-unit quiz worksheet (exam-style). Speed-camera flat-file scenario: choose the primary key + data types, describe a flat-file problem, read a query’s output, then write SELECT / INSERT / UPDATE / DELETE queries. Exam conditions. Fix-words on the board: “text needs speech marks; always WHERE; one semicolon at the end.”\n4. (53–55) End of unit — recap the journey: database → relational database with keys → SQL SELECT/INSERT/UPDATE/DELETE. Self-tick the 3 “I can…”.\nDifferentiation: the starter is on the SAME task at three depths; the quiz is a shared assessment everyone sits. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Swim challenge and assessment — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-swim-challenge-assessment-starter-worksheet.md"
+        },
+        {
+          "title": "End-of-unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-end-of-unit-quiz-worksheet.md"
+        },
+        {
+          "title": "Swim challenge and assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-swim-challenge-assessment-slides.md"
+        },
+        {
+          "title": "Swimmer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-swimmer.png"
+        }
+      ]
+    }
+  ]
+}

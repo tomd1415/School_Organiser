@@ -1,0 +1,205 @@
+{
+  "unitTitle": "GCSE Programming part 1 — sequence (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Translators — how computers understand our code",
+      "objectives": "I can explain that computers need exact, precise instructions\nI can tell the difference between high-level and low-level languages\nI can say why a translator is needed\nI can describe the difference between a compiler and an interpreter",
+      "outline": "Routine first (same every lesson). Vocabulary on board: translator · compiler · interpreter · machine code · high-level · low-level. TA: hand out the starter; one counter per pair for the path activity. Read the four “I can…” aloud.\n1. (0–5) Starter — humans or computers? Pupils DRAG cards into Humans / Computers on the starter worksheet (card-sort, no writing). Think–pair–share.\n   • Support: tick which one only does exactly what it is told.  • Core: write one thing a human can do that a computer cannot.  • Challenge: explain what the off-path sprite tells us. Likely error: “computers are cleverer” → fix-words “a computer only does EXACTLY what it is told, it cannot guess.”\n2. (5–12) I-do — humans vs computers path. Same instructions to a person and a Scratch sprite; the sprite walks off the path because it cannot fill in the missing detail.\n3. (12–32) We-do — lost in translation. Journey from machine code → assembly → high-level languages (Grace Hopper, Fortran). Pupils ORDER the journey on the activity worksheet (order block, drag).\n4. (32–50) You-do — programming languages worksheet. Match the words (Support), fill the CPU gap + say why translators are needed (Core), compare compiler vs interpreter using the cake-recipe analogy (Challenge). TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the four “I can…”; quick true/false recall of key terms. Keep a screenshot/photo of the mind map.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Translators — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-translators-starter-worksheet.md"
+        },
+        {
+          "title": "Translators — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-translators-activity-worksheet.md"
+        },
+        {
+          "title": "Translators — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-translators-slides.md"
+        },
+        {
+          "title": "humans vs computers path (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-humans-vs-computers-path-teach-computing.png"
+        },
+        {
+          "title": "popular programming languages chart (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-popular-languages-chart-teach-computing.jpg"
+        },
+        {
+          "title": "Fortran reference manual (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-fortran-manual-teach-computing.png"
+        },
+        {
+          "title": "compiler vs interpreter recipe (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-compiler-interpreter-recipe-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Sequence — your first Python code",
+      "objectives": "I can name the tools an IDE gives a programmer\nI can run a Python program made of subroutines in sequence\nI can predict what a sequence of code will do\nI can spot and name syntax and logic errors",
+      "outline": "Routine first. Vocabulary on board: IDE · subroutine · sequence · syntax error · logic error. TA: everyone has the Python IDE (Mu or Trinket) open. Read the four “I can…” aloud.\n1. (0–3) Starter — why do we need translators? Recap from last lesson; fill-in-the-gap on the starter worksheet (machine code).\n2. (3–8) I-do — what is an IDE? Colour coding, syntax highlighting, auto-indent, autocomplete, error checking, run in real time.\n3. (8–22) I-do live coding — the welcome() program (a subroutine). Make a syntax error on purpose (delete a colon) then a logic error (do not call welcome()). Optional teacher-played live-coding video.\n4. (22–37) We-do PRIMM — predict the Twinkle program. Only twinkle() is called, so only its lines run.\n   • Support: card-sort syntax vs logic errors.  • Core: what is shown / why the rhyme stops.  • Challenge: Parsons — order the code to sing the whole verse. Likely error: forgetting to call a subroutine → “a subroutine only runs when it is CALLED.”\n5. (37–52) You-do — run, investigate and modify on the activity worksheet; paste a Trinket link + screenshot.\n6. (52–55) Plenary — self-tick the four “I can…”; syntax vs logic error. TA notes who met all four.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Sequence — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sequence-starter-worksheet.md"
+        },
+        {
+          "title": "Sequence — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sequence-activity-worksheet.md"
+        },
+        {
+          "title": "Sequence — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-sequence-slides.md"
+        },
+        {
+          "title": "first Python code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-first-python-code-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Variables — named boxes that hold a value",
+      "objectives": "I can use meaningful names for variables\nI can say why we need variables\nI can explain assignment (giving a variable a value)\nI can print a variable with print()",
+      "outline": "Routine first. Vocabulary on board: variable · assignment · initialisation · declaration · naming convention. TA: the silly-sentences start file is open for each pair. Read the four “I can…” aloud.\n1. (0–5) Starter — which file name is better? Pupils CHOOSE the clearest name (multiple choice, no writing) and say why.\n2. (5–13) I-do — a variable is a named box that holds ONE value at a time. noun = \"Car\" puts \"Car\" in the box.\n3. (13–20) We-do PRIMM — predict the silly sentences program; the same boxes are filled twice. Misconception fix: it only holds the LAST value put in it.\n4. (20–48) You-do — investigate and make on the activity worksheet.\n   • Support: card-sort good vs bad variable names.  • Core: match declaration/initialisation/assignment + fill the gap.  • Challenge: why it does not print “Car Zebra”; what the f-string does. TA: “prompt, do not do it for them.”\n5. (48–55) Plenary — self-tick the four “I can…”; peer-review a partner's silly story (variety of variables? any errors?).\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Variables — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-variables-starter-worksheet.md"
+        },
+        {
+          "title": "Variables — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-variables-activity-worksheet.md"
+        },
+        {
+          "title": "Variables — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-variables-slides.md"
+        },
+        {
+          "title": "silly sentences code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-silly-sentences-code-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Input — adding interactivity and data types",
+      "objectives": "I can use input() to get an answer from the user\nI can name the five data types (integer, real, Boolean, character, string)\nI can use int() or float() to change a data type (casting)\nI can say what a runtime error is",
+      "outline": "Routine first. Vocabulary on board: input · integer · real · Boolean · character · string · casting · runtime error. TA: the silly stories from last lesson are open; the data-collection start file is ready. Read the four “I can…” aloud.\n1. (0–8) Starter — variables recap. Three multiple-choice questions (print syntax, set-before-use, one value at a time) on the starter worksheet.\n2. (8–18) I-do live coding — input() waits for the user and stores what they type. Ask: “how could inputs improve our silly stories?” Optional teacher-played live-coding video.\n3. (18–28) We-do — the five data types and casting. input() ALWAYS gives a string; int()/float() cast it to a number.\n4. (28–48) You-do PRIMM — the mini data collection program on the activity worksheet.\n   • Support: card-sort the values into data types.  • Core: what type input() gives + fill the int() gap.  • Challenge: the runtime error when “nine” is typed for age; what a validation check does. Likely error: typing letters for a number → a runtime error (ValueError) → “wrap input() in int() and check it.”\n5. (48–55) Plenary — self-tick the four “I can…”; recall the five data types. TA notes who met all four.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Input — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-input-starter-worksheet.md"
+        },
+        {
+          "title": "Input — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-input-activity-worksheet.md"
+        },
+        {
+          "title": "Input — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-input-slides.md"
+        },
+        {
+          "title": "data collection code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-data-collection-code-teach-computing.png"
+        }
+      ]
+    },
+    {
+      "title": "Flowcharts — plan a program with shapes",
+      "objectives": "I can name the main flowchart symbols\nI can follow a flowchart and write the code it shows\nI can design a simple flowchart for a program",
+      "outline": "Routine first. Vocabulary on board: flowchart · terminator · subroutine · input · output. TA: Flowgorithm is open on each machine; pairs are set for pair programming. Read the three “I can…” aloud.\n1. (0–5) Starter — what will this flowchart do? Pupils PREDICT the output of the Lesson 2 flowchart (unfamiliar shapes) on the starter worksheet.\n2. (5–10) I-do — the flowchart symbols: terminator (start/end), input/output (parallelogram), process (rectangle), subroutine (rectangle with side bars). Optional teacher-played Flowgorithm demo video.\n3. (10–28) We-do/you-do pair programming — translate the “Susan from Space” chatbot flowchart into Python. Swap driver/navigator every 5 minutes; common-errors list on the worksheet. Likely error: missing int() around a number input.\n4. (28–50) You-do — design a flowchart for the “always 3” mind-reading trick.\n   • Support: match each symbol to its use.  • Core: order the trick steps.  • Challenge: code the first chatbot steps. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the three “I can…”; say what three symbols are used for. TA notes who met all three.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Flowcharts — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-flowcharts-starter-worksheet.md"
+        },
+        {
+          "title": "Flowcharts — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-flowcharts-activity-worksheet.md"
+        },
+        {
+          "title": "Flowcharts — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-flowcharts-slides.md"
+        },
+        {
+          "title": "pair programming (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-pair-programming-teach-computing.png"
+        }
+      ]
+    }
+  ]
+}

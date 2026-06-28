@@ -63,7 +63,21 @@ build detail: [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTAT
 
 > **Validation (2026-06-27):** the whole Year-8 batch (6 units / 36 lessons) converted with **zero new
 > type-gaps** — the four types above covered all the demand the Y7 batch had logged (Y8 used order=15,
-> card-sort=142 items, label=22 zones, slider=10). The backlog is, for now, **empty**.
+> card-sort=142 items, label=22 zones, slider=10). Years 9 + GCSE then surfaced ONE new wanted type (§2.7).
+
+### 2.7 Interactive trace table  — **NOT BUILT**
+- **What.** A fillable GRID where the pupil records how variables change as code runs (line | var1 | var2 |
+  output), each cell auto-marked against the expected trace. Today these are done as a screenshot
+  show-your-work or broken into separate fill-blank cells.
+- **Why.** Tracing is a core GCSE/KS3 programming skill (OCR J277, "trace tables"); a real grid that
+  auto-marks would save a lot of teacher marking and give pupils immediate feedback.
+- **Example.** Trace `for i in range(3): total = total + i` — rows for each iteration, columns `i`, `total`.
+- **Wants it:** **GCSE Algorithms 1** (tracing), **GCSE Programming 3 — iteration** (loop traces), GCSE
+  Programming 2 (selection traces), KS3 Y8 Scratch / Python traces. (Stop-gapped with screenshot + fill-blank.)
+- **Likely build.** Extend the existing trace/truth-table grid render (`isGrid` in `worksheetForm.ts` already
+  makes ≥3-col answer tables compact-input grids) with per-cell expected values + a `trace` block syntax, then
+  mark each cell `exact`/`numeric`. The storage is already per-cell `t{n}.r{n}.c{n}` text — so, like the
+  others, **no storage change**; it's a marking-scheme + authoring-syntax addition.
 
 ### 2.3 Order / sequence (non-code)  — **BUILT 2026-06-27 (see §1)**
 - **What.** Drag plain-text steps into the right order (Parsons but for **words/steps**, not code).
