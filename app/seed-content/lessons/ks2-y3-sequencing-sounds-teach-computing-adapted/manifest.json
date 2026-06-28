@@ -1,0 +1,79 @@
+{
+  "unitTitle": "KS2 Y3 Sequencing sounds (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Introduction to Scratch",
+      "objectives": "I can find the three main areas of the Scratch screen\nI can name a sprite and the stage\nI can place a block and run it\nI can add a new sprite",
+      "outline": "Routine first (same every lesson). Vocabulary on the board: Scratch · block · command · sprite · stage · backdrop. TA: everyone has the starter worksheet; a device open at scratch.mit.edu. Read the four “I can…” aloud.\n1. (0–10) Starter — what is Scratch? Pupils have used Bee-Bot and ScratchJr before. On the starter worksheet they CHOOSE which things are true about Scratch and match a word to its meaning (block, sprite, stage). Show the Bee-Bot photo next to the Scratch screen: both follow commands.\n2. (10–20) I-do → we-do — the Scratch screen. Point to the three areas: the blocks palette (left), the code area (middle), the stage with the sprite (right). Pupils LABEL the screen on the activity worksheet (drag Blocks / Code area / Stage). Likely error: calling the cat “the stage” → fix-words “the cat is the SPRITE; the stage is the white box it stands on.”\n3. (20–40) You-do — place a block and run it. Drag a move block to the code area, click it to run. Try turn and point in direction. Return each block to the palette after. TA: prompt, do not do it for them.\n4. (40–50) Add a sprite. Show the add-sprite button; pupils add one new sprite, then screenshot their screen onto the activity worksheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil points to the blocks, the code area and the stage on screen.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Introduction to Scratch — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-scratch-starter-worksheet.md" },
+        { "title": "Introduction to Scratch — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-scratch-activity-worksheet.md" },
+        { "title": "Introduction to Scratch — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-scratch-slides.md" },
+        { "title": "The Scratch screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-scratch-screen.png" },
+        { "title": "Bee-Bot top (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-beebot-top.png" }
+      ]
+    },
+    {
+      "title": "Programming sprites",
+      "objectives": "I can choose blocks to make a sprite move\nI can predict which block moved a sprite\nI can match a motion block to what it does\nI can program more than one sprite",
+      "outline": "Routine first. Vocabulary on the board: sprite · motion · turn · point in direction · go to · glide. TA: everyone has the starter worksheet; Scratch open. Read the four “I can…” aloud.\n1. (0–10) Starter — which block moved the cat? Show the start and end of a short move on the starter worksheet. Pupils TICK ALL the blocks that could have moved the cat (more than one can be right).\n2. (10–25) I-do → we-do — one block, one outcome. Each block does one thing: move steps, turn, point in direction, go to, glide. Show the separate motion blocks image. Likely error: thinking turn moves the sprite to a new place → fix-words “turn changes the way it FACES, not where it is.”\n3. (25–45) You-do — match and program. On the activity worksheet pupils MATCH each motion block to what it does, then add blocks to TWO sprites so each moves its own way. A block only controls its own sprite. Screenshot the project.\n   • Support: match block ↔ action.  • Core: predict the block used.  • Challenge: explain why a block only moves its own sprite.\n4. (45–52) Predict — show a sprite that has moved; pupils choose the block(s) used. Run it to check.\n5. (52–55) Plenary — self-tick the four “I can…”; each pupil names one motion block and what it does.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Programming sprites — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-sprites-starter-worksheet.md" },
+        { "title": "Programming sprites — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-sprites-activity-worksheet.md" },
+        { "title": "Programming sprites — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-programming-sprites-slides.md" },
+        { "title": "Motion blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-which-blocks.png" }
+      ]
+    },
+    {
+      "title": "Sequences",
+      "objectives": "I can explain that a program has a start\nI can name three event blocks that start a program\nI can join blocks into a sequence\nI can build a project from a design",
+      "outline": "Routine first. Vocabulary on the board: sequence · event · start · run the code · design. TA: everyone has the starter worksheet; Scratch open. Read the four “I can…” aloud.\n1. (0–10) Starter — joined or not joined? Show separate blocks next to joined blocks on the starter worksheet. Pupils CHOOSE which set is a sequence and why (joined blocks run one after another from one click).\n2. (10–22) I-do → we-do — events start a program. Show the three event blocks (when flag clicked, when sprite clicked, when key pressed). Pupils MATCH each event to what makes it happen. Likely error: forgetting an event so nothing runs → fix-words “every script needs an event hat to start it.”\n3. (22–45) You-do — build from a design. On the activity worksheet pupils plan three sprites (an event + a movement each), then build it in Scratch and run it. If it does not work, debug. Screenshot the project.\n   • Support: choose an event for each sprite.  • Core: write the event + movement for each.  • Challenge: explain what “run the code” does and how they checked it.\n4. (45–52) Sequences are everywhere — order the steps of getting ready in the morning (a real-world sequence).\n5. (52–55) Plenary — self-tick the four “I can…”; each pupil names one event block.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Sequences — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sequences-starter-worksheet.md" },
+        { "title": "Sequences — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sequences-activity-worksheet.md" },
+        { "title": "Sequences — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sequences-slides.md" },
+        { "title": "Joined blocks make a sequence (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-joined-blocks.png" },
+        { "title": "Three event blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-event-blocks.png" }
+      ]
+    },
+    {
+      "title": "Ordering commands",
+      "objectives": "I can choose a sound block to play notes\nI can explain that the order of notes changes the tune\nI can order sound blocks to play a tune\nI can play notes together to make a chord",
+      "outline": "Routine first. Vocabulary on the board: sequence · order · note · chord · play sound until done · start sound. TA: everyone has the starter worksheet; Scratch open with sound; headphones optional. Read the four “I can…” aloud.\n1. (0–10) Starter — two sound blocks. Show “play sound until done” and “start sound”. Pupils CHOOSE which one plays notes one after another (a tune) and which plays them together (a chord).\n2. (10–22) I-do → we-do — order matters for a tune. Use “play sound until done” blocks; the order of the notes is the tune. Show the note sequence. Likely error: using “start sound” for a tune so all notes play at once → fix-words “use play sound UNTIL DONE so each note waits its turn.”\n3. (22–45) You-do — order a tune, then make a chord. On the activity worksheet pupils ORDER the sound blocks to play a known tune, build it in Scratch, then swap to “start sound” to play three notes together as a chord. Screenshot the project.\n   • Support: order three notes.  • Core: order the tune and say why order matters.  • Challenge: explain why a chord uses “start sound”.\n4. (45–52) Test it — does it sound right? If not, check the order, then run again.\n5. (52–55) Plenary — self-tick the four “I can…”; each pupil plays their tune or chord.\nDifferentiation on the SAME task; no flashing; sound is part of the task (headphones if needed); movement breaks are routine.",
+      "resources": [
+        { "title": "Ordering commands — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ordering-commands-starter-worksheet.md" },
+        { "title": "Ordering commands — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ordering-commands-activity-worksheet.md" },
+        { "title": "Ordering commands — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ordering-commands-slides.md" },
+        { "title": "Start sound vs play until done (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-sound-blocks.png" },
+        { "title": "A tune made of sound blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-tune-sequence.png" }
+      ]
+    },
+    {
+      "title": "Looking good",
+      "objectives": "I can build a sequence with motion and sound together\nI can change a sprite using costumes\nI can change the stage using backdrops\nI can make design choices for my project",
+      "outline": "Routine first. Vocabulary on the board: sprite · stage · costume · backdrop · sequence. TA: everyone has the starter worksheet; Scratch open. Read the four “I can…” aloud.\n1. (0–10) Starter — predict the sequence. Show a sequence with a move block and a sound block on the starter worksheet. Pupils PREDICT what the sprite will do, then sort the words costume / backdrop / sprite / stage onto where they belong.\n2. (10–22) I-do → we-do — costumes and backdrops. A costume changes how the SPRITE looks; a backdrop changes the STAGE. Likely error: mixing up costume and backdrop → fix-words “costume = the sprite’s clothes; backdrop = the room behind it.”\n3. (22–48) You-do — design your project. On the activity worksheet pupils plan three sprites (sound + movement + a look change) and a backdrop, then build it in Scratch. Screenshot the project.\n   • Support: choose a costume and a backdrop from a list.  • Core: write what each sprite does and changes.  • Challenge: explain one design choice they made and why.\n4. (48–52) Share — show a partner and say one thing you designed.\n5. (52–55) Plenary — self-tick the four “I can…”.\nDifferentiation on the SAME task; no flashing; sound is part of the task; movement breaks are routine.",
+      "resources": [
+        { "title": "Looking good — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-looking-good-starter-worksheet.md" },
+        { "title": "Looking good — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-looking-good-activity-worksheet.md" },
+        { "title": "Looking good — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-looking-good-slides.md" },
+        { "title": "Motion blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-motion-blocks.png" }
+      ]
+    },
+    {
+      "title": "Making an instrument",
+      "objectives": "I can name the objects I need for a project\nI can turn a task into a design\nI can write an algorithm and build it as code\nI can find and fix a bug (debug)",
+      "outline": "Routine first. Vocabulary on the board: design · algorithm · bug · debug · object. TA: everyone has the starter worksheet; the instrument template project open. Read the four “I can…” aloud.\n1. (0–10) Starter — what do I need? To build an instrument I need a sprite for each note, each with a sound. On the starter worksheet pupils fill the blanks and choose useful sprite names (Note A, Note B …).\n2. (10–22) I-do → we-do — task → design → code → run. An algorithm is a precise set of ordered steps. Plan one key: an event, a sound, a look change. Likely error: code that does the wrong thing → fix-words “a bug is a mistake in the code; debug = find it and fix it.”\n3. (22–48) You-do — make your instrument. On the activity worksheet pupils order the build steps, write the algorithm for one key, build it, test it and DEBUG, then copy the code to the other keys. Screenshot the finished instrument.\n   • Support: order the build steps.  • Core: write the algorithm for one key.  • Challenge: describe a bug they found and how they fixed it.\n4. (48–52) Showcase — play your instrument to a partner.\n5. (52–55) Plenary — self-tick the four “I can…”; recap the unit: sprite → sequence → events → sound → design.\nDifferentiation on the SAME task; no flashing; sound is part of the task; movement breaks are routine.",
+      "resources": [
+        { "title": "Making an instrument — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-an-instrument-starter-worksheet.md" },
+        { "title": "Making an instrument — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-an-instrument-activity-worksheet.md" },
+        { "title": "Making an instrument — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-an-instrument-slides.md" },
+        { "title": "Motion block bank (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-block-bank.png" },
+        { "title": "A bug (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-bug.png" }
+      ]
+    }
+  ]
+}
