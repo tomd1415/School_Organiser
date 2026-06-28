@@ -15,6 +15,9 @@ export interface QRow {
   kind: 'text' | 'screenshot' | 'choice' | 'multichoice' | 'scale';
   options?: string[];
   scale?: { min: number; max: number; minLabel?: string; maxLabel?: string };
+  // The teacher's correct/model answer (choice → one option; multichoice → the correct set). Editor-only:
+  // it is NEVER serialised into the pupil worksheet Markdown — it's written to the mark scheme on save.
+  answer?: string | string[];
 }
 
 export type Block =
@@ -39,6 +42,7 @@ export const blockSchema: z.ZodType<Block> = z.union([
         kind: z.enum(['text', 'screenshot', 'choice', 'multichoice', 'scale']),
         options: z.array(z.string()).optional(),
         scale: z.object({ min: z.number(), max: z.number(), minLabel: z.string().optional(), maxLabel: z.string().optional() }).optional(),
+        answer: z.union([z.string(), z.array(z.string())]).optional(),
       }),
     ),
   }),

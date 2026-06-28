@@ -2179,3 +2179,8 @@ html[data-textscale="3"] { font-size: 142%; }
 .ws-adjust-preview { max-height: 50vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem; margin: 0.4rem 0; }
 .ws-adjust-apply { display: flex; gap: 0.5rem; align-items: center; }
 .ws-adjust-msg { margin: 0.3rem 0; }
+
+/* The "mark correct answer" toggle in the worksheet editor (noted_bugs.md #5 Gap B). */
+.ws-ed-correct { font: inherit; line-height: 1; border: 1px solid var(--line); background: var(--card); border-radius: 6px; cursor: pointer; padding: 0.1rem 0.35rem; color: var(--muted); }
+.ws-ed-correct:hover { border-color: var(--accent); }
+.ws-ed-correct.is-correct { color: var(--good, #2e7d32); border-color: var(--good, #2e7d32); font-weight: 700; }

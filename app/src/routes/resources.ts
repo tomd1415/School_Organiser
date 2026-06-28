@@ -23,6 +23,8 @@ import { renderMarkdown } from '../lib/markdown';
 import { splitTeacherNotes } from '../lib/slideDeck';
 import { renderWorksheet, sliceWorksheetMarkdown, type Level } from '../lib/worksheetForm';
 import { parseBlocks, serialiseBlocks, blocksSchema } from '../lib/worksheetBlocks';
+import { choiceAnswerPoints, choiceAnswersInOrder } from '../lib/worksheetAnswers';
+import { upsertScheme, getScheme } from '../repos/marking';
 import { proposeAdjustment, applyAdjustment } from '../services/adjustArtefact';
 import { markdownToDocx } from '../lib/docx';
 import { convertToPdf } from '../lib/officePreview';
@@ -495,10 +497,38 @@ export function registerResourceRoutes(app: FastifyInstance): void {
     const parsed = blocksSchema.safeParse((req.body as { blocks?: unknown })?.blocks);
     if (!parsed.success) return reply.code(400).type('application/json').send(JSON.stringify({ error: 'bad blocks' }));
     const nextNo = (r.versionNo ?? 0) + 1;
-    const buf = Buffer.from(serialiseBlocks(parsed.data), 'utf8');
+    const markdown = serialiseBlocks(parsed.data);
+    const buf = Buffer.from(markdown, 'utf8');
     const rel = relPathFor(id.data.id, nextNo, r.title);
     await withStagedFile(rel, buf, () => addVersion(id.data.id, rel, buf.length, checksum(buf), 'teacher', 'edited in browser (blocks)'));
-    return reply.type('application/json').send(JSON.stringify({ ok: true, version: nextNo }));
+    // Gap B: persist the teacher's choice/multi-select model answers to this version's mark scheme. Aligned
+    // by document order; choiceAnswerPoints returns null if a stray choice cell breaks alignment (then we
+    // write no scheme rather than a wrong one). The answer is never in the pupil Markdown (serialise drops it).
+    let answersSaved = 0;
+    if (r.kind === 'worksheet') {
+      const cp = choiceAnswerPoints(markdown, parsed.data);
+      if (cp && cp.length) {
+        await upsertScheme(id.data.id, nextNo, 'teacher', 'ready', cp.map((p) => ({ fieldKey: p.fieldKey, kind: p.kind, expected: p.expected, alternatives: [], marks: 1, required: false })));
+        answersSaved = cp.length;
+      }
+    }
+    return reply.type('application/json').send(JSON.stringify({ ok: true, version: nextNo, answersSaved }));
+  });
+
+  // Gap B: the choice/multi-select model answers (expected per choice field, in document order) so the editor
+  // can show them when it loads. Worksheet only; empty list otherwise.
+  app.get('/resources/:id/scheme', { preHandler: requireAuth }, async (req, reply) => {
+    const id = idParam.safeParse(req.params);
+    if (!id.success) return reply.code(400).send('');
+    const [r, v] = await Promise.all([getResource(id.data.id), getCurrentVersion(id.data.id)]);
+    if (!r || !v) return reply.code(404).send('');
+    if (r.kind !== 'worksheet') return reply.type('application/json').send(JSON.stringify({ answers: [] }));
+    const sch = await getScheme(id.data.id, v.versionNo);
+    const expectedByKey: Record<string, string> = {};
+    if (sch) for (const p of sch.points) if (p.kind === 'choice' || p.kind === 'multichoice') expectedByKey[p.fieldKey] = p.expected;
+    let md = '';
+    try { md = (await readStored(v.storagePath)).toString('utf8'); } catch { /* missing file → no answers */ }
+    return reply.type('application/json').send(JSON.stringify({ answers: md ? choiceAnswersInOrder(md, expectedByKey) : [] }));
   });
 
   // "Adjust with AI" — step 1: generate an improved version (saves nothing) and show it for approval.

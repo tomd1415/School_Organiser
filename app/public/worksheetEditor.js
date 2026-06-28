@@ -166,14 +166,25 @@
     // Single-choice (pick ONE) or multi-select (tick SEVERAL): an option list. The correct answer goes in
     // the mark scheme, not the pupil-facing worksheet, so there's no "mark correct" control here.
     if (b.rows[k].kind === 'choice' || b.rows[k].kind === 'multichoice') {
-      var mark = b.rows[k].kind === 'multichoice' ? '☐' : '○';
+      var isMulti = b.rows[k].kind === 'multichoice';
       var opts = el('div', 'ws-ed-opts');
+      var isCorrect = function (t) { var a = b.rows[k].answer; return isMulti ? (Array.isArray(a) && a.indexOf(t) >= 0) : (a === t); };
       (b.rows[k].options || []).forEach(function (o, oi) {
         var orow = el('div', 'ws-ed-optrow');
-        orow.appendChild(el('span', 'ws-ed-optmark', mark));
+        // The mark is now a TOGGLE: click it to set this option as a correct answer (stored in the mark
+        // scheme on save — pupils never see it). choice = pick one; multi-select = tick several.
+        var cm = el('button', 'ws-ed-correct' + (isCorrect(b.rows[k].options[oi]) ? ' is-correct' : ''), isCorrect(b.rows[k].options[oi]) ? (isMulti ? '☑' : '◉') : (isMulti ? '☐' : '○'));
+        cm.type = 'button'; cm.title = 'Mark this as a correct answer (pupils never see it)';
+        cm.addEventListener('click', function () {
+          var t = b.rows[k].options[oi]; var r = b.rows[k];
+          if (isMulti) { if (!Array.isArray(r.answer)) r.answer = []; var ix = r.answer.indexOf(t); if (ix >= 0) r.answer.splice(ix, 1); else r.answer.push(t); }
+          else { r.answer = (r.answer === t) ? undefined : t; }
+          render(); markDirty();
+        });
+        orow.appendChild(cm);
         orow.appendChild(inputFor(function () { return b.rows[k].options[oi]; }, function (v) { b.rows[k].options[oi] = v; }, 'option ' + (oi + 1)));
         var orm = el('button', 'link ws-ed-rm', '✕'); orm.type = 'button';
-        orm.addEventListener('click', function () { b.rows[k].options.splice(oi, 1); render(); markDirty(); });
+        orm.addEventListener('click', function () { b.rows[k].options.splice(oi, 1); if (Array.isArray(b.rows[k].answer)) b.rows[k].answer.splice(b.rows[k].answer.indexOf(o), 1); render(); markDirty(); });
         orow.appendChild(orm);
         opts.appendChild(orow);
       });
@@ -310,7 +321,7 @@
     setStatus('saving…');
     fetch('/resources/' + RES + '/edit-blocks', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': CSRF }, body: JSON.stringify({ blocks: blocks }), credentials: 'same-origin' })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (d) { dirty = false; setStatus('saved ✓ — now v' + d.version); })
+      .then(function (d) { dirty = false; setStatus('saved ✓ — now v' + d.version + (d.answersSaved ? ' · ' + d.answersSaved + ' answer' + (d.answersSaved === 1 ? '' : 's') + ' saved' : '')); })
       .catch(function () { setStatus('could not save — try again'); });
   });
 
@@ -328,4 +339,21 @@
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
   render();
+
+  // Gap B: load the saved choice/multi-select model answers and attach them to the choice rows in document
+  // order (the server returns them in the same order). Worksheet only; the route gives [] otherwise.
+  fetch('/resources/' + RES + '/scheme', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !d.answers || !d.answers.length) return;
+      var i = 0, changed = false;
+      blocks.forEach(function (b) { if (b.type === 'qtable') (b.rows || []).forEach(function (row) {
+        if (row.kind === 'choice' || row.kind === 'multichoice') {
+          var exp = d.answers[i++];
+          if (exp != null && exp !== '') { row.answer = row.kind === 'multichoice' ? String(exp).split(/\s*,\s*/) : exp; changed = true; }
+        }
+      }); });
+      if (changed) render();
+    })
+    .catch(function () {});
 })();
