@@ -456,15 +456,21 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .sch-cog > summary::-webkit-details-marker { display: none; }
 .sch-cog[open] .scheme-controls { display: block; margin-top: 0.5rem; }
 
-.sch-spine { display: grid; grid-template-columns: 248px 1fr; gap: 16px; align-items: start; margin: 1rem 0; }
-.sch-units { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.sch-spine { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; margin: 1rem 0; }
+/* The unit navigator scrolls within itself (sticky) so long schemes don't scroll the whole page — bug #2. */
+.sch-units { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; position: sticky; top: 12px; max-height: calc(100vh - 90px); overflow-y: auto; }
 .sch-units-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
 .sch-units-cap { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); }
 .sch-unit-btn { display: block; width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 9px 11px; margin-bottom: 4px; cursor: pointer; font: inherit; color: inherit; }
 .sch-unit-btn:hover { border-color: var(--line); }
 .sch-unit-btn.active { background: var(--accent-soft); border-color: var(--accent); }
-.sch-unit-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.sch-unit-name { font-weight: 700; font-size: 0.92rem; }
+.sch-unit-row { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.sch-unit-num { font-weight: 700; font-size: 0.85rem; color: var(--muted); flex: none; }
+/* Let the unit name use the room (wrap rather than truncate) so long titles are readable — bug #2/#3. */
+.sch-unit-name { font-weight: 700; font-size: 0.92rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+/* In the unit panel: a non-editable "Unit N" badge, and a comfortably wide title input — bug #2/#3. */
+.unit-num { font-weight: 700; font-size: 0.82rem; color: var(--muted); white-space: nowrap; flex: none; padding: 1px 7px; border: 1px solid var(--line); border-radius: 999px; }
+.row-head input.unit-title { min-width: 16rem; }
 .sch-unit-pct { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
 .sch-unit-count { display: block; font-size: 0.75rem; color: var(--muted); margin: 2px 0 7px; }
 .sch-unit-bar { display: block; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }

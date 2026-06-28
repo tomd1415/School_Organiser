@@ -174,10 +174,13 @@ export function renderPlan(p: PlanRow, opts: { open?: boolean; draftStatus?: str
   </li>`;
 }
 
-function renderUnit(u: UnitWithPlans, openReviews: ReadonlySet<number>, activeJobs: ReadonlyMap<number, ResourceJob> = new Map()): string {
+function renderUnit(u: UnitWithPlans, num: number, openReviews: ReadonlySet<number>, activeJobs: ReadonlyMap<number, ResourceJob> = new Map()): string {
   const save = (t: string) => `hx-post="${paths.schemesUnit(u.id)}" hx-swap="none" hx-trigger="${t}"`;
+  // The unit NUMBER is presentation only (the unit's position) — never folded into the editable title value,
+  // so the stored title stays clean and the number tracks reordering (▲▼). See docs/noted_bugs.md #3.
   return `<section class="unit" id="unit-${u.id}">
     <div class="row-head">
+      <span class="unit-num" title="Unit number (position in the scheme)">Unit ${num}</span>
       <input class="unit-title" type="text" name="title" value="${esc(u.title)}" placeholder="Unit…" ${save('input changed delay:600ms, blur')}>
       <span class="note-status" id="unit-${u.id}-status"></span>
       ${rowActions('unit', u.id, 'Delete this unit and its plans?')}
@@ -264,14 +267,14 @@ export function renderSchemeTree(
       const pct = unitPlannedPct(u);
       const n = u.plans.length;
       return `<button type="button" class="sch-unit-btn${i === 0 ? ' active' : ''}" data-unit="${u.id}" onclick="${select(u.id)}">
-        <span class="sch-unit-row"><span class="sch-unit-name">${esc(u.title || 'Untitled unit')}</span><span class="sch-unit-pct">${pct}%</span></span>
+        <span class="sch-unit-row"><span class="sch-unit-num">${i + 1}.</span><span class="sch-unit-name">${esc(u.title || 'Untitled unit')}</span><span class="sch-unit-pct">${pct}%</span></span>
         <span class="sch-unit-count">${n} lesson${n === 1 ? '' : 's'}</span>
         <span class="sch-unit-bar"><span style="width:${pct}%"></span></span>
       </button>`;
     })
     .join('');
   const panels = tree
-    .map((u, i) => `<div class="sch-unit-panel" data-unit="${u.id}"${i === 0 ? '' : ' hidden'}>${renderUnit(u, openReviews, activeJobs)}</div>`)
+    .map((u, i) => `<div class="sch-unit-panel" data-unit="${u.id}"${i === 0 ? '' : ' hidden'}>${renderUnit(u, i + 1, openReviews, activeJobs)}</div>`)
     .join('');
   return `<div id="scheme-tree" class="sch-spine">
     <aside class="sch-units">
