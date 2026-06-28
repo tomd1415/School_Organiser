@@ -1,0 +1,90 @@
+{
+  "unitTitle": "KS1 Y2 Digital photography (Teach Computing — adapted)",
+  "course": {
+    "name": "KS1 Computing",
+    "keyStage": "KS1"
+  },
+  "lessons": [
+    {
+      "title": "Taking photographs",
+      "objectives": "I can name devices that can take photographs\nI can hold a device to take a photograph\nI can take a photograph with a digital device\nI can say what I did to take my photograph",
+      "outline": "Routine first (same every lesson). Vocabulary on the board: device · camera · photograph · capture · image · digital. TA: everyone has the starter worksheet; devices ready (tablet / camera if available). Read the four \"I can…\" aloud.\n1. (0–8) Starter — can these take photos? On the starter worksheet pupils SORT devices into \"can take photos / cannot take photos\". A device needs a camera to take a photo.\n   • Support: choose the one that can take a photo.  • Core: a device that takes photos must have a camera.  • Challenge: name a device in the room that can take a photo.\n2. (8–18) I-do — photograph vs drawing; a photograph is captured with a camera. Then the three steps: Hold · Look · Press. Likely error: not looking at the screen in the excitement → fix-words \"look first, then press.\"\n3. (18–35) You-do — on the activity worksheet pupils ORDER the three steps, then do the photo challenge (a building, a close-up, something far away, a selfie). Always ask before photographing a person; check the background.\n4. (35–50) We-do — pupils choose their best photo and photograph/screenshot it for show-your-work.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says one thing they did to take their photo.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Taking photographs — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-taking-photographs-starter-worksheet.md" },
+        { "title": "Taking photographs — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-taking-photographs-activity-worksheet.md" },
+        { "title": "Taking photographs — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-taking-photographs-slides.md" },
+        { "title": "A laptop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-laptop.png" },
+        { "title": "A tablet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-tablet.png" },
+        { "title": "A printer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-printer.png" },
+        { "title": "A photographer taking a photo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-photographer.png" }
+      ]
+    },
+    {
+      "title": "Landscape or portrait?",
+      "objectives": "I can say what portrait and landscape mean\nI can take a photo in portrait format\nI can take a photo in landscape format\nI can say why a photo looks better one way",
+      "outline": "Routine first. Vocabulary on the board: landscape · portrait. TA: everyone has the starter worksheet; devices ready. Recap: hold · look · press. Read the four \"I can…\" aloud.\n1. (0–8) Starter — two ways to hold the device. On the starter worksheet pupils learn portrait (upright, taller than wide) and landscape (sideways, wider than tall) and choose which is which.\n   • Support: choose which is held upright.  • Core: a landscape photo is wider than tall.  • Challenge: when would you hold it sideways?\n2. (8–25) I-do → we-do — portrait suits tall things (a person, a tower); landscape suits wide things (a beach, mountains, a group). On the activity worksheet pupils SORT subjects into portrait / landscape. Likely error: mixing the words → fix-words \"portrait = a person standing up, tall.\"\n3. (25–45) You-do — choose a subject, PREDICT the best format, take it both ways, decide which is best (delete the weaker one). Ask before photographing a person.\n4. (45–50) We-do — pupils photograph/screenshot their best photo for show-your-work and say which format won.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says why their photo is better that way.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Landscape or portrait? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-landscape-or-portrait-starter-worksheet.md" },
+        { "title": "Landscape or portrait? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-landscape-or-portrait-activity-worksheet.md" },
+        { "title": "Landscape or portrait? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-landscape-or-portrait-slides.md" },
+        { "title": "Holding a device upright and sideways (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-holding-portrait-landscape.png" },
+        { "title": "A tall tower in portrait format (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-tower-portrait.jpg" },
+        { "title": "A wide view in landscape format (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-arches-landscape.png" }
+      ]
+    },
+    {
+      "title": "What makes a good photograph?",
+      "objectives": "I can spot what is wrong with a photo\nI can say how to take a good photo\nI can take a well-composed photo\nI can improve a photo by taking it again",
+      "outline": "Routine first. Vocabulary on the board: framing · subject · compose. TA: everyone has the starter worksheet; devices and the Paper frame ready. Recap: portrait and landscape. Read the four \"I can…\" aloud.\n1. (0–8) Starter — which photos need improving? On the starter worksheet pupils SORT photos into good / needs improving (too close, too far, blurry).\n   • Support: choose the good photo.  • Core: say why the goat photo is not good.  • Challenge: name one thing that makes a photo hard to see.\n2. (8–20) I-do — three things to check: positioning, framing, detail. Likely error: cutting off part of the subject → fix-words \"fit the whole thing in the frame.\"\n3. (20–40) You-do — on the activity worksheet pupils ORDER the steps to compose a photo, then take a display, a window view and some pencils, and rate each one.\n4. (40–50) We-do — pupils choose their lowest-rated photo, take it again better, and photograph/screenshot the improved one.\n5. (50–55) Plenary — self-tick the four \"I can…\"; pairs share a before/after and say what changed.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "What makes a good photograph? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-good-photograph-starter-worksheet.md" },
+        { "title": "What makes a good photograph? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-good-photograph-activity-worksheet.md" },
+        { "title": "What makes a good photograph? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-good-photograph-slides.md" },
+        { "title": "A clear photo of a butterfly (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-butterfly-clear.png" },
+        { "title": "A goat photo taken far too close (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-goat-tooclose.png" },
+        { "title": "A butterfly too far away to see (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-butterfly-far.png" },
+        { "title": "A clear, well-composed beach photo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-beach-good.png" }
+      ]
+    },
+    {
+      "title": "Lighting",
+      "objectives": "I can see how light changes a photo\nI can find a place with good light\nI can use a different light source\nI can say why a photo is unclear",
+      "outline": "Routine first. Vocabulary on the board: light source · flash · focus · background. TA: everyone has the starter worksheet; devices and a torch/lamp ready, auto-flash off. Recap: positioning, framing, detail. Read the four \"I can…\" aloud.\n1. (0–8) Starter — keep or delete? On the starter worksheet pupils SORT photos into keep (good light) / delete (too dark).\n   • Support: choose the photo to keep.  • Core: a photo is hard to see when there is not enough light.  • Challenge: why might a photo turn out too dark?\n2. (8–22) I-do → we-do — cameras need enough light; check the light before you press. Pupils photograph the SAME object in different places and rate how clear each is (windowsill, under a table, the hall). Likely error: changing the object too → fix-words \"same object, only the light changes.\"\n3. (22–42) You-do — add a light source. On the activity worksheet pupils ORDER the steps to fix a dark photo (torch or flash), then try it. Likely error: covering the flash with a finger → fix-words \"keep fingers away from the flash.\"\n4. (42–50) We-do — pupils photograph/screenshot their clearest photo and say which place was best.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names one way to fix a dark photo.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Lighting — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-lighting-starter-worksheet.md" },
+        { "title": "Lighting — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-lighting-activity-worksheet.md" },
+        { "title": "Lighting — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-lighting-slides.md" },
+        { "title": "A bright, clear photo of a tree (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-bright-tree.png" },
+        { "title": "A photo that is too dark (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-dark-desk.jpg" },
+        { "title": "A clear, well-lit photo of food (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-salad-bright.png" }
+      ]
+    },
+    {
+      "title": "Effects",
+      "objectives": "I can see that a photo can be changed\nI can use a tool to change the colour\nI can save my edited photo with a clear name\nI can explain my choice",
+      "outline": "Routine first. Vocabulary on the board: editing · filter. TA: everyone has the starter worksheet; the photo editor open with a photo to edit. Recap: lighting and clear photos. Read the four \"I can…\" aloud.\n1. (0–8) Starter — the same photo, changed. On the starter worksheet pupils MATCH a colour effect to how it feels (blue tint = cold, red tint = warm). Editing = changing a photo on a computer.\n   • Support: can a photo be changed? yes/no.  • Core: changing a photo on a computer is called editing.  • Challenge: what colour effect makes a photo feel warm?\n2. (8–18) I-do — open the photo, find the Adjust tools, move a colour slider. Likely error: dragging every slider at once → fix-words \"one slider, then look.\"\n3. (18–38) You-do — on the activity worksheet pupils ORDER the steps to edit and save, then change the colour of their own photo.\n4. (38–50) We-do — Save as a copy with a clear name; pupils photograph/screenshot their edited photo. Likely error: overwriting the original → fix-words \"Save as a copy, not Save.\"\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says what they changed and why.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Effects — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-effects-starter-worksheet.md" },
+        { "title": "Effects — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-effects-activity-worksheet.md" },
+        { "title": "Effects — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-effects-slides.md" },
+        { "title": "A dog photo with normal colours (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-dog-original.jpg" },
+        { "title": "The same dog with a blue tint (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-dog-blue.jpg" },
+        { "title": "The same dog with a red tint (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-dog-red.jpg" },
+        { "title": "The photo editor with a picture open (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-editor-screenshot.png" }
+      ]
+    },
+    {
+      "title": "Is it real?",
+      "objectives": "I can use my photo skills to take a good photo\nI can see that photos can be changed\nI can spot clues that a photo has been changed\nI can decide if a photo is real or changed",
+      "outline": "Routine first. Vocabulary on the board: format · framing · lighting · focus · filter. TA: everyone has the starter worksheet; devices and the Paper frame ready. This is the last lesson — recap the whole unit. Read the four \"I can…\" aloud.\n1. (0–8) Starter — remember your photo skills. On the starter worksheet pupils TICK everything to think about when taking a photo (format, framing, lighting — not the colour of your shoes).\n   • Support: should you check the lighting? yes/no.  • Core: what does framing mean?  • Challenge: write two things you check.\n2. (8–23) You-do (Activity 1) — pupils take their best photo of the classroom using every skill from the unit. Ask before photographing a person; check the background.\n3. (23–40) We-do — real or changed? On the activity worksheet pupils SORT photos into real / changed and spot a clue (snow in one part but not another; something too big or in the wrong place). Likely error: thinking a changed photo is real → fix-words \"look for the clue that does not fit.\"\n4. (40–50) Plenary — pupils decide real/changed on a few examples and photograph/screenshot their best photo for show-your-work.\n5. (50–55) Self-tick the four \"I can…\"; each pupil names one clue that a photo has been changed. End by celebrating the best photos.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Is it real? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-is-it-real-starter-worksheet.md" },
+        { "title": "Is it real? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-is-it-real-activity-worksheet.md" },
+        { "title": "Is it real? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-is-it-real-slides.md" },
+        { "title": "A real photo of a dog and a baby giraffe (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-real-dog-giraffe.png" },
+        { "title": "A changed photo with a whale added near a bridge (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-changed-whale.png" },
+        { "title": "A magnifying glass looking for clues (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-magnifier.png" }
+      ]
+    }
+  ]
+}

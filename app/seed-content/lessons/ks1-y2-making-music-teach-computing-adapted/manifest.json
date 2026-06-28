@@ -1,0 +1,85 @@
+{
+  "unitTitle": "KS1 Y2 Making music (Teach Computing — adapted)",
+  "course": {
+    "name": "KS1 Computing",
+    "keyStage": "KS1"
+  },
+  "lessons": [
+    {
+      "title": "How music makes us feel",
+      "objectives": "I can hear the differences between two pieces of music\nI can describe music using words\nI can say how the music makes me feel\nI can say what I like and do not like about music",
+      "outline": "Routine first (same every lesson). Vocabulary on board: music · loud · quiet · fast · slow · feelings · Mars · Venus. TA: everyone has the starter worksheet; tell pupils before any audio plays (offer headphones / sitting away from the speaker). Read the 4 “I can…” aloud.\n1. (0–5) Starter — Holst wrote The Planets. On the starter worksheet pupils CHOOSE whether the Mars music is loud/fast or quiet/slow, and the same for Venus (after the teacher plays ~1 min of each).\n   • Support: choose for Mars only.  • Core: choose for both.  • Challenge: add a describing word.\n2. (5–15) I-do/we-do — listen to Mars (loud, fast, marching) then Venus (quiet, slow, gentle). Likely error: pupils say “good/bad” not describing words → fix-words “tell me loud or quiet, fast or slow.”\n3. (15–35) You-do — on the activity worksheet pupils SORT describing words into Mars (loud) and Venus (quiet), then write a word for each and RATE how much they liked Mars (slider).\n   • Support: sort the words.  • Core: write a word for each.  • Challenge: say which they liked best and why.\n4. (35–45) Plenary — computers can make music too (spectrogram image); self-tick the 4 “I can…”; each pupil shares one word.\nDifferentiation on the SAME task, low floor / high ceiling. Audio is teacher-played and kept low-arousal; no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "How music makes us feel — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-how-music-feels-starter-worksheet.md" },
+        { "title": "How music makes us feel — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-how-music-feels-activity-worksheet.md" },
+        { "title": "How music makes us feel — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-how-music-feels-slides.md" },
+        { "title": "The planets in space (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-solar-system.png" },
+        { "title": "Mars — the red planet (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-mars.jpg" },
+        { "title": "Venus — the orange planet (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-venus.jpg" },
+        { "title": "Coloured sound bars on a computer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-spectrogram.png" }
+      ]
+    },
+    {
+      "title": "Rhythms and patterns",
+      "objectives": "I can make a pattern\nI can play a rhythm from a pattern\nI can make a rhythm on the computer\nI can say that people make and play music",
+      "outline": "Routine first. Vocabulary on board: pattern · rhythm · pulse · beat. TA: starter worksheet out; Chrome Music Lab Rhythm tool open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — patterns repeat (🔴🟡🔴🟡). On the starter worksheet pupils CHOOSE what comes next and CHOOSE that a rhythm is a pattern of sounds.\n   • Support: choose the next colour.  • Core: choose what a rhythm is.  • Challenge: clap a pattern back.\n2. (10–20) We-do — clap a short rhythm together (clap, clap, rest, clap); music is made by people. Pupils who prefer can tap the table.\n3. (20–40) You-do — make a rhythm in the Chrome Music Lab Rhythm tool. On the activity worksheet pupils LABEL the play button and the pattern dots, ORDER the steps to make a rhythm, and MULTI-SELECT who can make music. Likely error: too many dots at once → fix-words “start small, add one dot, then listen.”\n   • Support: label the tool.  • Core: order the steps.  • Challenge: say how to fix a rhythm that sounds wrong.\n4. (40–45) Plenary — computer or instrument? self-tick the 4 “I can…”; screenshot the rhythm.\nDifferentiation on the SAME task; audio kept low; no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "Rhythms and patterns — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rhythms-and-patterns-starter-worksheet.md" },
+        { "title": "Rhythms and patterns — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rhythms-and-patterns-activity-worksheet.md" },
+        { "title": "Rhythms and patterns — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-rhythms-and-patterns-slides.md" },
+        { "title": "Hands clapping a rhythm (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-clapping.png" },
+        { "title": "The Rhythm tool in Chrome Music Lab (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-rhythm-tool.png" }
+      ]
+    },
+    {
+      "title": "How music can be used",
+      "objectives": "I can connect pictures with sounds\nI can use a computer to change the pitch\nI can make high and low sounds\nI can make music about an idea",
+      "outline": "Routine first. Vocabulary on board: pitch · high · low · idea · Neptune. TA: starter worksheet out; Chrome Music Lab open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — listen to ~1 min of Neptune (teacher-played). On the starter worksheet pupils CHOOSE that it sounds mysterious/quiet, and CHOOSE that a high sound is drawn near the top.\n   • Support: choose how Neptune sounds.  • Core: choose top for high.  • Challenge: explain high vs low.\n2. (10–20) I-do — drawing music (a child’s drawing example); pitch = how high or low a sound is. Top = high, bottom = low. Likely error: mixing up top/bottom → fix-words “high goes high, low goes low.”\n3. (20–40) You-do — open the Kandinsky tool and draw lines/shapes to make sounds. On the activity worksheet pupils SORT high and low sounds, ORDER the steps to make a sound, then choose a space object (a rocket) and make music for it.\n   • Support: sort high/low sounds.  • Core: order the steps; name the object.  • Challenge: say why a scary sound uses high or low notes.\n4. (40–45) Plenary — share; self-tick the 4 “I can…”; screenshot the music.\nDifferentiation on the SAME task; audio kept low; no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "How music can be used — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-how-music-is-used-starter-worksheet.md" },
+        { "title": "How music can be used — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-how-music-is-used-activity-worksheet.md" },
+        { "title": "How music can be used — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-how-music-is-used-slides.md" },
+        { "title": "Neptune — the blue planet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-neptune.png" },
+        { "title": "A child's drawing of music (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-music-drawing.jpg" },
+        { "title": "A rocket in space (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-rocket.png" },
+        { "title": "The Chrome Music Lab tools (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-music-lab-home.png" }
+      ]
+    },
+    {
+      "title": "Notes and tempo",
+      "objectives": "I can say that music is a sequence of notes\nI can make a pattern of notes on the computer\nI can change the instrument\nI can change the tempo",
+      "outline": "Routine first. Vocabulary on board: note · pattern · sequence · instrument · tempo. TA: starter worksheet out; Chrome Music Lab Song Maker open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — each coloured block is a note; tempo means how fast or slow. On the starter worksheet pupils CHOOSE what a coloured block is and that a fast tempo is quick.\n   • Support: choose what a block is.  • Core: choose what tempo means.  • Challenge: give an example of fast and slow music.\n2. (10–20) I-do — music is a sequence of notes. Model adding three notes in Song Maker and pressing play; show how to remove a note. Likely error: adding too many notes at once → fix-words “add one, then listen.”\n3. (20–40) You-do — make a pattern of notes, change the instrument, change the tempo. On the activity worksheet pupils ORDER the Song Maker steps, answer what a note/tempo is, and MULTI-SELECT what they can change (notes, instrument, tempo).\n   • Support: order the steps.  • Core: explain note and tempo.  • Challenge: say why to change one thing then listen.\n4. (40–45) Plenary — save (Copy Link, paste by name); self-tick the 4 “I can…”; screenshot the notes.\nDifferentiation on the SAME task; tempo kept slow/low-arousal; no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "Notes and tempo — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-notes-and-tempo-starter-worksheet.md" },
+        { "title": "Notes and tempo — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-notes-and-tempo-activity-worksheet.md" },
+        { "title": "Notes and tempo — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-notes-and-tempo-slides.md" },
+        { "title": "The Chrome Music Lab tools (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-music-lab-home.png" }
+      ]
+    },
+    {
+      "title": "Creating digital music",
+      "objectives": "I can choose an animal\nI can make a rhythm for my animal\nI can make my animal's rhythm on the computer\nI can add a pattern of notes to my rhythm",
+      "outline": "Routine first. Vocabulary on board: create · rhythm · pattern · notes · tempo · animal. TA: starter worksheet out; Song Maker open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — an elephant walks slow and heavy; a mouse is fast and light. On the starter worksheet pupils CHOOSE the rhythm for an elephant and a mouse.\n   • Support: choose for the elephant.  • Core: choose for both.  • Challenge: tap each rhythm.\n2. (10–20) We-do — choose an animal; tap its rhythm quietly with your hand; keep it short and repeat it. Likely error: rhythm too long → fix-words “keep it short, then repeat it.”\n3. (20–40) You-do — make the rhythm in Song Maker (no more than three notes, repeating), then add a short pattern of notes on top. On the activity worksheet pupils SORT animals into fast/slow, name their animal, and ORDER the make-animal-music steps.\n   • Support: sort the animals.  • Core: name the animal and its rhythm.  • Challenge: say how the rhythm sounds like the animal moving.\n4. (40–45) Plenary — save the link by name; self-tick the 4 “I can…”; screenshot the music.\nDifferentiation on the SAME task; choices kept small to avoid overload; tempo kept slow; no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "Creating digital music — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-creating-digital-music-starter-worksheet.md" },
+        { "title": "Creating digital music — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-creating-digital-music-activity-worksheet.md" },
+        { "title": "Creating digital music — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-creating-digital-music-slides.md" },
+        { "title": "An elephant walking (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-elephant.jpg" },
+        { "title": "A small mouse (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-mouse.png" },
+        { "title": "A crocodile (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-crocodile.png" },
+        { "title": "A bird (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-bird.png" }
+      ]
+    },
+    {
+      "title": "Reviewing and editing music",
+      "objectives": "I can open my saved work\nI can listen to and review my work\nI can edit my work to make it better\nI can say how I changed my work",
+      "outline": "Routine first. Vocabulary on board: open · review · edit · change · improve. TA: starter worksheet out; pupils' saved links ready in a shared place by name. Read the 4 “I can…” aloud.\n1. (0–10) Starter — edit means to change to make better; your work is in a saved link. On the starter worksheet pupils CHOOSE what edit means and how to get their work back.\n   • Support: choose what edit means.  • Core: choose where the work is saved.  • Challenge: name one thing they could change.\n2. (10–15) We-do — open the saved link; review (listen) before changing anything. Likely error: changing lots at once → fix-words “change one thing, then listen.”\n3. (15–40) You-do — edit: add/remove notes, try a different instrument or tempo, use Undo, then save the NEW link. On the activity worksheet pupils MULTI-SELECT what they can change, ORDER the edit-and-save steps, RATE how happy they are (slider), and say what they changed.\n   • Support: tick what you can change.  • Core: order the steps.  • Challenge: say what they changed and why it is better.\n4. (40–45) Plenary — share with a partner and say one kind thing; self-tick the 4 “I can…”; screenshot the edited music.\nDifferentiation on the SAME task; volume kept low (offer headphones); no flashing; movement breaks are routine.",
+      "resources": [
+        { "title": "Reviewing and editing music — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-reviewing-and-editing-starter-worksheet.md" },
+        { "title": "Reviewing and editing music — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-reviewing-and-editing-activity-worksheet.md" },
+        { "title": "Reviewing and editing music — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-reviewing-and-editing-slides.md" },
+        { "title": "Colourful music bars (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-music-equaliser.png" }
+      ]
+    }
+  ]
+}
