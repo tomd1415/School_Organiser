@@ -1,0 +1,83 @@
+{
+  "unitTitle": "KS1 Y1 Grouping data (Teach Computing — adapted)",
+  "course": {
+    "name": "KS1 Computing",
+    "keyStage": "KS1"
+  },
+  "lessons": [
+    {
+      "title": "Label and match",
+      "objectives": "I can describe an object using a label\nI can match objects to a group\nI can find the label for a group of objects",
+      "outline": "Routine first (same every lesson). Vocabulary on the board: object · label · group · search · image. TA: everyone has the starter worksheet; a tray of real objects (cars, animals, cups) per table. Read the three “I can…” aloud.\n1. (0–5) Starter — a name is a label. Show two cars (red and blue). Both have the label “car”. Pupils CHOOSE the label on the starter worksheet.\n   • Support: match each object to its label.  • Core: fill the blanks (a label is a name; we use it to find things).  • Challenge: multi-select why a search shows you cats (a person labelled them).\n2. (5–15) I-do → we-do — labels and search. A computer search for “cat” shows cats because a PERSON labelled each picture. Likely error: “the computer knows it is a cat” → fix-words “a person typed the label; the computer just matches it.” Play the “Finding images” video as a teacher hook (motion + sound — teacher’s choice).\n3. (15–35) You-do — match objects to a group (activity worksheet card sort: Cars / Cats / Frogs), then sort REAL objects on the table into labelled groups (hoops or table areas). TA: prompt, do not sort it for them.\n4. (35–45) Label the group — a group has a name too. Pupils find the best label for a group, then take a photo of their group for the show-your-work box.\n5. (45–50) Plenary — self-tick the three “I can…”; each pupil shows one object and says its label, then names a group it belongs to (an object can fit more than one group).\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s tray looks “less done”. No flashing/animation/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "Label and match — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-label-and-match-starter-worksheet.md" },
+        { "title": "Label and match — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-label-and-match-activity-worksheet.md" },
+        { "title": "Label and match — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-label-and-match-slides.md" },
+        { "title": "Red car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-red-car.png" },
+        { "title": "Blue car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-blue-car.png" },
+        { "title": "Cat (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-cat.png" }
+      ]
+    },
+    {
+      "title": "Group and count",
+      "objectives": "I can count objects\nI can group objects\nI can count a group of objects",
+      "outline": "Routine first. Vocabulary on the board: group · object · label · image. TA: starter worksheet out; each table has a set of 10–20 identical real objects. Read the three “I can…” aloud.\n1. (0–5) Starter — how many? Pupils count objects on the starter worksheet and CHOOSE the total.\n   • Support: choose what makes objects easier to count.  • Core: why a big mixed pile is hard to count.  • Challenge: multi-select why grouping makes counting easier.\n2. (5–10) I-do — count a messy pile. Scatter real objects; NO moving allowed. Pupils feel that counting a mess is hard (they lose track). This is the point of the lesson.\n3. (10–20) We-do — make it easier. Think-pair-share “How could you make counting easier?” → sort into groups, then count one group at a time.\n4. (20–40) You-do — group and count (activity worksheet: order the steps, then a card sort, then count each group), then sort and count REAL objects. Likely error: counting an object twice → fix-words “touch each one once.” TA: prompt, do not count it for them.\n5. (40–50) Plenary — computers are not clever: a computer only “counts” pictures a person has grouped and labelled. Self-tick the three “I can…”; each pupil says how many are in one of their groups.\nDifferentiation on the SAME task; no flashing/animation/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Group and count — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-group-and-count-starter-worksheet.md" },
+        { "title": "Group and count — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-group-and-count-activity-worksheet.md" },
+        { "title": "Group and count — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-group-and-count-slides.md" },
+        { "title": "Frog (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-frog.png" },
+        { "title": "Blue car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-blue-car.png" }
+      ]
+    },
+    {
+      "title": "Describe an object",
+      "objectives": "I can describe an object\nI can describe a property of an object\nI can find objects with similar properties",
+      "outline": "Routine first. Vocabulary on the board: object · property · label · colour · shape · size. TA: starter worksheet out; a box of real 2D shapes (varying colour, size, shape) per table. Read the three “I can…” aloud.\n1. (0–5) Starter — describe this object. A property is a way to describe an object (colour, shape, size). Pupils CHOOSE the car’s colour.\n   • Support: match each describing word to its property (red→colour, round→shape, big→size).  • Core: write a colour word for the tennis ball.  • Challenge: multi-select which things are properties.\n2. (5–20) I-do → we-do — colour, shape, size. Name the red car’s colour, the ball’s shape (round), the parrot’s many colours. Reveal the word PROPERTY each time. Likely error: naming the value but not the property (“red” vs “colour”) → fix-words “red is the colour; colour is the property.”\n3. (20–35) You-do — complete the property + sort by property (activity worksheet card sort: Colour / Shape / Size), using real shapes alongside. TA: prompt, do not do it for them.\n4. (35–45) Similar properties hunt — pairs find three objects around the room that are the SAME colour and take a photo (show-your-work). The focus is the word “property”, not drawing.\n5. (45–50) Plenary — labels on pictures let a computer find what we search for. Self-tick the three “I can…”; each pupil names one property of an object on their table.\nDifferentiation on the SAME task; no flashing/animation/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Describe an object — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-describe-an-object-starter-worksheet.md" },
+        { "title": "Describe an object — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-describe-an-object-activity-worksheet.md" },
+        { "title": "Describe an object — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-describe-an-object-slides.md" },
+        { "title": "Red car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-red-car.png" },
+        { "title": "Tennis ball (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-tennis-ball.png" },
+        { "title": "Parrot (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-parrot.png" }
+      ]
+    },
+    {
+      "title": "Making different groups",
+      "objectives": "I can group similar objects\nI can group objects in more than one way\nI can count how many objects share a property",
+      "outline": "Routine first. Vocabulary on the board: group · object · property · value · colour · data set. TA: starter worksheet out; a box of real 2D shapes (a few shapes, two sizes) per group; sticky notes for labels. Read the three “I can…” aloud.\n1. (0–5) Starter — more than one group. An object has more than one property, so it fits more than one group (a green frog → “green” OR “animals”). Pupils CHOOSE a group for the frog.\n   • Support: the same objects can be grouped by colour OR shape.  • Core: name two ways to group a box of shapes.  • Challenge: multi-select why the same objects make more than one group.\n2. (5–20) I-do → we-do — group by colour, then RE-GROUP the same objects by what they are. The big idea: same objects, different property, different groups. Use “is… / is not…” language.\n3. (20–40) You-do — two card sorts on the activity worksheet (by colour, then by type), then real shapes grouped by colour and re-grouped by size. Count how many share a property (whole numbers — this is a small data set). Scaffold: offer “red / not red” if two groups is easier. TA: prompt, do not do it for them.\n4. (40–50) Plenary — which property did each pupil group by? Self-tick the three “I can…”; each pupil shows the same objects grouped two ways and says how many shared a property.\nDifferentiation on the SAME task; no flashing/animation/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Making different groups — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-making-different-groups-starter-worksheet.md" },
+        { "title": "Making different groups — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-making-different-groups-activity-worksheet.md" },
+        { "title": "Making different groups — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-making-different-groups-slides.md" },
+        { "title": "Frog (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-frog.png" },
+        { "title": "Cat (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-cat.png" }
+      ]
+    },
+    {
+      "title": "Comparing groups",
+      "objectives": "I can choose how to group objects\nI can describe groups of objects\nI can record how many objects are in a group",
+      "outline": "Routine first. Vocabulary on the board: group · property · more · less · most · fewest. TA: starter worksheet out; computers ready with the “Creating groups” activity sheet (or printed images). Read the three “I can…” aloud.\n1. (0–10) Starter — comparing words. Comparing means looking at what is the same and what is different (more · less · most · fewest · the same). Pupils CHOOSE which group has more on the starter worksheet.\n   • Support: match each comparing word to its meaning.  • Core: fill the blanks (more / fewest).  • Challenge: write a comparing sentence for two equal groups.\n2. (10–25) I-do → we-do — compare two groups out loud as full sentences (“the ___ group has more than the ___ group”). Play the “Creating groups” video as a teacher hook (motion + sound — teacher’s choice).\n3. (25–45) You-do — pupils CHOOSE how to group (the activity worksheet card sort, or drag on the computer), then RECORD how many are in each group (whole numbers), and describe the groups with comparing words. Likely error: counting an object twice → fix-words “touch each one once.” TA: prompt, do not do it for them.\n4. (45–50) Plenary — each pupil says which of their groups has the most. Self-tick the three “I can…”.\nDifferentiation on the SAME task; no flashing/animation/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Comparing groups — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-groups-starter-worksheet.md" },
+        { "title": "Comparing groups — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-groups-activity-worksheet.md" },
+        { "title": "Comparing groups — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-groups-slides.md" },
+        { "title": "Frog (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-frog.png" },
+        { "title": "Blue car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-blue-car.png" }
+      ]
+    },
+    {
+      "title": "Answering questions",
+      "objectives": "I can decide how to group objects to answer a question\nI can compare groups of objects\nI can record and share what I have found",
+      "outline": "Routine first. Vocabulary on the board: group · property · compare · most · fewest · the same. TA: starter worksheet out; a tray of mixed real objects per table. Read the three “I can…” aloud.\n1. (0–10) Starter — true or false? Thumbs up/down for statements about a group (grouped by colour? by shape? which has more?). Pupils answer one on the starter worksheet.\n   • Support: choose the groups that help answer “how many red?”.  • Core: why two groups is quicker.  • Challenge: multi-select the best plan to answer “how many cats?”.\n2. (10–20) I-do → we-do — group to answer a question. To answer “How many cats?”, sort into just “cat” and “not cat” — the SMALLEST number of groups that answers it. You do not need to sort everything else.\n3. (20–40) You-do — the activity worksheet: order the steps, sort to answer, then count and compare the two groups, and RECORD the answer. Then group real objects to answer their own question and take a photo. Likely error: making too many groups → fix-words “only the groups you need.” TA: prompt, do not do it for them.\n4. (40–48) Share — each pupil tells a partner what they found and how they grouped to find it.\n5. (48–50) End of unit — recap the journey: label → group → count → compare → answer questions. Self-tick the three “I can…”.\nDifferentiation on the SAME task; no flashing/animation/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Answering questions — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-questions-starter-worksheet.md" },
+        { "title": "Answering questions — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-questions-activity-worksheet.md" },
+        { "title": "Answering questions — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-answering-questions-slides.md" },
+        { "title": "Red car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-red-car.png" },
+        { "title": "Cat (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-cat.png" }
+      ]
+    }
+  ]
+}

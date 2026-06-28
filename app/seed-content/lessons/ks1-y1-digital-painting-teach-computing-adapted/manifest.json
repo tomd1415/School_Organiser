@@ -1,0 +1,75 @@
+{
+  "unitTitle": "KS1 Y1 Digital painting (Teach Computing — adapted)",
+  "course": {
+    "name": "KS1 Computing",
+    "keyStage": "KS1"
+  },
+  "lessons": [
+    {
+      "title": "How can we paint using computers?",
+      "objectives": "I can name some paint tools\nI can use a tool to make marks on the screen\nI can say what a tool does\nI can draw a picture using the paint tools",
+      "outline": "Routine first (same every lesson). Vocabulary on board: paint program · tool · paintbrush · pencil · erase · fill · undo. TA: everyone has the starter worksheet; the paint program (paintz.app or Microsoft Paint) open on each screen. Read the 4 “I can…” aloud.\n1. (0–10) Starter — what is a paint program? On the starter worksheet pupils CHOOSE what a paint program is for, then look at a tool icon and CHOOSE its name.\n   • Support: name 1 tool.  • Core: name 2 tools.  • Challenge: name the tool from its job.\n2. (10–20) I-do → we-do — the tools. Teacher names paintbrush, pencil, fill, eraser, undo and models the pencil. Likely error: “the fill went everywhere” → fix-words “close the shape, then undo and try again.”\n3. (20–30) Be a tool detective. Pupils try each tool and watch what it does, then MATCH each tool to its job on the activity worksheet.\n   • Support: match 3 tools.  • Core: say what fill and undo do.  • Challenge: say which tool fixes a wrong line and why.\n4. (30–50) You-do — draw a face. Pupils draw a picture of their face using the tools and screenshot it onto the activity worksheet. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows one tool they used.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        { "title": "How can we paint using computers? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-painting-on-computers-starter-worksheet.md" },
+        { "title": "How can we paint using computers? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-painting-on-computers-activity-worksheet.md" },
+        { "title": "How can we paint using computers? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-painting-on-computers-slides.md" },
+        { "title": "Paint tools — pot and brush (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-paint-tools.png" },
+        { "title": "Pencil tool (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-tool-pencil.png" },
+        { "title": "Spray can tool (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-tool-spraycan.png" },
+        { "title": "Eraser tool (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-tool-eraser.png" }
+      ]
+    },
+    {
+      "title": "Using shapes and lines",
+      "objectives": "I can find the square tool and the line tool\nI can use the shape and line tools to make a picture\nI can fill shapes with colour\nI can use undo to fix a mistake",
+      "outline": "Routine first. Vocabulary on board: square tool · line tool · fill tool · undo tool · primary colours · Piet Mondrian. TA: paint program open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — on the starter worksheet pupils CHOOSE the primary colours (red, yellow, blue) and pick the tool for a line and for a box.\n   • Support: pick the colour set.  • Core: pick line and square tools.  • Challenge: explain why undo helps.\n2. (10–20) I-do — the artist Piet Mondrian. Show a Mondrian picture (link from the original deck — copyright, not embedded). Name the tools: square, line, fill, undo. Likely error: line not straight → fix-words “drag slowly, or undo and try again.”\n3. (20–30) We-do — ORDER the steps to make a Mondrian picture on the activity worksheet (square → lines → fill → leave some white).\n4. (30–50) You-do — make a Mondrian picture, fill boxes with red/yellow/blue, screenshot onto the activity worksheet. Challenge: multi-select what is true about a Mondrian. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows one box they filled.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Using shapes and lines — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-shapes-and-lines-starter-worksheet.md" },
+        { "title": "Using shapes and lines — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-shapes-and-lines-activity-worksheet.md" },
+        { "title": "Using shapes and lines — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-shapes-and-lines-slides.md" }
+      ]
+    },
+    {
+      "title": "Making careful choices",
+      "objectives": "I can choose the right shape for the job\nI can choose colours for my picture\nI can build a picture from shapes\nI can make a picture in the style of an artist",
+      "outline": "Routine first. Vocabulary on board: shape tool · fill tool · Henri Matisse · collage. TA: paint program open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — the artist Henri Matisse (photo on the starter worksheet). Pupils CHOOSE how Matisse made his pictures (cutting out shapes — a collage) and pick the shape tool.\n   • Support: pick how he made it.  • Core: name the shape tool.  • Challenge: name two tools that fix a wrong colour.\n2. (10–20) I-do — show “The Snail” by Matisse (link from the original deck — copyright, not embedded). Bright shapes that spiral. Which tools? shape, fill, undo (not spray can).\n3. (20–30) We-do — SORT good choices from bad choices for a shape picture on the activity worksheet.\n4. (30–50) You-do — build a picture from bright shapes, fill them, screenshot onto the worksheet. Likely error: shape filled wrong colour → fix-words “undo, pick the colour, fill again.” TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows a favourite shape.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Making careful choices — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-careful-choices-starter-worksheet.md" },
+        { "title": "Making careful choices — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-careful-choices-activity-worksheet.md" },
+        { "title": "Making careful choices — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-careful-choices-slides.md" },
+        { "title": "Henri Matisse — portrait photo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-matisse-portrait.png" }
+      ]
+    },
+    {
+      "title": "Why did I choose that?",
+      "objectives": "I can say what each paint tool does\nI can choose the best tool for the job\nI can pick colours for my picture\nI can say which tools helped me",
+      "outline": "Routine first. Vocabulary on board: tool · choose · colour · feeling · Wassily Kandinsky. TA: paint program open for everyone. Read the 4 “I can…” aloud.\n1. (0–10) Starter — on the starter worksheet pupils MATCH each tool to its job (paintbrush, fill, eraser, undo) and choose the best tool to colour a whole circle.\n   • Support: match 2 tools.  • Core: match all 4.  • Challenge: choose the best tool for a job.\n2. (10–20) I-do — quick-fire: hold up the question, pupils vote A/B/C for what each tool does. Likely error: using the eraser to change a colour → fix-words “to change a colour use undo or fill, not the eraser.”\n3. (20–30) The artist Wassily Kandinsky — show “Squares with Concentric Circles” (link from the original deck — copyright, not embedded). Choose colours for a feeling.\n4. (30–50) You-do — make circles inside squares, choosing the best tool each time and saying why, then RATE how easy the tools were (slider) and screenshot onto the worksheet. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil names one tool that helped and why.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Why did I choose that? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-that-tool-starter-worksheet.md" },
+        { "title": "Why did I choose that? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-that-tool-activity-worksheet.md" },
+        { "title": "Why did I choose that? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-why-that-tool-slides.md" }
+      ]
+    },
+    {
+      "title": "Painting all by myself",
+      "objectives": "I can make dots of colour on the page\nI can change the brush colour\nI can change the brush size\nI can paint a picture on my own",
+      "outline": "Routine first. Vocabulary on board: Georges Seurat · pointillism · dots · brush size. TA: paint program open for everyone. Read the 4 “I can…” aloud. Today is an independent task.\n1. (0–10) Starter — on the starter worksheet pupils CHOOSE what pointillism means (dots of colour) and the best tool for dots (paintbrush).\n   • Support: choose what pointillism is.  • Core: choose the dot tool.  • Challenge: explain when to use small dots.\n2. (10–20) I-do — the artist Georges Seurat (link from the original deck — copyright, not embedded). Model making dots. Likely error: dragging makes a line → fix-words “tap, do not drag.” Then ORDER the steps for a dotty sunflower on the activity worksheet.\n3. (20–30) We-do — change the brush colour and brush size; bigger dots are quicker, smaller dots add detail.\n4. (30–50) You-do (independent) — paint a dotty sunflower on your own, RATE how independent you were (slider), screenshot onto the worksheet. TA: help with saving only.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows their dots.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Painting all by myself — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-painting-on-my-own-starter-worksheet.md" },
+        { "title": "Painting all by myself — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-painting-on-my-own-activity-worksheet.md" },
+        { "title": "Painting all by myself — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-painting-on-my-own-slides.md" }
+      ]
+    },
+    {
+      "title": "Comparing computer art and painting",
+      "objectives": "I can name different ways to make a picture\nI can spot how a picture was made\nI can say what is different about computer and paper\nI can say which way I prefer",
+      "outline": "Routine first. Vocabulary on board: computer · paper · paint · like · prefer. TA: paint sets, paper, aprons ready for the practical task; the pupils’ sunflowers from lesson 5 to hand. Read the 4 “I can…” aloud.\n1. (0–10) Starter — spot how a picture was made (chalk photo on the starter worksheet); CHOOSE that neat, block-colour lines mean a computer made it.\n   • Support: spot the chalk picture.  • Core: spot the computer picture.  • Challenge: give a reason.\n2. (10–20) I-do — lots of ways to make a picture: chalk, crayon, felt tip, paint, computer. Look for the clues on each.\n3. (20–40) You-do (practical) — paint a sunflower on paper with real paint, like last lesson but on paper. Movement break before painting.\n4. (40–50) Compare — SORT facts into painting on a computer vs on paper, RATE which they preferred (sliders), and screenshot/photo their two sunflowers side by side. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; class vote: computer or paper, with a reason.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        { "title": "Comparing computer art and painting — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-computer-vs-paper-starter-worksheet.md" },
+        { "title": "Comparing computer art and painting — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-computer-vs-paper-activity-worksheet.md" },
+        { "title": "Comparing computer art and painting — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-computer-vs-paper-slides.md" },
+        { "title": "Chalk drawing on the ground (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-chalk-drawing.png" }
+      ]
+    }
+  ]
+}
