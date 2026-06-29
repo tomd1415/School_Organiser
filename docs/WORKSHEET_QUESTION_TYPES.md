@@ -24,6 +24,7 @@
 | **Order** *(sequence, non-code)* | drags plain-language **steps** into order | a fenced ```` ```order ```` block, one step per line in CORRECT order | self-marked (modal: correct order + ✓ badge) |
 | **Card-sort** *(group into categories)* | drags items into category columns | a fenced ```` ```sort ```` block, one `Category: item, item` line per group | self-marked (modal: correct group + ✓ badge per item) |
 | **Label a diagram** | drags labels onto spots on an image | a fenced ```` ```label ```` block: `image: {{res:file}}` then `zoneId (x%, y%): correct label` per spot | self-marked (modal: correct label + ✓ badge per zone) |
+| **Trace table** *(fill a grid)* | types each cell as code runs (line \| var… \| output) | a 3+-column table where each **pupil-fill** answer cell is written `??expected??` (given cells stay plain) | self-marked (modal: expected value + ✓ badge per cell) |
 | **Slider / rating** | drags a 1–N scale | an answer cell `[scale 1-5]` or `[scale 1-5: low … high]` | uncredited self-assessment |
 | **Screenshot / upload** | pastes or drops an image of their work | cell with `📷`/`🖼` or "paste … screenshot/image/work …" or "screenshot … here" | teacher view (PII) |
 | **Checklist** | self-ticks success criteria | `- [ ] …` lines (usually under `## ✅ I can…`) | self-assessment (not credited) |
@@ -69,7 +70,18 @@ build detail: [QUESTION_TYPES_IMPLEMENTATION_PLAN.md](QUESTION_TYPES_IMPLEMENTAT
 > type-gaps** — used order/sort/label/parsons/multi-select/matching/fill-blank/scale throughout. Only §2.7
 > (interactive trace table) remains wanted (not needed at KS2). This completes the full TCC catalogue (KS1→KS4 + GCSE).
 
-### 2.7 Interactive trace table  — **NOT BUILT**
+### ✅ Interactive trace table — **BUILT 2026-06-28** (moved to §1)
+A 3+-column table where each **pupil-fill** answer cell is written `??expected??` (given cells stay plain) →
+each becomes a self-marked `trace` field carrying the expected value; the value never reaches form/preview
+HTML (only the mark modal, which shows the expected value + a ✓ badge per cell). No DB/storage change — same
+`t{n}.r{n}.c{n}` keys; excluded from AI marking via `SELF_MARKED`. Tests: `tests/worksheetTypes.test.ts`.
+This was the **last** wanted type — the question-type backlog is now empty. Cell marking is lenient (trim +
+case-insensitive, numeric-equal where both are numbers) so "8"/" 8 "/"8.0" and "True"/"true" all match.
+**All six stop-gapped trace lessons are now converted** to real `??expected??` grids: Programming-3 L2 (while
+loop), Algorithms-1 L3 (find-the-bug trace), Algorithms-2 L6 (linear search), L9 (bubble-sort swap), L12
+(assessment swap), Programming-4 L2 (function return). (Programming-2 selection had no trace worksheet.)
+
+### 2.7 Interactive trace table  — ~~NOT BUILT~~ **BUILT (see above)**
 - **What.** A fillable GRID where the pupil records how variables change as code runs (line | var1 | var2 |
   output), each cell auto-marked against the expected trace. Today these are done as a screenshot
   show-your-work or broken into separate fill-blank cells.

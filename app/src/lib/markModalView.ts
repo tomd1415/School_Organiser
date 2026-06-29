@@ -86,7 +86,7 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
   );
   // 'image' = a screenshot-paste answer (the pupil drops a picture of their work). It IS markable, so it
   // belongs with the questions — previously omitted entirely, so pasted screenshots had nowhere to show.
-  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons' || f.kind === 'order' || f.kind === 'sort' || f.kind === 'label' || f.kind === 'image');
+  const questions = fields.filter((f) => f.kind === 'text' || f.kind === 'blank' || f.kind === 'choice' || f.kind === 'code' || f.kind === 'parsons' || f.kind === 'order' || f.kind === 'sort' || f.kind === 'label' || f.kind === 'image' || f.kind === 'trace');
   const checks = fields.filter((f) => f.kind === 'check');
   const pointByKey = new Map<string, any>((scheme?.points ?? []).map((p: any) => [ws.keyPrefix + p.fieldKey, p]));
 
@@ -103,7 +103,7 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
       const ans = ansByKey.get(f.key);
       const mk = markByKey.get(f.key);
       const ordering = f.kind === 'parsons' || f.kind === 'order';
-      const grouping = f.kind === 'sort' || f.kind === 'label'; // one chosen category/label per item — solution[0]
+      const grouping = f.kind === 'sort' || f.kind === 'label' || f.kind === 'trace'; // one known value/category — solution[0]
       const selfMarked = ordering || grouping; // answer carried in the worksheet, not the AI scheme
       const codey = f.kind === 'code' || ordering; // mono <pre> so the model + pupil order show line-by-line
       const maxMarks = pt?.marks ?? (selfMarked ? 1 : 2);
@@ -124,12 +124,21 @@ export function renderMarkModal(options: MarkModalViewOptions): string {
           : '<span class="mm-blank">— no screenshot yet —</span>'
         : ansVal ? (codey ? mono(ansVal) : esc(ansVal)) : '<span class="mm-blank">— left blank —</span>';
       const norm = (s: string): string => s.replace(/\r/g, '').split('\n').map((l) => l.trimEnd()).join('\n').trim();
+      // Trace-table cells mark leniently: trim + case-insensitive, and numeric-equal where both are numbers
+      // (so "8" = " 8 " = "8.0", and "True" = "true"). Other self-marked types compare exactly (norm).
+      const numEq = /^-?\d+(?:\.\d+)?$/;
+      const traceEq = (a: string, b: string): boolean => {
+        const x = a.trim(), y = b.trim();
+        if (numEq.test(x) && numEq.test(y)) return Number(x) === Number(y);
+        return x.toLowerCase() === y.toLowerCase();
+      };
+      const isOk = f.kind === 'trace' ? traceEq(ansVal, modelText) : norm(ansVal) === norm(modelText);
       const selfHint = selfMarked && ansVal
-        ? norm(ansVal) === norm(modelText)
+        ? isOk
           ? ` <span class="mm-badge mm-ok">✓ ${ordering ? 'correct order' : 'correct'}</span>`
           : ` <span class="mm-badge mm-warn">${ordering ? 'order differs' : 'not the expected answer'}</span>`
         : '';
-      const kindTag = f.kind === 'parsons' ? '<span class="mm-tag">Parson’s</span>' : f.kind === 'order' ? '<span class="mm-tag">sequence</span>' : f.kind === 'sort' ? '<span class="mm-tag">sort</span>' : f.kind === 'label' ? '<span class="mm-tag">label</span>' : f.kind === 'code' ? '<span class="mm-tag">code</span>' : f.kind === 'image' ? '<span class="mm-tag">screenshot</span>' : '';
+      const kindTag = f.kind === 'parsons' ? '<span class="mm-tag">Parson’s</span>' : f.kind === 'order' ? '<span class="mm-tag">sequence</span>' : f.kind === 'sort' ? '<span class="mm-tag">sort</span>' : f.kind === 'label' ? '<span class="mm-tag">label</span>' : f.kind === 'trace' ? '<span class="mm-tag">trace</span>' : f.kind === 'code' ? '<span class="mm-tag">code</span>' : f.kind === 'image' ? '<span class="mm-tag">screenshot</span>' : '';
       const control = marking
         ? ans
           ? markControl(oc, pid, ans.id, mk, maxMarks, wi)

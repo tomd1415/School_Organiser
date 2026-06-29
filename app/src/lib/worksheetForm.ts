@@ -14,7 +14,7 @@ export type BlockLevel = Level | 'shared';
 
 export interface WorksheetField {
   key: string;
-  kind: 'text' | 'check' | 'image' | 'choice' | 'multichoice' | 'blank' | 'code' | 'parsons' | 'order' | 'sort' | 'label' | 'scale';
+  kind: 'text' | 'check' | 'image' | 'choice' | 'multichoice' | 'blank' | 'code' | 'parsons' | 'order' | 'sort' | 'label' | 'scale' | 'trace';
   level: BlockLevel;
   label: string;
   options?: string[]; // choice/multichoice/sort/label fields — the selectable options/categories/labels, in source order
@@ -100,6 +100,10 @@ function multiOptions(s: string): string[] {
 // its column header) names code, e.g. "Type your code here", "Write your program here". Pedagogy P11
 // (Use–Modify–Create) — the "Modify"/"Make" answer where pupils write or change code.
 const CODE_CELL = /\b(?:code|program|programme|script|pseudocode|algorithm)\b/i;
+// A TRACE-table answer cell: `??expected??` renders as an empty input the pupil fills, self-marked
+// against `expected` (the value never reaches form/preview HTML — only the mark modal). Used in trace
+// tables (line | var… | output) and truth tables, where each cell has one known correct value. §2.7.
+const TRACE_CELL = /^\s*\?\?(.+?)\?\?\s*$/;
 /** Split a choice cell into its options (the text after each "( )" marker), in source order. */
 function choiceOptions(s: string): string[] {
   return s.split(/\(\s*\)/).map((o) => o.trim()).filter((o) => o !== '');
@@ -810,7 +814,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   const header = rows[0] ?? [];
   const bodyRows = rows.slice(1).filter((r) => !isSepRow(r));
   const answerCol = header.map((c) => PROMPT.test(c) || SCREENSHOT.test(c));
-  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c) || isMultiCell(c) || isScaleCell(c)));
+  const anyBodyPlaceholder = bodyRows.some((r) => r.some((c) => PLACEHOLDER_CELL.test(c) || SCREENSHOT.test(c) || isChoiceCell(c) || isMultiCell(c) || isScaleCell(c) || TRACE_CELL.test(c)));
   const isAnswerTable = answerCol.some(Boolean) || anyBodyPlaceholder;
 
   if (!isAnswerTable) {
@@ -868,7 +872,7 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
   // A cell is an input when it's an answer-column blank/placeholder, or itself a placeholder/screenshot/choice.
   const cellIsInput = (c: number, cell: string): boolean => {
     const ph = PLACEHOLDER_CELL.test(cell);
-    return (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell);
+    return TRACE_CELL.test(cell) || (answerCol[c] && (cell.trim() === '' || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell))) || ph || SCREENSHOT.test(cell) || isChoiceCell(cell) || isMultiCell(cell) || isScaleCell(cell);
   };
   const renderRow = (row: string[], rowNo: number): string => {
     // A4: a row that has an input is a question — give its prompt cell a 🔊 read-aloud button.
@@ -885,7 +889,8 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       const cho = isChoiceCell(cell);
       const multi = isMultiCell(cell);
       const scl = isScaleCell(cell);
-      const isInput = (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho || multi || scl)) || placeholder || shot || cho || multi || scl;
+      const traceM = TRACE_CELL.exec(cell); // `??expected??` answer cell (trace/truth table)
+      const isInput = !!traceM || (answerCol[c] && (cell.trim() === '' || placeholder || shot || cho || multi || scl)) || placeholder || shot || cho || multi || scl;
       if (!isInput) {
         // The question prompt for this row (its first non-empty text cell) gets the read-aloud button.
         if (opts.mode === 'form' && rowHasInput && !promptSpoken && cell.trim() !== '') {
@@ -926,6 +931,12 @@ function renderTable(block: Block, tableIdx: number, opts: WorksheetOptions, fie
       // "( ) a ( ) b" cell becomes a multiple-choice field; everything else is a typed answer. Same
       // key scheme for all → marking is unaffected.
       const isShot = shot || SCREENSHOT.test(theadCells?.[c] ?? '') || SCREENSHOT.test(label);
+      // A `??expected??` trace/truth-table cell: an empty typed input the pupil fills, self-marked against
+      // `expected` in the mark modal. The expected value NEVER reaches the form/preview HTML (only `solution`).
+      if (traceM) {
+        localFields.push({ key, kind: 'trace', level: block.level, label, solution: [traceM[1]!.trim()] });
+        return `<td class="ws-answer-cell ws-trace-cell">${textControl(key, label, '', opts, true)}</td>`;
+      }
       if (scl && !isShot) {
         const sc = parseScale(cell);
         if (sc) {

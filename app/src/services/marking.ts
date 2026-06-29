@@ -102,9 +102,9 @@ export async function deriveScheme(occurrenceCourseId: number): Promise<DeriveRe
   const ws = await getLessonWorksheet(oc.groupCourseId, oc.lessonPlanId);
   if (!ws) return { ok: false, message: 'No worksheet to build a scheme from.' };
   // Not auto-marked by the AI scheme: screenshots (image, teacher reviews); ordering (parsons/order) and
-  // grouping (sort/label) carry their own correct answer and are checked in the marking modal; slider
-  // (scale) is uncredited self-assessment.
-  const SELF_MARKED = new Set(['image', 'parsons', 'order', 'sort', 'label', 'scale']);
+  // grouping (sort/label) and trace-table cells (trace) carry their own correct answer and are checked in
+  // the marking modal; slider (scale) is uncredited self-assessment.
+  const SELF_MARKED = new Set(['image', 'parsons', 'order', 'sort', 'label', 'scale', 'trace']);
   const fields = renderWorksheet(ws.markdown, { mode: 'review' }).fields.filter((f) => !SELF_MARKED.has(f.kind));
   if (fields.length === 0) return { ok: false, message: 'This worksheet has no answerable fields.' };
   const answersMd = await getLessonDocMarkdown(oc.groupCourseId, oc.lessonPlanId, 'answers');

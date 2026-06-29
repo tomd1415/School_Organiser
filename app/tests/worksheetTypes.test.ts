@@ -307,3 +307,34 @@ The CPU does [[ ]].
     expect(html).toContain('key=w1.t1.r1.c2');
   });
 });
+
+describe('trace table (??expected?? self-marked cells)', () => {
+  // A trace table: line | i | total | output. Given cells are plain; pupil-fill cells are `??expected??`.
+  const md = `## Trace the loop
+| line | i | total |
+|---|---|---|
+| 1 | 0 | 0 |
+| 2 | ??1?? | ??1?? |
+| 3 | ??2?? | ??3?? |
+`;
+  it('every ??expected?? cell becomes a self-marked trace field carrying the expected value', () => {
+    const fields = renderWorksheet(md, { mode: 'review' }).fields;
+    expect(fields).toHaveLength(4); // four ??...?? cells; the given "1/0/0" row emits nothing
+    expect(new Set(fields.map((f) => f.kind))).toEqual(new Set(['trace']));
+    expect(fields.map((f) => f.solution?.[0])).toEqual(['1', '1', '2', '3']);
+    expect(fields[0]!.label).toBe('i'); // a grid cell is labelled by its column header
+  });
+  it('the expected value NEVER leaks into the form OR preview HTML', () => {
+    const form = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1' }).html;
+    const preview = renderWorksheet(md, { mode: 'preview' }).html;
+    expect(form).not.toMatch(/\?\?/); // no raw marker
+    expect(form).not.toMatch(/value="[123]"/); // expected not pre-filled into the input
+    expect(preview).not.toMatch(/\?\?/);
+    expect(form).toMatch(/ws-trace-cell/); // it did render as a trace input cell
+  });
+  it("a pupil's saved value renders back into the cell (form mode)", () => {
+    const values = new Map([['t1.r2.c2', '1']]);
+    const form = renderWorksheet(md, { mode: 'form', action: '/me/answer?oc=1', values }).html;
+    expect(form).toMatch(/value="1"/); // the saved answer, not the marker
+  });
+});

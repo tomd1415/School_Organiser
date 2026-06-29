@@ -40,13 +40,20 @@ items[current + 1] = temp
 |---|---|
 | A second improvement stops the sort if no swaps were made in a pass. Why does "no swaps" mean the list is already sorted? | Type your answer here |
 
-## Show your work
-Trace lines 7–9 (the swap) for one swap during a pass, using a trace table. Then show it.
+## Trace the swap
+The swap uses a `temp` variable. We are swapping `items[i] = 8` and `items[i+1] = 3` (because 8 is greater than 3). Fill in each value after each line runs.
+
+| Line | items[i] | items[i+1] | temp |
+|---|---|---|---|
+| before | 8 | 3 | — |
+| `temp = items[i]` | 8 | 3 | ??8?? |
+| `items[i] = items[i+1]` | ??3?? | 3 | 8 |
+| `items[i+1] = temp` | 3 | ??8?? | 8 |
 
 | Question | Your answer |
 |---|---|
-| After the swap, which two items have changed places? | Type your answer here |
-| Show your completed trace table | 📷 Paste a screenshot of your work here |
+| Why is `temp` needed before line 8 overwrites `items[i]`? | (  ) so the 8 is not lost (  ) to count passes (  ) to make the list longer |
+| Show your working out | 📷 Paste a screenshot of your work here |
 
 ## ✅ I can…
 - [ ] I can read and explain the code for a bubble sort

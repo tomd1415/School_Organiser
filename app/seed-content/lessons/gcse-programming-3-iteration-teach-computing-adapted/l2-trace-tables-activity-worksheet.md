@@ -22,7 +22,14 @@ while count != 0:
     count = count - 1
 ```
 
-Fill in the numbers it prints, in order: [[ ]], then [[ ]], then [[ ]].
+Fill in the trace table. Each row is one check of the `while` condition: write the value of **count**, and what the loop **prints** that time. The first row is done for you.
+
+| Check | count | What it prints |
+|---|---|---|
+| 1 | 3 | ??3?? |
+| 2 | ??2?? | ??2?? |
+| 3 | ??1?? | ??1?? |
+| 4 (stops) | ??0?? | — |
 
 ## 🟢 Support
 | Question | Choose |

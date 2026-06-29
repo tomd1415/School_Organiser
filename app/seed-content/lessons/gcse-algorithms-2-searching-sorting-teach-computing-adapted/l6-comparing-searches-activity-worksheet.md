@@ -66,13 +66,25 @@ def linear_search(items, search_item):
 |---|---|
 | The faster version returns `-1`. What does `-1` tell you? | Type your answer here |
 
-## Show your work
-Trace the linear search to find "Neptune" using a trace table (on the board or on paper), then show it.
+## Trace the linear search
+The list is `[Earth, Jupiter, Mars, Mercury, Neptune]`. Fill in the value of **current** each time round the loop, as the search looks for "Neptune". The given column shows the item it checks.
+
+| Loop round | current | item it checks | is it Neptune? |
+|---|---|---|---|
+| 1 | ??0?? | Earth | no |
+| 2 | ??1?? | Jupiter | no |
+| 3 | ??2?? | Mars | no |
+| 4 | ??3?? | Mercury | no |
+| 5 | ??4?? | Neptune | yes — stop |
 
 | Question | Your answer |
 |---|---|
-| Write the final value the search returns for "Neptune" | Type your answer here |
-| Show your completed trace table | 📷 Paste a screenshot of your work here |
+| So the search returns the index | ??4?? |
+
+## Show your work
+| Question | Your answer |
+|---|---|
+| Show your completed trace table or any working out | 📷 Paste a screenshot of your work here |
 
 ## ✅ I can…
 - [ ] I can compare linear and binary search and pick the best one

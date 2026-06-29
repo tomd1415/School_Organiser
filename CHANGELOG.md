@@ -32,8 +32,14 @@ Built on branch `phase-15-17-unattended`, continuing the same run. Plan: `docs/R
   **Huffman tree**, GCSE Programming-1 **flowchart**, Programming-4 **structure chart**, Programming-6 Battle
   Boats flowchart. Stayed disciplined about NOT padding already-complete lessons (TCP/IP+OSI label-backdrops,
   bubble sort, textual binary calc, FDE order-task all confirmed fine). Corpus `_vfile.ts` = 69/77 bundles
-  clean (8 false-positives). The one remaining genuine gap is the **§2.7 trace-table question type** — an
-  engine build, not an image fix. Per-unit detail in `app/seed-content/lessons/_notes/*`.
+  clean (8 false-positives). Per-unit detail in `app/seed-content/lessons/_notes/*`.
+- **Interactive trace-table question type — BUILT (the last backlog type; backlog now empty).** A 3+-column
+  table answer cell written `??expected??` becomes a self-marked `trace` field: the pupil types each cell, the
+  mark modal shows the expected value + a ✓ badge, the value never leaks to form/preview HTML, and it's
+  excluded from AI marking (`SELF_MARKED`). No DB/storage change — same `t{n}.r{n}.c{n}` keys. Engine in
+  `worksheetForm.ts` + `markModalView.ts` + `marking.ts`; tests in `tests/worksheetTypes.test.ts` (full suite
+  1198 green). Demonstrated live in GCSE Programming-3 "Trace tables". Moves §2.7 of
+  `WORKSHEET_QUESTION_TYPES.md` from NOT-BUILT to §1.
 
 ### 2026-06-28 — KS2 Year 6 lesson conversion (7 units / 38 lessons) — TCC catalogue complete
 

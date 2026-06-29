@@ -28,11 +28,13 @@ def to_the_power(a, b):
 
 Trace the call `to_the_power(2, 3)`:
 
+Fill in the **answer** and **return value** as the function runs (`a ** b` means a to the power b).
+
 | Line | a | b | answer | return value |
 |---|---|---|---|---|
 | 1 | 2 | 3 |  |  |
-| 2 | 2 | 3 | [[ ]] |  |
-| 3 | 2 | 3 | 8 | [[ ]] |
+| 2 | 2 | 3 | ??8?? |  |
+| 3 | 2 | 3 | ??8?? | ??8?? |
 
 ## 🟢 Support
 | Question | Choose |

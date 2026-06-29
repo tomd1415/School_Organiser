@@ -66,13 +66,20 @@ def an_algorithm(items):
 |---|---|
 | One improvement reduces the comparisons each pass. Explain how you would change the inner loop range. | Type your answer here |
 
-## Show your work
-Trace lines 7–9 (the swap) for the list `Pakistan, China, Greece, Chad` on a trace table, then show it.
+## Trace the first swap
+For `Pakistan, China, Greece, Chad`, the first compare is **Pakistan** and **China**. Pakistan comes after China, so they swap. Trace lines 7–9 (the swap of `items[i] = Pakistan` and `items[i+1] = China`). Fill in each value after each line runs.
 
+| Line | items[i] | items[i+1] | temp |
+|---|---|---|---|
+| before | Pakistan | China | — |
+| `temp = items[i]` | Pakistan | China | ??Pakistan?? |
+| `items[i] = items[i+1]` | ??China?? | China | Pakistan |
+| `items[i+1] = temp` | China | ??Pakistan?? | Pakistan |
+
+## Show your work
 | Question | Your answer |
 |---|---|
-| After the first swap, which two items change places? | Type your answer here |
-| Show your completed trace table | 📷 Paste a screenshot of your work here |
+| Show any other working out | 📷 Paste a screenshot of your work here |
 
 ## ✅ I can…
 - [ ] I can develop a linear search function in Python

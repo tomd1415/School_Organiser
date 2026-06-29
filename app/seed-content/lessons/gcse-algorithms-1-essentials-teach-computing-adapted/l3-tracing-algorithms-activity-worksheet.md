@@ -41,9 +41,19 @@ for current in range(1, len(items)):
 
 For the list `[24, 16, 35, 42, 7]` the correct lowest is 7.
 
+Trace it. For each step, write the value the list holds at `current`, and the value of `lowest` after that step. The first row is done for you.
+
+| current | items[current] | lowest |
+|---|---|---|
+| start | — | 24 |
+| 1 | ??16?? | ??24?? |
+| 2 | ??35?? | ??35?? |
+| 3 | ??42?? | ??42?? |
+| 4 | ??7?? | ??42?? |
+
 | Question | Choose |
 |---|---|
-| Does the code work as intended? | (  ) no — it finds the HIGHEST number, not the lowest (  ) yes — it finds the lowest correctly |
+| Your trace ends with `lowest` = 42. Does the code work as intended? | (  ) no — it finds the HIGHEST number, not the lowest (  ) yes — it finds the lowest correctly |
 | Which change fixes it? | (  ) change the condition to `items[current] < lowest` (  ) change `items[0]` to `items[1]` (  ) delete the loop |
 
 ## 🔴 Challenge
