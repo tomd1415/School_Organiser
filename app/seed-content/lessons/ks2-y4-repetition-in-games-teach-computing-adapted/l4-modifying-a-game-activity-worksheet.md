@@ -10,7 +10,7 @@ Today I will change parts of a loop in a game and re-use code on a new sprite. *
 ## What can I change in a loop?
 Inside a forever loop you can change **the number**, **the block**, or **the sprite** it is on.
 
-![The shark game]({{res:l4-shark-game.png}})
+![The shark game]({{res:l4-shark-game-on-the-stage-teach-computing.png}})
 
 ## Sort the changes
 A bigger move number makes a sprite faster. A smaller number makes it slower. Drag each change into the right group.

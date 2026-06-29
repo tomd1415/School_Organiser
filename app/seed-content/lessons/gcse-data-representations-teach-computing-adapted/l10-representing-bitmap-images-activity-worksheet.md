@@ -20,9 +20,9 @@ The colour depth is the number of bits used for each pixel. More bits means more
 ## Same photo, two colour depths
 The first picture uses a high colour depth (lots of bits per pixel). The second uses only 1 bit per pixel, so each pixel can only be black or white.
 
-![A colour photo of two puppies]({{res:l10-colour-depth-original.png}})
+![A colour photo of two puppies]({{res:l10-two-puppies-full-colour-depth.png}})
 
-![The same photo at 1 bit per pixel — only black or white]({{res:l10-colour-depth-1bit.png}})
+![The same photo at 1 bit per pixel — only black or white]({{res:l10-two-puppies-1-bit-per-pixel.png}})
 
 ## 🟢 Support
 Match each word to what it means. Drag the meaning onto the word.

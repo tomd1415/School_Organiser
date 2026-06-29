@@ -21,11 +21,11 @@ Conclusion — answer the question and report what you found
 ## The roller coaster problem
 A new theme park wants your advice on what makes a **cool** roller coaster. The rule: no higher than 350 ft.
 
-![A roller coaster with loops]({{res:l3-roller-coaster-photo.png}})
+![A roller coaster with loops]({{res:l3-roller-coaster-photo-teach-computing.png}})
 
 Here is data about real roller coasters. Each dot is one ride: its top speed and its height.
 
-![A scatter graph of roller coaster top speed against maximum height]({{res:l3-roller-coaster-scatter.png}})
+![A scatter graph of roller coaster top speed against maximum height]({{res:l3-roller-coaster-speed-vs-height-scatter-teach-computing.png}})
 
 | Question | Choose one |
 |---|---|

@@ -10,7 +10,7 @@ Today I will build my web page in Google Sites, preview it on different devices,
 ## Building your page
 Last lesson you planned your page on paper. Today you will build it in **Google Sites**. First, let's remember the steps.
 
-![A web page being built in Google Sites]({{res:l4-made-page.png}})
+![A web page being built in Google Sites]({{res:l4-a-web-page-being-built-in-google-sites-teach-computing.png}})
 
 Put the steps in order to set up a web page.
 

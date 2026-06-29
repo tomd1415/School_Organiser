@@ -10,7 +10,7 @@ Today I will look at how words (text) and pictures (images) send a message.
 ## Starter — what does this sign mean?
 We see signs all around us. Some use a picture, some use words, and some use both.
 
-![Ten signs from the world around us]({{res:l1-signs-grid.png}})
+![Ten signs from the world around us]({{res:l1-signs-from-the-world-around-us-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

@@ -10,7 +10,7 @@ Today I will learn the two ways to hold a camera: portrait and landscape.
 ## Two ways to hold the device
 You can hold a device **upright** (portrait) or **sideways** (landscape).
 
-![Holding a device upright and sideways]({{res:l2-holding-portrait-landscape.png}})
+![Holding a device upright and sideways]({{res:l2-holding-a-device-upright-and-sideways-teach-computing.png}})
 
 - **Portrait** = held upright. The photo is **taller** than it is wide.
 - **Landscape** = held sideways. The photo is **wider** than it is tall.

@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Same routine. Vocabulary on the board: desktop publishing · benefits. Whiteboards and A4 paper ready.
 
 ## What is desktop publishing?
-![A pile of magazines made with desktop publishing]({{res:l6-magazines.png}})
+![A pile of magazines made with desktop publishing]({{res:l6-magazines-teach-computing.png}})
 
 - making documents with text and images
 - using page layout software
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Ask pupils to say it in their own words first. Then share the unit definition.
 
 ## Who uses it in the real world?
-![Newspapers, made with desktop publishing]({{res:l6-newspapers.png}})
+![Newspapers, made with desktop publishing]({{res:l6-newspapers-teach-computing.png}})
 
 - estate agents → house brochures
 - card companies → greeting cards
@@ -33,7 +33,7 @@
 > 🧑‍🏫 We-do: take a shop poster — what is good about making it on a computer? Easy to change the price, quick to print more. This is the Support multi-select.
 
 ## By hand or by computer?
-![A laptop ready for desktop publishing]({{res:l6-laptop.png}})
+![A laptop ready for desktop publishing]({{res:l6-laptop-ready-for-desktop-publishing-teach-computing.png}})
 
 - the time changes — easy to fix on a computer
 - you need 20 copies — quick to print on a computer

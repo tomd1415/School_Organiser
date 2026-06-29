@@ -11,7 +11,7 @@ Today I will learn what we can share on the World Wide Web, where websites are s
 We can share **media** on the web: pictures, videos, text and sounds.
 We cannot share real, physical things like a sandwich or a pet.
 
-![Lots of media that can be shared online]({{res:l3-media-collage.png}})
+![Lots of media that can be shared online]({{res:l3-media-that-can-be-shared-online-teach-computing.png}})
 
 ## Sort — can share or cannot share?
 Drag each one into the right group.

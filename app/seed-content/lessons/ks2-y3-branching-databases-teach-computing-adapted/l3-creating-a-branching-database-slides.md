@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: branching database · attribute · question · identify · test. Have j2data Branch open: ncce.io/branchingdb.
 
 ## Identify a minibeast
-![A minibeast branching database]({{res:l3-minibeast-branching-database.png}})
+![A minibeast branching database]({{res:l3-minibeast-branching-database-teach-computing.png}})
 
 Answer each yes/no question to reach the right minibeast.
 

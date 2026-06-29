@@ -7,7 +7,7 @@
 ## Starter — explore the code
 Look at this HTML. A `<div>` groups part of a page into a section.
 
-![HTML showing a div with a class, holding a heading]({{res:l5-div-code-teach-computing.png}})
+![HTML showing a div with a class, holding a heading]({{res:l5-div-with-a-class-code-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

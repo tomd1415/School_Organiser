@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: div · class · style · nesting.
 
 ## Starter — explore the code
-![HTML showing a div with a class, holding a heading]({{res:l5-div-code-teach-computing.png}})
+![HTML showing a div with a class, holding a heading]({{res:l5-div-with-a-class-code-teach-computing.png}})
 
 What is the relationship between the HTML and the CSS? Answer on the starter worksheet.
 
@@ -20,7 +20,7 @@ A `<div>` groups part of a page into a meaningful **section**, so you can style 
 > 🧑‍🏫 Compare to drawing boxes around parts of a newspaper. A div by itself is invisible — the class lets CSS find it.
 
 ## Classes  (we do)
-![Two div sections styled as blue boxes, with the code beside the output]({{res:l5-divs-code-output-teach-computing.png}})
+![Two div sections styled as blue boxes, with the code beside the output]({{res:l5-two-styled-divs-code-and-output-teach-computing.png}})
 
 Add `class="favourite"` to a div. In CSS, style it with `.favourite { ... }`. Every div with that class matches.
 

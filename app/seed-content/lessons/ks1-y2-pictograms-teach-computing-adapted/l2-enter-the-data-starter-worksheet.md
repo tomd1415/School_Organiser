@@ -10,7 +10,7 @@ Today I will make a pictogram on the computer and read it.
 ## What is a pictogram?
 A **pictogram** is a chart that uses **pictures** to show data. One picture stands for one thing.
 
-![Our favourite fruit pictogram]({{res:l2-fruit-pictogram.png}})
+![Our favourite fruit pictogram]({{res:l2-our-favourite-fruit-pictogram-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

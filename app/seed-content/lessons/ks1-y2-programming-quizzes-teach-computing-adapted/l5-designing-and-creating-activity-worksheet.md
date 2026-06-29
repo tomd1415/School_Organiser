@@ -45,7 +45,7 @@ Other actions: say, grow, change page
 ## Save your work
 When you finish, **save** your project so you can use it next lesson.
 
-![Saving a project in ScratchJr]({{res:l5-save.jpg}})
+![Saving a project in ScratchJr]({{res:l5-saving-a-project-in-scratchjr-teach-computing.jpg}})
 
 ## Show your work
 | Question | Your answer |

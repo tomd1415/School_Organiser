@@ -10,7 +10,7 @@ Today I will read a graph carefully to draw a conclusion.
 ## Read the graph
 This graph shows the light in a room over time. Look at where the line goes up and where it dips down.
 
-![A light graph with two dips]({{res:l6-light-graph.png}})
+![A light graph with two dips]({{res:l6-light-graph-with-two-dips-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

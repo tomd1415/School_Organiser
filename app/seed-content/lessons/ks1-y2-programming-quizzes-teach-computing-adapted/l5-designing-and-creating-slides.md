@@ -14,7 +14,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil what the wrong answer does.
 
 ## Choose your pictures
-![A space background with two sprites]({{res:l5-moon-aliens.jpg}})
+![A space background with two sprites]({{res:l5-a-space-background-with-two-sprites-teach-computing.jpg}})
 
 - pick a **background** you like
 - pick **sprites** that go with it
@@ -37,7 +37,7 @@
 > 🧑‍🏫 You-do. Pupils build their quiz from their design. Support: build the right-answer sprite only. Challenge: both sprites.
 
 ## Save your work
-![Saving a project]({{res:l5-save.jpg}})
+![Saving a project]({{res:l5-saving-a-project-in-scratchjr-teach-computing.jpg}})
 
 - give your project a name
 - you will use it again next lesson

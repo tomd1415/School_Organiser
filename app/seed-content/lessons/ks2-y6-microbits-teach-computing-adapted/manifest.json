@@ -10,12 +10,48 @@
       "objectives": "I can explain that a variable holds one value that can change\nI can use the micro:bit buttons (inputs) to change a variable\nI can plan an algorithm for a counter\nI can make and test a counter in MakeCode",
       "outline": "Routine first (same every lesson). Words on the board: micro:bit · MakeCode · variable · input · count. TA: everyone has the starter worksheet open; the activity worksheet ready; MakeCode loaded; micro:bits/USB leads out. Read the four 'I can…' aloud, slowly.\n1. (0–8) Starter — what is a micro:bit? A micro:bit is a tiny computer programmed in MakeCode; its buttons are inputs. Pupils choose what a micro:bit is. Likely error: 'a micro:bit is a phone' → fix-words 'a tiny computer we program.'\n2. (8–18) I-do → we-do — a variable holds ONE value. Use a real box + number cards: swap one card for another, the box still holds one value. Our variable is 'count'. Support choose what a variable is; Challenge: what happens to the old value (replaced).\n3. (18–28) Inputs. Button A, B and A+B are inputs; the battery is power, not an input. Pupils MULTI-SELECT the inputs we use to count.\n4. (28–40) Plan then code. Pupils ORDER the algorithm steps, then open MakeCode → New Project → Variables → Make a Variable → count. Model 'Make a Variable'. Then pupils ORDER the counter blocks (Parsons). Support choose which block adds 1 / which resets; Core explain 'set count to 0'.\n5. (40–52) You-do — make and test the counter; test with the play button (emulator). Pupils screenshot their work + paste the MakeCode link. Challenge: add an A+B reset. Likely error: forgetting 'set count to 0' → fix-words 'start at zero.' TA: prompt, do not drag blocks for them.\n6. (52–55) Plenary — self-tick the four 'I can…'; each pupil says what 'change count by 1' does (adds 1).\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Making a micro:bit counter — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-microbit-counter-starter-worksheet.md" },
-        { "title": "Making a micro:bit counter — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-microbit-counter-activity-worksheet.md" },
-        { "title": "Making a micro:bit counter — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-microbit-counter-slides.md" },
-        { "title": "MakeCode start screen — New Project (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-makecode-home.png" },
-        { "title": "Variables blocks — Make a Variable, set, change (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-variables-panel.png" },
-        { "title": "The finished counter program in MakeCode (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-counter-program.png" }
+        {
+          "title": "MakeCode start screen — New Project (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-makecode-start-screen-new-project-teach-computing.png"
+        },
+        {
+          "title": "Variables blocks — Make a Variable, set, change (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-variables-blocks-make-a-variable-set-change-teach-computing.png"
+        },
+        {
+          "title": "The finished counter program in MakeCode (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-finished-counter-program-in-makecode-teach-computing.png"
+        },
+        {
+          "title": "Making a micro:bit counter — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-making-a-micro-bit-counter-starter-worksheet.md"
+        },
+        {
+          "title": "Making a micro:bit counter — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-making-a-micro-bit-counter-activity-worksheet.md"
+        },
+        {
+          "title": "Making a micro:bit counter — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-making-a-micro-bit-counter-slides.md"
+        }
       ]
     },
     {
@@ -23,15 +59,69 @@
       "objectives": "I can explain what a countdown timer does and how a loop repeats steps\nI can find and fix a bug in a program\nI can use true/false (Boolean) and if…else to start and stop the timer\nI can make and test a countdown timer in MakeCode",
       "outline": "Routine first. Words on the board: timer · loop · bug · Boolean · true · false · if…else. TA: everyone has the starter worksheet open; the activity worksheet ready; MakeCode loaded; stopwatches out. Read the four 'I can…' aloud. Recap: last lesson we made a counter.\n1. (0–8) Starter — why a timer? A counter alone is not fair (people take different times); a timer gives everyone the same time. A forever loop repeats steps. Pupils recap 'change count by 1' and choose why we add a timer. Likely error: '30 goals is the score' → fix-words '30 goals in HOW LONG?'\n2. (8–22) Debug with PRIMM (Predict, Run, Investigate). Show the buggy countdown: it starts at 30 but the bar graph only goes up to 10 — the numbers do not match. Support choose where the bug is; Core write the fix (graph up to 30). Show the fixed code.\n3. (22–34) True/false — Boolean. A Boolean is only ever true or false (light-switch analogy). Timer running = true → ON (button A); = false → OFF (button B). Pupils choose what 'true' means; Challenge: why true/false is clearer than 1/0.\n4. (34–44) if…else — selection. If Countdown = 0 → show the finish icon; else if Timer running = true → take 1 away, wait, show the graph. Pupils ORDER the timer blocks (Parsons). TA: prompt 'what happens first when it reaches 0?'\n5. (44–52) You-do — make and test the timer (button A start, button B stop). Pupils screenshot their work + paste the MakeCode link. Likely error: changing the start number but not the graph 'up to' number → fix-words 'change BOTH numbers.'\n6. (52–55) Plenary / end of unit — self-tick the four 'I can…'; each pupil says what a Boolean can be (true or false). Recap the unit: counter → timer.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Making a micro:bit timer — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-microbit-timer-starter-worksheet.md" },
-        { "title": "Making a micro:bit timer — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-microbit-timer-activity-worksheet.md" },
-        { "title": "Making a micro:bit timer — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-microbit-timer-slides.md" },
-        { "title": "Countdown bug — starts at 30, graph only up to 10 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-timer-bug-30.png" },
-        { "title": "Countdown fixed — starts at 30, graph up to 30 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-timer-fixed-30.png" },
-        { "title": "Boolean block — set Timer running to true (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-boolean-true.png" },
-        { "title": "Boolean block — set Timer running to false (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-boolean-false.png" },
-        { "title": "if … else if blocks for the timer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-if-else.png" },
-        { "title": "The complete countdown timer — start, stop, reset (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-timer-complete.png" }
+        {
+          "title": "Countdown bug — starts at 30, graph only up to 10 (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-countdown-bug-starts-at-30-graph-only-up-to-10-teach-computing.png"
+        },
+        {
+          "title": "Countdown fixed — starts at 30, graph up to 30 (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-countdown-fixed-starts-at-30-graph-up-to-30-teach-computing.png"
+        },
+        {
+          "title": "Boolean block — set Timer running to true (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-boolean-block-set-timer-running-to-true-teach-computing.png"
+        },
+        {
+          "title": "Boolean block — set Timer running to false (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-boolean-block-set-timer-running-to-false-teach-computing.png"
+        },
+        {
+          "title": "if … else if blocks for the timer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-if-else-if-blocks-for-the-timer-teach-computing.png"
+        },
+        {
+          "title": "The complete countdown timer — start, stop, reset (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-the-complete-countdown-timer-start-stop-reset-teach-computing.png"
+        },
+        {
+          "title": "Making a micro:bit timer — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-a-micro-bit-timer-starter-worksheet.md"
+        },
+        {
+          "title": "Making a micro:bit timer — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-a-micro-bit-timer-activity-worksheet.md"
+        },
+        {
+          "title": "Making a micro:bit timer — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-a-micro-bit-timer-slides.md"
+        }
       ]
     }
   ]

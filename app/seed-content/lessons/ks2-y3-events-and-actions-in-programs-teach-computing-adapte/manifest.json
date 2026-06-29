@@ -1,0 +1,247 @@
+{
+  "unitTitle": "KS2 Y3 Events and actions in programs (Teach Computing — adapted)",
+  "course": {
+    "name": "KS2 Computing",
+    "keyStage": "KS2"
+  },
+  "lessons": [
+    {
+      "title": "Moving a sprite",
+      "objectives": "I can explain that an event makes an action happen\nI can name the event and the action in a block stack\nI can choose sensible keys to move a sprite and say why",
+      "outline": "Routine first (same every lesson). Vocabulary on board: event · action · sprite · key press · move. TA: everyone has the starter worksheet; the shared Scratch project open. Read the 3 “I can…” aloud.\n1. (0–5) Starter — how do games control movement? Steer to keys on the keyboard; show the arrow-keys photo on the starter worksheet.\n2. (5–15) I-do → we-do — event and action. Point at the yellow block (event = key press) and the blue blocks (action = point and move). Pupils SORT blocks into Event vs Action on the starter worksheet. Likely error: thinking the sprite moves on its own → fix-words “nothing happens until the event.”\n3. (15–30) Explore the project — press the keys and watch one sprite move. Pupils LABEL the event and action on the activity worksheet.\n4. (30–50) You-do — choose your own keys. • Support: choose the up key only. • Core: choose all four arrow keys. • Challenge: explain why arrow keys are clearer than random letters. TA: prompt, do not do it for them. Show-your-work: project link + screenshot.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil names one event and one action on their screen.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Event and action block stack (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-event-and-action-block-stack-teach-computing.png"
+        },
+        {
+          "title": "Arrow keys (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-arrow-keys-teach-computing.png"
+        },
+        {
+          "title": "Moving a sprite — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-moving-a-sprite-starter-worksheet.md"
+        },
+        {
+          "title": "Moving a sprite — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-moving-a-sprite-activity-worksheet.md"
+        },
+        {
+          "title": "Moving a sprite — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-moving-a-sprite-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Maze movement",
+      "objectives": "I can choose and resize a character for my maze\nI can program a sprite to move in four directions\nI can copy a block stack and change it",
+      "outline": "Routine first. Vocabulary on board: sprite · resize · move · point in direction · algorithm. TA: starter worksheet out; the maze Scratch project open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — the maze. Show the Start→Finish maze; ask if a big sprite fits the paths. Pupils answer the resize question on the starter worksheet.\n2. (10–20) I-do → we-do — choose and resize a sprite. Model changing the Size value and pressing Enter. Likely error: a sprite too big for the paths → fix-words “make the Size number smaller, then press Enter.”\n3. (20–40) We-do → you-do — program one direction, then copy it. Build the “right” stack (event → point in direction 90 → move 10). Pupils ORDER the build steps on the activity worksheet, then duplicate and change the copies (up 0, right 90, down 180, left -90). • Support: up only. • Core: all four. • Challenge: change the steps value to move faster/slower. Show-your-work: project link + screenshot.\n4. (40–50) You-do — test in the maze; debug if a direction is wrong.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows one direction working.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Maze with a sprite (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-maze-with-a-sprite-teach-computing.png"
+        },
+        {
+          "title": "Four-direction movement code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-four-direction-movement-code-teach-computing.png"
+        },
+        {
+          "title": "Maze movement — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-maze-movement-starter-worksheet.md"
+        },
+        {
+          "title": "Maze movement — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-maze-movement-activity-worksheet.md"
+        },
+        {
+          "title": "Maze movement — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-maze-movement-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Drawing lines",
+      "objectives": "I can use a programming extension (Pen)\nI can use pen down to draw a line\nI can choose blocks to set up my program",
+      "outline": "Routine first. Vocabulary on board: extension block · pen down · pen up · set up. TA: starter worksheet out; a movement project open; the Setup worksheet ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — extension blocks. Show where Add Extension is and choose Pen. Pupils answer the starter worksheet questions.\n2. (10–20) I-do → we-do — pen down draws a line. Model adding pen down, then move the sprite. Likely error: “pen down” read as putting a pen on the table → fix-words “pen down means the pen draws.”\n3. (20–40) Set up the program (initialisation). Show the setup blocks (when green flag clicked → go to x:0 y:0 → set pen colour → erase all). Pupils ORDER the setup on the activity worksheet, then add it to their project. • Support: copy the setup as shown. • Core: choose your own pen colour. • Challenge: explain why setup goes under the green flag. Show-your-work: project link + screenshot.\n4. (40–50) You-do — draw a picture with the pen; check it starts the same every run.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows one drawn line.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Program setup blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-program-setup-blocks-teach-computing.png"
+        },
+        {
+          "title": "Drawing lines — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-drawing-lines-starter-worksheet.md"
+        },
+        {
+          "title": "Drawing lines — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-drawing-lines-activity-worksheet.md"
+        },
+        {
+          "title": "Drawing lines — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-drawing-lines-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Adding features",
+      "objectives": "I can name extra Pen blocks and say what they do\nI can choose a key to turn a feature on\nI can join the event and action to make a feature work",
+      "outline": "Routine first. Vocabulary on board: pen up · change pen colour · change pen size · event · action. TA: starter worksheet out; the experimenting Pen project open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — the Pen blocks. Name set pen colour, change pen size by 1/-1, pen up, pen down, erase all. Pupils MATCH each block to what it does on the starter worksheet. Likely error: mixing up pen up with erase all → fix-words “pen up stops drawing; erase all clears the screen.”\n2. (10–20) We-do — experiment with the blocks; press u (pen up) and d (pen down) and watch the line stop and start.\n3. (20–35) You-do — add a feature. Each pupil joins a Pen block to a key (event → action). Plan it on the activity worksheet first. • Support: add pen up on the u key. • Core: add a colour or size change. • Challenge: add two features and explain the key choices. Show-your-work: project link + screenshot.\n4. (35–50) Test the features; debug if a key does the wrong thing.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows one feature and names its key.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Pen feature blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-pen-feature-blocks-teach-computing.png"
+        },
+        {
+          "title": "Pen up and pen down on keys (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-pen-up-and-pen-down-on-keys-teach-computing.png"
+        },
+        {
+          "title": "Adding features — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-adding-features-starter-worksheet.md"
+        },
+        {
+          "title": "Adding features — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-adding-features-activity-worksheet.md"
+        },
+        {
+          "title": "Adding features — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-adding-features-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Debugging movement",
+      "objectives": "I can test a program against a design\nI can match a piece of code to what it does\nI can find and fix a bug in a program",
+      "outline": "Routine first. Vocabulary on board: bug · debug · error · design · test. TA: starter worksheet out; the debugging Scratch project open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — what is a bug? Name the parts of the Scratch screen; pupils LABEL the green flag, stop button, stage and instructions on the starter worksheet.\n2. (10–20) I-do — test against the design. Compare “should happen” with “does happen”; a mismatch is a bug.\n3. (20–40) We-do → you-do — find and fix the bug. The left arrow makes the sprite go right (point in direction 90). Pupils answer the activity worksheet (is it a bug? which block? what should the value be → -90), then fix it. Likely error: blaming the event block → fix-words “the event is fine; the action has the wrong number.” • Support: change the one number as shown. • Core: find and fix it in their own project. • Challenge: fix a second bug (a key with pen down where it should be pen up). Show-your-work: project link + screenshot.\n4. (40–50) Test the fixes against the design again.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil names one bug they fixed.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Scratch project screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-scratch-project-screen-teach-computing.png"
+        },
+        {
+          "title": "Buggy left-arrow code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-buggy-left-arrow-code-teach-computing.png"
+        },
+        {
+          "title": "Debugging movement — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-debugging-movement-starter-worksheet.md"
+        },
+        {
+          "title": "Debugging movement — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-debugging-movement-activity-worksheet.md"
+        },
+        {
+          "title": "Debugging movement — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-debugging-movement-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Making a project",
+      "objectives": "I can make design choices and say why\nI can build my design into a maze project\nI can test and evaluate my project",
+      "outline": "Routine first. Vocabulary on board: design · code · set up · test · debug · event · action. TA: starter worksheet out; the template Scratch project open; the design worksheet ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — design first. Show the blank maze; pupils ORDER the five build steps on the starter worksheet.\n2. (10–20) I-do → we-do — design it. Choose sprite, keys (events) and pen colour; fill the plan rows on the activity worksheet.\n3. (20–40) You-do — build it in five steps: add/resize/recentre the sprite → choose event blocks → add motion blocks → add pen blocks → set up (x: -200 y: 100). Likely error: forgetting the minus sign in x: -200 → fix-words “the start needs a minus sign for x.” • Support: follow a part-completed design. • Core: full own design. • Challenge: add an extra feature. Show-your-work: project link + screenshot.\n4. (40–50) Test it against the design and debug; then evaluate (what works / what to improve) on the activity worksheet.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows their project and names one thing that works well.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Blank maze design (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-blank-maze-design-teach-computing.png"
+        },
+        {
+          "title": "Making a project — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-project-starter-worksheet.md"
+        },
+        {
+          "title": "Making a project — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-project-activity-worksheet.md"
+        },
+        {
+          "title": "Making a project — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-project-slides.md"
+        }
+      ]
+    }
+  ]
+}

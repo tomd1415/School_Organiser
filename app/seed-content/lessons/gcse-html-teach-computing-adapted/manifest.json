@@ -10,12 +10,48 @@
       "objectives": "I can describe what HTML is and what a tag does\nI can use heading, paragraph and list tags to structure a page\nI can write and view a simple HTML page in a browser",
       "outline": "Routine first (same every lesson). Vocabulary on board: website · HTML · element · tag. TA: everyone has a code editor and a browser open. Read the 3 “I can…” aloud.\n1. (0–5) Starter — how does a web page reach your screen? (think–pair–share with the browsers image). Pupils write/choose on the starter worksheet (minimal writing).\n   • Support: tick the right answer.  • Core: explain why every browser opens the same file.  • Challenge: say what the server sends back.\n2. (5–15) I-do — what is HTML? Tags in angle brackets; opening vs closing `/`. Map tags onto a newspaper (heading, subheading, paragraph) using the newspaper image.\n3. (15–25) We-do (Predict). Pupils predict what a small page will show, then open and refresh it.\n   • Support: match tag→job on the worksheet.  • Core: fill the “ul vs ol” answer.  • Challenge: explain why plain text is useful. Likely error: forgetting the closing `</tag>` → fix-words “every tag needs a partner that closes it with a /.”\n4. (25–45) You-do — build a page with DOCTYPE/html/body, a heading, a paragraph and a list. Use the Parsons block to order a valid page first. Keep a screenshot.\n   • Support: “type THIS line” card.  • Core: build unaided.  • Challenge: add an ordered list. TA: “prompt, do not do it for them.”\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil shows their page in the browser. TA notes who closed every tag.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Introduction to HTML — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-html-starter-worksheet.md" },
-        { "title": "Introduction to HTML — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-html-activity-worksheet.md" },
-        { "title": "Introduction to HTML — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-to-html-slides.md" },
-        { "title": "web browsers (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-web-browsers-teach-computing.png" },
-        { "title": "newspaper parts (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-newspaper-teach-computing.png" },
-        { "title": "HTML lists code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-html-lists-code-teach-computing.png" }
+        {
+          "title": "web browsers (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-web-browsers-teach-computing.png"
+        },
+        {
+          "title": "newspaper parts (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-newspaper-parts-teach-computing.png"
+        },
+        {
+          "title": "HTML lists code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-html-lists-code-teach-computing.png"
+        },
+        {
+          "title": "Introduction to HTML — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-html-starter-worksheet.md"
+        },
+        {
+          "title": "Introduction to HTML — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-html-activity-worksheet.md"
+        },
+        {
+          "title": "Introduction to HTML — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-html-slides.md"
+        }
       ]
     },
     {
@@ -23,10 +59,34 @@
       "objectives": "I can explain what accessibility means on a website\nI can add an image to a page with the img tag\nI can create a hyperlink with the a href tag",
       "outline": "Routine first. Vocabulary on board: image · hyperlink · accessibility · source (src). TA: pupils open the page they made in L1. Read the 3 “I can…” aloud.\n1. (0–10) Starter — what does “accessibility” mean? (think–pair–share). Pupils tick/choose on the starter worksheet (a multi-select “what helps accessibility”).\n   • Support: choose the meaning.  • Core: tick all that help.  • Challenge: explain why alt text helps a screen-reader user.\n2. (10–20) Optional teacher-played accessibility video (external link in the source, up to 4:00 — has sound, teacher’s choice given low-arousal default).\n3. (20–30) I-do — add an image: `<img src alt width>`. Live code; name the common errors (`scr`, missing quotes, self-closing tag).\n4. (30–40) We-do — make a hyperlink `<a href>`; show an image-as-link.\n5. (40–50) You-do — add one image and one working link to your page. Worksheet: matching (src/alt/width), card-sort (tag vs attribute), order (steps to add an image), challenge code (write a link).\n   • Support: block-by-block strip.  • Core: do both unaided.  • Challenge: make the image itself a link. Likely error: missing quotes around the address → “the address always goes inside quote marks.” Keep a screenshot.\n6. (50–55) Plenary — self-tick the 3 “I can…”; TA notes who added sensible alt text.\nDifferentiation on the SAME task; movement breaks routine, not reward; no flashing/sound.",
       "resources": [
-        { "title": "Images and links — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-images-and-links-starter-worksheet.md" },
-        { "title": "Images and links — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-images-and-links-activity-worksheet.md" },
-        { "title": "Images and links — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-images-and-links-slides.md" },
-        { "title": "image frames (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-image-frames-teach-computing.png" }
+        {
+          "title": "image frames (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-image-frames-teach-computing.png"
+        },
+        {
+          "title": "Images and links — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-images-and-links-starter-worksheet.md"
+        },
+        {
+          "title": "Images and links — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-images-and-links-activity-worksheet.md"
+        },
+        {
+          "title": "Images and links — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-images-and-links-slides.md"
+        }
       ]
     },
     {
@@ -34,13 +94,55 @@
       "objectives": "I can identify features of good and bad web design\nI can link pages stored in the same folder\nI can insert an image stored locally in my folder",
       "outline": "Routine first. Vocabulary on board: web design · local · remote · folder. TA: pupils open their site from L1–L2. Read the 3 “I can…” aloud.\n1. (0–5) Starter — match the tags (recall of L1–L2). Pupils drag answers on the starter worksheet.\n2. (5–15) We-do — the parts of a web page (anatomy image): heading, menu, content, footer. Contrast a good page with a cluttered bad page (bad-website image). Sort good vs bad on the worksheet (card-sort).\n3. (15–25) Plan — a quick wireframe sketch (wireframe image); naming and purpose of two new pages.\n4. (25–45) I-do/you-do — local vs remote files (folder image). A local link/image uses just a file name. Pupils make page2.html, add a local image, and link the pages with a list (order block for the steps; challenge code for a local image + nav list).\n   • Support: copy the menu from page 1.  • Core: build unaided.  • Challenge: add a “home” button on every page. Likely error: link points to a file not in the folder → “check the file name and folder match exactly.” Keep a screenshot.\n5. (45–50) Plenary — self-tick the 3 “I can…”; pupils click their links to prove they work. TA notes who has working links between all pages.\nDifferentiation on the SAME task; no flashing/sound; calm discussion of bad design using stills only.",
       "resources": [
-        { "title": "Mini project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-mini-project-starter-worksheet.md" },
-        { "title": "Mini project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-mini-project-activity-worksheet.md" },
-        { "title": "Mini project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-mini-project-slides.md" },
-        { "title": "web page anatomy (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-website-anatomy-teach-computing.png" },
-        { "title": "cluttered web page (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-bad-website-teach-computing.png" },
-        { "title": "website wireframe sketch (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-wireframe-sketch-teach-computing.png" },
-        { "title": "website folder structure (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-folder-structure-teach-computing.png" }
+        {
+          "title": "web page anatomy (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-web-page-anatomy-teach-computing.png"
+        },
+        {
+          "title": "cluttered web page (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-cluttered-web-page-teach-computing.png"
+        },
+        {
+          "title": "website wireframe sketch (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-website-wireframe-sketch-teach-computing.png"
+        },
+        {
+          "title": "website folder structure (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-website-folder-structure-teach-computing.png"
+        },
+        {
+          "title": "Mini project — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-mini-project-starter-worksheet.md"
+        },
+        {
+          "title": "Mini project — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-mini-project-activity-worksheet.md"
+        },
+        {
+          "title": "Mini project — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-mini-project-slides.md"
+        }
       ]
     },
     {
@@ -48,10 +150,34 @@
       "objectives": "I can describe what CSS is and why we use it as well as HTML\nI can write a CSS rule with a selector, property and value\nI can link my HTML page to an external stylesheet",
       "outline": "Routine first. Vocabulary on board: CSS · style sheet · selector · property · value. TA: pupils open their HTML files. Read the 3 “I can…” aloud.\n1. (0–5) Starter — predict what a block of CSS would do (do NOT reveal yet; they test it). Pupils write a prediction on the starter worksheet.\n2. (5–15) I-do — what is CSS? Sets the look; one stylesheet styles every page at once (one-style-many-pages image).\n3. (15–25) We-do — the shape of a rule: `h1 { color: red; }` — selector, property, value. Live demo the external `<link rel=\"stylesheet\">`; name the file `styles.css`.\n4. (25–45) You-do — make styles.css, link it, change a background colour and a font. Worksheet: matching (property→effect), card-sort (inline vs external), order (steps to link a stylesheet), challenge code (a CSS rule).\n   • Support: copy the example rule, change one value.  • Core: add two rules.  • Challenge: style several tags. Likely error: missing the semicolon or `}` → “every rule ends with ; and closes with }.” Keep a screenshot.\n5. (45–50) Plenary — self-tick the 3 “I can…”; TA notes who linked an external file rather than styling inline.\nDifferentiation on the SAME task; no flashing/sound; movement breaks routine.",
       "resources": [
-        { "title": "Introduction to CSS — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-introduction-to-css-starter-worksheet.md" },
-        { "title": "Introduction to CSS — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-introduction-to-css-activity-worksheet.md" },
-        { "title": "Introduction to CSS — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-introduction-to-css-slides.md" },
-        { "title": "one style, many pages (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-css-one-style-many-pages-teach-computing.png" }
+        {
+          "title": "one style, many pages (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-one-style-many-pages-teach-computing.png"
+        },
+        {
+          "title": "Introduction to CSS — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-introduction-to-css-starter-worksheet.md"
+        },
+        {
+          "title": "Introduction to CSS — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-introduction-to-css-activity-worksheet.md"
+        },
+        {
+          "title": "Introduction to CSS — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-introduction-to-css-slides.md"
+        }
       ]
     },
     {
@@ -59,11 +185,41 @@
       "objectives": "I can describe what a div is used for\nI can give a div a class\nI can use a class in CSS to style a section",
       "outline": "Routine first. Vocabulary on board: div · class · style · nesting. TA: pupils open their HTML + CSS files. Read the 3 “I can…” aloud.\n1. (0–10) Starter — explore the code (div-code image): what is the relationship between the HTML and the CSS? Pupils answer on the starter worksheet.\n2. (10–20) I-do — a `<div>` groups part of a page into a section; a class lets CSS find it. We-do: add `class=\"favourite\"`, style `.favourite { }` (divs-code-output image).\n3. (20–30) Nesting — a div inside a div (kept light, one level).\n4. (30–45) You-do — wrap part of the page in a `<div class>` and style the class. Worksheet: matching (div/class/nesting), Parsons (order a div block), challenge code (CSS for a class).\n   • Support: copy a class, change one value.  • Core: add a styled section.  • Challenge: nest a div. Likely error: missing the full stop in the CSS rule → “a class rule starts with a full stop, like `.header`.” Keep a screenshot.\n5. (45–50) Plenary — self-tick the 3 “I can…”; TA notes who used a class in BOTH the HTML and the CSS.\nDifferentiation on the SAME task; no flashing/sound.",
       "resources": [
-        { "title": "DIVs and classes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-divs-and-classes-starter-worksheet.md" },
-        { "title": "DIVs and classes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-divs-and-classes-activity-worksheet.md" },
-        { "title": "DIVs and classes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-divs-and-classes-slides.md" },
-        { "title": "div with a class — code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-div-code-teach-computing.png" },
-        { "title": "two styled divs — code and output (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-divs-code-output-teach-computing.png" }
+        {
+          "title": "div with a class — code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-div-with-a-class-code-teach-computing.png"
+        },
+        {
+          "title": "two styled divs — code and output (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-two-styled-divs-code-and-output-teach-computing.png"
+        },
+        {
+          "title": "DIVs and classes — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-divs-and-classes-starter-worksheet.md"
+        },
+        {
+          "title": "DIVs and classes — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-divs-and-classes-activity-worksheet.md"
+        },
+        {
+          "title": "DIVs and classes — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-divs-and-classes-slides.md"
+        }
       ]
     },
     {
@@ -71,12 +227,48 @@
       "objectives": "I can plan a layout with a wireframe and a house style\nI can describe the parts of the CSS box model\nI can use margin and padding to space out elements",
       "outline": "Routine first. Vocabulary on board: box model · padding · border · margin · float. TA: pupils have their site and CSS open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — same site, different screens. What changes on a small phone? (think–pair–share; link to L2 accessibility.)\n2. (10–18) I-do — plan first: sitemap + wireframe (sitemap/wireframe images); house style = consistent colours and fonts (colour-swatches image).\n3. (18–30) We-do — the CSS box model (box-model image): content → padding → border → margin. Worksheet: matching (layer→meaning), order (layers inside-out), Core text (padding vs margin; what `px` means).\n4. (30–45) You-do — add padding and margin to a div, then float two boxes side by side. Challenge code (10px padding + a border).\n   • Support: change one padding value and watch it move.  • Core: pad and border a div.  • Challenge: float two columns. Likely error: mixing up padding and margin → “padding pads INSIDE, margin pushes OUTSIDE.” Keep a screenshot.\n5. (45–50) Plenary — self-tick the 3 “I can…”; TA notes who can name where padding and margin sit. Homework: wireframe the assessed site.\nDifferentiation on the SAME task; no flashing/sound.",
       "resources": [
-        { "title": "Layouts and the CSS box model — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-layouts-and-box-model-starter-worksheet.md" },
-        { "title": "Layouts and the CSS box model — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-layouts-and-box-model-activity-worksheet.md" },
-        { "title": "Layouts and the CSS box model — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-layouts-and-box-model-slides.md" },
-        { "title": "CSS box model (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-css-box-model-teach-computing.png" },
-        { "title": "website sitemap (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-sitemap-teach-computing.png" },
-        { "title": "colour swatches — house style (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-colour-swatches-teach-computing.png" }
+        {
+          "title": "CSS box model (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-css-box-model-teach-computing.png"
+        },
+        {
+          "title": "website sitemap (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-website-sitemap-teach-computing.png"
+        },
+        {
+          "title": "colour swatches — house style (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-colour-swatches-house-style-teach-computing.png"
+        },
+        {
+          "title": "Layouts and the CSS box model — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-layouts-and-the-css-box-model-starter-worksheet.md"
+        },
+        {
+          "title": "Layouts and the CSS box model — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-layouts-and-the-css-box-model-activity-worksheet.md"
+        },
+        {
+          "title": "Layouts and the CSS box model — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-layouts-and-the-css-box-model-slides.md"
+        }
       ]
     },
     {
@@ -84,9 +276,27 @@
       "objectives": "I can build a three-page website using HTML and CSS\nI can use a rubric to evaluate a website\nI can give and act on peer feedback",
       "outline": "Routine first. Vocabulary on board: HTML · CSS · div · class · box model. TA: pupils ready to build their site. Read the 3 “I can…” aloud.\n1. (0–15) Starter — write the HTML and CSS (recall): write a list inside a `div`, then CSS to make it red and monospace. Swap and check.\n   • Support: choose the right tag/class syntax.  • Core: write the CSS rule.  • Challenge: add a monospace font.\n2. (15–35) I-do/you-do — the project: build a three-page website on a chosen theme, reusing earlier code. Hand out the rubric now.\n3. (35–45) Self-check against the rubric — pupils slide a 1–3 rating for HTML/CSS, pages, images, accessibility, navigation (slider questions). This focuses their next steps.\n4. (45–55) Plenary — peer feedback: swap with a neighbour, give two things that work and one to improve (text fields). Model kind, specific feedback.\nDifferentiation: the SAME build task with a low floor (one styled page) and high ceiling (three linked, well-styled pages); no flashing/sound; the site need not be finished today.",
       "resources": [
-        { "title": "Final project — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-final-project-starter-worksheet.md" },
-        { "title": "Final project — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-final-project-activity-worksheet.md" },
-        { "title": "Final project — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-final-project-slides.md" }
+        {
+          "title": "Final project — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-final-project-starter-worksheet.md"
+        },
+        {
+          "title": "Final project — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-final-project-activity-worksheet.md"
+        },
+        {
+          "title": "Final project — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-final-project-slides.md"
+        }
       ]
     },
     {
@@ -94,10 +304,34 @@
       "objectives": "I can act on feedback to finish my website\nI can show my work to others\nI can answer end-of-unit questions about HTML and CSS",
       "outline": "Routine first. Vocabulary on board: HTML · CSS · div · class · box model · float. TA: assessment criteria on display all lesson. Read the 3 “I can…” aloud.\n1. (0–5) Starter — review your feedback; turn it into a short to-do list (starter worksheet). Help anyone whose feedback is vague pick one concrete first job.\n2. (5–25) Finish the website — work the to-do list and save where the teacher can collect it. Circulate, focus on flagged learners.\n3. (25–35) Showcase — share the site with the class or just a neighbour (low-pressure). Activity worksheet: confidence sliders + show-your-work.\n4. (35–50) End-of-unit quiz — 20 single-choice questions on the quiz worksheet; quiet individual work (~15 min). Read aloud for anyone who needs it. Answer key is in the conversion notes.\n5. (50–55) Plenary — hand in website + quiz; congratulate the class on finishing the unit.\nDifferentiation: open finishing task (low floor/high ceiling); quiz read aloud on request; no flashing/sound.",
       "resources": [
-        { "title": "Project completion — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-project-completion-starter-worksheet.md" },
-        { "title": "Project completion — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-project-completion-activity-worksheet.md" },
-        { "title": "End-of-unit quiz — HTML and CSS.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-project-completion-quiz-worksheet.md" },
-        { "title": "Project completion — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l8-project-completion-slides.md" }
+        {
+          "title": "Project completion — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-project-completion-starter-worksheet.md"
+        },
+        {
+          "title": "Project completion — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-project-completion-activity-worksheet.md"
+        },
+        {
+          "title": "End-of-unit quiz — HTML and CSS.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-end-of-unit-quiz-html-and-css.md"
+        },
+        {
+          "title": "Project completion — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-project-completion-slides.md"
+        }
       ]
     }
   ]

@@ -21,7 +21,7 @@ A **topology** is the *shape* of a network — how the nodes are arranged.
 - **Star** — one central node (hub/switch); easy to add nodes; but the centre is a single point of failure.
 - **Bus** — one cable with a **terminator** at each end; cheap and simple; but if the cable fails the whole network fails.
 
-![Star and bus topologies, with their advantages and disadvantages]({{res:l4-topologies.png}})
+![Star and bus topologies, with their advantages and disadvantages]({{res:l4-star-and-bus-topologies.png}})
 
 > 🧑‍🏫 Terminator = stops the signal bouncing back. Likely error: thinking the bus terminators are nodes — fix-words "terminators are caps, not computers."
 

@@ -10,7 +10,7 @@ Today I will learn that I can change a 3D object: make it bigger or smaller, lif
 ## Handles
 When you click a 3D object, it turns blue and small squares appear. These are called **handles**. You drag a handle to change the object.
 
-![A cube with handles around it]({{res:l2-cube-handles.png}})
+![A cube with handles around it]({{res:l2-a-cube-with-resize-handles-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

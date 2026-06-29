@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: design · algorithm · variable · program flow · step counter. Recap: the accelerometer senses movement.
 
 ## Starter — counting steps
-![The micro:bit, showing the accelerometer]({{res:l5-microbit-parts.png}})
+![The micro:bit, showing the accelerometer]({{res:l5-a-micro-bit-with-its-parts-labelled-teach-computing.png}})
 
 - count your steps across the room
 - a step counter does this for you
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Pupils count steps across the room. Think-pair-share: which sensor could count steps? (the accelerometer). Support pupils choose what a step counter does.
 
 ## What a step counter does
-![A step counter design: algorithm and program flow]({{res:l5-stepcounter-design.png}})
+![A step counter design: algorithm and program flow]({{res:l5-a-step-counter-design-algorithm-and-program-flow-teach-computing.png}})
 
 - a shake = a step
 - button B shows the number of steps

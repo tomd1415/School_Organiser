@@ -10,7 +10,7 @@ Today I will decide how an app should handle user data safely and fairly.
 ## Secure data handling
 Good apps protect the data they collect.
 
-![A padlock made of circuit lines]({{res:l4-data-security-padlock.jpg}})
+![A padlock made of circuit lines]({{res:l4-data-security-padlock-teach-computing.jpg}})
 
 ## Good practice or poor practice?
 Drag each one into the right group.
@@ -36,7 +36,7 @@ Poor practice: Collects your location secretly, Shares your data without asking,
 ## 🔴 Challenge — ethical dilemmas
 Some apps collect huge amounts of data.
 
-![Data rising from a laptop into the cloud]({{res:l4-big-data-cloud.jpg}})
+![Data rising from a laptop into the cloud]({{res:l4-big-data-cloud-teach-computing.jpg}})
 
 | Question | Your answer |
 |---|---|

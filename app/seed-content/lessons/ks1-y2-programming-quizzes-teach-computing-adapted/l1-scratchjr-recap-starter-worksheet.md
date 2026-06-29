@@ -11,7 +11,7 @@ Today I will find my way around ScratchJr again.
 This is the ScratchJr screen. Drag each label onto the right place.
 
 ```label
-image: {{res:l1-scratchjr-screen.png}}
+image: {{res:l1-the-scratchjr-screen-teach-computing.png}}
 stage (49%, 30%): The stage — where the sprite moves
 flag (68%, 5%): Green flag — press to start
 blocks (34%, 77%): The blocks — the program

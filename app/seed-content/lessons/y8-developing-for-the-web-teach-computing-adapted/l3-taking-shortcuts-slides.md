@@ -22,7 +22,7 @@ A rule like `h2 { color: red; }` styles EVERY `<h2>` on the page at once.
 > 🧑‍🏫 Change the CSS once → the whole site updates. The styling moves out of the HTML and into the CSS file.
 
 ## A page styled with CSS  (we do)
-![A web page styled with CSS]({{res:l3-web-page-styled.png}})
+![A web page styled with CSS]({{res:l3-web-page-styled-with-css-teach-computing.png}})
 
 > 🧑‍🏫 Model styling the `<img>` tag so every image gets a border. Then learners style the other tags.
 

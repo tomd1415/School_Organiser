@@ -1,0 +1,21 @@
+{
+  "unitTitle": "Recording & mixing",
+  "course": {
+    "name": "Year 10 Sound Engineering",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Setting levels & gain",
+      "objectives": "- Set a clean recording level\n- Avoid clipping",
+      "outline": "Record a short clip; check meters.",
+      "resources": []
+    },
+    {
+      "title": "EQ & dynamics",
+      "objectives": "- Use EQ to shape a sound\n- Apply basic compression",
+      "outline": "Sweep EQ; tame a vocal with a compressor.",
+      "resources": []
+    }
+  ]
+}

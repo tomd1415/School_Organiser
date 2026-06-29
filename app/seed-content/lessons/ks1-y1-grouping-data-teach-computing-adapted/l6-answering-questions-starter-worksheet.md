@@ -10,8 +10,8 @@ Today I will decide how to group objects to answer a question.
 ## Starter — true or false?
 Look at a group of cars and cats on the board.
 
-![A red car]({{res:l6-red-car.png}})
-![A cat]({{res:l6-cat.png}})
+![A red car]({{res:l6-red-car-teach-computing.png}})
+![A cat]({{res:l6-cat-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

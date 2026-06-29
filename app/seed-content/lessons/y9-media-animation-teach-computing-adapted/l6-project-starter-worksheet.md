@@ -7,7 +7,7 @@
 ## Starter — how was this made?
 This short film shows a cube that bounces and changes shape.
 
-![A frame from a bouncing cube animation]({{res:l6-bouncing-cube.jpg}})
+![A frame from a bouncing cube animation]({{res:l6-bouncing-cube-frame.jpg}})
 
 | Question | Choose |
 |---|---|

@@ -12,7 +12,7 @@ A **function** is a ready-made formula. **SUM** adds up many cells at once. A gr
 
 To total the scores in row 2, the formula is **=SUM(B2:G2)**.
 
-![A spreadsheet of scores with totals]({{res:l4-times-table-totals.png}})
+![A spreadsheet of scores with totals]({{res:l4-a-spreadsheet-of-scores-with-totals-teach-computing.png}})
 
 Put the steps in order. How do you total a row with SUM?
 

@@ -20,7 +20,7 @@ HTML uses **tags** to mark up parts of a page. A tag sits inside angle brackets:
 > 🧑‍🏫 `<h1>` = big heading, `<p>` = paragraph. Only the text BETWEEN the tags is affected. Every opening tag needs a closing partner.
 
 ## Tags are like the parts of a newspaper  (we do)
-![A newspaper with a title, headlines and columns of text]({{res:l1-newspaper-teach-computing.png}})
+![A newspaper with a title, headlines and columns of text]({{res:l1-newspaper-parts-teach-computing.png}})
 
 A newspaper has a title, headings and paragraphs. A web page uses tags for the same jobs.
 

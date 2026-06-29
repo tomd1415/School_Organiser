@@ -15,7 +15,7 @@
 > 🧑‍🏫 Show how five move-right blocks is a lot. Set up the problem before the solution.
 
 ## The number is the value
-![A move block with its value and a number pad]({{res:l3-change-value.png}})
+![A move block with its value and a number pad]({{res:l3-changing-a-value-with-the-number-pad-teach-computing.png}})
 
 - some blocks have a NUMBER underneath
 - this number is the VALUE
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Hunt activity first: pupils go through each block colour and find which blocks have a number. This matches the label task on the starter worksheet.
 
 ## One block can do the work of many
-![A program with a move-right block set to 5]({{res:l3-value-program.png}})
+![A program with a move-right block set to 5]({{res:l3-a-program-with-a-value-of-5-teach-computing.png}})
 
 - one move-right block with value 5
 - moves the cat 5 steps

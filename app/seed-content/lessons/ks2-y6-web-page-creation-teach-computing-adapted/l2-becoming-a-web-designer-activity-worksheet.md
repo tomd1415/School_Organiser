@@ -10,9 +10,9 @@ Today I will name the common features of a web page, choose media for my page, a
 ## Match the page to its audience
 Each web page below was made for a different audience. Match each page to who it is for.
 
-![A web page made for parents]({{res:l2-uniform-page.png}})
+![A web page made for parents]({{res:l2-a-web-page-for-parents-school-uniform-teach-computing.png}})
 
-![A web page advertising games]({{res:l2-gaming-page.png}})
+![A web page advertising games]({{res:l2-a-web-page-for-adults-new-stock-teach-computing.png}})
 
 | Web page | Who is it for? |
 |---|---|
@@ -27,7 +27,7 @@ A web page is built from features. The main ones are:
 - **layouts** — the boxes that hold your text and pictures
 - **media** — your text, images, and so on
 
-![Google Sites — headers and layouts]({{res:l2-google-sites.png}})
+![Google Sites — headers and layouts]({{res:l2-google-sites-headers-and-layouts-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

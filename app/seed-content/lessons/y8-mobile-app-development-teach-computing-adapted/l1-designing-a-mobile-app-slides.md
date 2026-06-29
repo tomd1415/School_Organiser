@@ -31,12 +31,12 @@ We design the app around the **user** — what they need and find easy.
 ## What is a wireframe?
 A wireframe is a simple sketch of one screen — boxes for buttons, text and pictures.
 
-![A hand-drawn wireframe sketch]({{res:l1-wireframe-sketch.jpg}})
+![A hand-drawn wireframe sketch]({{res:l1-wireframe-sketch-teach-computing.jpg}})
 
 > 🧑‍🏫 Show the sketch, then the finished example next. Stress: rough sketch first, no need for neat art.
 
 ## Wireframe example — one screen
-![An example app screen wireframe]({{res:l1-app-wireframe-example.png}})
+![An example app screen wireframe]({{res:l1-app-wireframe-example-teach-computing.png}})
 
 > 🧑‍🏫 Each screen is a separate sketch. Pupils draw ONE screen of their tracker app and photograph it onto the worksheet.
 

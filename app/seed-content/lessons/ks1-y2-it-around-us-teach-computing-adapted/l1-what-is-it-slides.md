@@ -16,7 +16,7 @@
 > 🧑‍🏫 Keep it concrete. "IT = a computer, or something that works with a computer." Say the full words once, then just use "IT".
 
 ## The parts of a computer
-![A desktop computer]({{res:l1-desktop-computer.png}})
+![A desktop computer]({{res:l1-a-desktop-computer-teach-computing.png}})
 
 - the **screen** shows us what is happening
 - the **keyboard** and **mouse** let us control it

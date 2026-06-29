@@ -15,7 +15,7 @@ The [[ ]] key makes a capital letter. The [[ ]] key deletes the letter before th
 ## Fonts make a difference
 The same words can look very different. This is the font STYLE.
 
-![A bright, fancy 'Happy Birthday' font]({{res:l2-font-example.png}})
+![A bright, fancy 'Happy Birthday' font]({{res:l2-bright-font-example-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

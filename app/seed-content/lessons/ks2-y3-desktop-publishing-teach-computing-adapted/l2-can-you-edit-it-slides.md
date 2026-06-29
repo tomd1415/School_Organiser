@@ -15,7 +15,7 @@
 > 🧑‍🏫 We use desktop publishing (e.g. Canva) this unit. A template means you do not start from a blank page. Keep it concrete: show the invitation template now.
 
 ## A party invitation
-![A bright Happy Birthday graphic]({{res:l2-invitation.png}})
+![A bright Happy Birthday graphic]({{res:l2-party-invitation-graphic-teach-computing.png}})
 
 - the date and time matter most
 - big, bright text helps them stand out

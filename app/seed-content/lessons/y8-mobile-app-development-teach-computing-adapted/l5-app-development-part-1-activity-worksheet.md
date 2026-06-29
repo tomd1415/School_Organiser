@@ -11,7 +11,7 @@ Today I will use App Lab to build the welcome screen of my app.
 Drag each label onto the right part of App Lab.
 
 ```label
-image: {{res:l5-app-lab-interface.png}}
+image: {{res:l5-app-lab-design-view-teach-computing.png}}
 design (10%, 13%): Design tab
 toolbox (37%, 14%): Toolbox
 preview (14%, 47%): Phone screen

@@ -10,13 +10,55 @@
       "objectives": "I can tell a yes/no question from an open question\nI can make up a yes/no question about an object\nI can split a group of objects into two groups using one attribute",
       "outline": "Routine first (same every lesson). Vocabulary on board: attribute · value · yes/no question · object · group. TA: everyone has the starter and activity worksheets; a small set of real objects (or the vehicle pictures) on each table. Read the 3 “I can…” aloud.\n1. (0–10) Starter — two kinds of question. On the starter worksheet pupils SORT questions into ‘yes/no question’ and ‘open question’, then tick which questions only need a yes or no.\n   • Support: choose yes/no or open for one question.  • Core: write one yes/no question.  • Challenge: turn an open question into a yes/no question.\n2. (10–20) I-do → we-do — guess the object. Show the four vehicles. Teacher picks one in secret; pupils ask yes/no questions (Can it fly? Does it have an engine?) to find it. Likely error: an open question like “What colour is it?” → fix-words “a yes/no question can only be answered yes or no.”\n3. (20–35) You-do — split into two groups. On the activity worksheet pupils SORT the vehicles by one attribute (Can it fly?) into two groups, then choose/write the question that splits them.\n   • Support: drag each object into ‘can fly’ or ‘cannot fly’.  • Core: write the yes/no question used to split them.  • Challenge: explain why ‘What colour is it?’ does not make two clear groups.\n4. (35–50) Show your work — pupils make their own two groups with the objects and take a photo, then write the splitting question. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil says one yes/no question about an object on their table.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Yes or no questions — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-yes-no-questions-starter-worksheet.md" },
-        { "title": "Yes or no questions — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-yes-no-questions-activity-worksheet.md" },
-        { "title": "Yes or no questions — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-yes-no-questions-slides.md" },
-        { "title": "Car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-vehicle-car.png" },
-        { "title": "Motorbike (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-vehicle-motorbike.png" },
-        { "title": "Bicycle (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-vehicle-bicycle.png" },
-        { "title": "Hot-air balloon (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-vehicle-balloon.png" }
+        {
+          "title": "Car (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-car-teach-computing.png"
+        },
+        {
+          "title": "Motorbike (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-motorbike-teach-computing.png"
+        },
+        {
+          "title": "Bicycle (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-bicycle-teach-computing.png"
+        },
+        {
+          "title": "Hot-air balloon (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-hot-air-balloon-teach-computing.png"
+        },
+        {
+          "title": "Yes or no questions — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-yes-or-no-questions-starter-worksheet.md"
+        },
+        {
+          "title": "Yes or no questions — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-yes-or-no-questions-activity-worksheet.md"
+        },
+        {
+          "title": "Yes or no questions — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-yes-or-no-questions-slides.md"
+        }
       ]
     },
     {
@@ -24,11 +66,41 @@
       "objectives": "I can choose an attribute to split objects into two groups\nI can split a group again to make smaller groups\nI can arrange objects and questions into a tree (a branching database)",
       "outline": "Routine first. Vocabulary on board: branching database · attribute · question · group · tree · even. TA: everyone has the worksheets; the dinosaur picture cards ready to cut out. Read the 3 “I can…” aloud.\n1. (0–10) Starter — recap. On the starter worksheet pupils tick the yes/no questions and choose the attribute each question is about (e.g. ‘Can it fly?’ → the attribute is ‘flight’).\n   • Support: choose the attribute from two options.  • Core: write a yes/no question for a given attribute.  • Challenge: write a question that splits a group into two even halves.\n2. (10–20) I-do → we-do — split twice. Use the vehicles: ‘Can it fly?’ splits them, then ‘Does it have an engine?’ splits the no-group again. Show that a group can be split more than once. Likely error: a second question that leaves a group of zero → fix-words “a good question makes two groups, not an empty one.”\n3. (20–25) Why is it called a tree? Show the bare tree picture, then the finished minibeast branching database — explain ‘branching’ means it splits like a tree. Pupils LABEL the parts (a first question, a question, an object) on the activity worksheet.\n4. (25–45) You-do — make a tree. Pupils cut the dinosaur cards and arrange them with yes/no questions on paper, splitting until each dinosaur is on its own. They ORDER a worked example first (split → split again → label yes/no).\n   • Support: arrange three cards with one given question.  • Core: choose the questions to split all six.  • Challenge: keep the groups even so the tree is short. TA: prompt, do not do it for them.\n5. (45–55) Show your work — photo of the paper tree. Plenary — self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Making groups — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-making-groups-starter-worksheet.md" },
-        { "title": "Making groups — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-making-groups-activity-worksheet.md" },
-        { "title": "Making groups — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-making-groups-slides.md" },
-        { "title": "Tree shape (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-branching-tree-shape.png" },
-        { "title": "Minibeast branching database (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-minibeast-branching-database.png" }
+        {
+          "title": "Tree shape (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-tree-shape-teach-computing.png"
+        },
+        {
+          "title": "Minibeast branching database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-minibeast-branching-database-teach-computing.png"
+        },
+        {
+          "title": "Making groups — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-groups-starter-worksheet.md"
+        },
+        {
+          "title": "Making groups — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-groups-activity-worksheet.md"
+        },
+        {
+          "title": "Making groups — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-groups-slides.md"
+        }
       ]
     },
     {
@@ -36,11 +108,41 @@
       "objectives": "I can use a branching database to identify an object\nI can build a branching database online with my own yes/no questions\nI can test my branching database to check it works",
       "outline": "Routine first. Vocabulary on board: branching database · attribute · question · identify · test. TA: j2data Branch open in a browser for everyone (ncce.io/branchingdb); the example minibeast tree ready (ncce.io/minibtree). Read the 3 “I can…” aloud.\n1. (0–10) Starter — follow the tree. Show the minibeast branching database. On the starter worksheet pupils ORDER the questions on the path to a bee, and answer which minibeast each path reaches.\n   • Support: choose yes or no to reach the bee.  • Core: order the three questions to the bee.  • Challenge: write the path (the yes/no answers) to reach the snail.\n2. (10–15) I-do — identify. Use the example tree to identify a caterpillar and a ladybird, reading each question and answering yes/no.\n3. (15–40) You-do — build online. Demonstrate j2data Branch: pick a library set, choose 6–8 objects, press Sort, type a yes/no question, drag objects into thumbs-up / thumbs-down. Pupils build their own. On the activity worksheet they ORDER the build steps and write their first question. Likely error: a question that does not split the objects → fix-words “try to split the group into two even halves.”\n   • Support: build with a partner using a given first question.  • Core: choose your own questions.  • Challenge: keep each group even so the tree is short.\n4. (40–50) Test it — press Play and answer the questions to reach an object; swap with a partner to test. Screenshot the finished tree.\n5. (50–55) Plenary — self-tick the 3 “I can…”; each pupil shows one question that worked.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Creating a branching database — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-a-branching-database-starter-worksheet.md" },
-        { "title": "Creating a branching database — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-a-branching-database-activity-worksheet.md" },
-        { "title": "Creating a branching database — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-a-branching-database-slides.md" },
-        { "title": "Minibeast branching database (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-minibeast-branching-database.png" },
-        { "title": "Bee (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-bee.png" }
+        {
+          "title": "Minibeast branching database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-minibeast-branching-database-teach-computing.png"
+        },
+        {
+          "title": "Bee (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-bee-teach-computing.png"
+        },
+        {
+          "title": "Creating a branching database — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-branching-database-starter-worksheet.md"
+        },
+        {
+          "title": "Creating a branching database — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-branching-database-activity-worksheet.md"
+        },
+        {
+          "title": "Creating a branching database — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-branching-database-slides.md"
+        }
       ]
     },
     {
@@ -48,10 +150,34 @@
       "objectives": "I can write a yes/no question for a given attribute\nI can compare two branching databases and say which is better structured\nI can explain why the order of questions matters",
       "outline": "Routine first. Vocabulary on board: structure · attribute · question · order · even · efficient. TA: the minibeast branching database on the board; sticky notes for writing questions. Read the 3 “I can…” aloud.\n1. (0–10) Starter — questions from attributes. On the starter worksheet pupils MATCH each attribute to a yes/no question, then write their own question for a given attribute.\n   • Support: match the attribute to the question.  • Core: write a yes/no question for the attribute ‘number of legs’.  • Challenge: write a question that splits a group into two even halves.\n2. (10–25) Compare two trees. Show a well-structured (even) tree and a ‘one-at-a-time’ tall tree. On the activity worksheet pupils answer how many questions each needs and CHOOSE which is better structured.\n   • Support: choose which tree is shorter.  • Core: say how many questions the even tree needs.  • Challenge: explain why even groups make fewer questions.\n3. (25–45) You-do — order questions. Pupils ORDER a set of questions so the objects split into even groups, and explain that the first question should split everything roughly in half. Likely error: starting with a question that only picks out one object → fix-words “start with a question that splits the whole group in two.”\n4. (45–53) Show your work — photo of an ordered tree. TA: prompt, do not do it for them.\n5. (53–55) Plenary — self-tick the 3 “I can…”; each pupil names the attribute one question is about.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Structuring a branching database — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-structuring-a-branching-database-starter-worksheet.md" },
-        { "title": "Structuring a branching database — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-structuring-a-branching-database-activity-worksheet.md" },
-        { "title": "Structuring a branching database — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-structuring-a-branching-database-slides.md" },
-        { "title": "Minibeast branching database (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-minibeast-branching-database.png" }
+        {
+          "title": "Minibeast branching database (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-minibeast-branching-database-teach-computing.png"
+        },
+        {
+          "title": "Structuring a branching database — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-structuring-a-branching-database-starter-worksheet.md"
+        },
+        {
+          "title": "Structuring a branching database — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-structuring-a-branching-database-activity-worksheet.md"
+        },
+        {
+          "title": "Structuring a branching database — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-structuring-a-branching-database-slides.md"
+        }
       ]
     },
     {
@@ -59,10 +185,34 @@
       "objectives": "I can write my own yes/no questions to tell dinosaurs apart\nI can choose questions that give every dinosaur its own ending\nI can lay out a branching database plan on paper",
       "outline": "Routine first. Vocabulary on board: attribute · value · question · plan · identify · unique. TA: dinosaur fact cards cut out; the A3 branching template and dry-wipe boards ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — dinosaur attributes. Show the dinosaurs. On the starter worksheet pupils SORT the attributes that describe a dinosaur (colour, diet, length) from ones that do not, and choose how two dinosaurs are different.\n   • Support: choose an attribute you could use.  • Core: write a yes/no question about a dinosaur attribute.  • Challenge: write a question that two dinosaurs would answer differently.\n2. (10–25) I-do → we-do — plan questions. Model writing yes/no questions about the dinosaurs (Does it have wings? Is it taller than a person?). Pupils write questions on the activity worksheet. Likely error: a question every dinosaur answers the same way → fix-words “a useful question gets a yes from some and a no from others.”\n   • Support: finish a sentence-started question.  • Core: write three different questions.  • Challenge: write questions so every dinosaur ends up on its own.\n3. (25–50) You-do — lay out the plan. Pupils ORDER the plan steps, then arrange the dinosaur cards and questions on paper into a tree until each dinosaur is identified on its own. Test it with a partner.\n4. (50–55) Show your work — photo of the paper plan. Plenary — self-tick the 3 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Planning a branching database — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-a-branching-database-starter-worksheet.md" },
-        { "title": "Planning a branching database — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-a-branching-database-activity-worksheet.md" },
-        { "title": "Planning a branching database — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-a-branching-database-slides.md" },
-        { "title": "Dinosaur cards (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-dinosaur-cards.png" }
+        {
+          "title": "Dinosaur cards (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-dinosaur-cards-teach-computing.png"
+        },
+        {
+          "title": "Planning a branching database — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-planning-a-branching-database-starter-worksheet.md"
+        },
+        {
+          "title": "Planning a branching database — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-planning-a-branching-database-activity-worksheet.md"
+        },
+        {
+          "title": "Planning a branching database — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-planning-a-branching-database-slides.md"
+        }
       ]
     },
     {
@@ -70,10 +220,34 @@
       "objectives": "I can build my dinosaur branching database online from my plan\nI can test a partner's identifier and check it works\nI can suggest real-world uses for branching databases",
       "outline": "Routine first. Vocabulary on board: branching database · attribute · question · identify · decision tree. TA: j2data Branch open (ncce.io/branchingdb); learners’ paper plans from last lesson; the dinosaur activity sheet ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — check the plan. Pupils review their paper plan and on the starter worksheet ORDER the steps to build it online, and tick what they need before they start.\n   • Support: choose the first build step.  • Core: order the build steps.  • Challenge: explain one thing to fix on their plan before building.\n2. (10–30) You-do — build it. Pupils open j2data Branch and build their dinosaur branching database from their plan, choosing objects and typing their yes/no questions. Screenshot it. Likely error: typing a question that is not yes/no → fix-words “each question can only be answered yes or no.” TA: prompt, do not do it for them.\n3. (30–45) Test it — pairs swap. One picks a dinosaur in secret; the partner uses their branching database to identify it by asking the questions. Swap roles. On the activity worksheet they record whether it worked.\n4. (45–53) Real-world uses — branching databases identify things, find faults, and help spot health problems. Pupils SORT real-world jobs that a branching database could do.\n5. (53–55) Plenary — self-tick the 3 “I can…”; each pupil names one real-world use.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Making a dinosaur identifier — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-dinosaur-identifier-starter-worksheet.md" },
-        { "title": "Making a dinosaur identifier — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-dinosaur-identifier-activity-worksheet.md" },
-        { "title": "Making a dinosaur identifier — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-dinosaur-identifier-slides.md" },
-        { "title": "Dinosaur cards (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-dinosaur-cards.png" }
+        {
+          "title": "Dinosaur cards (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-dinosaur-cards-teach-computing.png"
+        },
+        {
+          "title": "Making a dinosaur identifier — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-dinosaur-identifier-starter-worksheet.md"
+        },
+        {
+          "title": "Making a dinosaur identifier — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-dinosaur-identifier-activity-worksheet.md"
+        },
+        {
+          "title": "Making a dinosaur identifier — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-dinosaur-identifier-slides.md"
+        }
       ]
     }
   ]

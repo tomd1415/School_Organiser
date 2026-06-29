@@ -10,7 +10,7 @@ Today I will rotate, duplicate, and group shapes, then make my own name badge.
 ## Rotating
 To **rotate** a shape means to turn it. Select the shape and use the curved double arrows to spin it.
 
-![Text rotated in 3D with the rotate arrows]({{res:l3-rotate-text.png}})
+![Text rotated in 3D with the rotate arrows]({{res:l3-text-rotated-in-3d-with-the-rotate-arrows-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |
@@ -25,9 +25,9 @@ To **rotate** a shape means to turn it. Select the shape and use the curved doub
 ## Duplicating
 To **duplicate** means to make an exact copy. Select a shape, then click the duplicate button or press **Ctrl + D**.
 
-![The duplicate button (Ctrl + D)]({{res:l3-duplicate-button.png}})
+![The duplicate button (Ctrl + D)]({{res:l3-the-duplicate-button-ctrl-d-teach-computing.png}})
 
-![Four copies of the same shape]({{res:l3-duplicated-shapes.png}})
+![Four copies of the same shape]({{res:l3-four-copies-of-the-same-shape-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|
@@ -36,7 +36,7 @@ To **duplicate** means to make an exact copy. Select a shape, then click the dup
 ## Grouping
 **Grouping** joins shapes into one object, so you can move and resize them together. A grouped object shows as one colour.
 
-![A grouped name badge shown in one colour]({{res:l3-grouped.png}})
+![A grouped name badge shown in one colour]({{res:l3-a-grouped-name-badge-shown-in-one-colour-teach-computing.png}})
 
 Put the steps in order to group your shapes.
 

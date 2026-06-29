@@ -14,7 +14,7 @@
 > 🧑‍🏫 Show a page shape and ask "what is it?" before reading. We know from the layout.
 
 ## A newspaper
-![A newspaper layout with a headline, columns and a picture]({{res:l5-newspaper.png}})
+![A newspaper layout with a headline, columns and a picture]({{res:l5-newspaper-layout-teach-computing.png}})
 
 - a big headline
 - columns of text
@@ -23,7 +23,7 @@
 > 🧑‍🏫 Lots of detail goes in a newspaper. This is the starter question.
 
 ## A poster
-![A bright Keep Calm and Carry On poster]({{res:l5-poster.png}})
+![A bright Keep Calm and Carry On poster]({{res:l5-poster-example-teach-computing.png}})
 
 - a few big words
 - one strong picture
@@ -32,7 +32,7 @@
 > 🧑‍🏫 A poster gives a quick message fast. Contrast with the newspaper's detail.
 
 ## Layout matches purpose
-![Five layouts and their purposes]({{res:l5-layouts.png}})
+![Five layouts and their purposes]({{res:l5-layouts-and-their-purposes-teach-computing.png}})
 
 - poster → quick, eye-catching message
 - newspaper → long, detailed message

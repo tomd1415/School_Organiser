@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: design · algorithm · model project · repetition · sprite · plan.
 
 ## The model game
-![The model bat game]({{res:l5-bat-game.png}})
+![The model bat game]({{res:l5-model-bat-game-teach-computing.png}})
 
 - the bats flap **forever**
 - they keep moving down

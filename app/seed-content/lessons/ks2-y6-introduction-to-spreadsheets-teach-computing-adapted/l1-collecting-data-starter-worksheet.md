@@ -10,7 +10,7 @@ Today I will collect some data and start to organise it.
 ## Rolling for data
 **Data** means facts and numbers we collect. We will roll a dice and write down the score each time. Each score is a piece of data.
 
-![A dice]({{res:l1-dice.png}})
+![A dice]({{res:l1-a-dice-collecting-data-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

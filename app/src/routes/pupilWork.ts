@@ -52,6 +52,8 @@ import { guardMatch } from '../lib/markSafetyGate';
 import { markOpenAttrs } from './markModal';
 import { getProfile } from '../repos/pupilProfiles';
 import { revokeDevicesForGroup } from '../repos/pupilDevices';
+import { getLessonAttendance, getPupilAttendance, setAttendance, markAllPresent } from '../repos/attendance';
+import { renderAttendanceCard, renderAttendanceRow } from '../lib/attendanceView';
 
 interface OcInfo {
   occurrenceId: number;
@@ -255,6 +257,57 @@ export function registerPupilWorkRoutes(app: FastifyInstance): void {
     if (sig === null) return reply.type('text/html').send((await buildGrid(p.data.id, info)).full);
     if (sig === (await gridSignature(p.data.id, info))) return reply.code(204).send();
     return reply.type('text/html').send((await buildGrid(p.data.id, info)).live);
+  });
+
+  // ── Attendance register (Phase 17 / noted_bugs2 #4) ───────────────────────────────────────────
+  // Teacher-side and independent of pupil device access, so this is NOT gated behind pupilAccessEnabled.
+  app.get('/lesson/oc/:id/attendance', { preHandler: requireAuth }, async (req, reply) => {
+    const p = ocParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const info = await ocInfo(p.data.id);
+    if (!info) return reply.type('text/html').send('');
+    const [roster, attendance] = await Promise.all([pupilWorkRows(p.data.id, info.groupCourseId), getLessonAttendance(p.data.id)]);
+    return reply.type('text/html').send(renderAttendanceCard(p.data.id, roster, attendance));
+  });
+
+  app.post('/lesson/oc/:id/attendance/all-present', guard, async (req, reply) => {
+    const p = ocParam.safeParse(req.params);
+    if (!p.success) return reply.code(400).send('');
+    const info = await ocInfo(p.data.id);
+    if (!info) return reply.code(404).send('');
+    await markAllPresent(p.data.id);
+    const [roster, attendance] = await Promise.all([pupilWorkRows(p.data.id, info.groupCourseId), getLessonAttendance(p.data.id)]);
+    return reply.type('text/html').send(renderAttendanceCard(p.data.id, roster, attendance));
+  });
+
+  app.post('/lesson/oc/:id/pupil/:pid/attendance', guard, async (req, reply) => {
+    const p = z.object({ id: z.coerce.number().int().positive(), pid: z.coerce.number().int().positive() }).safeParse(req.params);
+    const b = z
+      .object({
+        status: z.enum(['present', 'absent', 'left_early', 'extended_leave']),
+        leftEarlyMinutes: z.coerce.number().int().min(0).max(600).optional(),
+        leaveReason: z.string().trim().max(200).optional(),
+        expectedReturn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      })
+      .safeParse(req.body);
+    if (!p.success || !b.success) return reply.code(400).send('');
+    const info = await ocInfo(p.data.id);
+    if (!info) return reply.code(404).send('');
+    if (!(await pupilCanAccessOc(p.data.pid, p.data.id))) return reply.code(403).send('');
+    await setAttendance({
+      occurrenceCourseId: p.data.id,
+      pupilId: p.data.pid,
+      status: b.data.status,
+      leftEarlyMinutes: b.data.leftEarlyMinutes ?? null,
+      leaveReason: b.data.leaveReason ?? null,
+      expectedReturn: b.data.expectedReturn ?? null,
+    });
+    const [row, nameRow] = await Promise.all([
+      getPupilAttendance(p.data.id, p.data.pid),
+      pool.query<{ displayName: string }>(`SELECT display_name AS "displayName" FROM pupils WHERE id = $1`, [p.data.pid]),
+    ]);
+    const displayName = nameRow.rows[0]?.displayName ?? 'Pupil';
+    return reply.type('text/html').send(renderAttendanceRow(p.data.id, { pupilId: p.data.pid, displayName }, row));
   });
 
   app.post('/lesson/oc/:id/pupil/:pid/level', guard, async (req, reply) => {

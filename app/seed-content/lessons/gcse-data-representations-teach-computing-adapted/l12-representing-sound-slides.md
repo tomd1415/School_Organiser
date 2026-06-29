@@ -15,7 +15,7 @@ What is the bitmap file-size formula? Sound travels as a…?
 - Real (analogue) sound is a smooth, continuous wave in the air.
 - A computer can only store 0s and 1s, so the wave must be turned into binary.
 
-![A sound wave]({{res:l12-sound-waveform.png}})
+![A sound wave]({{res:l12-a-sound-waveform.png}})
 
 > 🧑‍🏫 Optional calm demo with a microphone on screen — no sudden loud noise. Plain line: "the computer takes the wave and writes down numbers".
 
@@ -23,7 +23,7 @@ What is the bitmap file-size formula? Sound travels as a…?
 - Sampling = measuring the height (amplitude) of the wave at regular times.
 - Each measurement is written as a binary number.
 
-![The sampling graph — amplitude as binary against time]({{res:l12-sampling-wave.png}})
+![The sampling graph — amplitude as binary against time]({{res:l12-sampling-a-sound-wave-amplitude-in-binary-against-time.png}})
 
 > 🧑‍🏫 The class labels this graph on the worksheet. Walk along the time axis, reading one value together.
 

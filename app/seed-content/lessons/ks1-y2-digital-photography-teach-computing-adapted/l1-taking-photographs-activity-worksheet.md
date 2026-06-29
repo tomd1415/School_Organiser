@@ -10,7 +10,7 @@ Today I will take a photograph with a digital device and say what I did.
 ## How to take a photograph
 A photograph is an image you **capture** with a camera. Three steps help you take a good one.
 
-![A photographer taking a photo]({{res:l1-photographer.png}})
+![A photographer taking a photo]({{res:l1-a-photographer-taking-a-photo-teach-computing.png}})
 
 Put the steps in the right order. Drag them into order.
 

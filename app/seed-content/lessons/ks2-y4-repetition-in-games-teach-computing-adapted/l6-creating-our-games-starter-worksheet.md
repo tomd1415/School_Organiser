@@ -10,7 +10,7 @@ Today I will **build** my game from my design. I will test it and **fix** any mi
 ## My plan for building
 This is the Scratch editor with the bat game. I follow my design and add the loops.
 
-![The bat game in the Scratch editor]({{res:l6-bat-game-editor.png}})
+![The bat game in the Scratch editor]({{res:l6-bat-game-in-the-scratch-editor-teach-computing.png}})
 
 ## Order the build steps
 Put the build steps in order. Drag them into order.

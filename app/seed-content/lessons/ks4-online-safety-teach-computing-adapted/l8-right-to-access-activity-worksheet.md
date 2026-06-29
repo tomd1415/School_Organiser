@@ -10,7 +10,7 @@ Today I will name privacy-enhancing technologies and give an opinion on the righ
 ## Privacy-enhancing technologies
 Some tools help people keep their activity private or reach blocked information.
 
-![The Tor Browser start page]({{res:l8-tor-browser.png}})
+![The Tor Browser start page]({{res:l8-tor-browser-start-page-teach-computing.png}})
 
 ## Match the technology
 Drag each tool onto what it does.

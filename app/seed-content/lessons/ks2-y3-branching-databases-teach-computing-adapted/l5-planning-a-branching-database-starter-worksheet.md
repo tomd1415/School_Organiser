@@ -10,7 +10,7 @@ Today I will plan a branching database to tell dinosaurs apart.
 ## Dinosaur attributes
 Here are some dinosaurs. An **attribute** is one thing you could use to describe them.
 
-![Dinosaur cards]({{res:l5-dinosaur-cards.png}})
+![Dinosaur cards]({{res:l5-dinosaur-cards-teach-computing.png}})
 
 Sort each idea: is it an attribute you could use to compare dinosaurs, or not?
 

@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will give real-world uses of desktop publishing and compare it to work done by hand.
 
-![A laptop on a desk, ready for desktop publishing]({{res:l6-laptop.png}})
+![A laptop on a desk, ready for desktop publishing]({{res:l6-laptop-ready-for-desktop-publishing-teach-computing.png}})
 
 ## Who uses it, and for what?
 Drag each job to what they make.

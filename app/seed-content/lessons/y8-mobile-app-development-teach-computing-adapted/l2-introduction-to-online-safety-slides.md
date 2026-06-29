@@ -29,7 +29,7 @@ Your personal data should be kept private and protected. A law called GDPR sets 
 > 🧑‍🏫 Ask where their data is stored (school, doctor, shops). Keep it general and cohort-level.
 
 ## Case study — end-to-end encryption
-![A phone showing a messaging app]({{res:l2-whatsapp-encryption.png}})
+![A phone showing a messaging app]({{res:l2-messaging-app-end-to-end-encryption-teach-computing.png}})
 
 Some messaging apps encrypt messages so not even the company can read them.
 
@@ -38,7 +38,7 @@ Some messaging apps encrypt messages so not even the company can read them.
 ## Ethics — doing what is right and fair
 Ask permission · be clear how data is used · take responsibility.
 
-![Deciding what is right and wrong]({{res:l2-ethical-choice.png}})
+![Deciding what is right and wrong]({{res:l2-ethical-choice-teach-computing.png}})
 
 > 🧑‍🏫 Introduce consent, transparency, accountability. They sort "safe vs risky" on the worksheet.
 

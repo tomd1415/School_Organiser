@@ -15,9 +15,9 @@
 > 🧑‍🏫 Teach the word "consistent" = keeping things the same. This is the match and multi-select on the starter worksheet.
 
 ## Small, careful changes
-![Animation frame one: two characters in front of an old building]({{res:l4-frame-1.png}})
+![Animation frame one: two characters in front of an old building]({{res:l4-animation-frame-one-teach-computing.png}})
 
-![Animation frame two: the same scene, with a small change]({{res:l4-frame-2.png}})
+![Animation frame two: the same scene, with a small change]({{res:l4-animation-frame-two-teach-computing.png}})
 
 - move the character a tiny bit
 - the onion skin shows the last frame

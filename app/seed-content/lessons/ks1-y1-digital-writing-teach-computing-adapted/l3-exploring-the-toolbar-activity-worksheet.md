@@ -10,7 +10,7 @@ Today I will find the toolbar and use bold, italic and underline.
 ## The toolbar
 The toolbar has buttons that change how the text looks. Look at the buttons B, I and U.
 
-![A word processor toolbar with the bold, italic and underline buttons]({{res:l3-toolbar.png}})
+![A word processor toolbar with the bold, italic and underline buttons]({{res:l3-word-processor-toolbar-teach-computing.png}})
 
 ## Sort the buttons
 Drag each one into the right box.

@@ -10,7 +10,7 @@ Today I will change a photo with editing tools and save it with a clear name.
 ## Editing a photo
 You open a photo in **editing software** and use the **Adjust** tools to change it.
 
-![The photo editor with the picture open]({{res:l5-editor-screenshot.png}})
+![The photo editor with the picture open]({{res:l5-the-photo-editor-with-a-picture-open-teach-computing.png}})
 
 Put the steps in the right order. Drag them into order.
 

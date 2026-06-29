@@ -10,9 +10,9 @@ Today I will move my character only a little between frames, and check my work.
 ## Spot the small change
 Here are two frames from the same animation. Look carefully at both.
 
-![Animation frame one: two characters in front of an old building]({{res:l4-frame-1.png}})
+![Animation frame one: two characters in front of an old building]({{res:l4-animation-frame-one-teach-computing.png}})
 
-![Animation frame two: the same scene, with a small change]({{res:l4-frame-2.png}})
+![Animation frame two: the same scene, with a small change]({{res:l4-animation-frame-two-teach-computing.png}})
 
 ## Order the careful steps
 Drag the steps into order to film one small movement.

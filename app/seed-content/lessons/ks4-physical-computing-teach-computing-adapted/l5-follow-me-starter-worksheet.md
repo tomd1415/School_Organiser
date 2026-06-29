@@ -10,7 +10,7 @@ Today I will find out how a reflective optical sensor works and what its three p
 ## Starter — how does it "see" the line?
 A reflective optical sensor shines infrared light DOWN at the floor and measures how much bounces back. A black line reflects very little; a white floor reflects a lot.
 
-![A reflective optical sensor with pins G, V+ and S]({{res:l5-optical-sensor.png}})
+![A reflective optical sensor with pins G, V+ and S]({{res:l5-reflective-optical-sensor-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

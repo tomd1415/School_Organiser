@@ -7,13 +7,13 @@
 ## Starter — name the component
 Look at each photo. What is it?
 
-![A computer processor chip]({{res:l3-cpu-processor.jpg}})
+![A computer processor chip]({{res:l3-cpu-processor-teach-computing.jpg}})
 
 | Question | Choose |
 |---|---|
 | This component does the "thinking" — what is it? | (  ) CPU / processor (  ) speaker (  ) screen |
 
-![A stick of computer memory]({{res:l3-ram-memory.jpg}})
+![A stick of computer memory]({{res:l3-ram-memory-teach-computing.jpg}})
 
 | Question | Choose |
 |---|---|

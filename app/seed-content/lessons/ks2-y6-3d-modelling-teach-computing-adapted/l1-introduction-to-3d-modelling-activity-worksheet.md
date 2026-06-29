@@ -13,12 +13,12 @@ Tinkercad is the program we use to make 3D models. Three parts you will use a lo
 - the **shapes** — the panel of ready-made shapes you drag on.
 - the **view tools** — the buttons that turn and zoom your view.
 
-![The Tinkercad screen]({{res:l1-tinkercad-interface.png}})
+![The Tinkercad screen]({{res:l1-the-tinkercad-screen-workplane-shapes-view-tools-teach-computing.png}})
 
 Drag each label onto the right part of the screen.
 
 ```label
-image: {{res:l1-tinkercad-interface.png}}
+image: {{res:l1-the-tinkercad-screen-workplane-shapes-view-tools-teach-computing.png}}
 view (7%, 48%): View tools
 work (37%, 62%): Workplane
 shapes (86%, 50%): Shapes
@@ -27,12 +27,12 @@ shapes (86%, 50%): Shapes
 ## Add two shapes
 Drag a **cube** and a **sphere** onto your workplane, next to each other.
 
-![A cube and a sphere on the workplane]({{res:l1-cube-sphere.png}})
+![A cube and a sphere on the workplane]({{res:l1-a-cube-and-a-sphere-on-the-workplane-teach-computing.png}})
 
 ## Looking from different sides (perspective)
 The way something looks changes when you move around it. This is called **perspective**. The shapes do not move — only your view moves.
 
-![The same two shapes seen from the top]({{res:l1-perspective-top.png}})
+![The same two shapes seen from the top]({{res:l1-the-same-shapes-seen-from-the-top-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

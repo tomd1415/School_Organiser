@@ -19,12 +19,12 @@ Changes the style: a font-name list like Comic Sans, the T text button
 ## Look at the invitation
 This party invitation was made in desktop publishing software.
 
-![A party invitation open in desktop publishing software]({{res:l2-invitation.png}})
+![A party invitation open in desktop publishing software]({{res:l2-party-invitation-in-desktop-publishing-software-teach-computing.png}})
 
 Drag the labels onto the right parts of the invitation.
 
 ```label
-image: {{res:l2-invitation.png}}
+image: {{res:l2-party-invitation-in-desktop-publishing-software-teach-computing.png}}
 title (51%, 31%): Big title text
 picture (51%, 17%): An image
 date (51%, 60%): The date

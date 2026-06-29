@@ -10,12 +10,48 @@
       "objectives": "I can find the parts of the ScratchJr screen\nI can find the start of a sequence\nI can see that a program needs to be started\nI can run my program",
       "outline": "Routine first (same every lesson). Vocabulary on the board: sequence · command · program · run · start. TA: everyone has the starter worksheet; ScratchJr open on each tablet. Read the four \"I can…\" aloud.\n1. (0–10) Starter — recap the ScratchJr screen. On the starter worksheet pupils LABEL the screen (the stage, the green flag, the blocks).\n   • Support: choose what starts a program.  • Core: choose what the stage is.  • Challenge: write one thing you can do on the screen.\n2. (10–20) I-do — a sequence is things that happen in order, and every sequence has a start (the school day: gate opens → line up → walk to class). Likely error: naming a later step as the start → fix-words \"the start is the very first thing.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the school-day sequence, then learn that a program does not move until you start it (the green flag).\n4. (35–50) You-do — pupils build a tiny program and run it full screen with the green flag, then screenshot it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil shows their green flag.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/animation/sound on slides; movement breaks are routine; usable by a non-specialist TA.",
       "resources": [
-        { "title": "ScratchJr recap — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-scratchjr-recap-starter-worksheet.md" },
-        { "title": "ScratchJr recap — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-scratchjr-recap-activity-worksheet.md" },
-        { "title": "ScratchJr recap — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-scratchjr-recap-slides.md" },
-        { "title": "The ScratchJr screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-scratchjr-screen.png" },
-        { "title": "The yellow start blocks in ScratchJr (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-start-blocks.png" },
-        { "title": "A program running full screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-fullscreen.png" }
+        {
+          "title": "The ScratchJr screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-scratchjr-screen-teach-computing.png"
+        },
+        {
+          "title": "The yellow start blocks in ScratchJr (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-yellow-start-blocks-in-scratchjr-teach-computing.png"
+        },
+        {
+          "title": "A program running full screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-program-running-full-screen-teach-computing.png"
+        },
+        {
+          "title": "ScratchJr recap — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-scratchjr-recap-starter-worksheet.md"
+        },
+        {
+          "title": "ScratchJr recap — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-scratchjr-recap-activity-worksheet.md"
+        },
+        {
+          "title": "ScratchJr recap — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-scratchjr-recap-slides.md"
+        }
       ]
     },
     {
@@ -23,12 +59,48 @@
       "objectives": "I can predict the outcome of a sequence of commands\nI can match two sequences with the same outcome\nI can change the outcome of a sequence of commands",
       "outline": "Routine first. Vocabulary on the board: sequence · command · outcome · predict · program · blocks. TA: everyone has the starter worksheet; ScratchJr open with the cat. Read the three \"I can…\" aloud.\n1. (0–10) Starter — what is an outcome? (clap → a noise; pour juice and water → a drink). On the starter worksheet pupils CHOOSE the outcome of an everyday sequence.\n   • Support: choose the outcome of a clap.  • Core: choose the outcome of the juice steps.  • Challenge: say the outcome of baking a cake.\n2. (10–20) I-do — a program is a sequence of commands and running it has an outcome; read the blocks and PREDICT before you run. Likely error: guessing without reading → fix-words \"read the blocks in order, left to right.\"\n3. (20–35) We-do — two programs use the same blocks in a different order and end the same way (the same outcome). On the activity worksheet pupils SORT same-outcome from different-outcome, then MATCH the programs that do the same thing.\n4. (35–50) You-do — pupils start a new project and add blocks to send the cat somewhere new (change the outcome), then screenshot it.\n5. (50–55) Plenary — self-tick the three \"I can…\"; each pupil names one outcome they made.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Outcomes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-outcomes-starter-worksheet.md" },
-        { "title": "Outcomes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-outcomes-activity-worksheet.md" },
-        { "title": "Outcomes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-outcomes-slides.md" },
-        { "title": "Match the programs activity (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-match-programs.png" },
-        { "title": "Program A — blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-program-a.png" },
-        { "title": "Program B — same blocks reordered (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-program-b.png" }
+        {
+          "title": "Match the programs activity (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-match-the-programs-activity-teach-computing.png"
+        },
+        {
+          "title": "Program A — blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-program-a-blocks-teach-computing.png"
+        },
+        {
+          "title": "Program B — same blocks reordered (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-program-b-same-blocks-reordered-teach-computing.png"
+        },
+        {
+          "title": "Outcomes — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-outcomes-starter-worksheet.md"
+        },
+        {
+          "title": "Outcomes — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-outcomes-activity-worksheet.md"
+        },
+        {
+          "title": "Outcomes — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-outcomes-slides.md"
+        }
       ]
     },
     {
@@ -36,11 +108,41 @@
       "objectives": "I can use the Start on tap block\nI can work out the actions of a sprite in an algorithm\nI can decide which blocks to use to meet the design\nI can build the sequence of blocks I need",
       "outline": "Routine first. Vocabulary on the board: sprite · algorithm · blocks · design · sequence · predict. TA: everyone has the starter worksheet; ScratchJr open with the cat. Read the four \"I can…\" aloud.\n1. (0–10) Starter — a new way to start: the Start on tap block runs when you tap the sprite. On the starter worksheet pupils CHOOSE how Start on tap works.\n   • Support: choose how to start (tap the sprite).  • Core: choose that both blocks start a program.  • Challenge: say why tapping the sprite is useful.\n2. (10–20) I-do — show a design (background · sprite · algorithm) and read the seasons design together. Model finding the Say and Change page blocks. Likely error: pressing the flag instead of tapping the sprite → fix-words \"this one needs a tap on the sprite.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the algorithm (tap the cat → say the season → change the background) and SORT each block to its job.\n4. (35–50) You-do — pupils build the seasons animation from the design (spring → summer → autumn → winter) and screenshot it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil taps their cat.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Using a design — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-using-a-design-starter-worksheet.md" },
-        { "title": "Using a design — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-using-a-design-activity-worksheet.md" },
-        { "title": "Using a design — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-using-a-design-slides.md" },
-        { "title": "The seasons animation design (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-seasons-design.png" },
-        { "title": "The Start on tap block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-start-on-tap.png" }
+        {
+          "title": "The seasons animation design (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-the-seasons-animation-design-teach-computing.png"
+        },
+        {
+          "title": "The Start on tap block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-the-start-on-tap-block-teach-computing.png"
+        },
+        {
+          "title": "Using a design — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-design-starter-worksheet.md"
+        },
+        {
+          "title": "Using a design — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-design-activity-worksheet.md"
+        },
+        {
+          "title": "Using a design — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-using-a-design-slides.md"
+        }
       ]
     },
     {
@@ -48,12 +150,48 @@
       "objectives": "I can choose backgrounds for the design\nI can choose characters for the design\nI can create a program based on the new design",
       "outline": "Routine first. Vocabulary on the board: sprite · project · blocks · design · sequence · change. TA: everyone has the starter worksheet; ScratchJr open. Read the three \"I can…\" aloud.\n1. (0–10) Starter — look at the \"Who lives here?\" quiz (sea background, a cat and a fish). On the starter worksheet pupils LABEL the quiz screen (cat, fish, the program) and choose which animal lives in the sea.\n   • Support: choose which animal lives in the sea.  • Core: choose the quiz question.  • Challenge: name another sprite that could live there.\n2. (10–25) I-do → we-do — the right answer says \"Yes\" then changes to the next question; the wrong answer says \"No\" and stops. Compare the two codes. Likely error: thinking the wrong answer also changes the background → fix-words \"the wrong answer just says No and stops.\"\n3. (25–40) You-do part 1 — on the activity worksheet pupils RECORD their background and two sprites (sprites that live in the background), and a multi-select on what the wrong-answer code does.\n4. (40–50) You-do part 2 — pupils build their quiz question in ScratchJr and screenshot it.\n5. (50–55) Plenary — self-tick the three \"I can…\"; each pupil says their quiz question.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Changing a design — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-changing-a-design-starter-worksheet.md" },
-        { "title": "Changing a design — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-changing-a-design-activity-worksheet.md" },
-        { "title": "Changing a design — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-changing-a-design-slides.md" },
-        { "title": "The Who lives here? quiz screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-quiz-who-lives-here.png" },
-        { "title": "The right-answer code — says Yes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-code-yes.png" },
-        { "title": "The wrong-answer code — says No (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-code-no.png" }
+        {
+          "title": "The Who lives here? quiz screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-who-lives-here-quiz-screen-teach-computing.png"
+        },
+        {
+          "title": "The right-answer code — says Yes (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-right-answer-code-says-yes-teach-computing.png"
+        },
+        {
+          "title": "The wrong-answer code — says No (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-wrong-answer-code-says-no-teach-computing.png"
+        },
+        {
+          "title": "Changing a design — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-changing-a-design-starter-worksheet.md"
+        },
+        {
+          "title": "Changing a design — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-changing-a-design-activity-worksheet.md"
+        },
+        {
+          "title": "Changing a design — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-changing-a-design-slides.md"
+        }
       ]
     },
     {
@@ -61,11 +199,41 @@
       "objectives": "I can choose the images for my own design\nI can create an algorithm\nI can build sequences of blocks to match my design",
       "outline": "Routine first. Vocabulary on the board: design · algorithm · build · sequence · blocks · match. TA: everyone has the starter worksheet; ScratchJr open; design sheets ready. Read the three \"I can…\" aloud.\n1. (0–10) Starter — choose your own pictures: the background and the sprites should go together (a space background with space sprites). On the starter worksheet pupils CHOOSE that sprites should match the background.\n   • Support: choose that sprites match the background.  • Core: write the background they will use.  • Challenge: write a question that fits their background.\n2. (10–25) I-do → we-do — an algorithm is the ordered steps (tap → say \"Yes\" → an action → change the background). Write one algorithm on the board. Likely error: steps out of order → fix-words \"read it like a list, top to bottom.\"\n3. (25–40) You-do — on the activity worksheet pupils ORDER the algorithm and SORT the actions (moving vs other), then build their quiz from their own design.\n4. (40–50) Save — pupils SAVE their project (name it) so it can be reused in Lesson 6, and screenshot it.\n5. (50–55) Plenary — self-tick the three \"I can…\"; each pupil shows their saved project.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Designing and creating — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-and-creating-starter-worksheet.md" },
-        { "title": "Designing and creating — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-and-creating-activity-worksheet.md" },
-        { "title": "Designing and creating — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-and-creating-slides.md" },
-        { "title": "A space background with two sprites (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-moon-aliens.jpg" },
-        { "title": "Saving a project in ScratchJr (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-save.jpg" }
+        {
+          "title": "A space background with two sprites (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-space-background-with-two-sprites-teach-computing.jpg"
+        },
+        {
+          "title": "Saving a project in ScratchJr (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-saving-a-project-in-scratchjr-teach-computing.jpg"
+        },
+        {
+          "title": "Designing and creating — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-and-creating-starter-worksheet.md"
+        },
+        {
+          "title": "Designing and creating — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-and-creating-activity-worksheet.md"
+        },
+        {
+          "title": "Designing and creating — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-and-creating-slides.md"
+        }
       ]
     },
     {
@@ -73,12 +241,48 @@
       "objectives": "I can compare my project to my design\nI can improve my project by adding features\nI can debug my program",
       "outline": "Routine first. Vocabulary on the board: compare · design · debug · program · features · evaluate. TA: everyone has the starter worksheet; saved projects and design sheets handed back. Read the three \"I can…\" aloud.\n1. (0–10) Starter — to evaluate is to check your work with two questions: does the design match my project, and can I improve it? On the starter worksheet pupils CHOOSE what evaluate means.\n   • Support: choose what evaluate means.  • Core: choose that a mismatch is OK to change.  • Challenge: say why comparing is useful.\n2. (10–25) I-do → we-do — compare the design and the code side by side: the dog code matches (says \"Yes!\"); the cat code has a mistake (says \"hi\" not \"Yes!\") — circle and fix it. Key idea: debugging is finding and fixing a mistake. Likely error: not reading closely → fix-words \"check every word against the design.\"\n3. (25–40) You-do — on the activity worksheet pupils find the cat's mistake and say the fix, then improve their own quiz with a feature (the green Sound block).\n4. (40–50) You-do — pupils check, debug and improve their own quiz, then screenshot the finished quiz.\n5. (50–55) Plenary — self-tick the three \"I can…\"; each pupil names one thing they fixed or added. Celebrate the finished quizzes (last lesson of the unit).\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Evaluating — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-starter-worksheet.md" },
-        { "title": "Evaluating — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-activity-worksheet.md" },
-        { "title": "Evaluating — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-slides.md" },
-        { "title": "The dog code that matches the design (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-dog-correct.png" },
-        { "title": "The cat code with a mistake to debug (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-cat-bug.png" },
-        { "title": "The pop Sound block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-sound-pop.png" }
+        {
+          "title": "The dog code that matches the design (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-the-dog-code-that-matches-the-design-teach-computing.png"
+        },
+        {
+          "title": "The cat code with a mistake to debug (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-the-cat-code-with-a-mistake-to-debug-teach-computing.png"
+        },
+        {
+          "title": "The pop Sound block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-the-pop-sound-block-teach-computing.png"
+        },
+        {
+          "title": "Evaluating — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-starter-worksheet.md"
+        },
+        {
+          "title": "Evaluating — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-activity-worksheet.md"
+        },
+        {
+          "title": "Evaluating — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-slides.md"
+        }
       ]
     }
   ]

@@ -10,7 +10,7 @@ Today I will learn that joined blocks make a sequence, and that an event starts 
 ## Joined or not joined?
 Look at these blocks. When blocks are joined, they run one after another from ONE click. That is a sequence.
 
-![Three blocks joined into a sequence]({{res:l3-joined-blocks.png}})
+![Three blocks joined into a sequence]({{res:l3-joined-blocks-make-a-sequence-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

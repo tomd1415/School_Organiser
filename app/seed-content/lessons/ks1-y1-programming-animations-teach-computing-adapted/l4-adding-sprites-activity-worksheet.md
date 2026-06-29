@@ -10,7 +10,7 @@ Today I will show that a project can have more than one sprite, and add blocks t
 ## More than one sprite
 A project can have more than one sprite. Each sprite has its own program.
 
-![An underwater project with a fish, a yellow fish, a seahorse and a starfish]({{res:l4-many-sprites.jpg}})
+![An underwater project with a fish, a yellow fish, a seahorse and a starfish]({{res:l4-an-underwater-project-with-several-sprites-teach-computing.jpg}})
 
 ## Match the sprite to the background
 Drag each sprite into the background where it fits.

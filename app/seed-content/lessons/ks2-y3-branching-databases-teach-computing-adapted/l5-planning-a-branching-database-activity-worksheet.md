@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will plan a dinosaur branching database on paper, with my own yes/no questions.
 
-![Dinosaur cards]({{res:l5-dinosaur-cards.png}})
+![Dinosaur cards]({{res:l5-dinosaur-cards-teach-computing.png}})
 
 ## Plan the steps
 Put the planning steps in the right order.

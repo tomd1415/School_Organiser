@@ -10,14 +10,14 @@ Today I will predict outcomes and match programs that do the same thing.
 ## Same blocks, same outcome
 These two programs use the **same blocks** in a **different order**. When you run them, the sprite ends up in the same place. They have the **same outcome**.
 
-![Program A]({{res:l2-program-a.png}})
+![Program A]({{res:l2-program-a-blocks-teach-computing.png}})
 
-![Program B]({{res:l2-program-b.png}})
+![Program B]({{res:l2-program-b-same-blocks-reordered-teach-computing.png}})
 
 ## Match the programs
 Programs that do the same thing have the **same outcome**. On your tablet, run the programs and find the ones that match.
 
-![Match the programs activity]({{res:l2-match-programs.png}})
+![Match the programs activity]({{res:l2-match-the-programs-activity-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

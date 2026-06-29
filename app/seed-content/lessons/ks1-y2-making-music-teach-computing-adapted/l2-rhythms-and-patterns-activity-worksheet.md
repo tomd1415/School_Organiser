@@ -10,7 +10,7 @@ Today I will make a rhythm on the computer.
 ## People make music
 People clap, tap and play instruments to make music.
 
-![Hands clapping a rhythm]({{res:l2-clapping.png}})
+![Hands clapping a rhythm]({{res:l2-hands-clapping-a-rhythm-teach-computing.png}})
 
 ## The Rhythm tool
 We will use the Rhythm tool in Chrome Music Lab.
@@ -19,7 +19,7 @@ We will use the Rhythm tool in Chrome Music Lab.
 Drag each label onto the right part of the Rhythm tool.
 
 ```label
-image: {{res:l2-rhythm-tool.png}}
+image: {{res:l2-the-rhythm-tool-in-chrome-music-lab-teach-computing.png}}
 play (50%, 72%): play button
 dots (46%, 90%): the pattern dots
 ```

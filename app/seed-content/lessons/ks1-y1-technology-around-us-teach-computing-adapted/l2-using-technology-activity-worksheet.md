@@ -11,7 +11,7 @@ Today I will name the main parts of a computer, log in, and use a mouse to click
 Drag each word onto the right part of the computer.
 
 ```label
-image: {{res:l2-desktop-computer.png}}
+image: {{res:l2-a-desktop-computer-screen-base-unit-keyboard-mouse-teach-computing.png}}
 screen (28%, 33%): Screen
 base (80%, 38%): Base unit
 keyboard (25%, 81%): Keyboard
@@ -37,7 +37,7 @@ Match each part to its job. Drag the right job onto each row.
 ## 🔴 Challenge
 A laptop has the same parts in one case.
 
-![A laptop computer]({{res:l2-laptop.png}})
+![A laptop computer]({{res:l2-a-laptop-computer-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

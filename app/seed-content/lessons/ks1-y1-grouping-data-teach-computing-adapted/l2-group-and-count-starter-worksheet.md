@@ -10,10 +10,10 @@ Today I will count objects, group objects, and count a group of objects.
 ## Starter — how many?
 Count the frogs.
 
-![A frog]({{res:l2-frog.png}})
-![A frog]({{res:l2-frog.png}})
-![A frog]({{res:l2-frog.png}})
-![A frog]({{res:l2-frog.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

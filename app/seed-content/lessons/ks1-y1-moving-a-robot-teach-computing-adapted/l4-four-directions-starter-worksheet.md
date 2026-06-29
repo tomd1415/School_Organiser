@@ -10,7 +10,7 @@ Today I will use Left turn and Right turn with Forwards and Backwards.
 ## Starter — the turn buttons
 Find the Left turn and Right turn buttons on the robot.
 
-![The buttons on top of the floor robot]({{res:l1-beebot-buttons.png}})
+![The buttons on top of the floor robot]({{res:l4-floor-robot-buttons-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

@@ -10,12 +10,12 @@ Today I will be a **games designer**: I will choose artwork and plan my game.
 ## What does a games designer do?
 A games designer plans a game before it is made. They choose the **sprites** (the characters and objects), the **background**, and they plan how everything works.
 
-![Two game controllers]({{res:l4-gamer.jpg}})
+![Two game controllers]({{res:l4-two-game-controllers-teach-computing.jpg}})
 
 ## Looking at the Fruit catcher game
 This is the **Fruit catcher** game. You move the bowl to catch things that fall down.
 
-![The Fruit catcher game with a bowl, a star, a spider, apples, a score and a timer]({{res:l4-fruit-catcher.png}})
+![The Fruit catcher game with a bowl, a star, a spider, apples, a score and a timer]({{res:l4-the-fruit-catcher-game-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

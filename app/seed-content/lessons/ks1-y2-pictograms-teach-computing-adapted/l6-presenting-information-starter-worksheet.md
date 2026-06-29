@@ -10,7 +10,7 @@ Today I will make a block diagram on the computer and think about keeping data s
 ## Another way to show data
 A **block diagram** shows data as blocks. A taller column means more. It has numbers up the side.
 
-![Car colours block diagram]({{res:l6-car-colours-block.png}})
+![Car colours block diagram]({{res:l6-car-colours-block-diagram-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |
@@ -20,7 +20,7 @@ A **block diagram** shows data as blocks. A taller column means more. It has num
 ## 🟡 Core
 On the software home screen below, to make a block diagram you click on **Chart**, not Pictogram.
 
-![Data software home screen]({{res:l6-j2data-home.png}})
+![Data software home screen]({{res:l6-data-software-home-screen-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

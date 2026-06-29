@@ -10,7 +10,7 @@ Today I will make a flip book and show how it makes a picture move.
 ## A flip book
 A flip book is lots of pages with a small change on each one. When you flip them fast, the picture looks like it moves.
 
-![Coloured sticky notes stacked to make a small flip book]({{res:l1-flip-book.png}})
+![Coloured sticky notes stacked to make a small flip book]({{res:l1-sticky-notes-for-a-flip-book-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

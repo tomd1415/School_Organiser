@@ -7,7 +7,7 @@
 ## Starter — tracking the traffic
 This is a map from a phone app. The blue line is the route. The red and orange show the traffic.
 
-![A route map with coloured traffic lines]({{res:l2-traffic-map.png}})
+![A route map with coloured traffic lines]({{res:l2-traffic-route-map-teach-computing.png}})
 
 | Question | Choose one |
 |---|---|

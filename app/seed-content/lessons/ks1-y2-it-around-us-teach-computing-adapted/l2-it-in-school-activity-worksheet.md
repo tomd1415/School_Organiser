@@ -9,7 +9,7 @@ Today I will sort school IT by what it is used for, and see that some IT can be 
 
 We use IT in school for different jobs. A computer can help us **write**, **find things out**, and **play and learn**.
 
-![A desktop computer]({{res:l2-desktop-computer.png}})
+![A desktop computer]({{res:l2-a-desktop-computer-teach-computing.png}})
 
 ## Sort the school IT
 Drag each piece of IT into the job we use it for.

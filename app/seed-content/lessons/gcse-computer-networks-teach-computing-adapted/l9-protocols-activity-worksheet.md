@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will explain what a protocol is, say why networks need agreed standards, and name what the common protocols are used for.
 
-![Two hands meeting in an agreed greeting — both sides follow the same rule]({{res:l9-agreed-greeting.png}})
+![Two hands meeting in an agreed greeting — both sides follow the same rule]({{res:l9-an-agreed-greeting-both-sides-follow-the-same-rule.png}})
 
 ## A protocol is a set of rules
 A **protocol** is a set of rules for communication. Both the sender and receiver follow the same rules so the message gets through.

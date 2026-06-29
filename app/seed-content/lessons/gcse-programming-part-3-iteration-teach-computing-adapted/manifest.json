@@ -1,0 +1,191 @@
+{
+  "unitTitle": "GCSE Programming part 3 — iteration (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "While loops — condition-controlled iteration",
+      "objectives": "I can explain what iteration (a loop) means\nI can read a while loop and say when it stops\nI can change an if statement into a while loop\nI can extend a guess the number game with a while loop",
+      "outline": "Routine first (same every lesson). Vocabulary on board: iteration · while loop · condition · True / False. TA: everyone has Python (Trinket or IDE) open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — the robot that never stops (think–pair–share on the fish image). Pupils PREDICT what the robot keeps doing, then TICK what iteration means (no writing for Support).\n   • Support: tick-box choices.  • Core: define iteration in own words.  • Challenge: name an infinite loop.\n2. (5–20) I-do → we-do (PRIMM Predict–Run). Teacher reads the guess-the-number code aloud (I do); class predicts the next line (we do). Stress: the condition is checked at the START of each loop (misconception M9).\n   • Support: word-choice.  • Core: fill the True/False gaps.  • Challenge: explain why input is needed inside the loop. Likely error: forgetting `guess = int(input())` inside the loop → loops forever on the same number; fix-words “ask again INSIDE the loop.”\n3. (20–40) You-do — order the guess-the-word Parson’s puzzle, then turn the if into a while and add a guess counter.\n   • Support: order the Parson’s puzzle.  • Core: explain the early “Correct”.  • Challenge: add a counter that prints the total. TA: “prompt, do not do it for them.” They paste their link + a screenshot.\n4. (40–55) Plenary — pupils self-tick the 4 “I can…”; show their working loop. TA notes who turned the if into a while.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "while loop never stops (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-while-loop-never-stops-teach-computing.png"
+        },
+        {
+          "title": "While loops — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-while-loops-starter-worksheet.md"
+        },
+        {
+          "title": "While loops — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-while-loops-activity-worksheet.md"
+        },
+        {
+          "title": "While loops — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-while-loops-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Trace tables — walking through a while loop",
+      "objectives": "I can use a trace table to walk through a while loop\nI can record the variable and condition at each step\nI can use a trace table to find a logic error",
+      "outline": "Routine first. Vocabulary on board: trace table · variable · condition · logic error · iteration. TA: everyone has Python open. Read the 3 “I can…” aloud.\n1. (0–7) Starter — what is the output? (the count = 5 down to 1 loop). Pupils PREDICT the outputs, then ORDER the steps a while loop repeats (no writing for that step).\n   • Support: choose when the loop stops.  • Core: the last number printed.  • Challenge: why 0 is never printed (M9 — condition checked at the start of each loop).\n2. (7–20) I-do → we-do — introduce the trace table on the code screenshot. Fill one row at a time (I do); trace the short count = 3 loop together (we do).\n   • Support: tick when the condition is checked.  • Core: record values.  • Challenge: predict before tracing.\n3. (20–50) You-do — find the logic error: the 5-times-table loop that skips 25 (1 → 6 → 11 … 26). Trace it, spot the bug, rewrite it.\n   • Support: choose where the bug is.  • Core: explain the bug.  • Challenge: rewrite the loop (start at 0, or use <= 25). Likely error: keeping `!= 25` so it never stops; fix-words “make it stop on or before 25.” TA: “prompt, do not do it for them.” They screenshot the completed trace table / fixed code.\n4. (50–55) Plenary — self-tick the 3 “I can…”; one situation a trace table helps. TA notes who found the bug from the trace table.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "while loop and trace table (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-while-loop-and-trace-table-teach-computing.png"
+        },
+        {
+          "title": "Trace tables — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-trace-tables-starter-worksheet.md"
+        },
+        {
+          "title": "Trace tables — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-trace-tables-activity-worksheet.md"
+        },
+        {
+          "title": "Trace tables — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-trace-tables-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "For loops — count-controlled iteration with range()",
+      "objectives": "I can describe what a for loop does\nI can read a for loop that uses range()\nI can modify a for loop program (times table generator)\nI can compare a for loop and a while loop",
+      "outline": "Routine first. Vocabulary on board: for loop · range · sequence · definite · indefinite. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict the times-table for loop (on the code screenshot). Pupils PREDICT the output (rough is fine — it is new), then TICK what a for loop does.\n   • Support: tick-box choices.  • Core: how many lines print.  • Challenge: why range(1, 11) stops at 10.\n2. (5–18) I-do → we-do — define a for loop; range(start, stop) stops ONE BEFORE stop. Walk through range(1, 11) → 1…10 (I do); match the ranges together (we do).\n   • Support: card-sort for vs while facts.  • Core: does times_table change? what happens to x?  • Challenge: predict each range.\n3. (18–48) You-do — modify the times table generator to ask the user which table to show (input + int), 1 to 12.\n   • Support: the matching + card-sort.  • Core: read/answer the investigate questions.  • Challenge: change the range to 1–12 and add input. Likely error: table repeats a digit (5 5 5…) because input is a string; fix-words “wrap it in int(...).” TA: “prompt, do not do it for them.” They screenshot their program.\n4. (48–55) Plenary — compare a for loop and a while loop (card-sort): definite vs indefinite. Self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "times table for loop with range (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-times-table-for-loop-with-range-teach-computing.png"
+        },
+        {
+          "title": "For loops — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-for-loops-starter-worksheet.md"
+        },
+        {
+          "title": "For loops — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-for-loops-activity-worksheet.md"
+        },
+        {
+          "title": "For loops — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-for-loops-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Data validation — try / except inside a while loop",
+      "objectives": "I can explain why programs need data validation\nI can sort inputs into Correct / Out of range / ValueError / Empty\nI can use a while loop with try / except to validate input\nI can add a range check to a program",
+      "outline": "Routine first. Vocabulary on board: data validation · try / except · ValueError · range check · robustness. TA: everyone has Python open; pair programming — driver / navigator, swap every 5 minutes. Read the 4 “I can…” aloud.\n1. (0–8) Starter — sort the data entry (card-sort: Correct / Out of range / ValueError / Empty) for “Enter a number between 1 and 10”. Watch 7.5 — a number but not an integer, so still a ValueError.\n   • Support: tick what validation means.  • Core: why a bad input crashes a program.  • Challenge: why robustness matters.\n2. (8–18) I-do → we-do — why validate? define robustness plainly. Show the try/except that only works once.\n   • Support: choose what try/except catches.  • Core: predict a double bad input.  • Challenge: reason about real software.\n3. (18–48) You-do — live code a try/except INSIDE a while loop so it keeps asking, then add a range check (1–10).\n   • Support: order the validation Parson’s puzzle.  • Core: what does try/except catch.  • Challenge: add the `if 1 <= number <= 10` range check. Likely error: forgetting `not_validated = False`, so it loops forever; fix-words “turn the loop OFF when the input is good.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (48–55) Plenary — self-tick the 4 “I can…”; name one input the program now handles safely.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Data validation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-data-validation-starter-worksheet.md"
+        },
+        {
+          "title": "Data validation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-data-validation-activity-worksheet.md"
+        },
+        {
+          "title": "Data validation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-data-validation-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Pseudocode and FizzBuzz — designing an algorithm (double lesson)",
+      "objectives": "I can describe what pseudocode is and why we use it\nI can match pseudocode to Python code\nI can translate pseudocode into Python\nI can design an algorithm in pseudocode (FizzBuzz)",
+      "outline": "Double lesson — take your time. Routine first. Vocabulary on board: pseudocode · syntax · algorithm · MOD · iteration. TA: everyone has Python open; pair each pupil with a learning partner, check in every 15 minutes. Read the 4 “I can…” aloud.\n1. (0–5) Starter — will this code run? (password pseudocode). Pupils decide it is NOT Python and spot non-Python words.\n   • Support: tick what pseudocode is.  • Core: name a non-Python word.  • Challenge: why pseudocode helps planning.\n2. (5–20) I-do → we-do — define pseudocode (structured English for planning). Match pseudocode to Python (OUTPUT→print, <-→=, MOD→%, is equal to→==), then translate the password program together.\n   • Support: order the FizzBuzz rules.  • Core: translate the password code.  • Challenge: write FizzBuzz.\n3. (20–95) You-do — design and build FizzBuzz: count 1–15, print Fizz / Buzz / FizzBuzz else the number. MOD (%) gives the remainder; divisible by 3 means `number % 3 == 0`. Learning-partner check-ins every 15 minutes.\n   Likely error: outputting both Fizz and Buzz instead of FizzBuzz — check “divisible by BOTH 3 and 5” FIRST. Fix-words “test FizzBuzz before Fizz and Buzz.” TA: “prompt, do not do it for them.” They screenshot their program.\n4. (95–110) Plenary + unit quiz — final learning-partner discussion, then the Iteration unit quiz (key words, sort the loops, multi-select for-loop facts, fill the gaps, write a for loop and a while loop, confidence slider). Self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "pseudocode to Python (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-pseudocode-to-python-teach-computing.png"
+        },
+        {
+          "title": "FizzBuzz sequence and output (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-fizzbuzz-sequence-and-output-teach-computing.png"
+        },
+        {
+          "title": "Pseudocode and FizzBuzz — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-pseudocode-and-fizzbuzz-starter-worksheet.md"
+        },
+        {
+          "title": "Pseudocode and FizzBuzz — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-pseudocode-and-fizzbuzz-activity-worksheet.md"
+        },
+        {
+          "title": "Pseudocode and FizzBuzz — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-pseudocode-and-fizzbuzz-slides.md"
+        },
+        {
+          "title": "Iteration unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-iteration-unit-quiz-worksheet.md"
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud, slowly. Words on the board: data · collecting · table · structure · spreadsheet. Same routine as every lesson.
 
 ## Starter — rolling for data
-![A dice]({{res:l1-dice.png}})
+![A dice]({{res:l1-a-dice-collecting-data-teach-computing.png}})
 
 - data means facts and numbers we collect
 - roll the dice, write down each score
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Model one table with headings on the board. TA: prompt pupils to choose headings, do not write them for them. Core: pupils write a sensible heading.
 
 ## Putting data in a spreadsheet
-![Data in a spreadsheet grid]({{res:l1-spreadsheet-grid.png}})
+![Data in a spreadsheet grid]({{res:l1-data-in-a-spreadsheet-grid-teach-computing.png}})
 
 - a spreadsheet stores data in a grid of boxes
 - type the headings along the top

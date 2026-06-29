@@ -10,9 +10,9 @@ Today I will group objects by an attribute, tally them, and answer questions.
 ## Group by an attribute
 We can group the same objects in different ways. Here we will group vehicles by the attribute **number of wheels**.
 
-![A blue car]({{res:l4-blue-car.png}})
-![A red bus]({{res:l4-red-bus.png}})
-![A motorbike]({{res:l4-motorbike.png}})
+![A blue car]({{res:l4-a-blue-car-teach-computing.png}})
+![A red bus]({{res:l4-a-red-bus-teach-computing.png}})
+![A motorbike]({{res:l4-a-motorbike-teach-computing.png}})
 
 Sort each vehicle by its number of wheels. Drag each one into a group.
 

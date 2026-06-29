@@ -10,7 +10,7 @@ Today I will learn what to think about before linking to other people's websites
 ## Linking to other people
 A link that goes to someone else's website is called an **external link**. It is OK to link to other people's work, but there are some things you should think about first.
 
-![A locked and an unlocked padlock — is the site secure?]({{res:l6-secure.png}})
+![A locked and an unlocked padlock — is the site secure?]({{res:l6-a-locked-and-unlocked-padlock-is-the-site-secure-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

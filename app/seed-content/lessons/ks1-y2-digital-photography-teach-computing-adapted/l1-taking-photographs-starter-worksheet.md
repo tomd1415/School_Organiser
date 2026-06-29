@@ -10,9 +10,9 @@ Today I will find out which devices can take a photograph.
 ## Can these take photos?
 Some devices have a camera inside. Some do not. A device with a camera **can take photos**.
 
-![A laptop]({{res:l1-laptop.png}})
-![A tablet]({{res:l1-tablet.png}})
-![A printer]({{res:l1-printer.png}})
+![A laptop]({{res:l1-a-laptop-teach-computing.png}})
+![A tablet]({{res:l1-a-tablet-teach-computing.png}})
+![A printer]({{res:l1-a-printer-teach-computing.png}})
 
 Drag each device into the right group.
 

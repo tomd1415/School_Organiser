@@ -10,12 +10,12 @@ Today I will be a web designer. I will look at the features of a web page and pl
 ## A web designer plans a page
 A **web designer** plans and builds web pages. The first job is to think about the **purpose** (why the page is made) and the **audience** (who it is for).
 
-![A web designer at work]({{res:l2-web-designer.png}})
+![A web designer at work]({{res:l2-a-web-designer-at-work-teach-computing.png}})
 
 ## Who is it for?
 Look at the example pages your teacher shows you. You can often guess the audience from the words and pictures.
 
-![A web page about dogs]({{res:l2-dogs-page.png}})
+![A web page about dogs]({{res:l2-a-web-page-for-children-all-about-dogs-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

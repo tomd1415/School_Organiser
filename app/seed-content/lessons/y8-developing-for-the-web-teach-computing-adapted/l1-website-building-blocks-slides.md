@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Same routine as every lesson. Vocabulary on board: HTML · tag · formatting.
 
 ## Starter — work smarter, not harder
-![A wall of many identical bricks]({{res:l1-brick-wall.png}})
+![A wall of many identical bricks]({{res:l1-brick-wall-teach-computing.png}})
 
 Painting 5,000 bricks by hand, one at a time, takes a very long time.
 
@@ -22,9 +22,9 @@ A tag sits inside angle brackets: `<h1>` opens, `</h1>` closes. The `/` marks th
 > 🧑‍🏫 `<h1>` = big heading, `<b>` = bold, `<em>` = italic. Only the text BETWEEN the tags is changed.
 
 ## Plain page vs styled page  (we do)
-![A plain web page]({{res:l1-web-page-plain.png}})
+![A plain web page]({{res:l1-plain-web-page-teach-computing.png}})
 
-![The same page after styling]({{res:l1-web-page-styled.png}})
+![The same page after styling]({{res:l1-styled-web-page-teach-computing.png}})
 
 > 🧑‍🏫 Same content, different look. Ask: what changed? (heading colour, alignment, background). Inline style did it.
 

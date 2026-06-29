@@ -8,9 +8,9 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: object · label · group · search · image. Same routine as every lesson.
 
 ## A name is a label
-![A red car]({{res:l1-red-car.png}})
+![A red car]({{res:l1-red-car-teach-computing.png}})
 
-![A blue car]({{res:l1-blue-car.png}})
+![A blue car]({{res:l1-blue-car-teach-computing.png}})
 
 - a LABEL is a name we give to an object
 - both cars have the label "car"
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Teacher-played hook: the "Finding images — labels around us" clip. It has motion and sound — play it only if it suits the class. Ask: "Does the computer KNOW these are cats?"
 
 ## The computer is not clever
-![A cat]({{res:l1-cat.png}})
+![A cat]({{res:l1-cat-teach-computing.png}})
 
 - the computer shows cats because a person LABELLED each picture "cat"
 - no label means the computer cannot find it

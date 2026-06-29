@@ -10,7 +10,7 @@ Today I will compare RAM and ROM, and describe what cache memory does.
 ## RAM and ROM
 RAM and ROM are both MAIN MEMORY — the memory the CPU works with directly.
 
-![RAM memory sticks]({{res:l4-ram.png}})
+![RAM memory sticks]({{res:l4-ram-memory-sticks-teach-computing.png}})
 
 ## Sort the facts
 Drag each fact onto RAM or ROM.
@@ -26,7 +26,7 @@ VOLATILE memory loses its data when the power is off. NON-VOLATILE memory keeps 
 RAM is [[ ]], so it loses everything when you switch off. ROM is [[ ]], so it keeps the start-up instructions even with the power off.
 
 ## Cache
-![Memory chips on a circuit board]({{res:l4-cache-chips.png}})
+![Memory chips on a circuit board]({{res:l4-memory-chips-on-a-circuit-board-teach-computing.png}})
 
 Cache is a small amount of very fast memory. It sits between the CPU and RAM and holds the data the CPU uses most.
 

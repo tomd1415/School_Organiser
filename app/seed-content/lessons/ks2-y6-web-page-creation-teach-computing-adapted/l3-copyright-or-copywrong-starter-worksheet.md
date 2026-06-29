@@ -10,7 +10,7 @@ Today I will learn what copyright and fair use mean, why I should use copyright-
 ## Finding pictures online
 When you need a picture for your work, you might search the internet. But not every picture is free to use. The person who made it owns it.
 
-![The copyright symbol]({{res:l3-copyright.png}})
+![The copyright symbol]({{res:l3-the-copyright-symbol-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

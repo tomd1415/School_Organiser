@@ -16,7 +16,7 @@
 > 🧑‍🏫 Build this checklist together — it matches the starter worksheet. "Evaluate" means look at it and say what is good and what to improve.
 
 ## Watch it back
-![The animation app watching a film back]({{res:l5-imotion-capture.png}})
+![The animation app watching a film back]({{res:l5-watching-an-animation-back-teach-computing.png}})
 
 - press stop, then stop again
 - watch your animation

@@ -11,32 +11,32 @@
       "outline": "Routine first (same every lesson). Vocabulary on board: technology. TA: everyone has the starter and activity worksheet; have a few real objects ready (pencil, scissors, a computer). Read the four “I can…” aloud.\n1. (0–5) Starter — what is technology? On the starter worksheet pupils CHOOSE the meaning of technology (made by people to help us). Then tick yes/no on a few items.\n   • Support: yes/no — is a pencil/tree/computer technology?  • Core: name one piece of technology in the room.  • Challenge: multi-select what makes something technology.\n2. (5–15) I-do → we-do — say what technology means. Technology is MADE BY PEOPLE and HELPS US. Show the computer image. Likely error: “technology must be electronic” → fix-words “a pencil is technology too.” A guide dog helps us but people did not make it, so it is not technology.\n3. (15–30) Is it technology? Pupils SORT items into technology / not technology on the activity worksheet (card-sort). Scaffolding prompts: “Does it help us? Did people make it?” TA: prompt, do not sort it for them.\n4. (30–45) How does it help us? Pupils MATCH each piece of technology to the job it helps with (pencil→write, scissors→cut, phone→call, lamp→see). Use the phrase “it helps us to…”. Then a calm technology hunt; they photograph one piece for show-your-work.\n5. (45–50) Plenary — self-tick the four “I can…”; each pupil names one piece of technology and why it is technology.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s sheet looks “less done”. No flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "A desktop computer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-desktop-computer-teach-computing.png"
+        },
+        {
           "title": "Technology in our classroom — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-technology-around-us-starter-worksheet.md"
+          "file": "l1-technology-in-our-classroom-starter-worksheet.md"
         },
         {
           "title": "Technology in our classroom — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-technology-around-us-activity-worksheet.md"
+          "file": "l1-technology-in-our-classroom-activity-worksheet.md"
         },
         {
           "title": "Technology in our classroom — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-technology-around-us-slides.md"
-        },
-        {
-          "title": "A desktop computer (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l1-technology-computer.png"
+          "file": "l1-technology-in-our-classroom-slides.md"
         }
       ]
     },
@@ -45,6 +45,20 @@
       "objectives": "I can name the main parts of a computer\nI can switch on and log in to a computer\nI can use a mouse to click and drag",
       "outline": "Routine first. Vocabulary on board: computer · screen · base unit · keyboard · mouse · trackpad. TA: a computer ready per pupil/pair; the drag puzzle (ncce.io/drag) bookmarked. Read the three “I can…” aloud.\n1. (0–5) Starter — recap: technology is made by people to help us (single choice on the starter worksheet).\n2. (5–15) I-do → we-do — name the parts. Show the desktop image: SCREEN (look at), BASE UNIT (the thinking box), KEYBOARD (type), MOUSE (point/click). Pupils LABEL the computer on the activity worksheet (drag screen/base unit/keyboard/mouse). Show the laptop — same parts in one case. Likely error: “a laptop has no base unit” → fix-words “the laptop keeps the parts inside the case.”\n3. (15–20) Online-safety recap (first time online this unit): tell a trusted adult if anything online makes you uncomfortable. Short and reassuring.\n4. (20–45) You-do — switch on, log in, use the mouse. Break logging in into small steps; log them in if needed. Open the drag puzzle; model click-hold-drag. Pupils click and drag the pieces and screenshot the puzzle.\n   • Support: choose which part you LOOK at / TYPE on / POINT with.  • Core: match each part to its job.  • Challenge: where are the desktop parts on a laptop?\n5. (45–50) Plenary — fill in the missing computer parts; self-tick the three “I can…”. Log off safely.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
+        {
+          "title": "A desktop computer — screen, base unit, keyboard, mouse (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-desktop-computer-screen-base-unit-keyboard-mouse-teach-computing.png"
+        },
+        {
+          "title": "A laptop computer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-laptop-computer-teach-computing.png"
+        },
         {
           "title": "Using technology — starter worksheet.md",
           "kind": "worksheet",
@@ -65,20 +79,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l2-using-technology-slides.md"
-        },
-        {
-          "title": "A desktop computer — screen, base unit, keyboard, mouse (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l2-desktop-computer.png"
-        },
-        {
-          "title": "A laptop computer (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l2-laptop.png"
         }
       ]
     },
@@ -92,21 +92,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l3-mouse-skills-starter-worksheet.md"
+          "file": "l3-developing-mouse-skills-starter-worksheet.md"
         },
         {
           "title": "Developing mouse skills — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l3-mouse-skills-activity-worksheet.md"
+          "file": "l3-developing-mouse-skills-activity-worksheet.md"
         },
         {
           "title": "Developing mouse skills — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l3-mouse-skills-slides.md"
+          "file": "l3-developing-mouse-skills-slides.md"
         }
       ]
     },
@@ -116,32 +116,32 @@
       "outline": "Routine first. Vocabulary on board: computer · keyboard · mouse · typing · save. TA: computers ready; the paint program from last lesson bookmarked. Read the three “I can…” aloud.\n1. (0–10) Starter — what is a keyboard for? Typing = writing letters, words and numbers on a screen (single choice). Keyboards look different but do the same job.\n2. (10–30) I-do → we-do — type your name. Open the paint program, click the text tool (T), drag a text box, type your name. Note: clicking away finalises the box. TA: prompt, do not type for them.\n3. (30–40) Save your work. Pupils ORDER the save steps on the activity worksheet (click save icon → type a sensible name → keep .png → save). The save icon looks the same in many programs.\n   • Support: choose which part you type with / which button saves.  • Core: a good, sensible file name.  • Challenge: multi-select why a sensible name helps.\n4. (40–45) Why a sensible name? So you can find it again and know what it is without opening it. Pupils screenshot their typed name.\n5. (45–50) Plenary — review one saved file; which tools were used? Self-tick the three “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "A computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-computer-keyboard-teach-computing.png"
+        },
+        {
           "title": "Using a computer keyboard — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-keyboard-starter-worksheet.md"
+          "file": "l4-using-a-computer-keyboard-starter-worksheet.md"
         },
         {
           "title": "Using a computer keyboard — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-keyboard-activity-worksheet.md"
+          "file": "l4-using-a-computer-keyboard-activity-worksheet.md"
         },
         {
           "title": "Using a computer keyboard — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-keyboard-slides.md"
-        },
-        {
-          "title": "A computer keyboard (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l4-keyboard.png"
+          "file": "l4-using-a-computer-keyboard-slides.md"
         }
       ]
     },
@@ -151,32 +151,32 @@
       "outline": "Routine first. Vocabulary on board: keyboard · computer · cursor · backspace. TA: computers ready; the printed keyboard/mouse cards for the recap; pupils’ saved files findable. Read the three “I can…” aloud.\n1. (0–10) Starter — mouse or keyboard? Quick statements; pupils move to the matching device. On the starter worksheet they choose mouse/keyboard and the right key.\n2. (10–20) Open your saved file. Pupils ORDER the open-a-file steps on the activity worksheet (open paint → click open icon → find file by name → open). Remind them WHY a sensible name helped.\n3. (20–40) I-do → we-do — the keys that help you write. Pupils LABEL the keyboard image (space bar, backspace, arrow keys). The cursor is the blinking line. Model: type a sentence, then fix a letter with arrow keys + backspace. Likely error: holding backspace too long → fix-words “one tap, one letter.” Scaffold sheet gives ready-made sentences.\n   • Support: which key makes a space / deletes a letter.  • Core: which key moves the cursor to fix a word.  • Challenge: write the steps to delete a letter and retype it.\n4. (40–45) You-do — write and fix a short sentence under the picture; screenshot it.\n5. (45–50) Plenary — think-pair-share “why give a file a sensible name?” Self-tick the three “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "A computer keyboard — space bar, backspace, arrow keys (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-computer-keyboard-space-bar-backspace-arrow-keys-teach-computing.png"
+        },
+        {
           "title": "Developing keyboard skills — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l5-keyboard-skills-starter-worksheet.md"
+          "file": "l5-developing-keyboard-skills-starter-worksheet.md"
         },
         {
           "title": "Developing keyboard skills — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l5-keyboard-skills-activity-worksheet.md"
+          "file": "l5-developing-keyboard-skills-activity-worksheet.md"
         },
         {
           "title": "Developing keyboard skills — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l5-keyboard-skills-slides.md"
-        },
-        {
-          "title": "A computer keyboard — space bar, backspace, arrow keys (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l5-keyboard.png"
+          "file": "l5-developing-keyboard-skills-slides.md"
         }
       ]
     },
@@ -190,21 +190,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l6-using-responsibly-starter-worksheet.md"
+          "file": "l6-using-a-computer-responsibly-starter-worksheet.md"
         },
         {
           "title": "Using a computer responsibly — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l6-using-responsibly-activity-worksheet.md"
+          "file": "l6-using-a-computer-responsibly-activity-worksheet.md"
         },
         {
           "title": "Using a computer responsibly — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l6-using-responsibly-slides.md"
+          "file": "l6-using-a-computer-responsibly-slides.md"
         }
       ]
     }

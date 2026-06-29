@@ -23,7 +23,7 @@
 > 🧑‍🏫 Show the colour pattern. Ask what comes next. Pupils answer this on the starter worksheet. Use counters: one colour = one instrument.
 
 ## A rhythm
-![Hands clapping a rhythm]({{res:l2-clapping.png}})
+![Hands clapping a rhythm]({{res:l2-hands-clapping-a-rhythm-teach-computing.png}})
 
 - a rhythm is a pattern of sounds
 - people clap and tap rhythms
@@ -32,7 +32,7 @@
 > 🧑‍🏫 We-do. Clap a short rhythm together (clap, clap, rest, clap). Keep it quiet and steady. Pupils who do not want to clap can tap the table.
 
 ## Make a rhythm on the computer
-![The Rhythm tool in Chrome Music Lab]({{res:l2-rhythm-tool.png}})
+![The Rhythm tool in Chrome Music Lab]({{res:l2-the-rhythm-tool-in-chrome-music-lab-teach-computing.png}})
 
 - tap the dots to make a pattern
 - press play to hear it

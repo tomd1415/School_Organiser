@@ -10,7 +10,7 @@ Today I will learn about compasses and comparison operators (< > =).
 ## What is a compass?
 A **compass** shows which direction is north. The micro:bit has a compass inside it. It can tell us a **heading** — a direction shown as a number of degrees.
 
-![A micro:bit showing a compass heading]({{res:l4-compass-emulator.png}})
+![A micro:bit showing a compass heading]({{res:l4-a-micro-bit-showing-a-compass-heading-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

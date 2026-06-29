@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will record my voice tracks from my plan, review them, and improve them.
 
-![Recording a podcast on a computer]({{res:l4-headphones-laptop.png}})
+![Recording a podcast on a computer]({{res:l4-recording-a-podcast-teach-computing.png}})
 
 ## Make your podcast — in order
 Put these steps in the right order.

@@ -13,9 +13,9 @@ Fill in the gaps with the right word: text, images.
 Desktop publishing means making documents with [[ ]] and [[ ]] using page layout software.
 
 ## Real-world desktop publishing
-![Rolled-up newspapers]({{res:l6-newspapers.png}})
+![Rolled-up newspapers]({{res:l6-newspapers-in-the-real-world-teach-computing.png}})
 
-![An estate agent 'house for sale' sign]({{res:l6-house-for-sale.png}})
+![An estate agent 'house for sale' sign]({{res:l6-estate-agent-sign-teach-computing.png}})
 
 | Question | Tick ALL the people who use desktop publishing |
 |---|---|

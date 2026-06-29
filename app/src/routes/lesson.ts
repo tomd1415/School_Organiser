@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
+import { paths } from '../lib/paths';
 import {
   findOrCreateOccurrence,
   findOccurrence,
@@ -248,17 +249,30 @@ function adaptView(gc: number, lp: number, eff: EffectiveLesson, oob = false): s
   return `<div class="adapt-view" id="adapt-${gc}-${lp}-view"${oob ? ' hx-swap-oob="true"' : ''}>${inner}</div>`;
 }
 
-function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: string, toolsOpen: boolean = getExperienceMode() === 'power'): string {
+function renderAdaptation(
+  gc: number,
+  lp: number,
+  eff: EffectiveLesson,
+  msg?: string,
+  toolsOpen: boolean = getExperienceMode() === 'power',
+  noticeHtml?: string,
+): string {
   // Rail & Stage declutter: the status (whether this class has a revised version) + the read-only view
-  // stay visible, but the EDITOR, AI tools and change log fold into one "Adapt & AI tools" disclosure —
-  // closed by default for the everyday teacher (so a fresh lesson never looks unfinished), pre-opened
-  // only when advanced tools are on. After an AI action that re-renders this block, the caller passes
-  // toolsOpen=true so the disclosure doesn't snap shut and hide its own result + follow-up controls.
+  // stay visible. The primary "✨ Adapt for this class (AI)" button is ALSO always visible (noted_bugs2
+  // #5 — the teacher couldn't find it when it sat behind the disclosure); only the secondary editor /
+  // extra AI tools / change log fold into the "Adapt & AI tools" disclosure — closed by default for the
+  // everyday teacher, pre-opened only when advanced tools are on. After an AI action that re-renders this
+  // block, the caller passes toolsOpen=true so the disclosure doesn't snap shut. `noticeHtml` is a
+  // trusted, pre-built notice (e.g. the skip prompt with an inline "add teaching context" action) and is
+  // rendered RAW; `msg` is plain text and is escaped.
   return `<div class="adapt" id="adapt-${gc}-${lp}">
       ${adaptMeta(gc, lp, eff.adapted)}
       ${eff.adaptationNote ? `<p class="adapt-note">${esc(eff.adaptationNote)}</p>` : ''}
-      ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
+      ${noticeHtml ? noticeHtml : msg ? `<p class="muted">${esc(msg)}</p>` : ''}
       ${adaptView(gc, lp, eff)}
+      <p class="adapt-primary">
+        <button type="button" class="button small" title="Re-pitch this lesson for this class from its teaching context, ability and access needs — and its recent lessons where there are any (AI)" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt for this class (AI)</button>
+      </p>
       <details class="advanced ld-adapt-tools"${toolsOpen ? ' open' : ''}>
         <summary>🛠 Adapt &amp; AI tools</summary>
         <details class="adapt-edit">
@@ -268,7 +282,6 @@ function renderAdaptation(gc: number, lp: number, eff: EffectiveLesson, msg?: st
             <label class="adapt-l">Outline — for this group<textarea name="outline" rows="3" placeholder="(inherits the master)">${esc(eff.outline ?? '')}</textarea></label>
           </form>
         </details>
-        <button type="button" class="link fu-ai" title="Re-pitch this lesson for this class from its teaching context, ability and access needs — and its recent lessons where there are any (AI)" hx-post="/lesson/adapt/${gc}/${lp}/ai" hx-target="#adapt-${gc}-${lp}" hx-swap="outerHTML" hx-disabled-elt="this">✨ Adapt for this class (AI)</button>
         <button type="button" class="link fu-ai" title="3 quick recall questions re-testing what this class got wrong recently (AI)" hx-post="/lesson/gc/${gc}/retrieval-starter" hx-target="#starter-${gc}-${lp}" hx-swap="innerHTML" hx-disabled-elt="this">🔁 Retrieval starter (AI)</button>
         <div id="starter-${gc}-${lp}"></div>
         ${eff.adapted ? `<button type="button" class="link fu-ai" hx-post="/lesson/adapt/${gc}/${lp}/improve-master" hx-target="#adapt-${gc}-${lp}-proposal" hx-swap="innerHTML" hx-disabled-elt="this">⬆ Suggest master improvement (AI)</button>
@@ -311,6 +324,22 @@ function renderOutlineTracker(oc: number, outline: string | null, progress: numb
 }
 
 const LEVEL_LABEL: Record<Level, string> = { support: '🟢 Support', core: '🟡 Core', challenge: '🔴 Challenge' };
+
+/** The quick-peek worksheet modal body: a title, an in-modal level switcher (🟢/🟡/🔴) that swaps just
+ * the preview, the worksheet preview itself, and a close button — large type so it reads at a glance
+ * from the front of the room. Reuses renderWorksheetPreview; no new worksheet-resolution logic. */
+async function renderWorksheetModalBody(gc: number, lp: number, level: Level): Promise<string> {
+  const tab = (lv: Level): string =>
+    `<button type="button" class="ws-tab${lv === level ? ' is-on' : ''}" hx-get="${paths.worksheetPreview(gc, lp, lv)}" hx-target="#worksheet-modal-prev" hx-swap="innerHTML">${LEVEL_LABEL[lv]}</button>`;
+  return `<div class="ws-modal">
+      <header class="ws-modal-head">
+        <h2>📖 Worksheet — what pupils are about to do</h2>
+        <button type="button" class="mm-x" onclick="this.closest('dialog').close()" aria-label="Close">✕</button>
+      </header>
+      <div class="ws-preview-tabs" role="tablist">${tab('support')}${tab('core')}${tab('challenge')}</div>
+      <div id="worksheet-modal-prev" class="ws-modal-prev">${await renderWorksheetPreview(gc, lp, level)}</div>
+    </div>`;
+}
 
 /** The teacher's "preview as pupil" fragment: the worksheet sliced to one level, rendered inert
  * (preview mode). Surfaces the answer-space count so a level with zero boxes is obvious at a glance. */
@@ -1236,6 +1265,16 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     return reply.type('text/html').send(await renderWorksheetPreview(q.data.gc, q.data.lp, q.data.level));
   });
 
+  // Quick-peek worksheet MODAL body (one click from the Now card or the cockpit) — the same preview as
+  // /lesson/worksheet-preview, wrapped in modal chrome with an in-modal level switcher and a close button.
+  app.get('/lesson/worksheet-modal', { preHandler: requireAuth }, async (req, reply) => {
+    const q = z
+      .object({ gc: z.coerce.number().int().positive(), lp: z.coerce.number().int().positive(), level: z.enum(['support', 'core', 'challenge']) })
+      .safeParse(req.query);
+    if (!q.success) return reply.code(400).type('text/html').send('<p class="muted">Bad worksheet request.</p>');
+    return reply.type('text/html').send(await renderWorksheetModalBody(q.data.gc, q.data.lp, q.data.level));
+  });
+
   // Image gaps the generator left (`> 🖼️ [show: …]`) become a pre-lesson to-do: surfaced on the
   // lesson page AND added to the occurrence's "Before the bell" prep list (idempotent by text). The
   // teacher drops the images in via the worksheet editor, which removes the markers.
@@ -1372,12 +1411,21 @@ export function registerLessonRoutes(app: FastifyInstance): void {
     const master = await getLessonPlan(lp);
     if (!master) return reply.code(404).send('');
     const eff = await getEffectiveLesson(gc, lp, { objectives: master.objectives, outline: master.outline });
+    if (outcome.status === 'skip') {
+      // Not a fault — the AI has nothing to adapt FROM (no history and no class context). Make it
+      // unmistakable and actionable: an inline "add teaching context" button reveals the editor right
+      // here, so the teacher doesn't have to hunt for it (noted_bugs2 #5).
+      const notice = `<div class="adapt-skip">
+          <p class="muted">✨ <strong>Can't adapt yet</strong> — this class has no teaching context and no lessons taught, so there's nothing for the AI to adapt from. Add this class's context (ability, access needs, what they've covered), or teach a lesson, then try again.</p>
+          <button type="button" class="button small" hx-get="${paths.groupContext(gc)}" hx-target="#adapt-ctx-${gc}-${lp}" hx-swap="innerHTML">➕ Add teaching context for this class</button>
+          <div id="adapt-ctx-${gc}-${lp}" class="adapt-ctx-reveal"></div>
+        </div>`;
+      return reply.type('text/html').send(renderAdaptation(gc, lp, eff, undefined, true, notice));
+    }
     const msg =
       outcome.status === 'ok'
         ? 'adapted ✓ — review and edit below; the change log records it'
-        : outcome.status === 'skip'
-          ? "Nothing to adapt from yet — add this class's teaching context, ability or access needs (the “this class's teaching context” panel), or teach a lesson, then try again."
-          : (outcome.message ?? 'AI unavailable — nothing changed.');
+        : (outcome.message ?? 'AI unavailable — nothing changed.');
     return reply.type('text/html').send(renderAdaptation(gc, lp, eff, msg, true));
   });
 

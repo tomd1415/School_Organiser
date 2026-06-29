@@ -111,6 +111,9 @@ export function nextShell({ title, body, authed = false, csrfToken, width }: Lay
   </dialog>
   <dialog id="mark-modal" class="mark-modal" hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'>
     <div id="mark-modal-body" aria-live="polite"></div>
+  </dialog>
+  <dialog id="worksheet-modal" class="worksheet-modal" hx-headers='{"x-csrf-token":"${esc(csrfToken)}"}'>
+    <div id="worksheet-modal-body" aria-live="polite"></div>
   </dialog>`
       : ''
   }

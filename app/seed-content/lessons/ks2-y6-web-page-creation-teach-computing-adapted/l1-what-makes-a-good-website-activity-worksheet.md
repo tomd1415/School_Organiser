@@ -10,7 +10,7 @@ Today I will explore a website, find the media on it, and look at the HTML code 
 ## Quick quest — explore the website
 Use the website your teacher shows you (for example San Diego Zoo Kids). Click the buttons and the menu to find the answers.
 
-![The San Diego Zoo Kids website]({{res:l1-zoo-website.png}})
+![The San Diego Zoo Kids website]({{res:l1-the-san-diego-zoo-kids-website-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|
@@ -37,7 +37,7 @@ Use the website your teacher shows you (for example San Diego Zoo Kids). Click t
 ## Websites are written in HTML
 Websites are made with a special code called **HTML** (Hypertext Markup Language). The code tells the browser what the page should look like. HTML is not run like a program — the browser just reads it to draw the page.
 
-![The HTML code behind a web page]({{res:l1-html-code.png}})
+![The HTML code behind a web page]({{res:l1-the-html-code-behind-a-web-page-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

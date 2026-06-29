@@ -25,7 +25,7 @@ Here is a table that has clear headings (the words along the top): Name, Roll 1,
 ## Typing data into a spreadsheet
 A **spreadsheet** is a computer program for storing data in a grid of boxes. Here is data typed into a spreadsheet. Each box holds one piece of data.
 
-![Data in a spreadsheet grid]({{res:l1-spreadsheet-grid.png}})
+![Data in a spreadsheet grid]({{res:l1-data-in-a-spreadsheet-grid-teach-computing.png}})
 
 Put the steps in order. How do you get your data into a spreadsheet?
 

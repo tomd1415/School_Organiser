@@ -12,7 +12,7 @@ Huffman coding gives each character a bit pattern. Common characters get short p
 
 This is the Huffman tree for the word **MISSISSIPPI**:
 
-![Huffman tree for MISSISSIPPI — S=0, I=10, M=110, P=111]({{res:l17-huffman-tree.png}})
+![Huffman tree for MISSISSIPPI — S=0, I=10, M=110, P=111]({{res:l17-huffman-tree-for-mississippi-teach-computing.png}})
 
 Following each path from the top gives these bit patterns:
 

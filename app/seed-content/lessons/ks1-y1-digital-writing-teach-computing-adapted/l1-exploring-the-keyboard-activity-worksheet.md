@@ -11,7 +11,7 @@ Today I will find keys on a keyboard and type my name in a word processor.
 Drag each label onto the right key on the keyboard.
 
 ```label
-image: {{res:l1-keyboard.png}}
+image: {{res:l1-computer-keyboard-teach-computing.png}}
 space (40%, 76%): Space bar
 backspace (79%, 35%): Backspace
 enter (80%, 50%): Enter

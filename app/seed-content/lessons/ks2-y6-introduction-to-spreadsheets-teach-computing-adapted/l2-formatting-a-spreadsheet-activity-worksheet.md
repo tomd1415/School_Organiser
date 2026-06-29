@@ -10,7 +10,7 @@ Today I will choose a suitable format for a cell, and apply it.
 ## A data item has a format
 The piece of data in a cell is a **data item**. A **format** tells the spreadsheet what kind of data it is, so it shows it in the right way. Some common formats are below.
 
-![A list of cell formats]({{res:l2-formats-list.png}})
+![A list of cell formats]({{res:l2-a-list-of-cell-formats-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|
@@ -39,7 +39,7 @@ Match each data item to the best format. Use the same choices each time.
 ## Applying a format
 To change a cell's format: click the cell, click **Format**, then **Number**, then choose the format you want.
 
-![The Format menu]({{res:l2-format-menu.png}})
+![The Format menu]({{res:l2-the-format-menu-in-a-spreadsheet-teach-computing.png}})
 
 ## 🔴 Challenge
 | Question | Your answer |

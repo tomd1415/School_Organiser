@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: breadcrumb trail · navigation · hyperlink · subpage. Recap: last lesson we built a home page; today we add more pages and link them.
 
 ## Starter — breadcrumbs
-![A site map showing how pages link]({{res:l5-site-map.png}})
+![A site map showing how pages link]({{res:l5-a-site-map-showing-how-pages-link-together-teach-computing.png}})
 
 - in Hansel and Gretel, breadcrumbs show the way back
 - on a website, a breadcrumb trail shows where you have been
@@ -16,7 +16,7 @@
 > 🧑‍🏫 Briefly recap the story. Ask why the breadcrumbs mattered. Link it to not getting lost on a website. Support pupils choose what a navigation path is.
 
 ## Where will you go?
-![Exploring the zoo website]({{res:l5-zoo-website.png}})
+![Exploring the zoo website]({{res:l5-exploring-the-san-diego-zoo-kids-website-teach-computing.png}})
 
 - start on the home page
 - click a link to a subpage, then go back

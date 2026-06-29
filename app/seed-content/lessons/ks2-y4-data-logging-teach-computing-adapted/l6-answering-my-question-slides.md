@@ -16,7 +16,7 @@
 > 🧑‍🏫 Help pupils download or open their file. Remind them how to hide data they don't need and zoom in.
 
 ## Read the graph
-![A light graph with two dips]({{res:l6-light-graph.png}})
+![A light graph with two dips]({{res:l6-light-graph-with-two-dips-teach-computing.png}})
 
 - a dip down = it got darker / quieter / colder
 - a peak up = the opposite

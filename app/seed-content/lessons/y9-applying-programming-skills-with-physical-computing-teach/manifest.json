@@ -1,0 +1,205 @@
+{
+  "unitTitle": "Y9 Applying programming skills with physical computing (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Hello physical world — meeting the micro:bit",
+      "objectives": "I can describe what the micro:bit is\nI can list the micro:bit's input and output devices\nI can write and run a Python program on the micro:bit\nI can find and fix a syntax error",
+      "outline": "Routine first (same every lesson). Vocabulary on board: input · output · sensor · hardware component · flash · syntax error. TA: everyone has the Mu editor (or python.microbit.org) open + 1 micro:bit + USB cable per pair. Read the 4 “I can…” aloud.\n1. (0–10) Starter — input or output? (think–pair–share). On the starter worksheet pupils DRAG devices into input/output and DRAG labels onto the board (no writing).\n   • Support: tick “an input is…”.  • Core: name one phone output.  • Challenge: is the display input or output, and how do you know? Likely error: calls a sensor just “input” → fix-words “which sensor — light, sound or movement?”\n2. (10–25) Know your tools (I-do). Show the board front + back (embedded images); link each component back to the input/output columns. Pairs skim the component list.\n3. (25–40) Walk-through — live-code “Hello there!”, flash it, watch it scroll (I-do → we-do). Pairs then change scroll→show and the text→Image.HEART (you-do).\n   • Support: “change THIS line” arrow card.  • Core: change it unaided.  • Challenge: spot + fix the syntax error on the worksheet. Likely error: missing quotes → “text always goes inside quotes”. TA: “prompt, do not type it for them.”\n4. (40–50) Pairs paste their share link + a screenshot on the activity worksheet.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pair shows their running board. TA notes who flashed a working program.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "micro:bit front (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-micro-bit-front-teach-computing.png"
+        },
+        {
+          "title": "micro:bit back, labelled (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-micro-bit-back-labelled-teach-computing.png"
+        },
+        {
+          "title": "Hello physical world — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-hello-physical-world-starter-worksheet.md"
+        },
+        {
+          "title": "Hello physical world — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-hello-physical-world-activity-worksheet.md"
+        },
+        {
+          "title": "Hello physical world — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-hello-physical-world-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Bare bones — built-in input and output",
+      "objectives": "I can use the LED display for output\nI can read a sensor or button for input\nI can use a while True loop to keep checking for input\nI can change a program to respond to a button press",
+      "outline": "Routine first. Vocabulary on board: output · input · sensor · while loop · pixel · coordinates. TA: 1 micro:bit + USB per pair; pairs swap driver/navigator each task. Read the 4 “I can…” aloud.\n1. (0–10) Starter — what does each part do? Pupils MATCH each built-in part to its job (display=output; light/accelerometer=input).\n   • Support: display is input or output? (tick).  • Core: name one input.  • Challenge: why a program needs both input and output.\n2. (10–25) Output — the 5×5 display (I-do). show vs set_pixel; columns/rows numbered 0–4. Worked example, then pairs try the Output tasks.\n   • Likely error: x or y above 4 → error scrolls; fix-words “the grid only goes up to 4”.\n3. (25–40) Input — buttons + sensors (we-do). Predict then run the button counter; stress while True keeps checking and was_pressed counts each press once.\n4. (40–50) You-do — on the worksheet, put the counter program in order (Parsons) then build it.\n   • Support: block-order strip.  • Core: build unaided.  • Challenge: stop the count going above 4. Paste link + screenshot. TA: “prompt, do not do it for them.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; collect project ideas on the board. TA notes who got input AND output working.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "micro:bit display (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-micro-bit-display-teach-computing.png"
+        },
+        {
+          "title": "Bare bones — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-bare-bones-starter-worksheet.md"
+        },
+        {
+          "title": "Bare bones — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-bare-bones-activity-worksheet.md"
+        },
+        {
+          "title": "Bare bones — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-bare-bones-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Connections — pins and radio",
+      "objectives": "I can use a pin to send output (an LED or a speaker)\nI can use a pin to read input (a switch or a touch)\nI can send and receive a message by radio\nI can explain why a circuit must be closed for current to flow",
+      "outline": "Routine first. Vocabulary on board: GPIO pin · circuit · current · wireless · radio · group · message. TA: pairs share micro:bits; some tasks need wires, a speaker or an LED; agree radio group numbers. Read the 4 “I can…” aloud.\n1. (0–10) Starter — light it up. Pupils ORDER the steps to close a circuit so an LED lights; link to science. Tick the power + ground pins on the board image.\n   • Support: a circuit must be closed/open? (tick).  • Core: why GPIO pins are useful for a project.  • Challenge: an output use vs an input use of a pin.\n2. (10–25) Pins / GPIO (I-do). Output through a pin (LED/speaker) vs input through a pin (switch/touch). Pairs try the Pins tasks; build the simple circuits from the worksheet.\n   • Likely error: wrong pin (pin0 vs pin1) → fix-words “check which pin your wire is in”.\n3. (25–40) Radio (I-do → we-do). radio.on / send / receive; same group can talk; messages are TEXT only (str(...) for numbers). Predict the heart-on-ping receiver, then run.\n4. (40–50) You-do — sort pin uses (input/output), then put the “pass the love” radio program in order (Parsons) and test on two boards. Paste link + screenshot.\n   • Support: block-order strip.  • Core: build it.  • Challenge: explain how shake-on-one shows heart-on-other. TA: “prompt, check connections first.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; set homework: put a project idea on paper. TA notes who got radio working.\nDifferentiation on the SAME task; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "micro:bit pins (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-micro-bit-pins-teach-computing.png"
+        },
+        {
+          "title": "Connections — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-connections-starter-worksheet.md"
+        },
+        {
+          "title": "Connections — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-connections-activity-worksheet.md"
+        },
+        {
+          "title": "Connections — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-connections-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Dream it up — designing a project",
+      "objectives": "I can describe a project for a real problem and audience\nI can break my project into separate features\nI can list the input, processing and output of a feature\nI can choose the hardware components my project needs",
+      "outline": "Routine first. Vocabulary on board: design · problem · audience · decomposition · input · processing · output · prototype. TA: pairs now work together to the end of the unit; have the four example proposals + the project diary ready. Read the 4 “I can…” aloud.\n1. (0–10) Starter — input, processing or output? Pupils SORT the steps of a guessing game into the three parts (no writing).\n   • Support: “show on the display” — which part? (tick).  • Core: write one input.  • Challenge: give the I/P/O of a feature.\n2. (10–20) Four example projects (I-do). Clicker, guess-the-number, music keys, password-from-gestures. Reassure: a small finished idea beats a big unfinished one.\n3. (20–35) How to design (we-do). Model on ONE example: problem → audience → features → input/processing/output → components. Decomposition = break the big idea into small features.\n4. (35–50) You-do — on the worksheet, pick an idea, ORDER the design steps, then write the problem, audience and one decomposed feature; photo the proposal sheet for the screenshot box.\n   • Support: match project → component.  • Core: problem + audience.  • Challenge: decompose a feature + list components. TA: “prompt for a SMALLER first feature.”\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pair pitches their project in one sentence. TA notes which pairs have a focused, buildable idea.\nDesign lesson — minimal code; differentiation on the SAME task; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Dream it up — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-dream-it-up-starter-worksheet.md"
+        },
+        {
+          "title": "Dream it up — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-dream-it-up-activity-worksheet.md"
+        },
+        {
+          "title": "Dream it up — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-dream-it-up-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Build it up — building the prototype",
+      "objectives": "I can build a prototype that follows my plan\nI can use a \"wait for the button\" pattern\nI can give and use peer feedback\nI can record a problem and a fix in my diary",
+      "outline": "Routine first. Vocabulary on board: prototype · refine · feedback · decomposition · debug. TA: pairs need their proposal, code and project diary open; project parts and craft materials available. Read the 4 “I can…” aloud.\n1. (0–10) Starter — wait for the button. Pupils ORDER the flag/while program (Parsons) that waits for one press then stops; note alternative correct answers.\n   • Support: the loop runs while flag is… (tick).  • Core: what makes the loop stop.  • Challenge: why “wait then stop” beats while True for starting a game.\n2. (10–25) Build (you-do). Work from the proposal, ONE feature at a time, test on the board. This is the main assessment window — circulate and observe.\n   • Likely stall: trying everything at once → fix-words “get ONE feature working first”. TA: “prompt, do not fix it for them.”\n3. (25–35) Pause — feedback + diary (we-do). Tell another pair about your prototype; write their feedback and your response in the diary.\n4. (35–50) Build again (you-do). Resume; plan what to finish, as only a little more time remains next lesson. Paste link + screenshot of the prototype so far.\n5. (50–55) Plenary — self-tick the 4 “I can…” + rate confidence (slider, uncredited); share what was hardest. TA notes pairs at risk of not finishing.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Build it up — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-build-it-up-starter-worksheet.md"
+        },
+        {
+          "title": "Build it up — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-build-it-up-activity-worksheet.md"
+        },
+        {
+          "title": "Build it up — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-build-it-up-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Wrap it up — finishing, reflecting, comparing",
+      "objectives": "I can finish and test my prototype against my plan\nI can document what I built\nI can reflect on a problem I solved and what I would change\nI can compare the micro:bit with another platform",
+      "outline": "Routine first. Vocabulary on board: prototype · evaluation · rubric · microcontroller · microcomputer · platform. TA: pairs need code, board and project diary; have the rubric and the summative quiz ready. Read the 4 “I can…” aloud.\n1. (0–10) Starter — small board or full computer? Pupils SORT devices into microcontroller (micro:bit, Arduino) vs full computer (Raspberry Pi, laptop).\n   • Support: the micro:bit runs… (tick).  • Core: name another platform.  • Challenge: why a Pi suits a job the micro:bit cannot.\n2. (10–25) Finishing touches (you-do). Get the last feature working and test it against the plan. Use the rubric's Implementation/Ambition rows while pupils work.\n3. (25–38) Document + reflect. Complete day 3 of the diary and the documentation boxes: what you built, problems solved, one top tip.\n4. (38–50) Individual summative quiz (set separately) + plenary research: compare the micro:bit with the Raspberry Pi / Arduino — similarities and differences.\n   • Support: match platform → description.  • Core: microcontroller vs full computer.  • Challenge: pick the platform for an HD-video project + why. TA: “prompt for honest reflection, not the ‘right’ answer.”\n5. (50–55) Plenary — self-tick the 4 “I can…” + rate confidence (slider); each pair shows their finished prototype. TA notes completed projects for the rubric.\nDifferentiation on the SAME task; no flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Wrap it up — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-it-up-starter-worksheet.md"
+        },
+        {
+          "title": "Wrap it up — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-it-up-activity-worksheet.md"
+        },
+        {
+          "title": "Wrap it up — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-it-up-slides.md"
+        }
+      ]
+    }
+  ]
+}

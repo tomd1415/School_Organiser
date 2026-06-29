@@ -26,7 +26,7 @@ Background (the scene behind): a park, the sky, a beach
 ## An algorithm is a set of steps
 An **algorithm** is a precise set of steps to do a job. Here is the design sketch for a star that falls and is caught in the bowl:
 
-![A hand-drawn sketch: a star falls from the top down into a bowl on the ground]({{res:l4-algorithm-sketch.png}})
+![A hand-drawn sketch: a star falls from the top down into a bowl on the ground]({{res:l4-a-hand-drawn-algorithm-sketch-a-star-falling-into-a-bowl-teach-computing.png}})
 
 Fill in the missing words in the algorithm for the falling star. The star moves down, the bowl catches it, and the score goes up.
 

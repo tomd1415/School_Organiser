@@ -19,7 +19,7 @@ Drag each answer to the right word.
 ## Data or instruction? — sort the recipe parts
 A calculator holds **data** (the numbers) and follows **instructions** (add, subtract). Sort each part of a cake recipe.
 
-![A calculator: numbers are data, the operations are instructions]({{res:l1-calculator-data-instructions-teach-computing.png}})
+![A calculator: numbers are data, the operations are instructions]({{res:l1-calculator-data-and-instructions-teach-computing.png}})
 
 ```sort
 Data: 200°C, 3 eggs, 170g flour

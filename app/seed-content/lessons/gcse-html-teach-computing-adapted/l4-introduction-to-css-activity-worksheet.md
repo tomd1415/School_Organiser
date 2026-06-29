@@ -10,7 +10,7 @@ Today I will write a CSS rule and link my HTML page to an external stylesheet.
 ## What is CSS?
 CSS (Cascading Style Sheets) sets the **look** of a page — colours, fonts and sizes. One stylesheet can style every page at once.
 
-![One set of styles being applied to three web pages at once]({{res:l4-css-one-style-many-pages-teach-computing.png}})
+![One set of styles being applied to three web pages at once]({{res:l4-one-style-many-pages-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|

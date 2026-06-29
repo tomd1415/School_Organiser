@@ -10,13 +10,55 @@
       "objectives": "I can name the main parts of a micro:bit\nI can make a simple program in MakeCode and test it on the emulator\nI can put my program onto a real micro:bit (flash it)",
       "outline": "Routine first (same every lesson). Words on the board: micro:bit · MakeCode · input · output · emulator · flash. TA: everyone has the starter worksheet open; the activity worksheet ready; micro:bits handed out (no wires yet). Read the three 'I can…' aloud, slowly.\n1. (0–8) Starter — what is a micro:bit? Show the labelled board. A micro:bit is a tiny computer; it takes inputs and makes outputs. Pupils look at the front and back. Support choose the part that senses movement (accelerometer).\n2. (8–18) The parts. Name buttons A/B, LED screen, USB, pins, accelerometer. Likely error: calling the whole board 'the accelerometer' → fix-words 'the accelerometer is one PART that senses movement.' Core name two parts; Challenge give an input and an output.\n3. (18–32) I-do → we-do — MakeCode. Open makecode.microbit.org, make a New Project, drag a block inside on start. Likely error: blocks left grey/outside a wrap-around block → 'they will not run.'\n4. (32–45) You-do — make and test. Pupils scroll text or light the LEDs and press play to test on the emulator. Then they ORDER the flash steps on the activity worksheet and flash a real micro:bit; screenshot their work.\n5. (45–55) Plenary — accelerometers are also in phones, smart watches and game controllers. Self-tick the three 'I can…'; each pupil names one part.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "The micro:bit — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-the-microbit-starter-worksheet.md" },
-        { "title": "The micro:bit — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-the-microbit-activity-worksheet.md" },
-        { "title": "The micro:bit — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-the-microbit-slides.md" },
-        { "title": "A micro:bit with its parts labelled (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-microbit-parts.png" },
-        { "title": "The MakeCode programming screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-makecode-environment.png" },
-        { "title": "The MakeCode home screen — New Project (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-makecode-home.png" },
-        { "title": "The on start and forever blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-onstart-forever.png" }
+        {
+          "title": "A micro:bit with its parts labelled (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-micro-bit-with-its-parts-labelled-teach-computing.png"
+        },
+        {
+          "title": "The MakeCode programming screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-makecode-programming-screen-teach-computing.png"
+        },
+        {
+          "title": "The MakeCode home screen — New Project (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-makecode-home-screen-new-project-teach-computing.png"
+        },
+        {
+          "title": "The on start and forever blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-on-start-and-forever-blocks-teach-computing.png"
+        },
+        {
+          "title": "The micro:bit — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-the-micro-bit-starter-worksheet.md"
+        },
+        {
+          "title": "The micro:bit — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-the-micro-bit-activity-worksheet.md"
+        },
+        {
+          "title": "The micro:bit — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-the-micro-bit-slides.md"
+        }
       ]
     },
     {
@@ -24,12 +66,48 @@
       "objectives": "I can spot 'if… then… else…' choices in real life (conditions)\nI can use 'if… then… else…' to control what a program does\nI can use a random number to make a program choose",
       "outline": "Routine first. Words on the board: selection · condition · if then else · variable · random. TA: everyone has the starter worksheet open; the activity worksheet ready. Read the three 'I can…' aloud. Recap: last lesson we made and flashed a first program.\n1. (0–8) Starter — making choices. 'If it is raining then take a coat else wear a cap.' The condition is 'it is raining'. Pupils choose the condition; Core write their own if/then/else.\n2. (8–18) I-do → we-do — if/then/else. The condition is checked first; 'then' runs if true, 'else' if false. Likely error: thinking both sides run → fix-words 'only ONE side runs — then if true, else if false.' This is selection.\n3. (18–28) A random number. Show pick random 1 to 6 — like a dice. Support choose what pick random does.\n4. (28–48) You-do — the fortune teller. On shake, set a variable 'answer' to pick random 1 to 2; if answer = 1 show 'Yes' else 'No'. Pupils ORDER the blocks (Parsons), build it in MakeCode and test on the emulator (hold the shake a moment); screenshot it. Core: what decides Yes or No? Challenge: why use a random number?\n5. (48–55) Plenary — a battery pack lets the micro:bit work away from the computer. Self-tick the three 'I can…'; each pupil says one real-life if/then/else.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "Go with the flow — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-go-with-the-flow-starter-worksheet.md" },
-        { "title": "Go with the flow — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-go-with-the-flow-activity-worksheet.md" },
-        { "title": "Go with the flow — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-go-with-the-flow-slides.md" },
-        { "title": "The fortune teller code blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-fortune-teller-code.png" },
-        { "title": "The pick random 1 to 6 block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-pick-random.png" },
-        { "title": "A micro:bit with a battery connector (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-microbit-battery.jpg" }
+        {
+          "title": "The fortune teller code blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-the-fortune-teller-code-blocks-teach-computing.png"
+        },
+        {
+          "title": "The pick random 1 to 6 block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-the-pick-random-1-to-6-block-teach-computing.png"
+        },
+        {
+          "title": "A micro:bit with a battery connector (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-micro-bit-with-a-battery-connector-teach-computing.jpg"
+        },
+        {
+          "title": "Go with the flow — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-go-with-the-flow-starter-worksheet.md"
+        },
+        {
+          "title": "Go with the flow — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-go-with-the-flow-activity-worksheet.md"
+        },
+        {
+          "title": "Go with the flow — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-go-with-the-flow-slides.md"
+        }
       ]
     },
     {
@@ -37,13 +115,55 @@
       "objectives": "I can use a button press to change a variable\nI can use movement (the accelerometer) to change a variable\nI can show a variable, and know that checking it does not change its value",
       "outline": "Routine first. Words on the board: input · variable · accelerometer · condition · value. TA: everyone has the starter worksheet open; the activity worksheet ready. Read the three 'I can…' aloud. Recap: the micro:bit takes inputs.\n1. (0–10) Starter — inputs. An input puts information into the micro:bit. Pupils MULTI-SELECT the inputs (button A, accelerometer, microphone) — the LED screen is the odd one out (an output). Support choose what an input is.\n2. (10–22) A variable counts. A variable holds a value that can change; set it to 0 at the start, change it by 1 to count up. Challenge explain why we start at 0.\n3. (22–38) You-do — change a variable with buttons, then movement. If button A → change count by 1; if button B → change count by -1; if is shake gesture → show count. Pupils ORDER the blocks (Parsons), build and test on the emulator; screenshot it. Likely error: count jumps a lot on a shake (many tiny moves) — note it; fixed in Lesson 6.\n4. (38–50) Checking a variable. Showing the count just looks at it; the value stays the same. Core choose 'stays the same'; Challenge explain why checking doesn't change a value.\n5. (50–55) Plenary — self-tick the three 'I can…'; each pupil names one input they used.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "Sensing inputs — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sensing-inputs-starter-worksheet.md" },
-        { "title": "Sensing inputs — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sensing-inputs-activity-worksheet.md" },
-        { "title": "Sensing inputs — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-sensing-inputs-slides.md" },
-        { "title": "Code: change a counter with buttons A and B (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-counter-buttons.png" },
-        { "title": "Code: show the count when shaken (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-counter-shake.png" },
-        { "title": "A micro:bit on the emulator — buttons and shake (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-emulator-inputs.png" },
-        { "title": "A micro:bit with its parts labelled (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-microbit-parts.png" }
+        {
+          "title": "Code: change a counter with buttons A and B (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-code-change-a-counter-with-buttons-a-and-b-teach-computing.png"
+        },
+        {
+          "title": "Code: show the count when shaken (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-code-show-the-count-when-shaken-teach-computing.png"
+        },
+        {
+          "title": "A micro:bit on the emulator — buttons and shake (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-micro-bit-on-the-emulator-buttons-and-shake-teach-computing.png"
+        },
+        {
+          "title": "A micro:bit with its parts labelled (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-micro-bit-with-its-parts-labelled-teach-computing.png"
+        },
+        {
+          "title": "Sensing inputs — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-sensing-inputs-starter-worksheet.md"
+        },
+        {
+          "title": "Sensing inputs — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-sensing-inputs-activity-worksheet.md"
+        },
+        {
+          "title": "Sensing inputs — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-sensing-inputs-slides.md"
+        }
       ]
     },
     {
@@ -51,13 +171,55 @@
       "objectives": "I can use a comparison operator (< > =) in an 'if… then…' statement\nI can explain why the order of conditions matters\nI can change a program to make a micro:bit compass",
       "outline": "Routine first. Words on the board: compass · direction · comparison operator · order · variable. TA: everyone has the starter worksheet open; the activity worksheet ready. Read the three 'I can…' aloud. Recap: we can check a condition to make a choice.\n1. (0–10) Starter — what is a compass? It shows which direction is north; the micro:bit gives a heading in degrees. Pupils choose what a compass shows. Support choose which symbol means 'less than'.\n2. (10–22) Comparison operators < > =. 'compass heading < 45' is true when the heading is under 45. Starter Challenge: is 30 < 45 true or false? (true). Show headings → directions: under 45 N, under 135 E, under 225 S, under 315 W. Pupils MATCH a heading to its direction.\n3. (22–34) Order matters. The program checks conditions from the top; the first true one wins. Likely error: any order will do → fix-words 'check from the TOP — the first true one wins.' Pupils test blocks in two orders. Core explain why order matters.\n4. (34–50) You-do — make your compass. Pupils ORDER a simple N/S compass (Parsons), build it in MakeCode (drag the logo on the emulator to face a direction) and add East and West; screenshot it. Challenge: 325° — which direction and why?\n5. (50–55) Plenary — self-tick the three 'I can…'; each pupil says what '<' means.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "Finding your way — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-finding-your-way-starter-worksheet.md" },
-        { "title": "Finding your way — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-finding-your-way-activity-worksheet.md" },
-        { "title": "Finding your way — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-finding-your-way-slides.md" },
-        { "title": "The simple compass code (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-compass-code.png" },
-        { "title": "Compass heading compared to a number (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-compass-blocks.png" },
-        { "title": "The compass algorithm and program flow (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-compass-flow.png" },
-        { "title": "A micro:bit showing a compass heading (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-compass-emulator.png" }
+        {
+          "title": "The simple compass code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-simple-compass-code-teach-computing.png"
+        },
+        {
+          "title": "Compass heading compared to a number (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-compass-heading-compared-to-a-number-teach-computing.png"
+        },
+        {
+          "title": "The compass algorithm and program flow (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-compass-algorithm-and-program-flow-teach-computing.png"
+        },
+        {
+          "title": "A micro:bit showing a compass heading (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-micro-bit-showing-a-compass-heading-teach-computing.png"
+        },
+        {
+          "title": "Finding your way — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-finding-your-way-starter-worksheet.md"
+        },
+        {
+          "title": "Finding your way — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-finding-your-way-activity-worksheet.md"
+        },
+        {
+          "title": "Finding your way — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-finding-your-way-slides.md"
+        }
       ]
     },
     {
@@ -65,11 +227,41 @@
       "objectives": "I can choose the variable my step counter needs\nI can design the algorithm for my step counter\nI can design the program flow for my step counter",
       "outline": "Routine first. Words on the board: design · algorithm · variable · program flow · step counter. TA: everyone has the starter worksheet open; the activity worksheet and design template ready. Read the three 'I can…' aloud. Recap: the accelerometer senses movement.\n1. (0–8) Starter — counting steps. Pupils count steps across the room; a step counter does this using the accelerometer. Pupils choose which sensor counts steps. Support choose what a step counter does.\n2. (8–18) What our step counter does. A shake = a step; button B shows the number; a message encourages you. Read the task together. We work at the DESIGN level today — planning, not coding.\n3. (18–28) Choosing the variable. One variable: steps; set to 0 at the start. Core name the variable; Challenge: why start at 0? Pupils fill in the variable section of the design.\n4. (28–48) You-do — design the algorithm and flow. An algorithm is a plan written as clear steps in order. Pupils ORDER the algorithm steps, then write their own on the template and complete the program flow; screenshot their design. Likely error: steps out of order → fix-words 'set the variable FIRST.'\n5. (48–55) Plenary — selection appears in lifts and traffic lights. Self-tick the three 'I can…'; each pupil names the variable. Collect the finished designs for Lesson 6.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not write it for them.",
       "resources": [
-        { "title": "Designing a step counter — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-step-counter-starter-worksheet.md" },
-        { "title": "Designing a step counter — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-step-counter-activity-worksheet.md" },
-        { "title": "Designing a step counter — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-designing-a-step-counter-slides.md" },
-        { "title": "A step counter design — algorithm and program flow (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-stepcounter-design.png" },
-        { "title": "A micro:bit with its parts labelled (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-microbit-parts.png" }
+        {
+          "title": "A step counter design — algorithm and program flow (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-step-counter-design-algorithm-and-program-flow-teach-computing.png"
+        },
+        {
+          "title": "A micro:bit with its parts labelled (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-micro-bit-with-its-parts-labelled-teach-computing.png"
+        },
+        {
+          "title": "Designing a step counter — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-a-step-counter-starter-worksheet.md"
+        },
+        {
+          "title": "Designing a step counter — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-a-step-counter-activity-worksheet.md"
+        },
+        {
+          "title": "Designing a step counter — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-designing-a-step-counter-slides.md"
+        }
       ]
     },
     {
@@ -77,11 +269,41 @@
       "objectives": "I can build my step counter program from my design\nI can test my program and find and fix bugs\nI can change the shake sensitivity so it counts better",
       "outline": "Routine first. Words on the board: create · code · test · debug · sensitivity. TA: everyone has the starter worksheet open; the activity worksheet and last lesson's designs ready. Read the three 'I can…' aloud. End-of-unit lesson — recap the whole journey at the end.\n1. (0–8) Starter — review your design and meet 'debug'. A bug is a mistake; debugging is finding and fixing it. Pupils choose what 'debug' means. Support choose what 'test' means.\n2. (8–28) You-do — build your code. Set steps to 0; a shake changes steps by 1; button B shows steps and a message. Pupils ORDER the blocks (Parsons), then build it in MakeCode from their own design; test often on the emulator. Likely error: blocks outside a wrap-around block → they will not run.\n3. (28–40) Test and debug. Test on the emulator, then a real micro:bit (taped to a shoe). Two ways to find bugs: isolate code, or substitute one block at a time. Likely error: changing lots at once → fix-words 'change ONE thing, then test.' Core name a way to find a bug; Challenge: why test on the emulator first?\n4. (40–50) Fix the sensitivity. The count may jump up too fast; only count a step when the shake is strong (acceleration (mg) strength > 1500). Core choose the fixing check; Challenge: a bigger number means you must shake harder. Screenshot the finished step counter.\n5. (50–55) End of unit — recap: the micro:bit → if/then/else → inputs and variables → the compass → designing → making a step counter. Self-tick the three 'I can…'; each pupil names one way to fix a bug.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "Making a step counter — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-step-counter-starter-worksheet.md" },
-        { "title": "Making a step counter — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-step-counter-activity-worksheet.md" },
-        { "title": "Making a step counter — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-making-a-step-counter-slides.md" },
-        { "title": "The step counter code blocks (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-stepcounter-code.png" },
-        { "title": "A block that counts a step only when the shake is strong (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-sensitivity-block.png" }
+        {
+          "title": "The step counter code blocks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-the-step-counter-code-blocks-teach-computing.png"
+        },
+        {
+          "title": "A block that counts a step only when the shake is strong (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-a-block-that-counts-a-step-only-when-the-shake-is-strong-teach-computing.png"
+        },
+        {
+          "title": "Making a step counter — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-step-counter-starter-worksheet.md"
+        },
+        {
+          "title": "Making a step counter — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-step-counter-activity-worksheet.md"
+        },
+        {
+          "title": "Making a step counter — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-a-step-counter-slides.md"
+        }
       ]
     }
   ]

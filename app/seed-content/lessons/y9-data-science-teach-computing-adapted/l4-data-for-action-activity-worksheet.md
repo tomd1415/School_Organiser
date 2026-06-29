@@ -7,7 +7,7 @@
 ## What we are learning
 Now we use the first two steps of the cycle — **Problem** and **Plan** — on a real problem: **litter in our school**.
 
-![A 'put litter in the bin' sign]({{res:l4-litter-bin-sign.png}})
+![A 'put litter in the bin' sign]({{res:l4-put-litter-in-the-bin-sign-teach-computing.png}})
 
 Walt Disney had the same kind of problem in his parks. He asked a precise question: *how far will people walk holding rubbish before they drop it?* Then he used data to decide where to put bins.
 
@@ -26,7 +26,7 @@ Not useful here: a pupil's name, your favourite colour
 ## Plan the data — mind map
 Use a mind map like this to plan ALL the data you might collect about the litter.
 
-![A blank mind map template]({{res:l4-mind-map-template.jpg}})
+![A blank mind map template]({{res:l4-mind-map-template-teach-computing.jpg}})
 
 ## 🟢 Support
 | Question | Tick the data you could collect about litter (tick all that apply) |

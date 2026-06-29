@@ -10,7 +10,7 @@ Today I will describe people using attributes and make a pictogram about my clas
 ## People have attributes too
 We can describe people with attributes, like their **hair colour** or whether they **wear glasses**.
 
-![A face with glasses]({{res:l5-face-glasses.png}})
+![A face with glasses]({{res:l5-a-face-with-glasses-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

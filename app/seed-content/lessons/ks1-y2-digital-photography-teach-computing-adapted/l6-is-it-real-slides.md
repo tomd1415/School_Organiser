@@ -17,8 +17,8 @@
 > 🧑‍🏫 Activity 1. Pupils take their best photo of the classroom using every skill. Remind: ask before photographing a person; check the background.
 
 ## Photos can be changed
-![A real photo of a dog and a baby giraffe]({{res:l6-real-dog-giraffe.png}})
-![A changed photo with a whale added near a bridge]({{res:l6-changed-whale.png}})
+![A real photo of a dog and a baby giraffe]({{res:l6-a-real-photo-of-a-dog-and-a-baby-giraffe-teach-computing.png}})
+![A changed photo with a whale added near a bridge]({{res:l6-a-changed-photo-with-a-whale-added-near-a-bridge-teach-computing.png}})
 
 - some photos are **real**
 - some are **changed** on a computer
@@ -27,7 +27,7 @@
 > 🧑‍🏫 Explain: people change photos to make them feel different, to make art, or to trick you.
 
 ## Look for clues
-![A magnifying glass looking for clues]({{res:l6-magnifier.png}})
+![A magnifying glass looking for clues]({{res:l6-a-magnifying-glass-looking-for-clues-teach-computing.png}})
 
 - snow in one part but not another
 - something far too big or too small

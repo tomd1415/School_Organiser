@@ -9,14 +9,14 @@ Today I will describe what each piece of network hardware does, define a MAC add
 
 A network needs hardware to move data around. Two important ones are below.
 
-![A router — moves data from one network to another]({{res:l3-router.png}})
-![A switch — sends data to the correct wired device]({{res:l3-switch.png}})
+![A router — moves data from one network to another]({{res:l3-a-router-icon.png}})
+![A switch — sends data to the correct wired device]({{res:l3-a-switch-icon.png}})
 
 ## Find the network port
 A **NIC** (network interface card) lets a computer join a network. You plug a network cable into the **network port**. Drag each label onto the right port on this laptop.
 
 ```label
-image: {{res:l3-laptop-ports.png}}
+image: {{res:l3-ports-on-the-side-of-a-laptop-label-the-network-port.png}}
 zone1 (17%, 73%): Network port (NIC)
 zone2 (35%, 68%): HDMI port
 zone3 (60%, 64%): USB port

@@ -11,7 +11,7 @@ Today I will remember the parts of a spreadsheet and the words we use for them.
 Here is a spreadsheet for a TV show called Rock Star Challenge. Drag each word onto the right spot.
 
 ```label
-image: {{res:l1-voting-cell-grid.png}}
+image: {{res:l1-voting-spreadsheet-cell-grid-teach-computing.png}}
 col (35%, 4%): Column letter
 row (3%, 55%): Row number
 cell (35%, 72%): Cell

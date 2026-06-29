@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the "I can…" aloud. Vocabulary: right to privacy · Human Rights Act · Data Protection Act · Investigatory Powers Act · terms and conditions. Keep it general, not personal.
 
 ## Starter — how private?
-![Levels of privacy diagram]({{res:l4-levels-of-privacy.png}})
+![Levels of privacy diagram]({{res:l4-levels-of-privacy-diagram-teach-computing.png}})
 
 - some information should ALWAYS be private (passwords, bank details)
 - for other information, it is a personal choice

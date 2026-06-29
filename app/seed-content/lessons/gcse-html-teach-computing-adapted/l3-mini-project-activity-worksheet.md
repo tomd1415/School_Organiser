@@ -10,7 +10,7 @@ Today I will judge what makes good web design, then add a second page and link i
 ## Look — the parts of a web page
 A clear page has a heading, a menu, content and a footer.
 
-![A web page with its parts labelled: menu, header, content, footer]({{res:l3-website-anatomy-teach-computing.png}})
+![A web page with its parts labelled: menu, header, content, footer]({{res:l3-web-page-anatomy-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|
@@ -24,12 +24,12 @@ Good design: clear menu, same layout on every page, easy to read
 Bad design: lots of flashing adverts, hard-to-read colours, broken links
 ```
 
-![A cluttered, hard-to-read old web page]({{res:l3-bad-website-teach-computing.png}})
+![A cluttered, hard-to-read old web page]({{res:l3-cluttered-web-page-teach-computing.png}})
 
 ## 🟢 Support
 Files for a website are kept together in one folder.
 
-![A folder holding the pages, images and CSS for a website]({{res:l3-folder-structure-teach-computing.png}})
+![A folder holding the pages, images and CSS for a website]({{res:l3-website-folder-structure-teach-computing.png}})
 
 | Question | Choose |
 |---|---|
@@ -54,7 +54,7 @@ Open the pages in a browser and click the links
 ## 🔴 Challenge
 First plan your two new pages:
 
-![A hand sketching a website wireframe with labels]({{res:l3-wireframe-sketch-teach-computing.png}})
+![A hand sketching a website wireframe with labels]({{res:l3-website-wireframe-sketch-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

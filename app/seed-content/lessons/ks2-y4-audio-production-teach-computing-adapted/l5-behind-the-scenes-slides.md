@@ -16,7 +16,7 @@
 > 🧑‍🏫 Starter. Model opening a saved project. Check everyone can find theirs. If a project is missing, pair them up so no one is stuck.
 
 ## Add music and sound effects
-![Layers of music, voice and a sound effect]({{res:l5-layers.png}})
+![Layers of music, voice and a sound effect]({{res:l5-layered-tracks-music-voice-sound-effect-teach-computing.png}})
 
 - **import** music or a sound effect on a new track
 - move it to the right place

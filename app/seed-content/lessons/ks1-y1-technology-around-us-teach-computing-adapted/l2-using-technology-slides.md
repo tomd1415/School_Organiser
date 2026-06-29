@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: computer · screen · base unit · keyboard · mouse · trackpad. Same routine as every lesson.
 
 ## The parts of a computer
-![A desktop computer with screen, base unit, keyboard and mouse]({{res:l2-desktop-computer.png}})
+![A desktop computer with screen, base unit, keyboard and mouse]({{res:l2-a-desktop-computer-screen-base-unit-keyboard-mouse-teach-computing.png}})
 
 - SCREEN — you look at it
 - BASE UNIT — the box that does the thinking
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Point at each part as you name it. This matches the LABEL task on the activity worksheet. Have a real computer to point at if you can.
 
 ## A laptop is the same
-![A laptop computer]({{res:l2-laptop.png}})
+![A laptop computer]({{res:l2-a-laptop-computer-teach-computing.png}})
 
 - a laptop has ALL the parts in one case
 - the screen, keyboard and trackpad are joined together

@@ -10,7 +10,7 @@ Today I will use an animation app. Each photo I take is called a frame.
 ## Start a new movie
 This is the app home screen. Drag the steps into the right order to start a new movie.
 
-![The animation app home screen with a 'new movie' button]({{res:l2-imotion-home.png}})
+![The animation app home screen with a 'new movie' button]({{res:l2-the-animation-app-home-screen-teach-computing.png}})
 
 ```order
 Open the animation app

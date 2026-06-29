@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: evaluate · feedback · export · MP3 · improve. Same routine as every lesson.
 
 ## Listen carefully
-![Listening back to a podcast]({{res:l6-headphones-laptop.png}})
+![Listening back to a podcast]({{res:l6-listening-back-to-a-podcast-teach-computing.png}})
 
 - listening carefully is a skill
 - notice what works well

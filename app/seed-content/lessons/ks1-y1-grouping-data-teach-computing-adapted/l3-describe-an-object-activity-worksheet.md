@@ -10,7 +10,7 @@ Today I will describe properties of objects and find objects with the same prope
 ## Complete the property
 Look at each object and finish the sentence. Drag the right word in.
 
-![A parrot]({{res:l3-parrot.png}})
+![A parrot]({{res:l3-parrot-teach-computing.png}})
 
 The parrot has many [[ ]]. Its shape is a [[ ]]. (Choose from: colours, bird)
 

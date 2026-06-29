@@ -8,7 +8,7 @@
 Today I will type capital letters and use bold, italic and underline.
 
 ## Starter — what do these keys do?
-![A computer keyboard]({{res:l3-keyboard.png}})
+![A computer keyboard]({{res:l3-computer-keyboard-teach-computing.png}})
 
 Match each key to what it does. Drag the right word into each row.
 

@@ -10,7 +10,7 @@ Today I will describe an object and name a property of an object.
 ## Starter — describe this object
 A **property** is a way to describe an object, like its colour, shape or size.
 
-![A red car]({{res:l3-red-car.png}})
+![A red car]({{res:l3-red-car-teach-computing.png}})
 
 | Question | Choose |
 |---|---|
@@ -30,7 +30,7 @@ Match each describing word to the right property. Drag the word onto its propert
 |---|---|
 | Look at the tennis ball below. Write ONE word that describes its colour. | Type your answer here |
 
-![A tennis ball]({{res:l3-tennis-ball.png}})
+![A tennis ball]({{res:l3-tennis-ball-teach-computing.png}})
 
 ## 🔴 Challenge
 | Question | Tick ALL that are true |

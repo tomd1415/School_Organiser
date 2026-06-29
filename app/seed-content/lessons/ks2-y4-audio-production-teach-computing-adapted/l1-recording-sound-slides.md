@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: audio · microphone · speaker · headphones · input device · output device. Same routine as every lesson.
 
 ## Sound goes IN and OUT
-![A microphone records sound]({{res:l1-microphone.png}})
+![A microphone records sound]({{res:l1-microphone-teach-computing.png}})
 
 - a **microphone** records sound IN — it is an **input** device
 - a **speaker** or **headphones** play sound OUT — they are **output** devices
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Starter. Hold up the real devices if you have them. Ask: which one do you TALK into? Which one do you LISTEN with? Likely error: mixing up input and output. Fix-words: "IN to record, OUT to hear."
 
 ## Some devices do both
-![Headphones play sound out]({{res:l1-headphones.png}})
+![Headphones play sound out]({{res:l1-headphones-teach-computing.png}})
 
 - a **headset** has a microphone AND ear cups
 - so it is BOTH input and output

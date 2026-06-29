@@ -10,7 +10,7 @@ Today I will build my game from my design, choose good variable names, and test 
 ## Give the variables better names
 Here is the chatbot code with **better names**. Now you can tell what each variable holds.
 
-![Chatbot code with variables renamed to name and age]({{res:l5-chatbot-good-names.png}})
+![Chatbot code with variables renamed to name and age]({{res:l5-chatbot-code-with-clear-names-name-and-age-teach-computing.png}})
 
 Match each old name to a better name that says what it holds.
 

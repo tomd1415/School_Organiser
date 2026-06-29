@@ -11,7 +11,7 @@ Today I will use the **place-value grid** to convert **binary to decimal** and *
 Each column in an 8-bit binary number has a **place value**. Drag each place value onto the right box, biggest on the left.
 
 ```label
-image: {{res:l2-place-value-grid.png}}
+image: {{res:l2-8-bit-place-value-grid.png}}
 p128 (10.6%, 41.7%): 128
 p64 (21.9%, 41.7%): 64
 p32 (33.1%, 41.7%): 32

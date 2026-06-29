@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will add music and sound effects as layers, set the volume, and export my podcast.
 
-![Layers of music, voice and sound effects]({{res:l5-layers.png}})
+![Layers of music, voice and sound effects]({{res:l5-layered-tracks-music-voice-sound-effect-teach-computing.png}})
 
 ## Finish your podcast — in order
 Put these steps in the right order.

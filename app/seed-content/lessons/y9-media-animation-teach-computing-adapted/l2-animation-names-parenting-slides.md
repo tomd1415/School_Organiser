@@ -15,7 +15,7 @@
 > 🧑‍🏫 Teacher-played hook (optional): play ~10 seconds of an old stop-motion clip, then ask "why is keyframing faster on a computer?". Keep it short and calm. Sort the cards on the starter worksheet.
 
 ## Keyframes and tweening
-![Keyframes (set positions) and the tweened frames between them]({{res:l2-keyframe-tween-diagram.png}})
+![Keyframes (set positions) and the tweened frames between them]({{res:l2-keyframes-and-tweening-diagram.png}})
 
 The red ones are **keyframes** you set. The grey ones are **tweened** — the computer makes them.
 
@@ -34,7 +34,7 @@ Make the snowball roll into the snowman. Two keyframes, then play.
 > 🧑‍🏫 Support: the steps are in order on the worksheet. Challenge: make the hat fall off, or bounce. TA: prompt, do not do it for them.
 
 ## Names and parenting
-![The Outliner with the Head parented to the Body]({{res:l2-parenting-outliner.png}})
+![The Outliner with the Head parented to the Body]({{res:l2-parenting-in-the-outliner.png}})
 
 Name your objects. **Parent** the head to the body so they move together.
 

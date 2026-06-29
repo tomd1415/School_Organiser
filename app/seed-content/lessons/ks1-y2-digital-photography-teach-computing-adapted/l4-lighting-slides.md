@@ -9,8 +9,8 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: light source · flash · focus · background. Recap: positioning, framing, detail.
 
 ## Keep or delete?
-![A bright, clear photo of a tree]({{res:l4-bright-tree.png}})
-![A photo that is too dark]({{res:l4-dark-desk.jpg}})
+![A bright, clear photo of a tree]({{res:l4-a-bright-clear-photo-of-a-tree-teach-computing.png}})
+![A photo that is too dark]({{res:l4-a-photo-that-is-too-dark-teach-computing.jpg}})
 
 - a clear photo → keep
 - a dark or blurry photo → delete
@@ -19,7 +19,7 @@
 > 🧑‍🏫 Starter. On the worksheet pupils SORT photos into keep / delete. It is fine to have different opinions.
 
 ## Why is good light important?
-![A clear, well-lit photo of food]({{res:l4-salad-bright.png}})
+![A clear, well-lit photo of food]({{res:l4-a-clear-well-lit-photo-of-food-teach-computing.png}})
 
 - cameras need **enough light**
 - our eyes see better than the camera

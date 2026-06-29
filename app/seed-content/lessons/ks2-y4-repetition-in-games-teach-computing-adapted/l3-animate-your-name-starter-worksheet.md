@@ -10,7 +10,7 @@ Today I will use a loop to **animate** the letters of my name. To animate means 
 ## An animated name
 These letters change colour and look again and again. A loop does that.
 
-![An animated name on the stage]({{res:l3-animate-name-stage.png}})
+![An animated name on the stage]({{res:l3-animated-name-on-the-stage-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

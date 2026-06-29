@@ -23,7 +23,7 @@ Add one picture for each one you tallied
 ## Read the pictogram
 This pictogram shows the minibeasts one class found.
 
-![Minibeast pictogram]({{res:l3-minibeast-pictogram.png}})
+![Minibeast pictogram]({{res:l3-minibeast-pictogram-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

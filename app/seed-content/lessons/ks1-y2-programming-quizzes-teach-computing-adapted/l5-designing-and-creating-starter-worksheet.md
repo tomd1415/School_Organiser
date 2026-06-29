@@ -10,7 +10,7 @@ Today I will design my own quiz and choose my own pictures.
 ## Choose your pictures
 You pick the **background** and the **sprites**. They should go together. Here is a **space** background with two space sprites.
 
-![A space background with two sprites]({{res:l5-moon-aliens.jpg}})
+![A space background with two sprites]({{res:l5-a-space-background-with-two-sprites-teach-computing.jpg}})
 
 ## 🟢 Support
 | Question | Choose |

@@ -1,0 +1,21 @@
+{
+  "unitTitle": "Sensing the world",
+  "course": {
+    "name": "AIMS Robotics",
+    "keyStage": "KS5"
+  },
+  "lessons": [
+    {
+      "title": "Touch & distance sensors",
+      "objectives": "- Read a sensor\n- React to an obstacle",
+      "outline": "Stop before a wall; bumper reflex.",
+      "resources": []
+    },
+    {
+      "title": "Line following",
+      "objectives": "- Use a light sensor to follow a line",
+      "outline": "Tune thresholds on the track.",
+      "resources": []
+    }
+  ]
+}

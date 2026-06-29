@@ -10,12 +10,12 @@ Today I will change a variable using buttons and movement, and show the variable
 ## Changing a variable with buttons
 A **variable** holds a value that can change. Here a variable called *count* goes up by 1 when button A is pressed, and down by 1 when button B is pressed.
 
-![Code: if button A change count by 1, if button B change count by -1]({{res:l3-counter-buttons.png}})
+![Code: if button A change count by 1, if button B change count by -1]({{res:l3-code-change-a-counter-with-buttons-a-and-b-teach-computing.png}})
 
 ## Changing a variable by moving
 The **accelerometer** senses movement. The *is shake gesture* block lets a shake change the count too.
 
-![Code with is shake gesture showing the count]({{res:l3-counter-shake.png}})
+![Code with is shake gesture showing the count]({{res:l3-code-show-the-count-when-shaken-teach-computing.png}})
 
 Put the blocks in the right order to make the counter.
 

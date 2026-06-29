@@ -10,7 +10,7 @@ Today I will turn a task into a design, build it as code, and fix any bugs.
 ## A bug is a mistake in the code
 When the code does the wrong thing, that is a bug. Finding it and fixing it is called debug.
 
-![A bug — a mistake in the code]({{res:l6-bug.png}})
+![A bug — a mistake in the code]({{res:l6-a-bug-teach-computing.png}})
 
 ## 🟢 Support
 Drag the build steps into the right order.

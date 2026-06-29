@@ -10,13 +10,55 @@
       "objectives": "I can describe what physical computing is\nI can explain what a microcontroller and an embedded system are\nI can tell an input device from an output device\nI can build and test a working circuit with an LED",
       "outline": "Routine first (same every lesson). Vocabulary on board: physical computing · microcontroller · embedded system · GPIO pin · input · output · circuit. TA: every pair has 1 Raspberry Pi Pico on a breadboard, a micro USB cable, Thonny open and showing MicroPython, an LED, a 50 ohm resistor, jumper cables and a button. Read the 4 “I can…” aloud.\n1. (0–5) Starter — what is a microcontroller? Think, write, pair, share. On the starter worksheet pupils CHOOSE what a microcontroller is and SORT everyday devices into “has an embedded system” / “not really”.\n   • Support: tick “a microcontroller is…”.  • Core: name one device at home with a microcontroller.  • Challenge: explain why a washing machine is an embedded system.\n2. (5–20) I-do → we-do — meet the Pico and its GPIO pins. Show the board (embedded image); name the USB port, the BOOTSEL button, the microcontroller chip and the GPIO pins. LABEL the board on the starter worksheet (drag the words on, no writing). Input sends a signal IN to the Pico (button); output sends a signal OUT (LED).\n   • Likely error: “the Pico IS the computer” → fix-words “the Pico is the microcontroller — a tiny computer on one chip.”\n3. (20–45) You-do — build a circuit. On the activity worksheet pupils build the LED circuit (LED long leg → resistor → GP15; short leg → GND), put the blink program in order (Parsons), then run it. Stress: current flows ONE way through an LED; everything needs a path back to GND.\n   • Support: choose what value(1) / value(0) does.  • Core: complete the blink loop.  • Challenge: add a button so the LED only lights when pressed. Paste a screenshot of the working circuit. TA: “prompt, do not wire it for them.”\n4. (45–55) Plenary — quick-fire questions (input or output? what is GPIO? what is an embedded system?). Self-tick the 4 “I can…”. TA notes who got a circuit working.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Introduction to physical computing — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-starter-worksheet.md" },
-        { "title": "Introduction to physical computing — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-activity-worksheet.md" },
-        { "title": "Introduction to physical computing — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introduction-slides.md" },
-        { "title": "Raspberry Pi Pico board (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-pico-board.png" },
-        { "title": "Microcontroller chip (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-microcontroller-chip.png" },
-        { "title": "Physical computing components (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-components.png" },
-        { "title": "LED circuit on a breadboard (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-led-circuit.png" }
+        {
+          "title": "Raspberry Pi Pico board (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-raspberry-pi-pico-board-teach-computing.png"
+        },
+        {
+          "title": "Microcontroller chip (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-microcontroller-chip-teach-computing.png"
+        },
+        {
+          "title": "Physical computing components (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-physical-computing-components-teach-computing.png"
+        },
+        {
+          "title": "LED circuit on a breadboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-led-circuit-on-a-breadboard-teach-computing.png"
+        },
+        {
+          "title": "Introduction to physical computing — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-physical-computing-starter-worksheet.md"
+        },
+        {
+          "title": "Introduction to physical computing — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-physical-computing-activity-worksheet.md"
+        },
+        {
+          "title": "Introduction to physical computing — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introduction-to-physical-computing-slides.md"
+        }
       ]
     },
     {
@@ -24,12 +66,48 @@
       "objectives": "I can explain why motors need a separate motor controller board\nI can name the parts of the motor wiring (controller, motors, battery pack, common rails)\nI can write code to drive a motor forwards and backwards\nI can work out which motor is left and which is right",
       "outline": "Routine first. Vocabulary on board: motor controller · L298N · IN1–IN4 · OUT1–OUT4 · common rail · ground (GND) · battery pack. TA: each pair has their Pico, an L298N motor controller, two DC motors, a battery pack (4×AA), jumper cables, a screwdriver, Thonny open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — the power of GPIO. Recall: there are 26 GPIO pins but fewer GND pins — how do we share? Pupils CHOOSE the answer (a common rail on the breadboard) on the starter worksheet.\n   • Support: tick “a motor needs…”.  • Core: why can’t the Pico power a motor directly.  • Challenge: explain what a common ground rail is for.\n2. (5–25) I-do → we-do — the motor controller. Motors need MORE power than the Pico can give, so a separate board (and battery pack) drives them; the Pico only sends the data signals (IN1–IN4). Show the wiring image. Pupils ORDER the wiring steps on the activity worksheet (terminals → motors → IN pins to GP12–15 → common rails → battery). Build it.\n   • Likely error: motors wired to the wrong IN pins → fix-words “IN1/IN2 go to GP12/GP13, IN3/IN4 to GP14/GP15.”\n3. (25–50) You-do — test and configure. Put the motor-test program in order (Parsons), run it, and find out which motor is left/right and which pin is forwards/backwards. Then SORT pin signals into “drives forwards” / “drives backwards”.\n   • Support: choose what value(1) does to a motor.  • Core: complete the test code for the second motor.  • Challenge: make both motors spin forwards together. Paste a screenshot. TA: “prompt, do not screw it in for them.”\n4. (50–55) Plenary — how would you make the buggy spin on the spot, or zigzag? Self-tick the 4 “I can…”. Homework: collect chassis materials (recycling) for next lesson. TA notes who got both motors driving.\nDifferentiation on the SAME task; no flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Working with motors — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-motors-starter-worksheet.md" },
-        { "title": "Working with motors — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-motors-activity-worksheet.md" },
-        { "title": "Working with motors — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-motors-slides.md" },
-        { "title": "L298N motor controller board (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-motor-controller.png" },
-        { "title": "Motors wired to the controller (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-motor-wiring.png" },
-        { "title": "Raspberry Pi Pico pinout (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-pico-pinout.png" }
+        {
+          "title": "L298N motor controller board (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-l298n-motor-controller-board-teach-computing.png"
+        },
+        {
+          "title": "Motors wired to the controller (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-motors-wired-to-the-controller-teach-computing.png"
+        },
+        {
+          "title": "Raspberry Pi Pico pinout (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-raspberry-pi-pico-pinout-teach-computing.png"
+        },
+        {
+          "title": "Working with motors — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-working-with-motors-starter-worksheet.md"
+        },
+        {
+          "title": "Working with motors — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-working-with-motors-activity-worksheet.md"
+        },
+        {
+          "title": "Working with motors — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-working-with-motors-slides.md"
+        }
       ]
     },
     {
@@ -37,10 +115,34 @@
       "objectives": "I can plan where each component will sit on my buggy\nI can choose materials that are strong enough for the job\nI can build a chassis that holds together when the buggy moves\nI can test my buggy with a simple forwards and backwards program",
       "outline": "Routine first. Vocabulary on board: chassis · prototype · structural integrity · aesthetics · power bank. TA: each pair has their Pico project from last lesson, the recycled materials they collected, scissors/tape, Thonny open. Read the 4 “I can…” aloud. This is a hands-on making lesson — minimal code.\n1. (0–10) Starter — preparing to build. What does a good chassis have to do? Pupils SORT statements into “a strong chassis” / “a weak chassis” and plan/sketch where the motors, board, battery and sensors will go on the activity worksheet.\n   • Support: tick what the chassis must hold.  • Core: name one material and why.  • Challenge: explain why a smooth ‘third wheel’ is needed at one end.\n2. (10–40) You-do — build the chassis. ORDER the build steps first (plan → mark out → cut/fix the base → attach motors → add the third wheel → mount the board and battery). Then build it. The chassis must hold the weight AND stay together when it moves.\n   • Support: a parts checklist to tick off.  • Core: build to the plan.  • Challenge: make it tidy and decorate it. TA: “prompt for a smaller, sturdier base first.”\n3. (40–50) Test it. Run last lesson’s forwards/backwards code on the buggy. Does it hold together and move straight? If it wobbles, fix and test again. Untethered? You need a separate power bank. Paste a screenshot/photo of the buggy.\n4. (50–55) Plenary — reflect: did it work as planned, and what would you change? Self-tick the 4 “I can…”. TA notes which buggies are stable enough to carry on.\nDesign/make lesson — differentiation on the SAME task; no flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Chassis design and build — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-chassis-starter-worksheet.md" },
-        { "title": "Chassis design and build — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-chassis-activity-worksheet.md" },
-        { "title": "Chassis design and build — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-chassis-slides.md" },
-        { "title": "Buggy component layout (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-buggy-layout.png" }
+        {
+          "title": "Buggy component layout (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-buggy-component-layout-teach-computing.png"
+        },
+        {
+          "title": "Chassis design and build — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-chassis-design-and-build-starter-worksheet.md"
+        },
+        {
+          "title": "Chassis design and build — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-chassis-design-and-build-activity-worksheet.md"
+        },
+        {
+          "title": "Chassis design and build — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-chassis-design-and-build-slides.md"
+        }
       ]
     },
     {
@@ -48,11 +150,41 @@
       "objectives": "I can explain how ultrasonic sound waves are used to sense distance\nI can name the four pins of an ultrasonic sensor and what they do\nI can wire an ultrasonic sensor to the Raspberry Pi Pico\nI can run code that measures the distance to an object",
       "outline": "Routine first. Vocabulary on board: ultrasonic · sound wave · sensor · Trig · Echo · VCC · GND · distance. TA: each pair has their buggy from last lesson, an HC-SR04 ultrasonic sensor, four female-to-male jumper cables, the pinout handout, Thonny open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — what do a bat, a dolphin and a submarine have in common? They all use ultrasonic sound to ‘see’ their surroundings (echolocation). Pupils CHOOSE the answer and SORT things into “uses ultrasonic to sense” / “does not” on the starter worksheet.\n   • Support: tick what ultrasonic means.  • Core: explain echolocation in one line.  • Challenge: why a robot uses it instead of a camera.\n2. (5–20) I-do → we-do — add the sensor. Show the HC-SR04 (embedded image). MATCH each of the four pins to its job: VCC=power, GND=ground, Trig=send the ping, Echo=hear it bounce back. Wire it: Trig→GP20, Echo→GP21, VCC→red rail, GND→blue rail. Pupils ORDER the wiring steps on the activity worksheet, then build.\n   • Likely error: Trig and Echo swapped → fix-words “Trig sends, Echo hears — GP20 then GP21.”\n3. (20–50) You-do — test it. Put the ultrasonic test program in order (Parsons), run it, and read the distance as objects move closer/further. The sensor times how long the ping takes to come back; distance = time × speed of sound ÷ 2.\n   • Support: choose what the Trig pin does.  • Core: complete the print(distance) line.  • Challenge: make the buggy stop when something is within 10 cm. Paste a screenshot. TA: “prompt, check the pins first.”\n4. (50–55) Plenary — how could you combine the motors AND the sensor to avoid bumping into things? Self-tick the 4 “I can…”. TA notes who got a distance reading.\nDifferentiation on the SAME task; no flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Going ultrasonic — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ultrasonic-starter-worksheet.md" },
-        { "title": "Going ultrasonic — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ultrasonic-activity-worksheet.md" },
-        { "title": "Going ultrasonic — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-ultrasonic-slides.md" },
-        { "title": "HC-SR04 ultrasonic sensor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-ultrasonic-sensor.png" },
-        { "title": "Dolphin — echolocation (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-dolphin.png" }
+        {
+          "title": "HC-SR04 ultrasonic sensor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-hc-sr04-ultrasonic-sensor-teach-computing.png"
+        },
+        {
+          "title": "Dolphin — echolocation (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-dolphin-echolocation-teach-computing.png"
+        },
+        {
+          "title": "Going ultrasonic — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-going-ultrasonic-starter-worksheet.md"
+        },
+        {
+          "title": "Going ultrasonic — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-going-ultrasonic-activity-worksheet.md"
+        },
+        {
+          "title": "Going ultrasonic — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-going-ultrasonic-slides.md"
+        }
       ]
     },
     {
@@ -60,11 +192,41 @@
       "objectives": "I can explain how a reflective optical sensor works\nI can wire two optical sensors to the Raspberry Pi Pico\nI can read sensor values to tell if the buggy is on or off the line\nI can use the sensor values to steer the buggy along a line",
       "outline": "Routine first. Vocabulary on board: reflective optical sensor · infrared · reflect · potentiometer · digital signal (0/1) · autonomous. TA: each pair has their buggy, two reflective optical sensors, six female-to-male jumper cables, a printed black line/track, Thonny open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — wiring recap + how does it work? An optical sensor shines infrared light DOWN and measures how much bounces back: black line = little reflection, white floor = lots. Pupils CHOOSE what the sensor reads and MATCH the three pins (G, V+, S) to their jobs on the starter worksheet.\n   • Support: tick what the sensor shines.  • Core: black line gives a 0 or a 1?  • Challenge: explain what the potentiometer adjusts.\n2. (5–20) I-do → we-do — add two sensors. Show the sensor (embedded image). Wire each: GND→blue rail, VCC→red rail, OUT→GP10 (left) and GP11 (right). Run the test code and read “Left: 0/1  Right: 0/1” while covering each sensor. Pupils put the test code in order (Parsons).\n   • Likely error: both OUT wires to the same pin → fix-words “left sensor GP10, right sensor GP11.”\n3. (20–50) You-do — line-following challenge. Use the steering rules: both off the line → drive forwards; right sensor ON the line → turn right; left sensor ON the line → turn left. Pupils SORT each sensor situation to the right motor action, then write/refine the code and test on the track.\n   • Support: match each situation to the action.  • Core: complete the ‘drive forwards’ branch.  • Challenge: make it follow a curve. Paste a screenshot. TA: “prompt, adjust the potentiometer if it is too twitchy.”\n4. (50–55) Plenary — quick GPIO quiz (Pin.OUT vs Pin.IN; value(1) vs value(0)). Self-tick the 4 “I can…”. Homework: plan headlight + brake-light code in Python. TA notes whose buggy followed the line.\nDifferentiation on the SAME task; no flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Follow me — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-follow-me-starter-worksheet.md" },
-        { "title": "Follow me — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-follow-me-activity-worksheet.md" },
-        { "title": "Follow me — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-follow-me-slides.md" },
-        { "title": "Reflective optical sensor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-optical-sensor.png" },
-        { "title": "Line-following buggy (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-line-follower.png" }
+        {
+          "title": "Reflective optical sensor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-reflective-optical-sensor-teach-computing.png"
+        },
+        {
+          "title": "Line-following buggy (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-line-following-buggy-teach-computing.png"
+        },
+        {
+          "title": "Follow me — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-follow-me-starter-worksheet.md"
+        },
+        {
+          "title": "Follow me — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-follow-me-activity-worksheet.md"
+        },
+        {
+          "title": "Follow me — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-follow-me-slides.md"
+        }
       ]
     },
     {
@@ -72,14 +234,62 @@
       "objectives": "I can wire white headlights and red brake lights to the Pico\nI can turn lights on and off at the right time in my code\nI can combine motors, sensors and lights so the buggy works on its own\nI can answer review questions about the whole physical computing project",
       "outline": "Routine first. Vocabulary on board: headlight · brake light · anode (long leg) · cathode (short leg) · synergy · autonomous · sequence. TA: each pair has their buggy, two white LEDs, two red LEDs, jumper cables, Thonny open; the end-of-unit quiz ready. Read the 4 “I can…” aloud. Final lesson — pupils are more independent; the assessment rubric is used while they work.\n1. (0–5) Starter — light it up! Recall last lesson’s homework: which pins, what setup, when to switch lights on/off. Pupils CHOOSE which LED leg is the anode and SORT “turn this light ON” situations on the starter worksheet.\n   • Support: tick which leg is positive.  • Core: when should the brake lights come on?  • Challenge: explain ‘synergy’ for the buggy.\n2. (5–20) I-do → we-do — add the lights. Anode (long leg) → a spare GPIO pin; cathode (short leg) → GND. Show the LED images. Pupils write simple on/off test code for white headlights and red brake lights, and put the ‘flash the headlights three times’ program in order (Parsons) on the activity worksheet.\n   • Likely error: LED in the wrong way round → fix-words “long leg to the pin, short leg to ground.”\n3. (20–50) You-do — the final challenge (Pico Grand Prix). Combine everything: flash headlights ×3, brake lights on at a standstill, wait 5 s, brake lights off and drive, keep checking the ultrasonic distance, stop + brake lights if something is in the way. Pupils ORDER the whole sequence, then build and test. Paste a screenshot of the finished buggy.\n   • Support: match each light to when it is on.  • Core: complete the start sequence.  • Challenge: add line-following into the run. TA: “prompt, get ONE behaviour working before combining.”\n4. (45–55) End-of-unit quiz (set separately) — exam-style review of the whole unit. Then plenary: what would you add or improve next? Self-tick the 4 “I can…”. TA notes finished buggies for the rubric.\nDifferentiation: the activity is on the SAME task at three depths; the quiz is a shared review everyone sits. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Time to shine — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-time-to-shine-starter-worksheet.md" },
-        { "title": "Time to shine — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-time-to-shine-activity-worksheet.md" },
-        { "title": "End-of-unit quiz — worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-end-of-unit-quiz-worksheet.md" },
-        { "title": "Time to shine — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-time-to-shine-slides.md" },
-        { "title": "Finished buggy — headlights and sensor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-buggy-final.png" },
-        { "title": "Finished buggy — brake lights (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-buggy-brakelights.png" },
-        { "title": "White LED (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-led-white.png" },
-        { "title": "Red LED (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-led-red.png" }
+        {
+          "title": "Finished buggy — headlights and sensor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-finished-buggy-headlights-and-sensor-teach-computing.png"
+        },
+        {
+          "title": "Finished buggy — brake lights (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-finished-buggy-brake-lights-teach-computing.png"
+        },
+        {
+          "title": "White LED (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-white-led-teach-computing.png"
+        },
+        {
+          "title": "Red LED (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-red-led-teach-computing.png"
+        },
+        {
+          "title": "Time to shine — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-time-to-shine-starter-worksheet.md"
+        },
+        {
+          "title": "Time to shine — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-time-to-shine-activity-worksheet.md"
+        },
+        {
+          "title": "End-of-unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-end-of-unit-quiz-worksheet.md"
+        },
+        {
+          "title": "Time to shine — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-time-to-shine-slides.md"
+        }
       ]
     }
   ]

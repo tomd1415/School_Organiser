@@ -10,13 +10,55 @@
       "objectives": "I can describe what pre-production means\nI can name pre-production planning tools\nI can choose a planning tool for a media product\nI can create a piece of pre-production planning",
       "outline": "Routine first (same every lesson). Vocabulary on board: pre-production · mood board · mind map · storyboard · script · visualisation. TA: everyone has the starter worksheet; pens and a big sheet per group of 3–5. Read the 4 “I can…” aloud.\n1. (0–10) Starter — a new job. A client has built a home robot and wants a website. What should we ASK before we start? Land on the word pre-production = the planning stage. Pupils choose the meaning, then drag the three production stages into order.\n   • Support: matching planning tool to what it is.  • Core: name a tool you’d use to plan a video.  • Challenge: difference between a mood board and a storyboard.\n2. (10–20) I-do — the three stages: PRE-production (plan), PRODUCTION (make), POST-production (finish/release). Likely error: “pre-production is filming” → fix-words “pre-production is BEFORE we make anything.”\n3. (20–30) Tour the tools with the source examples: mood board, storyboard, script, visualisation. Pupils sort jobs into pre/production/post on the activity worksheet.\n4. (30–50) You-do — in groups, make a mind map for the robot website, then a storyboard for a short robot video. Photo both onto the activity worksheet. TA: “prompt with the headings, do not write it for them.” Likely error: writing a paragraph not boxes → fix-words “one box = one shot.”\n5. (50–55) Plenary — which tool suits which media type? Self-tick the 4 “I can…”.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "What is pre-production? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-pre-production-starter-worksheet.md" },
-        { "title": "Pre-production planning — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-pre-production-activity-worksheet.md" },
-        { "title": "What is pre-production? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-pre-production-slides.md" },
-        { "title": "Mood board example (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-mood-board.jpg" },
-        { "title": "Storyboard example (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-storyboard.jpg" },
-        { "title": "Visualisation sketch (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-visualisation.jpg" },
-        { "title": "Film script close-up (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-script.jpg" }
+        {
+          "title": "Mood board example (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-mood-board-example-teach-computing.jpg"
+        },
+        {
+          "title": "Storyboard example (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-storyboard-example-teach-computing.jpg"
+        },
+        {
+          "title": "Visualisation sketch (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-visualisation-sketch-teach-computing.jpg"
+        },
+        {
+          "title": "Film script close-up (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-film-script-close-up-teach-computing.jpg"
+        },
+        {
+          "title": "What is pre-production? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-pre-production-starter-worksheet.md"
+        },
+        {
+          "title": "Pre-production planning — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-pre-production-planning-activity-worksheet.md"
+        },
+        {
+          "title": "What is pre-production? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-pre-production-slides.md"
+        }
       ]
     },
     {
@@ -24,12 +66,48 @@
       "objectives": "I can describe raster and vector graphics\nI can name file formats for each type\nI can make a graphic using open-source software\nI can explain copyright and Creative Commons",
       "outline": "Routine first. Vocabulary on board: raster · vector · pixel · file format · open source · copyright · Creative Commons. TA: GIMP and Inkscape open for everyone; graphical assets shared. Read the 4 “I can…” aloud.\n1. (0–10) Starter — raster vs vector. Raster = pixels (a photo, goes blurry enlarged); vector = maths paths (stays sharp). Pupils choose which stays sharp, then sort file extensions into raster/vector on the starter worksheet.\n   • Support: choose what a raster is made of.  • Core: define the difference.  • Challenge: which type a logo should be, and why.\n2. (10–30) I-do → you-do — make a VECTOR logo in Inkscape (Fab Gadget). I-do the first shapes, then they follow the worksheet. Likely error: text not on the path → fix-words “select text AND circle first.”\n3. (30–50) Make a RASTER poster in GIMP from supplied photos. Pupils drag the poster steps into order first. Stress LAYERS. Add the logo on top.\n4. (40–50) Legal use — copyright vs Creative Commons. Multi-select: use a licensed image, credit the creator, credit the source. Misconception: “online means free” → fix-words “online does not mean free to reuse.”\n5. (50–55) Plenary — raster or vector for each file extension; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Creating digital graphics — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-graphics-starter-worksheet.md" },
-        { "title": "Making graphics legally — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-graphics-activity-worksheet.md" },
-        { "title": "Creating digital graphics — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-graphics-slides.md" },
-        { "title": "Inkscape logo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-inkscape-logo.png" },
-        { "title": "GIMP logo (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-gimp-logo.png" },
-        { "title": "Copyright symbol (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-copyright.png" }
+        {
+          "title": "Inkscape logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-inkscape-logo-teach-computing.png"
+        },
+        {
+          "title": "GIMP logo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-gimp-logo-teach-computing.png"
+        },
+        {
+          "title": "Copyright symbol (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-copyright-symbol-teach-computing.png"
+        },
+        {
+          "title": "Creating digital graphics — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-creating-digital-graphics-starter-worksheet.md"
+        },
+        {
+          "title": "Making graphics legally — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-making-graphics-legally-activity-worksheet.md"
+        },
+        {
+          "title": "Creating digital graphics — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-creating-digital-graphics-slides.md"
+        }
       ]
     },
     {
@@ -37,12 +115,48 @@
       "objectives": "I can name camera angles used in video\nI can describe video properties: FPS, compression, file format\nI can use OpenShot to edit a short video\nI can export a finished video file",
       "outline": "Routine first. Vocabulary on board: camera angle · frames per second · compression · codec · container · transition · export. TA: OpenShot installed, video assets shared, headphones out. Read the 4 “I can…” aloud.\n1. (0–10) Starter — camera angles (close-up, long shot, high/low angle). Demo each with a hand as the camera. Pupils LABEL the parts of a video camera and match angles to descriptions on the starter worksheet.\n   • Support: matching angle to description.  • Core: which angle makes a subject look weak (high angle).  • Challenge: why angles are chosen at the storyboard stage.\n2. (10–25) Video properties — frames (flip-book), FPS, compression (smaller file, less quality), container vs codec. Teacher-played flip-book hook (motion only — play if it suits the class). Fill-in-the-blank on the activity worksheet.\n3. (25–50) You-do — edit in OpenShot. I-do: import → drag a clip → one cut → one fade. Pupils order the editing steps, then build the short robot-mower video and keep the logo on top. Export as MP4.\n   • Support: choose what FPS / a container is.  • Core: why compression is a trade-off.  • Challenge: how to keep the logo on screen the whole video. Likely error: not exporting → fix-words “save the project AND export the video.” TA: prompt, do not edit for them.\n4. (50–55) Plenary — missing-words recap; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Creating digital video — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-video-starter-worksheet.md" },
-        { "title": "Editing a video in OpenShot — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-video-activity-worksheet.md" },
-        { "title": "Creating digital video — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-video-slides.md" },
-        { "title": "Video camera on a tripod (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-video-camera.jpg" },
-        { "title": "Video editing timeline (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-editing-timeline.jpg" },
-        { "title": "File container (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-file-container.png" }
+        {
+          "title": "Video camera on a tripod (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-video-camera-on-a-tripod-teach-computing.jpg"
+        },
+        {
+          "title": "Video editing timeline (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-video-editing-timeline-teach-computing.jpg"
+        },
+        {
+          "title": "File container (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-file-container-teach-computing.png"
+        },
+        {
+          "title": "Creating digital video — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-digital-video-starter-worksheet.md"
+        },
+        {
+          "title": "Editing a video in OpenShot — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-editing-a-video-in-openshot-activity-worksheet.md"
+        },
+        {
+          "title": "Creating digital video — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-digital-video-slides.md"
+        }
       ]
     },
     {
@@ -50,11 +164,41 @@
       "objectives": "I can describe features of a good website\nI can plan a multi-page website\nI can build a multi-page website with HTML\nI can add my own logo and video to the site",
       "outline": "Routine first. Vocabulary on board: navigation · call to action · hosting · SSL certificate · HTML · CSS. TA: text editor installed, template folder shared, sticky notes out. Read the 4 “I can…” aloud.\n1. (0–10) Starter — what makes a website good? Sort features into FRONT END (what visitors see: home page, navigation, logo, call to action) and BACK END (server: hosting, SSL certificate, CMS) on the starter worksheet.\n   • Support: choose what navigation / a call to action is.  • Core: what a call to action is and why a business wants one.  • Challenge: why a site taking payments needs SSL.\n2. (10–20) I-do — HTML = content/structure (tags in < >); CSS = design. Show one <a> link and one <img> tag. Keep it light — they edit a template, not write from scratch.\n3. (20–50) You-do — build from the template: copy the folder, make the four pages, change headings and text, check in a browser. Pupils order the build steps, then add their Lesson 2 logo and Lesson 3 video. Likely error: filename not exactly logo.png → fix-words “the code looks for logo.png exactly.” TA: prompt, do not type for them.\n4. (50–55) Plenary — true/false on website features; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Creating a multi-page website — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-website-starter-worksheet.md" },
-        { "title": "Building the website with HTML — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-website-activity-worksheet.md" },
-        { "title": "Creating a multi-page website — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-website-slides.md" },
-        { "title": "Website hosted on a server (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-website-hosting.jpg" },
-        { "title": "HTML code on a screen (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-html-code.jpg" }
+        {
+          "title": "Website hosted on a server (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-website-hosted-on-a-server-teach-computing.jpg"
+        },
+        {
+          "title": "HTML code on a screen (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-html-code-on-a-screen-teach-computing.jpg"
+        },
+        {
+          "title": "Creating a multi-page website — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-multi-page-website-starter-worksheet.md"
+        },
+        {
+          "title": "Building the website with HTML — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-building-the-website-with-html-activity-worksheet.md"
+        },
+        {
+          "title": "Creating a multi-page website — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-multi-page-website-slides.md"
+        }
       ]
     },
     {
@@ -62,11 +206,41 @@
       "objectives": "I can read a client brief and choose one\nI can choose a media artefact to make\nI can plan the artefact with my group\nI can use the rubric to aim for a higher level",
       "outline": "Routine first. Vocabulary on board: digital media artefact · client brief · stock materials · delegation · collaboration · rubric. TA: groups of 4–5 set; the rubric, briefs and storyboard templates ready. Read the 4 “I can…” aloud.\n1. (0–10) Starter — key words. Digital media artefact, client brief, delegation, rubric. Pupils match each word to its meaning on the starter worksheet.\n   • Support: matching word to meaning.  • Core: what a client brief is and why it comes first.  • Challenge: why to document the reasons for choices.\n2. (10–20) Introduce the marking rubric — walk through one row so they know what “excelling” looks like. They are graded against this in Lesson 7.\n3. (20–50) You-do — in groups, read the four briefs (game app, farming robots, medical AI, driverless truck), choose ONE brief and ONE artefact (poster / video / website), pick pre-production tools, and delegate jobs. Pupils order the planning steps and rate their readiness on a scale.\n   • Support: choose what to read first / what delegation means.  • Core: which brief they chose and why.  • Challenge: how to reach the top rubric level on one row. TA: prompt quieter members to take a real job.\n4. (50–55) Plenary — review another group’s plan; self-tick the 4 “I can…”. Homework: finish the planning.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Planning your digital media artefact — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-starter-worksheet.md" },
-        { "title": "Choosing a brief and planning — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-activity-worksheet.md" },
-        { "title": "Planning your digital media artefact — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-planning-slides.md" },
-        { "title": "Client meeting (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-client-meeting.jpg" },
-        { "title": "Unit assessment rubric (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-assessment-rubric.png" }
+        {
+          "title": "Client meeting (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-client-meeting-teach-computing.jpg"
+        },
+        {
+          "title": "Unit assessment rubric (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-unit-assessment-rubric-teach-computing.png"
+        },
+        {
+          "title": "Planning your digital media artefact — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-planning-your-digital-media-artefact-starter-worksheet.md"
+        },
+        {
+          "title": "Choosing a brief and planning — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-choosing-a-brief-and-planning-activity-worksheet.md"
+        },
+        {
+          "title": "Planning your digital media artefact — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-planning-your-digital-media-artefact-slides.md"
+        }
       ]
     },
     {
@@ -74,10 +248,34 @@
       "objectives": "I can work in my team and do my delegated job\nI can help make our digital media artefact\nI can use the rubric to check our work\nI can name one thing to improve and how",
       "outline": "Routine first. Vocabulary on board: collaboration · delegation · teamwork · communication · documentation. TA: software ready; the rubric out per group; cameras/devices if filming. Read the 4 “I can…” aloud.\n1. (0–10) Starter — good teamwork. Collaborate = work together; delegate = share the jobs. Multi-select good team behaviours; reset who is doing which job today.\n   • Support: choose what collaboration / delegation means.  • Core: name a job and who is doing it.  • Challenge: a fair way to help a teammate who is behind.\n2. (10–20) Check the rubric — rate each row on a scale, pick ONE thing to improve today.\n3. (20–50) You-do — make the artefact. Roles: documentation/presentation lead, two artefact leads (logo + poster/video/site), support sourcing stock materials. Remind: licence-check and credit any stock images. TA: prompt, do not take over. Likely error: not recording design choices → fix-words “write down WHY, as you go.”\n4. (50–55) Plenary — rate the rubric again; what moved up, what is next? Self-tick the 4 “I can…”. Can be finished as homework / catch-up.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Producing your digital media artefact — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-producing-starter-worksheet.md" },
-        { "title": "Making it and checking the rubric — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-producing-activity-worksheet.md" },
-        { "title": "Producing your digital media artefact — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-producing-slides.md" },
-        { "title": "Team working together (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-teamwork.png" }
+        {
+          "title": "Team working together (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-team-working-together-teach-computing.png"
+        },
+        {
+          "title": "Producing your digital media artefact — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-producing-your-digital-media-artefact-starter-worksheet.md"
+        },
+        {
+          "title": "Making it and checking the rubric — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-making-it-and-checking-the-rubric-activity-worksheet.md"
+        },
+        {
+          "title": "Producing your digital media artefact — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-producing-your-digital-media-artefact-slides.md"
+        }
       ]
     },
     {
@@ -85,10 +283,34 @@
       "objectives": "I can present my work and explain my design choices\nI can evaluate what worked and what to improve\nI can assess another group fairly using the rubric\nI can answer questions about the whole unit",
       "outline": "Routine first. Vocabulary on board: peer assessment · rubric · weighting · reflection · evaluate. TA: a rubric per pupil per group; presentation facilities ready; the end-of-unit quiz worksheet ready. Read the 4 “I can…” aloud.\n1. (0–10) Starter — peer assessment. You grade the WORK against the rubric, fairly and kindly. Pupils choose what peer assessment means on the starter worksheet.\n   • Support: choose what good feedback / “evaluate” means.  • Core: one thing they will say to explain a design choice.  • Challenge: why the teacher’s grade is weighted more.\n2. (10–35) Group presentations — each group shows the artefact, the process, and their design choices. Non-presenters complete a rubric per group. Prompt any group that misses a rubric area.\n3. (35–52) End-of-unit quiz and evaluation (the summative knowledge check, exam-style but supported): match pre-production tools, single-choice across pre-production/graphics/video/websites, multi-select Creative Commons rules, fill-in FPS/compression, then evaluate what worked and what they’d change.\n   • Support: recognition single-choices.  • Core: why a logo is a vector.  • Challenge: two audience-fit design choices for a brief.\n4. (52–55) Recap the unit journey (plan → create graphics/video/website → plan/produce/present a real artefact). Self-tick the 4 “I can…”.\nDifferentiation: the starter and quiz S/C/C sit on the SAME tasks at three depths; the presentation/peer-assessment is shared. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Presenting your digital media artefact — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-presenting-starter-worksheet.md" },
-        { "title": "End-of-unit quiz and evaluation — worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-end-of-unit-quiz-worksheet.md" },
-        { "title": "Presenting your digital media artefact — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l7-presenting-slides.md" },
-        { "title": "Presenting results (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l7-presenting.png" }
+        {
+          "title": "Presenting results (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-presenting-results-teach-computing.png"
+        },
+        {
+          "title": "Presenting your digital media artefact — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-presenting-your-digital-media-artefact-starter-worksheet.md"
+        },
+        {
+          "title": "End-of-unit quiz and evaluation — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-end-of-unit-quiz-and-evaluation-worksheet.md"
+        },
+        {
+          "title": "Presenting your digital media artefact — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-presenting-your-digital-media-artefact-slides.md"
+        }
       ]
     }
   ]

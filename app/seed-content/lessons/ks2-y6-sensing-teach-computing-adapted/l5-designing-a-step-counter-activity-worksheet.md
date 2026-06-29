@@ -12,7 +12,7 @@ Today I will design my step counter: the variable, the algorithm, and the progra
 - show the number of steps when button B is pressed
 - show "Keep it up!" or "Great!" depending on how many steps
 
-![A step counter design: algorithm and program flow]({{res:l5-stepcounter-design.png}})
+![A step counter design: algorithm and program flow]({{res:l5-a-step-counter-design-algorithm-and-program-flow-teach-computing.png}})
 
 An **algorithm** is the plan for the program, written as clear steps in order. Put the algorithm steps in order.
 

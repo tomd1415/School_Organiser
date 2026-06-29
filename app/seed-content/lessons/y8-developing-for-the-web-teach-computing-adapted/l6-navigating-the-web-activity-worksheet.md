@@ -10,7 +10,7 @@ Today I will add the same navigation menu to every page to finish a working webs
 ## A finished website
 Your pages join together into one website that visitors can move around.
 
-![A finished website with pages and navigation]({{res:l6-finished-website.png}})
+![A finished website with pages and navigation]({{res:l6-finished-website-with-navigation-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|

@@ -10,7 +10,7 @@ Today I will build my planned 3D model, then check it and improve it.
 ## From a plan to a model
 Last lesson you planned a building. Today you will turn your plan into a real 3D model in Tinkercad, using the skills from this whole unit.
 
-![A house pulled apart into its shapes]({{res:l6-exploded-house.png}})
+![A house pulled apart into its shapes]({{res:l6-a-house-pulled-apart-into-its-shapes-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

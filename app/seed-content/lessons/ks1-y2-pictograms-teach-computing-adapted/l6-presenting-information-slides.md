@@ -16,7 +16,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil for a conclusion from last lesson.
 
 ## A new way: block diagrams
-![Car colours block diagram]({{res:l6-car-colours-block.png}})
+![Car colours block diagram]({{res:l6-car-colours-block-diagram-teach-computing.png}})
 
 - data shown as **blocks** in columns
 - taller column = more
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Key idea. Likely error: reading at the wrong height → fix-words "follow the top of the column across to the number."
 
 ## Reading another block diagram
-![Teachers' pets block diagram]({{res:l6-pets-block.png}})
+![Teachers' pets block diagram]({{res:l6-teachers-pets-block-diagram-teach-computing.png}})
 
 - find the most and the least
 - which pet got 0?
@@ -34,7 +34,7 @@
 > 🧑‍🏫 We-do. Read a few values together before pupils make their own.
 
 ## Make a block diagram
-![Data software home screen]({{res:l6-j2data-home.png}})
+![Data software home screen]({{res:l6-data-software-home-screen-teach-computing.png}})
 
 - click **Chart**, not Pictogram
 - type your totals into the table

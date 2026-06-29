@@ -10,12 +10,12 @@ Today I will describe where websites are stored, and how we get to them on diffe
 ## Where are websites stored?
 A website is stored on a **server**. Lots of servers are kept in a big building called a **data centre**. Data centres are all around the world.
 
-![A data centre full of servers]({{res:l3-data-centre.png}})
+![A data centre full of servers]({{res:l3-a-data-centre-full-of-servers-teach-computing.png}})
 
 ## How do we get to a website?
 We use a **web browser** to open websites. A browser runs on lots of devices: a computer, a tablet, a phone, a games console.
 
-![Some web browsers]({{res:l3-browsers.png}})
+![Some web browsers]({{res:l3-some-web-browsers-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

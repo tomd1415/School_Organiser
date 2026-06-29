@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: stop-frame animation · frame · photo · capture · onion skinning. Recap: last lesson our flip books made pictures move.
 
 ## From paper to screen
-![The animation app home screen with a 'new movie' button]({{res:l2-imotion-home.png}})
+![The animation app home screen with a 'new movie' button]({{res:l2-the-animation-app-home-screen-teach-computing.png}})
 
 - last time we drew every page
 - now we take photos instead
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Show the home screen. Tap "new movie". This matches the order task on the starter worksheet. Keep the tablet on its stand and still.
 
 ## The capture screen
-![The animation app capture screen showing a stick figure and the buttons]({{res:l2-imotion-screen.png}})
+![The animation app capture screen showing a stick figure and the buttons]({{res:l2-the-animation-app-capture-screen-teach-computing.png}})
 
 - capture takes a photo
 - onion skin shows the last frame

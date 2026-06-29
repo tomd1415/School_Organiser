@@ -20,7 +20,7 @@
 - **Instructions** = how to do a task (e.g. "add", "preheat the oven").
 - A calculator holds the **data** and follows the **instructions**.
 
-![A calculator: the numbers are data, the operations are instructions]({{res:l1-calculator-data-instructions-teach-computing.png}})
+![A calculator: the numbers are data, the operations are instructions]({{res:l1-calculator-data-and-instructions-teach-computing.png}})
 
 > 🧑‍🏫 I-do → we-do. Sort the recipe parts on the worksheet (card-sort). Likely mix-up: numbers that tell you "how much" feel like instructions — fix-words: "a number on its own is data; a verb like mix or bake is an instruction."
 

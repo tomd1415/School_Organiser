@@ -10,12 +10,12 @@ Today I will compare, improve and debug my quiz.
 ## Does the code match the design?
 The design says the dog should say "**Yes!**". This dog code matches the design. ✓
 
-![The dog code that matches]({{res:l6-dog-correct.png}})
+![The dog code that matches]({{res:l6-the-dog-code-that-matches-the-design-teach-computing.png}})
 
 ## Find the mistake (debug)
 The design says this cat should say "**Yes!**". But look at the **Say** block in the code below.
 
-![The cat code with a mistake]({{res:l6-cat-bug.png}})
+![The cat code with a mistake]({{res:l6-the-cat-code-with-a-mistake-to-debug-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |
@@ -32,7 +32,7 @@ The design says this cat should say "**Yes!**". But look at the **Say** block in
 ## Improve your project
 You can add a **feature** to make your quiz better. The green **Sound** block adds a sound.
 
-![The pop sound block]({{res:l6-sound-pop.png}})
+![The pop sound block]({{res:l6-the-pop-sound-block-teach-computing.png}})
 
 ## 🔴 Challenge
 | Question | Your answer |

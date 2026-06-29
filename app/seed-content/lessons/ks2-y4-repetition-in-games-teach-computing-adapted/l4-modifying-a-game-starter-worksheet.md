@@ -10,7 +10,7 @@ Today I will **modify** a game. To modify means to change something that is alre
 ## The shark game
 In this game the sharks swim. Each shark is a **sprite**. A forever loop keeps it swimming.
 
-![The shark game]({{res:l4-shark-game.png}})
+![The shark game]({{res:l4-shark-game-on-the-stage-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

@@ -10,7 +10,7 @@ Today I will change a value and say what happens.
 ## Look at this block
 The move-right block has a value of **5**. The bigger the number, the further the cat moves.
 
-![A program with a move-right block set to 5]({{res:l3-value-program.png}})
+![A program with a move-right block set to 5]({{res:l3-a-program-with-a-value-of-5-teach-computing.png}})
 
 ## Predict
 | Question | Choose |

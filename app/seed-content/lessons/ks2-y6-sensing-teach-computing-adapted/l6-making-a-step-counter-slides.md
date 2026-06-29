@@ -14,7 +14,7 @@
 > 🧑‍🏫 Hand back the designs with feedback. On the starter worksheet pupils choose what "debug" means. Support pupils choose what "test" means.
 
 ## Build your code
-![The step counter code blocks]({{res:l6-stepcounter-code.png}})
+![The step counter code blocks]({{res:l6-the-step-counter-code-blocks-teach-computing.png}})
 
 - set steps to 0
 - a shake changes steps by 1
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Core pupils name a way to find a bug. Likely error: changing lots at once — fix-words: "change ONE thing, then test." If the algorithm is wrong, go back to the design.
 
 ## Fix the sensitivity
-![A block that counts a step only when the shake is strong]({{res:l6-sensitivity-block.png}})
+![A block that counts a step only when the shake is strong]({{res:l6-a-block-that-counts-a-step-only-when-the-shake-is-strong-teach-computing.png}})
 
 - the counter may go up too fast
 - only count a step when the shake is strong: acceleration (mg) strength > 1500

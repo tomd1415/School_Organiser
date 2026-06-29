@@ -7,7 +7,7 @@
 ## Starter — where is 3D animation?
 3D animation and modelling are made on a computer. This still is from *Agent 327*, a short film made in Blender — the same software we will use.
 
-![A still from the Blender film Agent 327]({{res:l1-agent327-blender-film.png}})
+![A still from the Blender film Agent 327]({{res:l1-agent-327-blender-film-still.png}})
 
 | Question | Tick ALL the answers |
 |---|---|

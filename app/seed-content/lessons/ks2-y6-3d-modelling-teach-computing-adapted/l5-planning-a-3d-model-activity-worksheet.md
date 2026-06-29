@@ -10,7 +10,7 @@ Today I will break a model into its shapes, find shapes in real buildings, and p
 ## Exploding a model
 To **analyse** a model means to look closely at what it is made from. When you pull a model apart, you can see the separate 3D shapes inside it.
 
-![A 3D house pulled apart into a base, a roof and a chimney]({{res:l5-exploded-house.png}})
+![A 3D house pulled apart into a base, a roof and a chimney]({{res:l5-a-house-pulled-apart-into-its-shapes-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|
@@ -30,9 +30,9 @@ To **analyse** a model means to look closely at what it is made from. When you p
 ## Shapes in real buildings
 Real buildings are made of 3D shapes too.
 
-![A round stadium]({{res:l5-stadium.jpg}})
+![A round stadium]({{res:l5-a-round-stadium-teach-computing.jpg}})
 
-![Modern towers]({{res:l5-modern-towers.png}})
+![Modern towers]({{res:l5-modern-towers-teach-computing.png}})
 
 Match each building to its main shape.
 
@@ -50,7 +50,7 @@ Match each building to its main shape.
 ## Plan your building
 You will build your design in Tinkercad next lesson, so use shapes you can find there.
 
-![An example house built in Tinkercad]({{res:l5-tinkercad-house.png}})
+![An example house built in Tinkercad]({{res:l5-an-example-house-built-in-tinkercad-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

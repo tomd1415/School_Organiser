@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: chart · pie chart · table · compare. End-of-unit lesson — recap the whole journey at the end.
 
 ## Starter — a chart is a picture of data
-![A pie chart of party costs]({{res:l6-pie-chart.png}})
+![A pie chart of party costs]({{res:l6-a-pie-chart-of-party-costs-teach-computing.png}})
 
 - a chart turns numbers into a picture
 - a pie chart shows the parts of a whole
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Model making a pie chart from the party data. Pupils order the steps, then make their own and screenshot it. Likely error: highlighting the wrong cells. Fix-words: "highlight only the totals you want to compare."
 
 ## Reading a chart
-![A party spreadsheet with a chart]({{res:l6-party-table.png}})
+![A party spreadsheet with a chart]({{res:l6-a-party-spreadsheet-with-a-chart-teach-computing.png}})
 
 - find the biggest and smallest slices
 - compare two amounts

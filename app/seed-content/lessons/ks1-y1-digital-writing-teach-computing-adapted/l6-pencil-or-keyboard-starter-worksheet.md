@@ -8,9 +8,9 @@
 Today I will compare typing on a computer to writing on paper.
 
 ## Starter — paper or computer?
-![A pencil]({{res:l6-pencil.png}})
+![A pencil]({{res:l6-pencil-teach-computing.png}})
 
-![A computer keyboard]({{res:l6-keyboard.png}})
+![A computer keyboard]({{res:l6-computer-keyboard-teach-computing.png}})
 
 Drag each one into the right box.
 

@@ -11,7 +11,7 @@ Today I will look at a quiz and start to make my own.
 This quiz asks "**Who lives here?**". The background is the sea. There are two sprites — a cat and a fish. You **tap the right answer**. Drag the labels onto the screen.
 
 ```label
-image: {{res:l4-quiz-who-lives-here.png}}
+image: {{res:l4-the-who-lives-here-quiz-screen-teach-computing.png}}
 cat (40%, 36%): Cat
 fish (57%, 36%): Fish
 program (40%, 86%): The program

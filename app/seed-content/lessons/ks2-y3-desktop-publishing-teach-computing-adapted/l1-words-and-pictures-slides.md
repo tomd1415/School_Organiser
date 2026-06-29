@@ -16,7 +16,7 @@
 > 🧑‍🏫 We also say "writing/words" for text and "pictures/graphics" for images. In this unit we say text and images. Think-pair-share: which sends a message faster?
 
 ## Signs all around us
-![A page of safety and road signs]({{res:l1-signs.png}})
+![A page of safety and road signs]({{res:l1-safety-and-road-signs-teach-computing.png}})
 
 - some signs are just a picture
 - some have words too

@@ -9,7 +9,7 @@ Today I will describe the star, bus, mesh and ring topologies, give an advantage
 
 A **topology** is the *shape* — the way the nodes are arranged. Here are the four shapes.
 
-![Star and bus topologies, with their advantages and disadvantages]({{res:l4-topologies.png}})
+![Star and bus topologies, with their advantages and disadvantages]({{res:l4-star-and-bus-topologies.png}})
 
 | Ring topology | Mesh topology |
 |---|---|

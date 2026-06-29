@@ -32,7 +32,7 @@ A DDoS attack floods a server with so many requests that it cannot answer real u
 > 🧑‍🏫 Optional active demo: the paper-ball / maths-sum DoS game from the teacher handout. Then pairs order the four steps on the sheet.
 
 ## Real attack — WannaCry
-![WannaCry ransomware lock screen]({{res:l3-wannacry-ransomware.png}})
+![WannaCry ransomware lock screen]({{res:l3-wannacry-ransomware-screen.png}})
 
 WannaCry locked files and demanded a ransom. It only hit computers that had not been updated.
 

@@ -16,7 +16,7 @@ School holds your name, address and grades. Why should that data be kept safe?
 - **Social engineering** — tricking a person (phishing, blagging, shouldering).
 - **Malicious software** — harmful code (viruses, spyware, a DDoS that floods a server).
 
-![A padlock on a laptop keyboard]({{res:l12-padlock-laptop.png}})
+![A padlock on a laptop keyboard]({{res:l12-a-padlock-on-a-laptop-keyboard.png}})
 
 > 🧑‍🏫 Plain line: one attacks the person, one attacks the machine. Class sorts the attacks on the worksheet.
 

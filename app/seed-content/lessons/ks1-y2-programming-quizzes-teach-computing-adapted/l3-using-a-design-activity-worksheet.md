@@ -10,7 +10,7 @@ Today I will use a design to build a seasons animation.
 ## The seasons design
 A **design** tells you what to build: the background, the sprite, and the algorithm. Read this design.
 
-![The seasons animation design]({{res:l3-seasons-design.png}})
+![The seasons animation design]({{res:l3-the-seasons-animation-design-teach-computing.png}})
 
 ## Work out the algorithm
 Each row of the design has the same algorithm. Put the steps in order.

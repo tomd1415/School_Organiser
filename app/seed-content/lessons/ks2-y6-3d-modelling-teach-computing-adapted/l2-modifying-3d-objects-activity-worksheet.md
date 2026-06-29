@@ -13,12 +13,12 @@ Different handles change a shape in different ways:
 - the **black side handles** change **one** side (width or length).
 - the **white top handle** changes the **height**.
 
-![A cube with handles]({{res:l2-cube-handles.png}})
+![A cube with handles]({{res:l2-a-cube-with-resize-handles-teach-computing.png}})
 
 Drag each label onto the matching handle.
 
 ```label
-image: {{res:l2-cube-handles.png}}
+image: {{res:l2-a-cube-with-resize-handles-teach-computing.png}}
 top (40%, 20%): Height handle
 corner (18%, 50%): Corner handle
 side (60%, 62%): Side handle
@@ -38,7 +38,7 @@ side (60%, 62%): Side handle
 ## Lifting and lowering
 The cone-shaped handle on top lets you **lift** a shape up or **lower** it down. It does not change the size. A shape sitting on the workplane is at **0 mm**.
 
-![A triangular prism lifted onto a cuboid to make a house]({{res:l2-house.png}})
+![A triangular prism lifted onto a cuboid to make a house]({{res:l2-a-roof-lifted-onto-a-base-to-make-a-house-teach-computing.png}})
 
 Put the steps in order to make this house shape.
 
@@ -57,7 +57,7 @@ Lift the prism up so it sits on top of the cuboid
 ## Changing colour
 When a shape is selected, the colour box appears. Click it to recolour the shape.
 
-![The Tinkercad colour picker]({{res:l2-colour-picker.png}})
+![The Tinkercad colour picker]({{res:l2-the-tinkercad-colour-picker-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

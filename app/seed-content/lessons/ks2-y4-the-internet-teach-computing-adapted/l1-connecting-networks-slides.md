@@ -15,7 +15,7 @@
 > 🧑‍🏫 Recap from Year 3. Quick check: "what does the switch do?" Answer wanted: passes the message to the right computer. Keep it concrete.
 
 ## The internet = a network of networks
-![Internet cables joining the whole world]({{res:l1-submarine-cable-map.png}})
+![Internet cables joining the whole world]({{res:l1-internet-cables-across-the-world-teach-computing.png}})
 
 - the **internet** joins lots of networks together
 - it reaches all around the world through cables
@@ -23,7 +23,7 @@
 > 🧑‍🏫 The lines are real cables, many under the sea, joining countries. Point, do not animate. The big idea: the internet is networks joined to networks.
 
 ## A router joins networks
-![A router]({{res:l1-router.png}})
+![A router]({{res:l1-a-router-teach-computing.png}})
 
 - a **switch** passes a message inside ONE network
 - a **router** passes a message to ANOTHER network
@@ -37,7 +37,7 @@
 > 🧑‍🏫 You-do: the `order` task crosses TWO networks. Likely error: thinking the message skips the router — fix-words "to reach another network, it must go through the router." TA: prompt, do not order it for them.
 
 ## Keep the network safe
-![A safe shield and an unsafe shield]({{res:l1-security-shields.png}})
+![A safe shield and an unsafe shield]({{res:l1-safe-and-unsafe-shields-network-security-teach-computing.png}})
 
 - **network security** keeps a network safe
 - it lets the right people in and keeps others out

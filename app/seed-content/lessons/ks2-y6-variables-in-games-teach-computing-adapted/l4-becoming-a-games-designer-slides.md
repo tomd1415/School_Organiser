@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: design · algorithm · code · sprite · background. Recap: variables make a game more fun.
 
 ## Starter — a games designer
-![Two game controllers]({{res:l4-gamer.jpg}})
+![Two game controllers]({{res:l4-two-game-controllers-teach-computing.jpg}})
 
 - a games designer **plans** a game before it is made
 - they choose the sprites, the background, and how it works
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Frame the job: designers plan first, then build. Support choose what a designer does.
 
 ## Look at Fruit catcher
-![The Fruit catcher game]({{res:l4-fruit-catcher.png}})
+![The Fruit catcher game]({{res:l4-the-fruit-catcher-game-teach-computing.png}})
 
 - a **bowl** catches things that fall down
 - there are falling **sprites** (apples, a star, a bug)
@@ -33,7 +33,7 @@
 > 🧑‍🏫 Pupils sort sprites and backgrounds on the activity worksheet. Encourage Scratch's built-in sprites for ease.
 
 ## Write an algorithm
-![A sketch of a star falling into a bowl]({{res:l4-algorithm-sketch.png}})
+![A sketch of a star falling into a bowl]({{res:l4-a-hand-drawn-algorithm-sketch-a-star-falling-into-a-bowl-teach-computing.png}})
 
 - an **algorithm** is a precise set of steps
 - the star falls from the top → if it touches the bowl, the score changes

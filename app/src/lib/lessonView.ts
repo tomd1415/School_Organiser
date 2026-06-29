@@ -14,6 +14,7 @@ import { renderMarkdown } from './markdown';
 import { sliceSlidesForLevel, splitTeacherNotes } from './slideDeck';
 import { renderPslide } from './meView'; // ONE per-slide renderer shared by cockpit, board + pupil decks
 import { paths } from './paths'; // route URLs (path-only family migrated; see docs/UI_SEPARATION_PLAN.md Phase 2)
+import { worksheetModalOpenAttrs } from '../routes/markModal'; // shared modal-open attrs (mirrors markOpenAttrs)
 
 // Custom interface for notes in the cockpit
 export interface CockpitNote {
@@ -671,6 +672,8 @@ export function renderLessonCockpit(options: {
           <section class="plan-tools-card card" aria-labelledby="plan-tools-title">
             <div class="card-head"><div><p class="eyebrow">Prep &amp; checks</p><h2 id="plan-tools-title">Plan tools</h2></div></div>
 
+            <p class="ws-modal-launch"><button type="button" class="button small" ${worksheetModalOpenAttrs(paths.worksheetModal(groupCourseId, lp))}>📖 View worksheets</button></p>
+
             <details class="ws-preview" id="ws-prev-d-${oc}">
               <summary>👁 Quick peek — each ability level</summary>
               <div class="ws-preview-tabs" role="tablist">
@@ -717,6 +720,11 @@ export function renderLessonCockpit(options: {
              <div class="lesson-preview-placeholder"><strong>No pupil data is loaded in preview.</strong><span>The live lesson shows saves, completion, feedback and marking controls here.</span></div>`
           : `<div class="pupil-work-panel" hx-get="${paths.occPupilWork(oc)}" hx-trigger="load" hx-swap="innerHTML"></div>`}
       </section>
+
+      <!-- Attendance register (noted_bugs2 #4) — lazy-loaded quick-mark roster for the live lesson. -->
+      ${isPreview ? '' : `<section class="card" id="attendance-section">
+        <div class="att-panel" hx-get="${paths.occAttendance(oc)}" hx-trigger="load" hx-swap="innerHTML"><span class="muted">Loading register…</span></div>
+      </section>`}
 
       ${groupEditDialog}
       ${hiddenOriginalSwapElements}

@@ -10,9 +10,9 @@ Today I will name different layouts and match each one to its purpose.
 ## Look at these layouts
 The way text and pictures are arranged on a page is called the layout.
 
-![A newspaper layout]({{res:l5-newspaper.png}})
+![A newspaper layout]({{res:l5-newspaper-layout-teach-computing.png}})
 
-![A poster layout]({{res:l5-poster.png}})
+![A poster layout]({{res:l5-poster-layout-teach-computing.png}})
 
 ## Starter — name the layout
 | Question | Choose |

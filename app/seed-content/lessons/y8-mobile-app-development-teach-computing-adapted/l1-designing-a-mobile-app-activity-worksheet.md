@@ -48,7 +48,7 @@ Improve your design
 ## Wireframe example
 A wireframe is a simple sketch. Here is one screen of an example app.
 
-![An example app wireframe — the Tappy Tap App]({{res:l1-app-wireframe-example.png}})
+![An example app wireframe — the Tappy Tap App]({{res:l1-app-wireframe-example-teach-computing.png}})
 
 ## Show your work
 | Question | Your answer |

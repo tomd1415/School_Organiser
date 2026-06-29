@@ -17,7 +17,7 @@ Drag each meaning into the right box.
 | Bias | (  ) the study of right and wrong (  ) a set of step-by-step instructions (  ) unfairness built into rules or data |
 
 ## AI and driverless cars
-![A Moral Machine dilemma: a self-driving car must choose who is hurt in a crash]({{res:l7-moral-machine-dilemma-teach-computing.png}})
+![A Moral Machine dilemma: a self-driving car must choose who is hurt in a crash]({{res:l7-moral-machine-driverless-car-dilemma-teach-computing.png}})
 
 A self-driving car with no brakes must "choose" who is hurt. Researchers use these dilemmas to study how machines could make moral choices.
 

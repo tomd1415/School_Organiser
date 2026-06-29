@@ -23,7 +23,7 @@ Write the number in the Total box
 ## Read the tally chart
 This tally chart shows how a class voted for their favourite pet.
 
-![Favourite pets tally chart]({{res:l1-pets-tally-chart.png}})
+![Favourite pets tally chart]({{res:l1-favourite-pets-tally-chart-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

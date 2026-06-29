@@ -10,7 +10,7 @@ Today I will make a chart and use it to answer questions.
 ## Showing data as a picture
 A **chart** turns numbers into a picture. A picture can be quicker to understand than a long table of numbers. A **pie chart** shows how a whole is split into parts.
 
-![A pie chart of party costs]({{res:l6-pie-chart.png}})
+![A pie chart of party costs]({{res:l6-a-pie-chart-of-party-costs-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

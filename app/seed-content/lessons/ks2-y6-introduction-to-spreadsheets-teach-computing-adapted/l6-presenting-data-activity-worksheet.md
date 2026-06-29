@@ -23,7 +23,7 @@ Choose the chart type you want, such as a pie chart
 | After you highlight your data, which menu do you click to add a chart? | (  ) Insert (  ) Help (  ) the dice |
 
 ## Reading a chart
-![A completed party spreadsheet with a chart]({{res:l6-party-table.png}})
+![A completed party spreadsheet with a chart]({{res:l6-a-party-spreadsheet-with-a-chart-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

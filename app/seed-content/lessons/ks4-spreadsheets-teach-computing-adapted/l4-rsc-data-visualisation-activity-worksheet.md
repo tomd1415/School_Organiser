@@ -10,9 +10,9 @@ Today I will make a column chart and a pie chart, give them clear titles and lab
 ## Two charts, two jobs
 A column chart compares amounts. A pie chart shows parts of a whole.
 
-![A column chart of telephone votes by week]({{res:l4-column-chart.png}})
+![A column chart of telephone votes by week]({{res:l4-column-chart-votes-by-week-teach-computing.png}})
 
-![A pie chart of total seat sales by section]({{res:l4-pie-chart.png}})
+![A pie chart of total seat sales by section]({{res:l4-pie-chart-seat-sales-teach-computing.png}})
 
 ## Sort — which chart for which job?
 Drag each job into the right group.
@@ -51,7 +51,7 @@ Every chart needs a clear [[ ]] that describes the data. The axes should have [[
 ## 🔴 Challenge
 Here is a grouped column chart comparing income from each seat type.
 
-![A grouped column chart of income from Adult, Student and Over 60s seats]({{res:l4-grouped-column-chart.png}})
+![A grouped column chart of income from Adult, Student and Over 60s seats]({{res:l4-grouped-column-chart-income-by-seat-type-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

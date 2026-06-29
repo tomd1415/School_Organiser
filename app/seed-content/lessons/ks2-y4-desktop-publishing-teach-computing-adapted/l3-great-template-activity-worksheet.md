@@ -10,7 +10,7 @@ Today I will make my own magazine front cover template using placeholders.
 ## A good magazine cover
 A magazine cover usually has a big title, some smaller text, and a main picture.
 
-![An example magazine cover called Tech Trends]({{res:l3-magazine-cover.png}})
+![An example magazine cover called Tech Trends]({{res:l3-example-magazine-cover-teach-computing.png}})
 
 ## Fill in the words
 Use the right word: template, placeholder, orientation.

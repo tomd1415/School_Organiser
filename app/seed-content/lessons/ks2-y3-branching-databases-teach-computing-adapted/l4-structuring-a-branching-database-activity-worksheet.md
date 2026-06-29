@@ -10,7 +10,7 @@ Today I will compare two branching databases and explain why the order of questi
 ## A well-structured tree
 This branching database splits the minibeasts into even groups. You never need more than a few questions to reach any minibeast.
 
-![A minibeast branching database]({{res:l4-minibeast-branching-database.png}})
+![A minibeast branching database]({{res:l4-minibeast-branching-database-teach-computing.png}})
 
 A different tree picks off one object at a time, like this:
 - Q1: Is it the bee? → no

@@ -12,7 +12,7 @@ People look at websites on many **devices**: a phone, a tablet, and a computer. 
 
 In Google Sites you can use the **Preview** button to see your page on each device.
 
-![Previewing a web page on a phone, tablet and computer]({{res:l4-devices.png}})
+![Previewing a web page on a phone, tablet and computer]({{res:l4-previewing-a-web-page-on-a-phone-tablet-and-computer-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

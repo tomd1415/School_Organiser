@@ -10,17 +10,17 @@ Today I will arrange objects and questions into a tree — a branching database.
 ## Why a "tree"?
 A branching database splits objects with yes/no questions. It looks like a tree turned upside down — it **branches**.
 
-![A tree with branches]({{res:l2-branching-tree-shape.png}})
+![A tree with branches]({{res:l2-tree-shape-teach-computing.png}})
 
 This is a finished branching database. It sorts minibeasts using yes/no questions.
 
-![A minibeast branching database]({{res:l2-minibeast-branching-database.png}})
+![A minibeast branching database]({{res:l2-minibeast-branching-database-teach-computing.png}})
 
 ## Label the parts
 Drag each label onto the right spot on the branching database above.
 
 ```label
-image: {{res:l2-minibeast-branching-database.png}}
+image: {{res:l2-minibeast-branching-database-teach-computing.png}}
 top (48%, 5%): First question
 mid (20%, 19%): Question
 leaf (4%, 48%): Object

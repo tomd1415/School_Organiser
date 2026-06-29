@@ -10,8 +10,8 @@ Today I will decide if a photo is real or has been changed.
 ## Real or changed?
 Some photos are **real**. Some have been **changed** on a computer. We look for clues.
 
-![A real photo of a dog and a baby giraffe]({{res:l6-real-dog-giraffe.png}})
-![A changed photo with a whale added near a bridge]({{res:l6-changed-whale.png}})
+![A real photo of a dog and a baby giraffe]({{res:l6-a-real-photo-of-a-dog-and-a-baby-giraffe-teach-computing.png}})
+![A changed photo with a whale added near a bridge]({{res:l6-a-changed-photo-with-a-whale-added-near-a-bridge-teach-computing.png}})
 
 Drag each photo into the right group.
 

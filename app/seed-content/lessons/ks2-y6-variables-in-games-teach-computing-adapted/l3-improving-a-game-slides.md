@@ -15,7 +15,7 @@
 > 🧑‍🏫 Pupils tick variables to add on the starter worksheet. A "new background colour" is not a variable. Support choose which is a variable.
 
 ## Set the score at the start
-![Pong code: when flag clicked, set score to 0]({{res:l3-pong-code.png}})
+![Pong code: when flag clicked, set score to 0]({{res:l3-pong-code-set-score-to-0-and-a-repeat-loop-teach-computing.png}})
 
 - **set score to 0** with the green flag
 - this starts each game fresh
@@ -31,7 +31,7 @@
 > 🧑‍🏫 Pupils predict on the activity worksheet (the matching grid), then TEST each place in Scratch. Predict first, then run.
 
 ## Changing up and down
-![A change score by 1 then change score by -1 block]({{res:l3-change-up-down.png}})
+![A change score by 1 then change score by -1 block]({{res:l3-a-change-score-by-1-then-by-1-teach-computing.png}})
 
 - a positive number makes the score go up
 - a negative number (-1) makes it go down

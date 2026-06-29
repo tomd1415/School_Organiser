@@ -10,7 +10,7 @@ Today I will explore a website, spot the media on it, and learn that websites ar
 ## Websites we use
 A **website** is a set of pages on the internet. A **web page** is one page of a website. We look at websites using a **browser** (like Chrome, Safari or Firefox).
 
-![A real website — San Diego Zoo Kids]({{res:l1-zoo-website.png}})
+![A real website — San Diego Zoo Kids]({{res:l1-the-san-diego-zoo-kids-website-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

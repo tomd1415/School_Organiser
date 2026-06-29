@@ -10,7 +10,7 @@ Today I will learn more ways to change shapes, and use them to make my own name 
 ## More than just shapes
 In Tinkercad you can add ready-made shapes, but you can also add **text** (letters and words) and even draw shapes freehand.
 
-![A 3D name badge: the word Ben with two stars]({{res:l3-name-badge.png}})
+![A 3D name badge: the word Ben with two stars]({{res:l3-a-3d-name-badge-with-text-and-stars-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

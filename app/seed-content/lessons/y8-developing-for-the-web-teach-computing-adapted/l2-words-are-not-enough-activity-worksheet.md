@@ -10,7 +10,7 @@ Today I will add an image to a web page with the `img` tag, then build a page to
 ## Predict
 The image file lives in the same folder as the web page.
 
-![A folder that holds the page's files]({{res:l2-folders-directory.png}})
+![A folder that holds the page's files]({{res:l2-files-in-a-folder-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|
@@ -56,7 +56,7 @@ Open the page in a browser to check it
 ## Build the design
 Match your page to this target design as closely as you can.
 
-![The target web page design with text and images]({{res:l2-web-page-with-images.png}})
+![The target web page design with text and images]({{res:l2-web-page-with-images-target-design-teach-computing.png}})
 
 ## Show your work
 | Question | Your answer |

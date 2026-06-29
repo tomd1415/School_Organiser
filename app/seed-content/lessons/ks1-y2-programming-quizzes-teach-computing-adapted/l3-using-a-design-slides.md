@@ -15,7 +15,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil what "outcome" means.
 
 ## A new start block
-![The Start on tap block]({{res:l3-start-on-tap.png}})
+![The Start on tap block]({{res:l3-the-start-on-tap-block-teach-computing.png}})
 
 - before, you used the **green flag**
 - the **Start on tap** block runs when you **tap the sprite**
@@ -24,7 +24,7 @@
 > 🧑‍🏫 I-do. Show a tiny program with Start on tap, then say "Hi". Likely error: pressing the flag instead of tapping the sprite → fix-words "this one needs a tap on the sprite."
 
 ## Read the design
-![The seasons design]({{res:l3-seasons-design.png}})
+![The seasons design]({{res:l3-the-seasons-animation-design-teach-computing.png}})
 
 - a **design** tells you what to build
 - it shows the **background**, the **sprite** and the **algorithm**

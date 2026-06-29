@@ -10,7 +10,7 @@ Today I will count objects and write down how many there are.
 ## Count the animals
 Look carefully. Point to each one as you count.
 
-![A cartoon elephant]({{res:l1-elephant.png}})
+![A cartoon elephant]({{res:l1-a-cartoon-elephant-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

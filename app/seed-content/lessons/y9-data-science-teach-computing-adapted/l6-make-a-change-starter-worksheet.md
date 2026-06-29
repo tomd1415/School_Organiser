@@ -7,14 +7,14 @@
 ## Starter — what can we learn from this?
 This visualisation shows litter found around a school. Each dot is one piece of litter: where it was found, and whether it can be recycled.
 
-![A dot plot of recyclable waste by school location]({{res:l6-litter-visualisation.png}})
+![A dot plot of recyclable waste by school location]({{res:l6-litter-recyclable-waste-visualisation-teach-computing.png}})
 
 | Question | Choose one |
 |---|---|
 | Which area had the MOST recyclable waste (the most purple "Yes" dots)? | (  ) Dining Hall (  ) Technology corridor (  ) Maths corridor |
 
 ## The raw data behind the chart
-![The raw litter data table]({{res:l6-litter-data-table.png}})
+![The raw litter data table]({{res:l6-litter-raw-data-table-teach-computing.png}})
 
 | Question | Choose one |
 |---|---|

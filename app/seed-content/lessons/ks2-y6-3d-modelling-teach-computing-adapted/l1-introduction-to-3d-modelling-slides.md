@@ -16,7 +16,7 @@
 > 🧑‍🏫 Likely error: "a cube is a square." Fix-words: "a square is FLAT; a cube is SOLID — it has depth." Support pupils choose what 3D means; Challenge: why model in 3D on a computer?
 
 ## Real things are modelled in 3D
-![A 3D model of a car]({{res:l1-complete-car.png}})
+![A 3D model of a car]({{res:l1-a-complete-3d-car-model-teach-computing.png}})
 
 - people use computers to model real objects in 3D
 - this car model is made of many separate 3D shapes
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Optional: play the source "exploded car" video as a hook (it has motion — your choice, given our low-arousal default). The exploded picture is on the plenary slide.
 
 ## The Tinkercad screen
-![The Tinkercad screen]({{res:l1-tinkercad-interface.png}})
+![The Tinkercad screen]({{res:l1-the-tinkercad-screen-workplane-shapes-view-tools-teach-computing.png}})
 
 - the workplane is the blue grid where we build
 - the shapes panel is where we drag shapes from
@@ -34,7 +34,7 @@
 > 🧑‍🏫 Give out the class code. On the activity worksheet, pupils label the three parts. Then ask everyone to drag on a cube and a sphere.
 
 ## Looking from different sides
-![The same shapes from the top]({{res:l1-perspective-top.png}})
+![The same shapes from the top]({{res:l1-the-same-shapes-seen-from-the-top-teach-computing.png}})
 
 - move your view by dragging on the workplane
 - the shapes stay still — only your view moves
@@ -50,7 +50,7 @@
 > 🧑‍🏫 Pupils order the "move a shape" steps, then place a cube and sphere next to each other and screenshot it. TA: prompt, do not do it for them.
 
 ## Which shapes make the car?
-![An exploded 3D car]({{res:l1-exploded-car.png}})
+![An exploded 3D car]({{res:l1-an-exploded-3d-car-teach-computing.png}})
 
 - the car is made of many separate 3D shapes
 - which shapes can you spot? (cylinders for wheels, cuboids for the body)

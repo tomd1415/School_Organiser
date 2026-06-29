@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: home page · preview · evaluate · device · Google Sites. Recap: last lesson we found copyright-free images; today we build the page.
 
 ## Starter — the steps to build
-![A web page being built in Google Sites]({{res:l4-made-page.png}})
+![A web page being built in Google Sites]({{res:l4-a-web-page-being-built-in-google-sites-teach-computing.png}})
 
 - open Google Sites → name the site → header → layout → content
 
@@ -21,7 +21,7 @@
 > 🧑‍🏫 Give a long, calm block to build (about 20 mins). Distribute the paper plans. TA: prompt with the layout boxes; do not build it for them. Early finishers: the exploratory task (header colour, image carousel, map).
 
 ## Preview on devices
-![Previewing on a phone, tablet and computer]({{res:l4-devices.png}})
+![Previewing on a phone, tablet and computer]({{res:l4-previewing-a-web-page-on-a-phone-tablet-and-computer-teach-computing.png}})
 
 - people use phones, tablets and computers
 - screens are different sizes

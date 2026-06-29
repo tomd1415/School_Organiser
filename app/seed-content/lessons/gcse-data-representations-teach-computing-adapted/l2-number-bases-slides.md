@@ -27,7 +27,7 @@
 - Put a **1** where you use that value, **0** where you do not.
 - Add up the 1s to get the decimal number.
 
-![An 8-bit place-value grid showing 10110100]({{res:l2-place-value-grid.png}})
+![An 8-bit place-value grid showing 10110100]({{res:l2-8-bit-place-value-grid.png}})
 
 > 🧑‍🏫 We-do. The grid shows 10110100 = 128+32+16+4 = 180. On the worksheet pupils label the place values (drag) and sort digits by base.
 

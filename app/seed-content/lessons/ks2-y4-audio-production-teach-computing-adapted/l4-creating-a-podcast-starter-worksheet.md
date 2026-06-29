@@ -11,7 +11,7 @@ Today I will find my way around the Audacity editor and record my voice tracks.
 Drag each label onto the right part of the screen.
 
 ```label
-image: {{res:l4-audacity-editor.png}}
+image: {{res:l4-the-audacity-editor-teach-computing.png}}
 play (10%, 11%): Play button
 record (32%, 11%): Record button
 timeline (51%, 26%): Timeline

@@ -8,8 +8,8 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: group · property · compare · most · fewest · the same. Same routine as every lesson.
 
 ## Starter — true or false?
-![A red car]({{res:l6-red-car.png}})
-![A cat]({{res:l6-cat.png}})
+![A red car]({{res:l6-red-car-teach-computing.png}})
+![A cat]({{res:l6-cat-teach-computing.png}})
 
 - thumbs up for true, thumbs down for false
 - "these are grouped by colour" — true or false?
@@ -23,7 +23,7 @@
 > 🧑‍🏫 Activity 1: show a big mixed pile. Ask the question. Let them feel that counting a mess is slow — last lesson's idea.
 
 ## Group to answer — keep it simple
-![A cat]({{res:l6-cat.png}})
+![A cat]({{res:l6-cat-teach-computing.png}})
 
 - you only need TWO groups: "cat" and "not cat"
 - you do not need to sort everything else

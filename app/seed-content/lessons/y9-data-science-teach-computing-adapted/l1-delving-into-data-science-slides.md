@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Same routine as every lesson. Vocabulary on board: data science · visualisation · insight · infographic.
 
 ## Starter — what story does this data tell?
-![Rows of raw data]({{res:l1-raw-data-table.png}})
+![Rows of raw data]({{res:l1-raw-data-table-teach-computing.png}})
 
 Look at the raw numbers. Can you tell the story? Think · pair · share.
 
@@ -17,19 +17,19 @@ Look at the raw numbers. Can you tell the story? Think · pair · share.
 ## What is data science?
 Data science = taking meaning out of large data sets to help people make decisions.
 
-![An infographic with several charts telling a story]({{res:l1-infographic-dashboard.png}})
+![An infographic with several charts telling a story]({{res:l1-data-science-infographic-teach-computing.png}})
 
 > 🧑‍🏫 Keep it to one sentence. The picture is an INFOGRAPHIC — charts + a few numbers telling a story. Link forward: "a picture of the data makes the story jump out."
 
 ## The same data, as a picture
-![Minard's visualisation of Napoleon's 1812 march]({{res:l1-minard-napoleon-march.png}})
+![Minard's visualisation of Napoleon's 1812 march]({{res:l1-minard-s-visualisation-of-napoleon-s-march-teach-computing.png}})
 
 The thick band is the army marching out. It gets thinner as soldiers die.
 
 > 🧑‍🏫 This is the SAME data as the starter. Point out: band width = number of soldiers; bottom line = temperature. The visualisation tells the story the numbers hid.
 
 ## Charts do different jobs
-![A bar chart of female astronauts per year]({{res:l1-female-astronauts-chart.png}})
+![A bar chart of female astronauts per year]({{res:l1-female-astronauts-bar-chart-teach-computing.png}})
 
 - line graph → change over time
 - bar chart → compare amounts

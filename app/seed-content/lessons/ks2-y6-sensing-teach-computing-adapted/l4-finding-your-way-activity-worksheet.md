@@ -15,7 +15,7 @@ We use four directions: North, East, South and West. Each direction covers a ran
 - less than 225° → South
 - less than 315° → West
 
-![Compass heading blocks compared to numbers]({{res:l4-compass-blocks.png}})
+![Compass heading blocks compared to numbers]({{res:l4-compass-heading-compared-to-a-number-teach-computing.png}})
 
 Match each heading to its direction.
 
@@ -29,7 +29,7 @@ Match each heading to its direction.
 ## Why order matters
 The program checks the conditions in order, from the top. The first one that is true is used. So the conditions must be in the right order.
 
-![The compass algorithm and program flow]({{res:l4-compass-flow.png}})
+![The compass algorithm and program flow]({{res:l4-the-compass-algorithm-and-program-flow-teach-computing.png}})
 
 Put the blocks in order to make a simple compass (just North and South).
 

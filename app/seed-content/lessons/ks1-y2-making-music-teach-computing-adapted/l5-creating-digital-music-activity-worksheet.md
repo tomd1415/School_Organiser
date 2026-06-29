@@ -10,7 +10,7 @@ Today I will make my animal's rhythm and add notes on the computer.
 ## Choose your animal
 Pick an animal. Think about how it moves.
 
-![A crocodile]({{res:l5-crocodile.png}}) ![A bird]({{res:l5-bird.png}})
+![A crocodile]({{res:l5-a-crocodile-teach-computing.png}}) ![A bird]({{res:l5-a-bird-teach-computing.png}})
 
 ## 🟢 Support
 Sort the animals. Does it move **slow and heavy** or **fast and light**?

@@ -32,7 +32,7 @@
 > 🧑‍🏫 Emphasise the brackets — like maths, they set the order. Then pupils do the worksheet problems (problem 2 adds a NOT gate).
 
 ## Gates do maths
-![A circuit board built from logic gates]({{res:l11-logic-chips.png}})
+![A circuit board built from logic gates]({{res:l11-a-circuit-board-built-from-logic-chips-teach-computing.png}})
 - join gates together and a computer can ADD binary
 - a half adder is just a few gates working together
 

@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: forever loop · infinite loop · count-controlled loop · repeat · at the same time.
 
 ## A forever loop
-![A forever loop block]({{res:l2-forever-loop.png}})
+![A forever loop block]({{res:l2-forever-loop-block-teach-computing.png}})
 
 - **forever** = never stops
 - keeps doing the inside blocks
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Starter. A forever loop is also called an infinite loop. Example: a fish swimming back and forth. It only stops when you click the red stop.
 
 ## A count-controlled loop
-![A repeat loop block]({{res:l2-repeat-loop.png}})
+![A repeat loop block]({{res:l2-repeat-count-controlled-loop-block-teach-computing.png}})
 
 - **repeat 3** = do it 3 times, then stop
 - you choose the number

@@ -14,7 +14,7 @@ App Lab is where we build the app. It has Code, Design and Data views.
 > 🧑‍🏫 Optional: play the short App Lab intro clip (teacher-played hook — has motion and sound, preview first). Then pupils answer the starter.
 
 ## The App Lab Design view
-![The App Lab Design view]({{res:l5-app-lab-interface.png}})
+![The App Lab Design view]({{res:l5-app-lab-design-view-teach-computing.png}})
 
 Design tab · Toolbox · Phone screen · Properties · Run.
 

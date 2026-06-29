@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: branching database · attribute · question · identify · decision tree. Have j2data Branch open and the paper plans handed back.
 
 ## Check your plan
-![Dinosaur cards]({{res:l6-dinosaur-cards.png}})
+![Dinosaur cards]({{res:l6-dinosaur-cards-teach-computing.png}})
 
 - look back at your paper plan
 - fix any problems you spot before you build

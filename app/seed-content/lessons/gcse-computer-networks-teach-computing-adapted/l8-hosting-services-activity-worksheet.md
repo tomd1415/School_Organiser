@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will describe how servers host services, say what a web server and a client do, explain the cloud, and weigh up its good and bad points.
 
-![A stack of servers in a data centre]({{res:l8-data-centre-servers.png}})
+![A stack of servers in a data centre]({{res:l8-servers-in-a-data-centre.png}})
 
 ## Web server or client?
 A **web server** stores web pages and sends them out when asked. A **client** is the device that asks for them and shows them to you. Drag each one into the right box.

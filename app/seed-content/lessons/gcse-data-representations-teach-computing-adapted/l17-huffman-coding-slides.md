@@ -20,7 +20,7 @@ A 5-character word in 8-bit ASCII is how many bits? Do common letters get short 
 > 🧑‍🏫 Plain line: "short codes for the letters you use a lot." Note: in English exams pupils only READ trees, not build them.
 
 ## Reading a Huffman tree  (we do)
-![Huffman tree for MISSISSIPPI]({{res:l17-huffman-tree.png}})
+![Huffman tree for MISSISSIPPI]({{res:l17-huffman-tree-for-mississippi-teach-computing.png}})
 
 - Follow the path from the top to the character.
 - Go left = write 0. Go right = write 1.

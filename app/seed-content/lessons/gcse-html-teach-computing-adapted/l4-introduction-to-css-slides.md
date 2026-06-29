@@ -13,7 +13,7 @@ What would this code do to a web page? Discuss with the person next to you.
 > 🧑‍🏫 Do NOT reveal the answer yet — they test it in a moment. Collect a few predictions.
 
 ## What is CSS?  (I do)
-![One set of styles applied to three web pages at once]({{res:l4-css-one-style-many-pages-teach-computing.png}})
+![One set of styles applied to three web pages at once]({{res:l4-one-style-many-pages-teach-computing.png}})
 
 CSS sets the look — colours, fonts, sizes. One stylesheet can style every page at once.
 

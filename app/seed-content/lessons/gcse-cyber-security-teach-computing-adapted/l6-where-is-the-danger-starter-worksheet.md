@@ -8,7 +8,7 @@
 Today I will learn how companies find their own weak spots before criminals do, using penetration testing.
 
 ## Starter — think like a hacker
-![A bitcoin coin next to a computer chip]({{res:l6-cybercrime-payoff.png}})
+![A bitcoin coin next to a computer chip]({{res:l6-cybercrime-payoff-bitcoin-and-chip.png}})
 
 | Question | Choose one |
 |---|---|

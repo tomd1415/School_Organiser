@@ -11,7 +11,7 @@ Today I will name the parts of a website, and use a web tool to make my own cont
 Drag each label onto the right part of this website.
 
 ```label
-image: {{res:l4-website.png}}
+image: {{res:l4-a-website-to-label-logo-search-menu-picture-teach-computing.png}}
 logo (3%, 11%): Logo
 search (92%, 4%): Search box
 menu (45%, 11%): Menu links

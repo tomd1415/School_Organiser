@@ -10,9 +10,9 @@ Today I will convert between **hexadecimal**, **decimal** and **binary**, and sa
 ## Where is hexadecimal used?
 Hex is a short, tidy way to write long binary numbers. You see it in colour codes, network (MAC) addresses, and memory dumps.
 
-![A network MAC address written in hexadecimal: B8:27:EB:10:20:AB]({{res:l7-mac-address-hex-teach-computing.png}})
+![A network MAC address written in hexadecimal: B8:27:EB:10:20:AB]({{res:l7-mac-address-in-hexadecimal-teach-computing.png}})
 
-![A memory dump — every value is written in hexadecimal]({{res:l7-hex-dump-teach-computing.png}})
+![A memory dump — every value is written in hexadecimal]({{res:l7-hexadecimal-memory-dump-teach-computing.png}})
 
 ## Sort the facts — which base?
 Drag each fact into the right number base.

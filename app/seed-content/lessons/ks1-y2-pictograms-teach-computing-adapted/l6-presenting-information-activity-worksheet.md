@@ -23,7 +23,7 @@ Add a title to your block diagram
 ## Read the block diagram
 This block diagram shows the colours of cars.
 
-![Car colours block diagram]({{res:l6-car-colours-block.png}})
+![Car colours block diagram]({{res:l6-car-colours-block-diagram-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

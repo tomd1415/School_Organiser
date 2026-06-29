@@ -10,8 +10,8 @@ Today I will find out how light changes a photo.
 ## Keep or delete?
 A photo with **good light** is clear. A photo that is **too dark** is hard to see.
 
-![A bright, clear photo of a tree]({{res:l4-bright-tree.png}})
-![A photo that is too dark]({{res:l4-dark-desk.jpg}})
+![A bright, clear photo of a tree]({{res:l4-a-bright-clear-photo-of-a-tree-teach-computing.png}})
+![A photo that is too dark]({{res:l4-a-photo-that-is-too-dark-teach-computing.jpg}})
 
 Drag each photo into the right group.
 

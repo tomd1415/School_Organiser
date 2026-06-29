@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: group · object · property · value · colour · data set. Same routine as every lesson.
 
 ## One object, many labels
-![A frog]({{res:l4-frog.png}})
+![A frog]({{res:l4-frog-teach-computing.png}})
 
 - the frog is green AND an animal
 - so it could go in a "green" group OR an "animals" group
@@ -16,7 +16,7 @@
 > 🧑‍🏫 Show the slide out of Present mode if you drag objects. An object has more than one property, so it fits more than one group.
 
 ## Group by colour
-![A cat]({{res:l4-cat.png}})
+![A cat]({{res:l4-cat-teach-computing.png}})
 
 - put all the GREEN objects together
 - the rest go in "not green"

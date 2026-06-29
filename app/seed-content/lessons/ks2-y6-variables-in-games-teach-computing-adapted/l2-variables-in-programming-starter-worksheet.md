@@ -10,7 +10,7 @@ Today I will learn that a **variable** holds one value at a time, and that it ha
 ## A game with variables
 Look at this Scratch game. Two things on the screen change while you play.
 
-![A Scratch game showing a score of 0 and a timer of 30]({{res:l2-score-timer.png}})
+![A Scratch game showing a score of 0 and a timer of 30]({{res:l2-a-scratch-game-with-a-score-and-a-timer-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

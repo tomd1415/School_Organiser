@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: headlight · brake light · anode · cathode · synergy · autonomous · sequence. Final lesson — pupils are more independent; use the assessment rubric while they work.
 
 ## Starter — light it up!
-![A white LED]({{res:l6-led-white.png}})
+![A white LED]({{res:l6-white-led-teach-computing.png}})
 
 - long leg (anode) → a GPIO pin
 - short leg (cathode) → ground
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Recall last lesson's homework: which pins, what setup, when on/off. Likely error: LED in backwards — fix-words: "long leg to the pin, short leg to ground."
 
 ## I-do — add the lights
-![A red LED]({{res:l6-led-red.png}})
+![A red LED]({{res:l6-red-led-teach-computing.png}})
 
 - white LEDs at the front (headlights)
 - red LEDs at the back (brake lights)
@@ -34,7 +34,7 @@
 > 🧑‍🏫 Emphasise the word synergy. The buggy must travel a circuit, light up at the right times, and avoid an obstacle.
 
 ## You-do — the Pico Grand Prix
-![The finished buggy with headlights and ultrasonic sensor]({{res:l6-buggy-final.png}})
+![The finished buggy with headlights and ultrasonic sensor]({{res:l6-finished-buggy-headlights-and-sensor-teach-computing.png}})
 
 - flash headlights ×3, brake lights on, wait 5 s
 - brake lights off, drive the circuit

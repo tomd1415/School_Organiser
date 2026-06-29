@@ -15,21 +15,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-introduction-starter-worksheet.md"
+          "file": "l1-an-introduction-to-online-safety-starter-worksheet.md"
         },
         {
           "title": "An introduction to online safety — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-introduction-activity-worksheet.md"
+          "file": "l1-an-introduction-to-online-safety-activity-worksheet.md"
         },
         {
           "title": "An introduction to online safety — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l1-introduction-slides.md"
+          "file": "l1-an-introduction-to-online-safety-slides.md"
         }
       ]
     },
@@ -95,6 +95,13 @@
       "outline": "Routine first. Vocabulary on board: right to privacy · Human Rights Act · Data Protection Act · Investigatory Powers Act · terms and conditions. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep it general, not personal.\n1. (0–10) Starter — how private? Using the levels-of-privacy diagram, pupils card-sort information into keep-private vs okay-to-share on the starter worksheet. Stress: passwords are always private.\n   • Support: which item is always private.  • Core: why people choose differently.  • Challenge: why it is not a simple choice.\n2. (10–25) I-do → we-do — UK privacy laws. Human Rights Act (private life), Data Protection Act (how data is used), Investigatory Powers Act (state surveillance). Likely error: mixing them up → fix-words \"Data Protection = how DATA is used.\"\n3. (25–45) You-do — match the laws, fill the blanks, and rate an opinion on the slider, on the activity worksheet. Terms and conditions: a fair trade or not? Balanced view.\n4. (45–55) Plenary — self-tick the four \"I can…\"; each pupil names one UK privacy law.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Levels of privacy diagram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-levels-of-privacy-diagram-teach-computing.png"
+        },
+        {
           "title": "Right to privacy — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -114,13 +121,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l4-right-to-privacy-slides.md"
-        },
-        {
-          "title": "Levels of privacy diagram (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l4-levels-of-privacy.png"
         }
       ]
     },
@@ -214,6 +214,13 @@
       "outline": "Routine first. Vocabulary on board: censorship · VPN · Tor · encryption · privacy-enhancing technologies. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud. Keep the country comparison factual and balanced.\n1. (0–10) Starter — what is censorship? Pupils choose the definition, then card-sort what is sensible to block vs should stay allowed on a school computer.\n   • Support: is blocking harmful content sensible.  • Core: why a country or school blocks content.  • Challenge: when blocking is unfair.\n2. (10–22) I-do → we-do — rules around the world. The UK blocks some illegal content; some countries block much more; some block almost nothing. Keep it about systems, not naming individuals.\n3. (22–48) You-do — match the technologies (encryption / VPN / Tor) using the Tor screenshot, give good vs risky uses, and rate an opinion on the slider on the activity worksheet. Likely error: thinking the tools are only for criminals → fix-words \"they protect ordinary people's privacy too.\"\n4. (48–55) Plenary — self-tick the four \"I can…\"; each pupil names one privacy-enhancing technology.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Tor Browser start page (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-tor-browser-start-page-teach-computing.png"
+        },
+        {
           "title": "Right to access — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -233,13 +240,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l8-right-to-access-slides.md"
-        },
-        {
-          "title": "Tor Browser start page (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l8-tor-browser.png"
         }
       ]
     },
@@ -281,14 +281,14 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l10-protecting-myself-starter-worksheet.md"
+          "file": "l10-protecting-myself-online-starter-worksheet.md"
         },
         {
           "title": "Protecting myself online — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l10-protecting-myself-activity-worksheet.md"
+          "file": "l10-protecting-myself-online-activity-worksheet.md"
         },
         {
           "title": "End-of-unit quiz — worksheet.md",
@@ -302,7 +302,7 @@
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l10-protecting-myself-slides.md"
+          "file": "l10-protecting-myself-online-slides.md"
         }
       ]
     }

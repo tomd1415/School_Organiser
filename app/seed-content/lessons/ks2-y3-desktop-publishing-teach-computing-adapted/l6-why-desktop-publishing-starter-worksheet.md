@@ -8,7 +8,7 @@
 Today I will say what desktop publishing is and why it is helpful in the real world.
 
 ## What is desktop publishing?
-![A pile of magazines made with desktop publishing]({{res:l6-magazines.png}})
+![A pile of magazines made with desktop publishing]({{res:l6-magazines-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

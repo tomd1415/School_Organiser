@@ -11,7 +11,7 @@ Today I will name the hardware inside a phone and say what each sensor does.
 Drag each label onto the right part of the board.
 
 ```label
-image: {{res:l3-circuit-board.jpg}}
+image: {{res:l3-circuit-board-teach-computing.jpg}}
 cpu (32%, 34%): CPU socket
 ram (50%, 22%): RAM slots
 ports (11%, 50%): Ports

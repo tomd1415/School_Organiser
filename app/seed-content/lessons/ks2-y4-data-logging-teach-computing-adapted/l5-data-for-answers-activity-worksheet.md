@@ -45,7 +45,7 @@ Fill in your plan.
 | What do you think your data will show? Write your prediction. | Type your answer here |
 
 ## Set it up and test it
-![A data logger]({{res:l5-data-logger.png}})
+![A data logger]({{res:l5-data-logger-teach-computing.png}})
 
 Set your data logger up the way your plan says. Let it record for a minute and check it is working.
 

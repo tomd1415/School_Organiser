@@ -56,7 +56,7 @@ Fill in the Boolean expression.
 Siren = (pressure [[AND]] [[NOT]] valve) [[OR]] temperature
 
 ## Hardware — gates do maths
-![A circuit board built from logic chips]({{res:l11-logic-chips.png}})
+![A circuit board built from logic chips]({{res:l11-a-circuit-board-built-from-logic-chips-teach-computing.png}})
 
 Joining logic gates together lets a computer ADD binary numbers. A part that adds two bits is called a half adder — it is just gates joined up.
 

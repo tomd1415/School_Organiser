@@ -22,7 +22,7 @@
 > 🧑‍🏫 Link back to Lesson 1. Stress: plan first, then type. A clear plan makes debugging easier.
 
 ## Squared-off letters
-![Typing a command into the Logo command box]({{res:l2-fmslogo-typing.png}})
+![Typing a command into the Logo command box]({{res:l2-typing-a-command-into-the-logo-command-box-teach-computing.png}})
 
 - use straight lines and 90 degree turns
 - think: line, turn, line, turn

@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: sprite · instructions · delete · program · algorithm. Recap: last lesson we changed a value.
 
 ## Starter — what is wrong?
-![A cat sprite standing on the moon]({{res:l4-cat-on-moon.png}})
+![A cat sprite standing on the moon]({{res:l4-a-cat-sprite-on-the-moon-teach-computing.png}})
 
 - a cat does not belong on the moon
 - pick a sprite that fits the background
@@ -16,7 +16,7 @@
 > 🧑‍🏫 Think-pair-share: what's wrong? (a cat can't live on the moon). A spaceman would fit better. This matches the starter worksheet.
 
 ## More than one sprite
-![An underwater project with several sea-animal sprites]({{res:l4-many-sprites.jpg}})
+![An underwater project with several sea-animal sprites]({{res:l4-an-underwater-project-with-several-sprites-teach-computing.jpg}})
 
 - a project can have more than one sprite
 - count them

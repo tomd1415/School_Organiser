@@ -10,11 +10,11 @@ Today I will tell two kinds of loop apart. A **forever loop** never stops. A **c
 ## Two loops
 This loop runs **forever**. It never stops on its own.
 
-![A forever loop block]({{res:l2-forever-loop.png}})
+![A forever loop block]({{res:l2-forever-loop-block-teach-computing.png}})
 
 This loop **repeats 3** times, then stops.
 
-![A repeat loop block]({{res:l2-repeat-loop.png}})
+![A repeat loop block]({{res:l2-repeat-count-controlled-loop-block-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

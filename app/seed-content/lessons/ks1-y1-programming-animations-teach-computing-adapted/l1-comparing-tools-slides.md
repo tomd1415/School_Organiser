@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: ScratchJr · sprite · command · programming area · compare. Same routine as every lesson. Last unit we used Bee-Bot floor robots; this unit we use ScratchJr on screen.
 
 ## Starter — this is ScratchJr
-![The ScratchJr screen]({{res:l1-scratchjr-screen.jpg}})
+![The ScratchJr screen]({{res:l1-the-scratchjr-screen-teach-computing.jpg}})
 
 - the cat is a SPRITE
 - the blue blocks are COMMANDS
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Point at the cat (sprite), the blue blocks (commands), the green flag (run). On a tablet the app icon is the cat's face. This matches the label task on the starter worksheet.
 
 ## The move blocks
-![Four move blocks]({{res:l1-move-blocks.png}})
+![Four move blocks]({{res:l1-four-move-blocks-teach-computing.png}})
 
 - move right · move left · move up · move down
 

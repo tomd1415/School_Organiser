@@ -8,7 +8,7 @@
 This quiz checks what I have learned across the whole physical computing project. Answer in exam conditions and do your best.
 
 ## The buggy you built
-![The finished buggy with its brake lights on]({{res:l6-buggy-brakelights.png}})
+![The finished buggy with its brake lights on]({{res:l6-finished-buggy-brake-lights-teach-computing.png}})
 
 ## Key words
 Match each key word to its meaning.

@@ -10,7 +10,7 @@ Today I will choose an action to repeat for each letter and build the animation.
 ## The blocks I will use
 The **Looks** blocks change how a sprite looks: next costume, change colour. Put them inside a loop to repeat them.
 
-![Looks blocks for animation]({{res:l3-scratch-looks.png}})
+![Looks blocks for animation]({{res:l3-looks-blocks-for-animation-teach-computing.png}})
 
 ## Plan one letter
 Put the steps in order to make one letter animate. Drag them into order.

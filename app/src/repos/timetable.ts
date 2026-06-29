@@ -82,6 +82,46 @@ export async function getTimetabledLessons(yearId?: number): Promise<LessonRow[]
   return rows;
 }
 
+export interface TeacherClass {
+  id: number;
+  name: string;
+}
+
+/** The teacher's OWN classes (groups with a self-taught timetabled slot) — for the "mark class away"
+ * picker on the timetable. Distinct, name-ordered. */
+export async function listTeacherClasses(yearId?: number): Promise<TeacherClass[]> {
+  const { rows } = await pool.query<TeacherClass>(
+    `SELECT DISTINCT g.id, g.name
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     JOIN staff s              ON s.id = tl.staff_id
+     JOIN groups g             ON g.id = tl.group_id
+     WHERE s.is_self AND p.academic_year_id = COALESCE($1, ${CURRENT_YEAR})
+     ORDER BY g.name`,
+    [yearId ?? null],
+  );
+  return rows;
+}
+
+export interface GroupSelfLesson {
+  lessonId: number;
+  weekday: number;
+}
+
+/** A group's self-taught timetabled slots (lesson id + weekday). Used to fan a "class away" out across
+ * every slot that group has on the affected dates. */
+export async function getGroupSelfLessons(groupId: number, yearId?: number): Promise<GroupSelfLesson[]> {
+  const { rows } = await pool.query<GroupSelfLesson>(
+    `SELECT tl.id AS "lessonId", p.weekday
+     FROM timetabled_lessons tl
+     JOIN period_definitions p ON p.id = tl.period_definition_id
+     JOIN staff s              ON s.id = tl.staff_id
+     WHERE tl.group_id = $1 AND s.is_self AND p.academic_year_id = COALESCE($2, ${CURRENT_YEAR})`,
+    [groupId, yearId ?? null],
+  );
+  return rows;
+}
+
 // Every term-date overlay across all years (term / half_term / holiday / inset). The timetable uses
 // these to grey out non-teaching days; spanning all years means a week viewed in any year classifies
 // correctly (including the Aug→Sep boundary week).

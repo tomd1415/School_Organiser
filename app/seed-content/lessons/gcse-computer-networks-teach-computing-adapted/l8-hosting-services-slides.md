@@ -21,7 +21,7 @@ A **web server** is a powerful computer that stores web pages and sends them out
 ## Data centres
 Big companies keep thousands of servers together in a **data centre** — a building built to power and cool them.
 
-![A stack of servers in a data centre]({{res:l8-data-centre-servers.png}})
+![A stack of servers in a data centre]({{res:l8-servers-in-a-data-centre.png}})
 
 > 🧑‍🏫 Optional teacher-played hook: the Google data-centre tour video (ncce.io/TheTour) — motion/sound, your choice. Point out the cooling and the rows of servers in the photo.
 

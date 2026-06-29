@@ -16,8 +16,8 @@
 > 🧑‍🏫 Quick recap. Ask one pupil for an attribute of an object.
 
 ## People have attributes
-![A face with glasses]({{res:l5-face-glasses.png}})
-![A face with red hair]({{res:l5-face-red.png}})
+![A face with glasses]({{res:l5-a-face-with-glasses-teach-computing.png}})
+![A face with red hair]({{res:l5-a-face-with-red-hair-teach-computing.png}})
 
 - hair colour, wears glasses, number of pets
 - some attributes you can see, some you cannot

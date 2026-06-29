@@ -10,7 +10,7 @@ Today I will read a joined program and run it to see what the cat does.
 ## Look at this program
 The blocks are joined like a jigsaw. It runs from left to right.
 
-![A joined program: Start, up, up, up, right, right, right, right, right, End]({{res:l2-joined-program.png}})
+![A joined program: Start, up, up, up, right, right, right, right, right, End]({{res:l2-a-joined-program-teach-computing.png}})
 
 ## Predict
 | Question | Choose |

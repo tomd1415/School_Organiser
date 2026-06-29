@@ -10,7 +10,7 @@ Today I will watch my animation back, choose one thing to improve, and make it b
 ## Watch your animation back
 You can press stop, then stop again, to watch your animation. If a frame is wrong, you can delete it.
 
-![The animation app watching a film back]({{res:l5-imotion-capture.png}})
+![The animation app watching a film back]({{res:l5-watching-an-animation-back-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

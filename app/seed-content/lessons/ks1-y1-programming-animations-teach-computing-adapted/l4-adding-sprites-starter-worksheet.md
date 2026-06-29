@@ -10,7 +10,7 @@ Today I will choose a sprite that fits the background.
 ## What is wrong here?
 A **sprite** is a character in your project. Look at the cat on the moon.
 
-![A cat sprite standing on the moon]({{res:l4-cat-on-moon.png}})
+![A cat sprite standing on the moon]({{res:l4-a-cat-sprite-on-the-moon-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

@@ -11,6 +11,13 @@
       "outline": "Routine first (same every lesson). Vocabulary on board: data · instructions · binary · coding system · transistor. TA: this is lesson 1 — keep it calm and concrete. Read the 4 “I can…” aloud.\n1. (0–6) Starter — a representation is one thing standing for another; why writing mattered (think–write–pair–share, no writing for Support — tick boxes).\n   • Support: tick what a representation is.  • Core: the two states of a switch.  • Challenge: why agreement on meaning matters.\n2. (6–20) I-do → we-do — data (numbers/text with no meaning on their own) vs instructions (how to do a task). Card-sort the recipe parts; calculator image as the anchor. Likely mix-up: a number that says “how much” feels like an instruction; fix-words “a number on its own is data; a verb like mix or bake is an instruction.”\n3. (20–30) Two states — transistors are tiny switches, on (1) or off (0); everything is built from 1s and 0s.\n4. (30–50) You-do — how many things can a group of switches represent? Fill the gaps (1→2, 2→4, 3→8).\n   • Support: tick on/off meaning.  • Core: write the 4 combinations for 2 switches.  • Challenge: 10 switches → 2^10 = 1024. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — self-tick the 4 “I can…”; recap representation stands for something, computers use on/off, more switches = many more combinations (2^n).\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Calculator — data and instructions (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-calculator-data-and-instructions-teach-computing.png"
+        },
+        {
           "title": "What is representation — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -30,13 +37,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l1-what-is-representation-slides.md"
-        },
-        {
-          "title": "Calculator — data and instructions (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l1-calculator-data-instructions-teach-computing.png"
         }
       ]
     },
@@ -45,6 +45,20 @@
       "objectives": "I can explain the difference between base-2 and base-10\nI can read the place values in a binary number\nI can convert a binary number to decimal\nI can convert a decimal number to binary",
       "outline": "Routine first. Vocabulary on board: base 2 · base 10 · decimal · binary · place value. TA: everyone has the place-value grid in front of them. Read the 4 “I can…” aloud.\n1. (0–6) Starter — transistors are tiny on/off switches (hair image for scale); decimal uses 0–9, binary uses 0 and 1.\n   • Support: tick the digits each base uses.  • Core: how many digits binary uses.  • Challenge: binary columns multiply by 2 each time.\n2. (6–18) I-do — place value: decimal columns ×10, binary columns ×2 (128 64 32 16 8 4 2 1). Label-the-grid task (drag the place values). Card-sort digits by base.\n3. (18–28) We-do — binary → decimal: add the place values with a 1 (101 = 5; 1001 = 9; 1111 = 15). Common slip: reading binary as a decimal number; fix-words “say one-zero-one, not one hundred and one.”\n4. (28–50) You-do — decimal → binary: biggest place value that fits, put 1, subtract, repeat (10 = 1010).\n   • Support: which place values make 5.  • Core: convert 10.  • Challenge: 10110100 → 180; 68 → 01000100. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — quick-fire; self-tick the 4 “I can…”; recap columns double, add 1s for decimal, subtract place values for binary.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
       "resources": [
+        {
+          "title": "8-bit place-value grid.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted for this lesson (place-value grid). Based on Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-8-bit-place-value-grid.png"
+        },
+        {
+          "title": "Transistor on a human hair (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-transistor-on-a-human-hair-teach-computing.png"
+        },
         {
           "title": "Number bases — starter worksheet.md",
           "kind": "worksheet",
@@ -65,20 +79,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l2-number-bases-slides.md"
-        },
-        {
-          "title": "8-bit place-value grid.png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Adapted for this lesson (place-value grid). Based on Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l2-place-value-grid.png"
-        },
-        {
-          "title": "Transistor on a human hair (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l2-transistor-on-a-hair-teach-computing.png"
         }
       ]
     },
@@ -200,6 +200,20 @@
       "outline": "Routine first. Vocabulary on board: hexadecimal · base 16 · nibble · byte. TA: say “five, three” for 53, not “fifty-three”. Read the 4 “I can…” aloud.\n1. (0–8) Starter — recap signed integers (sign and magnitude 10110000 = -48; two's complement -5 = 1011).\n   • Support: tick base-16 and A = 10.  • Core: write the six letters A–F.  • Challenge: one hex digit = a nibble (4 bits).\n2. (8–18) I-do — hex is base-16: 0–9 then A–F (10–15); one hex digit = 4 bits, two = a byte. Where it is used: colour codes, MAC addresses (image), memory dumps (image).\n3. (18–30) We-do — nibble method: split the hex, turn each digit into a 4-bit nibble, join, add place values (A2 → 1010 0010 → 162). Order the nibble-method steps. Common slip: forgetting A = 1010; fix-words “A is ten, ten is 1010.”\n4. (30–50) You-do — Core: A1 = 161, B3 = 179, 11 → B. Challenge: 9D = 157; 255 → FF. Sort-the-facts card task fixes the three bases.\n   • Support: tick A = 10 and one digit = 4 bits. TA: “prompt, do not do it for them.” Screenshot the working.\n5. (50–55) Plenary — short “quiz of everything so far”; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
       "resources": [
         {
+          "title": "MAC address in hexadecimal (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-mac-address-in-hexadecimal-teach-computing.png"
+        },
+        {
+          "title": "Hexadecimal memory dump (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-hexadecimal-memory-dump-teach-computing.png"
+        },
+        {
           "title": "Hexadecimal — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -219,20 +233,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l7-hexadecimal-slides.md"
-        },
-        {
-          "title": "MAC address in hexadecimal (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l7-mac-address-hex-teach-computing.png"
-        },
-        {
-          "title": "Hexadecimal memory dump (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l7-hex-dump-teach-computing.png"
         }
       ]
     },
@@ -241,6 +241,13 @@
       "objectives": "I can work out how many things n bits can represent\nI can explain what a character set is and how ASCII works\nI can explain a limitation of ASCII\nI can encode and decode text using the ASCII table",
       "outline": "Routine first. Vocabulary on board: bit · to the power of · ASCII · character set. TA: everyone has the ASCII table to hand. Read the 4 “I can…” aloud.\n1. (0–6) Starter — are there enough bits? 4 bits = 16, not enough for 26 letters.\n   • Support: tick “2 to the power of n”.  • Core: 3 bits = 8.  • Challenge: ~100 keyboard characters need 7 bits.\n2. (6–18) I-do — number of combinations = 2^n (3 bits → 8; 7 → 128; 8 → 256). Two methods: next place-value heading, or the formula.\n3. (18–28) We-do — a character set lists each character and its binary code; ASCII A = 65, B = 66, C = 67 (in sequence). Predict D = 68.\n4. (28–40) 7 vs 8 bits — ASCII first used 7 bits (128 chars), now 8 bits (256). Limitation: English keyboard only (leads to Unicode). Fix-words “ASCII is English only.”\n5. (40–55) You-do — Core: 7 bits = 128; find D’s code. Challenge: 8 bits = 256; decode 01000011 01000001 01010100 = CAT.\n   • Support: tick A = 65 and steps of 1. Likely error: miscounting 8-bit groups; fix-words “8 bits = one character.” TA: “prompt, do not do it for them.” Screenshot the work. Plenary quiz; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
       "resources": [
+        {
+          "title": "ASCII character set (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-ascii-character-set-teach-computing.png"
+        },
         {
           "title": "Representing text — starter worksheet.md",
           "kind": "worksheet",
@@ -261,13 +268,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l8-representing-text-slides.md"
-        },
-        {
-          "title": "ASCII character set (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l8-ascii-character-set-teach-computing.png"
         }
       ]
     },
@@ -277,32 +277,32 @@
       "outline": "Routine first (last lesson of this half of the unit). Vocabulary on board: ASCII · Unicode · bit · byte. TA: keep the file-size formula visible. Read the 4 “I can…” aloud.\n1. (0–6) Starter — revisiting ASCII: it codes English keyboard characters only; it cannot do other alphabets or emoji.\n   • Support: tick “many languages and symbols”.  • Core: why more bits = more characters.  • Challenge: why backwards compatibility helps old files.\n2. (6–16) I-do — Unicode uses more bits per character → many languages, symbols, emoji (image); first 128 codes match ASCII (backwards compatible).\n3. (16–26) We-do — bytes per character: ASCII 1, 16-bit Unicode 2, 32-bit Unicode 4 (1 byte = 8 bits).\n4. (26–38) We-do — file size = characters × bytes per character (10 chars ASCII = 10 bytes). Common slip: forgetting Unicode uses more bytes each; fix-words “characters times bytes each.”\n5. (38–55) You-do — Core: 20 characters → ASCII 20 B, 16-bit 40 B, 32-bit 80 B. Challenge: the storage-vs-coverage trade-off.\n   • Support: tick “more bits per character”. TA: “prompt, do not do it for them.” Screenshot the calculations. Plenary + half-unit recap (bases, add/subtract, shifts, signed, hex, ASCII, Unicode); self-tick the 4 “I can…”. (Bitmaps, sound and compression come in the next set of lessons.)\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
       "resources": [
         {
+          "title": "Emoji — characters Unicode can represent (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l9-emoji-characters-unicode-can-represent-teach-computing.png"
+        },
+        {
           "title": "Unicode and file size — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l9-unicode-file-size-starter-worksheet.md"
+          "file": "l9-unicode-and-file-size-starter-worksheet.md"
         },
         {
           "title": "Unicode and file size — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l9-unicode-file-size-activity-worksheet.md"
+          "file": "l9-unicode-and-file-size-activity-worksheet.md"
         },
         {
           "title": "Unicode and file size — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l9-unicode-file-size-slides.md"
-        },
-        {
-          "title": "Emoji — characters Unicode can represent (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l9-emoji-unicode-teach-computing.png"
+          "file": "l9-unicode-and-file-size-slides.md"
         }
       ]
     },
@@ -311,6 +311,20 @@
       "objectives": "I can describe what a pixel is and how pixels make a bitmap image\nI can describe colour depth and image resolution\nI can say what metadata is\nI can give an example of metadata applied to an image",
       "outline": "Routine first (same every lesson). Vocabulary on board: bitmap · pixel · colour depth · image resolution · metadata. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — a photo is made of tiny squares: what is each one called, and how many bits in a byte? Recap text/file size from last lesson. No writing beyond a tick.\n2. (8–22) I-do → we-do. Teacher shows a zoomed-in image so the pixels appear, then defines colour depth (bits per pixel; 2^n colours) (I do); class does the colour-depth card-sort 1/2/3/8 bit → 2/4/8/256 colours (we do). Embed the two puppy images (full colour vs 1-bit) to show colour depth changing quality. Likely error: confusing colour depth with resolution — fix-words “depth = colours, resolution = number of pixels.”\n3. (22–42) You-do — define pixel/colour depth/metadata by matching; fill-in 1-bit→2, 3-bit→8, 32 colours→5 bits; the ppi calculation (300×300 at 100ppi → 3×3 inches).\n   • Support: word↔meaning matching.  • Core: the colours/bits fill-in + define metadata.  • Challenge: the physical-size (ppi) calculation + why higher colour depth means a bigger file. TA: prompt, do not do it for them.\n4. (42–50) Consolidate — a way to remember 'colour depth' written + photo of finished sheet (show-your-work).\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil names one piece of image metadata.\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
+        {
+          "title": "Two puppies — full colour depth.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-two-puppies-full-colour-depth.png"
+        },
+        {
+          "title": "Two puppies — 1 bit per pixel.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l10-two-puppies-1-bit-per-pixel.png"
+        },
         {
           "title": "Representing bitmap images — starter worksheet.md",
           "kind": "worksheet",
@@ -331,20 +345,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l10-representing-bitmap-images-slides.md"
-        },
-        {
-          "title": "Two puppies — full colour depth.png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l10-colour-depth-original.png"
-        },
-        {
-          "title": "Two puppies — 1 bit per pixel.png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Adapted from Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l10-colour-depth-1bit.png"
         }
       ]
     },
@@ -358,21 +358,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l11-bitmap-file-size-starter-worksheet.md"
+          "file": "l11-bitmap-file-size-calculation-starter-worksheet.md"
         },
         {
           "title": "Bitmap file size calculation — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l11-bitmap-file-size-activity-worksheet.md"
+          "file": "l11-bitmap-file-size-calculation-activity-worksheet.md"
         },
         {
           "title": "Bitmap file size calculation — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l11-bitmap-file-size-slides.md"
+          "file": "l11-bitmap-file-size-calculation-slides.md"
         }
       ]
     },
@@ -381,6 +381,20 @@
       "objectives": "I can explain why analogue sound is converted into binary\nI can describe what sampling is\nI can describe sample rate\nI can describe sample resolution",
       "outline": "Routine first. Vocabulary on board: analogue · digital · sampling · sample rate · sample resolution · amplitude · frequency · pitch. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap the bitmap file-size formula; sound travels as a wave; a computer can only store binary.\n2. (8–24) I-do → we-do. Teacher explains analogue sound is a continuous wave and must be turned into binary, then samples a wave by reading its height at each time (I do); class LABELS the sampling graph (amplitude axis, time axis, the wave, a sample point) on the worksheet (we do). The clean sampling-wave grid image is embedded for the label task; the audio-waveform image hooks the I-do.\n3. (24–44) You-do — sort analogue vs digital; match sampling/sample rate/sample resolution to their meanings; fill-in (rate in hertz, resolution in bits, more samples = more accurate).\n   • Support: analogue/digital card-sort.  • Core: term↔meaning match + fill-in.  • Challenge: why analogue must be converted, and why a redrawn wave differs from the original + how to improve it. Likely error: swapping sample rate and resolution — fix-words “rate = how often, resolution = how many bits.” TA: prompt, do not do it for them.\n4. (44–50) Consolidate — 'sampling' in the pupil's own words + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil says what sampling means.\nOptional calm demo: a microphone wave on screen — no sudden loud noise (the low-arousal default; teacher's choice). No flashing; movement breaks are routine.",
       "resources": [
+        {
+          "title": "Sampling a sound wave — amplitude in binary against time.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-sampling-a-sound-wave-amplitude-in-binary-against-time.png"
+        },
+        {
+          "title": "A sound waveform.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l12-a-sound-waveform.png"
+        },
         {
           "title": "Representing sound — starter worksheet.md",
           "kind": "worksheet",
@@ -401,20 +415,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l12-representing-sound-slides.md"
-        },
-        {
-          "title": "Sampling a sound wave — amplitude in binary against time.png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l12-sampling-wave.png"
-        },
-        {
-          "title": "A sound waveform.png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l12-sound-waveform.png"
         }
       ]
     },
@@ -428,21 +428,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l13-sound-file-size-starter-worksheet.md"
+          "file": "l13-sound-file-size-calculation-starter-worksheet.md"
         },
         {
           "title": "Sound file size calculation — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l13-sound-file-size-activity-worksheet.md"
+          "file": "l13-sound-file-size-calculation-activity-worksheet.md"
         },
         {
           "title": "Sound file size calculation — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l13-sound-file-size-slides.md"
+          "file": "l13-sound-file-size-calculation-slides.md"
         }
       ]
     },
@@ -484,21 +484,21 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l15-lossy-lossless-compression-starter-worksheet.md"
+          "file": "l15-lossy-and-lossless-compression-starter-worksheet.md"
         },
         {
           "title": "Lossy and lossless compression — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l15-lossy-lossless-compression-activity-worksheet.md"
+          "file": "l15-lossy-and-lossless-compression-activity-worksheet.md"
         },
         {
           "title": "Lossy and lossless compression — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l15-lossy-lossless-compression-slides.md"
+          "file": "l15-lossy-and-lossless-compression-slides.md"
         }
       ]
     },
@@ -536,6 +536,13 @@
       "outline": "Routine first. Vocabulary on board: Huffman coding · Huffman tree · bit pattern · lossless · binary tree. TA: hand out both worksheets; read the four “I can…” aloud.\n1. (0–8) Starter — recap text file size (8 bits per ASCII character; a 5-character word = 40 bits); common letters get the shortest codes; Huffman is lossless.\n2. (8–24) I-do → we-do. Teacher explains Huffman gives common characters short patterns and rare ones longer patterns, then reads a tree (left = 0, right = 1) for MISSISSIPPI: S=0, I=10, M=110, P=111 (I do); class reads S and I off the table (we do). Note: English exams only require READING trees.\n3. (24–44) You-do — ORDER the Huffman steps; read bit patterns (which is shortest, the pattern for I, why S is shortest); calculate the original size (11×8 = 88 bits) and the compressed size (S×4 + I×4×2 + M×3 + P×2×3 = 21 bits) and the bits saved.\n   • Support: read patterns from the table (shortest, I, why S).  • Core: write M-I-S patterns + original 88-bit size.  • Challenge: the 21-bit compressed size + bits saved (67). Likely error: reading the path the wrong way — fix-words “start at the top, left is zero.” TA: prompt, do not do it for them.\n4. (42–50) Consolidate — why short codes for common letters shrink the file + photo of finished sheet.\n5. (50–55) Plenary — self-tick the four “I can…”; each pupil reads the bit pattern for M.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Huffman tree for MISSISSIPPI (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l17-huffman-tree-for-mississippi-teach-computing.png"
+        },
+        {
           "title": "Huffman coding — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -555,13 +562,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l17-huffman-coding-slides.md"
-        },
-        {
-          "title": "Huffman tree for MISSISSIPPI (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l17-huffman-tree.png"
         }
       ]
     },
@@ -575,7 +575,7 @@
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l18-end-of-unit-quiz-worksheet.md"
+          "file": "l18-data-representations-part-2-end-of-unit-quiz.md"
         },
         {
           "title": "Summative assessment — slides.md",

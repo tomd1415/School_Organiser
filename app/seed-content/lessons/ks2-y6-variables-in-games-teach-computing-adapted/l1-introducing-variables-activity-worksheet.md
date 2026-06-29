@@ -10,13 +10,13 @@ Today I will change a **score** variable in Scratch, and learn that a variable c
 ## The Score change project
 Open the **Score change** Scratch project. Clicking a ball changes the score. This is the Scratch editor:
 
-![The Scratch editor with blocks on the left and the stage on the right]({{res:l1-scratch-editor.png}})
+![The Scratch editor with blocks on the left and the stage on the right]({{res:l1-the-scratch-editor-teach-computing.png}})
 
 The score goes up or down with a **change score by** block. You can pick the number.
 
 | Change the score by 2 | Change the score by -2 |
 |---|---|
-| ![A change score by 2 block]({{res:l1-change-score-by-2.png}}) | ![A change score by minus 2 block]({{res:l1-change-score-by-neg2.png}}) |
+| ![A change score by 2 block]({{res:l1-a-change-score-by-2-block-teach-computing.png}}) | ![A change score by minus 2 block]({{res:l1-a-change-score-by-2-block-teach-computing.png}}) |
 
 ## 🟢 Support
 | Question | Choose |

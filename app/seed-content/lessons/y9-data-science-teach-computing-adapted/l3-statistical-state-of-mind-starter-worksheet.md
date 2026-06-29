@@ -7,7 +7,7 @@
 ## Starter — analyse the graph
 This graph shows life expectancy (how long people live) going up over time.
 
-![A graph of life expectancy rising over time, with positive correlation from 1949]({{res:l3-correlation-graph.png}})
+![A graph of life expectancy rising over time, with positive correlation from 1949]({{res:l3-life-expectancy-positive-correlation-graph-teach-computing.png}})
 
 When two things move together — here, as time goes on, life expectancy goes up — we call it a **correlation**.
 
@@ -16,7 +16,7 @@ When two things move together — here, as time goes on, life expectancy goes up
 | From 1949 onwards the line generally goes UP. This is a… | (  ) positive correlation (  ) negative correlation (  ) no correlation |
 
 ## This graph has some odd points
-![The same graph with sharp dips labelled 1871, 1918 and 1940]({{res:l3-outliers-graph.png}})
+![The same graph with sharp dips labelled 1871, 1918 and 1940]({{res:l3-life-expectancy-graph-with-outliers-teach-computing.png}})
 
 A point that is far away from the others is called an **outlier**.
 

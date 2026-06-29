@@ -10,7 +10,7 @@ Today I will read a graph and a table, and sort data to find the highest and low
 ## The cooling graph
 This graph shows the hot water cooling down over time. The temperature is on the side. The time is along the bottom.
 
-![A graph showing temperature falling over time]({{res:l4-cooling-graph.png}})
+![A graph showing temperature falling over time]({{res:l4-cooling-graph-temperature-over-time-teach-computing.png}})
 
 | Question | Choose |
 |---|---|
@@ -27,7 +27,7 @@ After 60 minutes the temperature was about [[ ]] °C.
 ## 🟡 Core
 The same data can be shown in a table. Each row is one reading.
 
-![The cooling data shown in a table]({{res:l4-data-table.png}})
+![The cooling data shown in a table]({{res:l4-cooling-data-in-a-table-teach-computing.png}})
 
 | Question | Choose |
 |---|---|
@@ -41,7 +41,7 @@ The same data can be shown in a table. Each row is one reading.
 ## Sorting to find answers
 In a spreadsheet you can SORT the data. Sorting puts the numbers in order, so the highest and lowest are easy to find.
 
-![A spreadsheet showing the sort menu]({{res:l4-sort-spreadsheet.png}})
+![A spreadsheet showing the sort menu]({{res:l4-sorting-data-in-a-spreadsheet-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

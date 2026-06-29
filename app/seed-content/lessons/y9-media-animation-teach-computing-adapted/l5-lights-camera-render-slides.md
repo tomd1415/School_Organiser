@@ -17,12 +17,12 @@ Use your earlier skills: add a cube, scale, extrude the lid, add materials.
 - **Sun** = lights everything evenly (daylight)
 - **Point** = shines all around (a bulb)
 
-![A night scene lit by a spotlight]({{res:l5-island-spotlight-night.png}})
+![A night scene lit by a spotlight]({{res:l5-island-lit-by-a-spotlight.png}})
 
 > 🧑‍🏫 Add a spot to the lighthouse, turn up the power, animate it spinning. Likely error: light too weak — fix-words "turn up the power."
 
 ## The camera and the rule of thirds  (we do)
-![A scene with a rule-of-thirds grid]({{res:l5-rule-of-thirds.png}})
+![A scene with a rule-of-thirds grid]({{res:l5-rule-of-thirds-grid.png}})
 
 Place your main object on a line, not in the dead centre.
 

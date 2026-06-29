@@ -26,9 +26,9 @@
 - Network **MAC addresses**.
 - Memory **dumps**.
 
-![A MAC address in hexadecimal]({{res:l7-mac-address-hex-teach-computing.png}})
+![A MAC address in hexadecimal]({{res:l7-mac-address-in-hexadecimal-teach-computing.png}})
 
-![A memory dump in hexadecimal]({{res:l7-hex-dump-teach-computing.png}})
+![A memory dump in hexadecimal]({{res:l7-hexadecimal-memory-dump-teach-computing.png}})
 
 > 🧑‍🏫 Real-world hook: these are everywhere in computing. Point out the A–F letters in the addresses.
 

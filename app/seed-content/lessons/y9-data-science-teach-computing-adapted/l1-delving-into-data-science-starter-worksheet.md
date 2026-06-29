@@ -7,7 +7,7 @@
 ## Starter — what story does this data tell?
 Look at this raw data. It is just rows of numbers and words.
 
-![Rows of raw data — hard to read on its own]({{res:l1-raw-data-table.png}})
+![Rows of raw data — hard to read on its own]({{res:l1-raw-data-table-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

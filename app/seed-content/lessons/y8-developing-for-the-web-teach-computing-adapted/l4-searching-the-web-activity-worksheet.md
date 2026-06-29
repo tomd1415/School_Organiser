@@ -10,7 +10,7 @@ Today I will explain how a search engine crawls and indexes the web, and what ma
 ## Crawlers follow links
 A web crawler (also called a spider) visits a page, records what it finds, then follows the links to the next page.
 
-![A web crawler following links from page to page]({{res:l4-web-crawler.png}})
+![A web crawler following links from page to page]({{res:l4-web-crawler-following-links-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|
@@ -48,7 +48,7 @@ Follow a link to the next page
 
 Now act like a crawler. Read this page's code.
 
-![An example web page the crawler is reading]({{res:l4-example-web-page.png}})
+![An example web page the crawler is reading]({{res:l4-example-web-page-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

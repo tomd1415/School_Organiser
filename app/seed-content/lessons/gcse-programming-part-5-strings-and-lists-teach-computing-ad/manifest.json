@@ -1,0 +1,324 @@
+{
+  "unitTitle": "GCSE Programming part 5 — strings and lists (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "GUIs — Tkinter and event-driven programming",
+      "objectives": "I can describe what a GUI and event-driven programming are\nI can build a Tkinter window with widgets\nI can make a button call a subroutine when clicked\nI can make an app that adds two numbers",
+      "outline": "Routine first (same every lesson). Vocabulary on board: GUI · widget · Tkinter · event loop · event-driven · procedural. TA: everyone has Python (Trinket or Mu) open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — procedural (runs line by line) vs event-driven (waits for a click). A GUI is event-driven (think–pair–share, no writing for Support — tick-boxes).\n   • Support: tick what GUI stands for / what an event-driven program waits for.  • Core: name one difference.  • Challenge: why a GUI needs an event loop.\n2. (5–15) I-do → we-do — Tkinter widgets (Label, Entry, Button). Add widgets BETWEEN tk.Tk() and app.mainloop(); mainloop() is ALWAYS last. Card-sort procedural vs event-driven.\n3. (15–45) You-do — pair programming (driver / navigator, swap every 5 mins): build the “Add two numbers” app; the Button calls an add subroutine.\n   • Support: order the add subroutine (Parson’s).  • Core: build the widgets + button.  • Challenge: the Joke machine with radio buttons. Likely error: button does nothing because command=add() has brackets (runs it immediately); fix-words “name the subroutine, no brackets.” TA: “prompt, do not do it for them.” They paste their link + a screenshot.\n4. (45–55) Plenary — self-tick the 4 “I can…”; recap procedural runs in order, event-driven waits for an event.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Add two numbers app (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-add-two-numbers-app-teach-computing.png"
+        },
+        {
+          "title": "Joke machine app (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-joke-machine-app-teach-computing.png"
+        },
+        {
+          "title": "GUIs — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-guis-starter-worksheet.md"
+        },
+        {
+          "title": "GUIs — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-guis-activity-worksheet.md"
+        },
+        {
+          "title": "GUIs — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-guis-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "String handling I — length, indexing and iterating",
+      "objectives": "I can find the length of a string with len()\nI can get a character using its index\nI can use a for loop to iterate over a string\nI can count matching characters in a string",
+      "outline": "Routine first. Vocabulary on board: string · string handling · concatenate · element · index. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict len(word) and word[0] for word = \"sheep\" (peer instruction). len = 5; word[0] = \"s\".\n   • Support: tick what len() / word[0] do.  • Core: write both outputs.  • Challenge: which index is the first \"e\".\n2. (5–15) I-do — indexing starts at 0; draw the boxes 0..5 under the word. len() counts characters (spaces too). Common slip: word[1] is NOT the first letter; fix-words “counting starts at zero.”\n3. (15–25) We-do — iterate over a string: for letter in word, count the matches (count_e example). Same loop as for x in range(...), but over a string.\n4. (25–48) You-do — pair programming (swap every 5 mins): change the count program to count a character the user types.\n   • Support: order the count loop (Parson’s).  • Core: count a user’s character.  • Challenge: a “guess the word” game using len() + the first letter. Likely error: case mismatch (\"E\" vs \"e\"); fix-words “check the letter is the same case.” TA: “prompt, do not do it for them.” They screenshot the program.\n5. (48–55) Plenary — self-tick the 4 “I can…”; recap len = how many, word[index] = one character, a for loop visits each character.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "String handling I — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-string-handling-i-starter-worksheet.md"
+        },
+        {
+          "title": "String handling I — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-string-handling-i-activity-worksheet.md"
+        },
+        {
+          "title": "String handling I — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-string-handling-i-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "String handling II — substrings, in and ASCII",
+      "objectives": "I can take a substring using slicing\nI can use the in operator to check for a substring\nI can use chr() and ord() for ASCII conversions\nI can build a program that uses substrings",
+      "outline": "Routine first. Vocabulary on board: string handling · substring · slice · concatenate · ASCII. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict word[1:4] for \"HELLO\" (peer instruction). Answer “ELL” — the slice stops BEFORE the last number, like range().\n   • Support: tick which indexes [1:4] includes.  • Core: write the output.  • Challenge: explain why the end isn’t included.\n2. (5–20) I-do → we-do — slicing word[1:3]; concatenation with + ; the in operator (\"12\" in username); ASCII with chr()/ord(). Draw index boxes. Common slip: expecting the end index to be included; fix-words “the last number is the stop, not the last letter.”\n3. (20–30) We-do — build the username 20SmithR from slices (startyear[0:2], firstname[0]) and concatenation.\n4. (30–50) You-do — pair programming (swap every 5 mins).\n   • Support: order the username program (Parson’s).  • Core: a year-group checker using if \"20\" in username:.  • Challenge: a secret-message decoder with chr(). Likely error: forgetting int() before chr(); fix-words “chr needs a number, so int() the input.” TA: “prompt, do not do it for them.” They screenshot the program.\n5. (50–55) Plenary — predict one slice and one in check; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "String handling II — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-string-handling-ii-starter-worksheet.md"
+        },
+        {
+          "title": "String handling II — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-string-handling-ii-activity-worksheet.md"
+        },
+        {
+          "title": "String handling II — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-string-handling-ii-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "String handling III — building a secure password",
+      "objectives": "I can plan the steps of a program in order\nI can join strings together (concatenation)\nI can use randomisation with chr() to make a random character\nI can build a secure password generator",
+      "outline": "Routine first. Vocabulary on board: ASCII · string handling · substring · concatenate · randomisation. TA: everyone has Python open. Read the 4 “I can…” aloud. This is a build — take your time.\n1. (0–5) Starter — predict chr(randint(65, 90)) (peer instruction). 65–90 are ASCII for A–Z, so it prints a random capital letter — the key trick for today.\n   • Support: tick what randint / chr do.  • Core: what chr(randint(65,90)) gives.  • Challenge: why random characters are hard to guess.\n2. (5–15) I-do — plan the program with the order task (ask 3 words → lower-case → join → loop letters → swap vowels → show). Big idea: don’t solve it all at once; build one step, test it, then the next.\n3. (15–25) We-do — join strings with + ; build a NEW string letter by letter; swap vowels with if letter in \"aeiou\". Likely error: trying to change a string in place; fix-words “make a new empty string and add to it.”\n4. (25–48) You-do — pair programming (swap every 5 mins).\n   • Support: order the replace-a-letter program (Parson’s).  • Core: join three words and lower-case them.  • Challenge: the full vowel-swapping password generator. TA: “prompt, do not do it for them.” Reassure: big build — “do your best, test as you go.” They screenshot the program.\n5. (48–55) Plenary — solve the key-word anagrams (concatenate / substring / element); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "String handling III — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-string-handling-iii-starter-worksheet.md"
+        },
+        {
+          "title": "String handling III — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-string-handling-iii-activity-worksheet.md"
+        },
+        {
+          "title": "String handling III — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-string-handling-iii-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Arrays and lists — Simon says, append and remove",
+      "objectives": "I can describe the difference between an array and a list\nI can create a list and get an item by its index\nI can append an item to a list\nI can remove an item from a list",
+      "outline": "Routine first. Vocabulary on board: list · array · index · append · remove · data structure. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict words[2] for a 4-item list (peer instruction). Answer is the THIRD item (counting from 0).\n   • Support: tick what a list holds / what words[0] is.  • Core: write the output.  • Challenge: which index is the last item.\n2. (5–18) I-do — a list holds many items under one name; indexes start at 0. A list is dynamic (can grow/shrink, mixed types); an array is static (fixed size, one type). Common slip: index 1 ≠ first item; fix-words “the first item is at zero.”\n3. (18–28) We-do — append adds to the END; remove takes out the first match. Card-sort: which facts are about an array, which about a list.\n4. (28–48) You-do — pair programming (swap every 5 mins).\n   • Support: order the Simon-says program (Parson’s).  • Core: a shopping-list program that adds an item.  • Challenge: ask “add or remove?” and do the right one. Likely error: remove an item that isn’t in the list → crash; fix-words “check it’s in the list first.” TA: “prompt, do not do it for them.” They screenshot the program.\n5. (48–55) Plenary — self-tick the 4 “I can…”; recap list = many items, one name, indexes from 0; append/remove change it.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Arrays and lists — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-arrays-and-lists-starter-worksheet.md"
+        },
+        {
+          "title": "Arrays and lists — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-arrays-and-lists-activity-worksheet.md"
+        },
+        {
+          "title": "Arrays and lists — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-arrays-and-lists-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "List methods — traversing and a deck of cards",
+      "objectives": "I can traverse a list with a for loop\nI can use list methods (append, sort, reverse, count)\nI can build a deck of cards with a nested loop\nI can write a function that returns a list",
+      "outline": "Routine first. Vocabulary on board: traverse · method · nested loop · custom-built function. TA: everyone has Python open. Real cards on tables help if you have them. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict a for loop over a 3-item list (peer instruction). Three lines printed — traversing a list is the SAME loop as traversing a string.\n   • Support: tick what the loop visits / what traverse means.  • Core: write the output.  • Challenge: why that makes lists easy.\n2. (5–15) I-do — a method belongs to the list (list.method()): append, remove, sort, reverse, count. Predict the output after each.\n3. (15–25) We-do — build a deck of cards (deck-of-cards image): 4 suits × 13 = 52 with a nested loop (a loop inside a loop). Likely error: x + suit crashes (number + text); fix-words “make the number a string first — str(x).”\n4. (25–48) You-do — pair programming (swap every 5 mins).\n   • Support: order the deck builder (Parson’s).  • Core: build the deck, check it prints 52.  • Challenge: a make_deck() function that RETURNS the deck. TA: “prompt, do not do it for them.” They screenshot the program.\n5. (48–55) Plenary — match each method to its description; self-tick the 4 “I can…”; recap methods use a dot, a nested loop makes patterns, a function can return a list.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Deck of cards (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-deck-of-cards-teach-computing.png"
+        },
+        {
+          "title": "List methods — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-list-methods-starter-worksheet.md"
+        },
+        {
+          "title": "List methods — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-list-methods-activity-worksheet.md"
+        },
+        {
+          "title": "List methods — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-list-methods-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Sense HAT I — lists and the LED matrix",
+      "objectives": "I can start a Sense HAT program and show a message\nI can use RGB values to make a colour\nI can use a list to light up the LED matrix\nI can make my own pixel character",
+      "outline": "Routine first. Vocabulary on board: Sense HAT · LED matrix · pixel · RGB · emulator. TA: everyone has the Sense HAT emulator (or a board) open. Read the 4 “I can…” aloud. Output is a small 8×8 LED grid — calm, no flashing animation.\n1. (0–5) Starter — recap array vs list; a Sense HAT LED matrix is an 8×8 grid (64 pixels) controlled with a list.\n   • Support: tick what an LED matrix / RGB are.  • Core: one difference between an array and a list.  • Challenge: 8×8 = 64 pixels.\n2. (5–18) I-do — show_message; colour is RGB (Red, Green, Blue), each 0–255: (255,0,0) red, (0,255,0) green, (0,0,255) blue. Store colours in variables.\n3. (18–28) We-do — a list of 64 colours sets all 64 pixels with set_pixels(); lay it out as 8 rows of 8 so the picture is visible (smiley example). Likely error: a comma after the last item, or the wrong number of items; fix-words “8 rows of 8 — count them.”\n4. (28–48) You-do — pair programming (swap every 5 mins).\n   • Support: order a coloured-message program (Parson’s).  • Core: show a message in green.  • Challenge: design your own 8×8 character. TA: “prompt, do not do it for them.” They screenshot the LED grid.\n5. (48–55) Plenary — self-tick the 4 “I can…”; recap RGB = three colour numbers, a list of 64 colours fills the grid.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Sense HAT I — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-sense-hat-i-starter-worksheet.md"
+        },
+        {
+          "title": "Sense HAT I — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-sense-hat-i-activity-worksheet.md"
+        },
+        {
+          "title": "Sense HAT I — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-sense-hat-i-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Sense HAT II — random pixels and a Magic 8-ball",
+      "objectives": "I can use choice() to pick a random item from a list\nI can append random items to build a list\nI can light the LED matrix with a random grid\nI can build a Magic 8-ball",
+      "outline": "Routine first. Vocabulary on board: choice · append · random · list · LED matrix. TA: emulator (or board) open. Read the 4 “I can…” aloud. Calm 8×8 output — no flashing.\n1. (0–5) Starter — predict choice(colours) (peer instruction). It picks ONE random item — could be any in the list.\n   • Support: tick what choice does / if it changes each run.  • Core: name one possible result.  • Challenge: why it’s simpler than randint + index.\n2. (5–15) I-do — choice(list) returns one random item; grid.append(colour) adds it. Use the order task to plan: colours → list → empty grid → pick+append in a loop → light it.\n3. (15–25) We-do — a for loop that appends a random colour 64 times builds the grid. Likely error: lighting with the wrong number of colours (not 64); fix-words “the grid needs exactly 64.”\n4. (25–48) You-do — pair programming (swap every 5 mins).\n   • Support: order a random colour pick (Parson’s).  • Core: append 64 random colours in a loop.  • Challenge: a Magic 8-ball with eight answers. TA: “prompt, do not do it for them.” They screenshot the program.\n5. (48–55) Plenary — short showcase (volunteers show their grid or 8-ball); self-tick the 4 “I can…”; recap choice = random pick, append = build a list.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Sense HAT II — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-sense-hat-ii-starter-worksheet.md"
+        },
+        {
+          "title": "Sense HAT II — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-sense-hat-ii-activity-worksheet.md"
+        },
+        {
+          "title": "Sense HAT II — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-sense-hat-ii-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "2D lists — rows, columns and a password manager",
+      "objectives": "I can describe what a 2D list is\nI can access a row and a single item with two indexes\nI can change and append items in a 2D list\nI can build a program that uses a 2D list",
+      "outline": "Routine first. Vocabulary on board: 2D list · 2D array · row · column · index. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict scores[1][2] for a 2-row 2D list (peer instruction). scores[1] is the row, [2] picks the item.\n   • Support: tick what a 2D list is / what scores[1] gives.  • Core: write the output.  • Challenge: which index comes first.\n2. (5–18) I-do — a 2D list is a list of lists; list[row][column] — row FIRST, then column; both start at 0. Draw the grid with row/column numbers. Common slip: column before row; fix-words “row first, then column.”\n3. (18–28) We-do — read animals[1][2]; change animals[0][2] = \"Plaice\"; append animals[0].append(\"Trout\") (2D-list code image). Use the fill-the-gaps + match-the-code tasks.\n4. (28–50) You-do — pair programming (swap every 5 mins).\n   • Support: order an access program (Parson’s).  • Core: change an item and print the 2D list.  • Challenge: a password manager (accounts / usernames / passwords) — the lookup is hard, support there. Reminder: do NOT use real passwords. TA: “prompt, do not do it for them.” They screenshot the program.\n5. (50–55) Plenary — predict one list[row][column] access; self-tick the 4 “I can…”; recap row first then column, you can change and append.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "2D list code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l9-2d-list-code-teach-computing.png"
+        },
+        {
+          "title": "2D lists — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-2d-lists-starter-worksheet.md"
+        },
+        {
+          "title": "2D lists — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-2d-lists-activity-worksheet.md"
+        },
+        {
+          "title": "2D lists — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-2d-lists-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "2D lists challenge — noughts and crosses (double lesson)",
+      "objectives": "I can decompose a problem using a structure chart\nI can use a 2D list to store a game board\nI can build and test a noughts and crosses game",
+      "outline": "Double lesson and a project — take your time. Routine first. Vocabulary on board: decomposition · structure chart · interface · iterative testing · final testing · 2D list. TA: learning partners; check in every 15 minutes. Read the 3 “I can…” aloud.\n1. (0–8) Starter — testing recap: iterative (test as you build) vs final (test at the end); match the words, then sort test data into normal / boundary / erroneous.\n   • Support: tick iterative vs final / what decomposition means.  • Core: why test as you go.  • Challenge: an example of erroneous data for a 1–9 position.\n2. (8–20) I-do — decompose the game into small subroutines (display board · instructions · read a position · move · check_win · play); a structure chart shows them (identifier · parameters · return). Use the order task to build a sensible order.\n3. (20–35) We-do — the board is a 2D list; display it with a procedure; place a piece by setting board[r][c]. Likely error: row/column the wrong way round; fix-words “row first, then column.”\n4. (35–95) Design → create → test (you do) — pair programming. Build one subroutine, test it, then the next.\n   • Support: order/complete the displayboard procedure (Parson’s).  • Core: place X and O pieces.  • Challenge: add winning lines to check_win, then play + validation. Assess with the rubric (instructions, places a piece, displays, switches players, plays to a win, announces the winner, validation). TA: “prompt, do not do it for them.” They screenshot the working game.\n5. (95–110) Plenary + unit quiz — self-tick the 3 “I can…”, then the Strings and lists unit quiz (key-word matching, string slicing fill-blank, list-methods multi-select, 2D-index fill-blank, write code, confidence slider) — the unit’s final assessment, in place of the TCC noughts-and-crosses rubric/summative.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "2D lists challenge — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-2d-lists-challenge-starter-worksheet.md"
+        },
+        {
+          "title": "2D lists challenge — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-2d-lists-challenge-activity-worksheet.md"
+        },
+        {
+          "title": "2D lists challenge — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-2d-lists-challenge-slides.md"
+        },
+        {
+          "title": "Strings and lists unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-strings-and-lists-unit-quiz-worksheet.md"
+        }
+      ]
+    }
+  ]
+}

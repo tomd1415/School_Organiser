@@ -1,0 +1,296 @@
+{
+  "unitTitle": "Y9 Introduction to cybersecurity (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "You and your data",
+      "objectives": "I can explain the difference between data and information\nI can work out what a company can learn about you from your data\nI can describe what happens to data you enter online\nI can explain why we need the Data Protection Act",
+      "outline": "Routine first (same every lesson). Vocabulary on board: data · information · profiling · privacy policy · Data Protection Act · cybercriminal. TA: hand out the starter worksheet, then the activity worksheet. Read the four “I can…” aloud.\n1. (0–5) Starter — “Under attack”. Show the live cyber threat map on the board. Pupils CHOOSE on the starter worksheet why attackers do this (no writing). Land the point: attackers are after DATA.\n2. (5–10) I-do → we-do — data vs information. Teacher gives the two definitions with an example (I do); class matches each word to its meaning on the worksheet (we do).\n   • Support: match the two words to their meanings.  • Core: write what turns data into information.  • Challenge: give your own example of data becoming information. Likely error: thinks data and information are the same → fix-words “information is data that has MEANING.”\n3. (10–25) You-do — the customer profile (Activity 1). A shopping basket (tent, dog toys, fitness tracker). Pupils TICK what the shop should recommend, then choose three fair assumptions.\n   • Support: tick from a list.  • Core: tick + say why.  • Challenge: name one assumption that would NOT be fair. TA: “prompt, do not decide for them.”\n4. (25–40) You-do — categorise the data (Activity 2). A drag-and-drop card sort: sort items a social media app collects into Personal information / Content you post / User behaviour / Data about others.\n5. (40–50) Data Protection Act + exit ticket. Teacher explains the DPA keeps your data safe and used responsibly; pupils answer the exit-ticket questions (name three data items; one risk to you; one risk to the company).\n6. (50–55) Plenary — self-tick the four “I can…”. TA notes who met all four.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; the threat map is shown as a still image. Keep it cohort-level — talk about “a customer / a user”, never an individual pupil.",
+      "resources": [
+        {
+          "title": "live cyber threat map (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-live-cyber-threat-map-teach-computing.png"
+        },
+        {
+          "title": "You and your data — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-you-and-your-data-starter-worksheet.md"
+        },
+        {
+          "title": "You and your data — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-you-and-your-data-activity-worksheet.md"
+        },
+        {
+          "title": "You and your data — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-you-and-your-data-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Social engineering",
+      "objectives": "I can explain what social engineering is\nI can spot the signs of a phishing or blagging message\nI can name common social engineering tricks\nI can give advice to keep data safe from human error",
+      "outline": "Routine first. Vocabulary on board: social engineering · phishing · blagging · shouldering · name generator attack · scam. TA: hand out the starter worksheet then the activity worksheet. Read the four “I can…” aloud.\n1. (0–8) Starter — name generator attack. Show the “Which rock star are you?” quiz idea. Pupils CHOOSE on the worksheet why a fun quiz can be risky (it asks the same things as security questions). Reassure: nothing was really stored.\n2. (8–20) I-do → we-do — the tricks. Teacher defines each trick with the slide example (I do); class matches each trick to its meaning on the worksheet (we do): social engineering, phishing, blagging, shouldering, name generator attack.\n   • Support: match trick to meaning.  • Core: write what shouldering is and one way to stop it.  • Challenge: explain why a name generator quiz is so dangerous. Likely error: muddles phishing and blagging → fix-words “phishing = a fake MESSAGE with a link; blagging = a made-up STORY to win your trust.”\n3. (20–38) You-do — spot the phishing signs (multi-select: tick ALL the warning signs in a message) + write three pieces of advice (card sort the advice by trick).\n   • Support: tick the signs from a list.  • Core: tick + give two pieces of advice.  • Challenge: write a short warning notice for customers. TA: “prompt, do not do it for them.”\n4. (38–52) Protect your customers. Pupils act as a bank’s cyber-team and give three ways to spot a scam message (shared task; cohort-level — never about a real person).\n5. (52–55) Plenary — the four-question quiz (which attack is the email? what is the giveaway?). Self-tick the four “I can…”.\nDifferentiation on the SAME task. Keep ALL social-engineering content cohort-level — talk about “a user / a customer”, never name or describe an individual pupil. No flashing/sound; the comedy clip is an optional teacher-played hook (external link, not embedded).",
+      "resources": [
+        {
+          "title": "name generator quiz (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-name-generator-quiz-teach-computing.png"
+        },
+        {
+          "title": "Social engineering — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-social-engineering-starter-worksheet.md"
+        },
+        {
+          "title": "Social engineering — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-social-engineering-activity-worksheet.md"
+        },
+        {
+          "title": "Social engineering — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-social-engineering-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Script kiddies — hacking, DDoS & the law",
+      "objectives": "I can define hacking in cybersecurity\nI can explain how a DDoS attack affects users of a service\nI can name ways to make a brute force attack less likely to work\nI can explain why we need the Computer Misuse Act (1990)",
+      "outline": "Routine first. Vocabulary on board: hacking · unauthorised · ethical hacking · penetration tester · brute force · DoS · DDoS · Computer Misuse Act (1990). TA: hand out the starter worksheet then the activity worksheet. Read the four “I can…” aloud.\n1. (0–10) Starter — define hacking. Show the “hack George’s account” idea (cohort scenario, a made-up character). Pupils CHOOSE the best definition of hacking and discuss whether it was ethical.\n   • Support: choose the definition.  • Core: write what “unauthorised” means.  • Challenge: give an argument for AND against it being ethical. Likely error: thinks all hacking is illegal → fix-words “hacking is gaining access WITHOUT permission; ethical hackers have permission.”\n2. (10–22) I-do → we-do — DDoS. Teacher models the paper-ball demo (one client vs many) (I do); class puts the steps of a DDoS in order on the worksheet (we do). Show the DDoS attack card.\n3. (22–38) You-do — brute force & strong passwords. Card sort: sort passwords into Weak / Strong. Then choose the rules that make a brute force attack less likely.\n   • Support: sort + tick the rules.  • Core: say why length and mixing characters help.  • Challenge: write a password rule a company should set. TA: “prompt, do not give the answer.”\n4. (38–50) The Computer Misuse Act (1990). Match each action to the section of the law it breaks (or “does not break”).\n5. (50–55) Plenary — self-tick the four “I can…”; one-line “why do we need this law?”\nNote: keep the “George” starter strictly as a fictional scenario; never reframe it onto a real pupil. No flashing/sound.",
+      "resources": [
+        {
+          "title": "DDoS attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-ddos-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "brute force attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-brute-force-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "hacking attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-hacking-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "Script kiddies — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-script-kiddies-starter-worksheet.md"
+        },
+        {
+          "title": "Script kiddies — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-script-kiddies-activity-worksheet.md"
+        },
+        {
+          "title": "Script kiddies — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-script-kiddies-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Rise of the bots — malware",
+      "objectives": "I can list the common types of malware\nI can match each type of malware to what it does\nI can explain how a virus, worm and trojan are different\nI can explain how malicious bots can affect society",
+      "outline": "Routine first. Vocabulary on board: malware · malicious · virus · worm · trojan · ransomware · spyware · adware · bot · botnet. TA: hand out the starter worksheet then the activity worksheet. Read the four “I can…” aloud.\n1. (0–5) Starter — ransomware scenario. Show the (pretend) ransom message: “your files are locked, pay to unlock”. Pupils CHOOSE what they would do and meet the word ‘malware’. Land the point: malware = malicious software.\n2. (5–18) I-do → we-do — the malware family. Teacher names each type with its attack card (I do); class matches each type to what it does on the worksheet (we do): virus, worm, trojan, ransomware, spyware, adware.\n   • Support: match type to meaning.  • Core: write how a worm is different from a virus.  • Challenge: explain why a trojan tricks the user. Likely error: thinks every type damages files → fix-words “a worm copies itself and clogs the system; it does NOT damage files.”\n3. (18–35) You-do — sort + select. Card sort: sort malware into ‘Self-replicates’ / ‘Does NOT self-replicate’. Multi-select: tick ALL the items that are malware (some are protections, not malware).\n   • Support: sort + tick.  • Core: add one fact per type.  • Challenge: pick one type and describe a real-world example. TA: “prompt, do not do it for them.”\n4. (35–50) Bots & society. Short read: thousands of automated accounts posting during an election. Pupils CHOOSE the possible consequences (cohort discussion).\n5. (50–55) Plenary — self-tick the four “I can…”.\nNo flashing/sound; the ransomware scene is a still image only. Differentiation on the SAME task.",
+      "resources": [
+        {
+          "title": "virus attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-virus-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "ransomware attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-ransomware-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "spyware attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-spyware-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "adware attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-adware-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "Rise of the bots — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-rise-of-the-bots-starter-worksheet.md"
+        },
+        {
+          "title": "Rise of the bots — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-rise-of-the-bots-activity-worksheet.md"
+        },
+        {
+          "title": "Rise of the bots — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-rise-of-the-bots-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "There’s no place like 127.0.0.1 — protecting a network",
+      "objectives": "I can compare threats by how likely they are and how much harm they cause\nI can name ways a network is protected from attacks\nI can match a threat to a protection that stops it\nI can choose the most important protection for a school network",
+      "outline": "Routine first. Vocabulary on board: risk · impact · probability · firewall · anti-malware · two-factor authentication (2FA) · CAPTCHA · backups · end-user authentication. TA: hand out the starter worksheet then the activity worksheet. Read the four “I can…” aloud.\n1. (0–8) Starter — retrieval quiz. Three multiple-choice questions recapping the unit (data, social engineering, DDoS). Pupils CHOOSE the answer; teacher reveals and clears up misconceptions.\n2. (8–18) Cyberthreats are everywhere. Show the live cyber threat map (still image). Pupils CHOOSE which industries are most targeted and why (cohort discussion).\n3. (18–32) I-do → we-do — protections. Teacher names each protection with its card (I do); class matches each protection to the threat it stops (we do): firewall, anti-malware, 2FA, CAPTCHA.\n   • Support: match protection to threat.  • Core: say what a firewall does.  • Challenge: explain why 2FA helps even if a password is stolen. Likely error: thinks one protection stops everything → fix-words “different attacks need different protections — layer them up.”\n4. (32–48) You-do — risk vs impact. Card sort the threats into ‘High impact’ / ‘Lower impact’, then choose the biggest danger to a school network and one protection for it (homework starter).\n   • Support: sort + tick.  • Core: justify one placement.  • Challenge: rank three threats. TA: “prompt, do not decide for them.”\n5. (48–55) Plenary — self-tick the four “I can…”; rate your confidence.\nNo flashing/sound; the threat map is a still image. Differentiation on the SAME task.",
+      "resources": [
+        {
+          "title": "firewall protection card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-firewall-protection-card-teach-computing.jpg"
+        },
+        {
+          "title": "anti-malware protection card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-anti-malware-protection-card-teach-computing.jpg"
+        },
+        {
+          "title": "two-factor authentication card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-two-factor-authentication-card-teach-computing.jpg"
+        },
+        {
+          "title": "CAPTCHA protection card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-captcha-protection-card-teach-computing.jpg"
+        },
+        {
+          "title": "live cyber threat map (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-live-cyber-threat-map-teach-computing.png"
+        },
+        {
+          "title": "Protecting a network — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-protecting-a-network-starter-worksheet.md"
+        },
+        {
+          "title": "Protecting a network — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-protecting-a-network-activity-worksheet.md"
+        },
+        {
+          "title": "Protecting a network — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-protecting-a-network-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Under attack — defend the network",
+      "objectives": "I can recall the main ways to protect against cyberattacks\nI can match an incident to the type of attack it is\nI can choose the protection that would stop each attack\nI can pick the protections that stop the most attacks",
+      "outline": "Routine first. Vocabulary on board: blagging · ransomware · DDoS · brute force · virus · spyware · adware · hacking · firewall · 2FA · backups · CAPTCHA · ISP · anti-malware. TA: hand out the starter worksheet then the activity worksheet. Read the four “I can…” aloud.\n1. (0–10) Starter — recall the protections. In pairs, pupils list every protection they can remember, then CHOOSE which one they think stops the most attacks. Show the protection cards to prompt.\n2. (10–40) Under Attack game (adapted). Pupils are the network managers of an online shop on a tight budget. For each incident card they MATCH it to the attack type, then CHOOSE the protection that would stop it. (Use the activity worksheet table; play in small groups.)\n   • Support: match incident → attack from a list.  • Core: match + name the protection.  • Challenge: justify the cheapest protection that still works. TA: “prompt the reasoning, do not award the answer.”\n3. (40–50) Reflect — which two protections stopped the most attacks? (2FA and anti-malware in the scenarios). Card sort: sort the items into ‘Attack’ / ‘Protection’.\n4. (50–55) Plenary — self-tick the four “I can…”; rate your confidence across the unit. Optional explorer: careers in cybersecurity (external link, teacher-shown).\nThis is the unit review before the summative assessment. Keep every scenario cohort-level (a company / a user), never a real pupil. No flashing/sound.",
+      "resources": [
+        {
+          "title": "ransomware attack card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-ransomware-attack-card-teach-computing.jpg"
+        },
+        {
+          "title": "firewall protection card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-firewall-protection-card-teach-computing.jpg"
+        },
+        {
+          "title": "two-factor authentication card (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-two-factor-authentication-card-teach-computing.jpg"
+        },
+        {
+          "title": "Under attack — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-under-attack-starter-worksheet.md"
+        },
+        {
+          "title": "Under attack — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-under-attack-activity-worksheet.md"
+        },
+        {
+          "title": "Under attack — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-under-attack-slides.md"
+        }
+      ]
+    }
+  ]
+}

@@ -78,6 +78,7 @@ export const paths = {
   boardView: (gc: number | null, lp: number, level: string, oc?: number): string =>
     `/lesson/pupil-view?${scopeQ(gc)}&amp;lp=${lp}&amp;level=${level}` + (oc ? `&amp;oc=${oc}` : ''),
   worksheetPreview: (gc: number, lp: number, level: string): string => `/lesson/worksheet-preview?gc=${gc}&amp;lp=${lp}&amp;level=${level}`,
+  worksheetModal: (gc: number, lp: number, level = 'core'): string => `/lesson/worksheet-modal?gc=${gc}&amp;lp=${lp}&amp;level=${level}`,
   imageTodo: (oc: number, gc: number, lp: number): string => `/lesson/oc/${oc}/image-todo?gc=${gc}&amp;lp=${lp}`,
   lessonPreview: (plan: number): string => `/lesson/preview?plan=${plan}`,
 
@@ -145,6 +146,7 @@ export const paths = {
   schemes: (): string => '/schemes',
   settings: (): string => '/settings',
   timetable: (): string => '/timetable',
+  timetableClassAway: (): string => '/timetable/class-away',
   tasks: (): string => '/tasks',
   tasksFiltered: (view: string): string => `/tasks?view=${view}`,
   captured: (): string => '/captured',
@@ -171,6 +173,8 @@ export const paths = {
   // ── Now screen ──────────────────────────────────────────────────────────────────────────────────
   nowClock: (sig: string): string => `/now/clock?sig=${encodeURIComponent(sig)}`,
   nowTimeline: (): string => '/now/timeline',
+  nowCurrent: (sig: string): string => `/now/current?sig=${encodeURIComponent(sig)}`,
+  nowInboxQueue: (): string => '/now/inbox-queue',
   settingsExperience: (): string => '/settings/experience',
   settingsExperienceNudgeDismiss: (): string => '/settings/experience-nudge/dismiss',
 
@@ -247,6 +251,10 @@ export const paths = {
   // ── Marking (occurrence-course / per-pupil mark modal) ──────────────────────────────────────────
   occMark: (oc: number): string => `/lesson/oc/${oc}/mark`,
   occAtl: (oc: number): string => `/lesson/oc/${oc}/atl`,
+  // ── Attendance register (Phase 17) ──────────────────────────────────────────────────────────────
+  occAttendance: (oc: number): string => `/lesson/oc/${oc}/attendance`,
+  occAttendanceAllPresent: (oc: number): string => `/lesson/oc/${oc}/attendance/all-present`,
+  occPupilAttendance: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/attendance`,
   occPupilMark: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark`,
   occPupilMarkWs: (oc: number, pid: number, ws: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark?ws=${ws}`,
   occPupilMarkSave: (oc: number, pid: number): string => `/lesson/oc/${oc}/pupil/${pid}/mark/save`,

@@ -39,7 +39,7 @@ A variable is like a labelled drawer. A good label tells you what is inside. A g
 ## Make and change a variable in Scratch
 Open the **Scoreboard** project. You will make a score and change it when a flag is clicked.
 
-![A Scratch scoreboard with the USA and Japan flags]({{res:l2-scoreboard.png}})
+![A Scratch scoreboard with the USA and Japan flags]({{res:l2-a-scratch-scoreboard-with-two-flags-teach-computing.png}})
 
 Put these Scratch blocks in the right order to make a score go up when the sprite is clicked.
 
@@ -52,7 +52,7 @@ change Score_A by 1
 Drag the labels onto the two variables you can see in this game.
 
 ```label
-image: {{res:l2-score-timer.png}}
+image: {{res:l2-a-scratch-game-with-a-score-and-a-timer-teach-computing.png}}
 score (13%, 11%): the score variable
 timer (87%, 11%): the timer variable
 ```

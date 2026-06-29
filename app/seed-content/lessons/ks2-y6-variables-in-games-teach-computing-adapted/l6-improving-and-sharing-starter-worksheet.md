@@ -10,7 +10,7 @@ Today I will make my game better, add a **lives** variable, and share my game.
 ## Are all games the same?
 Lots of people make catching games, and they are all a bit different. Here are four versions made by different people.
 
-![Four different fruit catcher games made by different people]({{res:l6-fruit-catcher-remixes.png}})
+![Four different fruit catcher games made by different people]({{res:l6-four-different-fruit-catcher-games-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

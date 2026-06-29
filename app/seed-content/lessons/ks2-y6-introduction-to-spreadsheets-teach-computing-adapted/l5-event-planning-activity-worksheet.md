@@ -13,7 +13,7 @@ Your spreadsheet already has headings. You enter your choices, then use formulas
 - the **total budget** is: attendees × budget per person
 - the **party cost per person** is: total party cost ÷ attendees
 
-![A completed party spreadsheet with a chart]({{res:l5-party-chart.png}})
+![A completed party spreadsheet with a chart]({{res:l5-a-completed-party-spreadsheet-with-a-chart-teach-computing.png}})
 
 ## Match the calculation
 Match each total to the right formula. Use the same choices each time.

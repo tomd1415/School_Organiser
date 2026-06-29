@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: game · sprite · forever loop · modify (change) · re-use.
 
 ## The shark game
-![The shark game]({{res:l4-shark-game.png}})
+![The shark game]({{res:l4-shark-game-on-the-stage-teach-computing.png}})
 
 - each shark is a **sprite**
 - a forever loop keeps it swimming

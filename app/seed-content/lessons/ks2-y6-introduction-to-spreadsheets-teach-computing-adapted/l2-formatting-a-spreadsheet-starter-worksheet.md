@@ -10,13 +10,13 @@ Today I will learn the parts of a spreadsheet and how to point to a box.
 ## Every box is a cell
 Each box in a spreadsheet is called a **cell**. Each cell has a **cell reference** — its address. The letters along the top name the columns. The numbers down the side name the rows. So the top-left cell is **A1**.
 
-![A spreadsheet toolbar]({{res:l2-toolbar.png}})
+![A spreadsheet toolbar]({{res:l2-a-spreadsheet-toolbar-teach-computing.png}})
 
 ## Label the spreadsheet
 Drag each label onto the right part of the grid.
 
 ```label
-image: {{res:l2-cell-grid.png}}
+image: {{res:l2-a-spreadsheet-cell-grid-teach-computing.png}}
 columns (20%, 6%): column letter
 rows (3%, 30%): row number
 a1 (20%, 14%): cell A1

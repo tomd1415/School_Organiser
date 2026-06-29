@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: logo · header · layout · media · purpose · audience. Recap: a website is a set of pages; a web page is one page.
 
 ## A web designer
-![A web designer at work]({{res:l2-web-designer.png}})
+![A web designer at work]({{res:l2-a-web-designer-at-work-teach-computing.png}})
 
 - a web designer plans and builds web pages
 - first they think about the PURPOSE and the AUDIENCE
@@ -16,7 +16,7 @@
 > 🧑‍🏫 You are all web designers this unit. Purpose = why. Audience = who for. Likely mix-up: purpose vs audience. Fix-words: "purpose is WHY, audience is WHO."
 
 ## Who is it for?
-![A web page about dogs]({{res:l2-dogs-page.png}})
+![A web page about dogs]({{res:l2-a-web-page-for-children-all-about-dogs-teach-computing.png}})
 
 - big text + cartoons → made for children
 - formal words + "your children" → made for parents
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Show the three example pages. Pupils guess the audience from the words and pictures, then match them on the worksheet. Draw out: the words and pictures give it away.
 
 ## The features of a web page
-![Google Sites — headers and layouts]({{res:l2-google-sites.png}})
+![Google Sites — headers and layouts]({{res:l2-google-sites-headers-and-layouts-teach-computing.png}})
 
 - logo (top corner) · header (title band) · layouts (boxes) · media
 - Google Sites is the tool we will build in

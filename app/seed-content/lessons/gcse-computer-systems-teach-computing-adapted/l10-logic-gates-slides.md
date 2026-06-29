@@ -14,14 +14,14 @@
 > 🧑‍🏫 Retrieval from Part 1. Self- or peer-marked. End on the big question: "Why do computers use binary?" → links to gates being on/off switches.
 
 ## Where the logic came from — Boole
-![George Boole, who turned logic into maths]({{res:l10-george-boole.png}})
+![George Boole, who turned logic into maths]({{res:l10-george-boole-who-turned-logic-into-maths-teach-computing.png}})
 - George Boole said any fact is either TRUE or FALSE
 - combine true/false facts and you can reason and decide
 
 > 🧑‍🏫 That is why we say "Boolean". Example: cats are animals (true), animals need water (true) → cats need water. True/False = 1/0.
 
 ## Claude Shannon — logic in circuits
-![Claude Shannon, who linked logic to electronic switches]({{res:l10-claude-shannon.png}})
+![Claude Shannon, who linked logic to electronic switches]({{res:l10-claude-shannon-who-linked-logic-to-electronic-switches-teach-computing.png}})
 - Shannon linked Boole's logic to electronic switches (1937)
 - a switch is on (1) or off (0) — just like a logic gate
 
@@ -36,7 +36,7 @@ This is what each one looks like:
 
 | AND | OR | NOT |
 |---|---|---|
-| ![AND gate symbol]({{res:l10-gate-and.png}}) | ![OR gate symbol]({{res:l10-gate-or.png}}) | ![NOT gate symbol]({{res:l10-gate-not.png}}) |
+| ![AND gate symbol]({{res:l10-and-gate-symbol-teach-computing.png}}) | ![OR gate symbol]({{res:l10-or-gate-symbol-teach-computing.png}}) | ![NOT gate symbol]({{res:l10-not-gate-symbol-teach-computing.png}}) |
 
 > 🧑‍🏫 I-do each gate with its symbol and an everyday example. AND and OR have a flat vs curved back; NOT is a triangle with a small circle. Likely error OR vs AND → fix-words "AND needs BOTH; OR needs at least one." Pupils have the gate symbols on their worksheet too.
 

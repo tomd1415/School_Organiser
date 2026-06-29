@@ -19,7 +19,7 @@ Ethical questions are about right and wrong. They often use the word "should".
 > 🧑‍🏫 Example overlap: keeping data secure is both ethical AND privacy. Draw the link out loud.
 
 ## AI and driverless cars
-![A Moral Machine dilemma: a driverless car with no brakes must choose who is hurt]({{res:l7-moral-machine-dilemma-teach-computing.png}})
+![A Moral Machine dilemma: a driverless car with no brakes must choose who is hurt]({{res:l7-moral-machine-driverless-car-dilemma-teach-computing.png}})
 
 The Moral Machine project studies how a car should "choose" in a no-win crash.
 

@@ -22,7 +22,7 @@
 > 🧑‍🏫 Keep it concrete: a team has ONE score at any moment. When they score, the new score replaces the old one.
 
 ## Changing the score in Scratch
-![A change score by 2 block]({{res:l1-change-score-by-2.png}})
+![A change score by 2 block]({{res:l1-a-change-score-by-2-block-teach-computing.png}})
 
 - the **change score by** block changes the score
 - a positive number makes it go up (by 2)
@@ -31,7 +31,7 @@
 > 🧑‍🏫 Demonstrate clicking the balls in the Score change project. Support choose what each block does. Challenge: what does -2 do?
 
 ## Make your own variable
-![The Scratch editor]({{res:l1-scratch-editor.png}})
+![The Scratch editor]({{res:l1-the-scratch-editor-teach-computing.png}})
 
 - click **Variables** → **Make a Variable**
 - type a clear name, like Score

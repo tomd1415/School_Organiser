@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: input device · sensor · data logger. Same routine as every lesson.
 
 ## Senses and sensors
-![A microphone]({{res:l2-microphone.png}})
+![A microphone]({{res:l2-a-microphone-teach-computing.png}})
 
 - people use senses: ears for sound, eyes for light
 - a computer uses SENSORS
@@ -18,7 +18,7 @@
 > 🧑‍🏫 A sensor is an INPUT — data going into the computer. Keep it concrete: the mic "hears" how loud the room is.
 
 ## The data logger
-![A data logger with three sensors]({{res:l2-data-logger.png}})
+![A data logger with three sensors]({{res:l2-data-logger-with-sensors-teach-computing.png}})
 
 - it has a SOUND sensor, a LIGHT sensor and a TEMPERATURE sensor
 - the screen shows the readings
@@ -34,7 +34,7 @@
 > 🧑‍🏫 On the screen image: 40.0 dBA, 24 lx, 22.4 °C. Likely error: mixing up the units. Fix-words: "dBA = sound, lx = light, °C = temperature."
 
 ## Collecting on its own
-![Readings on the EasySense screen]({{res:l2-easysense-live.png}})
+![Readings on the EasySense screen]({{res:l2-easysense-live-readings-teach-computing.png}})
 
 - the logger can record readings automatically
 - it can be left on its own

@@ -10,7 +10,7 @@ Today I will design a Space race project and write an algorithm.
 ## Our project — a Space race
 Three rockets will race. Today we plan it. We make it in ScratchJr next lesson.
 
-![Three rockets on the moon, ready to race]({{res:l5-space-race.jpg}})
+![Three rockets on the moon, ready to race]({{res:l5-three-rockets-a-space-race-teach-computing.jpg}})
 
 An **algorithm** is a precise set of instructions in the right order.
 

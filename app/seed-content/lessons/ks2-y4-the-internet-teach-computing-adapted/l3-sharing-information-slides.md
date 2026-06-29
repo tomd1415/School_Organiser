@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the "I can…" aloud. Vocabulary on the board: media · server · data centre · web browser. Same routine as every lesson.
 
 ## What can we share on the web?
-![Lots of media that can be shared]({{res:l3-media-collage.png}})
+![Lots of media that can be shared]({{res:l3-media-that-can-be-shared-online-teach-computing.png}})
 
 - we can share **media**: pictures, videos, text, sounds
 - we cannot share real, physical things (a sandwich, a pet)
@@ -16,7 +16,7 @@
 > 🧑‍🏫 Starter `sort`: can-share vs cannot-share. Fix-words for the tricky one: "a PHOTO of the dog can be shared, the real dog cannot."
 
 ## Where are websites stored?
-![A data centre full of servers]({{res:l3-data-centre.png}})
+![A data centre full of servers]({{res:l3-a-data-centre-full-of-servers-teach-computing.png}})
 
 - a website is stored on a **server**
 - many servers live in a big building — a **data centre**
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Concrete: when you open a website, you are getting it from a server in a data centre somewhere in the world. Point, do not animate.
 
 ## How do we get to a website?
-![Some web browsers]({{res:l3-browsers.png}})
+![Some web browsers]({{res:l3-some-web-browsers-teach-computing.png}})
 
 - we use a **web browser** to open websites
 - a browser runs on a computer, tablet, phone or console

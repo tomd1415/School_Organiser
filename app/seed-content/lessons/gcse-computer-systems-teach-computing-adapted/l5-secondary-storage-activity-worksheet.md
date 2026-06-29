@@ -10,9 +10,9 @@ Today I will name the three types of secondary storage and describe how solid-st
 ## The three types of secondary storage
 Secondary storage keeps your files when the power is off. There are three types: SOLID STATE, OPTICAL and MAGNETIC.
 
-![A solid-state storage chip]({{res:l5-solid-state.png}})
-![A hard disk drive]({{res:l5-hard-drive.png}})
-![An optical disc]({{res:l5-optical-disc.png}})
+![A solid-state storage chip]({{res:l5-solid-state-storage-chip-teach-computing.png}})
+![A hard disk drive]({{res:l5-a-hard-disk-drive-teach-computing.png}})
+![An optical disc]({{res:l5-an-optical-disc-teach-computing.png}})
 
 ## Sort the devices
 Drag each storage device into the right type.

@@ -97,6 +97,7 @@ Read in this order:
 | [docs/MORE_IDEAS.md](docs/MORE_IDEAS.md) | **Largely built.** Phase 11 — the teacher's idea backlog, sequenced: standing style/feature prefs, a teaching-concepts library and guided cohort-access prompts (all on the existing `context[]` seam), a spec-point coverage backbone + uploaded official course docs, per-feature model choice + an opt-in Opus reviewer, and a calmer nav (daily-vs-setup split, one typed nav model, swappable themes). Single-teacher only. |
 | [docs/PHASE_MULTI_TEACHER_PLAN.md](docs/PHASE_MULTI_TEACHER_PLAN.md) | **Unnumbered / parked** future v2: one shared school server, multiple teacher accounts, one account per pupil, opt-in cross-subject planning signal. Not started — gated on the single-teacher tool being proven and a fresh whole-school DPIA. |
 | [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions still needed from the teacher (you). |
+| [docs/LESSON_BUNDLE_TRANSFER.md](docs/LESSON_BUNDLE_TRANSFER.md) | Agent runbook for copying **master lessons** between instances (export → bundle → `seed:lessons`), incl. over the internet via git. Bundles not a DB copy; `--new-only` on a populated instance. |
 
 ## Run it
 

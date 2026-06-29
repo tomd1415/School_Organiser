@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: data set · organised · formula · subtotal · total · budget. Recap: SUM and duplicating formulas from last lesson.
 
 ## Starter — plan a party
-![A party planning spreadsheet]({{res:l5-party-table.png}})
+![A party planning spreadsheet]({{res:l5-a-party-planning-spreadsheet-teach-computing.png}})
 
 - we will plan a class party (for practice only)
 - a spreadsheet keeps every choice and cost organised
@@ -23,7 +23,7 @@
 > 🧑‍🏫 Pupils tick what a spreadsheet helps with on the starter. Support pupils choose why we organise data.
 
 ## Working out the costs
-![A completed party spreadsheet with a chart]({{res:l5-party-chart.png}})
+![A completed party spreadsheet with a chart]({{res:l5-a-completed-party-spreadsheet-with-a-chart-teach-computing.png}})
 
 - subtotal = cost × quantity
 - total budget = attendees × budget per person

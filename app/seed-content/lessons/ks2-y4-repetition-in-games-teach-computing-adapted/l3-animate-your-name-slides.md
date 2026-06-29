@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: animation · costume · sprite · loop · at the same time · evaluate.
 
 ## What is an animation?
-![An animated name on the stage]({{res:l3-animate-name-stage.png}})
+![An animated name on the stage]({{res:l3-animated-name-on-the-stage-teach-computing.png}})
 
 - an animation changes the look again and again
 - a **loop** makes it repeat
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Starter. Show the animated name. Ask: what is repeating? (the look of each letter). Keep it calm — no fast flashing on the board.
 
 ## The blocks I will use
-![Looks blocks]({{res:l3-scratch-looks.png}})
+![Looks blocks]({{res:l3-looks-blocks-for-animation-teach-computing.png}})
 
 - **next costume** — change the look
 - **change colour effect** — change colour

@@ -9,7 +9,7 @@ Today I will sort IT by where it is found and talk about what it is used for.
 
 IT is all around us. Here is some IT we find out in the world.
 
-![A card machine in a shop]({{res:l3-card-reader.jpg}})
+![A card machine in a shop]({{res:l3-a-card-machine-in-a-shop-teach-computing.jpg}})
 
 ## Sort the IT by where it is found
 Drag each piece of IT into the place you would most likely find it.
@@ -28,14 +28,14 @@ On the street: a cash machine, a crossing button, a speed camera
 ## 🟡 Core
 A **card machine** lets you pay in a shop with a card.
 
-![A cash machine]({{res:l3-cash-machine.jpg}})
+![A cash machine]({{res:l3-a-cash-machine-teach-computing.jpg}})
 
 | Question | Your answer |
 |---|---|
 | Pick one piece of IT from the pictures. Say where it is found and what it does. | Type your answer here |
 
 ## 🔴 Challenge
-![A crossing button]({{res:l3-crossing-button.jpg}})
+![A crossing button]({{res:l3-a-pedestrian-crossing-button-teach-computing.jpg}})
 
 | Question | Tick ALL that are true |
 |---|---|

@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: audio · podcast · edit · trim · waveform · track. Same routine as every lesson.
 
 ## The waveform
-![A waveform: tall parts are loud, flat parts are quiet]({{res:l2-waveform.png}})
+![A waveform: tall parts are loud, flat parts are quiet]({{res:l2-waveform-loud-and-quiet-teach-computing.png}})
 
 - Audacity draws a picture of your sound
 - tall, fat parts = **loud**

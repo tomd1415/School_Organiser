@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: sprite · stage · costume · backdrop · sequence. Same routine as every lesson.
 
 ## Motion and sound together
-![The motion blocks you can use]({{res:l5-motion-blocks.png}})
+![The motion blocks you can use]({{res:l5-motion-blocks-teach-computing.png}})
 
 - a sequence can mix a move block and a sound block
 - predict: move then sound = the sprite moves, then plays

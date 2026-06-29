@@ -16,7 +16,7 @@
 > 🧑‍🏫 "Text" = writing, typing, words. "Image" = picture, graphic, drawing. We use the words text and images all unit. Plain, literal language.
 
 ## Guess the sign
-![Ten signs from the world around us]({{res:l1-signs-grid.png}})
+![Ten signs from the world around us]({{res:l1-signs-from-the-world-around-us-teach-computing.png}})
 
 Which signs use a picture? Which use words? Which use both?
 

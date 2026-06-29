@@ -14,7 +14,7 @@ Look at a classmate's app. Say what works, then suggest one improvement.
 > 🧑‍🏫 Model kind, specific feedback. Pupils sort helpful vs unhelpful comments on the worksheet. Keep it kind — feedback is about the app, not the person.
 
 ## Tutorial — add a second screen
-![The App Lab Design view]({{res:l6-app-lab-interface.png}})
+![The App Lab Design view]({{res:l6-app-lab-design-view-teach-computing.png}})
 
 Add screen2, then a button on screen1 that goes to it.
 

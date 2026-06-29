@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: reflective optical sensor · infrared · reflect · potentiometer · digital signal · autonomous. Wiring recap first — check last lesson's wiring still matches.
 
 ## How does it work?
-![A reflective optical sensor]({{res:l5-optical-sensor.png}})
+![A reflective optical sensor]({{res:l5-reflective-optical-sensor-teach-computing.png}})
 
 - shines infrared light DOWN at the floor
 - black line reflects little → reads 1
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Likely error: both OUT wires to the same pin — fix-words: "left sensor GP10, right sensor GP11." Run the test code and read Left/Right values.
 
 ## We-do — the steering rules
-![A buggy following a line]({{res:l5-line-follower.png}})
+![A buggy following a line]({{res:l5-line-following-buggy-teach-computing.png}})
 
 - both read 0 → drive forwards (on the line)
 - right reads 1 → turn right

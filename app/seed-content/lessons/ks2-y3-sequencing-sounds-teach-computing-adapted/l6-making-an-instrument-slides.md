@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: design · algorithm · bug · debug · object. Same routine as every lesson.
 
 ## What do we need?
-![The blocks you can choose from]({{res:l6-block-bank.png}})
+![The blocks you can choose from]({{res:l6-motion-block-bank-teach-computing.png}})
 
 - one sprite for each key
 - each key plays one note
@@ -26,7 +26,7 @@
 > 🧑‍🏫 I-do → we-do. An algorithm is a precise set of ordered steps. Plan one key: an event, a sound, a look change.
 
 ## Build and debug
-![A bug — a mistake in the code]({{res:l6-bug.png}})
+![A bug — a mistake in the code]({{res:l6-a-bug-teach-computing.png}})
 
 - build one key, then test it
 - a bug is a mistake in the code

@@ -10,10 +10,34 @@
       "objectives": "I can explain the difference between text and images\nI can say that text and images send a message\nI can give a good point about using text and about using images\nI can use emojis kindly online",
       "outline": "Routine first (same every lesson). Vocabulary on board: text · images · communicate · advantages · disadvantages. TA: everyone has the starter worksheet; the signs image on the board. Read the four “I can…” aloud.\n1. (0–5) Starter — text vs image. On the starter worksheet pupils choose whether DANGER (word) and a skull (picture) are text or an image, then tick why a picture sign is useful. Signs image shown.\n   • Support: choose text or image for one item.  • Core: tick the true reasons.  • Challenge: name a sign that uses both.\n2. (5–15) I-do → we-do — text = words you read; an image = a picture; both can send a message. Show the signs grid: a no-entry symbol needs no words; the DOUANE/ZOLL sign has words but is still hard if you cannot read the language — so text is not always clearer.\n3. (15–35) You-do — on the activity worksheet, SORT items into text / image, then SORT good points into ‘good about text’ / ‘good about images’. Likely error: thinking text is always clearer → fix-words “a picture can be quicker and cross languages.” TA: prompt, do not sort it for them.\n4. (35–45) Emojis — an emoji is a small image; use it to be kind, not unkind (Challenge). Screenshot the sign/poster discussed.\n5. (45–50) Plenary — self-tick the four “I can…”; each pupil shows one picture-only sign.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Words and pictures — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-words-and-pictures-starter-worksheet.md" },
-        { "title": "Words and pictures — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-words-and-pictures-activity-worksheet.md" },
-        { "title": "Words and pictures — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-words-and-pictures-slides.md" },
-        { "title": "Safety and road signs (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-signs.png" }
+        {
+          "title": "Safety and road signs (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-safety-and-road-signs-teach-computing.png"
+        },
+        {
+          "title": "Words and pictures — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-words-and-pictures-starter-worksheet.md"
+        },
+        {
+          "title": "Words and pictures — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-words-and-pictures-activity-worksheet.md"
+        },
+        {
+          "title": "Words and pictures — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-words-and-pictures-slides.md"
+        }
       ]
     },
     {
@@ -21,10 +45,34 @@
       "objectives": "I can change font size, colour, and style for a purpose\nI can edit text on a page\nI can explain that changing text makes the message clearer",
       "outline": "Routine first. Vocabulary on board: font · font style · communicate · template. TA: the invitation template open and ready. Read the three “I can…” aloud.\n1. (0–5) Starter — what is desktop publishing? On the starter worksheet pupils choose that it puts text and images on a page to send a message, then tick what you can change about a font (size/colour/style). Invitation image shown.\n   • Support: choose one true thing about a font.  • Core/Challenge follow in the activity.\n2. (5–15) I-do — desktop publishing = page layout software; a ready-made page is a template. Show the invitation; the date and time matter most, so make them stand out.\n3. (15–25) We-do — the three font changes: size, colour, style. Model changing one word each way. Likely error: changing the page background instead of the text → fix-words “click the words first.”\n4. (25–40) You-do — on the activity worksheet SORT changes into size/colour/style, recall the Shift and Backspace keys, then edit the invitation (bigger, brighter title). Screenshot it. TA: tell them the menu, not the button.\n5. (40–50) Plenary — self-tick the three “I can…”; each pupil shows one word they made bigger.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Can you edit it? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-can-you-edit-it-starter-worksheet.md" },
-        { "title": "Can you edit it? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-can-you-edit-it-activity-worksheet.md" },
-        { "title": "Can you edit it? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-can-you-edit-it-slides.md" },
-        { "title": "Party invitation graphic (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-invitation.png" }
+        {
+          "title": "Party invitation graphic (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-party-invitation-graphic-teach-computing.png"
+        },
+        {
+          "title": "Can you edit it? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-can-you-edit-it-starter-worksheet.md"
+        },
+        {
+          "title": "Can you edit it? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-can-you-edit-it-activity-worksheet.md"
+        },
+        {
+          "title": "Can you edit it? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-can-you-edit-it-slides.md"
+        }
       ]
     },
     {
@@ -32,11 +80,41 @@
       "objectives": "I can explain what page orientation means\nI can find placeholders and say why they help\nI can make a template for a magazine cover",
       "outline": "Routine first. Vocabulary on board: portrait · landscape · orientation · placeholder · template · layout. TA: a sheet of A4 per pupil; the software open. Read the three “I can…” aloud.\n1. (0–5) Starter — a template is a page already laid out with spaces ready; choose why it helps, and that a magazine cover is portrait. (starter worksheet)\n2. (5–15) I-do → we-do — orientation: portrait = tall, landscape = wide. Play “show me” turning the A4. Show a real magazine cover (big title, main picture, short text); editorial designers decide where things go.\n3. (15–25) Placeholders — a placeholder is a box that holds content. Show the cover with title/picture/story/quote boxes.\n4. (25–40) You-do — on the activity worksheet SORT documents into portrait/landscape, then LABEL the magazine cover’s placeholders (title, picture, story, quote). Then build their own portrait template with three placeholders. Likely error: one box used for everything → fix-words “one box for each thing.” Screenshot the template. TA: prompt, do not build it.\n5. (40–50) Plenary — self-tick the three “I can…”; each pupil shows a placeholder. Save the template for Lesson 4.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Great template! — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-great-template-starter-worksheet.md" },
-        { "title": "Great template! — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-great-template-activity-worksheet.md" },
-        { "title": "Great template! — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-great-template-slides.md" },
-        { "title": "Magazine cover with placeholders (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-magazine-cover.png" },
-        { "title": "Tech Trends magazine cover (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-magazine-tech-trends.png" }
+        {
+          "title": "Magazine cover with placeholders (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-magazine-cover-with-placeholders-teach-computing.png"
+        },
+        {
+          "title": "Tech Trends magazine cover (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-tech-trends-magazine-cover-teach-computing.png"
+        },
+        {
+          "title": "Great template! — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-great-template-starter-worksheet.md"
+        },
+        {
+          "title": "Great template! — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-great-template-activity-worksheet.md"
+        },
+        {
+          "title": "Great template! — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-great-template-slides.md"
+        }
       ]
     },
     {
@@ -44,10 +122,34 @@
       "objectives": "I can choose the best place for my content\nI can paste text and add pictures to my cover\nI can change content after I have added it",
       "outline": "Routine first. Vocabulary on board: desktop publishing · copy · paste. TA: last week’s templates ready to open. Read the three “I can…” aloud.\n1. (0–5) Starter — why a saved template helps (no blank page, saves time); copy then paste to bring text in. (starter worksheet)\n2. (5–10) Find last week’s work — open the software, open the saved template. Likely error: starting a new blank page → fix-words “open the one you already made.”\n3. (10–30) I-do → we-do — add your text: click a placeholder, type or copy-and-paste. Then add a picture from the search (follow school image-search rules). On the activity worksheet pupils put the ‘add content’ steps in ORDER, then build their cover.\n4. (30–42) Make changes — move things that overlap, resize a picture, delete what you do not want. Challenge: a picture covers the title — name two fixes (move it / make it smaller). Screenshot the cover. TA: prompt, do not redesign it.\n5. (42–50) Plenary — self-tick the three “I can…”; each pupil shows one thing added and one thing changed. Save the cover.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Becoming a designer — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-designer-starter-worksheet.md" },
-        { "title": "Becoming a designer — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-designer-activity-worksheet.md" },
-        { "title": "Becoming a designer — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-designer-slides.md" },
-        { "title": "Finished magazine cover example (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-magazine-cover.png" }
+        {
+          "title": "Finished magazine cover example (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-finished-magazine-cover-example-teach-computing.png"
+        },
+        {
+          "title": "Becoming a designer — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-designer-starter-worksheet.md"
+        },
+        {
+          "title": "Becoming a designer — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-designer-activity-worksheet.md"
+        },
+        {
+          "title": "Becoming a designer — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-designer-slides.md"
+        }
       ]
     },
     {
@@ -55,12 +157,48 @@
       "objectives": "I can name different layouts\nI can match a layout to its purpose\nI can choose a suitable layout for a job",
       "outline": "Routine first. Vocabulary on board: layout · purpose. TA: whiteboards ready; the layouts image on the board. Read the three “I can…” aloud.\n1. (0–10) Starter — the layout is how text and pictures are set out; you can tell a page without reading it. On the starter worksheet pupils name a newspaper (headline + columns) and say a poster has a few big words and a picture.\n2. (10–20) I-do → we-do — show a newspaper (lots of detail, columns, portrait) and a poster (few big words, one picture, eye-catching). Layout matches purpose.\n3. (20–38) You-do — on the activity worksheet pupils MATCH each layout (poster/newspaper/postcard/magazine) to its purpose, SORT layouts into ‘lots of text’ / ‘a few big words’, then choose a layout for a scenario. Likely error: choosing by how it looks, not its purpose → fix-words “what job must it do?” TA: accept any layout with a good reason.\n4. (38–45) Screenshot the chosen layout.\n5. (45–50) Plenary — self-tick the three “I can…”; each pupil names the layout for a quick message.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Lay it out — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-lay-it-out-starter-worksheet.md" },
-        { "title": "Lay it out — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-lay-it-out-activity-worksheet.md" },
-        { "title": "Lay it out — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-lay-it-out-slides.md" },
-        { "title": "Layouts and their purposes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-layouts.png" },
-        { "title": "Newspaper layout (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-newspaper.png" },
-        { "title": "Poster example (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-poster.png" }
+        {
+          "title": "Layouts and their purposes (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-layouts-and-their-purposes-teach-computing.png"
+        },
+        {
+          "title": "Newspaper layout (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-newspaper-layout-teach-computing.png"
+        },
+        {
+          "title": "Poster example (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-poster-example-teach-computing.png"
+        },
+        {
+          "title": "Lay it out — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-lay-it-out-starter-worksheet.md"
+        },
+        {
+          "title": "Lay it out — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-lay-it-out-activity-worksheet.md"
+        },
+        {
+          "title": "Lay it out — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-lay-it-out-slides.md"
+        }
       ]
     },
     {
@@ -68,12 +206,48 @@
       "objectives": "I can name real-world uses of desktop publishing\nI can say why desktop publishing is helpful\nI can compare desktop publishing to work made by hand",
       "outline": "Routine first. Vocabulary on board: desktop publishing · benefits. TA: whiteboards and A4 paper ready. Read the three “I can…” aloud.\n1. (0–8) Starter — what is desktop publishing? (text + images with page layout software). On the starter worksheet pupils choose the definition and tick which things are made with it. Magazines image shown.\n2. (8–18) I-do → we-do — who uses it: estate agents (brochures), card companies (cards), newspaper editors (the news). On the activity worksheet pupils SORT each job to what they make.\n3. (18–30) The benefits — quick to copy many times, easy to change, always neat. Support: tick the true benefits.\n4. (30–42) By hand or by computer? — the time changes (easy to fix on a computer); 20 copies needed (quick to print). Core/Challenge: explain why the computer is better. Screenshot one piece of work from the unit. TA: prompt the reason, do not give it.\n5. (42–50) Plenary — self-tick the three “I can…”; each pupil gives one real benefit of desktop publishing.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Why desktop publishing? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-why-desktop-publishing-starter-worksheet.md" },
-        { "title": "Why desktop publishing? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-why-desktop-publishing-activity-worksheet.md" },
-        { "title": "Why desktop publishing? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-why-desktop-publishing-slides.md" },
-        { "title": "Laptop ready for desktop publishing (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-laptop.png" },
-        { "title": "Magazines (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-magazines.png" },
-        { "title": "Newspapers (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-newspapers.png" }
+        {
+          "title": "Laptop ready for desktop publishing (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-laptop-ready-for-desktop-publishing-teach-computing.png"
+        },
+        {
+          "title": "Magazines (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-magazines-teach-computing.png"
+        },
+        {
+          "title": "Newspapers (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-newspapers-teach-computing.png"
+        },
+        {
+          "title": "Why desktop publishing? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-why-desktop-publishing-starter-worksheet.md"
+        },
+        {
+          "title": "Why desktop publishing? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-why-desktop-publishing-activity-worksheet.md"
+        },
+        {
+          "title": "Why desktop publishing? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-why-desktop-publishing-slides.md"
+        }
       ]
     }
   ]

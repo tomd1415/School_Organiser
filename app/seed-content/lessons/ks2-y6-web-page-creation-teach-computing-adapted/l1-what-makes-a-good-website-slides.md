@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud, slowly. Words on the board: website · web page · browser · media · HTML. Same routine as every lesson.
 
 ## Starter — websites we use
-![The San Diego Zoo Kids website]({{res:l1-zoo-website.png}})
+![The San Diego Zoo Kids website]({{res:l1-the-san-diego-zoo-kids-website-teach-computing.png}})
 
 - a website is a set of pages on the internet
 - a web page is one page of a website
@@ -29,7 +29,7 @@
 > 🧑‍🏫 Pupils tick all the media they find (multi-select on the worksheet). Draw out that a page is more than just words.
 
 ## Websites are written in HTML
-![The HTML code behind a web page]({{res:l1-html-code.png}})
+![The HTML code behind a web page]({{res:l1-the-html-code-behind-a-web-page-teach-computing.png}})
 
 - HTML = Hypertext Markup Language
 - it tells the browser what the page should look like

@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will build and test my dinosaur identifier, and think of real-world uses.
 
-![Dinosaur cards]({{res:l6-dinosaur-cards.png}})
+![Dinosaur cards]({{res:l6-dinosaur-cards-teach-computing.png}})
 
 ## Build it
 Open j2data Branch and build your dinosaur branching database from your plan.

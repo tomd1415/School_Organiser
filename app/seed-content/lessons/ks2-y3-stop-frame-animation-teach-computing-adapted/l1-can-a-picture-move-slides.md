@@ -15,7 +15,7 @@
 > 🧑‍🏫 Ask: "Can a picture move?" Take a few ideas. Then explain: a picture cannot move on its own — we show many pictures quickly so it LOOKS like it moves. Cartoons and films are made this way.
 
 ## Pictures in order
-![Coloured sticky notes stacked to make a small flip book]({{res:l1-flip-book.png}})
+![Coloured sticky notes stacked to make a small flip book]({{res:l1-sticky-notes-for-a-flip-book-teach-computing.png}})
 
 - each page has a small change
 - in the right order they show movement

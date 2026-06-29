@@ -41,7 +41,7 @@ Match each type of malware to what it does. Drag the word onto its meaning.
 | Hides and secretly records what you do, like your typing | (  ) Virus (  ) Worm (  ) Trojan (  ) Spyware |
 
 ## 🟡 Core — the WannaCry case study
-![The WannaCry ransomware lock screen demanding payment]({{res:l3-wannacry-ransomware.png}})
+![The WannaCry ransomware lock screen demanding payment]({{res:l3-wannacry-ransomware-screen.png}})
 
 | Question | Your answer |
 |---|---|

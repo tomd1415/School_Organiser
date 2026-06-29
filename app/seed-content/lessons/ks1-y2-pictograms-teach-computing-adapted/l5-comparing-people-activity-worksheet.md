@@ -11,16 +11,16 @@ Today I will collect data about my class and make a pictogram, then draw a concl
 Here are four people. We will sort them by the attribute **wears glasses**.
 
 **A** — wears glasses:
-![A face with glasses]({{res:l5-face-glasses.png}})
+![A face with glasses]({{res:l5-a-face-with-glasses-teach-computing.png}})
 
 **B** — brown hair:
-![A face with brown hair]({{res:l5-face-brown.png}})
+![A face with brown hair]({{res:l5-a-face-with-brown-hair-teach-computing.png}})
 
 **C** — red hair:
-![A face with red hair]({{res:l5-face-red.png}})
+![A face with red hair]({{res:l5-a-face-with-red-hair-teach-computing.png}})
 
 **D** — black hair:
-![A face with black hair]({{res:l5-face-black.png}})
+![A face with black hair]({{res:l5-a-face-with-black-hair-teach-computing.png}})
 
 Drag each person into the right group.
 

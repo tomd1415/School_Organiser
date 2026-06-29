@@ -10,14 +10,62 @@
       "objectives": "I can name the input device used to record sound (the microphone)\nI can name output devices used to play sound (speaker, headphones)\nI can use a computer to record my voice\nI can say that the person who records a sound chooses who may use it",
       "outline": "Routine first (same every lesson). Vocabulary on board: audio · microphone · speaker · headphones · input device · output device. TA: everyone has the starter worksheet; Audacity open on each computer; a calm spot to record. Read the 4 “I can…” aloud.\n1. (0–10) Starter — sound goes IN and OUT. On the starter worksheet pupils MATCH each device to its job and pick the input/output devices. Hold up real devices if you have them.\n   • Support: match device to in/out.  • Core: which device you talk into; tick the output devices.  • Challenge: explain why a headset is both.\n   Likely error: mixing up input and output. Fix-words: “IN to record, OUT to hear.”\n2. (10–20) I-do → we-do — devices. Point out a laptop’s built-in microphone (pinhole) and speaker (grille). Pupils SORT the devices into input vs output on the activity worksheet.\n3. (20–40) You-do — record your voice. Model record (red) → play → delete in Audacity, then pupils record one sentence, listen, and re-record if needed. Keep recordings short so everyone gets a turn. TA: prompt, do not do it for them.\n4. (40–50) Who owns a recording? The person who records the sound chooses who may use it. Pupils answer the ownership question on the activity worksheet, then screenshot their recording.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil points to a microphone and a speaker.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/animation; keep audio teacher-played and low volume; movement breaks are routine.",
       "resources": [
-        { "title": "Recording sound — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-recording-sound-starter-worksheet.md" },
-        { "title": "Recording sound — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-recording-sound-activity-worksheet.md" },
-        { "title": "Recording sound — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-recording-sound-slides.md" },
-        { "title": "Microphone (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-microphone.png" },
-        { "title": "Speaker (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-speaker.png" },
-        { "title": "Headphones (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-headphones.png" },
-        { "title": "Headset (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-headset.png" },
-        { "title": "Laptop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-laptop.png" }
+        {
+          "title": "Microphone (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-microphone-teach-computing.png"
+        },
+        {
+          "title": "Speaker (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-speaker-teach-computing.png"
+        },
+        {
+          "title": "Headphones (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-headphones-teach-computing.png"
+        },
+        {
+          "title": "Headset (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-headset-teach-computing.png"
+        },
+        {
+          "title": "Laptop (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-laptop-teach-computing.png"
+        },
+        {
+          "title": "Recording sound — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-recording-sound-starter-worksheet.md"
+        },
+        {
+          "title": "Recording sound — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-recording-sound-activity-worksheet.md"
+        },
+        {
+          "title": "Recording sound — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-recording-sound-slides.md"
+        }
       ]
     },
     {
@@ -25,11 +73,41 @@
       "objectives": "I can record my voice again to make it better\nI can read the waveform to find loud and quiet parts\nI can trim and delete parts of a recording\nI can name some features of a podcast",
       "outline": "Routine first. Vocabulary on board: audio · podcast · edit · trim · waveform · track. TA: starter worksheet out; Audacity open with last lesson’s recording; a short, calm podcast clip ready to play. Read the 4 “I can…” aloud.\n1. (0–10) Starter — the waveform. Audacity draws a picture of the sound: tall = loud, flat = quiet. Pupils LABEL the waveform (drag ‘loud’ and ‘quiet’) on the starter worksheet.\n   • Support: loud vs quiet.  • Core: why the waveform helps.  • Challenge: a long flat line at the start means silence — trim it.\n2. (10–25) I-do → we-do — trimming. Model select → listen → delete → listen again. Pupils ORDER these steps on the activity worksheet. Likely error: deleting without listening first. Fix-words: “select, listen, THEN delete.”\n3. (25–40) You-do — trim your recording. Pupils re-record if needed, then trim mistakes and long pauses. TA: prompt, do not do it for them.\n4. (40–50) What is a podcast? Play ONE short, calm podcast clip (teacher-played, low volume). Build a class list of features; pupils tick podcast features on the activity worksheet. Mention the audio engineer job.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil points to a loud and a quiet part on their own waveform.\nDifferentiation on the SAME task. No flashing/animation; audio teacher-played and low volume; movement breaks are routine.",
       "resources": [
-        { "title": "Editing audio — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-editing-audio-starter-worksheet.md" },
-        { "title": "Editing audio — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-editing-audio-activity-worksheet.md" },
-        { "title": "Editing audio — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-editing-audio-slides.md" },
-        { "title": "Waveform — loud and quiet (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-waveform.png" },
-        { "title": "Two tracks playing in sequence (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-tracks-aligned.png" }
+        {
+          "title": "Waveform — loud and quiet (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-waveform-loud-and-quiet-teach-computing.png"
+        },
+        {
+          "title": "Two tracks playing in sequence (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-two-tracks-playing-in-sequence-teach-computing.png"
+        },
+        {
+          "title": "Editing audio — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-editing-audio-starter-worksheet.md"
+        },
+        {
+          "title": "Editing audio — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-editing-audio-activity-worksheet.md"
+        },
+        {
+          "title": "Editing audio — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-editing-audio-slides.md"
+        }
       ]
     },
     {
@@ -37,11 +115,41 @@
       "objectives": "I can add a sound effect on its own track (a layer)\nI can move and set the volume of a track\nI can save my project so I can keep editing it\nI can plan the parts of my podcast",
       "outline": "Routine first. Vocabulary on board: audio · layer · import · save · host · engineer. TA: starter worksheet out; Audacity open; the sound-effect files ready to import. Read the 4 “I can…” aloud.\n1. (0–10) Starter — layers of sound. Each sound goes on its own track; stacking them is layering. Pupils LABEL the three tracks (music / voice / sound effect) on the starter worksheet.\n   • Support: track and layering words.  • Core: why add quiet music under a voice.  • Challenge: what to change if the music is too loud.\n2. (10–30) I-do → you-do — add a sound effect. Model import → move → listen → set volume. Pupils ORDER these steps on the activity worksheet, then add a sound effect to a short voice track. Likely error: not listening after each change. Fix-words: “change one thing, then listen.”\n3. (30–40) Save the project. Saving keeps the separate tracks so you can edit again. Everyone saves with their name. TA: check each project is saved.\n4. (40–50) Plan your podcast. Pupils fill the plan on the activity worksheet (topic, who talks, where sounds go, how it ends). ‘School news’ is the example; any topic is fine. Agree host/engineer roles.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows their plan and saved project.\nDifferentiation on the SAME task. No flashing/animation; audio teacher-played and low volume; movement breaks are routine.",
       "resources": [
-        { "title": "Planning a podcast — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-planning-a-podcast-starter-worksheet.md" },
-        { "title": "Planning a podcast — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-planning-a-podcast-activity-worksheet.md" },
-        { "title": "Planning a podcast — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-planning-a-podcast-slides.md" },
-        { "title": "Layered tracks: music, voice, sound effect (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-layers.png" },
-        { "title": "The Audacity editor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-audacity-editor.png" }
+        {
+          "title": "Layered tracks: music, voice, sound effect (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-layered-tracks-music-voice-sound-effect-teach-computing.png"
+        },
+        {
+          "title": "The Audacity editor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-the-audacity-editor-teach-computing.png"
+        },
+        {
+          "title": "Planning a podcast — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-planning-a-podcast-starter-worksheet.md"
+        },
+        {
+          "title": "Planning a podcast — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-planning-a-podcast-activity-worksheet.md"
+        },
+        {
+          "title": "Planning a podcast — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-planning-a-podcast-slides.md"
+        }
       ]
     },
     {
@@ -49,11 +157,41 @@
       "objectives": "I can record my voice tracks from my plan\nI can review my recordings and spot what to fix\nI can trim and line up my voice tracks\nI can save my project to finish later",
       "outline": "Routine first. Vocabulary on board: record · playback · edit · selection · waveform · audio engineer. TA: starter worksheet out; each pupil’s saved project and plan open in Audacity. Read the 4 “I can…” aloud.\n1. (0–10) Starter — the editor. Pupils LABEL the Audacity editor (record button, play button, timeline, a track) on the starter worksheet. Likely error: recording over an old track. Fix-words: “mute the old track, then record a new one.”\n2. (10–30) I-do → you-do — record from your plan. Model record → play → delete. Pupils record each part on its own track, muting the previous track first. Computers let us try again — a strength. Pupils ORDER the make-a-podcast steps on the activity worksheet.\n3. (30–40) Review. Listen to each track with mute/solo: is it clear? any pauses or mistakes? Pupils tick what to AVOID on the activity worksheet. An audio engineer uses the waveform to spot coughs/bangs.\n4. (40–50) Trim, line up and save. Pupils trim and align tracks so they play in order, then SAVE to finish next lesson. TA: prompt, do not do it for them.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pupil shows their voice tracks. Reassure: more time next lesson.\nDifferentiation on the SAME task. No flashing/animation; record in a calm spot; movement breaks are routine.",
       "resources": [
-        { "title": "Creating a podcast — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-creating-a-podcast-starter-worksheet.md" },
-        { "title": "Creating a podcast — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-creating-a-podcast-activity-worksheet.md" },
-        { "title": "Creating a podcast — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-creating-a-podcast-slides.md" },
-        { "title": "The Audacity editor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-audacity-editor.png" },
-        { "title": "Recording a podcast (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-headphones-laptop.png" }
+        {
+          "title": "The Audacity editor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-audacity-editor-teach-computing.png"
+        },
+        {
+          "title": "Recording a podcast (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-recording-a-podcast-teach-computing.png"
+        },
+        {
+          "title": "Creating a podcast — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-podcast-starter-worksheet.md"
+        },
+        {
+          "title": "Creating a podcast — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-podcast-activity-worksheet.md"
+        },
+        {
+          "title": "Creating a podcast — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-creating-a-podcast-slides.md"
+        }
       ]
     },
     {
@@ -61,10 +199,34 @@
       "objectives": "I can open my saved project to keep working\nI can add music and sound effects as layers\nI can set the volume so voices are heard over music\nI can explain the difference between saving a project and exporting an MP3",
       "outline": "Routine first. Vocabulary on board: import · save · export · MP3 · layer · audio engineer. TA: starter worksheet out; saved projects ready to open; the sound-effect/music files available. Read the 4 “I can…” aloud.\n1. (0–10) Starter — save or export? Pupils SORT facts into ‘save the project’ vs ‘export an MP3’ on the starter worksheet.\n   • Support: which lets you edit / which plays anywhere.  • Core: why save before export.  • Challenge: why it is lucky you saved if you spot a mistake after exporting.\n2. (10–30) I-do → you-do — add music and sound effects. Open the saved project; import music/effects on new tracks and move them. Pupils ORDER the finish-your-podcast steps on the activity worksheet.\n3. (30–40) Set the volume. The voice must be the loudest part; turn music down so the voice is clear. Listen after each change. Likely error: music too loud. Fix-words: “voice on top, music underneath.”\n4. (40–50) Save AND export. Save keeps the editable project; export makes one MP3 that plays on any device. Everyone saves, then exports an MP3.\n5. (50–55) Plenary — play one short example (teacher-played, low volume); what worked? Self-tick the 4 “I can…”.\nDifferentiation on the SAME task. No flashing/animation; audio teacher-played and low volume; movement breaks are routine.",
       "resources": [
-        { "title": "Behind the scenes — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-starter-worksheet.md" },
-        { "title": "Behind the scenes — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-activity-worksheet.md" },
-        { "title": "Behind the scenes — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-behind-the-scenes-slides.md" },
-        { "title": "Layered tracks: music, voice, sound effect (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-layers.png" }
+        {
+          "title": "Layered tracks: music, voice, sound effect (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-layered-tracks-music-voice-sound-effect-teach-computing.png"
+        },
+        {
+          "title": "Behind the scenes — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-behind-the-scenes-starter-worksheet.md"
+        },
+        {
+          "title": "Behind the scenes — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-behind-the-scenes-activity-worksheet.md"
+        },
+        {
+          "title": "Behind the scenes — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-behind-the-scenes-slides.md"
+        }
       ]
     },
     {
@@ -72,10 +234,34 @@
       "objectives": "I can listen carefully and say what is good about a podcast\nI can suggest one way to improve a podcast\nI can make a change to improve my own podcast\nI can export my finished podcast as an MP3",
       "outline": "Routine first. Vocabulary on board: evaluate · feedback · export · MP3 · improve. TA: starter worksheet out; each pupil’s podcast ready to play; the evaluation/activity worksheet open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — active listening. Play one short clip (teacher-played, low volume); pupils count one word. Then pupils answer what makes a podcast GOOD on the starter worksheet.\n   • Support: clear voice / music quieter than voice.  • Core: tick what makes a podcast good.  • Challenge: explain what ‘evaluate’ means.\n2. (10–25) Evaluate — be kind and helpful. Pupils listen to their own podcast and one other group’s, RATE clarity and fit (sliders), and write one good thing and one kind suggestion on the activity worksheet. Move calmly between computers. TA: prompt, do not do it for them.\n3. (25–45) Make one improvement. Read the feedback; choose ONE change; make it; then SAVE and EXPORT. Keep it to one clear change so it stays calm. Pupils ORDER the final steps on the activity worksheet.\n4. (45–55) Plenary — celebrate the whole journey: record → edit → layer → evaluate → export. Self-tick the 4 “I can…”.\nDifferentiation on the SAME task; the evaluation is a shared task everyone does. No flashing/animation; audio teacher-played and low volume; movement breaks are routine.",
       "resources": [
-        { "title": "Evaluating podcasts — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-podcasts-starter-worksheet.md" },
-        { "title": "Evaluating podcasts — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-podcasts-activity-worksheet.md" },
-        { "title": "Evaluating podcasts — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-evaluating-podcasts-slides.md" },
-        { "title": "Listening back to a podcast (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-headphones-laptop.png" }
+        {
+          "title": "Listening back to a podcast (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-listening-back-to-a-podcast-teach-computing.png"
+        },
+        {
+          "title": "Evaluating podcasts — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-podcasts-starter-worksheet.md"
+        },
+        {
+          "title": "Evaluating podcasts — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-podcasts-activity-worksheet.md"
+        },
+        {
+          "title": "Evaluating podcasts — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-evaluating-podcasts-slides.md"
+        }
       ]
     }
   ]

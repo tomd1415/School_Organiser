@@ -9,7 +9,7 @@ Today I will describe the internet as a network of networks, describe an IP addr
 
 The **internet** is a global **network of networks**. The **World Wide Web** is the web pages you view on it — they are not the same thing.
 
-![The internet — networks linked all around the world]({{res:l7-internet-world.png}})
+![The internet — networks linked all around the world]({{res:l7-the-internet-networks-linked-around-the-world.png}})
 
 ## The internet or the Web?
 Drag each one into the right box.

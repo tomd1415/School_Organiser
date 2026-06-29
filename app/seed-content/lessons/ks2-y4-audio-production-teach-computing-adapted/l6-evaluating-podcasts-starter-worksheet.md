@@ -10,7 +10,7 @@ Today I will listen carefully and say what makes a podcast good.
 ## Active listening
 Listening carefully is a skill. When you listen to a podcast, notice what works well and what could be better.
 
-![Listening back to a podcast]({{res:l6-headphones-laptop.png}})
+![Listening back to a podcast]({{res:l6-listening-back-to-a-podcast-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Your answer |

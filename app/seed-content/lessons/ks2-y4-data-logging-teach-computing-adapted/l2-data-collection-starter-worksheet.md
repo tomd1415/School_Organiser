@@ -10,7 +10,7 @@ Today I will learn that computers use sensors to collect data from the world aro
 ## From senses to sensors
 People use their senses. We hear with our ears and see with our eyes. A computer can have SENSORS that do a similar job.
 
-![A microphone]({{res:l2-microphone.png}})
+![A microphone]({{res:l2-a-microphone-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

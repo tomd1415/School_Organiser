@@ -20,8 +20,8 @@ PAN = around a person · LAN = one site · WAN = a large area.
 - **WAP** — gives devices a wireless way to join.
 - **Bridge** — joins one LAN to another.
 
-![A router]({{res:l3-router.png}})
-![A switch]({{res:l3-switch.png}})
+![A router]({{res:l3-a-router-icon.png}})
+![A switch]({{res:l3-a-switch-icon.png}})
 
 > 🧑‍🏫 Go one device at a time, slowly. Stress the switch vs hub pair: switch = one device, hub = all devices. Pause and check after every two.
 

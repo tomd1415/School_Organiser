@@ -1,0 +1,268 @@
+{
+  "unitTitle": "GCSE Programming part 2 — selection (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Randomisation — modules, import and randint",
+      "objectives": "I can import a module into my program\nI can generate a random number with randint\nI can predict the possible outputs of a random program\nI can find information in the Python documentation",
+      "outline": "Routine first (same every lesson). Vocabulary on board: module · import · library · random · pseudorandom. TA: everyone has the Python IDE (Mu / Repl.it) open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — roll the dice. Where does a game need a random number? Pupils TICK on the starter worksheet (multi-select; score is the distractor).\n   • Support: choose the meaning of “random”.  • Core: name a game that uses randomness.  • Challenge: why a fixed dice is boring.\n2. (5–18) I-do → we-do (PRIMM Predict). Show the randint code (embedded screenshot). Class predicts the output (single-choice). Teacher explains import + module; pupils run randint.\n   • Support: match module/import to meaning.  • Core: range of randint(5,10); where to look things up.  • Challenge: write the two import+roll lines. Likely error: forgetting `import` at the top → fix-words “a module must be imported before you use it.”\n3. (18–30) Documentation — show docs.python.org (embedded screenshot). Reassure that looking things up is normal, not cheating.\n4. (30–45) True vs pseudorandom (card-sort) + you-do: order the dice-roll steps, then build a dice program. TA: “prompt, do not do it for them.” Keep a screenshot of the working program.\n5. (45–55) Plenary — pupils self-tick the 4 “I can…”; show their dice rolling. TA notes who imported + generated unaided.\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "randint program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-randint-program-teach-computing.png"
+        },
+        {
+          "title": "Python documentation home page (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-python-documentation-home-page-teach-computing.png"
+        },
+        {
+          "title": "Six-sided dice (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-six-sided-dice-teach-computing.png"
+        },
+        {
+          "title": "Randomisation — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-randomisation-starter-worksheet.md"
+        },
+        {
+          "title": "Randomisation — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-randomisation-activity-worksheet.md"
+        },
+        {
+          "title": "Randomisation — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-randomisation-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Arithmetic expressions — BIDMAS and operators",
+      "objectives": "I can use BIDMAS to work out an expression\nI can use Python arithmetic operators\nI can use integer division // and modulo %\nI can store the result of an expression in a variable",
+      "outline": "Routine first. Vocabulary on board: arithmetic expression · BIDMAS · operator · integer division · modulo. TA: Python IDE open. Read the 4 “I can…” aloud.\n1. (0–8) Starter — peer instruction. `number = 10 - 2 + 2 * 5`: what value is held? Single-choice (answer 18).\n   • Support: `2 + 3 * 4` (multiply first).  • Core: explain why * before +.  • Challenge: `10 // 3`. Likely error: doing add before subtract because of the word BIDMAS → fix-words “add and subtract are equal — read left to right.”\n2. (8–22) I-do → we-do — Python operators (+ - * / // % **). Worked examples for // and % with the counters image idea. Pupils MATCH operator↔meaning on the worksheet.\n   • Support: `10 % 3` remainder choice.  • Core: why pizza needs // and %.  • Challenge: write one bracketed expression. Misconception: modulo stores the decimal part → “modulo is the WHOLE remainder.”\n3. (22–45) PRIMM — Split my bill (embedded screenshot). Predict → run → investigate → modify (three lines into one with brackets). Then MAKE “split my pizza”. Keep a screenshot.\n   • Support: counters example shown.  • Core: log one value.  • Challenge: incorporate the bill cost per person.\n4. (45–55) Plenary — self-tick the 4 “I can…”; show the pizza program. TA notes who used // and % correctly.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Split my bill program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-split-my-bill-program-teach-computing.png"
+        },
+        {
+          "title": "Arithmetic expressions — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-arithmetic-expressions-starter-worksheet.md"
+        },
+        {
+          "title": "Arithmetic expressions — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-arithmetic-expressions-activity-worksheet.md"
+        },
+        {
+          "title": "Arithmetic expressions — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-arithmetic-expressions-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Selection — conditions and if / elif / else",
+      "objectives": "I can say what a condition is (True or False)\nI can explain how selection chooses which code runs\nI can trace if / elif / else code\nI can add a new branch to a program",
+      "outline": "Routine first. Vocabulary on board: selection · condition · decision · control flow · logical expression. TA: Python IDE open. Read the 4 “I can…” aloud.\n1. (0–7) Starter — True or False? A condition is always True or False. Pupils CARD-SORT six expressions into True/False.\n   • Support: a condition is always True or False (choice).  • Core: what `!=` means.  • Challenge: write a condition True when age > 18.\n2. (7–15) Flowchart with a decision symbol (diamond). Input 10: walk the True and False arrows. (Decision-symbol diagram is a PPT shape — logged as an image gap; draw it on the board.)\n3. (15–25) if / elif / else — trace the embedded program; pupils MATCH if/elif/else↔meaning and trace the Harry program (input/output boxes). Order block: how an if statement runs.\n4. (25–48) PRIMM — the chatterbot (embedded screenshot). Predict → run → investigate (.lower()/.upper()) → modify: add an elif for “leia”. Keep a screenshot.\n   • Support: else has no condition (choice).  • Core: why `.lower()` is used.  • Challenge: write the elif branch. Likely error: elif not lined up with if / missing colon / not lowercase → fix-words on the board.\n5. (48–55) Plenary — self-tick the 4 “I can…”. TA notes who traced if/elif/else correctly.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "What will be the output program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-what-will-be-the-output-program-teach-computing.png"
+        },
+        {
+          "title": "Chatterbot program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-chatterbot-program-teach-computing.png"
+        },
+        {
+          "title": "True or False game show (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-true-or-false-game-show-teach-computing.png"
+        },
+        {
+          "title": "Selection — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-starter-worksheet.md"
+        },
+        {
+          "title": "Selection — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-activity-worksheet.md"
+        },
+        {
+          "title": "Selection — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Selection challenge — the joke machine",
+      "objectives": "I can name the comparison operators\nI can choose the right comparison operator for a condition\nI can use selection (if / elif / else) in my own program\nI can build and test a joke machine in a pair",
+      "outline": "Routine first. Vocabulary on board: comparison operators · condition · selection · driver · navigator. TA: Python IDE open; pairs set with roles. Read the 4 “I can…” aloud.\n1. (0–6) Starter — comparison operators (== != < > <= >=). Embedded keyboard image. Pupils MATCH operator↔meaning.\n   • Support: which symbol is “not equal to”.  • Core: a trick to remember less-than.  • Challenge: a condition True when score ≥ 10.\n2. (6–10) Which is less than? The small end points at the smaller number. Pupils write their own memory trick.\n3. (10–15) Pair programming — driver types, navigator checks, SWAP every 5 minutes (embedded image). Set pairs and a swap timer as routine.\n4. (15–48) MAKE — the joke machine (pair programming). Order the build steps, then code it. Welcome → ask guess → store → check with if → score + feedback → reveal score.\n   • Support: how to add 1 to the score (choice).  • Core: write the if line.  • Challenge: add an elif for another wording. Likely error: one `=` instead of `==`; missing colon; print not indented; score not initialised → fix-words on the board. Keep a screenshot.\n5. (48–55) Plenary — self-tick the 4 “I can…”; show the joke machine scoring. TA notes pairs whose game gives feedback for right and wrong answers.\nDifferentiation on the SAME task; calm role (navigator) available; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Comparison operator keys (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-comparison-operator-keys-teach-computing.jpg"
+        },
+        {
+          "title": "Pair programming (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-pair-programming-teach-computing.png"
+        },
+        {
+          "title": "Selection challenge — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-selection-challenge-starter-worksheet.md"
+        },
+        {
+          "title": "Selection challenge — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-selection-challenge-activity-worksheet.md"
+        },
+        {
+          "title": "Selection challenge — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-selection-challenge-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Logical expressions — Boolean operators and / or",
+      "objectives": "I can put scrambled code in the right order\nI can use the Boolean operators and / or\nI can work out if an and / or condition is True or False\nI can write conditions that use and / or",
+      "outline": "Routine first. Vocabulary on board: Boolean / logical expression · Boolean / logical operator · and · or. TA: Python IDE open; a set of playing cards ready. Read the 4 “I can…” aloud.\n1. (0–6) Starter — Parson's puzzle: order the jumbled password-checker (parsons block). Self-check against the solution.\n   • Support: which line must come first (choice).  • Core: why the print is indented.  • Challenge: what `fish4321` would output (case).\n2. (6–10) and / or. `and` is True only when BOTH are True; `or` is True when AT LEAST ONE is True. Pupils fill the gaps.\n3. (10–17) Unplugged — playing cards (embedded card image). Pupils decide True/False for their card and move to a side of the room; worksheet has a card-sort version.\n4. (17–45) PRIMM — sandwich order calculator (embedded screenshot). Predict → run → investigate (sugar tax = cookie AND fizzy drink) → modify, then MAKE the pizza program (add £1 if extra sauce AND extra salad).\n   • Support: `True and False` (choice).  • Core: which two choices add the sugar tax.  • Challenge: write the sauce+salad if. Keep a screenshot.\n5. (45–55) Plenary — spot the five mistakes (multi-select), then self-tick the 4 “I can…”. TA notes who wrote a correct and/or condition.\nDifferentiation on the SAME task; movement (cards) built in as routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Sandwich order calculator program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-sandwich-order-calculator-program-teach-computing.png"
+        },
+        {
+          "title": "Five of spades playing card (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-five-of-spades-playing-card-teach-computing.png"
+        },
+        {
+          "title": "Logical expressions — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-logical-expressions-starter-worksheet.md"
+        },
+        {
+          "title": "Logical expressions — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-logical-expressions-activity-worksheet.md"
+        },
+        {
+          "title": "Logical expressions — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-logical-expressions-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Nested selection — an if inside an if",
+      "objectives": "I can say what nested selection means\nI can trace a nested-selection program\nI can explain why the inner question only runs when the first is True\nI can make a \"guess the…\" game with nested selection",
+      "outline": "Routine first. Vocabulary on board: nested selection · selection · condition. TA: Python IDE open. Read the 4 “I can…” aloud.\n1. (0–7) Starter — True or False? Work out four logical expressions and CARD-SORT into True/False (recaps and/or and BIDMAS).\n   • Support: what nested selection means (choice).  • Core: why `… or 9 > 6` is True.  • Challenge: `age > (80/2)` with age 40.\n2. (7–14) What is nested selection? An if INSIDE another if (nest + eggs image as the hook). The inner if only runs when the outer condition is True.\n3. (14–22) Walk through the username/password program — three outcomes, noting variable states.\n4. (22–48) PRIMM — guess the animal (embedded screenshot). Predict → run → investigate (trace table) → order the flow → modify (add a Fish). Then MAKE the guess-the-vegetable game from the tree diagram. Keep a screenshot.\n   • Support: when the second question is asked (choice).  • Core: why the first must be True first.  • Challenge: write the nested if. Likely error: indentation of the inner if → fix-words “the inner if is indented inside the outer if.”\n5. (48–55) Plenary — self-tick the 4 “I can…”; show the vegetable game. TA notes who nested an if correctly.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Guess the animal program (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-guess-the-animal-program-teach-computing.png"
+        },
+        {
+          "title": "Two eggs in a nest (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-two-eggs-in-a-nest-teach-computing.png"
+        },
+        {
+          "title": "Nested selection — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-nested-selection-starter-worksheet.md"
+        },
+        {
+          "title": "Nested selection — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-nested-selection-activity-worksheet.md"
+        },
+        {
+          "title": "Nested selection — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-nested-selection-slides.md"
+        }
+      ]
+    }
+  ]
+}

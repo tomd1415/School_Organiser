@@ -10,8 +10,8 @@ Today I will use a branching database to identify a minibeast, then build my own
 ## Follow the tree to find the bee
 Use the branching database to find the **bee**.
 
-![A minibeast branching database]({{res:l3-minibeast-branching-database.png}})
-![A bee]({{res:l3-bee.png}})
+![A minibeast branching database]({{res:l3-minibeast-branching-database-teach-computing.png}})
+![A bee]({{res:l3-bee-teach-computing.png}})
 
 Put the three questions in the order you answer them to reach the bee.
 

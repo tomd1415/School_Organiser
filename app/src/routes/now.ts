@@ -38,6 +38,10 @@ import {
   renderTimelineCard,
   renderTimelineShell,
   renderCurrentCard,
+  renderCurrentCardBody,
+  renderCurrentChangedBody,
+  currentCardSig,
+  renderInboxQueueCard,
   renderNextCard,
   renderDayList,
   purposeLabel,
@@ -47,6 +51,7 @@ import {
   nowLabels,
 } from '../lib/nowView';
 import { type FollowupItem, type NoteItem } from '../lib/notesView';
+import { paths } from '../lib/paths';
 
 async function resolveNowLessons(now: Date) {
   const ctx = await getClockContext();
@@ -243,6 +248,57 @@ export function registerNowRoutes(app: FastifyInstance): void {
       app.log.error({ err }, 'timeline fragment render failed');
       // Keep the self-polling element alive so a transient DB blip doesn't freeze the timeline.
       return reply.type('text/html').send(renderTimelineShell());
+    }
+  });
+
+  // Auto-refreshing current-lesson card body (every 30s). Recomputes "what is on now" so the card
+  // advances across lesson boundaries without a reload. The Quick-note form lives OUTSIDE the polled
+  // body, so it is never wiped; but because a lesson change also invalidates that form's occurrence
+  // binding, a signature mismatch returns a "refresh" prompt (which stops polling) instead of swapping
+  // in the new lesson. resolveNowLessons resolves minutes in the school timezone (ctx.tz).
+  app.get('/now/current', { preHandler: requireAuth }, async (req, reply) => {
+    const now = new Date();
+    const prevSig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
+    try {
+      const { state, current, next } = await resolveNowLessons(now);
+      const { curEx } = await nowExceptions(state.isoDate, current, next);
+      const isTeaching = !!current && (current.purpose === 'teaching' || current.purpose === 'free' || current.purpose === 'form');
+      if (!isTeaching || !current) {
+        // No teaching/free/form lesson on now any more — prompt a reload so the page rebuilds the
+        // correct card (and the note form rebinds to the right occurrence).
+        return reply.type('text/html').send(renderCurrentChangedBody(state));
+      }
+      const sig = currentCardSig(state, current, curEx);
+      if (prevSig !== null && prevSig !== sig) {
+        return reply.type('text/html').send(renderCurrentChangedBody(state));
+      }
+      const occurrenceId = await findOrCreateOccurrence(current.lessonId, state.isoDate);
+      const [courses, lastStops] = await Promise.all([
+        getOccurrenceCourses(occurrenceId),
+        getLastStoppingPoints(current.lessonId, state.isoDate),
+      ]);
+      return reply.type('text/html').send(renderCurrentCardBody(current, courses, lastStops, state, curEx));
+    } catch (err) {
+      app.log.error({ err }, 'now/current fragment render failed');
+      // Keep the poller alive (echo the prior signature) so a transient DB blip doesn't freeze the card.
+      const retrySig = prevSig ?? '';
+      return reply
+        .type('text/html')
+        .send(`<div id="now-current-body" class="now-current-body" hx-get="${paths.nowCurrent(retrySig)}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this"><p class="kicker">Now</p><p class="muted">current lesson unavailable</p></div>`);
+    }
+  });
+
+  // Auto-refreshing inbox queue card (every 30s). Re-runs the resurfacing query and re-renders so items
+  // captured elsewhere appear without a reload. The card has no text inputs, so an outer-swap is safe.
+  app.get('/now/inbox-queue', { preHandler: requireAuth }, async (_req, reply) => {
+    const csrf = reply.generateCsrf();
+    try {
+      const captured = await listForResurfacing();
+      return reply.type('text/html').send(renderInboxQueueCard(captured, csrf));
+    } catch (err) {
+      app.log.error({ err }, 'inbox-queue fragment render failed');
+      // Keep the self-polling element alive on a transient DB blip rather than letting it vanish.
+      return reply.type('text/html').send(renderInboxQueueCard([], csrf));
     }
   });
 

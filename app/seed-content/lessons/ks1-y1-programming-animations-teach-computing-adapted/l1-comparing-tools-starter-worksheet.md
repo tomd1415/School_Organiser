@@ -10,12 +10,12 @@ Today I will find the ScratchJr commands that move a sprite.
 ## The ScratchJr screen
 This is ScratchJr. The cat is a **sprite**. The blue blocks are **commands**.
 
-![The ScratchJr screen]({{res:l1-scratchjr-screen.jpg}})
+![The ScratchJr screen]({{res:l1-the-scratchjr-screen-teach-computing.jpg}})
 
 Drag each word onto the right spot.
 
 ```label
-image: {{res:l1-scratchjr-screen.jpg}}
+image: {{res:l1-the-scratchjr-screen-teach-computing.jpg}}
 sprite (50%, 33%): Cat sprite
 blocks (55%, 64%): Blocks
 flag (72%, 4%): Green flag

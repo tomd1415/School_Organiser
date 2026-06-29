@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: operator · AND · OR · NOT · quote search · hyperlink.
 
 ## Starter — too many results
-![A search with millions of results]({{res:l5-search-results.png}})
+![A search with millions of results]({{res:l5-search-results-millions-of-results-teach-computing.png}})
 
 Millions of pages is too many to read. We need to control the search.
 

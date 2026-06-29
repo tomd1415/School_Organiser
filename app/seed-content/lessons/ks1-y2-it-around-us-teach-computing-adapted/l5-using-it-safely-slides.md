@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Calm, low-arousal. This lesson touches online safety — follow the school online-safety policy if anything is disclosed.
 
 ## What can we do with IT?
-![A smart TV with lots of apps]({{res:l5-smart-tv.png}})
+![A smart TV with lots of apps]({{res:l5-a-smart-tv-with-apps-teach-computing.png}})
 
 - watch videos
 - play games

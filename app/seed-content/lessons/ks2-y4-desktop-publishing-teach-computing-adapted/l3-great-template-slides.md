@@ -21,7 +21,7 @@
 > 🧑‍🏫 Hold up an A4 sheet both ways. Quick "show me portrait / show me landscape" check. This matches the starter sort.
 
 ## A magazine cover
-![An example magazine cover called Tech Trends]({{res:l3-magazine-cover.png}})
+![An example magazine cover called Tech Trends]({{res:l3-example-magazine-cover-teach-computing.png}})
 
 - a big title at the top
 - a main picture
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Ask what every magazine cover has in common: a title and an image. Portrait orientation. This is the look pupils aim for.
 
 ## Placeholders
-![A template with empty placeholders]({{res:l3-placeholders.png}})
+![A template with empty placeholders]({{res:l3-template-with-empty-placeholders-teach-computing.png}})
 
 - a PLACEHOLDER is an empty box
 - it shows where the title, picture or text will go

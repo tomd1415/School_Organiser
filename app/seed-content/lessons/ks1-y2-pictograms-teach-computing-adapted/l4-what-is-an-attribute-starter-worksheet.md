@@ -10,7 +10,7 @@ Today I will group objects by an attribute and make a pictogram.
 ## What is an attribute?
 An **attribute** is a way to describe an object — like its **colour**, its **shape**, or its **size**.
 
-![A blue car]({{res:l4-blue-car.png}})
+![A blue car]({{res:l4-a-blue-car-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

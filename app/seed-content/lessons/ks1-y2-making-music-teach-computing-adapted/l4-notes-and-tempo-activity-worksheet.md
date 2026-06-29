@@ -10,7 +10,7 @@ Today I will make a pattern of notes in Song Maker and change it.
 ## Song Maker
 Song Maker has the smiley face. You click the squares to add notes.
 
-![The Chrome Music Lab tools]({{res:l4-music-lab-home.png}})
+![The Chrome Music Lab tools]({{res:l4-the-chrome-music-lab-tools-teach-computing.png}})
 
 ## 🟢 Support
 Put the steps in order to make music in Song Maker.

@@ -10,7 +10,7 @@ Today I will build my Space race in ScratchJr and test it.
 ## Use your design
 Last lesson you made a design and an algorithm. Today you build it.
 
-![Three rockets on the moon, ready to race]({{res:l6-space-race.jpg}})
+![Three rockets on the moon, ready to race]({{res:l6-three-rockets-a-space-race-teach-computing.jpg}})
 
 ## 🟢 Support
 | Question | Choose |

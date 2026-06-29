@@ -1,0 +1,275 @@
+{
+  "unitTitle": "Y8 Layers of computing systems (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Get in gear — what makes a computer a computer",
+      "objectives": "I can say that a computer is a device for running programs\nI can explain that a program is a list of instructions that work on data\nI can explain the difference between a general-purpose computer and a purpose-built machine\nI can give examples of programs (software) I use",
+      "outline": "Routine first (same every lesson). Vocabulary on board: computer · program · software · instructions · data · general-purpose. TA: everyone has the starter worksheet open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — old machines vs modern computers. Show the Analytical Engine image on the slide; pupils CHOOSE on the starter worksheet what a modern computer can do that an old calculating machine cannot. Think · pair · share.\n   • Support: tick-box choice (run programs / one sum / nothing).  • Core: name a program used today.  • Challenge: name one way the old machine is the SAME as a modern computer (input → process → output).\n2. (10–20) I-do → we-do — a computer RUNS PROGRAMS. Teacher defines program = a list of instructions that work on data (I do). Class sorts everyday things into purpose-built device vs general-purpose computer (we do). Likely error: “a phone is just a phone” → fix-words “a phone runs MANY programs, so it is general-purpose.”\n3. (20–35) You-do — the activity worksheet. Card-sort PROGRAM (software) vs DATA. Then fill the gap sentence about what a program is.\n   • Support: single-choice “which is a program?”.  • Core: name a program for documents and one for the web.  • Challenge: explain why a song file is data, not a program. TA: “prompt, do not give the answer.”\n4. (35–50) Unplugged — the intelligent piece of paper (mechanical noughts and crosses). Pupils follow the printed instructions like a machine; keep/screenshot the finished grid on the worksheet.\n5. (50–55) Plenary — pupils self-tick the 4 “I can…”. One sentence: “what is the difference between a computer and a calculator?”\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Babbage Analytical Engine (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-babbage-analytical-engine-teach-computing.png"
+        },
+        {
+          "title": "Scientific calculator — a purpose-built device (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-scientific-calculator-a-purpose-built-device-teach-computing.jpg"
+        },
+        {
+          "title": "A general-purpose computer running a game (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-general-purpose-computer-running-a-game-teach-computing.png"
+        },
+        {
+          "title": "Get in gear — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-in-gear-starter-worksheet.md"
+        },
+        {
+          "title": "Get in gear — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-in-gear-activity-worksheet.md"
+        },
+        {
+          "title": "Get in gear — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-get-in-gear-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Under the hood — the hardware components",
+      "objectives": "I can name the main hardware components of a computer\nI can describe what the processor, memory, storage, input/output and communication parts do\nI can explain that all computers have the same basic parts (architecture)",
+      "outline": "Routine first. Vocabulary on board: hardware · processor (CPU) · memory (RAM) · storage · input · output · communication · architecture. TA: starter worksheet open; have a real device to point at. Read the 3 “I can…” aloud.\n1. (0–10) Starter — recap. Show the space-rover image; pupils CHOOSE the main job of any computer (run programs) on the starter worksheet. Link to last lesson.\n   • Support: choose what ‘hardware’ means.  • Core: name two pieces of hardware in front of them.  • Challenge: a rover, a phone and a laptop look different — what do they all have inside?\n2. (10–25) I-do → we-do — the universal components. Teacher names processor, memory, storage, input/output, communication and what each does (I do), using the processor-chip image. Class does the MATCHING (component → what it does) on the activity worksheet (we do). Likely error: confuses memory and storage → fix-words “memory forgets when the power is off; storage remembers.”\n3. (25–40) You-do — card-sort INPUT vs OUTPUT devices; then a level question.\n   • Support: which part runs the instructions?  • Core: fill the ‘D is for Digital’ gap sentences (word bank given).  • Challenge: explain the difference between memory and storage. TA: “prompt with the word bank.”\n4. (40–52) Label the device — label the parts on the Google Glass image (camera, display, touchpad, frame). Almost no writing; drag the labels.\n5. (52–55) Plenary — self-tick the 3 “I can…”. One sentence: “every computer, big or small, has the same…?”\nDifferentiation on the SAME task; movement breaks built in; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Processor (CPU) chip (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-processor-cpu-chip-teach-computing.png"
+        },
+        {
+          "title": "A space rover is a computer too (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-space-rover-is-a-computer-too-teach-computing.png"
+        },
+        {
+          "title": "Google Glass — label the parts (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-google-glass-label-the-parts-teach-computing.jpg"
+        },
+        {
+          "title": "Under the hood — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-under-the-hood-starter-worksheet.md"
+        },
+        {
+          "title": "Under the hood — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-under-the-hood-activity-worksheet.md"
+        },
+        {
+          "title": "Under the hood — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-under-the-hood-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Orchestra conductor — how the parts work together",
+      "objectives": "I can describe how the processor, memory and storage work together to run a program\nI can put the steps of running a program in the right order\nI can say what an operating system is and what it does",
+      "outline": "Routine first. Vocabulary on board: processor · memory · storage · operating system · fetch · execute · load. TA: activity worksheet open; the two short system-monitor videos ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — ‘forbidden words’ recap. Pupils CHOOSE the processor’s job on the starter worksheet.\n   • Support: storage keeps files even when the power is off?  • Core: one sentence on what main memory (RAM) does.  • Challenge: why is the processor like an ‘orchestra conductor’?\n2. (10–25) I-do → we-do — what happens when you open a program. Teacher walks the journey storage → memory → processor (I do) using the planetarium image. Class does the ORDER activity (drag the behind-the-scenes steps into order) on the activity worksheet (we do). Likely error: “the program runs straight from storage” → fix-words “it is COPIED into memory first.”\n3. (25–40) You-do — watch the short system-monitor videos (Idle, Planetarium). Pupils PREDICT what happens to memory when a big program opens, then check it. Write the readings + screenshot in Show your work.\n   • Support: what is an operating system?  • Core: why does the processor load go up?  • Challenge: how does ONE processor seem to run many programs at once? TA: pause the video on the readings.\n4. (40–50) Operating system — define it as the program that controls the computer and shares the hardware.\n5. (50–55) Plenary — self-tick the 3 “I can…”. “Describe what happens when you power up your computer.”\nDifferentiation on the SAME task. Videos have motion/sound — teacher-played, paused on the readings (teacher’s choice given the low-arousal default). No flashing on slides.",
+      "resources": [
+        {
+          "title": "Planetarium night sky (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-planetarium-night-sky-teach-computing.png"
+        },
+        {
+          "title": "System monitor — idle computer (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-system-monitor-idle-computer-teach-computing.mp4"
+        },
+        {
+          "title": "System monitor — running a planetarium program (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-system-monitor-running-a-planetarium-program-teach-computing.mp4"
+        },
+        {
+          "title": "Orchestra conductor — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-orchestra-conductor-starter-worksheet.md"
+        },
+        {
+          "title": "Orchestra conductor — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-orchestra-conductor-activity-worksheet.md"
+        },
+        {
+          "title": "Orchestra conductor — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-orchestra-conductor-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "It's only logical — Boolean logic and logic gates",
+      "objectives": "I can describe the NOT, AND and OR logic operators\nI can complete a truth table for NOT, AND and OR\nI can explain that hardware is built from logic gates and uses 1s and 0s",
+      "outline": "Routine first. Vocabulary on board: logic · true · false · NOT · AND · OR · truth table · logic gate · binary (1s and 0s). TA: starter worksheet open; Turing Tumble gears video ready. Read the 3 “I can…” aloud.\n1. (0–10) Starter — gears as logic. Teacher plays the short Turing Tumble gears video (hook): a gear mechanism behaves like a NOT/AND gate. Pupils CHOOSE that a logic value can only be true or false on the starter worksheet.\n   • Support: ‘NOT true’ is…?  • Core: fill the gap — AND/OR rules (word bank).  • Challenge: describe when ‘A AND (NOT B)’ is true.\n2. (10–30) I-do → we-do — Boolean logic. Teacher models NOT, AND, OR with everyday examples and truth tables (I do). Class does the MATCHING (operator → what it means) on the activity worksheet (we do). Likely error: confuses OR with AND → fix-words “AND needs BOTH; OR needs at least one.”\n3. (30–45) You-do — complete the truth tables (true/false tick questions, auto-marked). Build a simple AND-gate circuit in CircuitVerse; paste a link/screenshot in Show your work.\n   • Support: NOT + an easy AND row.  • Core: AND/OR mix.  • Challenge: combined expressions. TA: read each row aloud before they pick.\n4. (45–52) Big picture — hardware is built from logic gates; show the adder circuit image. Multi-select: what is true about logic gates. Plenary uses the Boole Google Doodle.\n5. (52–55) Plenary — self-tick the 3 “I can…”. “Everything in a computer is made of switches that are…?” (on/off, 1/0).\nDifferentiation on the SAME task. Video has motion/sound — teacher-played hook, short (teacher’s choice). No flashing on slides.",
+      "resources": [
+        {
+          "title": "Logic-gate adder circuit (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-logic-gate-adder-circuit-teach-computing.png"
+        },
+        {
+          "title": "George Boole Google Doodle — logic operators (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-george-boole-google-doodle-logic-operators-teach-computing.png"
+        },
+        {
+          "title": "Turing Tumble gears as logic gates (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-turing-tumble-gears-as-logic-gates-teach-computing.mp4"
+        },
+        {
+          "title": "It's only logical — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-it-s-only-logical-starter-worksheet.md"
+        },
+        {
+          "title": "It's only logical — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-it-s-only-logical-activity-worksheet.md"
+        },
+        {
+          "title": "It's only logical — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-it-s-only-logical-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Thinking machines — artificial intelligence and machine learning",
+      "objectives": "I can give a simple definition of artificial intelligence and machine learning\nI can give real-world examples of AI and machine learning\nI can describe the steps to train a machine: gather, train, test\nI can say how machine learning is different from ordinary programming",
+      "outline": "Routine first. Vocabulary on board: artificial intelligence (AI) · machine learning (ML) · data · examples · train · test. TA: webcams and a set of objects (e.g. fruit) ready; starter worksheet open. Read the 4 “I can…” aloud.\n1. (0–10) Starter — ‘words matter’. Pupils CHOOSE what ‘artificial’ means on the starter worksheet, then think of synonyms for ‘intelligent’.\n   • Support: what does AI stand for?  • Core: two words meaning ‘intelligent’.  • Challenge: write your own one-sentence definition of AI.\n2. (10–20) I-do → we-do — defining AI/ML; can a machine ‘think’? Teacher gives broad definitions and examples (I do); class decides which everyday things use AI (we do).\n3. (20–45) You-do — Be the teacher (Google Teachable Machine). Pupils GATHER images, TRAIN, then TEST a fruit classifier (drag/click, almost no writing), using the Teachable Machine image as a guide. Put the ORDER activity (gather → train → test) on the activity worksheet first so they know the steps. Likely error: too few/poor examples → fix-words “more good examples = better guesses.”\n   • Support: how many examples do you need?  • Core: why might the model get it wrong?  • Challenge: an AI decides who gets a loan — why do the training examples matter (fairness)?\n4. (45–52) Card-sort — is this ordinary PROGRAMMING or MACHINE LEARNING? Plenary slider: how confident are you explaining ML?\n5. (52–55) Plenary — self-tick the 4 “I can…”; one moral question about an AI use. Show their trained model.\nDifferentiation on the SAME task; calm role (operate the webcam / sort objects) for anyone who prefers it. No flashing/sound on slides.",
+      "resources": [
+        {
+          "title": "Google Teachable Machine — new project (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-google-teachable-machine-new-project-teach-computing.png"
+        },
+        {
+          "title": "Thinking machines — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-thinking-machines-starter-worksheet.md"
+        },
+        {
+          "title": "Thinking machines — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-thinking-machines-activity-worksheet.md"
+        },
+        {
+          "title": "Thinking machines — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-thinking-machines-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Sharing — recap and open source software",
+      "objectives": "I can recall the key ideas about computing systems from this unit\nI can explain what it means to share and 'remix' program code\nI can explain one benefit and one risk of open source software",
+      "outline": "Routine first. Vocabulary on board: hardware · software · open source · share · see inside · remix · attribution. TA: recap (summative) worksheet open; the ‘Naughty elf’ Scratch link ready. Read the 3 “I can…” aloud.\n1. (0–25) Recap quiz — the recap worksheet pulls together the whole unit: card-sort HARDWARE vs SOFTWARE, ‘which are programs?’ (multi-select), ‘what does a processor do?’ (multi-select). Low-stakes, mostly tick/drag. Anyone who finishes early starts the open-source activity.\n   • Support: hardware/software card-sort + one-choice questions.  • Core/Challenge: the multi-selects + a short explain. TA: read options aloud.\n2. (25–40) Implications — explore the ‘Naughty elf’ Scratch program; use ‘See inside’ to read the code (it is cheating!). Pupils CHOOSE what ‘See inside’ does on the activity worksheet; card-sort BENEFIT vs RISK of sharing code. Likely error: “remix changes the original” → fix-words “remix makes a COPY and credits you.”\n3. (40–50) Free and open source software — define it (you can see, use and change the code). Pupils name one open source program for an everyday task.\n   • Support: what does open source mean?  • Core: name an open source program.  • Challenge: why is ‘see inside’ good for safety/trust?\n4. (50–55) Plenary — slider: how confident with the whole unit? Self-tick the 3 “I can…”.\nDifferentiation on the SAME task. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Scratch 'See inside' — Naughty elf project (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-scratch-see-inside-naughty-elf-project-teach-computing.png"
+        },
+        {
+          "title": "Sharing — recap quiz worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-sharing-recap-quiz-worksheet.md"
+        },
+        {
+          "title": "Sharing — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-sharing-activity-worksheet.md"
+        },
+        {
+          "title": "Sharing — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-sharing-slides.md"
+        }
+      ]
+    }
+  ]
+}

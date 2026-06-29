@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: sprite · design · programming blocks · algorithm · test. Hand back each pupil's design and algorithm from last lesson.
 
 ## Recap — your design
-![Three rockets on the moon, ready to race]({{res:l6-space-race.jpg}})
+![Three rockets on the moon, ready to race]({{res:l6-three-rockets-a-space-race-teach-computing.jpg}})
 
 - you chose a background
 - you designed three rockets

@@ -68,7 +68,7 @@ One time only: your shoe size today, the colour of your front door
 ## Count the cars
 Watch the short road video. Count one colour of car. Make a tally as you watch.
 
-![Cars driving along a road]({{res:l1-vehicles.png}})
+![Cars driving along a road]({{res:l1-cars-on-a-road-teach-computing.png}})
 
 > Teacher plays a 1-minute road video. Each pupil counts one car colour and tallies.
 

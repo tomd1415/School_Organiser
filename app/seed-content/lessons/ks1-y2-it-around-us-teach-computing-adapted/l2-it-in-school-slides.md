@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Recap from last lesson: IT means a computer, or something that works with a computer. Same routine.
 
 ## Is it IT?
-![A computer keyboard]({{res:l2-keyboard.png}})
+![A computer keyboard]({{res:l2-a-computer-keyboard-teach-computing.png}})
 
 - a keyboard is IT — it works with a computer
 - a printer is IT — it works with a computer

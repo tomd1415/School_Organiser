@@ -15,7 +15,7 @@
 > 🧑‍🏫 Show the school floor robot itself, not just the slide. Keep it calm: pass it round one table at a time. Ask: what jobs do robots do, and why?
 
 ## The buttons on the robot
-![The buttons on top of the floor robot]({{res:l1-beebot-buttons.png}})
+![The buttons on top of the floor robot]({{res:l4-floor-robot-buttons-teach-computing.png}})
 
 - the arrows are direction commands: forwards, backwards, left turn, right turn
 - Go (green) runs the program

@@ -16,7 +16,7 @@
 > 🧑‍🏫 Starter: thumbs up / down for "where might we find IT?" (shop, woods, street, sea). IT could be almost anywhere a person takes a phone, but it is MORE likely in some places.
 
 ## IT in a shop
-![A card machine in a shop]({{res:l3-card-reader.jpg}})
+![A card machine in a shop]({{res:l3-a-card-machine-in-a-shop-teach-computing.jpg}})
 
 - a till adds up what you buy
 - a card machine takes the payment
@@ -25,7 +25,7 @@
 > 🧑‍🏫 This is one group in the card-sort. Keep language simple: "the card machine takes your money to pay."
 
 ## IT on the street
-![A cash machine]({{res:l3-cash-machine.jpg}})
+![A cash machine]({{res:l3-a-cash-machine-teach-computing.jpg}})
 
 - a cash machine gives you money
 - a crossing button helps you cross safely
@@ -34,7 +34,7 @@
 > 🧑‍🏫 This is the other card-sort group. The crossing button matches the Challenge "tick all" question.
 
 ## Talk about IT
-![A crossing button]({{res:l3-crossing-button.jpg}})
+![A crossing button]({{res:l3-a-pedestrian-crossing-button-teach-computing.jpg}})
 
 - where is it found?
 - what does it do?

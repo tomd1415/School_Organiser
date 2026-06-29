@@ -10,7 +10,7 @@ Today I will add white headlights and red brake lights, and switch them on and o
 ## Starter — light it up!
 An LED has two legs. The **long leg (anode)** is positive and goes to a GPIO pin. The **short leg (cathode)** goes to ground.
 
-![A white LED]({{res:l6-led-white.png}})
+![A white LED]({{res:l6-white-led-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

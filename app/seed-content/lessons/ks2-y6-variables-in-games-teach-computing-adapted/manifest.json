@@ -10,12 +10,48 @@
       "objectives": "I can explain that a variable is something that can change\nI can find examples of things that change (like a score)\nI can change a score in a Scratch project\nI can say that a variable can hold a number or letters",
       "outline": "Routine first (same every lesson). Words on the board: variable · change · name · value. TA: everyone has the starter worksheet open; the Score change Scratch project (ncce.io/scorechange) ready. Read the four 'I can…' aloud, slowly.\n1. (0–10) Starter — the football score. In a match the score and the time CHANGE; the pitch size stays the same. Pupils MULTI-SELECT what changes. A thing that can change is a variable.\n2. (10–18) I-do → we-do — a variable can change. The score is a variable; it goes up and down. A variable holds ONE value at a time (one score at a time). Likely error: 'the pitch changes' → fix-words 'a variable is something that CHANGES.' Support choose what a variable is.\n3. (18–32) Changing the score in Scratch. Show the change score by block: +2 makes it go up, -2 makes it go down. Demonstrate clicking the balls in Score change. Support choose what each block does; Challenge: what does -2 do?\n4. (32–48) You-do — make a variable. Show the Scratch editor. Click Variables → Make a Variable → name it Score. Pupils ORDER the make-a-variable steps, SORT values into number/letters, then change the score and screenshot it.\n5. (48–55) Plenary — self-tick the four 'I can…'; each pupil says what a variable is (something that can change).\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine. TA: prompt, do not do it for them.",
       "resources": [
-        { "title": "Introducing variables — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introducing-variables-starter-worksheet.md" },
-        { "title": "Introducing variables — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introducing-variables-activity-worksheet.md" },
-        { "title": "Introducing variables — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-introducing-variables-slides.md" },
-        { "title": "The Scratch editor (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-scratch-editor.png" },
-        { "title": "A change score by 2 block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-change-score-by-2.png" },
-        { "title": "A change score by -2 block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-change-score-by-neg2.png" }
+        {
+          "title": "The Scratch editor (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-the-scratch-editor-teach-computing.png"
+        },
+        {
+          "title": "A change score by 2 block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-change-score-by-2-block-teach-computing.png"
+        },
+        {
+          "title": "A change score by -2 block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-change-score-by-2-block-teach-computing.png"
+        },
+        {
+          "title": "Introducing variables — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introducing-variables-starter-worksheet.md"
+        },
+        {
+          "title": "Introducing variables — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introducing-variables-activity-worksheet.md"
+        },
+        {
+          "title": "Introducing variables — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-introducing-variables-slides.md"
+        }
       ]
     },
     {
@@ -23,12 +59,48 @@
       "objectives": "I can explain that a variable holds one value at a time\nI can name the two parts of a variable: its name and its value\nI can choose a clear name for a variable\nI can make and change a variable in Scratch",
       "outline": "Routine first. Words on the board: variable · name · value · set · change. TA: everyone has the starter worksheet open; the Scoreboard Scratch project (ncce.io/scoreboard) ready. Read the four 'I can…' aloud. Recap: a variable is something that can change.\n1. (0–8) Starter — a game with variables. Show the score+timer game. The score and timer change; they are variables. Pupils choose the variables (the moving ball uses Motion, not a Variable block). Support choose how many values a variable holds.\n2. (8–22) I-do → we-do — one value at a time; name and value. A variable holds ONE value; a new value replaces the old. Every variable has a NAME (Score) and a VALUE (5). Likely error: 'it keeps both numbers' → fix-words 'the new value REPLACES the old one.' Pupils SORT names and values.\n3. (22–34) A good name. Use the labelled-drawers idea: a good label finds things fast. Names should be short, say what they hold, no spaces (use _). Core: rename 'Number' to something better.\n4. (34–50) You-do — make a scoreboard. Show the Scoreboard project (USA/Japan flags). Click Variables → Make a Variable; use change … by 1. Pupils ORDER the blocks (PARSONS), LABEL the score and timer on the stage, build the scoreboard and screenshot it.\n5. (50–55) Plenary — self-tick the four 'I can…'; each pupil names the two parts of a variable.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt with the Variables button; do not make it for them.",
       "resources": [
-        { "title": "Variables in programming — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-variables-in-programming-starter-worksheet.md" },
-        { "title": "Variables in programming — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-variables-in-programming-activity-worksheet.md" },
-        { "title": "Variables in programming — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-variables-in-programming-slides.md" },
-        { "title": "A Scratch game with a score and a timer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-score-timer.png" },
-        { "title": "A Scratch scoreboard with two flags (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-scoreboard.png" },
-        { "title": "A change Score_A by 1 block (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-change-score-a.png" }
+        {
+          "title": "A Scratch game with a score and a timer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-scratch-game-with-a-score-and-a-timer-teach-computing.png"
+        },
+        {
+          "title": "A Scratch scoreboard with two flags (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-scratch-scoreboard-with-two-flags-teach-computing.png"
+        },
+        {
+          "title": "A change Score_A by 1 block (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-change-score-a-by-1-block-teach-computing.png"
+        },
+        {
+          "title": "Variables in programming — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-in-programming-starter-worksheet.md"
+        },
+        {
+          "title": "Variables in programming — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-in-programming-activity-worksheet.md"
+        },
+        {
+          "title": "Variables in programming — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-in-programming-slides.md"
+        }
       ]
     },
     {
@@ -36,12 +108,48 @@
       "objectives": "I can choose variables that would improve a game\nI can set a variable to a start value with the green flag\nI can decide where in the code to change a variable\nI can improve a game using variables",
       "outline": "Routine first. Words on the board: variable · set · change · design · event. TA: everyone has the starter worksheet open; the Pong Scratch project (ncce.io/pong) ready. Read the four 'I can…' aloud. Recap: a variable is a name and a value that can change.\n1. (0–8) Starter — improving Pong. Pong has a ball and a paddle but no score. You could add a score, a timer, or lives — all variables. Pupils MULTI-SELECT the variables to add (a 'new background colour' is not one). Support choose which is a variable.\n2. (8–18) I-do → we-do — set the score at the start. Show the Pong code. set score to 0 with the green flag starts each game fresh. set PUTS a value in; change ADDS to it. Likely error: 'set and change are the same' → fix-words 'set PUTS a value in; change ADDS to it.' Pupils ORDER the green-flag blocks (PARSONS) and SORT set vs change.\n3. (18–38) You-do — where you change the score matters. In setup → changes once; in the loop → races up; in 'if touching paddle' → only when the ball is caught. Pupils PREDICT on the activity worksheet (matching grid), then TEST each place in Scratch.\n4. (38–50) Changing up and down. +1 up, -1 down; the score can change in more than one place. Core: up 1 then down 1 leaves it the same. Pupils add a working score and screenshot it.\n5. (50–55) Plenary — self-tick the four 'I can…'; each pupil says where to put the block so the score goes up only when the ball is caught.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: predict first, then run — do not run it for them.",
       "resources": [
-        { "title": "Improving a game — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-improving-a-game-starter-worksheet.md" },
-        { "title": "Improving a game — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-improving-a-game-activity-worksheet.md" },
-        { "title": "Improving a game — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-improving-a-game-slides.md" },
-        { "title": "Pong code: set score to 0 and a repeat loop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-pong-code.png" },
-        { "title": "A change score by 1 then by 2 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-change-twice.png" },
-        { "title": "A change score by 1 then by -1 (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-change-up-down.png" }
+        {
+          "title": "Pong code: set score to 0 and a repeat loop (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-pong-code-set-score-to-0-and-a-repeat-loop-teach-computing.png"
+        },
+        {
+          "title": "A change score by 1 then by 2 (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-change-score-by-1-then-by-2-teach-computing.png"
+        },
+        {
+          "title": "A change score by 1 then by -1 (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-change-score-by-1-then-by-1-teach-computing.png"
+        },
+        {
+          "title": "Improving a game — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-improving-a-game-starter-worksheet.md"
+        },
+        {
+          "title": "Improving a game — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-improving-a-game-activity-worksheet.md"
+        },
+        {
+          "title": "Improving a game — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-improving-a-game-slides.md"
+        }
       ]
     },
     {
@@ -49,12 +157,48 @@
       "objectives": "I can say what a games designer does\nI can choose the artwork (sprites and background) for my game\nI can write an algorithm for my game\nI can explain my design choices",
       "outline": "Routine first. Words on the board: design · algorithm · code · sprite · background. TA: everyone has the starter worksheet open; the Fruit catcher remix (ncce.io/introfruit) and Fruit catcher star (ncce.io/fruitcatcher) ready. Read the four 'I can…' aloud. Recap: variables make a game more fun.\n1. (0–10) Starter — a games designer. A designer PLANS a game before it is made: the sprites, the background, how it works. Show the controllers image. Try the Fruit catcher game; pupils MULTI-SELECT what they can see (bowl, falling apples, score — a racing car is the odd one out). Support choose what a designer does.\n2. (10–22) I-do → we-do — choose your artwork. Choose TWO sprites to fall and a background. A sprite is a character/object; the background is the scene behind. Pupils SORT sprites vs backgrounds.\n3. (22–42) You-do — write an algorithm. An algorithm is a precise set of steps. Show the star→bowl sketch. Pupils FILL-BLANK the falling-star algorithm and ORDER the algorithm steps. Likely error: 'an algorithm is the code' → fix-words 'an algorithm is the PLAN; code comes next.'\n4. (42–50) Explain your design. Challenge: explain WHY you chose your sprites and background. Pupils screenshot their finished design (keep for next lesson).\n5. (50–55) Plenary — self-tick the four 'I can…'; each pupil says what an algorithm is.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt for ideas; do not design it for them.",
       "resources": [
-        { "title": "Becoming a games designer — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-games-designer-starter-worksheet.md" },
-        { "title": "Becoming a games designer — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-games-designer-activity-worksheet.md" },
-        { "title": "Becoming a games designer — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-becoming-a-games-designer-slides.md" },
-        { "title": "Two game controllers (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-gamer.jpg" },
-        { "title": "The Fruit catcher game (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-fruit-catcher.png" },
-        { "title": "A hand-drawn algorithm sketch: a star falling into a bowl (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-algorithm-sketch.png" }
+        {
+          "title": "Two game controllers (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-two-game-controllers-teach-computing.jpg"
+        },
+        {
+          "title": "The Fruit catcher game (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-the-fruit-catcher-game-teach-computing.png"
+        },
+        {
+          "title": "A hand-drawn algorithm sketch: a star falling into a bowl (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-hand-drawn-algorithm-sketch-a-star-falling-into-a-bowl-teach-computing.png"
+        },
+        {
+          "title": "Becoming a games designer — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-games-designer-starter-worksheet.md"
+        },
+        {
+          "title": "Becoming a games designer — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-games-designer-activity-worksheet.md"
+        },
+        {
+          "title": "Becoming a games designer — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-becoming-a-games-designer-slides.md"
+        }
       ]
     },
     {
@@ -62,12 +206,48 @@
       "objectives": "I can add my artwork (sprites and background) to my game\nI can choose a variable name that says what it holds\nI can build my game from my design\nI can test my game and fix problems (debug)",
       "outline": "Routine first. Words on the board: design · code · variable · name · test · debug. TA: everyone has the starter worksheet open; the Intro chatbot (ncce.io/introchatbot), the chatbot code (ncce.io/chatbotcode) and the Fruit catcher template (ncce.io/catchertemplate) ready; pupils' Lesson 4 designs to hand. Read the four 'I can…' aloud. Recap: you planned your game last lesson.\n1. (0–8) Starter — a chatbot's variables. The chatbot remembers your name and age in variables, but they are called variable_a and variable_b. Pupils MULTI-SELECT where variables are used. Support choose why variable_a is a poor name.\n2. (8–18) I-do → we-do — good names help. Rename variable_b → name, variable_a → age; now anyone can read the code. Likely error: 'the name does not matter' → fix-words 'a good name SAYS what it holds.' Pupils MATCH the old names to better ones.\n3. (18–28) Build a small part. Pupils ORDER a short sequence (ask → set → say) as PARSONS, then start building their own game from their design (artwork + variables with good names).\n4. (28–50) You-do — build, test and debug. Build from the design, run with the green flag, TEST against the design, then DEBUG (find and fix). Pupils ORDER the build/test/debug cycle and screenshot their running game. Challenge: what would you check if the score did not go up?\n5. (50–55) Plenary — self-tick the four 'I can…'; each pupil says what debug means.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: prompt, do not build it for them.",
       "resources": [
-        { "title": "Design to code — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-design-to-code-starter-worksheet.md" },
-        { "title": "Design to code — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-design-to-code-activity-worksheet.md" },
-        { "title": "Design to code — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-design-to-code-slides.md" },
-        { "title": "Chatbot code with unclear names variable_a and variable_b (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-chatbot-bad-names.png" },
-        { "title": "Chatbot code with clear names name and age (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-chatbot-good-names.png" },
-        { "title": "Two game controllers (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-controllers.jpg" }
+        {
+          "title": "Chatbot code with unclear names variable_a and variable_b (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-chatbot-code-with-unclear-names-variable-a-and-variable-b-teach-computing.png"
+        },
+        {
+          "title": "Chatbot code with clear names name and age (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-chatbot-code-with-clear-names-name-and-age-teach-computing.png"
+        },
+        {
+          "title": "Two game controllers (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-two-game-controllers-teach-computing.jpg"
+        },
+        {
+          "title": "Design to code — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-design-to-code-starter-worksheet.md"
+        },
+        {
+          "title": "Design to code — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-design-to-code-activity-worksheet.md"
+        },
+        {
+          "title": "Design to code — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-design-to-code-slides.md"
+        }
       ]
     },
     {
@@ -75,11 +255,41 @@
       "objectives": "I can find ways to make my game better\nI can add a 'lives' variable to my game\nI can share my game with others\nI can give helpful feedback on someone's game",
       "outline": "Routine first. Words on the board: improve · evaluate · share · lives. TA: everyone has the starter worksheet open; the Banana overload Scratch project (ncce.io/bananas) ready; pupils' games from Lesson 5 open. Read the four 'I can…' aloud. End-of-unit lesson — recap the whole journey at the end.\n1. (0–8) Starter — are all games the same? Show four fruit-catcher versions. They all start the same but end up different; borrow good ideas. Pupils MULTI-SELECT ways to improve their game ('delete the whole game' is the odd one out). Support choose one real improvement.\n2. (8–20) I-do → we-do — add a lives variable. lives counts the tries left; change lives by -1 when a sprite is missed; set lives to 3 at the start. Likely error: 'change lives by 1 lowers it' → fix-words 'to go DOWN, change by -1.' Pupils ORDER the blocks (PARSONS), then add lives to their game.\n3. (20–35) You-do — share your game. Save → Share → copy the URL → give it to a friend. Pupils ORDER the share steps and screenshot their shared game.\n4. (35–48) Helpful feedback. Say what you liked; say how it could be even better; be kind. Pupils choose the most helpful feedback and RATE their own confidence with variables (scale).\n5. (48–55) End of unit — recap: introducing variables → variables in programming → improving a game → designing → design to code → improving and sharing. Self-tick the four 'I can…'; each pupil says what a lives variable does.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine. TA: model 'It would be even better if…'; keep feedback positive.",
       "resources": [
-        { "title": "Improving and sharing — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-improving-and-sharing-starter-worksheet.md" },
-        { "title": "Improving and sharing — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-improving-and-sharing-activity-worksheet.md" },
-        { "title": "Improving and sharing — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-improving-and-sharing-slides.md" },
-        { "title": "Four different fruit catcher games (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-fruit-catcher-remixes.png" },
-        { "title": "Scratch code for a lives variable (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-lives-code.png" }
+        {
+          "title": "Four different fruit catcher games (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-four-different-fruit-catcher-games-teach-computing.png"
+        },
+        {
+          "title": "Scratch code for a lives variable (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-scratch-code-for-a-lives-variable-teach-computing.png"
+        },
+        {
+          "title": "Improving and sharing — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-improving-and-sharing-starter-worksheet.md"
+        },
+        {
+          "title": "Improving and sharing — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-improving-and-sharing-activity-worksheet.md"
+        },
+        {
+          "title": "Improving and sharing — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-improving-and-sharing-slides.md"
+        }
       ]
     }
   ]

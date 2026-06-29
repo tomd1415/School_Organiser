@@ -10,7 +10,7 @@ Today I will construct my model, evaluate it with a partner, and improve it.
 ## Build your model
 Use your plan from last lesson. Add your shapes, then move, resize, lift, duplicate and group them to match your design.
 
-![An example 3D model built in Tinkercad]({{res:l6-finished-house.png}})
+![An example 3D model built in Tinkercad]({{res:l6-an-example-3d-model-built-in-tinkercad-teach-computing.png}})
 
 ## Show your work
 | Question | Your answer |

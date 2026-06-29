@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: sequence · command · program · run · start. Same routine as always. No sound or animation needed on the board.
 
 ## The ScratchJr screen
-![The ScratchJr screen]({{res:l1-scratchjr-screen.png}})
+![The ScratchJr screen]({{res:l1-the-scratchjr-screen-teach-computing.png}})
 
 - the **stage** is where the sprite moves
 - the **blocks** make the program
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Use your own school routine. Likely error: pupils name a later step as the start → fix-words "the start is the very first thing."
 
 ## Start the program
-![The yellow start blocks]({{res:l1-start-blocks.png}})
+![The yellow start blocks]({{res:l1-the-yellow-start-blocks-in-scratchjr-teach-computing.png}})
 
 - a program does not move until you start it
 - press the **green flag** to start
@@ -34,7 +34,7 @@
 > 🧑‍🏫 I-do then we-do. Build a tiny program and show it does nothing until the green flag is pressed.
 
 ## Run it full screen
-![A program running full screen]({{res:l1-fullscreen.png}})
+![A program running full screen]({{res:l1-a-program-running-full-screen-teach-computing.png}})
 
 - press the green flag
 - watch your sprite move

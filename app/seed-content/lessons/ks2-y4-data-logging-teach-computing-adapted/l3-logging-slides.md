@@ -23,7 +23,7 @@
 > 🧑‍🏫 Likely error: muddling "data point" and "interval". Fix-words: "a data point is a NUMBER; the interval is the GAP between them."
 
 ## Reading a table
-![A data table]({{res:l3-data-table.png}})
+![A data table]({{res:l3-data-table-of-readings-teach-computing.png}})
 
 - each row is one data point
 - the time goes up in small steps (0.1 s)
@@ -32,7 +32,7 @@
 > 🧑‍🏫 We-do: find the sound value at 00.000 together (41.2 dBA). You-do: pupils read another value. TA: prompt, do not do it for them.
 
 ## Reading a line graph
-![A line graph of light over time]({{res:l3-light-graph.png}})
+![A line graph of light over time]({{res:l3-light-line-graph-over-time-teach-computing.png}})
 
 - the data points join up to make a line
 - low points = darker; high points = brighter

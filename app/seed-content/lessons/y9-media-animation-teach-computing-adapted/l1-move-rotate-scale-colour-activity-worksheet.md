@@ -11,7 +11,7 @@ Today I will add objects in Blender and move, rotate, scale, and colour them to 
 Each part of this snowman started as a Blender object. Drag the right shape name onto each part.
 
 ```label
-image: {{res:l1-snowman-coloured.png}}
+image: {{res:l1-coloured-snowman-model.png}}
 hat (40%, 12%): cylinder
 head (40%, 30%): sphere
 nose (47%, 41%): cone

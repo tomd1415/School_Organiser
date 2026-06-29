@@ -10,7 +10,7 @@ Today I will add a **lives** variable, share my game, and give helpful feedback.
 ## Add a lives variable
 A **lives** variable counts how many tries the player has left. When a sprite is missed, the lives go down by 1.
 
-![Scratch code that changes a missed/lives variable when a sprite is touched]({{res:l6-lives-code.png}})
+![Scratch code that changes a missed/lives variable when a sprite is touched]({{res:l6-scratch-code-for-a-lives-variable-teach-computing.png}})
 
 Put these blocks in order so the lives go down when a sprite is missed.
 

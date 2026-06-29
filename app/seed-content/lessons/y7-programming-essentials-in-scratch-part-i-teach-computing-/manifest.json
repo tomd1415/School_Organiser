@@ -1,0 +1,247 @@
+{
+  "unitTitle": "Y7 Programming essentials in Scratch — part I (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Sequencing — Frère Jacques",
+      "objectives": "I can explain that computers need precise instructions\nI can say what a sequence is\nI can predict what a sequence of blocks will do\nI can put music blocks in the right order to play a song",
+      "outline": "Routine first (same every lesson). Vocabulary on board: sequence · instruction · execute · subroutine. TA: everyone has Scratch open; headphones for the music task. Read the four “I can…” aloud.\n1. (0–5) Starter — robots are not like people (think–pair–share): computers need precise instructions. Pupils CHOOSE on the starter worksheet (no writing).\n   • Support: tick the word ‘sequence’.  • Core: name one thing a computer needs that a person can guess.  • Challenge: why was “turn right” not enough for the robot?\n2. (5–20) I-do → we-do. Teacher plays the short commands video (teacher-played hook, has sound), then defines a sequence with the music-score / recipe / furniture image. Class predicts what the Frère Jacques program will play (PRIMM Predict).\n   • Support: first line placed for them.  • Core: predict in words.  • Challenge: explain why subroutines help. Likely error: blocks in the wrong order → fix-words “click one block to hear it, then check it comes next.”\n3. (20–45) You-do — order the eight song lines (each sung twice) on the worksheet, then build the sequence in Scratch (pair programming, swap each task). Keep a screenshot of the working program.\n4. (45–55) Plenary — “sequence the sounds” run live if time; pupils self-tick the four “I can…” and play their song. TA notes who got a working sequence.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing; the video/audio are the teacher’s low-arousal choice, played once.",
+      "resources": [
+        {
+          "title": "computers need precise instructions.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-computers-need-precise-instructions.png"
+        },
+        {
+          "title": "sequencing examples (music, recipe, furniture).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-sequencing-examples-music-recipe-furniture.png"
+        },
+        {
+          "title": "commands video (Teach Computing).mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-commands-video-teach-computing.mp4"
+        },
+        {
+          "title": "Frère Jacques audio (Teach Computing).mp3",
+          "kind": "document",
+          "mimeType": "audio/mpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-fr-re-jacques-audio-teach-computing.mp3"
+        },
+        {
+          "title": "Sequencing — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-sequencing-starter-worksheet.md"
+        },
+        {
+          "title": "Sequencing — Frère Jacques activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-sequencing-fr-re-jacques-activity-worksheet.md"
+        },
+        {
+          "title": "Sequencing in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-sequencing-in-scratch-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Variables — Chat with Big Ed",
+      "objectives": "I can explain what a variable is (a name for stored data)\nI can follow input → process → output\nI can predict what a program that uses a variable will do\nI can trace the value of a variable as a program runs",
+      "outline": "Routine first. Vocabulary on board: variable · store · input · process · output · trace. TA: everyone has Scratch open. Read the four “I can…” aloud.\n1. (0–15) Starter — variables storytime: pupils hold values for variable names (TOWN changes half-way). Pupils CHOOSE on the starter worksheet. Key point (misconception M1): a variable holds ONE value at a time.\n   • Support: tick ‘stored data’.  • Core: what did HERO stand for?  • Challenge: why mattered when TOWN changed?\n2. (15–18) Input → process → output: keyboard in, screen out, variable stores in between.\n3. (18–48) Chat with Big Ed (PRIMM). Predict the ‘Hello [name]’ code (I do → we do), then pairs investigate the variable blocks and modify (add the music question). Keep a screenshot.\n   • Support: identify which orange block sets the variable.  • Core: explain what `name` stores + why ask before say.  • Challenge: what happens to the stored name when a second person types. Likely error: thinks ‘Hello’ shows without the name → “the variable fills only after it is set.”\n4. (48–55) Plenary — trace the `temperature` variable (write each value Big Ed says); self-tick the four “I can…”. TA notes who traced correctly. Homework: 4 multiple-choice questions.\nDifferentiation on the SAME task; movement break as routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Chat with Big Ed — variable blocks.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-chat-with-big-ed-variable-blocks.png"
+        },
+        {
+          "title": "Variables — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-starter-worksheet.md"
+        },
+        {
+          "title": "Variables — Chat with Big Ed activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-chat-with-big-ed-activity-worksheet.md"
+        },
+        {
+          "title": "Variables in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-variables-in-scratch-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Selection — If statements",
+      "objectives": "I can say whether a condition is true or false\nI can explain what selection (an If statement) does\nI can spot where an If statement is needed\nI can change a program to use selection",
+      "outline": "Routine first. Vocabulary on board: condition · expression · evaluate · selection · If statement. TA: everyone has Scratch open. Read the four “I can…” aloud.\n1. (0–7) Starter — true or false? A condition is checked and is either true or false (optional true-side/false-side of the room). Pupils CHOOSE on the starter worksheet.\n   • Support: a condition is only true or false.  • Core: write a true condition.  • Challenge: the ‘this statement is false’ paradox.\n2. (7–18) If… else… (I do → we do). The birthday If/else image: true → If part runs, false → else runs. Misconception M21/M22: the else is NOT optional and NOT always run — exactly one path runs.\n3. (18–48) Chat with Big Ed (selection PRIMM). Predict, investigate, then modify: add the ‘Ed’ Easter egg (single If) and the ‘not OK’ reply (If → If/else). Keep a screenshot.\n   • Support: the Easter egg needs only one If.  • Core: difference between If and If/else; why both are written.  • Challenge: use Or so ‘Ed’ or ‘Big Ed’ both work. Likely error: thinks both messages show → “only one path runs each time.”\n4. (48–55) Plenary — Parson’s problem: order the capital-of-Spain quiz code (ask → if correct add score → else incorrect). Self-tick the four “I can…”. TA notes who used selection correctly.\nDifferentiation on the SAME task; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Selection — If/else blocks.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-selection-if-else-blocks.png"
+        },
+        {
+          "title": "Selection — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-starter-worksheet.md"
+        },
+        {
+          "title": "Selection — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-activity-worksheet.md"
+        },
+        {
+          "title": "Selection in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-selection-in-scratch-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Operators — comparison & logic",
+      "objectives": "I can use comparison operators (>, <, =) in a condition\nI can use logic operators (and, or, not) in a condition\nI can decide whether a condition is true or false\nI can add a quiz question using operators",
+      "outline": "Routine first. Vocabulary on board: operator · comparison · logic · condition · evaluate. TA: everyone has Scratch open; jumbo playing cards for the unplugged task. Read the four “I can…” aloud.\n1. (0–5) Starter — what will the program output? `score > 30` with score 42. Pupils CHOOSE true/false on the starter worksheet (links to maths’ >, <).\n   • Support: `>` means greater than.  • Core: what `<` means.  • Challenge: is 30 > 30?\n2. (5–18) Comparison (>, <, =) then logic (and, or, not) operators, using the ‘value = King and suit = hearts’ image. Optional playing-card stand-up: read a Boolean expression, pupils move to true/false; build complexity slowly.\n3. (18–43) Worked example — The Big Quiz (I do): add a question accepting more than one answer using `or` (deliberate `and` mistake first, let them catch it). Then you-do: build q2 and work the worksheet.\n   • Support: which operator means ‘both’.  • Core: when is `and` false / what `not` does.  • Challenge: the year-group question uses `>` to choose which questions to ask. Likely error: uses `and` where ‘either answer’ is allowed → “‘or’ is true when at least one side is true.”\n4. (43–55) Plenary — True or false table (peer-mark if time); self-tick the four “I can…”. TA notes who built a working operator condition.\nDifferentiation on the SAME task; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Operators — comparison and logic blocks.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-operators-comparison-and-logic-blocks.png"
+        },
+        {
+          "title": "Operators — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-operators-starter-worksheet.md"
+        },
+        {
+          "title": "Operators — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-operators-activity-worksheet.md"
+        },
+        {
+          "title": "Operators in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-operators-in-scratch-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Count-controlled iteration & debugging",
+      "objectives": "I can explain what iteration (a loop) is\nI can say why loops are useful\nI can use a count-controlled loop to make a program shorter\nI can find and fix a bug by tracing a variable",
+      "outline": "Routine first. Vocabulary on board: iteration · count-controlled · repeat · debug · trace. TA: everyone has Scratch open. Read the four “I can…” aloud.\n1. (0–5) Starter — spot the pattern: ten `say` blocks counting 1–10; what stays the same / changes? Pupils CHOOSE on the starter worksheet.\n   • Support: repeating a step is ‘repetition’.  • Core: how many say blocks were used.  • Challenge: what could make it shorter.\n2. (5–11) What is iteration? Count-controlled = repeat a set number of times (real example: writing lines). 3. (11–26) Worked example (I do → we do): live-code Counting Cat — replace ten blocks with `repeat 10` + a `number` variable + `change number by 1`. Deliberate mistakes (Forever block; set-value inside the loop) to catch. Start value goes BEFORE the loop.\n4. (26–41) You-do — order the loop on the worksheet (Parson’s), then build Ten Green Bottles (pair programming, swap every 5 min). Keep a screenshot.\n   • Support: blocks inside the repeat are the repeated ones.  • Core: what iteration means / why a loop beats ten blocks.  • Challenge: count DOWN from 10. Likely error: `change number by 1` omitted → the number never moves.\n5. (41–55) Plenary — debugging: the times-table program (every line shows the same answer). Add ‘say the variables’, trace the table, find the bug (`multiply-by` never increments). Introduce bug/debug (Grace Hopper’s moth). Self-tick the four “I can…”. Homework: 4 multiple-choice questions.\nDifferentiation on the SAME task; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Spot the pattern — ten say blocks.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-spot-the-pattern-ten-say-blocks.png"
+        },
+        {
+          "title": "Count-controlled loop — times table blocks.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-count-controlled-loop-times-table-blocks.png"
+        },
+        {
+          "title": "Count-controlled iteration — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-count-controlled-iteration-starter-worksheet.md"
+        },
+        {
+          "title": "Count-controlled iteration — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-count-controlled-iteration-activity-worksheet.md"
+        },
+        {
+          "title": "Count-controlled iteration in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-count-controlled-iteration-in-scratch-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Problem-solving — Moves like Jim",
+      "objectives": "I can remember the key programming words from this unit\nI can pick the right block to solve a problem\nI can combine sequence, selection, loops and operators in one program\nI can rate my own confidence honestly",
+      "outline": "Routine first (final lesson of the unit — work as independently as you can). Vocabulary on board: sequence · variable · selection · iteration · operator. TA: everyone has Scratch open. Read the four “I can…” aloud.\n1. (0–5) Starter — beat the teacher: write down as many unit key words as you can in 60 seconds, swap and tick. Then pupils TICK the key words on the starter worksheet.\n   • Support: name the count-controlled loop.  • Core: what a variable is used for.  • Challenge: explain a key word in your own words.\n2. (5–40) Moves like Jim — the summative dance game. Tasks get harder with less code given. Be-a-problem-solver routine: re-read → check earlier work → ask a partner to prompt → then ask the teacher. Keep a screenshot of each subroutine.\n   • Support: copy the shape of the subroutine above; a calm ‘plan it on paper’ role is fine.  • Core: shorten the countdown with a loop; pick the operator for ‘1 or 9’.  • Challenge: score + feedback explorer tasks (`score > 2`). Likely error: uses `and` where ‘either key’ is meant → “‘or’ is true when at least one side is true.”\n3. (40–55) Plenary — You’re hired: pupils tick which skills they are confident using and name one to practise next; self-tick the four “I can…”. TA/teacher uses the self-rating to plan support for the next unit (which starts with a Dance Battle).\nDifferentiation on the SAME task; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Dance Battle game.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-dance-battle-game.png"
+        },
+        {
+          "title": "Problem-solving — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-problem-solving-starter-worksheet.md"
+        },
+        {
+          "title": "Problem-solving — Moves like Jim activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-problem-solving-moves-like-jim-activity-worksheet.md"
+        },
+        {
+          "title": "Problem-solving in Scratch — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-problem-solving-in-scratch-slides.md"
+        }
+      ]
+    }
+  ]
+}

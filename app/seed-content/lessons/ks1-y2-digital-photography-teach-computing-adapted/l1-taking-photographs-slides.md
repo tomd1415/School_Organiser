@@ -16,8 +16,8 @@
 > 🧑‍🏫 Show a photo next to a drawing. Agree: photographs are taken with a camera. A tablet has a camera inside it.
 
 ## Can these take photos?
-![A tablet]({{res:l1-tablet.png}})
-![A printer]({{res:l1-printer.png}})
+![A tablet]({{res:l1-a-tablet-teach-computing.png}})
+![A printer]({{res:l1-a-printer-teach-computing.png}})
 
 - a device with a **camera** can take photos
 - a printer and a USB stick cannot
@@ -26,7 +26,7 @@
 > 🧑‍🏫 Starter. On the worksheet pupils SORT devices into "can take photos / cannot". Likely error: a desktop computer usually needs a webcam plugged in.
 
 ## How to take a photo
-![A photographer]({{res:l1-photographer.png}})
+![A photographer]({{res:l1-a-photographer-taking-a-photo-teach-computing.png}})
 
 - **Hold** the device still
 - **Look** at the screen

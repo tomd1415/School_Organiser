@@ -9,13 +9,13 @@ Today I will name the parts of a computer, say what a computer is used for, and 
 
 A **computer** is a part of **IT** (information technology). IT also means things that work with a computer, like a printer.
 
-![A desktop computer]({{res:l1-desktop-computer.png}})
+![A desktop computer]({{res:l1-a-desktop-computer-teach-computing.png}})
 
 ## Name the parts of the computer
 Drag each label onto the right part of the computer.
 
 ```label
-image: {{res:l1-desktop-computer.png}}
+image: {{res:l1-a-desktop-computer-teach-computing.png}}
 screen (22%, 28%): screen
 computer (80%, 34%): computer
 keyboard (33%, 80%): keyboard

@@ -21,7 +21,7 @@ The lesson begins
 ## Start the program
 A program will not move until you start it. In ScratchJr you press the **green flag** to start.
 
-![The yellow start blocks in ScratchJr]({{res:l1-start-blocks.png}})
+![The yellow start blocks in ScratchJr]({{res:l1-the-yellow-start-blocks-in-scratchjr-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

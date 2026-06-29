@@ -21,7 +21,7 @@
 > 🧑‍🏫 Play "show me": call portrait or landscape and pupils turn the A4. Then ask which way a magazine cover goes (portrait). This is the sort task on the worksheet.
 
 ## A magazine cover
-![A magazine front cover made with desktop publishing]({{res:l3-magazine-tech-trends.png}})
+![A magazine front cover made with desktop publishing]({{res:l3-tech-trends-magazine-cover-teach-computing.png}})
 
 - it has a big title
 - a main picture
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Editorial designers decide where the title, pictures and text go. A good cover makes people want to read it.
 
 ## Placeholders
-![A magazine cover showing where the title, picture, story and quote go]({{res:l3-magazine-cover.png}})
+![A magazine cover showing where the title, picture, story and quote go]({{res:l3-magazine-cover-with-placeholders-teach-computing.png}})
 
 - a **placeholder** is a box that holds content
 - one box for the title, one for a picture, one for a story

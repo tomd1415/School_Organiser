@@ -8,7 +8,7 @@
 Today I will match a layout to its purpose and choose the best layout for a message.
 
 ## Magazines have their own layout too
-![Some magazine covers]({{res:l5-magazine.png}})
+![Some magazine covers]({{res:l5-magazine-layout-teach-computing.png}})
 
 ## Match the layout to its purpose
 For each layout, choose what it is for.

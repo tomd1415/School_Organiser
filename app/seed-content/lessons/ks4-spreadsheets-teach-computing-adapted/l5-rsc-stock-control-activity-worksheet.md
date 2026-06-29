@@ -10,7 +10,7 @@ Today I will use VLOOKUP to fetch item data from a lookup sheet, and an IF funct
 ## How a till works
 You scan an item number. A LOOKUP finds that number in the lookup sheet and returns the matching data.
 
-![A till receipt with shortened item names]({{res:l5-till-receipt.png}})
+![A till receipt with shortened item names]({{res:l5-till-receipt-teach-computing.png}})
 
 ## Predict
 A VLOOKUP searches column A of the lookup sheet for the item number, then returns data from another column.
@@ -48,7 +48,7 @@ The formula `=IF(H8<100,"Reorder","")` shows the word [[ ]] when the stock in H8
 ## 🔴 Challenge
 We also want to warn the user if they enter more sales than the stock allows.
 
-![The VAT rate cell that the lookup uses]({{res:l5-vat-lookup.png}})
+![The VAT rate cell that the lookup uses]({{res:l5-vat-rate-lookup-cell-teach-computing.png}})
 
 | Question | Type your code here |
 |---|---|

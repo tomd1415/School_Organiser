@@ -10,9 +10,9 @@ Today I will wire and code my buggy's lights, then combine everything for the fi
 ## Add the lights
 White headlights at the front, red brake lights at the back. Anode (long leg) → a spare GPIO pin; cathode (short leg) → the ground rail.
 
-![A red LED]({{res:l6-led-red.png}})
+![A red LED]({{res:l6-red-led-teach-computing.png}})
 
-![The finished buggy with its headlights and ultrasonic sensor]({{res:l6-buggy-final.png}})
+![The finished buggy with its headlights and ultrasonic sensor]({{res:l6-finished-buggy-headlights-and-sensor-teach-computing.png}})
 
 ## Put the headlight flash program in order
 Drag these lines into order to flash the headlights three times.

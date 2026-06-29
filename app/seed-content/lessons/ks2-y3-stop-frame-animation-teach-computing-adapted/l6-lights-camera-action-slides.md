@@ -16,7 +16,7 @@
 > 🧑‍🏫 Media means the extra things we add to a film. This is the sort task on the starter worksheet. Keep examples simple and concrete.
 
 ## The movie app
-![The movie app media panel with Video, Photos and Audio]({{res:l6-imovie-media.png}})
+![The movie app media panel with Video, Photos and Audio]({{res:l6-the-movie-app-media-panel-teach-computing.png}})
 
 - Video adds a film
 - Photos adds a picture

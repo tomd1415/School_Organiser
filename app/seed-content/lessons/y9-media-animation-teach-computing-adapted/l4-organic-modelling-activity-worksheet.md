@@ -10,7 +10,7 @@ Today I will make natural-looking models with proportional editing, the knife to
 ## Real things are not perfect
 Look at these two faces. Natural, real things are usually a little bit uneven (asymmetrical).
 
-![Two drawn faces, one symmetrical and one natural and asymmetrical]({{res:l4-symmetry-faces.png}})
+![Two drawn faces, one symmetrical and one natural and asymmetrical]({{res:l4-symmetry-two-faces.png}})
 
 | Question | Choose |
 |---|---|
@@ -46,7 +46,7 @@ Move the leaf onto the trunk
 | What does **subdivision** do to a face? | Type your answer here |
 
 ## 🔴 Challenge
-![A palm tree made with organic modelling]({{res:l4-palm-tree.png}})
+![A palm tree made with organic modelling]({{res:l4-palm-tree-model.png}})
 
 | Question | Your answer |
 |---|---|

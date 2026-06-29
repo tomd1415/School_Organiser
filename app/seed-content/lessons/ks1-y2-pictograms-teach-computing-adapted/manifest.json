@@ -10,11 +10,41 @@
       "objectives": "I can count a group of objects\nI can record data in a tally chart\nI can write the tally as a total\nI can compare totals using more than and less than",
       "outline": "Routine first (same every lesson). Vocabulary on the board: data · count · tally chart · total · more than · less than. TA: everyone has the starter worksheet. Read the four \"I can…\" aloud.\n1. (0–10) Starter — count the animals. On the starter worksheet pupils COUNT a group of objects and choose the total.\n   • Support: count up to 5.  • Core: count up to 10.  • Challenge: say which group has more.\n2. (10–20) I-do — a tally chart keeps a record so we do not lose count. One mark for each object. At 5 we draw a line across, like a gate, so groups of five are easy to count. Likely error: counting the marks as you draw them → fix-words \"make the marks first, count the total at the end.\"\n3. (20–35) We-do — on the activity worksheet pupils ORDER the steps to make a tally, then READ the Favourite Pets tally chart (which pet has the most / fewest, more than / less than).\n4. (35–50) You-do — pupils make a tally of objects in the room (or counters) and write the totals, then photograph their tally chart.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says one \"more than\" or \"less than\" sentence.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Counting and comparing — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-counting-and-comparing-starter-worksheet.md" },
-        { "title": "Counting and comparing — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-counting-and-comparing-activity-worksheet.md" },
-        { "title": "Counting and comparing — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-counting-and-comparing-slides.md" },
-        { "title": "A cartoon elephant (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-elephant.png" },
-        { "title": "Favourite pets tally chart (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-pets-tally-chart.png" }
+        {
+          "title": "A cartoon elephant (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-cartoon-elephant-teach-computing.png"
+        },
+        {
+          "title": "Favourite pets tally chart (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-favourite-pets-tally-chart-teach-computing.png"
+        },
+        {
+          "title": "Counting and comparing — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-counting-and-comparing-starter-worksheet.md"
+        },
+        {
+          "title": "Counting and comparing — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-counting-and-comparing-activity-worksheet.md"
+        },
+        {
+          "title": "Counting and comparing — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-counting-and-comparing-slides.md"
+        }
       ]
     },
     {
@@ -22,11 +52,41 @@
       "objectives": "I can say what a pictogram is\nI can enter data on a computer to make a pictogram\nI can read a pictogram\nI can answer simple questions about a pictogram",
       "outline": "Routine first. Vocabulary on the board: pictogram · data · enter · most · fewest · computer. TA: everyone has the starter worksheet; the pictogram software (j2e Pictogram) open on each screen. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what is a pictogram? On the starter worksheet pupils CHOOSE that a pictogram is a chart that uses pictures to show data.\n   • Support: choose what a pictogram uses.  • Core: choose why a pictogram is helpful.  • Challenge: say one thing a pictogram shows.\n2. (10–20) I-do — a pictogram shows data with pictures. One picture stands for one thing. On the computer we click + to add a picture. Likely error: counting the picture in the bottom \"key\" box → fix-words \"the bottom box just shows the picture; count the pictures above the line.\"\n3. (20–35) You-do — on the activity worksheet pupils ORDER the steps to enter data in the software, then build a fruit pictogram on the computer.\n4. (35–50) We-do — pupils READ the Our Favourite Fruit pictogram (which fruit has the most / fewest; tick the true sentences) and photograph their own pictogram.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil reads one fact from a pictogram.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Enter the data — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-enter-the-data-starter-worksheet.md" },
-        { "title": "Enter the data — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-enter-the-data-activity-worksheet.md" },
-        { "title": "Enter the data — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-enter-the-data-slides.md" },
-        { "title": "Pictogram software template screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-pictogram-software.png" },
-        { "title": "Our favourite fruit pictogram (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-fruit-pictogram.png" }
+        {
+          "title": "Pictogram software template screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-pictogram-software-template-screen-teach-computing.png"
+        },
+        {
+          "title": "Our favourite fruit pictogram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-our-favourite-fruit-pictogram-teach-computing.png"
+        },
+        {
+          "title": "Enter the data — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-enter-the-data-starter-worksheet.md"
+        },
+        {
+          "title": "Enter the data — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-enter-the-data-activity-worksheet.md"
+        },
+        {
+          "title": "Enter the data — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-enter-the-data-slides.md"
+        }
       ]
     },
     {
@@ -34,11 +94,41 @@
       "objectives": "I can collect data in a tally chart\nI can turn my tally chart into a pictogram\nI can read my pictogram\nI can say what my pictogram shows",
       "outline": "Routine first. Vocabulary on the board: tally chart · data · pictogram · most · least · explain. TA: everyone has the starter worksheet; minibeast cards out; the pictogram software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — the parts of a tally chart. On the starter worksheet pupils LABEL the three columns of a tally chart (Minibeast · Tally · Total) and choose what the Total column is for.\n   • Support: label two columns.  • Core: label all three.  • Challenge: say what goes in the Tally column.\n2. (10–25) I-do → we-do — collect the data: tally the minibeast cards (one mark each, a gate at five), then count the totals. Likely error: forgetting a total of 0 → fix-words \"if you found none, write 0 — that is still data.\"\n3. (25–40) You-do — on the activity worksheet pupils ORDER the steps to turn a tally chart into a pictogram, then make their own minibeast pictogram on the computer.\n4. (40–50) We-do — pupils READ the minibeast pictogram (which minibeast has the most / least; how many; tick the true sentences) and photograph their pictogram.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says one thing their pictogram shows.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Creating pictograms — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-pictograms-starter-worksheet.md" },
-        { "title": "Creating pictograms — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-pictograms-activity-worksheet.md" },
-        { "title": "Creating pictograms — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-creating-pictograms-slides.md" },
-        { "title": "Blank minibeast tally chart (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-minibeast-tally-chart.png" },
-        { "title": "Minibeast pictogram (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-minibeast-pictogram.png" }
+        {
+          "title": "Blank minibeast tally chart (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-blank-minibeast-tally-chart-teach-computing.png"
+        },
+        {
+          "title": "Minibeast pictogram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-minibeast-pictogram-teach-computing.png"
+        },
+        {
+          "title": "Creating pictograms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-pictograms-starter-worksheet.md"
+        },
+        {
+          "title": "Creating pictograms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-pictograms-activity-worksheet.md"
+        },
+        {
+          "title": "Creating pictograms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-pictograms-slides.md"
+        }
       ]
     },
     {
@@ -46,12 +136,48 @@
       "objectives": "I can say what an attribute is\nI can group objects by an attribute\nI can tally objects by an attribute\nI can answer more than, less than, most and least questions",
       "outline": "Routine first. Vocabulary on the board: attribute · group · same · different · most · least. TA: everyone has the starter worksheet; the pictogram software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — what is an attribute? On the starter worksheet pupils CHOOSE that an attribute is a way to describe an object (its colour, shape or size).\n   • Support: choose what an attribute is.  • Core: choose an attribute of a car.  • Challenge: name two attributes of a ball.\n2. (10–20) I-do → we-do — group by an attribute. The same objects can be grouped different ways. On the activity worksheet pupils SORT vehicles by the attribute number of wheels (2 wheels / 4 wheels). Likely error: grouping by colour when the attribute is wheels → fix-words \"check the attribute first, then group.\"\n3. (20–40) You-do — tally objects by ONE attribute (colour), then make a pictogram on the computer.\n4. (40–50) We-do — pupils READ their pictogram with more than / less than / most / least questions and photograph it.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil names the attribute they used.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "What is an attribute? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-is-an-attribute-starter-worksheet.md" },
-        { "title": "What is an attribute? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-is-an-attribute-activity-worksheet.md" },
-        { "title": "What is an attribute? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-what-is-an-attribute-slides.md" },
-        { "title": "A blue car (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-blue-car.png" },
-        { "title": "A red bus (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-red-bus.png" },
-        { "title": "A motorbike (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-motorbike.png" }
+        {
+          "title": "A blue car (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-blue-car-teach-computing.png"
+        },
+        {
+          "title": "A red bus (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-red-bus-teach-computing.png"
+        },
+        {
+          "title": "A motorbike (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-motorbike-teach-computing.png"
+        },
+        {
+          "title": "What is an attribute? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-what-is-an-attribute-starter-worksheet.md"
+        },
+        {
+          "title": "What is an attribute? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-what-is-an-attribute-activity-worksheet.md"
+        },
+        {
+          "title": "What is an attribute? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-what-is-an-attribute-slides.md"
+        }
       ]
     },
     {
@@ -59,13 +185,55 @@
       "objectives": "I can describe people using attributes\nI can choose an attribute to compare people\nI can collect data and make a pictogram\nI can say what my pictogram shows",
       "outline": "Routine first. Vocabulary on the board: attribute · compare · collect · pictogram · most common · conclusion. TA: everyone has the starter worksheet; the pictogram software open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — people can be described by attributes too. On the starter worksheet pupils TICK the attributes you could use to describe people (hair colour, wears glasses, number of pets), not the things that are not attributes.\n   • Support: tick two attributes.  • Core: tick all the attributes.  • Challenge: add one more attribute of a person.\n2. (10–20) I-do → we-do — on the activity worksheet pupils SORT four faces by the attribute wears glasses / no glasses. The same people could be sorted by hair colour instead. Likely error: thinking everyone fits one group → fix-words \"every person goes in exactly one group.\"\n3. (20–40) You-do — choose a question about the class (for example: what is the most common hair colour?), collect the data, and make a pictogram on the computer.\n4. (40–50) We-do — pupils draw a CONCLUSION (which is the most common) and photograph their pictogram.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil shares one conclusion.\nDifferentiation on the SAME task. Use cohort-level data only — do not record any single pupil's personal details. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Comparing people — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-people-starter-worksheet.md" },
-        { "title": "Comparing people — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-people-activity-worksheet.md" },
-        { "title": "Comparing people — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-comparing-people-slides.md" },
-        { "title": "A face with glasses (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-face-glasses.png" },
-        { "title": "A face with brown hair (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-face-brown.png" },
-        { "title": "A face with red hair (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-face-red.png" },
-        { "title": "A face with black hair (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-face-black.png" }
+        {
+          "title": "A face with glasses (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-face-with-glasses-teach-computing.png"
+        },
+        {
+          "title": "A face with brown hair (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-face-with-brown-hair-teach-computing.png"
+        },
+        {
+          "title": "A face with red hair (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-face-with-red-hair-teach-computing.png"
+        },
+        {
+          "title": "A face with black hair (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-face-with-black-hair-teach-computing.png"
+        },
+        {
+          "title": "Comparing people — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-people-starter-worksheet.md"
+        },
+        {
+          "title": "Comparing people — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-people-activity-worksheet.md"
+        },
+        {
+          "title": "Comparing people — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-comparing-people-slides.md"
+        }
       ]
     },
     {
@@ -73,12 +241,48 @@
       "objectives": "I can say there are different ways to show data\nI can make a block diagram on the computer\nI can read a block diagram\nI can say why some information should not be shared",
       "outline": "Routine first. Vocabulary on the board: block diagram · chart · most · least · share · private. TA: everyone has the starter worksheet; the chart software (j2e Chart) open. Read the four \"I can…\" aloud.\n1. (0–10) Starter — there is more than one way to show data. On the starter worksheet pupils CHOOSE the block diagram and choose Chart (not Pictogram) on the software home screen.\n   • Support: choose which one is a block diagram.  • Core: choose what to click to make a chart.  • Challenge: say one way a block diagram is like a pictogram.\n2. (10–20) I-do — a block diagram shows data as blocks. Taller column = more. It has numbers up the side. Likely error: reading the block at the wrong height → fix-words \"follow the top of the column across to the number.\"\n3. (20–35) You-do — on the activity worksheet pupils ORDER the steps to make a block diagram, then READ the Car Colours block diagram (most / least, how many, tick the true sentences).\n4. (35–50) We-do — sharing data safely: pupils SORT what is OK to share and what is private, and learn it is OK to say no. They photograph their block diagram.\n5. (50–55) Plenary — self-tick the four \"I can…\"; each pupil says which way of showing data they like best.\nDifferentiation on the SAME task. No flashing/animation/sound on slides; movement breaks are routine.",
       "resources": [
-        { "title": "Presenting information — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-presenting-information-starter-worksheet.md" },
-        { "title": "Presenting information — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-presenting-information-activity-worksheet.md" },
-        { "title": "Presenting information — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-presenting-information-slides.md" },
-        { "title": "Data software home screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-j2data-home.png" },
-        { "title": "Car colours block diagram (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-car-colours-block.png" },
-        { "title": "Teachers' pets block diagram (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-pets-block.png" }
+        {
+          "title": "Data software home screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-data-software-home-screen-teach-computing.png"
+        },
+        {
+          "title": "Car colours block diagram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-car-colours-block-diagram-teach-computing.png"
+        },
+        {
+          "title": "Teachers' pets block diagram (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-teachers-pets-block-diagram-teach-computing.png"
+        },
+        {
+          "title": "Presenting information — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-information-starter-worksheet.md"
+        },
+        {
+          "title": "Presenting information — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-information-activity-worksheet.md"
+        },
+        {
+          "title": "Presenting information — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-presenting-information-slides.md"
+        }
       ]
     }
   ]

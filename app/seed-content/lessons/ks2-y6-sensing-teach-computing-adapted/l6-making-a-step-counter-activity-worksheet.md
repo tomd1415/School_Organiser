@@ -10,7 +10,7 @@ Today I will build my step counter from my design, test it, and fix the shake se
 ## Build your code
 Use your design from last lesson to build the step counter in MakeCode.
 
-![The step counter code blocks]({{res:l6-stepcounter-code.png}})
+![The step counter code blocks]({{res:l6-the-step-counter-code-blocks-teach-computing.png}})
 
 Put the blocks in the right order to build the step counter.
 
@@ -30,7 +30,7 @@ show string "Great!"
 ## Fix the sensitivity
 When you test it, the steps may jump up too fast. One shake counts as many steps. We can fix this by only counting a step when the shake is strong enough.
 
-![A block that counts a step only when the shake is strong]({{res:l6-sensitivity-block.png}})
+![A block that counts a step only when the shake is strong]({{res:l6-a-block-that-counts-a-step-only-when-the-shake-is-strong-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

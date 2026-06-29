@@ -10,7 +10,7 @@ Today I will say who owns the content on a website, and that there are rules to 
 ## Owning and sharing
 Things in the real world belong to someone, and there are rules for sharing them.
 
-![Books on a shelf — who do they belong to?]({{res:l5-books.png}})
+![Books on a shelf — who do they belong to?]({{res:l5-books-on-a-shelf-owning-and-sharing-teach-computing.png}})
 
 ## Sort — who owns it, and can you keep it?
 Drag each one into the right group.
@@ -23,7 +23,7 @@ Borrow and give back: a book from the library, play equipment in the park
 ## Rules protect content
 Content on the web belongs to the person who made it. **Copyright** is a rule that protects their work. You should not take it and say it is yours.
 
-![A copyright notice at the bottom of a website]({{res:l5-copyright.png}})
+![A copyright notice at the bottom of a website]({{res:l5-a-copyright-notice-on-a-website-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: input · variable · accelerometer · condition · value. Recap: the micro:bit takes inputs.
 
 ## Starter — inputs on a micro:bit
-![A micro:bit with its parts labelled]({{res:l3-microbit-parts.png}})
+![A micro:bit with its parts labelled]({{res:l3-a-micro-bit-with-its-parts-labelled-teach-computing.png}})
 
 - inputs put information into the micro:bit
 - buttons A and B, the accelerometer, the microphone are inputs
@@ -23,7 +23,7 @@
 > 🧑‍🏫 Think-pair-share: "what is the first thing we do with a variable?" Answer: set it (here, to 0). Challenge pupils explain why we start at 0.
 
 ## Change a variable with buttons
-![Code: button A change count by 1, button B change count by -1]({{res:l3-counter-buttons.png}})
+![Code: button A change count by 1, button B change count by -1]({{res:l3-code-change-a-counter-with-buttons-a-and-b-teach-computing.png}})
 
 - if button A is pressed → change count by 1
 - if button B is pressed → change count by -1
@@ -31,7 +31,7 @@
 > 🧑‍🏫 We-do: build the button A part together. You-do: pupils add button B. They order the blocks (Parsons) on the activity worksheet first. TA: prompt, do not build it for them.
 
 ## Change a variable by moving
-![Code with is shake gesture showing the count]({{res:l3-counter-shake.png}})
+![Code with is shake gesture showing the count]({{res:l3-code-show-the-count-when-shaken-teach-computing.png}})
 
 - the accelerometer senses movement
 - if is shake gesture → show number count

@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: record · playback · edit · selection · waveform · audio engineer. Same routine as every lesson.
 
 ## The Audacity editor
-![The Audacity editor with the record button, play button, timeline and tracks]({{res:l4-audacity-editor.png}})
+![The Audacity editor with the record button, play button, timeline and tracks]({{res:l4-the-audacity-editor-teach-computing.png}})
 
 - **record** button — the red circle
 - **play** button — the green triangle

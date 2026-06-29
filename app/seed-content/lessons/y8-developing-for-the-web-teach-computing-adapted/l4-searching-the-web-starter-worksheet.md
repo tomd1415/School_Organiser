@@ -8,7 +8,7 @@
 Drag each label onto the right spot on the search results page.
 
 ```label
-image: {{res:l4-search-results.png}}
+image: {{res:l4-search-results-page-teach-computing.png}}
 Search box (50%, 6%): Search box
 Web address (20%, 30%): Web address
 Result title (26%, 36%): Result title

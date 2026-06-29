@@ -10,7 +10,7 @@ Today I will list things we do with IT and talk about rules that keep us safe.
 ## Starter — what can we do with IT?
 We use lots of IT, like tablets, TVs and games consoles.
 
-![A smart TV with lots of apps]({{res:l5-smart-tv.png}})
+![A smart TV with lots of apps]({{res:l5-a-smart-tv-with-apps-teach-computing.png}})
 
 | Question | Tick ALL that apply |
 |---|---|

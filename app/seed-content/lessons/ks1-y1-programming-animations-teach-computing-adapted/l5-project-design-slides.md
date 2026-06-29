@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: sprite · background · appropriate · algorithm. Today is DESIGN only — no ScratchJr yet. We build it next lesson.
 
 ## Our project — a Space race
-![Three rockets on the moon, ready to race]({{res:l5-space-race.jpg}})
+![Three rockets on the moon, ready to race]({{res:l5-three-rockets-a-space-race-teach-computing.jpg}})
 
 - three rockets will race
 - we plan it today

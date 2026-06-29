@@ -15,7 +15,7 @@
 > 🧑‍🏫 Show a document and ask "what is it?" before reading. We know from the layout.
 
 ## A newspaper
-![A newspaper layout]({{res:l5-newspaper.png}})
+![A newspaper layout]({{res:l5-newspaper-layout-teach-computing.png}})
 
 - lots of writing in columns
 - mostly black and white
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Portrait, columns, a headline box. Purpose: detailed news.
 
 ## A poster
-![A poster layout]({{res:l5-poster.png}})
+![A poster layout]({{res:l5-poster-layout-teach-computing.png}})
 
 - a big, eye-catching message
 - little text, one big picture
@@ -33,7 +33,7 @@
 > 🧑‍🏫 Purpose: grab attention fast. Contrast with the newspaper's detail. This is the starter sort.
 
 ## Magazines and more
-![Some magazine covers]({{res:l5-magazine.png}})
+![Some magazine covers]({{res:l5-magazine-layout-teach-computing.png}})
 
 - magazine, letter, postcard — each has its own layout
 - each layout suits a different purpose

@@ -1,0 +1,21 @@
+{
+  "unitTitle": "Documents & presentations",
+  "course": {
+    "name": "Computer Skills",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Formatting documents well",
+      "objectives": "- Use headings and styles\n- Apply consistent formatting",
+      "outline": "Fix a \"badly formatted\" document against a checklist.",
+      "resources": []
+    },
+    {
+      "title": "Designing a clear presentation",
+      "objectives": "- Apply the 6x6 guideline\n- Use contrast and images well",
+      "outline": "Redesign a cluttered slide; before/after gallery.",
+      "resources": []
+    }
+  ]
+}

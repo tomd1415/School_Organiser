@@ -10,7 +10,7 @@ Today I will learn that the order of sound blocks changes the tune.
 ## Two sound blocks
 There are two ways to play sounds. Look at them carefully.
 
-![Start sound blocks and play sound until done blocks]({{res:l4-sound-blocks.png}})
+![Start sound blocks and play sound until done blocks]({{res:l4-start-sound-vs-play-until-done-teach-computing.png}})
 
 - **play sound until done** — each note waits for the one before to finish (a tune)
 - **start sound** — all the notes start at once (a chord)

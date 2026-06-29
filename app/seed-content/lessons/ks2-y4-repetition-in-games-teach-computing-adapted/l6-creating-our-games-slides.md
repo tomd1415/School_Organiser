@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: build · algorithm · loop · fix (debug) · test · evaluate.
 
 ## Read your design first
-![The bat game in the Scratch editor]({{res:l6-bat-game-editor.png}})
+![The bat game in the Scratch editor]({{res:l6-bat-game-in-the-scratch-editor-teach-computing.png}})
 
 - open your project
 - look at your plan from last lesson

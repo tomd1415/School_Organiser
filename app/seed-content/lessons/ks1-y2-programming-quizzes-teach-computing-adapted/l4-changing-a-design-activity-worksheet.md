@@ -11,9 +11,9 @@ Today I will change the quiz design and make my own quiz question.
 When you tap the **right** answer, it says "**Yes**".
 When you tap the **wrong** answer, it says "**No**" and the program stops.
 
-![The code for the right answer]({{res:l4-code-yes.png}})
+![The code for the right answer]({{res:l4-the-right-answer-code-says-yes-teach-computing.png}})
 
-![The code for the wrong answer]({{res:l4-code-no.png}})
+![The code for the wrong answer]({{res:l4-the-wrong-answer-code-says-no-teach-computing.png}})
 
 ## My choices
 | Question | Your answer |

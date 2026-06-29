@@ -10,9 +10,9 @@ Today I will give objects a label and match an object to a group.
 ## Starter — a name is a label
 A **label** is a name we give to an object. Look at the two cars.
 
-![A red car]({{res:l1-red-car.png}})
+![A red car]({{res:l1-red-car-teach-computing.png}})
 
-![A blue car]({{res:l1-blue-car.png}})
+![A blue car]({{res:l1-blue-car-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

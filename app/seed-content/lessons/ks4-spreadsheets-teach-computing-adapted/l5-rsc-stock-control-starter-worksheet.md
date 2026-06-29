@@ -10,7 +10,7 @@ Today I will use a LOOKUP function to fetch item data and an IF function to warn
 ## Starter — what happens after the beep?
 A barcode holds data about a product, but NOT the price. The price is kept in the shop's database.
 
-![A QR code]({{res:l5-qr-code.png}})
+![A QR code]({{res:l5-qr-code-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

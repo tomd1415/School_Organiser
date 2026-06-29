@@ -18,7 +18,7 @@ A floor robot moves when we press its buttons. We tell it what to do.
 Drag each label onto the right button on the robot.
 
 ```label
-image: {{res:l1-beebot-buttons.png}}
+image: {{res:l4-floor-robot-buttons-teach-computing.png}}
 forwards (49%, 39%): Forwards
 left (29%, 56%): Left turn
 go (49%, 56%): Go

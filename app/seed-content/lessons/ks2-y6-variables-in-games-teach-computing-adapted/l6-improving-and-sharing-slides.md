@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: improve · evaluate · share · lives. This is the last lesson — recap the whole unit at the end.
 
 ## Starter — are all games the same?
-![Four different fruit catcher games]({{res:l6-fruit-catcher-remixes.png}})
+![Four different fruit catcher games]({{res:l6-four-different-fruit-catcher-games-teach-computing.png}})
 
 - many people make catching games
 - they all start the same but end up different
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Pupils tick ways to improve their game on the starter worksheet. "Delete the whole game" is the odd one out. Support choose one real improvement.
 
 ## Add a lives variable
-![Scratch code that lowers a lives variable when a sprite is missed]({{res:l6-lives-code.png}})
+![Scratch code that lowers a lives variable when a sprite is missed]({{res:l6-scratch-code-for-a-lives-variable-teach-computing.png}})
 
 - **lives** counts how many tries are left
 - **change lives by -1** when a sprite is missed

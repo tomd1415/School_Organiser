@@ -10,7 +10,7 @@ Today I will wire two optical sensors and use their values to steer my buggy alo
 ## The line-following idea
 Two sensors point at the floor, one each side of the line. Reading them tells the buggy if it has drifted off the line, so it can steer back.
 
-![A buggy following a black line]({{res:l5-line-follower.png}})
+![A buggy following a black line]({{res:l5-line-following-buggy-teach-computing.png}})
 
 ## Put the test code in order
 Drag these lines into order to print both sensor values.

@@ -11,7 +11,7 @@ Today I will take frames in the app and use onion skinning to help me.
 Drag each label onto the right part of the animation app.
 
 ```label
-image: {{res:l2-imotion-screen.png}}
+image: {{res:l2-the-animation-app-capture-screen-teach-computing.png}}
 capture (41%, 88%): Capture — takes a photo
 stop (76%, 88%): Stop — finish filming
 onion (61%, 50%): Onion skin — shows the last frame

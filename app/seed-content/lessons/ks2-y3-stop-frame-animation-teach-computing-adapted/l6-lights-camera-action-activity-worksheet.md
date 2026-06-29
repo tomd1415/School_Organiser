@@ -11,7 +11,7 @@ Today I will add media to my animation and say why it makes the film better.
 Drag each label onto the right part of the movie app.
 
 ```label
-image: {{res:l6-imovie-media.png}}
+image: {{res:l6-the-movie-app-media-panel-teach-computing.png}}
 video (76%, 18%): Video — add a film
 photos (76%, 25%): Photos — add a picture
 audio (80%, 52%): Audio — add music

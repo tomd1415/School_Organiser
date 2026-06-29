@@ -19,7 +19,7 @@ Review the homework: technology connects the world, but what is the downside?
 > 🧑‍🏫 Start positive. Lord Broers' 2005 Reith Lectures argued technology can help save the planet. Pupils could research one preserver technology.
 
 ## Technology as destroyer — e-waste
-![A skip full of old computers and electronic waste]({{res:l6-ewaste-pile-teach-computing.jpg}})
+![A skip full of old computers and electronic waste]({{res:l6-e-waste-pile-teach-computing.jpg}})
 
 Old devices become e-waste — often shipped abroad and broken apart by hand.
 

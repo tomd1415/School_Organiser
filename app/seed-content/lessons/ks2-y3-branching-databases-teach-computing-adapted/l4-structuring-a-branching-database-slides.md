@@ -15,7 +15,7 @@
 > 🧑‍🏫 The starter worksheet matches attributes to questions. Take a few pupil questions for the attribute "number of legs".
 
 ## Two trees, same objects
-![A minibeast branching database]({{res:l4-minibeast-branching-database.png}})
+![A minibeast branching database]({{res:l4-minibeast-branching-database-teach-computing.png}})
 
 - the EVEN tree splits each group roughly in half — short and fast
 - a ONE-AT-A-TIME tree picks off one object each question — long and slow

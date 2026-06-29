@@ -14,7 +14,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil what a design shows.
 
 ## A quiz question
-![The "Who lives here?" quiz]({{res:l4-quiz-who-lives-here.png}})
+![The "Who lives here?" quiz]({{res:l4-the-who-lives-here-quiz-screen-teach-computing.png}})
 
 - the question is "**Who lives here?**"
 - the background is the **sea**
@@ -23,7 +23,7 @@
 > 🧑‍🏫 The starter labels the cat, the fish and the program. Ask which animal lives in the sea.
 
 ## Right answer
-![The right-answer code]({{res:l4-code-yes.png}})
+![The right-answer code]({{res:l4-the-right-answer-code-says-yes-teach-computing.png}})
 
 - tap the **right** answer
 - it says "**Yes**"
@@ -32,7 +32,7 @@
 > 🧑‍🏫 I-do. Walk through the blocks slowly, left to right.
 
 ## Wrong answer
-![The wrong-answer code]({{res:l4-code-no.png}})
+![The wrong-answer code]({{res:l4-the-wrong-answer-code-says-no-teach-computing.png}})
 
 - tap the **wrong** answer
 - it says "**No**"

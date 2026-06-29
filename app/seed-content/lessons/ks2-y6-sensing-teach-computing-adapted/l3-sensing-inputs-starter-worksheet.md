@@ -10,7 +10,7 @@ Today I will learn about the inputs on a micro:bit.
 ## Inputs on a micro:bit
 An **input** is a way of putting information into the micro:bit. Buttons A and B are inputs. The accelerometer (which senses movement) is an input too. The microphone is an input. The LED screen is *not* an input — it is an output.
 
-![A micro:bit on the screen, showing buttons A and B and SHAKE]({{res:l3-emulator-inputs.png}})
+![A micro:bit on the screen, showing buttons A and B and SHAKE]({{res:l3-a-micro-bit-on-the-emulator-buttons-and-shake-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

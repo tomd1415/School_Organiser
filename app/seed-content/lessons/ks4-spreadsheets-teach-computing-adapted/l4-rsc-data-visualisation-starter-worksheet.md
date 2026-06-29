@@ -10,7 +10,7 @@ Today I will choose the right chart for the data and spot charts that mislead.
 ## Starter — what's wrong with this chart?
 A badly made chart can mislead the reader. Look at this one.
 
-![A bar chart with the vertical axis starting at a high number]({{res:l4-misleading-bar-chart.png}})
+![A bar chart with the vertical axis starting at a high number]({{res:l4-misleading-bar-chart-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

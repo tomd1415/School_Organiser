@@ -10,7 +10,7 @@ Today I will match event blocks and build a project from a design.
 ## Events start a program
 An event block is the hat that starts a script. Match each event to what makes it happen.
 
-![The three event blocks]({{res:l3-event-blocks.png}})
+![The three event blocks]({{res:l3-three-event-blocks-teach-computing.png}})
 
 | Event block | What makes it happen |
 |---|---|

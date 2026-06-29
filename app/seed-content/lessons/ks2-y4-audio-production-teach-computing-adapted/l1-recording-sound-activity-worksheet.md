@@ -21,7 +21,7 @@ Plays sound OUT (output): speaker, headphones
 3. Click **stop**. Click **play** to hear it.
 4. If you do not like it, **delete** it and try again.
 
-![A laptop has a built-in microphone and speaker]({{res:l1-laptop.png}})
+![A laptop has a built-in microphone and speaker]({{res:l1-laptop-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Your answer |

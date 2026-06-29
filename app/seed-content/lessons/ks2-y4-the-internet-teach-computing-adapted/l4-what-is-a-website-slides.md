@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the "I can…" aloud. Vocabulary on the board: website · web page · content · logo · links · media. Same routine as every lesson.
 
 ## The parts of a website
-![A website with a logo, search box, menu and pictures]({{res:l4-website.png}})
+![A website with a logo, search box, menu and pictures]({{res:l4-a-website-to-label-logo-search-menu-picture-teach-computing.png}})
 
 - **logo** — shows whose site it is
 - **search box** — find things on the site
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Good: easy to share knowledge. Tricky: not everything added is true or kind. Keep this cohort-level — no personal posting stories. Sets up lessons 5 and 6.
 
 ## Make your own content
-![Chrome Music Lab — a web tool]({{res:l4-music-lab.png}})
+![Chrome Music Lab — a web tool]({{res:l4-chrome-music-lab-a-web-tool-teach-computing.png}})
 
 - a **web tool** lets you create content online
 - today: use Chrome Music Lab to make a sound or pattern

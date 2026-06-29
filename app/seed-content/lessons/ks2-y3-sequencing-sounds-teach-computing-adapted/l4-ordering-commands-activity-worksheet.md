@@ -10,7 +10,7 @@ Today I will order sound blocks to play a tune, then play notes together to make
 ## A tune is sound blocks in order
 Each "play sound until done" block plays one note, then waits. The order is the tune.
 
-![A tune made of play sound until done blocks]({{res:l4-tune-sequence.png}})
+![A tune made of play sound until done blocks]({{res:l4-a-tune-made-of-sound-blocks-teach-computing.png}})
 
 ## 🟢 Support
 Drag the blocks into order to play the three notes G, then B, then D.

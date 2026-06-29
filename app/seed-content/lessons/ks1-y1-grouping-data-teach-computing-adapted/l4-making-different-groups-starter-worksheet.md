@@ -10,7 +10,7 @@ Today I will group objects in more than one way and count how many share a prope
 ## Starter — more than one group
 The same objects can be grouped in different ways. Look at the frog.
 
-![A frog]({{res:l4-frog.png}})
+![A frog]({{res:l4-frog-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

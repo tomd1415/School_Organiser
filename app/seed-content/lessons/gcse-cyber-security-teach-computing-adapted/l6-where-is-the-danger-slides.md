@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: penetration testing · ethical hacking · network forensics · commercial analysis tool · network policy · user policy.
 
 ## Starter — think like a hacker
-![A bitcoin coin next to a computer chip]({{res:l6-cybercrime-payoff.png}})
+![A bitcoin coin next to a computer chip]({{res:l6-cybercrime-payoff-bitcoin-and-chip.png}})
 
 What is the safe and legal way for a skilled hacker to earn money?
 

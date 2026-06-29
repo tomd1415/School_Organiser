@@ -15,9 +15,9 @@
 > 🧑‍🏫 Recap from the whole unit. Ask pupils to say it in their own words first (the starter fill-the-gap).
 
 ## Where is it used?
-![Rolled-up newspapers]({{res:l6-newspapers.png}})
+![Rolled-up newspapers]({{res:l6-newspapers-in-the-real-world-teach-computing.png}})
 
-![An estate agent 'house for sale' sign]({{res:l6-house-for-sale.png}})
+![An estate agent 'house for sale' sign]({{res:l6-estate-agent-sign-teach-computing.png}})
 
 - newspapers and magazines
 - estate agents' house leaflets

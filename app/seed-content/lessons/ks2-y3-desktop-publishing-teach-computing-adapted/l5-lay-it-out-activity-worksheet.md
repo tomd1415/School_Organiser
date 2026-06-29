@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will match layouts to their purpose and choose the best layout for a job.
 
-![Five layouts and their purposes: poster, magazine, letter, postcard, newspaper]({{res:l5-layouts.png}})
+![Five layouts and their purposes: poster, magazine, letter, postcard, newspaper]({{res:l5-layouts-and-their-purposes-teach-computing.png}})
 
 ## Match the layout to its purpose
 Drag each answer to its layout.

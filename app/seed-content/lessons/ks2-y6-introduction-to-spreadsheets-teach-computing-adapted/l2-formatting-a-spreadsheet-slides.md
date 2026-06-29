@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: cell · cell reference · data item · format. Recap: last lesson we typed data into a spreadsheet.
 
 ## Cells and cell references
-![A spreadsheet toolbar]({{res:l2-toolbar.png}})
+![A spreadsheet toolbar]({{res:l2-a-spreadsheet-toolbar-teach-computing.png}})
 
 - each box is a cell
 - columns are named by letters; rows by numbers
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Point to A1 on the board. Likely error: pupils say the row before the column (1A). Fix-words: "letter first, then number — A1." Pupils label the grid on the starter worksheet.
 
 ## A data item has a format
-![A list of cell formats]({{res:l2-formats-list.png}})
+![A list of cell formats]({{res:l2-a-list-of-cell-formats-teach-computing.png}})
 
 - the data in a cell is a data item
 - a format says what kind of data it is
@@ -26,7 +26,7 @@
 > 🧑‍🏫 Show how £2.50 looks as Currency vs Number. Pupils match data items to formats on the activity worksheet. Support pupils choose the format for money.
 
 ## Applying a format
-![The Format menu]({{res:l2-format-menu.png}})
+![The Format menu]({{res:l2-the-format-menu-in-a-spreadsheet-teach-computing.png}})
 
 - click the cell
 - click Format, then Number

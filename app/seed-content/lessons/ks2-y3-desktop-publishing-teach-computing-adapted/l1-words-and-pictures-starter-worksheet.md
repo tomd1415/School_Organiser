@@ -16,7 +16,7 @@ Today I will learn the difference between text and images, and how each one send
 | A picture of a skull is an example of… | (  ) text (  ) an image |
 
 ## Look at these signs
-![A page of road and safety signs]({{res:l1-signs.png}})
+![A page of road and safety signs]({{res:l1-safety-and-road-signs-teach-computing.png}})
 
 | Question | Tick ALL that are TRUE |
 |---|---|

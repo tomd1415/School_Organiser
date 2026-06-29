@@ -34,7 +34,7 @@ An **implication** is something that might happen because of what you do. Before
 ## Evaluate a website
 **Evaluate** means to judge how good something is. The **user experience** is what it is like to use a website. Look at the example website your teacher shows you.
 
-![A finished website to evaluate]({{res:l6-website-example.png}})
+![A finished website to evaluate]({{res:l6-a-finished-website-to-evaluate-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

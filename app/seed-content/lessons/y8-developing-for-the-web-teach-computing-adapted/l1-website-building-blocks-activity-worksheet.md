@@ -27,9 +27,9 @@ Drag each answer to the right tag.
 ## 🟢 Support
 Here is a plain page, then the same page after a tag was styled.
 
-![A plain web page with black default text]({{res:l1-web-page-plain.png}})
+![A plain web page with black default text]({{res:l1-plain-web-page-teach-computing.png}})
 
-![The same page with a red, centred heading and a background colour]({{res:l1-web-page-styled.png}})
+![The same page with a red, centred heading and a background colour]({{res:l1-styled-web-page-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

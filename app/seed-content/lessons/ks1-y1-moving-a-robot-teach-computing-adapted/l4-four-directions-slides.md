@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: left · right · turn · commands. Same routine as every lesson.
 
 ## Move it
-![The buttons on top of the floor robot]({{res:l1-beebot-buttons.png}})
+![The buttons on top of the floor robot]({{res:l4-floor-robot-buttons-teach-computing.png}})
 
 - last lesson: Forwards and Backwards
 - today we add Left turn and Right turn

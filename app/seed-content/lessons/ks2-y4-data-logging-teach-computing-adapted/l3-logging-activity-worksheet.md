@@ -10,7 +10,7 @@ Today I will read data points from a table and from a line graph, and find the i
 ## Reading a data table
 A data logger recorded sound and light very fast. Here is part of the table it made.
 
-![A data table of time, temperature, sound and light]({{res:l3-data-table.png}})
+![A data table of time, temperature, sound and light]({{res:l3-data-table-of-readings-teach-computing.png}})
 
 Each row is one DATA POINT. The Time column counts up in small steps.
 
@@ -28,7 +28,7 @@ At time 00.000 the Sound reading was [[ ]] dBA.
 ## 🟡 Core
 The same data points can be drawn on a line graph. This graph shows the light readings over time.
 
-![A line graph of light over time]({{res:l3-light-graph.png}})
+![A line graph of light over time]({{res:l3-light-line-graph-over-time-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

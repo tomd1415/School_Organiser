@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: sequence · event · start · run the code · design. Same routine as every lesson.
 
 ## Joined makes a sequence
-![Three blocks joined into a sequence]({{res:l3-joined-blocks.png}})
+![Three blocks joined into a sequence]({{res:l3-joined-blocks-make-a-sequence-teach-computing.png}})
 
 - separate blocks: click each one
 - joined blocks: click once, all run in order
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Starter (10 min). Compare separate vs joined. The point: joined blocks run one after another from one click. On the worksheet pupils choose which is a sequence and why.
 
 ## Events start it
-![The three event blocks]({{res:l3-event-blocks.png}})
+![The three event blocks]({{res:l3-three-event-blocks-teach-computing.png}})
 
 - when green flag clicked
 - when this sprite clicked

@@ -10,10 +10,10 @@ Today I will use commands to move the cat sprite, and compare ScratchJr with a B
 ## Name the move blocks
 Each blue block is a command. Drag the direction word onto the right block.
 
-![Four move blocks]({{res:l1-move-blocks.png}})
+![Four move blocks]({{res:l1-four-move-blocks-teach-computing.png}})
 
 ```label
-image: {{res:l1-move-blocks.png}}
+image: {{res:l1-four-move-blocks-teach-computing.png}}
 right (12%, 45%): Right
 left (37%, 45%): Left
 up (62%, 45%): Up

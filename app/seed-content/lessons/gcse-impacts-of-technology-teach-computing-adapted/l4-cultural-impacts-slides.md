@@ -19,7 +19,7 @@ What would change if your school kept everything in the cloud and used no paper?
 > 🧑‍🏫 Example: the internet changed how we research, shop and talk to friends. Keep it concrete.
 
 ## Globalisation
-![Hands reaching towards planet Earth — a connected world]({{res:l4-globalisation-world-teach-computing.jpg}})
+![Hands reaching towards planet Earth — a connected world]({{res:l4-globalisation-a-connected-world-teach-computing.jpg}})
 
 Technology connects the whole world — trade, ideas and culture are shared.
 

@@ -22,14 +22,14 @@
 > 🧑‍🏫 This is the starter sort. Likely error: mixing up "size" and "style". Fix-words: "size = how BIG, style = the SHAPE of the letters."
 
 ## Look — fonts change the feel
-![A bright, fancy 'Happy Birthday' font]({{res:l2-font-example.png}})
+![A bright, fancy 'Happy Birthday' font]({{res:l2-bright-font-example-teach-computing.png}})
 
 The same words can look fun, serious or fancy.
 
 > 🧑‍🏫 Ask: does this font suit a party? Yes. Would it suit a serious letter? Probably not. Match the font to the purpose.
 
 ## Edit the invitation
-![A party invitation open in desktop publishing software]({{res:l2-invitation.png}})
+![A party invitation open in desktop publishing software]({{res:l2-party-invitation-in-desktop-publishing-software-teach-computing.png}})
 
 Click the text, then change the size, colour and style.
 

@@ -10,7 +10,7 @@ Today I will use formulae to work out income, and I will see the difference betw
 ## The model
 This is the Rock Star Challenge voting spreadsheet. Each vote costs money, and we work out the income with a formula.
 
-![The finished Rock Star Challenge voting model]({{res:l1-voting-completed.png}})
+![The finished Rock Star Challenge voting model]({{res:l1-voting-model-completed-teach-computing.png}})
 
 ## Predict
 The charge for one telephone vote is in cell B4. The week 1 votes are in cell D9.

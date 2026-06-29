@@ -9,9 +9,9 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: editing · filter. Recap: lighting and clear photos.
 
 ## The same photo, changed
-![A dog with normal colours]({{res:l5-dog-original.jpg}})
-![The same dog with a blue tint]({{res:l5-dog-blue.jpg}})
-![The same dog with a red tint]({{res:l5-dog-red.jpg}})
+![A dog with normal colours]({{res:l5-a-dog-photo-with-normal-colours-teach-computing.jpg}})
+![The same dog with a blue tint]({{res:l5-the-same-dog-with-a-blue-tint-teach-computing.jpg}})
+![The same dog with a red tint]({{res:l5-the-same-dog-with-a-red-tint-teach-computing.jpg}})
 
 - a **blue** tint feels cold
 - a **red** tint feels warm
@@ -20,7 +20,7 @@
 > 🧑‍🏫 Starter. On the worksheet pupils MATCH the colour effect to the feeling. Editing = changing a photo on a computer.
 
 ## The editing software
-![The photo editor with a picture open]({{res:l5-editor-screenshot.png}})
+![The photo editor with a picture open]({{res:l5-the-photo-editor-with-a-picture-open-teach-computing.png}})
 
 - open the photo
 - find the **Adjust** tools

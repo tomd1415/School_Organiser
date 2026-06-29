@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Same routine as every lesson. Everyone has Blender open.
 
 ## Starter — how important is 3D animation?
-![A still from the Blender film Agent 327]({{res:l1-agent327-blender-film.png}})
+![A still from the Blender film Agent 327]({{res:l1-agent-327-blender-film-still.png}})
 
 Where do we see 3D animation? Tick all that apply on your starter worksheet.
 
@@ -36,7 +36,7 @@ Two spheres (body + head), a cone for the nose. Move, scale, rotate.
 ## Colour with materials
 A **material** is a colour you make once, name, and reuse — like a **variable** in programming.
 
-![A coloured snowman model in Blender]({{res:l1-snowman-coloured.png}})
+![A coloured snowman model in Blender]({{res:l1-coloured-snowman-model.png}})
 
 > 🧑‍🏫 Make one black material, reuse it on both eyes + buttons. Stress the variables link: name it once, use it many times.
 

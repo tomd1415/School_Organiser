@@ -11,7 +11,7 @@ Today I will use a new block — Start on tap.
 Before, you used the green flag to start. Today you will use the **Start on tap** block.
 When a program has a **Start on tap** block, you **tap the sprite** to make it run.
 
-![The Start on tap block]({{res:l3-start-on-tap.png}})
+![The Start on tap block]({{res:l3-the-start-on-tap-block-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

@@ -17,7 +17,7 @@ When you record, Audacity draws a picture of the sound. It is called a **wavefor
 Drag each label onto the right part of the waveform.
 
 ```label
-image: {{res:l2-waveform.png}}
+image: {{res:l2-waveform-loud-and-quiet-teach-computing.png}}
 loud (12%, 30%): A loud sound
 quiet (90%, 50%): Quiet or silence
 ```

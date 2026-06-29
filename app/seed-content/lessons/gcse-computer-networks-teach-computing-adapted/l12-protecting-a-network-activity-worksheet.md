@@ -7,7 +7,7 @@
 ## What we are learning
 Today I will say why network security matters, name forms of attack, and explain ways to keep a network safe.
 
-![A padlock resting on a laptop keyboard]({{res:l12-padlock-laptop.png}})
+![A padlock resting on a laptop keyboard]({{res:l12-a-padlock-on-a-laptop-keyboard.png}})
 
 ## Two kinds of attack
 Attacks fall into two groups: **social engineering** (tricking people) and **malicious software** (harmful code). Drag each attack into the right group.

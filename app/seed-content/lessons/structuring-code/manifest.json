@@ -1,0 +1,21 @@
+{
+  "unitTitle": "Structuring code",
+  "course": {
+    "name": "BCS Thinking Like a Coder",
+    "keyStage": "KS5"
+  },
+  "lessons": [
+    {
+      "title": "Functions & parameters",
+      "objectives": "- Write a function\n- Pass a parameter",
+      "outline": "Refactor repeated code into a function.",
+      "resources": []
+    },
+    {
+      "title": "Lists and data",
+      "objectives": "- Store data in a list\n- Loop over a list",
+      "outline": "Build and process a list of scores.",
+      "resources": []
+    }
+  ]
+}

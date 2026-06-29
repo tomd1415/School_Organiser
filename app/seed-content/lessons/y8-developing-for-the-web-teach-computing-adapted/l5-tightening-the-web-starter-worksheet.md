@@ -7,7 +7,7 @@
 ## Starter — too many results
 A search engine indexes millions of pages. Searching for the right thing can be hard.
 
-![A search results page showing millions of results]({{res:l5-search-results.png}})
+![A search results page showing millions of results]({{res:l5-search-results-millions-of-results-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

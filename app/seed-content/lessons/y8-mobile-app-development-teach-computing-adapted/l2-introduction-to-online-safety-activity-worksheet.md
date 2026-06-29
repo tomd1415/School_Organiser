@@ -41,7 +41,7 @@ A strong password has more than one of these. Tick ALL that make a password stro
 ## 🔴 Challenge
 Some messaging apps use **end-to-end encryption** — only the sender and reader can see the message.
 
-![A padlock made of encrypted symbols]({{res:l2-encryption-code.jpg}})
+![A padlock made of encrypted symbols]({{res:l2-encryption-code-teach-computing.jpg}})
 
 | Question | Your answer |
 |---|---|
@@ -51,7 +51,7 @@ Some messaging apps use **end-to-end encryption** — only the sender and reader
 ## Case study — messaging apps
 Apps like this one use end-to-end encryption so not even the company can read your messages.
 
-![A phone showing a messaging app]({{res:l2-whatsapp-encryption.png}})
+![A phone showing a messaging app]({{res:l2-messaging-app-end-to-end-encryption-teach-computing.png}})
 
 ## Show your work
 | Question | Your answer |

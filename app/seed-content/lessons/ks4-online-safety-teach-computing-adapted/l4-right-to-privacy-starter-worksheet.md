@@ -10,7 +10,7 @@ Today I will sort information by how private it should be.
 ## Starter — how private?
 Some information should always be kept private. For other information, different people make different choices.
 
-![Levels of privacy: completely private, close friends, family, companies, completely public]({{res:l4-levels-of-privacy.png}})
+![Levels of privacy: completely private, close friends, family, companies, completely public]({{res:l4-levels-of-privacy-diagram-teach-computing.png}})
 
 ## Sort — keep private or okay to share?
 Drag each type of information into the right group.

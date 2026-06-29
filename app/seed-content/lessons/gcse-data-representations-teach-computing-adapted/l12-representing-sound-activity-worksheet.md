@@ -11,7 +11,7 @@ Today I will explain why analogue sound is turned into binary, and describe samp
 This graph shows a sound wave. The computer records the height (amplitude) of the wave at each time, as a binary number. Drag each label onto the right part of the graph.
 
 ```label
-image: {{res:l12-sampling-wave.png}}
+image: {{res:l12-sampling-a-sound-wave-amplitude-in-binary-against-time.png}}
 yaxis (8%, 45%): Amplitude as binary
 xaxis (55%, 96%): Time
 wave (40%, 30%): The sound wave

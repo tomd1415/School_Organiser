@@ -8,7 +8,7 @@
 Today I will learn that I can change text and move it around the page. This is called desktop publishing.
 
 ## A party invitation
-![A bright Happy Birthday graphic]({{res:l2-invitation.png}})
+![A bright Happy Birthday graphic]({{res:l2-party-invitation-graphic-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

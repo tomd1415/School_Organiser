@@ -22,7 +22,7 @@
 > 🧑‍🏫 Likely error: thinking both "then" and "else" run. Fix-words: "only ONE side runs — then if true, else if false." This is called selection.
 
 ## A random number
-![The pick random 1 to 6 block]({{res:l2-pick-random.png}})
+![The pick random 1 to 6 block]({{res:l2-the-pick-random-1-to-6-block-teach-computing.png}})
 
 - pick random chooses a number, like a dice
 - pick random 1 to 6 gives 1, 2, 3, 4, 5 or 6
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Support pupils choose what pick random does on the activity worksheet. Link it to rolling a dice.
 
 ## The fortune teller
-![The fortune teller code blocks]({{res:l2-fortune-teller-code.png}})
+![The fortune teller code blocks]({{res:l2-the-fortune-teller-code-blocks-teach-computing.png}})
 
 - on shake → set answer to pick random 1 to 2
 - if answer = 1 then show "Yes" else show "No"
@@ -39,7 +39,7 @@
 > 🧑‍🏫 Pupils order the blocks (Parsons) on the activity worksheet, then build it in MakeCode. The emulator can be slow to notice a shake — hold it a moment. TA: prompt, do not build it for them.
 
 ## Powering with a battery
-![A micro:bit with a battery connector]({{res:l2-microbit-battery.jpg}})
+![A micro:bit with a battery connector]({{res:l2-a-micro-bit-with-a-battery-connector-teach-computing.jpg}})
 
 - later we will use a battery pack so the micro:bit works away from the computer
 

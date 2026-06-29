@@ -11,7 +11,7 @@ Today I will find the three areas of the Scratch screen, run a block, and add a 
 Drag each label onto the right area of the screen.
 
 ```label
-image: {{res:l1-scratch-screen.png}}
+image: {{res:l1-the-scratch-screen-teach-computing.png}}
 blocks (11%, 45%): Blocks
 code (48%, 45%): Code area
 stage (82%, 40%): Stage

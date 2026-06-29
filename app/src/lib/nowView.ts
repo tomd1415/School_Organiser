@@ -15,7 +15,7 @@ import { PrepItem } from '../repos/prep';
 import { BriefItem } from '../services/brief';
 import { renderPrepList, renderPrepAdd } from './prepView';
 import { renderTimerBanner } from '../routes/timer';
-import { markOpenAttrs } from '../routes/markModal';
+import { markOpenAttrs, worksheetModalOpenAttrs } from '../routes/markModal';
 import { addDays, toMinutes, weekdayOf, fromMinutes } from './time';
 import { paths } from './paths';
 
@@ -170,12 +170,27 @@ export function renderNowHero(
   </div>`;
 }
 
-export function renderCurrentCard(
+// Signature for the current-lesson card's self-poll: changes when the lesson boundary is crossed (new
+// slot/lesson), the day rolls over, or an exception flips. The /now/current fragment compares the
+// page-render signature (carried in the poll URL) against a freshly computed one; a mismatch means the
+// card's identity AND its note-form occurrence binding are now stale, so we show a "refresh" prompt
+// rather than silently swapping in a new lesson while the note form still points at the old occurrence.
+export function currentCardSig(state: NowState, current: NowLesson | null, ex: ExceptionEffect): string {
+  return [state.isoDate, state.isSchoolDay ? '1' : '0', state.current?.slotOrder ?? '', current?.lessonId ?? '', ex.mode].join('|');
+}
+
+// The lesson-IDENTITY portion of the current card (kicker · exception banner · heading · last-time
+// resume lines). It self-polls every 30s so it advances across lesson boundaries WITHOUT a reload —
+// but, unlike the timeline, a boundary crossing also invalidates the Quick-note form's occurrence
+// binding (which lives OUTSIDE this element, in renderCurrentCard). So on a signature change the
+// fragment route swaps in renderCurrentChangedBody (a refresh prompt that stops polling) instead of the
+// new lesson; within the same lesson the re-render is a near-no-op that simply keeps the poll alive.
+// The SAME opening tag (id + poll attrs) is reused by the page-load render and the fragment, so the
+// swapped-in element keeps the timer registered (an attribute-less replacement would freeze it).
+export function renderCurrentCardBody(
   current: NowLesson,
   courses: OccurrenceCourseRow[],
   lastStops: LastStop[],
-  notes: NoteItem[],
-  occurrenceId: number,
   state: NowState,
   ex: ExceptionEffect
 ): string {
@@ -192,8 +207,6 @@ export function renderCurrentCard(
   const meta = [courseList || (current.purpose === 'free' ? 'Free — protected work time' : ''), current.roomName ? esc(current.roomName) : '']
     .filter(Boolean)
     .join(' · ');
-  const listId = `notes-list-${occurrenceId}`;
-  const openHref = paths.lessonOpen(current.lessonId, state.isoDate);
 
   const exBanner = ex.mode !== 'none'
     ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
@@ -201,13 +214,51 @@ export function renderCurrentCard(
   const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
   const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(current.groupName ?? purposeLabel(current.purpose));
   const wasLine = isFreeOrCover && current.groupName ? `<p class="muted now-ex-was">${ex.mode === 'free' ? 'was ' : 'instead of '}${esc(current.groupName)}</p>` : '';
-  return `<div class="now-card">
+  const sig = currentCardSig(state, current, ex);
+  return `<div id="now-current-body" class="now-current-body" hx-get="${paths.nowCurrent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">
     <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
     ${exBanner}
     <h1>${heading}</h1>
     ${wasLine}
     ${meta && !isFreeOrCover ? `<p class="ld-meta">${meta}</p>` : ''}
     ${isFreeOrCover ? '' : lastLines}
+  </div>`;
+}
+
+// Replacement body shown when the current-lesson poll detects the lesson has changed (or there is no
+// teaching lesson on now any more). It deliberately drops the poll attributes — polling stops, and the
+// teacher is prompted to reload so the whole card (including the Quick-note occurrence binding) rebinds.
+export function renderCurrentChangedBody(state: NowState): string {
+  return `<div id="now-current-body" class="now-current-body">
+    <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
+    <p class="now-changed-line"><a class="now-changed" href="/">↻ The lesson has changed — refresh</a></p>
+  </div>`;
+}
+
+export function renderCurrentCard(
+  current: NowLesson,
+  courses: OccurrenceCourseRow[],
+  lastStops: LastStop[],
+  notes: NoteItem[],
+  occurrenceId: number,
+  state: NowState,
+  ex: ExceptionEffect
+): string {
+  const listId = `notes-list-${occurrenceId}`;
+  const openHref = paths.lessonOpen(current.lessonId, state.isoDate);
+  // One-click "what are pupils about to do" — open the worksheet quick-peek modal for each bound plan.
+  // Reachable while teaching without leaving the Now screen (per noted_bugs2 #6). Labelled by course
+  // only when the lesson has more than one.
+  const wsButtons = courses
+    .filter((c) => c.lessonPlanId != null)
+    .map((c) => {
+      const label = courses.length > 1 ? `📖 ${esc(c.courseName)} worksheets` : '📖 View worksheets';
+      return `<button type="button" class="button small" ${worksheetModalOpenAttrs(paths.worksheetModal(c.groupCourseId, c.lessonPlanId as number))}>${label}</button>`;
+    })
+    .join(' ');
+  return `<div class="now-card">
+    ${renderCurrentCardBody(current, courses, lastStops, state, ex)}
+    ${wsButtons ? `<p class="now-ws-launch">${wsButtons}</p>` : ''}
     <div class="now-notes">
       <div class="ld-notes-head"><h2>Quick note</h2>${renderNewNoteButton(listId, { kind: 'lesson', occurrence: occurrenceId })}</div>
       ${renderNotesList(listId, notes)}
@@ -553,8 +604,14 @@ export function renderInboxQueueCard(captured: CapturedItem[] | undefined, csrf:
 
   const countBadge = count > 5 ? `<span class="badge warn" id="inbox-count-badge">${count} items (+${count - 5} more)</span>` : `<span class="badge warn" id="inbox-count-badge">${count} items</span>`;
 
+  // Self-poll every 30s so items captured elsewhere (e.g. POST /capture-quick from the Mind Dump card
+  // beside it) appear without a manual reload — mirroring the timeline card's NOW_TIMELINE_OPEN pattern.
+  // The SAME opening tag is used by the page-load render and the /now/inbox-queue fragment, so the
+  // swapped-in element keeps the timer registered. The card's only interactive controls are per-item
+  // hx-post buttons (no text inputs), so an outer-swap can never wipe in-progress typing. hx-sync coalesces
+  // the poll's own requests (a slow tick won't stack with the next), keeping at most one poll in flight.
   return `
-    <section class="card inbox-queue-card">
+    <section class="card inbox-queue-card" id="now-inbox-queue" hx-get="${paths.nowInboxQueue()}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this" hx-sync="this:queue last">
       <div class="card-head">
         <h2>Inbox Queue</h2>
         ${countBadge}

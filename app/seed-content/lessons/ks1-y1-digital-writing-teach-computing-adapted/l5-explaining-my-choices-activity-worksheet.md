@@ -10,7 +10,7 @@ Today I will use Undo, and say if my changes made my writing better.
 ## The Undo and Redo buttons
 Undo removes your last change. Redo puts it back.
 
-![A word processor toolbar showing the Undo and Redo arrows]({{res:l5-toolbar.png}})
+![A word processor toolbar showing the Undo and Redo arrows]({{res:l5-word-processor-toolbar-undo-and-redo-teach-computing.png}})
 
 ## Undo a change
 Drag the steps into the right order.

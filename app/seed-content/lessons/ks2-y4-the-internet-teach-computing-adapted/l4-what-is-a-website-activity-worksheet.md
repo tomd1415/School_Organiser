@@ -17,7 +17,7 @@ Websites are made by **people**. On some websites, anyone can **add content** �
 ## Make your own content
 A web tool lets you create content online. Today you will use **Chrome Music Lab** to make a sound or pattern.
 
-![Chrome Music Lab — a web tool for making music]({{res:l4-music-lab.png}})
+![Chrome Music Lab — a web tool for making music]({{res:l4-chrome-music-lab-a-web-tool-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

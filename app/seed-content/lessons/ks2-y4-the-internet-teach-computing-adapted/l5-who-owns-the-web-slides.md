@@ -8,8 +8,8 @@
 > 🧑‍🏫 Read the "I can…" aloud. Vocabulary on the board: content · owner · copyright · permission · credit. Same routine as every lesson.
 
 ## People make the content
-![A YouTube channel made by one person]({{res:l5-youtube.png}})
-![A website made by a company]({{res:l5-lego.png}})
+![A YouTube channel made by one person]({{res:l5-a-youtube-channel-content-made-by-one-person-teach-computing.png}})
+![A website made by a company]({{res:l5-the-lego-website-content-made-by-a-company-teach-computing.png}})
 
 - content is made by **people**
 - one person, a company, or a community of people
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Starter is the "who made it" match: a YouTuber (one person), LEGO (a company), Scratch (a community). Keep it factual.
 
 ## Owning and sharing — like the real world
-![Books on a shelf — who do they belong to?]({{res:l5-books.png}})
+![Books on a shelf — who do they belong to?]({{res:l5-books-on-a-shelf-owning-and-sharing-teach-computing.png}})
 
 - your own money is **yours to keep**
 - a library book is **borrowed** — you give it back
@@ -25,7 +25,7 @@
 > 🧑‍🏫 We-do the `sort`: yours-to-keep vs borrow-and-give-back. Bridge to the web: just because you can see something does not make it yours.
 
 ## Rules protect content — copyright
-![A copyright notice on a website]({{res:l5-copyright.png}})
+![A copyright notice on a website]({{res:l5-a-copyright-notice-on-a-website-teach-computing.png}})
 
 - content belongs to the person who made it
 - **copyright** is a rule that protects their work

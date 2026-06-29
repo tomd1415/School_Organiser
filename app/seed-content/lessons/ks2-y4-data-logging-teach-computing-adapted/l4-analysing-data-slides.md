@@ -16,7 +16,7 @@
 > 🧑‍🏫 Predict together: hot water left out gets colder. The graph line will go down. This is the starter.
 
 ## The cooling graph
-![Temperature falling over time]({{res:l4-cooling-graph.png}})
+![Temperature falling over time]({{res:l4-cooling-graph-temperature-over-time-teach-computing.png}})
 
 - the line starts high and falls
 - highest temperature ≈ 50°C
@@ -25,7 +25,7 @@
 > 🧑‍🏫 We-do: read the highest value together. You-do: find the value at 60 minutes (about 38°C). Support: trace the line with a finger.
 
 ## The same data as a table
-![The cooling data in a table]({{res:l4-data-table.png}})
+![The cooling data in a table]({{res:l4-cooling-data-in-a-table-teach-computing.png}})
 
 - the graph and the table show the SAME data
 - a graph shows change at a glance
@@ -34,7 +34,7 @@
 > 🧑‍🏫 Two ways to view the same data. Ask which they prefer and why — both are correct answers.
 
 ## Sorting data
-![A spreadsheet sort menu]({{res:l4-sort-spreadsheet.png}})
+![A spreadsheet sort menu]({{res:l4-sorting-data-in-a-spreadsheet-teach-computing.png}})
 
 - SORT puts the numbers in order
 - smallest to largest → lowest is at the top

@@ -10,10 +10,34 @@
       "objectives": "I can say that an animation is a sequence of pictures\nI can put pictures in the right order to show movement\nI can make a flip book and say how it works",
       "outline": "Routine first (same every lesson). Vocabulary on board: animation · sequence · frame · flip book. TA: each pupil has a small sticky-note book and the starter worksheet. Read the 3 “I can…” aloud. Recap: today we start a new unit about making pictures move.\n1. (0–10) Starter — what is an animation? Show the flip book picture. Explain: an animation is lots of still pictures shown fast, one after another, so it looks like it moves. On the starter worksheet pupils ORDER three pictures of a wave so the arm goes up.\n   • Support: which picture comes FIRST (arm down).  • Core: order all three.  • Challenge: say why the order matters.\n2. (10–20) I-do → we-do — how to draw a flip book. Teacher models: draw near the open edge, start on the bottom sheet, draw the part that moves first. Likely error: draws the new picture in a different place each time → fix-words “only move it a little bit.”\n3. (20–40) You-do — make a stick person wave. Pupils draw a small change on each page, then flip the book. On the activity worksheet they answer where to draw (single-choice) and tick the true facts about flip books (multi-select). TA: prompt, do not do it for them.\n   • Support: choose where to draw the stick person.  • Core: choose which sheet to start on.  • Challenge: explain why small changes work best.\n4. (40–50) Plenary — show a flip book; self-tick the 3 “I can…”. No flashing/sound; movement breaks are routine.\nDifferentiation on the SAME task — every flip book looks finished.",
       "resources": [
-        { "title": "Can a picture move — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-can-a-picture-move-starter-worksheet.md" },
-        { "title": "Can a picture move — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-can-a-picture-move-activity-worksheet.md" },
-        { "title": "Can a picture move — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-can-a-picture-move-slides.md" },
-        { "title": "Sticky notes for a flip book (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-flip-book.png" }
+        {
+          "title": "Sticky notes for a flip book (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-sticky-notes-for-a-flip-book-teach-computing.png"
+        },
+        {
+          "title": "Can a picture move — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-can-a-picture-move-starter-worksheet.md"
+        },
+        {
+          "title": "Can a picture move — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-can-a-picture-move-activity-worksheet.md"
+        },
+        {
+          "title": "Can a picture move — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-can-a-picture-move-slides.md"
+        }
       ]
     },
     {
@@ -21,11 +45,41 @@
       "objectives": "I can say that each photo is called a frame\nI can find the buttons in the animation app\nI can take frames to make a stop-frame animation",
       "outline": "Routine first. Vocabulary on board: stop-frame animation · frame · photo · capture · onion skinning. TA: tablets set on stands, the animation app open, starter worksheet out. Read the 3 “I can…” aloud. Recap: last lesson our flip books made pictures move.\n1. (0–10) Starter — from paper to screen. Show the app home screen. Explain: instead of drawing every page, we take photos. Each photo is a FRAME. On the starter worksheet pupils ORDER the steps to start a new movie.\n   • Support: which button starts a new movie.  • Core: order the start-up steps.  • Challenge: say why the tablet must stay still.\n2. (10–22) I-do → we-do — meet the app. Teacher shows the capture screen: take a photo, move the drawing a little, take another. Onion skinning shows the last frame faintly so you know where to draw next. Likely error: moves the tablet between photos → fix-words “keep the tablet still.”\n3. (22–42) You-do — make a stick person move. Pupils take 6–10 frames of a small movement. On the activity worksheet they LABEL the app screen (capture button, stop button, onion skin), then choose what onion skinning shows (single-choice). TA: prompt, do not do it for them.\n   • Support: find the capture button.  • Core: label all three parts.  • Challenge: say why onion skinning helps.\n4. (42–50) Plenary — play one animation back; self-tick the 3 “I can…”. No flashing/sound; movement breaks are routine.\nNote: the source ‘making your animation’ clip is teacher-played only.",
       "resources": [
-        { "title": "Frame by frame — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-frame-by-frame-starter-worksheet.md" },
-        { "title": "Frame by frame — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-frame-by-frame-activity-worksheet.md" },
-        { "title": "Frame by frame — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-frame-by-frame-slides.md" },
-        { "title": "The animation app home screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-imotion-home.png" },
-        { "title": "The animation app capture screen (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-imotion-screen.png" }
+        {
+          "title": "The animation app home screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-the-animation-app-home-screen-teach-computing.png"
+        },
+        {
+          "title": "The animation app capture screen (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-the-animation-app-capture-screen-teach-computing.png"
+        },
+        {
+          "title": "Frame by frame — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-frame-by-frame-starter-worksheet.md"
+        },
+        {
+          "title": "Frame by frame — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-frame-by-frame-activity-worksheet.md"
+        },
+        {
+          "title": "Frame by frame — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-frame-by-frame-slides.md"
+        }
       ]
     },
     {
@@ -33,10 +87,34 @@
       "objectives": "I can name the setting, the characters and the events in a story\nI can put the parts of a story in order on a storyboard\nI can choose a story that is simple enough to animate",
       "outline": "Routine first. Vocabulary on board: setting · character · event · storyboard. TA: starter worksheet and the printed scene picture ready; keep all sheets for Lesson 4. Read the 3 “I can…” aloud. Recap: last lesson we made the app take frames.\n1. (0–10) Starter — three story words. Show the scene picture. Teach: the SETTING is where it happens, a CHARACTER is who is in it, an EVENT is what happens. On the starter worksheet pupils SORT words into setting / character / event.\n   • Support: which word is the setting.  • Core: sort all the words.  • Challenge: add one event of your own.\n2. (10–22) I-do → we-do — keep it simple. Teacher shows that card characters can’t turn round or sit down, and each new background is extra work. So choose one setting and two characters. Likely error: plans too much to animate → fix-words “one place, two characters, one small event.”\n3. (22–42) You-do — make a storyboard. Pupils draw three boxes: start, middle, end. On the activity worksheet they ORDER three storyboard pictures, then choose which plan is easiest to animate (single-choice). TA: prompt, do not do it for them.\n   • Support: order start–middle–end.  • Core: pick the easy plan.  • Challenge: say why the busy plan is hard.\n4. (42–50) Plenary — share a storyboard; self-tick the 3 “I can…”. Keep all sheets. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "What's the story — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-whats-the-story-starter-worksheet.md" },
-        { "title": "What's the story — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-whats-the-story-activity-worksheet.md" },
-        { "title": "What's the story — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-whats-the-story-slides.md" },
-        { "title": "A scene with a setting and characters (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-scene.png" }
+        {
+          "title": "A scene with a setting and characters (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-scene-with-a-setting-and-characters-teach-computing.png"
+        },
+        {
+          "title": "What's the story — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-what-s-the-story-starter-worksheet.md"
+        },
+        {
+          "title": "What's the story — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-what-s-the-story-activity-worksheet.md"
+        },
+        {
+          "title": "What's the story — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-what-s-the-story-slides.md"
+        }
       ]
     },
     {
@@ -44,11 +122,41 @@
       "objectives": "I can move my character only a little between frames\nI can use onion skinning to line up the next frame\nI can spot when something is not consistent",
       "outline": "Routine first. Vocabulary on board: consistency · onion skinning · frame · careful. TA: tablets and the scene/characters from Lesson 3 ready; activity worksheet out. Read the 3 “I can…” aloud. Recap: last lesson we planned a simple story.\n1. (0–10) Starter — what does ‘consistent’ mean? Teach: consistent means keeping things the SAME. On the starter worksheet pupils choose what to keep the same (multi-select) and match each problem to its fix.\n   • Support: choose one thing to keep the same.  • Core: match problem to fix.  • Challenge: say what happens if the tablet moves.\n2. (10–22) I-do → we-do — small changes. Teacher takes a frame, moves the character a tiny bit using onion skinning, takes the next. Likely error: moves the character a big jump → fix-words “only a little, then a photo.”\n3. (22–42) You-do — film your animation. Pupils film their planned story with small, careful changes. On the activity worksheet they look at two frames and choose what changed a little (single-choice), then ORDER the careful-filming steps. TA: prompt, do not do it for them.\n   • Support: spot the one thing that moved.  • Core: order the steps.  • Challenge: say why small changes look smoother.\n4. (42–50) Plenary — watch a clip back; self-tick the 3 “I can…”. No flashing/sound; movement breaks are routine.\nNote: the source ‘spot the change’ clips are teacher-played only.",
       "resources": [
-        { "title": "Picture perfect — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-picture-perfect-starter-worksheet.md" },
-        { "title": "Picture perfect — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-picture-perfect-activity-worksheet.md" },
-        { "title": "Picture perfect — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-picture-perfect-slides.md" },
-        { "title": "Animation frame one (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-frame-1.png" },
-        { "title": "Animation frame two (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-frame-2.png" }
+        {
+          "title": "Animation frame one (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-animation-frame-one-teach-computing.png"
+        },
+        {
+          "title": "Animation frame two (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-animation-frame-two-teach-computing.png"
+        },
+        {
+          "title": "Picture perfect — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-picture-perfect-starter-worksheet.md"
+        },
+        {
+          "title": "Picture perfect — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-picture-perfect-activity-worksheet.md"
+        },
+        {
+          "title": "Picture perfect — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-picture-perfect-slides.md"
+        }
       ]
     },
     {
@@ -56,10 +164,34 @@
       "objectives": "I can watch my animation back and say what is good\nI can choose one thing to make better\nI can delete a frame I do not want",
       "outline": "Routine first. Vocabulary on board: evaluate · improve · delete · frame · feedback. TA: tablets with last lesson’s animations; activity worksheet out. Read the 3 “I can…” aloud. Recap: last lesson we filmed our stories.\n1. (0–10) Starter — what makes a good animation? Show the watch-back screen. Build a class checklist: smooth movement, tablet stayed still, no hands in shot. On the starter worksheet pupils tick what a good animation has (checklist).\n   • Support: tick one thing.  • Core: tick all that are true.  • Challenge: add one more idea.\n2. (10–22) I-do → we-do — watch back and tidy up. Teacher watches an animation back and deletes a frame with a hand in it. Likely error: keeps adding photos in the wrong place → fix-words “go to the end before you film more.”\n3. (22–42) You-do — evaluate and improve. Pupils watch their animation, rate it on a 1–5 scale, choose one thing to improve, and make a better version. On the activity worksheet they answer what to do with an unwanted frame (single-choice) and rate their own animation (scale). TA: prompt, do not do it for them.\n   • Support: rate it on the scale.  • Core: choose one thing to improve.  • Challenge: say how you will improve it.\n4. (42–50) Plenary — share one improvement; self-tick the 3 “I can…”. No flashing/sound; movement breaks are routine.\nNote: the source watch-back clips are teacher-played only.",
       "resources": [
-        { "title": "Evaluate and make it great — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-evaluate-and-make-it-great-starter-worksheet.md" },
-        { "title": "Evaluate and make it great — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-evaluate-and-make-it-great-activity-worksheet.md" },
-        { "title": "Evaluate and make it great — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-evaluate-and-make-it-great-slides.md" },
-        { "title": "Watching an animation back (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-imotion-capture.png" }
+        {
+          "title": "Watching an animation back (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-watching-an-animation-back-teach-computing.png"
+        },
+        {
+          "title": "Evaluate and make it great — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-evaluate-and-make-it-great-starter-worksheet.md"
+        },
+        {
+          "title": "Evaluate and make it great — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-evaluate-and-make-it-great-activity-worksheet.md"
+        },
+        {
+          "title": "Evaluate and make it great — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-evaluate-and-make-it-great-slides.md"
+        }
       ]
     },
     {
@@ -67,10 +199,34 @@
       "objectives": "I can name media I can add to a film, like music and a title\nI can add media to my animation\nI can say why my media makes the film better",
       "outline": "Routine first. Vocabulary on board: media · import · title · music · transition. TA: tablets with the saved animations; the movie app open; activity worksheet out. Read the 3 “I can…” aloud. Recap: last lesson we made our animation the best it could be.\n1. (0–10) Starter — what is media? Teach: media means extra things we add — music, a title, a picture, a sound. On the starter worksheet pupils SORT examples into media / not media.\n   • Support: is music media (yes/no).  • Core: sort all the examples.  • Challenge: add one more piece of media.\n2. (10–22) I-do → we-do — bring the animation into the movie app. Teacher imports the saved film, then adds a title and some music. Likely error: looks for media in the wrong tab → fix-words “music is in the Audio tab.”\n3. (22–42) You-do — add your media. Pupils add a title and music to their film. On the activity worksheet they LABEL the movie app (Video, Photos, Audio), then choose why a title helps (single-choice). TA: prompt, do not do it for them.\n   • Support: find the Audio tab.  • Core: label the three parts.  • Challenge: say why your music fits the film.\n4. (42–50) Plenary — watch a final film; rate it (scale); self-tick the 3 “I can…”. No flashing/sound; keep the volume low.\nNote: any source example films are teacher-played only.",
       "resources": [
-        { "title": "Lights camera action — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-lights-camera-action-starter-worksheet.md" },
-        { "title": "Lights camera action — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-lights-camera-action-activity-worksheet.md" },
-        { "title": "Lights camera action — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-lights-camera-action-slides.md" },
-        { "title": "The movie app media panel (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-imovie-media.png" }
+        {
+          "title": "The movie app media panel (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-the-movie-app-media-panel-teach-computing.png"
+        },
+        {
+          "title": "Lights camera action — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-lights-camera-action-starter-worksheet.md"
+        },
+        {
+          "title": "Lights camera action — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-lights-camera-action-activity-worksheet.md"
+        },
+        {
+          "title": "Lights camera action — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-lights-camera-action-slides.md"
+        }
       ]
     }
   ]

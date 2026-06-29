@@ -23,7 +23,7 @@
 > 🧑‍🏫 Keep it simple and neutral: UK, and "some countries block more / less". Avoid singling out individuals; this is about systems, not people.
 
 ## Privacy-enhancing technologies
-![The Tor Browser start page]({{res:l8-tor-browser.png}})
+![The Tor Browser start page]({{res:l8-tor-browser-start-page-teach-computing.png}})
 
 - encryption — scrambles data into code
 - VPN — hides your location

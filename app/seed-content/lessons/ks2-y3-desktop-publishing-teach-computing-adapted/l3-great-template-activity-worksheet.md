@@ -19,7 +19,7 @@ Landscape (wide): a postcard, a cinema ticket
 A **placeholder** is a box that holds a piece of content until you fill it. Drag each label onto the magazine cover.
 
 ```label
-image: {{res:l3-magazine-cover.png}}
+image: {{res:l3-magazine-cover-with-placeholders-teach-computing.png}}
 title (50%, 16%): A title
 picture (18%, 52%): A picture
 story (62%, 48%): A story (text)

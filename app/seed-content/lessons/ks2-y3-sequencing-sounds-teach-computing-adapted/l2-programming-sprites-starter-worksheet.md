@@ -10,7 +10,7 @@ Today I will choose blocks to move a sprite and predict which block was used.
 ## Which block moved the cat?
 The cat started in one place and ended in another. Look at the motion blocks.
 
-![The motion blocks you can use]({{res:l2-which-blocks.png}})
+![The motion blocks you can use]({{res:l2-motion-blocks-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

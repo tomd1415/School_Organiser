@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: formula · relative · absolute · ADD · SUM · MULTIPLY. Same routine as every lesson.
 
 ## Starter — name the parts
-![A spreadsheet for Rock Star Challenge voting]({{res:l1-voting-cell-grid.png}})
+![A spreadsheet for Rock Star Challenge voting]({{res:l1-voting-spreadsheet-cell-grid-teach-computing.png}})
 
 - COLUMN = the letters A, B, C across the top
 - ROW = the numbers 1, 2, 3 down the side
@@ -32,7 +32,7 @@
 > 🧑‍🏫 This is the key idea of the lesson. Demo: drag `=D9*B4` down and watch it break, then add the `$` signs and drag again. Fix-words: "lock it with dollar signs."
 
 ## The finished model
-![The completed voting model with income, donation and profit]({{res:l1-voting-completed.png}})
+![The completed voting model with income, donation and profit]({{res:l1-voting-model-completed-teach-computing.png}})
 
 - income = votes × charge
 - donation = total votes × amount per vote

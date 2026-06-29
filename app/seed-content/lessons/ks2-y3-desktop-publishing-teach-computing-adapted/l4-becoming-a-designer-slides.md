@@ -26,7 +26,7 @@
 > 🧑‍🏫 Follow your school's rules for pupils searching for images. Keep choices simple and safe.
 
 ## A finished cover
-![A finished magazine cover with a title, picture, story and quote]({{res:l4-magazine-cover.png}})
+![A finished magazine cover with a title, picture, story and quote]({{res:l4-finished-magazine-cover-example-teach-computing.png}})
 
 - title, picture, story and a quote
 - everything in its place

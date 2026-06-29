@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Same routine as every lesson.
 
 ## Starter — name the component
-![A computer processor chip]({{res:l3-cpu-processor.jpg}})
+![A computer processor chip]({{res:l3-cpu-processor-teach-computing.jpg}})
 
 What is this? What about RAM on your worksheet?
 
@@ -18,7 +18,7 @@ What is this? What about RAM on your worksheet?
 ## Inside a phone
 A phone is full of hardware: CPU, RAM, battery, screen, speaker and sensors.
 
-![The parts on a circuit board]({{res:l3-circuit-board.jpg}})
+![The parts on a circuit board]({{res:l3-circuit-board-teach-computing.jpg}})
 
 > 🧑‍🏫 Pupils label this board on the activity worksheet. Likely error: mixes up CPU and RAM → fix-words "CPU thinks, RAM remembers (for now)."
 

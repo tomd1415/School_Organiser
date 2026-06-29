@@ -8,7 +8,7 @@
 Today I will paste text and pictures into my magazine cover and make changes to them.
 
 ## Your finished cover should look something like this
-![An example magazine cover called Tech Trends]({{res:l4-magazine-cover.png}})
+![An example magazine cover called Tech Trends]({{res:l4-example-magazine-cover-teach-computing.png}})
 
 ## Put the steps to add a picture in order
 Drag the steps into the right order.

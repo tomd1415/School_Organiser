@@ -242,6 +242,18 @@ main:has(.tt) { max-width: 76rem; }
 .tt-head h1 { margin: 0 0 0.5rem; }
 .tt-weeknav { display: flex; gap: 0.75rem; }
 .tt-weeknav a { text-decoration: none; color: var(--accent); font-weight: 600; }
+
+/* "Mark class away" disclosure (noted_bugs2 #1) */
+.tt-away { position: relative; }
+.tt-away > summary { cursor: pointer; list-style: none; }
+.tt-away > summary::-webkit-details-marker { display: none; }
+.tt-away-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6rem; margin-top: 0.6rem; padding: 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface, #fff); }
+.tt-away-form label { display: flex; flex-direction: column; font-size: 0.78rem; color: var(--muted); gap: 0.2rem; }
+.tt-away-form select, .tt-away-form input { font: inherit; padding: 0.3rem 0.4rem; }
+.tt-away-status { font-size: 0.85rem; align-self: center; }
+.tt-away-status .form-error { color: var(--red, #b00020); }
+.tt-away-status .form-ok { color: var(--good, #1b7f3b); }
+.tt-away-hint { margin: 0.4rem 0 0; font-size: 0.78rem; }
 /* min-width makes the wide grid scroll inside its .table-scroll wrapper on narrow screens
    (SPEC §0/advice §7) rather than crushing columns to illegibility. */
 .tt-table { width: 100%; min-width: 720px; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
@@ -568,6 +580,10 @@ details.ld-adapt-tools[open] > summary { color: var(--muted); }
 .adapt-l { display: block; font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; }
 .adapt-l textarea { display: block; width: 100%; margin-top: 0.2rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; font-weight: 400; resize: vertical; }
 .adapt-note { font-size: 0.82rem; font-style: italic; margin: 0.3rem 0 0; color: var(--muted); }
+.adapt-primary { margin: 0.5rem 0; }
+.adapt-skip { margin: 0.4rem 0; }
+.adapt-skip p { margin: 0 0 0.4rem; }
+.adapt-ctx-reveal:not(:empty) { margin-top: 0.6rem; }
 /* 5.9: per-class teaching-context */
 .group-ctx { margin-top: 0.4rem; font-size: 0.82rem; }
 .group-ctx summary { cursor: pointer; color: var(--muted); }
@@ -1883,6 +1899,33 @@ html[data-textscale="3"] { font-size: 142%; }
    ─────────────────────────────────────────────────────────────────────────── */
 .mark-modal { border: none; border-radius: 14px; padding: 0; width: min(960px, 95vw); max-height: 92vh; box-shadow: 0 18px 56px rgba(0,0,0,0.28); color: var(--ink); }
 .mark-modal::backdrop { background: rgba(20,28,40,0.45); backdrop-filter: blur(2px); }
+
+/* Attendance register (noted_bugs2 #4) */
+.att-card .card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.att-summary { margin: 0.2rem 0 0.6rem; }
+.att-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.att-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; padding: 0.4rem 0.5rem; border: 1px solid var(--line); border-radius: 8px; }
+.att-name { font-weight: 600; min-width: 9rem; flex: 1 1 9rem; }
+.att-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.att-btn { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--surface, #fff); border-radius: 999px; padding: 0.25rem 0.7rem; }
+.att-btn:hover { background: var(--accent-soft, #eef2ff); }
+.att-btn.att-present.is-on { background: var(--green-soft, #e8f5e9); color: var(--green, #1b5e20); border-color: currentColor; }
+.att-btn.att-absent.is-on { background: var(--red-soft, #fdeaea); color: var(--red, #a01e1e); border-color: currentColor; }
+.att-btn.att-left_early.is-on, .att-btn.att-extended_leave.is-on { background: var(--amber-soft, #fff7e6); color: var(--amber, #8a5a00); border-color: currentColor; }
+.att-detail { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem; flex-basis: 100%; padding-left: 0.25rem; }
+.att-detail label { display: flex; flex-direction: column; font-size: 0.78rem; color: var(--muted); gap: 0.15rem; }
+.att-detail input { font: inherit; padding: 0.25rem 0.4rem; }
+
+/* Quick-peek worksheet modal (noted_bugs2 #6) — large type, scrollable, sized to read at a glance from
+   the front of the room. Reuses the worksheet preview body (.ws-doc-preview) inside modal chrome. */
+.worksheet-modal { border: none; border-radius: 14px; padding: 0; width: min(900px, 95vw); max-height: 92vh; box-shadow: 0 18px 56px rgba(0,0,0,0.28); color: var(--ink); }
+.worksheet-modal::backdrop { background: rgba(20,28,40,0.45); backdrop-filter: blur(2px); }
+#worksheet-modal-body { display: flex; flex-direction: column; max-height: 92vh; }
+.ws-modal { display: flex; flex-direction: column; min-height: 0; }
+.ws-modal-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: linear-gradient(180deg,#fff,#f7f9fc); border-bottom: 1px solid var(--line); padding: 0.7rem 1rem 0.6rem; border-radius: 14px 14px 0 0; }
+.ws-modal-head h2 { margin: 0; font-size: 1.15rem; }
+.ws-modal .ws-preview-tabs { padding: 0.6rem 1rem 0; margin: 0; }
+.ws-modal-prev { overflow: auto; padding: 0.4rem 1rem 1rem; font-size: 1.05rem; }
 #mark-modal-body { display: flex; flex-direction: column; max-height: 92vh; }
 .mm { display: flex; flex-direction: column; min-height: 0; }
 

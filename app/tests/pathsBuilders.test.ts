@@ -16,6 +16,7 @@ describe('paths builders — exact URLs', () => {
     [paths.schemesLens(9, 'spine', null), '/schemes?course=9&amp;lens=spine'],
     [paths.settings(), '/settings'],
     [paths.timetable(), '/timetable'],
+    [paths.timetableClassAway(), '/timetable/class-away'],
     [paths.tasks(), '/tasks'],
     [paths.tasksFiltered('interest'), '/tasks?view=interest'],
     [paths.captured(), '/captured'],
@@ -57,6 +58,8 @@ describe('paths builders — exact URLs', () => {
     // now
     [paths.nowClock('a b&c'), '/now/clock?sig=a%20b%26c'], // encodeURIComponent applied inside
     [paths.nowTimeline(), '/now/timeline'],
+    [paths.nowCurrent('a b&c'), '/now/current?sig=a%20b%26c'],
+    [paths.nowInboxQueue(), '/now/inbox-queue'],
     [paths.settingsExperience(), '/settings/experience'],
     [paths.settingsExperienceNudgeDismiss(), '/settings/experience-nudge/dismiss'],
     // tasks
@@ -118,9 +121,15 @@ describe('paths builders — exact URLs', () => {
     [paths.schemesPlanResources(11), '/schemes/plan/11/resources'],
     [paths.schemesPlanResourcesAi(11), '/schemes/plan/11/resources-ai'],
     [paths.schemesPlanResourcesAiStatus(11), '/schemes/plan/11/resources-ai/status'],
+    // worksheet quick-peek modal
+    [paths.worksheetModal(7, 3), '/lesson/worksheet-modal?gc=7&amp;lp=3&amp;level=core'],
+    [paths.worksheetModal(7, 3, 'support'), '/lesson/worksheet-modal?gc=7&amp;lp=3&amp;level=support'],
     // marking / mark modal
     [paths.occMark(20), '/lesson/oc/20/mark'],
     [paths.occAtl(20), '/lesson/oc/20/atl'],
+    [paths.occAttendance(20), '/lesson/oc/20/attendance'],
+    [paths.occAttendanceAllPresent(20), '/lesson/oc/20/attendance/all-present'],
+    [paths.occPupilAttendance(20, 30), '/lesson/oc/20/pupil/30/attendance'],
     [paths.occPupilMark(20, 30), '/lesson/oc/20/pupil/30/mark'],
     [paths.occPupilMarkWs(20, 30, 2), '/lesson/oc/20/pupil/30/mark?ws=2'],
     [paths.occPupilMarkSave(20, 30), '/lesson/oc/20/pupil/30/mark/save'],

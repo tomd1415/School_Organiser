@@ -8,9 +8,9 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: compare · typing · writing. Same routine. Open a blank document.
 
 ## Two ways to write
-![A pencil]({{res:l6-pencil.png}})
+![A pencil]({{res:l6-pencil-teach-computing.png}})
 
-![A computer keyboard]({{res:l6-keyboard.png}})
+![A computer keyboard]({{res:l6-computer-keyboard-teach-computing.png}})
 
 - one way: a pencil on paper
 - another way: keys on a computer

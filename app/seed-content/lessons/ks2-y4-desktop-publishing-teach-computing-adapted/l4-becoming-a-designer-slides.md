@@ -36,7 +36,7 @@
 > 🧑‍🏫 Remind pupils of the school rule for searching for images. Model adding and resizing one picture. You-do on the activity worksheet.
 
 ## Your finished cover
-![An example magazine cover called Tech Trends]({{res:l4-magazine-cover.png}})
+![An example magazine cover called Tech Trends]({{res:l4-example-magazine-cover-teach-computing.png}})
 
 A clear title, a main picture, and easy-to-read text.
 

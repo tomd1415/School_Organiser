@@ -35,7 +35,7 @@ A **podcast** is a recording people listen to, a bit like a radio show you can p
 ## 🔴 Challenge
 You can put different recordings on different **tracks** and play them one after another.
 
-![Two tracks: the first plays, then the second]({{res:l2-tracks-aligned.png}})
+![Two tracks: the first plays, then the second]({{res:l2-two-tracks-playing-in-sequence-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

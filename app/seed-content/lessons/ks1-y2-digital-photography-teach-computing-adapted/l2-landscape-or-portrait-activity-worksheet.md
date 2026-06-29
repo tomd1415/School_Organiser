@@ -10,8 +10,8 @@ Today I will choose portrait or landscape for a photo and say why.
 ## Which format suits the photo?
 A **tall** thing often looks best in **portrait**. A **wide** thing often looks best in **landscape**.
 
-![A tall tower in portrait format]({{res:l2-tower-portrait.jpg}})
-![A wide view of arches in landscape format]({{res:l2-arches-landscape.png}})
+![A tall tower in portrait format]({{res:l2-a-tall-tower-in-portrait-format-teach-computing.jpg}})
+![A wide view of arches in landscape format]({{res:l2-a-wide-view-in-landscape-format-teach-computing.png}})
 
 Drag each subject into the format that usually suits it best.
 

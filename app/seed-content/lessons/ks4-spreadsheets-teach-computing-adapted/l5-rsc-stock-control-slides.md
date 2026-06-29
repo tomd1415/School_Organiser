@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: LOOKUP · VLOOKUP · IF · absolute · conditional format. Same routine as every lesson.
 
 ## Starter — what happens after the beep?
-![A QR code]({{res:l5-qr-code.png}})
+![A QR code]({{res:l5-qr-code-teach-computing.png}})
 
 - a barcode holds item data, NOT the price
 - the price is kept in the shop's database
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Why keep price in the database? It can be changed in one place for an offer. The QR code on this slide links to a message — scan it if it suits the class.
 
 ## A till uses a LOOKUP
-![A till receipt with shortened names]({{res:l5-till-receipt.png}})
+![A till receipt with shortened names]({{res:l5-till-receipt-teach-computing.png}})
 
 - scan the item number → LOOKUP finds it → returns the data
 - the receipt shows the short name from the database
@@ -34,7 +34,7 @@
 > 🧑‍🏫 Read it in parts. Likely error: the range is not locked, so it shifts when filled down. Fix-words: "lock the range with dollar signs."
 
 ## IF — warn when stock is low
-![The VAT rate cell the lookup uses]({{res:l5-vat-lookup.png}})
+![The VAT rate cell the lookup uses]({{res:l5-vat-rate-lookup-cell-teach-computing.png}})
 
 - `=IF(H8<100,"Reorder","")`
 - if stock is below 100 → show "Reorder"

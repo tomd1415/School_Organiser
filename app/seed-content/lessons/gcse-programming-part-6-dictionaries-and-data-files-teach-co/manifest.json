@@ -1,0 +1,380 @@
+{
+  "unitTitle": "GCSE Programming part 6 — dictionaries and data files (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Records and dictionaries",
+      "objectives": "I can describe what a record is (an entity and its attributes)\nI can use a dictionary to make a record in Python\nI can get and change an attribute using its key\nI can use a list of dictionaries to make a database",
+      "outline": "Routine first (same every lesson). Vocabulary on board: entity · attribute · field · record · database · key · dictionary. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict a 2D-list battleship index `grid[1][1]` (peer instruction). Answer “B”. Recaps row-first-then-column before we meet dictionaries (accessed by a KEY, not an index). See the starter worksheet.\n   • Support: which number is the row / counting from 0.  • Core: write the output.  • Challenge: indexes for the top-right corner.\n2. (5–25) I-do → we-do (activity worksheet) — an entity has attributes; a record is all the attributes for one entity; many records = a database (records-database image). Python has no record type, so use a dictionary: `player = {\"username\": \"rockstar\", ...}`; get by key `player[\"username\"]`; change by key. Predict the outputs. Common slip: `()` instead of `[]`; fix-words “square brackets to look up a key.”\n3. (25–45) You-do — pair programming (driver/navigator, swap every 5 mins).\n   • Support: order the make-a-record program (Parson’s).  • Core: make your own record (3 attributes) + print one with a heading.  • Challenge: a list of dictionaries (a database), append two, print index 0. Likely error: missing comma between pairs / `{}` vs `[]`; fix-words “every pair ends with a comma; curly brackets hold the dictionary.” TA: “prompt, do not do it for them.” They paste their link + a screenshot.\n4. (45–55) Plenary — match the key word to its meaning (entity/attribute/key/record); self-tick the 4 “I can…”.\nDifferentiation on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "A database of records (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-database-of-records-teach-computing.png"
+        },
+        {
+          "title": "Records and dictionaries — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-records-and-dictionaries-starter-worksheet.md"
+        },
+        {
+          "title": "Records and dictionaries — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-records-and-dictionaries-activity-worksheet.md"
+        },
+        {
+          "title": "Records and dictionaries — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-records-and-dictionaries-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Dictionary challenge — Caesar cipher",
+      "objectives": "I can describe what a dictionary and a key–value pair are\nI can add a new key–value pair to a dictionary\nI can use a dictionary as a Caesar cipher\nI can build a Caesar cipher encryption program",
+      "outline": "Routine first. Vocabulary on board: Caesar cipher · dictionary · key · key–value pair. TA: everyone has Python open. Read the 4 “I can…” aloud. This is a mini-build — take your time.\n1. (0–7) Starter — crack the secret message `JCV` by shifting each letter back 2 (peer instruction). Answer “HAT”. Introduces ciphers. See the starter worksheet.\n   • Support: which way the shift goes / A→C.  • Core: encrypt CAT.  • Challenge: a letter past Z.\n2. (7–20) I-do → we-do (activity worksheet) — a dictionary is dynamic and can GROW: `caesar = {}` then `caesar[\"A\"] = \"C\"`. Plan the cipher program with the order task (key → build dictionary → message → upper case → look up each letter → show). Big idea: build one step, test it, then the next. Likely error: a letter past Z; fix-words “if it goes past Z, subtract 26.”\n3. (20–48) You-do — independent or pairs (they have enough skill now).\n   • Support: order a tiny cipher (Parson’s) and encrypt one letter.  • Core: plan the program with the order block.  • Challenge: build the full Caesar cipher program. TA: “prompt, do not do it for them.” Reassure: big build — test as you go. They screenshot the program.\n4. (48–55) Plenary — predict `print(chr(67))` (answer C); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Encryption — a locked safe (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-encryption-a-locked-safe-teach-computing.png"
+        },
+        {
+          "title": "Dictionary challenge — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-dictionary-challenge-starter-worksheet.md"
+        },
+        {
+          "title": "Dictionary challenge — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-dictionary-challenge-activity-worksheet.md"
+        },
+        {
+          "title": "Dictionary challenge — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-dictionary-challenge-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Reading text files",
+      "objectives": "I can explain why programs use external data files\nI can open and read a text file (open, read, close)\nI can iterate over a file and strip the newline\nI can read a file's lines into a list",
+      "outline": "Routine first. Vocabulary on board: data file · text file · open · read · close. TA: everyone has Python open; quick.txt / numbers.txt are in the shared area. Read the 4 “I can…” aloud.\n1. (0–5) Starter — “how limited would gaming be if you could never save your progress?” (think–pair–share; save-progress arcade image). A variable is forgotten when the program ends; a FILE keeps the data. See the starter worksheet.\n   • Support: tick why a data file is useful / open before read.  • Core: name a non-game program that saves data.  • Challenge: why a variable cannot keep a score after the program ends.\n2. (5–25) I-do → we-do (activity worksheet) — `open(\"quick.txt\", \"r\")` → `read()` → `close()` (\"r\" = read; a book must be opened first; warn that \"w\" WIPES a file). Then iterate `for line in file:` and `line.strip()` to remove the `\\n`. Default type is string — `int()` for numbers. Common slip: file-not-found; fix-words “the file must be in the same folder.”\n3. (25–48) You-do — pair programming (swap every 5 mins).\n   • Support: order the read program (Parson’s).  • Core: read the lines into a list and print it.  • Challenge: add up the numbers in numbers.txt and print the total. Likely error: forgetting `int()` so numbers join as text; fix-words “numbers from a file are strings — int() them first.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (48–55) Plenary — recap the five file methods (open, read, readline, readlines, close); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Saving progress — arcade high score (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-saving-progress-arcade-high-score-teach-computing.png"
+        },
+        {
+          "title": "Reading text files — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-reading-text-files-starter-worksheet.md"
+        },
+        {
+          "title": "Reading text files — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-reading-text-files-activity-worksheet.md"
+        },
+        {
+          "title": "Reading text files — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-reading-text-files-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Writing to text files",
+      "objectives": "I can write to a new text file with write mode\nI can explain that write mode overwrites the whole file\nI can append to a file with append mode\nI can use the newline character to put data on new lines",
+      "outline": "Routine first. Vocabulary on board: text file · write · append · mode · overwrite. TA: everyone has Python open. Read the 4 “I can…” aloud.\n1. (0–7) Starter — predict a program that opens in \"w\" then tries to `read()` without closing (peer instruction). Answer: an ERROR — you cannot read a write-mode file (and it wasn’t closed). Reinforces closing files; data saves on close. See the starter worksheet.\n   • Support: tick close-when-finished / data saves on close.  • Core: why you cannot read a \"w\" file.  • Challenge: why closing a written file matters.\n2. (7–28) I-do → we-do (activity worksheet) — `open(\"players.txt\", \"w\")` makes/WIPES a file; `write()`; `close()`; `\\n` for new lines. Then append `\"a\"` adds to the END (still `write()`). Card-sort the three modes (r / w / a). The TCC live-coding demo videos are described on screen instead of played (no flashing/sound). Likely error: \"w\" when they meant \"a\", wiping data; fix-words “w wipes, a adds.”\n3. (28–50) You-do — pair programming (swap every 5 mins).\n   • Support: order the write program (Parson’s).  • Core: ask for four names and write them, one per line.  • Challenge: append the latest score to scores.txt, keeping old ones. Likely error: data all on one line (missing `\\n`); fix-words “add a newline between entries.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (50–55) Plenary — recap w = make/overwrite, a = add to end, `\\n` = new line, always close; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Writing to text files — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-writing-to-text-files-starter-worksheet.md"
+        },
+        {
+          "title": "Writing to text files — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-writing-to-text-files-activity-worksheet.md"
+        },
+        {
+          "title": "Writing to text files — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-writing-to-text-files-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Reading CSV files",
+      "objectives": "I can describe a CSV file (commas, rows and columns)\nI can read a CSV file into a list\nI can use split() to break a line at the commas\nI can read a CSV file into a 2D list and find data",
+      "outline": "Routine first. Vocabulary on board: CSV (comma-separated values) · method · spreadsheet · tabular format. TA: everyone has Python open; the CSV files are in the shared area. Read the 4 “I can…” aloud.\n1. (0–5) Starter — predict `players[1][0]` for a 2-row 2D list (peer instruction). Answer “RockStar”. Recaps 2D indexing for CSV data. See the starter worksheet.\n   • Support: what CSV stands for / values separated by a comma.  • Core: write the output.  • Challenge: indexes for the score 20.\n2. (5–25) I-do → we-do (activity worksheet) — a CSV is a plain TEXT file with commas (tabular format); Python reads it all as strings. Read into a list, then a 2D list with `line.split(\",\")`; `pop(0)` removes the header. Match method ↔ effect (strip / split / pop). Common slip: forgetting to split, so the whole line is one item; fix-words “split at the comma to make columns.”\n3. (25–50) You-do — pair programming (swap every 5 mins).\n   • Support: order the read-into-2D-list program (Parson’s).  • Core: look up a player’s score by name.  • Challenge: find the highest value in a column (weather data). Likely error: comparing a string to a number / wrong column index; fix-words “float() the column before you compare; row first, then column.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (50–55) Plenary — discuss the 2D-list challenges; recap CSV = text + commas, split() makes columns; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Reading CSV files — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-reading-csv-files-starter-worksheet.md"
+        },
+        {
+          "title": "Reading CSV files — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-reading-csv-files-activity-worksheet.md"
+        },
+        {
+          "title": "Reading CSV files — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-reading-csv-files-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Writing to CSV files",
+      "objectives": "I can explain that data must be a string before writing to a CSV\nI can use join() to make a list into a comma string\nI can write a 1D list to a CSV file\nI can write a 2D list to a CSV file",
+      "outline": "Routine first. Vocabulary on board: CSV · split method · join method · string. TA: everyone has Python open. Read the 4 “I can…” aloud. Hard challenges — fine to spread over two lessons.\n1. (0–5) Starter — think, write, pair, share: “when might you use a CSV instead of a plain text file?” (tabular data, opens in a spreadsheet). See the starter worksheet.\n   • Support: tick rows-and-columns / change a number to a string first.  • Core: what join() does.  • Challenge: why each row needs `\\n`.\n2. (5–25) I-do → we-do (activity worksheet) — a file stores only strings, so `str()` each item; `join()` is the opposite of `split()`: `\",\".join(str_numbers)` → \"3,4,5\"; then `write()`. For a 2D list: join each row, add `\\n`. Match split ↔ join. Show the two typical errors (writing an int / a list). Likely error: rows all on one line (missing `\\n`); fix-words “join the row, then newline.”\n3. (25–50) You-do — pair programming (swap every 5 mins).\n   • Support: order the write-a-list program (Parson’s).  • Core: write a times table to a CSV (one row).  • Challenge: write a 2D number grid, each row on its own line. Likely error: a TypeError from writing an int; fix-words “str() it first.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (50–55) Plenary — recap str(), join(), write(); open the CSV in a spreadsheet to check; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Writing to CSV files — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-writing-to-csv-files-starter-worksheet.md"
+        },
+        {
+          "title": "Writing to CSV files — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-writing-to-csv-files-activity-worksheet.md"
+        },
+        {
+          "title": "Writing to CSV files — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-writing-to-csv-files-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Being a programmer",
+      "objectives": "I can describe the good habits of a programmer\nI can use meaningful identifiers and naming conventions\nI can rewrite code using a cleaner alternative\nI can append data to a CSV file",
+      "outline": "Routine first. Vocabulary on board: append · meaningful identifiers · naming conventions · Pythonista. TA: everyone has Python open. Read the 4 “I can…” aloud. Last lesson of new content before the project.\n1. (0–5) Starter — make a list of the good habits of a programmer (share to class). See the starter worksheet.\n   • Support: tick-all the good habits (multi-select).  • Core: why player_score beats a.  • Challenge: what “start small / decompose” means.\n2. (5–32) I-do → we-do (activity worksheet) — meaningful identifiers (an exam requirement), Python naming conventions (lower_case_with_underscores), test early/often, start small, comment. Card-sort good vs poor practice. Cleaner alternatives: `input(\"…\")`, `score += 1`, `print(\"Name:\", name)`. Rename + comment the messy “guess the word” code together.\n3. (32–50) You-do — pair programming (swap every 5 mins).\n   • Support: order the append-to-CSV program (Parson’s).  • Core: rename + comment the messy code.  • Challenge: the spelling-test program (read spellings.csv, test, append Correct/Incorrect). Likely error: overwriting with \"w\" instead of \"a\"; fix-words “a adds, w wipes.” TA: “prompt, do not do it for them.” They screenshot the program.\n4. (50–55) Plenary — write a short letter to your past self with tips; recap the good habits (all matter for the project); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Being a programmer — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-being-a-programmer-starter-worksheet.md"
+        },
+        {
+          "title": "Being a programmer — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-being-a-programmer-activity-worksheet.md"
+        },
+        {
+          "title": "Being a programmer — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-being-a-programmer-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Battle Boats — success criteria",
+      "objectives": "I can explain the rules of Battle Boats\nI can describe what success criteria are\nI can break the project into clear success criteria\nI can spot how an old program could help me",
+      "outline": "Routine first. Vocabulary on board: success criteria · decomposition. This is lesson 1 of the Battle Boats project — the unit’s summative assessment, spread over the next lessons. Read the 4 “I can…” aloud. Calm, steady pace.\n1. (0–15) Starter — play Battle Boats unplugged (one A0 paper sheet per pair): two 8×8 grids each (fleet `B`, target tracker `H`/`M`), take turns firing, sink all 5 to win. No screens. See the starter worksheet.\n   • Support: H marks a hit / 5 boats.  • Core: which data structure suits an 8×8 grid.  • Challenge: how the program knows someone has won.\n2. (15–25) I-do → we-do (activity worksheet) — success criteria = a clear, TESTABLE list of what the program must do, broken down (decomposition). Contrast a good criterion (“marks a hit with H”) with a vague one (“make it good”): card-sort. Order the 7 project tasks (menu → place boats → computer boats → tracker → player turn → computer turn → play to a winner). Everyone aims for up to Task 7.\n3. (25–50) You-do — write your own success criteria for Tasks 1–7, broken down. Challenge: list parts of your noughts and crosses game to reuse. TA: “prompt, do not write criteria for them.” They screenshot the sheet.\n4. (50–55) Plenary — how could noughts and crosses help? (displays a grid, modifies items, uses a 2D list); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Battle Boats — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-battle-boats-starter-worksheet.md"
+        },
+        {
+          "title": "Battle Boats success criteria — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-battle-boats-success-criteria-activity-worksheet.md"
+        },
+        {
+          "title": "Battle Boats success criteria — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-battle-boats-success-criteria-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Battle Boats — design",
+      "objectives": "I can describe what pseudocode and a flowchart are\nI can read Teach Computing pseudocode\nI can design part of my program with pseudocode or a flowchart\nI can use my success criteria to guide my design",
+      "outline": "Routine first. Vocabulary on board: pseudocode · flowchart. Lesson 2 of the project. Read the 4 “I can…” aloud. Steady pace — designs do not need to be perfect.\n1. (0–5) Starter — “how might this code snippet help?” `randint(0, 7)` for a row + column (peer discussion). It gives the computer a random target coordinate. See the starter worksheet.\n   • Support: what range randint(0,7) gives / picks a random target.  • Core: why a random row AND column.  • Challenge: why avoid firing at the same coordinate twice.\n2. (5–20) I-do → we-do (activity worksheet) — pseudocode = structured-English steps; flowchart = a picture of the algorithm. Match Python to TCC pseudocode (`<-` assign, `OUTPUT`, `USERINPUT`, IF/FOR/WHILE/SUBROUTINE). Order the design steps (read criteria → pick a task → write pseudocode → check it → next). Designs guided by the success criteria; reuse old programs for ideas.\n3. (20–50) You-do — design tasks.\n   • Support: read and explain a short piece of pseudocode.  • Core: design the menu task.  • Challenge: design the player’s turn (coordinate, no repeats, hit/miss). Remind them of the pseudocode reference sheet. TA: “prompt, do not design it for them.” They screenshot the design.\n4. (50–55) Plenary — one more snippet, how could it help?; self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "An example flowchart with code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l9-an-example-flowchart-with-code-teach-computing.png"
+        },
+        {
+          "title": "Battle Boats design — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-battle-boats-design-starter-worksheet.md"
+        },
+        {
+          "title": "Battle Boats design — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-battle-boats-design-activity-worksheet.md"
+        },
+        {
+          "title": "Battle Boats design — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-battle-boats-design-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Battle Boats — code (four-lesson build)",
+      "objectives": "I can keep a code log of my progress\nI can build my program one subroutine at a time\nI can test each part as I build it\nI can build the Battle Boats program (towards Task 7)",
+      "outline": "This is the four-lesson coding block (lessons 3–6 of the project) — treat as one combined lesson. Routine first each lesson. Vocabulary on board: code log · decomposition · subroutine · 2D list. TA: learning partners; check in every 15 minutes. Read the 4 “I can…” aloud. Calm, steady pace over the four lessons.\n1. (0–5) Starter — first lesson: why keep a code log? (think–pair–share); later lessons: read your code log (what did you do, what is next?). See the starter worksheet.\n   • Support: tick build-as-you-go.  • Core: what to write in the log.  • Challenge: why one-subroutine-at-a-time makes bugs easier to find.\n2. (5–15) I-do → we-do (activity worksheet) — the board is a 2D list (`board.append([\".\"]*8)` ×8); place a boat `board[2][3] = \"B\"` (row first, then column). Build ONE subroutine, test it, then the next (decomposition); reuse the noughts and crosses code. Order the build (board → display → place player boats → place computer boats → player turn → computer turn → check winner). Likely error: row/column swapped; fix-words “row first, then column.”\n3. (15–195, across four lessons) You-do — pair programming, swap regularly. Aim for up to Task 7; test normal/boundary/erroneous as you go.\n   • Support: order/complete the display-board subroutine (Parson’s).  • Core: let the player place a boat (check the square is empty).  • Challenge: the player’s turn (hit/miss, no repeat shots). TA: “prompt, do not do it for them.” They screenshot at the end of each lesson.\n4. (195–200) Plenary each lesson — update the code log (what worked, what was hard, next steps); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Battle Boats code — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-battle-boats-code-starter-worksheet.md"
+        },
+        {
+          "title": "Battle Boats code — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-battle-boats-code-activity-worksheet.md"
+        },
+        {
+          "title": "Battle Boats code — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l10-battle-boats-code-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Battle Boats — testing",
+      "objectives": "I can describe normal, boundary, and erroneous test data\nI can write a test plan from my success criteria\nI can record expected vs actual output\nI can find and fix a bug",
+      "outline": "Routine first. Vocabulary on board: normal · boundary · erroneous · test plan. Penultimate lesson of the project. Read the 4 “I can…” aloud. Calm, steady pace.\n1. (0–5) Starter — write the definitions of normal, boundary, and erroneous test data (mini-whiteboards). Grid is 0–7, so 0 and 7 are boundaries; 9 or \"cat\" are erroneous. See the starter worksheet.\n   • Support: match the test type to its meaning.  • Core: an example of erroneous row data + what the program should do.  • Challenge: why test boundary values 0 and 7.\n2. (5–15) I-do → we-do (activity worksheet) — a test plan: description · input · expected · actual, based on the success criteria. Card-sort inputs into normal/boundary/erroneous. Model one test row (e.g. firing at a repeat square). Robustness matters for the rubric — does it catch human error without crashing?\n3. (15–50) You-do — complete the testing table from your success criteria.\n   • Support: the prepared test rows.  • Core: a full test (input/expected/actual) for one criterion.  • Challenge: record a bug and exactly how you fixed it. Remind them to test the three data types. TA: “prompt, do not test it for them.” They screenshot the testing table.\n4. (50–55) Plenary — pairs discuss the biggest challenges faced (feeds into the evaluation lesson); self-tick the 4 “I can…”.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Battle Boats test — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-battle-boats-test-starter-worksheet.md"
+        },
+        {
+          "title": "Battle Boats test — testing table worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-battle-boats-test-testing-table-worksheet.md"
+        },
+        {
+          "title": "Battle Boats test — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l11-battle-boats-test-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Battle Boats — evaluate (+ unit quiz)",
+      "objectives": "I can explain why evaluation matters\nI can evaluate my project against the success criteria\nI can describe my strengths and what I'd do differently\nI can submit my finished project",
+      "outline": "Routine first. Vocabulary on board: evaluate. Final lesson of the project and of the unit. Read the 4 “I can…” aloud. The whole Battle Boats project is the unit’s summative assessment — mark it with the Battle Boats rubric (success criteria, design, naming conventions, subroutines, commenting, validation, structured approach, user-friendliness, scenario completed, testing, evaluation).\n1. (0–5) Starter — why evaluate? (think–pair–share): taking stock — did I meet the criteria, what was hard, what would I change. See the starter worksheet.\n   • Support: tick “compare against success criteria.”  • Core: one strength + one weakness.  • Challenge: one thing to do differently next time.\n2. (5–15) I-do → we-do (evaluation worksheet) — evaluate task by task (yes/partly/no, with evidence); be honest about strengths AND weaknesses. Model evaluating one task; “partly” is fine if the evidence is honest.\n3. (15–48) You-do — evaluate each of the 7 tasks; Core: summarise strengths/weaknesses; Challenge: which explorer task (save/resume, varied boat sizes) you’d add and how; rate confidence (slider). Then the Dictionaries and data files unit quiz (key-word matching, dictionary fill-blank, file-modes multi-select, reading-a-file Parson’s, CSV split/join matching, write code, confidence slider) — the unit’s final knowledge check alongside the project, in place of a separate summative exam. TA: “prompt, do not answer for them.” They submit the program + a screenshot of the working game.\n4. (48–55) Plenary — submit the full project (program, design, success criteria, testing table, evaluation) for marking; self-tick the 4 “I can…”. Two TCC example solutions (to task 7; with validation) exist as a marking reference.\nDifferentiation on the SAME task; movement breaks routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Battle Boats evaluate — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-battle-boats-evaluate-starter-worksheet.md"
+        },
+        {
+          "title": "Battle Boats evaluate — evaluation worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-battle-boats-evaluate-evaluation-worksheet.md"
+        },
+        {
+          "title": "Battle Boats evaluate — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-battle-boats-evaluate-slides.md"
+        },
+        {
+          "title": "Dictionaries and data files unit quiz — worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l12-dictionaries-and-data-files-unit-quiz-worksheet.md"
+        }
+      ]
+    }
+  ]
+}

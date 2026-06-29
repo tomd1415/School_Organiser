@@ -17,7 +17,7 @@ set score to 0
 
 This is the start of the Pong code:
 
-![Pong code: when flag clicked, set score to 0, then a repeat loop with the ball moving]({{res:l3-pong-code.png}})
+![Pong code: when flag clicked, set score to 0, then a repeat loop with the ball moving]({{res:l3-pong-code-set-score-to-0-and-a-repeat-loop-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |
@@ -43,7 +43,7 @@ Change (add to a value): change score by 1, change score by -1
 ```
 
 ## Changing by different amounts
-![A change score by 1 then change score by -1 block]({{res:l3-change-up-down.png}})
+![A change score by 1 then change score by -1 block]({{res:l3-a-change-score-by-1-then-by-1-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

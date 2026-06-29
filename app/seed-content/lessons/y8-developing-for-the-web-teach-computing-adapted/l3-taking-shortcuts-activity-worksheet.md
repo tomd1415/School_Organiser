@@ -10,7 +10,7 @@ Today I will use CSS to style a web page, and explain why CSS beats styling by h
 ## What is CSS?
 CSS (Cascading Style Sheets) keeps all the styling in one separate file. Change it once, and every matching tag updates.
 
-![A web page styled with CSS]({{res:l3-web-page-styled.png}})
+![A web page styled with CSS]({{res:l3-web-page-styled-with-css-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|

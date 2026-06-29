@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Same calm routine. Today: a quick recap, then the quiz, then careers.
 
 ## Starter — the global threat map
-![A live cyber threat map showing millions of attacks]({{res:l7-cyber-threat-map.png}})
+![A live cyber threat map showing millions of attacks]({{res:l7-live-cyber-threat-map.png}})
 
 Attacks happen all the time, all over the world.
 

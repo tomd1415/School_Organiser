@@ -1,0 +1,254 @@
+{
+  "unitTitle": "Y9 Python programming with sequences of data (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Warm up — selection and lists",
+      "objectives": "I can read a program and predict what it displays\nI can use selection (if-elif-else) to choose what a program does\nI can find and fix common syntax errors\nI can create a list and read an item using its index",
+      "outline": "Routine first (same every lesson). Vocabulary on board: selection · condition · syntax error · list · index. TA: everyone has the Python editor (Trinket/Mu) open; pairs set with a driver and a navigator. Read the 4 “I can…” aloud.\n1. (0–10) Starter — “let me check” on the starter worksheet. Pupils MATCH each Python word (input/print/while/if/=) to what it does, then a short walkthrough question (no writing for Support).\n   • Support: tick the one matching action.  • Core: explain operator precedence (+ before /).  • Challenge: why a condition needs a colon. Likely error: = vs == → fix-words “= stores a value, == checks if equal.”\n2. (10–20) I-do → we-do (selection recap). Walk through the “How long until the weekend?” code (embedded screenshot): days are numbers 0–6; the colon and indent set each branch. Pairs predict the output on the activity worksheet.\n3. (20–30) We-do — spot the syntax errors (card-sort on the activity worksheet): drag lines into “has a syntax error” vs “no syntax error”. TA: “prompt them to read the line aloud, do not fix it for them.”\n4. (30–50) You-do — lists. Use the “months” list (embedded screenshot): items are numbered from 0.\n   • Support: choose the index that gives a month.  • Core: fill the index gap; say what an index does.  • Challenge: write the weekday expression and fix `if day = 4:`. Keep a screenshot of the working program.\n5. (50–55) Plenary — self-tick the 4 “I can…”; each pair shows a list reading the right month. TA notes who can explain zero-based counting.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "pair programming (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-pair-programming-teach-computing.png"
+        },
+        {
+          "title": "weekday selection code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-weekday-selection-code-teach-computing.png"
+        },
+        {
+          "title": "months list code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-months-list-code-teach-computing.png"
+        },
+        {
+          "title": "Warm up — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-warm-up-starter-worksheet.md"
+        },
+        {
+          "title": "Warm up — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-warm-up-activity-worksheet.md"
+        },
+        {
+          "title": "Warm up — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-warm-up-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Playlist — operations on lists",
+      "objectives": "I can add and remove items from a list\nI can find an item's index and count how often it appears\nI can reorder a list with sort and reverse\nI can choose the right list operation for a task",
+      "outline": "Routine first. Vocabulary on board: list · index · append · insert · pop · remove · index · count · sort · reverse. TA: editor open; pairs swap driver/navigator. Read the 4 “I can…” aloud.\n1. (0–5) Starter — “find the item” on the starter worksheet: recall that `planets[2]` is the THIRD planet (zero-based), then MATCH each operation (append/remove/index/count) to its job.\n   • Support: first index is 0.  • Core: match the operations.  • Challenge: pop vs remove.\n2. (5–15) I-do → we-do — operations on lists. Show dot notation: `planets.append(\"Mars\")`. Card-sort on the activity worksheet: which operation adds, removes, finds/counts, or reorders.\n3. (15–35) You-do — “the solar system”: add Uranus and Neptune to the end, then remove Pluto.\n   • Support: pick the append line.  • Core: fill the method name; write the remove line. Likely error: `planets = append(...)` → fix-words “the list goes before the dot.” TA: prompt, don’t type for them.\n4. (35–50) Challenge — dice battle (embedded dice screenshot): sort each player’s dice highest-first, then compare the top rolls. Keep a screenshot of the working program.\n5. (50–55) Plenary — self-tick the 4 “I can…”; name the operations used. TA notes who can explain which operation fits which job.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "dice battle (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-dice-battle-teach-computing.png"
+        },
+        {
+          "title": "Playlist — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-playlist-starter-worksheet.md"
+        },
+        {
+          "title": "Playlist — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-playlist-activity-worksheet.md"
+        },
+        {
+          "title": "Playlist — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-playlist-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "In a while, crocodile — looping with while",
+      "objectives": "I can use a while loop to repeat until a condition is met\nI can build up a list inside a loop with append\nI can use len and in on lists and strings\nI can read a character of a string by its index",
+      "outline": "Routine first. Vocabulary on board: iteration · while · condition · len · in · index. TA: editor open; pairs swap roles. Read the 4 “I can…” aloud.\n1. (0–10) Starter — passwords on the starter worksheet: a real list of 1,000 leaked passwords (rude words removed). Recall `len` (how many), `in` (is mine there), `index` (where).\n   • Support: what `in` checks.  • Core: what `index` returns.  • Challenge: how to warn the user. Keep it light and factual.\n2. (10–25) I-do → we-do — “form a band”: live-code a while loop that keeps asking for instruments and `append`s them until `len(band) < 3` is no longer true. Indentation shows what is inside the loop.\n3. (25–40) You-do — city hopping (embedded screenshot). Parsons task on the activity worksheet: order the jumbled lines so the program keeps picking random cities and adds them to the trip until it has five.\n   • Support: choose the stopping condition.  • Core: fill the `append` gap; `\"London\"[0]`. Likely error: not appending inside the loop, so the trip never grows → fix-words “the loop body must add to the list.”\n4. (40–52) Challenge — city guessing (embedded screenshot): a string is a list of characters, so `city[0]` is the first letter and `len(city)` counts the letters. Reveal the first-letter hint. Keep a screenshot.\n5. (52–55) Plenary — self-tick the 4 “I can…”; show a loop that built a list. TA notes who can say when the loop stops.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "city hopping code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-city-hopping-code-teach-computing.png"
+        },
+        {
+          "title": "city guessing code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-city-guessing-code-teach-computing.png"
+        },
+        {
+          "title": "In a while, crocodile — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-in-a-while-crocodile-starter-worksheet.md"
+        },
+        {
+          "title": "In a while, crocodile — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-in-a-while-crocodile-activity-worksheet.md"
+        },
+        {
+          "title": "In a while, crocodile — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-in-a-while-crocodile-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "The famous for — looping over items",
+      "objectives": "I can use a for loop to go through a list\nI can count items that match a condition\nI can collect matching items into a new list\nI can use a for loop over a string",
+      "outline": "Routine first. Vocabulary on board: iteration · for · item · count · collect. TA: editor open; pairs swap roles. Read the 4 “I can…” aloud.\n1. (0–5) Starter — shopping list on the starter worksheet: predict the output of `for item in shopping: print(item)`. The `for` syntax reads like English.\n   • Support: the loop repeats once per item.  • Core: what `item` is each time.  • Challenge: why `for` is tidier than `while` for a list.\n2. (5–20) I-do → we-do — three for-loop patterns: print every item · count matches · collect matches into a new list. Card-sort on the activity worksheet: which lines belong to the counting pattern vs the collecting pattern.\n3. (20–30) We-do — lipogram (embedded Gadsby cover): loop over every word and check `if \"e\" in word`. Real hook: a 50,000-word novel with no letter “e”.\n4. (30–45) You-do — English words (embedded screenshot): count words of a given length, then collect the words that contain a piece of text.\n   • Support: pick the loop header.  • Core: fill the gap; print every word. Likely error: indenting the check outside the loop → fix-words “the work happens inside the loop, one indent in.” Keep a screenshot.\n5. (45–53) Challenge — heartbeats (embedded ECG plot): loop over real heart data and count beats by spotting zero crossings (fast finishers).\n6. (53–55) Plenary — self-tick the 4 “I can…”; name the pattern used (print/count/collect). TA notes who can read a for loop aloud.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "English words code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-english-words-code-teach-computing.png"
+        },
+        {
+          "title": "heartbeats ECG plot (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-heartbeats-ecg-plot-teach-computing.png"
+        },
+        {
+          "title": "Gadsby novel cover (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-gadsby-novel-cover-teach-computing.jpg"
+        },
+        {
+          "title": "The famous for — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-famous-for-starter-worksheet.md"
+        },
+        {
+          "title": "The famous for — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-famous-for-activity-worksheet.md"
+        },
+        {
+          "title": "The famous for — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-famous-for-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Make a thing — sums, strings and mini-projects",
+      "objectives": "I can build up a sum or count inside a loop\nI can use a for loop over the characters of a string\nI can combine selection, iteration and list and string operations\nI can choose and start a mini-project",
+      "outline": "Routine first. Vocabulary on board: accumulate · sum · for · string · character. TA: editor open; pairs swap roles. Read the 4 “I can…” aloud.\n1. (0–8) Starter — sums on the starter worksheet: predict the output of repeated `total = total + number`. Walk it through on the board, writing `total` each step.\n   • Support: `+ 4` makes total 4 bigger.  • Core: what `total = total + number` does.  • Challenge: why total needs a start value.\n2. (8–15) We-do — sums in a for-loop: put `total = total + number` inside a `for` loop.\n   • Support: pick the accumulator line.  • Core: fill the gap. Likely error: resetting total inside the loop → fix-words “set the total ONCE, before the loop.”\n3. (15–28) You-do — count the vowels (embedded screenshot). Parsons task on the activity worksheet: order the jumbled lines so the program counts vowels in a sentence. Watch the double indent (inside the loop AND the if).\n4. (28–50) Challenge — make a thing: each pupil chooses ONE mini-project (planetary quiz / password checker / Caesar cipher / ISBN checker), writes a one-line plan and the first lines. Everyone makes something; the project sets the ceiling. Keep a screenshot.\n5. (50–55) Plenary — self-confidence (embedded rating table): rate confidence with for-on-strings and building sums on the worksheet sliders. TA notes low ratings for a re-teach.\nDifferentiation on the SAME task; calm, one project each; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "for on strings code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-for-on-strings-code-teach-computing.png"
+        },
+        {
+          "title": "self-confidence table (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-self-confidence-table-teach-computing.png"
+        },
+        {
+          "title": "Make a thing — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-make-a-thing-starter-worksheet.md"
+        },
+        {
+          "title": "Make a thing — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-make-a-thing-activity-worksheet.md"
+        },
+        {
+          "title": "Make a thing — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-make-a-thing-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Wrap up — finish, show and reflect",
+      "objectives": "I can finish and show my mini-project\nI can read list and string code and predict its output\nI can complete a loop that goes through a sequence\nI can reflect on what I have learned this unit",
+      "outline": "Routine first. Vocabulary on board: sequence · list · string · selection · iteration. TA: editor open. Read the 4 “I can…” aloud. Calm wrap-up lesson.\n1. (0–5) Starter — “what do you remember?” on the starter worksheet: a multi-select of which operations work on a list (append/index/count, not print).\n   • Support: a list and a string are both sequences.  • Core: one thing you can do to both.  • Challenge: one way they differ.\n2. (5–20) Mini-project completion: quiet working time to finish last lesson’s project, or explore a second. Praise working programs, however small.\n3. (20–45) Show what you know — the activity worksheet is the assessment. Read short programs about days, planets and the alphabet.\n   • Support: match the string operations.  • Core: fill the loop gap; what `index` returns. Likely error: off-by-one in `index < 3` for four rocky planets → fix-words “four planets means indices 0,1,2,3, so use `< 4`.”  • Challenge: read the planets output and fix the condition. Everyone does the Parsons (the alphabet-position program) — it pulls input, a for-loop over a string, and `index` together.\n4. (45–53) A peek ahead — images are sequences too: a colour-filter program loops over pixels just like a list (optional showcase for fast finishers; no new task).\n5. (53–55) Reflection — write one thing learned and rate confidence with lists and strings (slider). Sticky notes work too: one learned, one surprise, one to improve.\nDifferentiation on the SAME task; movement breaks are routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Wrap up — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-up-starter-worksheet.md"
+        },
+        {
+          "title": "Wrap up — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-up-activity-worksheet.md"
+        },
+        {
+          "title": "Wrap up — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-wrap-up-slides.md"
+        }
+      ]
+    }
+  ]
+}

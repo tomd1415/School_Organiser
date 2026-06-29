@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: capital letters · toolbar · bold · italic · underline. Same routine.
 
 ## Recap — what do these keys do?
-![A computer keyboard]({{res:l3-keyboard.png}})
+![A computer keyboard]({{res:l3-computer-keyboard-teach-computing.png}})
 
 - Space — a gap between words
 - Backspace — removes a letter
@@ -24,7 +24,7 @@
 > 🧑‍🏫 We need capitals at the start of a sentence and for names. Model: Backspace the lower-case letter, Caps Lock on, type the capital. Likely error: leaving Caps Lock on — fix-words "press it again to turn it off."
 
 ## The toolbar
-![A word processor toolbar]({{res:l3-toolbar.png}})
+![A word processor toolbar]({{res:l3-word-processor-toolbar-teach-computing.png}})
 
 - the toolbar has buttons to change the look of text
 - B = bold, I = italic, U = underline

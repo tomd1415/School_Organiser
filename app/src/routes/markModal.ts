@@ -49,6 +49,14 @@ export function markOpenAttrs(url: string): string {
   return `hx-get="${esc(url)}" hx-target="#mark-modal-body" hx-swap="innerHTML" ${SHOW}`;
 }
 
+// Shared "open the worksheet quick-peek modal" attributes — load the worksheet body into the
+// <dialog id="worksheet-modal"> and show it (mirrors markOpenAttrs). `url` is a paths.worksheetModal(...)
+// value, already in HTML-attribute form (&amp; joiners), so it is NOT re-escaped here.
+const WS_SHOW = `hx-on::after-request="if(event.detail.successful){var d=document.getElementById('worksheet-modal');if(d&&!d.open)d.showModal();}"`;
+export function worksheetModalOpenAttrs(url: string): string {
+  return `hx-get="${url}" hx-target="#worksheet-modal-body" hx-swap="innerHTML" ${WS_SHOW}`;
+}
+
 /** Build the inner HTML of #mark-modal-body for one pupil. `wsIndex` picks which worksheet (a lesson
  * may have several). Null if the oc/pupil/worksheet is missing. */
 async function buildModal(oc: number, pid: number, marking: boolean, wsIndex = 0): Promise<string | null> {

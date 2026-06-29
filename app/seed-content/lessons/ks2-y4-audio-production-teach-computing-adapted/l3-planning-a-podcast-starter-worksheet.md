@@ -14,7 +14,7 @@ A podcast can play more than one sound at once. Each sound goes on its own **tra
 This project has three tracks. Drag the right label onto each one.
 
 ```label
-image: {{res:l3-layers.png}}
+image: {{res:l3-layered-tracks-music-voice-sound-effect-teach-computing.png}}
 music (22%, 14%): Music
 voice (40%, 47%): Voice
 effect (67%, 87%): Sound effect

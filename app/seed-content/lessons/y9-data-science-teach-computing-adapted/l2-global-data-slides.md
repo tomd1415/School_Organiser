@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: data · prediction · criteria · outlier.
 
 ## Starter — tracking the traffic
-![A route map with coloured traffic lines]({{res:l2-traffic-map.png}})
+![A route map with coloured traffic lines]({{res:l2-traffic-route-map-teach-computing.png}})
 
 What do the colours show? Where does the data come from? Think · pair · share.
 

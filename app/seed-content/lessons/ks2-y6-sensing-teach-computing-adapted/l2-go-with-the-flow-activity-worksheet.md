@@ -10,12 +10,12 @@ Today I will use "if… then… else…" and a random number to make a micro:bit
 ## A random number
 A program can pick a number at random, like rolling a dice. In MakeCode this is the **pick random** block.
 
-![The pick random 1 to 6 block]({{res:l2-pick-random.png}})
+![The pick random 1 to 6 block]({{res:l2-the-pick-random-1-to-6-block-teach-computing.png}})
 
 ## The fortune teller
 When you shake the micro:bit, it picks a random number and saves it in a **variable** called *answer*. Then it checks the answer and shows "Yes" or "No".
 
-![The fortune teller code blocks]({{res:l2-fortune-teller-code.png}})
+![The fortune teller code blocks]({{res:l2-the-fortune-teller-code-blocks-teach-computing.png}})
 
 Put the blocks in the right order to make the fortune teller.
 

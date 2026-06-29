@@ -26,12 +26,12 @@ Usually landscape (wide): a postcard, a cinema ticket, a name badge
 ## Placeholders
 A template has empty boxes that show where things go. These are called placeholders.
 
-![A template with empty placeholders for a heading, a picture and body text]({{res:l3-placeholders.png}})
+![A template with empty placeholders for a heading, a picture and body text]({{res:l3-template-with-empty-placeholders-teach-computing.png}})
 
 Drag the labels onto the right placeholders.
 
 ```label
-image: {{res:l3-placeholders.png}}
+image: {{res:l3-template-with-empty-placeholders-teach-computing.png}}
 heading (50%, 10%): Title placeholder
 picture (20%, 46%): Image placeholder
 body (29%, 74%): Text placeholder

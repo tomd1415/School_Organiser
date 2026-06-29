@@ -10,7 +10,7 @@ Today I will use `<div>` tags with classes to break a page into sections and sty
 ## Predict
 Here is HTML with two `<div>` sections, and the page it makes.
 
-![Two div sections styled as blue boxes, with the code beside the output]({{res:l5-divs-code-output-teach-computing.png}})
+![Two div sections styled as blue boxes, with the code beside the output]({{res:l5-two-styled-divs-code-and-output-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|

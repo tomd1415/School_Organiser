@@ -7,7 +7,7 @@
 ## Starter — work smarter, not harder
 The third little pig built his house out of bricks. Now imagine he wants to paint every single brick by hand.
 
-![A wall made of many identical bricks]({{res:l1-brick-wall.png}})
+![A wall made of many identical bricks]({{res:l1-brick-wall-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

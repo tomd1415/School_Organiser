@@ -10,12 +10,12 @@ Today I will find blocks that have a number underneath.
 ## The value
 Some blocks have a number underneath. This number is the **value**. You can tap it and change it.
 
-![A move block with its value and a number pad]({{res:l3-change-value.png}})
+![A move block with its value and a number pad]({{res:l3-changing-a-value-with-the-number-pad-teach-computing.png}})
 
 Drag each word onto the right spot.
 
 ```label
-image: {{res:l3-change-value.png}}
+image: {{res:l3-changing-a-value-with-the-number-pad-teach-computing.png}}
 value (16%, 55%): The value
 pad (65%, 45%): Number pad
 ```

@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: Scratch · block · command · sprite · stage. Same routine as every lesson.
 
 ## You already know this
-![A Bee-Bot floor robot]({{res:l1-beebot-top.png}})
+![A Bee-Bot floor robot]({{res:l1-bee-bot-top-teach-computing.png}})
 
 - you have used Bee-Bot and ScratchJr
 - they follow commands
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Starter (10 min). Quick think-pair-share: what is the same about Bee-Bot and Scratch? Both follow commands and must be run. Bee-Bot is a real robot you pick up; Scratch is on the screen.
 
 ## The Scratch screen
-![The three areas of the Scratch screen]({{res:l1-scratch-screen.png}})
+![The three areas of the Scratch screen]({{res:l1-the-scratch-screen-teach-computing.png}})
 
 - Blocks — on the LEFT, the commands you can use
 - Code area — in the MIDDLE, where you build

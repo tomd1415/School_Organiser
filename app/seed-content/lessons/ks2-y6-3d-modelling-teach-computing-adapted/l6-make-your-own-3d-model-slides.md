@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: construct · evaluate · modify. This is the last lesson — recap the whole unit at the end.
 
 ## From plan to model
-![A house pulled apart into its shapes]({{res:l6-exploded-house.png}})
+![A house pulled apart into its shapes]({{res:l6-a-house-pulled-apart-into-its-shapes-teach-computing.png}})
 
 - use your plan from last lesson
 - think which techniques you will need
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Starter: pupils tick the techniques they will use. Remind them all of these skills come from earlier lessons.
 
 ## Build it in Tinkercad
-![An example model built in Tinkercad]({{res:l6-finished-house.png}})
+![An example model built in Tinkercad]({{res:l6-an-example-3d-model-built-in-tinkercad-teach-computing.png}})
 
 - build your shapes one at a time
 - follow your plan

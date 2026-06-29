@@ -11,7 +11,7 @@ Today I will learn that the internet is a network of networks, and what a router
 A **network** is computers joined together so they can share.
 The **internet** joins lots of networks together. It is a network of networks.
 
-![Internet cables under the sea, joining the world]({{res:l1-submarine-cable-map.png}})
+![Internet cables under the sea, joining the world]({{res:l1-internet-cables-across-the-world-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

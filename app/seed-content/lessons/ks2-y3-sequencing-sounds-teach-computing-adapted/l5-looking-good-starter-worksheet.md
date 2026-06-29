@@ -10,7 +10,7 @@ Today I will combine motion and sound in one sequence, and change how my project
 ## Predict the sequence
 A sequence can mix motion blocks and sound blocks. Look at the motion blocks you can use.
 
-![The motion blocks you can use]({{res:l5-motion-blocks.png}})
+![The motion blocks you can use]({{res:l5-motion-blocks-teach-computing.png}})
 
 ## Sort the words
 Sort each word into the thing it changes.

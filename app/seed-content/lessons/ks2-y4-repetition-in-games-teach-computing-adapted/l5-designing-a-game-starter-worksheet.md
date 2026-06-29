@@ -10,7 +10,7 @@ Today I will **design** my own game that uses repetition. A design is a plan you
 ## The model game
 This is a model game. The bats keep flapping and keep moving down. Those parts **repeat**.
 
-![The model bat game]({{res:l5-bat-game.png}})
+![The model bat game]({{res:l5-model-bat-game-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

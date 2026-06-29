@@ -8,7 +8,7 @@
 Today I will add text and pictures to my magazine cover and make changes to them.
 
 ## A finished cover
-![A finished magazine cover with a title, picture, story and quote]({{res:l4-magazine-cover.png}})
+![A finished magazine cover with a title, picture, story and quote]({{res:l4-finished-magazine-cover-example-teach-computing.png}})
 
 ## Put the steps in order
 Drag the steps to add content into the right order.

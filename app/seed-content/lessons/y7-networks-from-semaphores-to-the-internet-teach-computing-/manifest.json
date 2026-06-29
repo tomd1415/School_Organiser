@@ -1,0 +1,240 @@
+{
+  "unitTitle": "Y7 Networks — from semaphores to the Internet (Teach Computing — adapted)",
+  "course": {
+    "name": "Computing Curriculum",
+    "keyStage": "KS3"
+  },
+  "lessons": [
+    {
+      "title": "Computer networks and protocols",
+      "objectives": "I can say what a computer network is\nI can explain that data is passed from device to device\nI can say what a protocol is\nI can give an example of a non-networking protocol",
+      "outline": "Routine first (same every lesson). Vocabulary on board: network · protocol · relay · stand-alone · HTTP. TA: each pupil has the starter and activity worksheets. Read the four “I can…” aloud.\n1. (0–8) Starter — sending messages long ago. Semaphore-tower image on the board; pupils TICK the ways that do NOT use a computer (multi-select, no writing).\n   • Support: choose how a semaphore worked.  • Core: write one old way to send a message.  • Challenge: link semaphore relay to a message crossing the internet.\n2. (8–18) What is a network? I-do → we-do. A network = two or more computers connected. Stand-alone = on its own. Pupils name things they do that use a network.\n3. (18–30) A message to Australia. A message is PASSED ON device to device (like a letter via depots), not sent straight there. Likely error: thinks email “goes straight” → fix-words “it hops through many devices.”\n4. (30–42) What is a protocol? A set of rules both sides follow. You-do: match the climber/belayer commands to their meanings on the activity worksheet (a non-networking protocol).\n   • Support: match command ↔ meaning.  • Core: explain what protocol means.  • Challenge: give an email-address rule. TA: “prompt, do not do it for them.”\n5. (42–50) Computer protocols (email needs @, web address starts http://). Pupils screenshot/photograph their ordered climber commands.\n6. (50–55) Plenary — self-tick the four “I can…”; share one rule a protocol gives. Differentiation is on the SAME task, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "semaphore signal tower (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-semaphore-signal-tower-teach-computing.png"
+        },
+        {
+          "title": "Computer networks and protocols — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-networks-and-protocols-starter-worksheet.md"
+        },
+        {
+          "title": "Computer networks and protocols — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-networks-and-protocols-activity-worksheet.md"
+        },
+        {
+          "title": "Computer networks and protocols — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-computer-networks-and-protocols-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Networking hardware",
+      "objectives": "I can name the main pieces of network hardware\nI can say what each piece of hardware does\nI can choose hardware to build a simple network\nI can say what an ISP is",
+      "outline": "Routine first. Vocabulary on board: network cable · hub · server · router · ISP · ports. TA: starter and activity worksheets ready; the “build a network” task on screen if available. Read the four “I can…” aloud.\n1. (0–8) Starter — what am I? Match each hardware NAME to what it does (matching widget; hub image on the board). No writing.\n   • Support: choose that a hub has ports.  • Core: say what a server does.  • Challenge: why a hub means fewer cables.\n2. (8–18) I-do → we-do. Cable carries messages (copper wires). Hub connects computers in one building, has ports, sends a message to ALL. Fill-in-the-blanks on the activity worksheet.\n3. (18–32) The server (image). A powerful computer providing a service; a file server stores shared files centrally. Link to the school shared drive. Likely error: thinks files live on each PC → fix-words “the files are on the server.”\n4. (32–45) You-do — build the network: add a hub, then a file server, then a router so four PCs share files and reach the internet.\n   • Support: a printed block-order strip.  • Core: build it.  • Challenge: count cables saved. TA: “prompt, do not build it for them.” Pupils screenshot their network.\n5. (45–52) The router and the ISP. A router joins networks (home → internet); the connection comes from an ISP.\n6. (52–55) Plenary — self-tick the four “I can…”; name one piece of hardware and its job. Same task for all; low floor / high ceiling. No flashing/sound.",
+      "resources": [
+        {
+          "title": "network hub (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-network-hub-teach-computing.png"
+        },
+        {
+          "title": "network server (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-network-server-teach-computing.png"
+        },
+        {
+          "title": "Networking hardware — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-networking-hardware-starter-worksheet.md"
+        },
+        {
+          "title": "Networking hardware — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-networking-hardware-activity-worksheet.md"
+        },
+        {
+          "title": "Networking hardware — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-networking-hardware-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Wired and wireless networks",
+      "objectives": "I can compare wired and wireless connections\nI can name wireless technologies\nI can say what bandwidth means and its units\nI can choose wired or wireless for a situation",
+      "outline": "Routine first. Vocabulary on board: wired · wireless · WiFi · bandwidth · bits per second · buffering. TA: starter and activity worksheets ready; speedtest.net open if used. Read the four “I can…” aloud.\n1. (0–8) Starter — wired or wireless? Pupils TICK the home devices that are usually wireless (multi-select). No writing.\n   • Support: choose that wireless uses radio waves.  • Core: name a wireless technology.  • Challenge: why wire a games console.\n2. (8–18) I-do → we-do. Wired = data along cables; wireless = radio waves. Names: Bluetooth, WiFi, 3G/4G/5G.\n3. (18–30) Bandwidth = data moved in a given time, measured in bits per second. Likely error: “more bandwidth = faster” → fix-words “a WIDER pipe, more water at once, not faster water.”\n4. (30–40) Test the speed (image). Optional: pupils run speedtest.net and read upload/download; screenshot the result. Skip if short on time — it does not affect the objectives.\n5. (40–50) You-do — wired or wireless? Tick the high-bandwidth activities and the wireless situations on the activity worksheet.\n   • Support: decide on portability.  • Core: define bandwidth.  • Challenge: a disadvantage of wired. TA: “prompt, do not choose for them.”\n6. (50–55) Plenary/exit ticket — self-tick the four “I can…”; define bandwidth. Same task for all; low floor / high ceiling. No flashing/sound.",
+      "resources": [
+        {
+          "title": "internet speed test result (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-internet-speed-test-result-teach-computing.png"
+        },
+        {
+          "title": "Wired and wireless networks — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-wired-and-wireless-networks-starter-worksheet.md"
+        },
+        {
+          "title": "Wired and wireless networks — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-wired-and-wireless-networks-activity-worksheet.md"
+        },
+        {
+          "title": "Wired and wireless networks — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-wired-and-wireless-networks-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "The internet",
+      "objectives": "I can say what the internet is\nI can explain how data crosses the internet in packets\nI can describe a packet (header, payload, IP address)\nI can name the protocols TCP and IP",
+      "outline": "Routine first. Vocabulary on board: internet · packet · IP address · header · payload · TCP · IP. TA: starter and activity worksheets ready. Read the four “I can…” aloud.\n1. (0–8) Starter — what is the internet? Single-choice definition + multi-select “tick the internet activities”. No writing.\n   • Support: choose where most data travels.  • Core: one sentence on what the internet is.  • Challenge: why “a network of networks”.\n2. (8–18) The internet is global (image). A network of networks; 99% of cross-continent data goes through sea cables. Optional teacher-played hook (motion/sound — teacher’s choice): the Vint Cerf video.\n3. (18–30) Data travels in packets (parcels image). A message is split into packets, each taking its own route. Optional hook: “A Packet’s Tale” video. Header (addresses + sequence number) vs payload (a piece of the message).\n4. (30–42) IP addresses — four numbers 0–255 with dots, unique to a device. You-do: fill in the missing packet parts and read the jumbled message. Likely error: forgets the sequence number → fix-words “how do we put them back in order?” TA: “prompt, do not fill it for them.” Screenshot the packets.\n5. (42–52) Protocols — TCP (splits + reorders) and IP (routes using addresses). Plenary multiple-choice questions.\n6. (52–55) Self-tick the four “I can…”. Same task for all; low floor / high ceiling. No flashing/sound.",
+      "resources": [
+        {
+          "title": "global network of networks (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-global-network-of-networks-teach-computing.png"
+        },
+        {
+          "title": "packets like parcels (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-packets-like-parcels-teach-computing.png"
+        },
+        {
+          "title": "The internet — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-internet-starter-worksheet.md"
+        },
+        {
+          "title": "The internet — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-internet-activity-worksheet.md"
+        },
+        {
+          "title": "The internet — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-internet-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Internet services",
+      "objectives": "I can explain the difference between the internet and the World Wide Web\nI can name internet services\nI can say what the Internet of Things is\nI can describe a privacy or security risk of IoT",
+      "outline": "Routine first. Vocabulary on board: internet · World Wide Web · service · email · VoIP · IoT · privacy · security. TA: starter and activity worksheets ready. Read the four “I can…” aloud.\n1. (0–6) Starter — internet or World Wide Web? Single-choice. No writing.\n   • Support: the internet is the hardware.  • Core: one difference.  • Challenge: explain why they are not the same.\n2. (6–18) The internet (hardware) vs the WWW (web pages on it) — connected-world image. The web is ONE service. Internet services: web, email, IM, VoIP, streaming, IoT.\n3. (18–28) VoIP (voice over the internet) and email (lots is spam). Misconception: web = internet → fix-words “the web is a service ON the internet.”\n4. (28–40) The Internet of Things — everyday objects connected to the internet. Optional teacher-played hook (motion/sound — teacher’s choice): the IoT video. IoT is helpful but risks PRIVACY and SECURITY.\n5. (40–50) You-do — match the service; tick the real IoT risks on the activity worksheet. Screenshot the matched services.\n   • Support: match the two you know.  • Core: name two services + define IoT.  • Challenge: a benefit AND a risk. TA: “prompt, do not match it for them.”\n6. (50–55) Exit ticket — self-tick the four “I can…”; difference between internet and web. Same task for all; calm, factual tone. No flashing/sound.",
+      "resources": [
+        {
+          "title": "a connected world (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-connected-world-teach-computing.png"
+        },
+        {
+          "title": "Internet services — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-internet-services-starter-worksheet.md"
+        },
+        {
+          "title": "Internet services — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-internet-services-activity-worksheet.md"
+        },
+        {
+          "title": "Internet services — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-internet-services-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "The World Wide Web",
+      "objectives": "I can name the parts of the World Wide Web\nI can explain the difference between HTTP and HTTPS\nI can describe what a URL is\nI can say what the domain name system does",
+      "outline": "Routine first. Vocabulary on board: web browser · web server · web page · search engine · HTTP · HTTPS · URL · domain name · DNS. TA: starter and activity worksheets ready; the end-of-unit assessment follows. Read the four “I can…” aloud.\n1. (0–8) Starter — browser, search engine, or website? Browser-logos image; single-choice. No writing.\n   • Support: a browser is software.  • Core: the job of a browser.  • Challenge: what a search engine does.\n2. (8–20) Browser (reads HTML, shows the page) and server (stores websites, sends pages). HTTP (plain text) vs HTTPS (encrypted, secure) — padlock image. Likely error: “HTTP is fine for passwords” → fix-words “passwords need HTTPS.”\n3. (20–32) URLs — http (protocol) · www (the web) · facebook.com (domain name). Top-level domains (.com, .gov, .co.uk).\n4. (32–42) Domain names and DNS — DNS maps an easy domain name to a device’s IP address (link back to lesson 4). You-do: match the terms; decide HTTP or HTTPS on the activity worksheet; screenshot a real address bar.\n   • Support: match the two you know.  • Core: HTTP vs HTTPS; what a URL is.  • Challenge: why a payment needs HTTPS. TA: “prompt, do not match it for them.”\n5. (42–52) End-of-unit assessment (multiple-choice across all six lessons); early finishers do the explorer activity.\n6. (52–55) Self-tick the four “I can…”. Same task for all; low floor / high ceiling. No flashing/sound.",
+      "resources": [
+        {
+          "title": "web browsers (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-web-browsers-teach-computing.png"
+        },
+        {
+          "title": "an HTTPS web address (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-an-https-web-address-teach-computing.png"
+        },
+        {
+          "title": "The World Wide Web — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-the-world-wide-web-starter-worksheet.md"
+        },
+        {
+          "title": "The World Wide Web — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-the-world-wide-web-activity-worksheet.md"
+        },
+        {
+          "title": "The World Wide Web — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-the-world-wide-web-slides.md"
+        }
+      ]
+    }
+  ]
+}

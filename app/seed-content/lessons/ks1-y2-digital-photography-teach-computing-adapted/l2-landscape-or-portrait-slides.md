@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: landscape · portrait. Recap last lesson: hold · look · press.
 
 ## Two ways to hold the device
-![Holding a device upright and sideways]({{res:l2-holding-portrait-landscape.png}})
+![Holding a device upright and sideways]({{res:l2-holding-a-device-upright-and-sideways-teach-computing.png}})
 
 - **Portrait** = held upright → photo is **taller** than wide
 - **Landscape** = held sideways → photo is **wider** than tall
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Demonstrate both holds with a real device if you can. Likely error: mixing up the words → fix-words "portrait = a person standing up, tall."
 
 ## Portrait suits tall things
-![A tall tower in portrait]({{res:l2-tower-portrait.jpg}})
+![A tall tower in portrait]({{res:l2-a-tall-tower-in-portrait-format-teach-computing.jpg}})
 
 - one person standing
 - a tall tower
@@ -26,7 +26,7 @@
 > 🧑‍🏫 Agree: tall subjects fill the frame better held upright.
 
 ## Landscape suits wide things
-![A wide beach view in landscape]({{res:l2-arches-landscape.png}})
+![A wide beach view in landscape]({{res:l2-a-wide-view-in-landscape-format-teach-computing.png}})
 
 - a beach
 - a row of mountains

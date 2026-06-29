@@ -37,7 +37,7 @@
 > 🧑‍🏫 Use the card-sort on the worksheet. Support: do the first one together. Challenge: ask them to add their own example to each group.
 
 ## Your turn — count the cars
-![Cars driving along a road]({{res:l1-vehicles.png}})
+![Cars driving along a road]({{res:l1-cars-on-a-road-teach-computing.png}})
 
 - watch the road video
 - count ONE car colour

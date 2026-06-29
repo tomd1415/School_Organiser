@@ -23,7 +23,7 @@
 > 🧑‍🏫 I-do. "Note" and "sequence" are the key words. Pupils answer "what is a coloured block?" on the starter worksheet.
 
 ## Song Maker
-![The Chrome Music Lab tools]({{res:l4-music-lab-home.png}})
+![The Chrome Music Lab tools]({{res:l4-the-chrome-music-lab-tools-teach-computing.png}})
 
 - open Song Maker (the smiley face)
 - click squares to add notes

@@ -10,7 +10,7 @@ Today I will find IT in my school and sort it by what it is used for.
 ## Starter — is it IT?
 IT is a computer, or something that works with a computer.
 
-![A computer keyboard]({{res:l2-keyboard.png}})
+![A computer keyboard]({{res:l2-a-computer-keyboard-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

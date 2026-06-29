@@ -8,14 +8,14 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: analysis · conclusion · recommendation · pattern · trend · outlier. The end-of-unit assessment also happens this lesson.
 
 ## Starter — what can we learn?
-![A dot plot of recyclable waste by school location]({{res:l6-litter-visualisation.png}})
+![A dot plot of recyclable waste by school location]({{res:l6-litter-recyclable-waste-visualisation-teach-computing.png}})
 
 What stands out? What does it make you wonder?
 
 > 🧑‍🏫 Model the thinking aloud: Dining Hall and PE have the most recyclable waste; Technology the least. The chart shows WHAT, not WHY — that sparks more questions.
 
 ## The data behind it
-![The raw litter data table]({{res:l6-litter-data-table.png}})
+![The raw litter data table]({{res:l6-litter-raw-data-table-teach-computing.png}})
 
 Adding a new column (distance to the nearest bin) can answer some of those questions.
 

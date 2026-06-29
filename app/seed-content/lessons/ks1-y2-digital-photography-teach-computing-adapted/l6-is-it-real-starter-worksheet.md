@@ -10,7 +10,7 @@ Today I will use all my photo skills, then look at photos that have been changed
 ## Remember your photo skills
 Before you take a photo, there are things to check.
 
-![A magnifying glass looking for clues]({{res:l6-magnifier.png}})
+![A magnifying glass looking for clues]({{res:l6-a-magnifying-glass-looking-for-clues-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

@@ -115,6 +115,11 @@ export function renderCell(
   return `${td}${cell.lessons.map((l) => renderLesson(l, date, exForLesson(date, l.lessonId), readinessFor(date, l.lessonId))).join('')}</td>`;
 }
 
+export interface TimetableClass {
+  id: number;
+  name: string;
+}
+
 export interface TimetableNextData {
   table: string;
   yearLabel: string;
@@ -123,10 +128,34 @@ export interface TimetableNextData {
   yearQ: string;
   explicitYear: number | undefined;
   csrf: string;
+  classes: TimetableClass[];
+  awayFrom: string;
+  awayTo: string;
+}
+
+// "Mark class away" — the missing timetable-level affordance for the existing `free` exception
+// (noted_bugs2 #1). Picks a class + a date range and POSTs to /timetable/class-away, which writes a
+// `free` exception to every slot that class has in range. HX-Refresh reloads the grid to show the
+// "Free (class away)" badges. Hidden behind a disclosure so it doesn't clutter the week at a glance.
+export function renderClassAway(classes: TimetableClass[], from: string, to: string): string {
+  if (classes.length === 0) return '';
+  const opts = classes.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  return `<details class="tt-away">
+      <summary class="chip">🚌 Mark class away</summary>
+      <form class="tt-away-form" hx-post="${paths.timetableClassAway()}" hx-target="#tt-away-status" hx-swap="innerHTML">
+        <label>Class <select name="groupId" required><option value="">choose…</option>${opts}</select></label>
+        <label>From <input type="date" name="dateFrom" value="${esc(from)}" required></label>
+        <label>To <input type="date" name="dateTo" value="${esc(to)}" required></label>
+        <label>Note <input name="note" placeholder="trip, exam…" maxlength="200"></label>
+        <button type="submit" class="btn-secondary">Mark away</button>
+        <span id="tt-away-status" aria-live="polite" class="tt-away-status"></span>
+      </form>
+      <p class="muted tt-away-hint">Frees every slot this class has on those dates (a trip/exam — you don't teach them). Reverse it from the lesson's exception list.</p>
+    </details>`;
 }
 
 export function renderTimetableNext(data: TimetableNextData): string {
-  const { table, yearLabel, prev, next, yearQ, explicitYear, csrf } = data;
+  const { table, yearLabel, prev, next, yearQ, explicitYear, csrf, classes, awayFrom, awayTo } = data;
   return `
     <section class="tt tt-overhaul" hx-headers='{"x-csrf-token":"${csrf}"}'>
       <div class="tt-head">
@@ -136,6 +165,7 @@ export function renderTimetableNext(data: TimetableNextData): string {
           <a href="${paths.timetable()}" class="chip">This week</a>
           <a href="${paths.timetableDate(next, yearQ)}" class="chip">Next ▶</a>
         </nav>${explicitYear ? ` <a class="tt-exit-preview muted" href="${paths.timetable()}">exit preview →</a>` : ''}
+        ${renderClassAway(classes, awayFrom, awayTo)}
       </div>
       <div class="tt-grid-container">
         ${table}

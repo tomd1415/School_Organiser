@@ -1,0 +1,317 @@
+{
+  "unitTitle": "GCSE Algorithms part 2 — searching and sorting (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Linear search",
+      "objectives": "I can say why computers need to search data\nI can carry out a linear search to find an item in a list\nI can count the comparisons a linear search makes\nI can give the best-case and worst-case for a linear search",
+      "outline": "Routine first (same every lesson). Vocabulary on board: linear search · list · comparison · ordered · unordered · best case · worst case. TA: hand out the playing cards (or printed cards) per group. Read the four “I can…” aloud.\n1. (0–5) Starter — searching for a book (think–pair–share). Pupils CHOOSE on the starter worksheet whether an ordered or unordered shelf is quicker. Draw out ordered vs unordered.\n   • Support: tick what a linear search does.  • Core: write one real search.  • Challenge: why an unordered list forces a linear search.\n2. (5–15) I-do → we-do. Cups demo: a computer cannot see the whole list, it checks one item at a time from the start. Pupils drag the linear-search STEPS into order on the activity worksheet.\n   • Support: word-bank/order task.  • Core: count comparisons. Likely error: forgetting the “or reach the end” stop → fix-words “a linear search also stops when the list runs out.”\n3. (15–35) You-do — unplugged: in groups, place cards face down and turn over ONE at a time to find a chosen card; fill the table; one run searches for a removed card (not found).\n   • Support: arrow card “check this one next”.  • Core: record comparisons.  • Challenge: convert the steps to Python (Parsons on the worksheet). TA: prompt, do not turn the cards for them.\n4. (35–50) Best and worst case — best = item is first (1 comparison); worst = item is last or not in the list (check them all). Worked example with the cities list.\n5. (50–55) Plenary — pupils self-tick the four “I can…”; ask the worst-case number of comparisons for 7 items (answer 7).\nDifferentiation is on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "searching hook (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-searching-hook-teach-computing.png"
+        },
+        {
+          "title": "Linear search — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-linear-search-starter-worksheet.md"
+        },
+        {
+          "title": "Linear search — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-linear-search-activity-worksheet.md"
+        },
+        {
+          "title": "Linear search — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-linear-search-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Binary search",
+      "objectives": "I can carry out a binary search on ordered data\nI can say why the list must be in order\nI can find the position of an item with a binary search\nI can say when a binary search cannot be used",
+      "outline": "Routine first. Vocabulary on board: binary search · ordered · midpoint · middle-left · divide and conquer. TA: cards in order per group. Read the four “I can…” aloud.\n1. (0–5) Starter — find the number (8 ordered boxes, 3 looks). Pupils CHOOSE to look in the middle box first. Draw out that the middle rules out half the boxes.\n   • Support: tick that binary search needs ordered data.  • Core: why the middle rules out the most.  • Challenge: which search if the boxes were jumbled.\n2. (5–15) I-do → we-do. Cups demo of divide and conquer: check the midpoint, throw away the half it cannot be in, repeat. Midpoint with an even number = MIDDLE-LEFT item. Pupils drag the binary-search STEPS into order and SORT facts (linear vs binary) on the worksheet.\n   • Support: sort-the-facts task.  • Core: before/after the midpoint. Likely error: not discarding a half → fix-words “after every check, half the list is gone.”\n3. (15–35) You-do — unplugged: cards in order, face down; turn over the MIDDLE card first; fill the table; one run for a not-found card.\n   • Support: “turn the middle first” prompt.  • Core: one full search.  • Challenge: doubling the list adds only ~1 comparison. TA: prompt, do not turn cards for them.\n4. (35–50) When can’t you use it? Binary search needs ordered data; otherwise use linear or sort first — a hook for the sorting lessons.\n5. (50–55) Plenary — self-tick the four “I can…”; name one thing binary search needs that linear search does not (the data in order).\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Binary search — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-binary-search-starter-worksheet.md"
+        },
+        {
+          "title": "Binary search — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-binary-search-activity-worksheet.md"
+        },
+        {
+          "title": "Binary search — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-binary-search-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Comparing searching algorithms",
+      "objectives": "I can compare linear and binary search and pick the best one\nI can read the Python code for a linear search\nI can trace a search with a set of data\nI can explain what returning -1 means",
+      "outline": "Routine first. Vocabulary on board: linear search · binary search · trace table · Python · efficiency. TA: pupils have the worksheet + a paper trace table. Read the four “I can…” aloud.\n1. (0–5) Starter — finding a word in a dictionary (ordered). Pupils CHOOSE that both searches work because it is in order. Recap worst case.\n2. (5–15) I-do → we-do. Which search, and when? Linear works on ANY data but is slower; binary needs ORDERED data but is faster on large lists. Pupils drag scenarios into a SORT (use linear / use binary).\n   • Support: tick which search works on unordered data.  • Core: comparisons to find Neptune by linear search (5).  • Challenge: a reason to still choose linear search.\n3. (15–35) Reading the code (I do). Embed the linear-search Python code (Figure 1); build it up from the inside out (one comparison, then the loop). Pupils answer “which line is the loop” (line 4) and the function/loop questions. Run the linear-search demo for the steps.\n   • Support: which line repeats.  • Challenge: order the FASTER version (with a found flag) as a Parsons. Likely error: thinking it must reach the end → fix-words “found = True lets it stop early.”\n4. (35–50) Trace it (you do). Trace the search for Neptune on a trace table, row by row, and screenshot it. Explain that -1 means “not found”.\n5. (50–55) Plenary — self-tick the four “I can…”; one reason to choose linear over binary (unordered / short / changing data).\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "linear search code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-linear-search-code-teach-computing.png"
+        },
+        {
+          "title": "Comparing searching algorithms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-comparing-searching-algorithms-starter-worksheet.md"
+        },
+        {
+          "title": "Comparing searching algorithms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-comparing-searching-algorithms-activity-worksheet.md"
+        },
+        {
+          "title": "Comparing searching algorithms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-comparing-searching-algorithms-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Bubble sort",
+      "objectives": "I can say why computers need to sort data\nI can do one pass of a bubble sort, swapping items that are out of order\nI can carry out a full bubble sort\nI can label the parts of one bubble-sort pass",
+      "outline": "Routine first. Vocabulary on board: bubble sort · pass · compare · swap. Avoid “bubbling up” (the largest item sinks to the end). TA: cards per pupil/pair. Read the four “I can…” aloud.\n1. (0–5) Starter — finding a surname in a jumbled vs ordered copy. Pupils CHOOSE the ordered copy. Big theme: we sort to make searching faster.\n   • Support: tick what sorting is for.  • Core: a real sorted dataset.  • Challenge: how sorting first helps binary search.\n2. (5–18) I-do → we-do. Compare two NEIGHBOURS, swap if out of order, move along — one pass. Step through the card picture (embedded); after one pass the largest item is at the end; comparisons per pass = items − 1. Pupils order the one-pass STEPS.\n   • Support: order-the-steps.  • Core: which item is sorted after one pass / comparisons in a 7-item pass (6). Likely error: comparing items far apart → fix-words “only ever the two next to each other.”\n3. (18–35) You-do — LABEL the embedded bubble-pass picture (a swap, a no-swap, the biggest card at the end), then carry out a FULL bubble sort of the cuisines list and screenshot it.\n   • Support: labels + arrow prompts.  • Core: full sort.  • Challenge: why one fewer pair each pass. TA: prompt, do not sort it for them.\n4. (35–50) Review — keep doing passes until no swaps are needed; the next-largest item lands in place each pass.\n5. (50–55) Plenary — self-tick the four “I can…”; which item is sorted after the first pass (the biggest).\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "one pass of a bubble sort (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-one-pass-of-a-bubble-sort-teach-computing.png"
+        },
+        {
+          "title": "Bubble sort — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-bubble-sort-starter-worksheet.md"
+        },
+        {
+          "title": "Bubble sort — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-bubble-sort-activity-worksheet.md"
+        },
+        {
+          "title": "Bubble sort — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-bubble-sort-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Insertion sort",
+      "objectives": "I can insert an item into the right place in an ordered list\nI can describe how an insertion sort works\nI can name the sorted and unsorted parts of the list\nI can carry out a full insertion sort",
+      "outline": "Routine first. Vocabulary on board: insertion sort · sorted sublist · unsorted sublist · insert. (Check the exam board — some do not require insertion sort.) TA: cards per pupil/pair. Read the four “I can…” aloud.\n1. (0–5) Starter — sorting a hand of cards / a new book on an ordered shelf (embedded hand-of-cards picture). Pupils CHOOSE “slide the others along and slot it in”.\n   • Support: tick that each card goes into its correct place.  • Core: which algorithm this is like.  • Challenge: how “slot it in” differs from bubble sort’s swap.\n2. (5–18) I-do — inserting ONE item (embedded insert-a-card picture). The sorted part grows at the start; bigger sorted items slide one place RIGHT to make a gap; the held value goes in the gap (stress the variable). Pupils order the insert STEPS and SORT insertion-vs-bubble facts.\n   • Support: order-the-steps + sort task.  • Core: which part the sorted sublist starts as (just the first item). Likely error: doing a bubble sort instead → fix-words “find the gap and slide, do not just swap neighbours.”\n3. (18–38) You-do — carry out a FULL insertion sort of the cuisines list, shading the sorted part each pass; screenshot it.\n   • Support: partially-worked first pass.  • Core: full sort.  • Challenge: the two pass-end conditions. TA: prompt, do not sort it for them.\n4. (38–52) Review — recap the sorted/unsorted parts and how each pass moves one item across.\n5. (52–55) Plenary — self-tick the four “I can…”; name the two parts the list is split into.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "a hand of cards (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-hand-of-cards-teach-computing.png"
+        },
+        {
+          "title": "inserting a card (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-inserting-a-card-teach-computing.png"
+        },
+        {
+          "title": "Insertion sort — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-insertion-sort-starter-worksheet.md"
+        },
+        {
+          "title": "Insertion sort — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-insertion-sort-activity-worksheet.md"
+        },
+        {
+          "title": "Insertion sort — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-insertion-sort-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Coding sorting algorithms",
+      "objectives": "I can read and explain the code for a bubble sort\nI can put the swap lines in the right order\nI can trace the swap part of a bubble sort\nI can identify a change that makes a bubble sort more efficient",
+      "outline": "Routine first. Vocabulary on board: bubble sort · insertion sort · trace table · pass · swap · temp variable. TA: pupils have the worksheet + a paper trace table. Read the four “I can…” aloud.\n1. (0–5) Starter — true or false about bubble and insertion sort. Pupils TICK ALL the TRUE statements (multi-select; bubble sort is NOT the fastest for large lists).\n   • Support: tick that both put data into order.  • Core: one difference between them.  • Challenge: why bubble sort can be fine for small, nearly-sorted lists.\n2. (5–20) I-do. Embed the bubble-sort Python code; build it up from the inside out (outer loop = passes; inner loop = compares each pair and swaps). Run the bubble-sort demo for the steps.\n   • Support: the outer loop counts the passes.  • Core: order the three SWAP lines (Parsons) and explain the temp variable. Likely error: overwriting without temp → fix-words “save the first value before you copy over it.”\n3. (20–38) You-do — trace lines 7–9 (one swap) on a trace table; screenshot it. Two improvements: check one fewer pair each pass (num_items − passes) and stop early if no swaps.\n   • Support: recap the code labels.  • Core: the swap trace.  • Challenge: why “no swaps” means already sorted. TA: prompt, do not trace it for them.\n4. (38–52) Review — insertion sort code is similar but copies items along instead of swapping pairs.\n5. (52–55) Plenary — self-tick the four “I can…”; why a swap needs a temp variable.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "bubble sort code (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-bubble-sort-code-teach-computing.png"
+        },
+        {
+          "title": "Coding sorting algorithms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-coding-sorting-algorithms-starter-worksheet.md"
+        },
+        {
+          "title": "Coding sorting algorithms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-coding-sorting-algorithms-activity-worksheet.md"
+        },
+        {
+          "title": "Coding sorting algorithms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-coding-sorting-algorithms-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Merge sort",
+      "objectives": "I can merge two ordered lists into one ordered list\nI can describe the split stage and the merge stage\nI can carry out a full merge sort\nI can say what merge sort divides",
+      "outline": "Routine first. Vocabulary on board: merge · split · sort · divide and conquer. TA: cards per pupil/pair. Read the four “I can…” aloud.\n1. (0–5) Starter — combining two ordered groups of birthdays into one ordered group. Pupils CHOOSE “keep taking the earlier of the two front birthdays”.\n   • Support: tick that merging two ordered groups gives an ordered group.  • Core: why ordered groups are easy to merge.  • Challenge: why looking only at the FRONT of each list is enough.\n2. (5–20) I-do → we-do. Merging two ordered lists (embedded merge picture): compare the FRONT of each, move the smaller, repeat. Pupils order the MERGE steps; then the whole-algorithm SPLIT-then-MERGE steps.\n   • Support: merge-steps order task.  • Core: split-then-merge order task; what merge sort divides (the list). Likely error: comparing the wrong items → fix-words “only the front of each list.”\n3. (20–38) You-do — carry out a FULL merge sort of the dog-breeds list: split to single items, then merge pairs back together; screenshot it.\n   • Support: empty split/merge tables as scaffolds.  • Core: full sort.  • Challenge: why merge sort always merges in PAIRS (odd item joins the first list; odd list waits). TA: prompt; draw clear boxes around each list.\n4. (38–52) More about merge sort — fast on large lists (divide and conquer); recursion not needed for GCSE.\n5. (52–55) Plenary — self-tick the four “I can…”; the two stages of a merge sort (split, then merge).\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "merging two ordered lists (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l7-merging-two-ordered-lists-teach-computing.png"
+        },
+        {
+          "title": "Merge sort — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-merge-sort-starter-worksheet.md"
+        },
+        {
+          "title": "Merge sort — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-merge-sort-activity-worksheet.md"
+        },
+        {
+          "title": "Merge sort — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l7-merge-sort-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Algorithms review",
+      "objectives": "I can choose the right searching or sorting algorithm for a list\nI can carry out a sort and then a search on a list\nI can describe how each algorithm works\nI can compare two algorithms and justify a choice",
+      "outline": "Routine first. Vocabulary on board: linear search · binary search · bubble sort · insertion sort · merge sort · trace table. TA: pupils have the worksheet + paper. Read the four “I can…” aloud. This lesson revises for the assessment.\n1. (0–5) Starter — mystery code (a linear search with hidden variable names). Pupils CHOOSE that it is a linear search; reveal one question at a time.\n   • Support: the while line repeats.  • Core: a clearer variable name.  • Challenge: how to let it stop early.\n2. (5–15) I-do → we-do. SORT the five algorithms into searches vs sorts. Recap: searches find an item; sorts put items in order so searching is faster.\n3. (15–35) You-do — the song list is unordered, so only a linear search works until we sort it. Pupils answer the search questions, order a bubble-sort pass, then SORT bubble-vs-merge facts, then bubble sort the songs and binary search “Shallow”; screenshot.\n   • Support: sort-the-algorithms.  • Core: which sort does what + the bubble pass order.  • Challenge: which sort for a large list, with a reason. Likely error: trying binary search on unsorted data → fix-words “sort first, then binary search.” TA: prompt, do not do it for them.\n4. (35–50) Compare bubble sort and merge sort — bubble is simple but slow; merge is faster (divide and conquer). Thumbs up/down whole-class check.\n5. (50–55) Plenary — self-tick the four “I can…”; one algorithm and one fact about it. Homework: revise for the assessment.\nDifferentiation on the SAME task. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "revision robot (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l8-revision-robot-teach-computing.png"
+        },
+        {
+          "title": "Algorithms review — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-algorithms-review-starter-worksheet.md"
+        },
+        {
+          "title": "Algorithms review — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-algorithms-review-activity-worksheet.md"
+        },
+        {
+          "title": "Algorithms review — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l8-algorithms-review-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Summative assessment",
+      "objectives": "I can develop a linear search function in Python\nI can choose the best search or sort for a situation\nI can trace a sorting algorithm\nI can use the correct computational thinking terms",
+      "outline": "Routine first. Vocabulary on board: computational thinking · linear search · binary search · bubble sort · insertion sort · merge sort · trace table. Keep the room calm and predictable — this is the assessment lesson. Read the four “I can…” aloud.\n1. (0–15) Starter — build a linear search function. Pupils order the lines of the function (Parsons) on the starter worksheet; the comments are the guide. Show the starter code in repl.it; walk through the success criteria, especially the -1 return.\n   • Support: what the function returns (the index).  • Core: what it returns when not found (-1).  • Challenge: where to set a found flag.\n2. (15–45) Assessment — pupils complete the end-of-unit quiz worksheet independently, in silence, like an exam. The quiz folds the unit’s summative questions into supported types: computational-thinking terms, which-algorithm, bubble-sort passes, a true-statements multi-select, a swap trace (screenshot), and an improvement. Allow extra time and movement breaks as normal.\n   • Support: recognition (terms, which algorithm).  • Core: bubble-sort passes / which search.  • Challenge: the true-statements set, the trace, and the efficiency improvement.\n3. (45–52) Recap — computational thinking (decomposition, abstraction, algorithmic thinking) and a one-line recap of each searching/sorting algorithm. End on the big idea: sorting data makes searching it faster.\n4. (52–55) Plenary — self-tick the four “I can…”; confidence rating to spot anything to revisit.\nDifferentiation on the SAME assessment, low floor / high ceiling. No flashing/sound; movement breaks are routine.",
+      "resources": [
+        {
+          "title": "Summative assessment — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-summative-assessment-starter-worksheet.md"
+        },
+        {
+          "title": "Summative assessment — end-of-unit quiz.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-summative-assessment-end-of-unit-quiz.md"
+        },
+        {
+          "title": "Summative assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l9-summative-assessment-slides.md"
+        }
+      ]
+    }
+  ]
+}

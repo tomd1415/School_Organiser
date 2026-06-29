@@ -10,7 +10,7 @@ Today I will look at how shapes make up buildings, and plan my own 3D building.
 ## Architects use 3D design
 An **architect** designs buildings. They often use 3D design on a computer to plan a building before it is built.
 
-![A 3D computer plan of a building]({{res:l5-architect-plan.png}})
+![A 3D computer plan of a building]({{res:l5-a-3d-computer-plan-of-a-building-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

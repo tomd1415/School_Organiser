@@ -1,0 +1,233 @@
+{
+  "unitTitle": "GCSE Object-oriented programming (Teach Computing — adapted)",
+  "course": {
+    "name": "OCR J277 GCSE Computer Science",
+    "keyStage": "KS4"
+  },
+  "lessons": [
+    {
+      "title": "Programming paradigms",
+      "objectives": "I can say why programming conventions (like clear variable names) matter\nI can explain what a programming paradigm is\nI can describe procedural programming (using functions)\nI can say what object-oriented programming uses (classes and objects)",
+      "outline": "Routine first (same every lesson). Vocabulary on board: convention · paradigm · procedural · object-oriented · class · object. TA: everyone has the code editor open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — “Improving a program” on the starter worksheet. A times-tables quiz has two badly named variables (c, d). Pupils CHOOSE better names (tick, no writing).\n   • Support: pick from given names.  • Core: rename from memory.  • Challenge: explain why the name helps the reader. Likely error: thinks names are just decoration → fix-words “a name tells the reader what the value is FOR.”\n2. (5–20) Conventions — define convention; BIDMAS as a maths convention. Two short programs break a convention (imports not at the top; no iteration). Class discussion; benefits to reader AND writer.\n3. (20–40) Paradigms — introduce the unit topic. Define paradigm (a style/pattern). Procedural = functions. Activity worksheet: the book-sorting program (image embedded). PREDICT what it runs (I-do → we-do), then ORDER the steps of one insertion (drag).\n   • Support: word-choice on “paradigm” and “OOP uses…”.  • Core: explain procedural + reader benefit.  • Challenge: writer benefit + what OOP uses that procedural does not.\n4. (40–50) First sight of OOP — a class is a blueprint, an object is made from it (Course/OnlineCourse image). Match: class↔blueprint, object↔a thing made from it.\n5. (50–55) Plenary — self-tick the 4 “I can…”; name one paradigm you have used. TA notes who can name procedural vs OOP.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement break is routine.",
+      "resources": [
+        {
+          "title": "procedural program (book sorter) code.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-procedural-program-book-sorter-code.png"
+        },
+        {
+          "title": "OOP class example on screens.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-oop-class-example-on-screens.png"
+        },
+        {
+          "title": "Programming paradigms — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-programming-paradigms-starter-worksheet.md"
+        },
+        {
+          "title": "Programming paradigms — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-programming-paradigms-activity-worksheet.md"
+        },
+        {
+          "title": "Programming paradigms — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-programming-paradigms-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Classes and objects",
+      "objectives": "I can describe how a class and an object are related\nI can tell an attribute from a method\nI can use a constructor to make an object\nI can get and set an attribute on an object",
+      "outline": "Routine first. Vocabulary on board: class · object · attribute · method · constructor · getter · setter. TA: pairs decided in advance for pair programming; editor open. Read the 4 “I can…” aloud.\n1. (0–5) Starter — “What is an animal?” on the starter worksheet. CARD-SORT: features true of ALL animals vs only SOME. Pull out the narrow shared list = the idea of a class.\n2. (5–20) Creating an object class — class = blueprint, object = made from it. Cars/houses share attributes but with different values (images). Constructor builds a cat: my_cat = Pet(\"Fluffy\", …). Video (slide hook) introduces the object class. Live-code/pair-program the Pet class + mypet.py.\n   • Support: pre-written constructor lines to match.  • Core: fill the constructor gaps with self.  • Challenge: order a getter as Parsons. Likely error: forgetting self → fix-words “self means THIS object — every attribute needs it.”\n3. (20–35) Getters and setters (you-do) — add get_/set_ for each attribute; test by printing. Activity worksheet: match the words (class/object/attribute/method), SORT attribute vs method, fill the constructor.\n   • Support: word-choice attribute vs method.  • Core: what a constructor / getter does.  • Challenge: why use a getter not direct access.\n4. (35–50) Describe method — one method that calls the getters. Pairs paste their link + a screenshot.\n5. (50–55) Plenary — self-tick the 4 “I can…”; show the Pet object. TA notes pairs with a working getter + setter.\nDifferentiation on the SAME task; movement break is routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "car object.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-car-object.png"
+        },
+        {
+          "title": "house object.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-house-object.png"
+        },
+        {
+          "title": "cat object.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-cat-object.png"
+        },
+        {
+          "title": "knowledge of objects video.mp4",
+          "kind": "document",
+          "mimeType": "video/mp4",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-knowledge-of-objects-video.mp4"
+        },
+        {
+          "title": "Classes and objects — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-classes-and-objects-starter-worksheet.md"
+        },
+        {
+          "title": "Classes and objects — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-classes-and-objects-activity-worksheet.md"
+        },
+        {
+          "title": "Classes and objects — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-classes-and-objects-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Creating a class",
+      "objectives": "I can create a class and a constructor\nI can explain what self does\nI can add getters and setters\nI can create a method on a class",
+      "outline": "Routine first. Vocabulary on board: class · constructor · attribute · method · getter · setter · self. TA: editor open; remind pupils to name the file monster.py. Read the 4 “I can…” aloud.\n1. (0–10) Starter — “Plan your monster” (Monster Quest). Each monster has name/health/dialogue and can take damage/speak. Starter worksheet: SORT attribute vs method; CHOOSE data types (integer/string). Plan before coding to lower load.\n2. (10–25) Create the class + constructor (you-do) — Pet class as the worked example on the board; copy the pattern, change the words. Make monster.py, write the class + constructor only.\n   • Support: “change THIS word” card.  • Core: write it from the Pet pattern.  • Challenge: start getters/setters. Likely error: missing self on an attribute → fix-words “every attribute in the constructor needs self.”\n3. (25–35) Why self? — show a version without self; discuss what breaks. Activity worksheet: ORDER the constructor as Parsons; fill the self gap; choose the self keyword.\n4. (35–50) Getters, setters and methods — add get_/set_ for each attribute, then take_damage and speak (ORDER take_damage as Parsons). Pairs paste link + screenshot.\n   • Support: copy the Pet getter pattern.  • Core: explain getter vs setter.  • Challenge: finish both methods.\n5. (50–55) Plenary — self-tick the 4 “I can…”; show a Monster taking damage. TA notes who has a working constructor + method.\nDifferentiation on the SAME task; movement break is routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "Monster Quest enemy.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-monster-quest-enemy.png"
+        },
+        {
+          "title": "Monster Quest slime.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-monster-quest-slime.png"
+        },
+        {
+          "title": "Creating a class — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-class-starter-worksheet.md"
+        },
+        {
+          "title": "Creating a class — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-class-activity-worksheet.md"
+        },
+        {
+          "title": "Creating a class — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-creating-a-class-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Inheritance",
+      "objectives": "I can explain what inheritance is\nI can use the words superclass and subclass correctly\nI can choose where an attribute belongs\nI can create a subclass",
+      "outline": "Routine first. Vocabulary on board: inheritance · superclass · subclass · super. TA: editor open with last lesson's Monster project. Read the 4 “I can…” aloud.\n1. (0–5) Starter — “Spot the OOP parts”. A short code snippet; pupils SORT names into class/object/method/attribute. Bonus: name the function on line 3.\n2. (5–20) Inheritance — a Pet is a kind of Animal. Animal = superclass (parent), Pet = subclass (child). The subclass inherits attributes/methods. Arrows point UP. Where does an attribute belong? Highest class that fits (species→Animal, breed→Pet) — a SORT on the activity worksheet. Match: superclass/subclass/inheritance.\n3. (20–35) Live coding — the Friend subclass (I-do). class Friend(Monster): then super().__init__(...). Pupils make notes. ORDER the Friend subclass as Parsons; fill the super().__init__ gap. Likely error: forgetting super().__init__() → fix-words “call super().__init__ first or the inherited data is missing.”\n   • Support: parent=superclass word-choice.  • Core: define inheritance + what Friend inherits.  • Challenge: why super() is needed; which Enemy parts are inherited vs new.\n4. (35–52) Your turn — the Enemy subclass (you-do). Plan, then build Enemy with a weakness attribute and a fight method, using Friend as a template. Paste link + screenshot.\n5. (52–55) Plenary — self-tick the 4 “I can…”; which is the superclass / subclass? TA notes who built a working subclass with super().\nDifferentiation on the SAME task; movement break is routine; no flashing/sound.",
+      "resources": [
+        {
+          "title": "two objects from one class.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-two-objects-from-one-class.png"
+        },
+        {
+          "title": "one object.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-one-object.png"
+        },
+        {
+          "title": "Inheritance — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-inheritance-starter-worksheet.md"
+        },
+        {
+          "title": "Inheritance — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-inheritance-activity-worksheet.md"
+        },
+        {
+          "title": "Inheritance — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-inheritance-slides.md"
+        }
+      ]
+    },
+    {
+      "title": "Assessment",
+      "objectives": "I can explore a program written using OOP\nI can identify classes, objects, attributes, methods and inheritance",
+      "outline": "Routine first. Calm, exam-style. Vocabulary recap on board: class · object · attribute · method · inheritance · superclass · subclass. TA: internet access for the example repl; minimise distraction. Read the 2 “I can…” aloud.\n1. (0–10) Starter — the library tracker (three classes: Book, User, Library). Explore worksheet: SORT each part into its class; note one book and one user already in the system. Show how to fork/copy the repl.\n2. (10–25) Explore (you-do) — note the classes and their attributes/methods; add a user and two books; rent out three books with print messages. The program saves nothing, so real names are safe.\n   • Support: do it together.  • Core/Challenge: independently.\n3. (25–45) Part 1 — the quiz worksheet (the unit's summative, adapted). Everyone does Q1–Q2 (multi-select: classes / objects). Then their level: Support = identify method/attribute; Core = add-an-attribute / create-object / getter; Challenge = setter / association / interacting method / inheritance + superclass-vs-subclass. Independent, exam conditions; example program may stay open.\n4. (45–55) Part 2 — adding to the library. Add a Book subclass (Fiction or Nonfiction) with two attributes + getters/setters; constructor must call super().__init__(...). They may use earlier programs (Pet, Monster, Friend, Enemy) for inspiration. Not everyone finishes — weight Part 1 more; mark the code with the rubric. Paste link + screenshot.\n5. Recap — define each OOP term in turn; close the unit calmly.\nMark scheme for the quiz choice/tick questions is in the conversion notes (slug notes file). Differentiation on the SAME assessment; no flashing/sound.",
+      "resources": [
+        {
+          "title": "library shelf.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-library-shelf.png"
+        },
+        {
+          "title": "library tracker explore sheet.png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-library-tracker-explore-sheet.png"
+        },
+        {
+          "title": "Assessment — explore worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-assessment-explore-worksheet.md"
+        },
+        {
+          "title": "Assessment — OOP quiz worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-assessment-oop-quiz-worksheet.md"
+        },
+        {
+          "title": "Assessment — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-assessment-slides.md"
+        }
+      ]
+    }
+  ]
+}

@@ -10,8 +10,8 @@ Today I will learn that people make the content on the web, who owns it, and tha
 ## Starter — who made this content?
 All content on the web is made by people. It might be one person, a company, or a big group of people.
 
-![A YouTube channel made by one person]({{res:l5-youtube.png}})
-![A website made by a company]({{res:l5-lego.png}})
+![A YouTube channel made by one person]({{res:l5-a-youtube-channel-content-made-by-one-person-teach-computing.png}})
+![A website made by a company]({{res:l5-the-lego-website-content-made-by-a-company-teach-computing.png}})
 
 | Website | Who made it? |
 |---|---|

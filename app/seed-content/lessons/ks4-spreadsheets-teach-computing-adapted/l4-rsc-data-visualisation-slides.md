@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: chart · title · label · legend · axis. Same routine as every lesson.
 
 ## Starter — charts can mislead
-![A bar chart whose vertical axis does not start at zero]({{res:l4-misleading-bar-chart.png}})
+![A bar chart whose vertical axis does not start at zero]({{res:l4-misleading-bar-chart-teach-computing.png}})
 
 - always check where the vertical axis starts
 - starting at 50 instead of 0 makes small gaps look huge
@@ -17,7 +17,7 @@
 > 🧑‍🏫 This is a truncated axis. One bad chart shared with millions can spread misinformation. Draw out: baseline, scale, cherry-picked data, wrong chart type.
 
 ## Column chart — compare amounts
-![A column chart of telephone votes by week]({{res:l4-column-chart.png}})
+![A column chart of telephone votes by week]({{res:l4-column-chart-votes-by-week-teach-computing.png}})
 
 - a COLUMN chart compares amounts side by side
 - highlight the data → Insert → Column chart
@@ -26,7 +26,7 @@
 > 🧑‍🏫 Worked example: chart the telephone votes. Stress a title that describes the data, e.g. "Telephone votes each week".
 
 ## Pie chart — parts of a whole
-![A pie chart of total seat sales by section]({{res:l4-pie-chart.png}})
+![A pie chart of total seat sales by section]({{res:l4-pie-chart-seat-sales-teach-computing.png}})
 
 - a PIE chart shows each part as a slice of the whole
 - use it for "how the total is split"
@@ -35,7 +35,7 @@
 > 🧑‍🏫 Pie = parts of one whole (seat sections as % of all seats). To compare three teams, use a column chart, not a pie.
 
 ## Pick the right chart
-![A grouped column chart of income by seat type]({{res:l4-grouped-column-chart.png}})
+![A grouped column chart of income by seat type]({{res:l4-grouped-column-chart-income-by-seat-type-teach-computing.png}})
 
 - compare week-by-week or group-by-group → column
 - show shares of a total → pie

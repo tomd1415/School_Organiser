@@ -11,6 +11,13 @@
       "outline": "Routine first (same every lesson). Vocabulary on board: word processor · keyboard · keys · letters · type. TA: everyone has the starter worksheet; a word processor open and ready. Read the 3 “I can…” aloud.\n1. (0–5) Starter — where can we write? Pupils tick all the things you can write with (pencil, chalk, keyboard) on the starter worksheet, leading to “a computer”.\n   • Support: choose which part types letters (keyboard).  • Core: fill the blank — the buttons are called keys.  • Challenge: write one thing you could make on a computer.\n2. (5–10) I-do — a word processor is a page on the computer, like blank paper. Hold up real paper next to it.\n3. (10–25) We-do — the keyboard. The buttons are KEYS; the letters are not in alphabetical order. On the activity worksheet, pupils DRAG labels onto the keyboard (Space bar, Backspace, Enter, a letter key, a number key) using the keyboard image. Then SORT keys into letter / not-a-letter.\n   • Support: the sort (recognition).  • Core: type your name, which key first.  • Challenge: fill the blank — not in alphabetical order.\n4. (25–45) You-do — open the word processor and type your name, then a friend’s name. Likely error: holding a key so it repeats → fix-words “one short press for one letter.” TA: prompt, do not do it for them. Screenshot the name onto the activity worksheet.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil shows a letter key on screen. Not saving this lesson.\nDifferentiation on the SAME task, low floor / high ceiling. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
         {
+          "title": "Computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-computer-keyboard-teach-computing.png"
+        },
+        {
           "title": "Exploring the keyboard — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
@@ -30,13 +37,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l1-exploring-the-keyboard-slides.md"
-        },
-        {
-          "title": "Computer keyboard (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l1-keyboard.png"
         }
       ]
     },
@@ -46,32 +46,32 @@
       "outline": "Routine first. Vocabulary on board: space · backspace · text cursor · enter · numbers. TA: word processor open; keyboard templates from Lesson 1. Read the 3 “I can…” aloud.\n1. (0–5) Starter — “catdog” has no gap. Pupils CHOOSE which key makes a space on the starter worksheet (keyboard image shown).\n   • Support: choose which key removes a wrong letter (Backspace).  • Core: match each key to what it does (Space/Backspace/Enter).  • Challenge: what does the text cursor show you?\n2. (5–15) I-do → we-do — the text cursor is the flashing line; click to move it, then type. Backspace removes the letter on the left. Likely error: typing in the wrong place → fix-words “click first, then type.”\n3. (15–35) You-do — on the activity worksheet, drag the steps to type “cat” into order, SORT keys into adds / takes-away, then type “cat dog” with a space and a short lost-toy sentence.\n   • Support: choose the Space key.  • Core: type “cat dog”, say what made the gap.  • Challenge: write the steps you took to fix a wrong letter.\n4. (35–45) Screenshot the typed words onto the activity worksheet. TA: prompt, do not type it for them.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil shows a space and a Backspace fix. Not saving this lesson.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-computer-keyboard-teach-computing.png"
+        },
+        {
           "title": "Adding and removing text — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l2-adding-removing-text-starter-worksheet.md"
+          "file": "l2-adding-and-removing-text-starter-worksheet.md"
         },
         {
           "title": "Adding and removing text — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l2-adding-removing-text-activity-worksheet.md"
+          "file": "l2-adding-and-removing-text-activity-worksheet.md"
         },
         {
           "title": "Adding and removing text — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l2-adding-removing-text-slides.md"
-        },
-        {
-          "title": "Computer keyboard (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l2-keyboard.png"
+          "file": "l2-adding-and-removing-text-slides.md"
         }
       ]
     },
@@ -80,6 +80,20 @@
       "objectives": "I can type capital letters with Caps Lock\nI can say what the keys do\nI can find the toolbar and use bold, italic and underline",
       "outline": "Routine first. Vocabulary on board: capital letters · toolbar · bold · italic · underline. TA: saved poster open; auto-capitalisation turned off. Read the 3 “I can…” aloud.\n1. (0–10) Starter — what do these keys do? On the starter worksheet pupils MATCH each key (Space, Backspace, Enter, Caps Lock) to what it does (keyboard image shown).\n   • Support: choose which key types capitals (Caps Lock).  • Core: write one place you need a capital.  • Challenge: fill the blanks — capital at the start of a sentence and for names.\n2. (10–20) I-do → we-do — Caps Lock turns on CAPITAL letters; press again to turn off. Model Backspace the lower-case, Caps Lock on, type the capital. Likely error: leaving Caps Lock on → fix-words “press it again to turn it off.”\n3. (20–30) The toolbar — B = bold, I = italic, U = underline (toolbar image). On the activity worksheet pupils SORT toolbar buttons vs keyboard keys, then MATCH each button to what it does.\n   • Support: choose which button makes letters dark and thick.  • Core: match B/I/U.  • Challenge: why make a word bold?\n4. (30–45) You-do — write “Ted”, try bold, italic, underline. Screenshot one bold word onto the activity worksheet. TA: prompt, do not do it for them. Save at the end.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil shows a bold word.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
+        {
+          "title": "Computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-computer-keyboard-teach-computing.png"
+        },
+        {
+          "title": "Word processor toolbar (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-word-processor-toolbar-teach-computing.png"
+        },
         {
           "title": "Exploring the toolbar — starter worksheet.md",
           "kind": "worksheet",
@@ -100,20 +114,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l3-exploring-the-toolbar-slides.md"
-        },
-        {
-          "title": "Computer keyboard (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l3-keyboard.png"
-        },
-        {
-          "title": "Word processor toolbar (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l3-toolbar.png"
         }
       ]
     },
@@ -123,32 +123,32 @@
       "outline": "Routine first. Vocabulary on board: mouse · select · font. TA: saved poster open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — make a word bold: on the starter worksheet pupils put the steps in ORDER (double-click → click Bold → bold).\n   • Support: choose how to select one word (double-click).  • Core: why select a word first?  • Challenge: fill the blank — click and drag to select all.\n2. (10–20) I-do → we-do — double-click selects a word (blue box). Click and drag selects ALL the text. Likely error: changing text without selecting → fix-words “select first, then change.”\n3. (20–30) Change the font — click the arrow by the font box, choose a new font (toolbar image). On the activity worksheet pupils ORDER the change-the-font steps and MATCH each action to its result.\n   • Support: choose how to select all the text.  • Core: match double-click / drag / font box.  • Challenge: why change the font of a title?\n4. (30–45) You-do — select all the text and change the font of the poster. Screenshot the new font. Support: change one word at a time with double-click. TA: prompt, do not do it for them. Save at the end.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil shows their new font.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
         {
+          "title": "Word processor toolbar — font box (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-word-processor-toolbar-font-box-teach-computing.png"
+        },
+        {
           "title": "Making changes to text — starter worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-making-changes-starter-worksheet.md"
+          "file": "l4-making-changes-to-text-starter-worksheet.md"
         },
         {
           "title": "Making changes to text — activity worksheet.md",
           "kind": "worksheet",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-making-changes-activity-worksheet.md"
+          "file": "l4-making-changes-to-text-activity-worksheet.md"
         },
         {
           "title": "Making changes to text — slides.md",
           "kind": "slides",
           "mimeType": "text/markdown",
           "sourceAttribution": "",
-          "file": "l4-making-changes-slides.md"
-        },
-        {
-          "title": "Word processor toolbar — font box (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l4-toolbar.png"
+          "file": "l4-making-changes-to-text-slides.md"
         }
       ]
     },
@@ -157,6 +157,13 @@
       "objectives": "I can say which tool I used to change my text\nI can use Undo to remove a change\nI can decide if a change made my writing better",
       "outline": "Routine first. Vocabulary on board: undo · redo · font · format. TA: saved poster open. Read the 3 “I can…” aloud.\n1. (0–10) Starter — which tool am I? Pupils read hints and CHOOSE the tool (bold/italic/underline) on the starter worksheet.\n   • Support: choose which button removes the last change (Undo).  • Core: what does Redo do?  • Challenge: fill the blank — Undo removes the last change.\n2. (10–20) I-do → we-do — Undo removes your last change (arrow points back, like Backspace); Redo puts it back. Paper-fold demo. Likely error: expecting Undo to remove an older change directly → fix-words “undo works backwards, one step at a time.”\n3. (20–40) You-do — make changes with the toolbar tools; use Undo if a change does not help. On the activity worksheet pupils ORDER the undo steps, MATCH Undo/Redo, and rate (1–5 scale) whether their changes made the poster better.\n   • Support: choose which button removes a change.  • Core: match Undo/Redo.  • Challenge: rate the improvement and say why.\n4. (40–45) Screenshot the finished poster and say which tool was used. TA: prompt, do not do it for them. Save at the end.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil names one tool they used and why.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
+        {
+          "title": "Word processor toolbar — Undo and Redo (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-word-processor-toolbar-undo-and-redo-teach-computing.png"
+        },
         {
           "title": "Explaining my choices — starter worksheet.md",
           "kind": "worksheet",
@@ -177,13 +184,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l5-explaining-my-choices-slides.md"
-        },
-        {
-          "title": "Word processor toolbar — Undo and Redo (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l5-toolbar.png"
         }
       ]
     },
@@ -192,6 +192,20 @@
       "objectives": "I can make changes to text on a computer\nI can say how typing and writing on paper are the same and different\nI can say which one I like best and why",
       "outline": "Routine first. Vocabulary on board: compare · typing · writing. TA: a blank word processor document open; a misspelt sentence pre-written on a flip chart. Read the 3 “I can…” aloud.\n1. (0–5) Starter — paper or computer? On the starter worksheet pupils SORT actions into on-paper / on-a-computer (pencil image + keyboard image shown).\n   • Support: choose which key fixes a mistake on a computer (Backspace).  • Core: write one thing that is the SAME.  • Challenge: write one thing that is DIFFERENT.\n2. (5–20) I-do → we-do — fixing a mistake: on paper you cross it out; on a computer Backspace removes it cleanly. Model fixing “brownfur” → “brown fur”. On the activity worksheet pupils type and fix “ted has brownfur and big ears.”\n3. (20–35) Same and different — build two class lists. On the activity worksheet pupils MATCH each tool/action to computer or paper.\n4. (35–45) Which do you prefer? Pupils finish “I like writing on ___ because ___”, rate how much they like typing (1–5 scale), and screenshot the fixed sentence. Both answers are fine — we want the reason.\n5. (45–50) Plenary — self-tick the 3 “I can…”; each pupil says which they prefer and why. End of unit: recap the journey — keyboard → adding/removing text → toolbar → changing text → comparing.\nDifferentiation on the SAME task; no flashing/sound; movement breaks are routine.",
       "resources": [
+        {
+          "title": "Pencil (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-pencil-teach-computing.png"
+        },
+        {
+          "title": "Computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-computer-keyboard-teach-computing.png"
+        },
         {
           "title": "Pencil or keyboard? — starter worksheet.md",
           "kind": "worksheet",
@@ -212,20 +226,6 @@
           "mimeType": "text/markdown",
           "sourceAttribution": "",
           "file": "l6-pencil-or-keyboard-slides.md"
-        },
-        {
-          "title": "Pencil (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l6-pencil.png"
-        },
-        {
-          "title": "Computer keyboard (Teach Computing).png",
-          "kind": "image",
-          "mimeType": "image/png",
-          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
-          "file": "l6-keyboard.png"
         }
       ]
     }

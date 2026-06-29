@@ -10,7 +10,7 @@ Today I will use the four operations and learn faster ways to calculate.
 ## The four operations
 A spreadsheet can add, subtract, multiply and divide. These are the four **operations**. Each one has its own symbol.
 
-![A spreadsheet with operation tabs]({{res:l4-operations.png}})
+![A spreadsheet with operation tabs]({{res:l4-a-spreadsheet-with-operation-tabs-teach-computing.png}})
 
 Match each operation to its symbol. Use the same choices each time.
 

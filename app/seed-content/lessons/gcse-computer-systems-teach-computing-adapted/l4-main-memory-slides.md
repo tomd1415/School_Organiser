@@ -16,7 +16,7 @@
 > 🧑‍🏫 Quick retrieval of the CPU. Matches the starter worksheet multiple-choice questions.
 
 ## RAM
-![RAM memory sticks]({{res:l4-ram.png}})
+![RAM memory sticks]({{res:l4-ram-memory-sticks-teach-computing.png}})
 
 - holds programs and data while they are RUNNING
 - can be read AND written
@@ -32,7 +32,7 @@
 > 🧑‍🏫 ROM = read only memory. It is why the computer knows how to start up. This sets up the RAM-vs-ROM sort task.
 
 ## Cache
-![Memory chips on a circuit board]({{res:l4-cache-chips.png}})
+![Memory chips on a circuit board]({{res:l4-memory-chips-on-a-circuit-board-teach-computing.png}})
 
 - a small amount of VERY FAST memory
 - sits between the CPU and RAM

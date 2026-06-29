@@ -11,7 +11,7 @@ Today I will collect data in a tally chart and turn it into a pictogram.
 A tally chart has three columns. Drag each label onto the right column.
 
 ```label
-image: {{res:l3-minibeast-tally-chart.png}}
+image: {{res:l3-blank-minibeast-tally-chart-teach-computing.png}}
 name (18%, 45%): The bug's name
 marks (53%, 45%): Make a mark for each one
 number (85%, 45%): The total number

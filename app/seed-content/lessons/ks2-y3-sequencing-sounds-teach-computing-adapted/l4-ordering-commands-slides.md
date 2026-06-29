@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: sequence · order · note · chord. Same routine as every lesson. Headphones optional; sound is part of today's task.
 
 ## Two sound blocks
-![Start sound blocks and play sound until done blocks]({{res:l4-sound-blocks.png}})
+![Start sound blocks and play sound until done blocks]({{res:l4-start-sound-vs-play-until-done-teach-computing.png}})
 
 - play sound UNTIL DONE — one note, then the next (a tune)
 - start sound — all notes at once (a chord)
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Starter (10 min). Play both for the class so they hear the difference. On the worksheet pupils choose which block makes a tune and which makes a chord.
 
 ## Order is the tune
-![A tune made of play sound until done blocks]({{res:l4-tune-sequence.png}})
+![A tune made of play sound until done blocks]({{res:l4-a-tune-made-of-sound-blocks-teach-computing.png}})
 
 - each block plays one note, in order
 - change the order and the tune changes

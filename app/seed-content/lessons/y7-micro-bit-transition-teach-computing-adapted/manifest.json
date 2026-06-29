@@ -11,13 +11,6 @@
       "outline": "Routine first (same every lesson). Vocabulary on board: iteration · loop · count-controlled · efficiency. TA: everyone has MakeCode open + 1 micro:bit per pair. Read the 4 “I can…” aloud.\n1. (0–5) Starter — micro:bit inputs (think–pair–share). Pupils TICK inputs on the worksheet (no writing).\n   • Support: word-bank/tick boxes to choose from.  • Core: list inputs from memory.  • Challenge: name a v2-only input (touch / sound).\n2. (5–20) I-do → we-do (PRIMM Predict–Run). Teacher predicts the count-UP code aloud (I do); class predicts the next block (we do). Pairs open the shared link, drag comments to blocks, fill blank comments.\n   • Support: comments pre-written — match them to blocks.  • Core: fill the blank comments from a word-bank.  • Challenge: explain why “index” is a sensible variable name. Likely error: no start value → fix-words “every loop needs a starting number.”\n3. (20–35) You-do — modify the program to count DOWN from 9 (change +1 → −1; one block).\n   • Support: printed “change THIS block” arrow card.  • Core: edit the block unaided.  • Challenge: update the comments to match. Success = the micro:bit shows 9…0. TA: “prompt, do not do it for them.”\n4. (35–50) Count-controlled iteration — the “for index from 0 to N” block replaces many blocks. Worked example (I do), pairs swap to the for-loop (you do). Keep a screenshot of the working countdown.\n5. (50–55) Plenary — pupils self-tick the 4 “I can…”; each pair shows their counting micro:bit. TA notes who met all four.\nDifferentiation is on the SAME task, low floor / high ceiling — nobody’s screen looks “less done”. No flashing/sound on slides; movement breaks are routine.",
       "resources": [
         {
-          "title": "micro:bit countdown — activity worksheet.md",
-          "kind": "worksheet",
-          "mimeType": "text/markdown",
-          "sourceAttribution": "",
-          "file": "l1-micro-bit-countdown-activity-worksheet.md"
-        },
-        {
           "title": "micro:bit v2 board (Teach Computing).png",
           "kind": "image",
           "mimeType": "image/png",
@@ -30,6 +23,13 @@
           "mimeType": "video/mp4",
           "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
           "file": "l1-countdown-video-teach-computing.mp4"
+        },
+        {
+          "title": "micro:bit countdown — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-micro-bit-countdown-activity-worksheet.md"
         },
         {
           "title": "micro:bit countdown — starter worksheet.md",

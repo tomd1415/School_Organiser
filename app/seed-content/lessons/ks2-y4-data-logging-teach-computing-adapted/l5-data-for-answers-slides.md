@@ -30,7 +30,7 @@
 > 🧑‍🏫 This matches the starter. Likely error: choosing a sensor that can't answer the question. Fix-words: "match the sensor to the question word."
 
 ## Make a plan
-![A data logger]({{res:l5-data-logger.png}})
+![A data logger]({{res:l5-data-logger-teach-computing.png}})
 
 - where will the logger go?
 - when will it start and stop?

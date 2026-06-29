@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: attribute · value · question · plan · identify · unique.
 
 ## Dinosaur attributes
-![Dinosaur cards]({{res:l5-dinosaur-cards.png}})
+![Dinosaur cards]({{res:l5-dinosaur-cards-teach-computing.png}})
 
 - main colour
 - diet (what it eats)

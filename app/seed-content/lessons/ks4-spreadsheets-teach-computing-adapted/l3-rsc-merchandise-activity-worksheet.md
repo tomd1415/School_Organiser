@@ -10,9 +10,9 @@ Today I will calculate profit for each item, add up the total, and use condition
 ## The model — before and after
 Start with a part-built sheet, then add prices, formulae and formatting.
 
-![The blank merchandise sheet with cost prices]({{res:l3-merch-blank.png}})
+![The blank merchandise sheet with cost prices]({{res:l3-merchandise-sheet-blank-teach-computing.png}})
 
-![The finished merchandise model with forecast profit]({{res:l3-merch-model.png}})
+![The finished merchandise model with forecast profit]({{res:l3-merchandise-model-completed-teach-computing.png}})
 
 ## Predict
 Profit for each item = (selling price − cost price) × number of sales.
@@ -47,7 +47,7 @@ To total the profit column from E8 to E22 we write `=[[ ]](E8:E22)`. To make mon
 ## 🔴 Challenge
 Conditional formatting can change a cell's colour when a rule is true.
 
-![The conditional formatting rule dialog]({{res:l3-conditional-format-dialog.png}})
+![The conditional formatting rule dialog]({{res:l3-conditional-format-rule-dialog-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

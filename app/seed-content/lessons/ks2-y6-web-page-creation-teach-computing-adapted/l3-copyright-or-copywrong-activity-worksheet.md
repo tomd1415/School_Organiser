@@ -12,7 +12,7 @@ Today I will explain copyright and fair use, find copyright-free images, and use
 - **Fair use** means there are some times you are allowed to use a small part of someone's work, for example for school work, if you give them credit.
 - **Copyright-free** or **Creative Commons** images are ones the owner has said you may use, often if you **credit** them (say who made it).
 
-![Creative Commons licences]({{res:l3-cc-licences.png}})
+![Creative Commons licences]({{res:l3-creative-commons-licences-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

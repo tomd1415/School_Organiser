@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: 3D shapes · choose · combine · analyse · architect. Recap: we have made a name badge and a desk tidy.
 
 ## Architects design buildings
-![A 3D computer plan of a building]({{res:l5-architect-plan.png}})
+![A 3D computer plan of a building]({{res:l5-a-3d-computer-plan-of-a-building-teach-computing.png}})
 
 - an architect designs buildings
 - they use 3D design to plan before building
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Starter: ask why 3D design helps an architect. Support choose what an architect designs.
 
 ## Exploding a model
-![A house pulled apart into its shapes]({{res:l5-exploded-house.png}})
+![A house pulled apart into its shapes]({{res:l5-a-house-pulled-apart-into-its-shapes-teach-computing.png}})
 
 - to analyse means to look closely at the shapes
 - this house is a cuboid, a triangular prism and a chimney
@@ -27,9 +27,9 @@
 > 🧑‍🏫 On the activity worksheet pupils tick the shapes they can see. Likely error: "it is just one house shape." Fix-words: "it is made of SEPARATE simple shapes joined together."
 
 ## Shapes in real buildings
-![A round stadium]({{res:l5-stadium.jpg}})
+![A round stadium]({{res:l5-a-round-stadium-teach-computing.jpg}})
 
-![Modern towers]({{res:l5-modern-towers.png}})
+![Modern towers]({{res:l5-modern-towers-teach-computing.png}})
 
 - real buildings are made of 3D shapes too
 - a tower can be cylinders; a box house is cuboids
@@ -38,7 +38,7 @@
 > 🧑‍🏫 Challenge: the Burj Khalifa looks complex but is mostly joined cylinders. Spotting simple shapes makes a hard build easier.
 
 ## Plan your building
-![An example house built in Tinkercad]({{res:l5-tinkercad-house.png}})
+![An example house built in Tinkercad]({{res:l5-an-example-house-built-in-tinkercad-teach-computing.png}})
 
 - sketch your building
 - label the shapes you will use

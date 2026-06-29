@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the "I can…" aloud. No new skills today — bring together what we have learnt.
 
 ## Starter — how was this made?
-![A frame from a bouncing cube animation]({{res:l6-bouncing-cube.jpg}})
+![A frame from a bouncing cube animation]({{res:l6-bouncing-cube-frame.jpg}})
 
 The cube bounces using **keyframes**, scaled with LocRotScale, lit by a moving light.
 

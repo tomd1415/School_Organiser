@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: variable · name · value · set · change. Recap: a variable is something that can change.
 
 ## Starter — a game with variables
-![A Scratch game with a score and a timer]({{res:l2-score-timer.png}})
+![A Scratch game with a score and a timer]({{res:l2-a-scratch-game-with-a-score-and-a-timer-teach-computing.png}})
 
 - the score changes; the timer changes
 - both are variables
@@ -37,7 +37,7 @@
 > 🧑‍🏫 Use the labelled drawers idea: a good label finds the pencils fast. Core: rename "Number" to something better.
 
 ## Make a variable in Scratch
-![A change Score_A by 1 block]({{res:l2-change-score-a.png}})
+![A change Score_A by 1 block]({{res:l2-a-change-score-a-by-1-block-teach-computing.png}})
 
 - click **Variables** → **Make a Variable**
 - use **change … by 1** to add to it

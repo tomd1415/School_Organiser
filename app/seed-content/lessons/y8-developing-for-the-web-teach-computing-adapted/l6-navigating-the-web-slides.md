@@ -18,7 +18,7 @@ Make a "How to build your first web page" page that sums up the unit.
 > 🧑‍🏫 Keep it short and clear: what software, the steps, how to test. Use the prompts to guide them.
 
 ## Add navigation to every page  (we do)
-![A finished website with navigation]({{res:l6-finished-website.png}})
+![A finished website with navigation]({{res:l6-finished-website-with-navigation-teach-computing.png}})
 
 Put the SAME menu of links on every page so a visitor can move around.
 

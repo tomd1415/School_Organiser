@@ -9,7 +9,7 @@ Today I will talk about rules for using IT and say how rules keep me safe.
 
 There are **rules** for using IT. Rules keep us safe and look after the device.
 
-![A smart speaker]({{res:l5-smart-speaker.png}})
+![A smart speaker]({{res:l5-a-smart-speaker-teach-computing.png}})
 
 ## Sort — safe or not safe?
 Drag each choice into the right group.

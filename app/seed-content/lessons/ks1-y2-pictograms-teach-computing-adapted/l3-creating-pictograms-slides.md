@@ -16,7 +16,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil to read a fact from a pictogram.
 
 ## Collect the data
-![Blank minibeast tally chart]({{res:l3-minibeast-tally-chart.png}})
+![Blank minibeast tally chart]({{res:l3-blank-minibeast-tally-chart-teach-computing.png}})
 
 - tally the minibeast cards: one mark each
 - a gate at five
@@ -25,7 +25,7 @@
 > 🧑‍🏫 I-do then we-do. Likely error: forgetting a total of 0 → fix-words "if you found none, write 0 — that is still data."
 
 ## Make the pictogram
-![Minibeast pictogram]({{res:l3-minibeast-pictogram.png}})
+![Minibeast pictogram]({{res:l3-minibeast-pictogram-teach-computing.png}})
 
 - add one picture for each one you tallied
 - the taller the column, the more there are

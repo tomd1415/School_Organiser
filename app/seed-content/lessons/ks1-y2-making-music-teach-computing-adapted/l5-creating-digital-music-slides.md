@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: create · rhythm · pattern · notes · tempo · animal. Same routine as every lesson.
 
 ## An elephant walking
-![An elephant walking]({{res:l5-elephant.jpg}})
+![An elephant walking]({{res:l5-an-elephant-walking-teach-computing.jpg}})
 
 - big, slow and heavy
 - a slow, heavy rhythm: BOOM … BOOM … BOOM
@@ -18,7 +18,7 @@
 > 🧑‍🏫 Optional: one volunteer walks slowly like an elephant while the class taps a slow beat. The starter worksheet asks about elephant and mouse rhythms.
 
 ## Choose your animal
-![A crocodile]({{res:l5-crocodile.png}}) ![A bird]({{res:l5-bird.png}})
+![A crocodile]({{res:l5-a-crocodile-teach-computing.png}}) ![A bird]({{res:l5-a-bird-teach-computing.png}})
 
 - pick an animal you like
 - a mouse is fast and light

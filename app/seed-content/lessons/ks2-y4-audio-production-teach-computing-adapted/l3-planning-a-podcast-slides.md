@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: audio · layer · import · save · host · engineer. Same routine as every lesson.
 
 ## Layers of sound
-![Three tracks layered: music, voice and a sound effect]({{res:l3-layers.png}})
+![Three tracks layered: music, voice and a sound effect]({{res:l3-layered-tracks-music-voice-sound-effect-teach-computing.png}})
 
 - each sound goes on its own **track**
 - stacking them is called **layering**

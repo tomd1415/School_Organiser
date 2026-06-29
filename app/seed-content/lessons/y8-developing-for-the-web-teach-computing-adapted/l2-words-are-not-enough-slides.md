@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: image · tag · attribute · directory · render.
 
 ## Starter — tags recap
-![A list of common HTML tags]({{res:l2-html-tags-reference.png}})
+![A list of common HTML tags]({{res:l2-html-tags-reference-teach-computing.png}})
 
 Fill in the missing closing tags on your starter worksheet.
 
@@ -23,14 +23,14 @@ Fill in the missing closing tags on your starter worksheet.
 > 🧑‍🏫 The image is NOT inside the page — the tag points to a file. Predict the output first, then render it.
 
 ## Files live in folders  (we do)
-![A folder holding the page's files]({{res:l2-folders-directory.png}})
+![A folder holding the page's files]({{res:l2-files-in-a-folder-teach-computing.png}})
 
 The image file must be in the same folder, or `src` must give the path to it.
 
 > 🧑‍🏫 Common error: image does not appear → check the file name and extension match exactly (`.jpg` vs `.png`).
 
 ## Your turn — build the design  (you do)
-![The target web page design]({{res:l2-web-page-with-images.png}})
+![The target web page design]({{res:l2-web-page-with-images-target-design-teach-computing.png}})
 
 Use what you know to make your page look like this.
 

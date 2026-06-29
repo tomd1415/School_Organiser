@@ -10,7 +10,7 @@ Today I will start to design a step counter for the micro:bit.
 ## Counting steps
 A step counter counts how many steps you take. A smart watch or fitness tracker does this. It uses the **accelerometer** to sense each step (a small movement).
 
-![The micro:bit, showing the accelerometer]({{res:l5-microbit-parts.png}})
+![The micro:bit, showing the accelerometer]({{res:l5-a-micro-bit-with-its-parts-labelled-teach-computing.png}})
 
 | Question | Choose |
 |---|---|

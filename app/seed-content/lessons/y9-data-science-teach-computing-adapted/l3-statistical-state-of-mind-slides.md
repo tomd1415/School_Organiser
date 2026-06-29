@@ -8,14 +8,14 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: correlation · outlier · PPDAC · investigative cycle · variable.
 
 ## Starter — analyse the graph
-![A graph of life expectancy rising, positive from 1949]({{res:l3-correlation-graph.png}})
+![A graph of life expectancy rising, positive from 1949]({{res:l3-life-expectancy-positive-correlation-graph-teach-computing.png}})
 
 Does the graph show a trend? Where are the odd points?
 
 > 🧑‍🏫 From 1949 it rises = positive correlation. Two things moving together = correlation.
 
 ## Outliers
-![The same graph with dips at 1871, 1918, 1940]({{res:l3-outliers-graph.png}})
+![The same graph with dips at 1871, 1918, 1940]({{res:l3-life-expectancy-graph-with-outliers-teach-computing.png}})
 
 An **outlier** is a point far from the rest.
 
@@ -27,14 +27,14 @@ An **outlier** is a point far from the rest.
 > 🧑‍🏫 We-do the order task on the worksheet together. Likely error: swapping Plan and Data. Fix-words: "you plan BEFORE you collect."
 
 ## The roller coaster problem  (we do)
-![A roller coaster with loops]({{res:l3-roller-coaster-photo.png}})
+![A roller coaster with loops]({{res:l3-roller-coaster-photo-teach-computing.png}})
 
 What makes a coaster cool? Turn it into questions we can measure (speed, height, drops…).
 
 > 🧑‍🏫 "Cool" is too vague. Help them turn it into measurable questions. Remember the 350 ft rule.
 
 ## Investigate the data  (you do)
-![A scatter graph of speed against height]({{res:l3-roller-coaster-scatter.png}})
+![A scatter graph of speed against height]({{res:l3-roller-coaster-speed-vs-height-scatter-teach-computing.png}})
 
 Make a chart, look for a correlation, write a recommendation.
 

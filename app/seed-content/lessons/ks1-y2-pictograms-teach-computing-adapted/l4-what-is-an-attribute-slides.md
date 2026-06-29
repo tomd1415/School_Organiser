@@ -16,7 +16,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil what a pictogram shows.
 
 ## What is an attribute?
-![A blue car]({{res:l4-blue-car.png}})
+![A blue car]({{res:l4-a-blue-car-teach-computing.png}})
 
 - an **attribute** describes an object
 - colour, shape, size, number of wheels
@@ -25,8 +25,8 @@
 > 🧑‍🏫 Key idea. Give examples around the room: "group by colour", "group by size".
 
 ## The same objects, grouped two ways
-![A red bus]({{res:l4-red-bus.png}})
-![A motorbike]({{res:l4-motorbike.png}})
+![A red bus]({{res:l4-a-red-bus-teach-computing.png}})
+![A motorbike]({{res:l4-a-motorbike-teach-computing.png}})
 
 - by **colour**: red things together, blue things together
 - by **number of wheels**: 2 wheels, 4 wheels

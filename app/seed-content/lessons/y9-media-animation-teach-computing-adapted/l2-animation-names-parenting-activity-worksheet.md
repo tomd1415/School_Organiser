@@ -11,7 +11,7 @@ Today I will add keyframes to make an animation, then name and parent my objects
 The **keyframes** are the positions you set. The frames the computer makes in between are **tweened** (the in-between frames). Drag the right label onto each spot.
 
 ```label
-image: {{res:l2-keyframe-tween-diagram.png}}
+image: {{res:l2-keyframes-and-tweening-diagram.png}}
 first set position (5%, 84%): keyframe
 an in-between frame (22%, 38%): tweened
 another set position (42%, 9%): keyframe
@@ -54,7 +54,7 @@ Press play to watch the animation
 ## 🔴 Challenge
 This is the Outliner. The Head is parented to the Body.
 
-![The Blender Outliner showing parented objects]({{res:l2-parenting-outliner.png}})
+![The Blender Outliner showing parented objects]({{res:l2-parenting-in-the-outliner.png}})
 
 | Question | Your answer |
 |---|---|

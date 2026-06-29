@@ -24,9 +24,9 @@ A photo is made of tiny squares. What is each square called? How many bits are i
 - More bits → more colours. The rule is 2 to the power of the number of bits.
 - 1 bit = 2 colours · 2 bits = 4 · 3 bits = 8 · 8 bits = 256.
 
-![A colour photo of two puppies]({{res:l10-colour-depth-original.png}})
+![A colour photo of two puppies]({{res:l10-two-puppies-full-colour-depth.png}})
 
-![The same photo at 1 bit per pixel]({{res:l10-colour-depth-1bit.png}})
+![The same photo at 1 bit per pixel]({{res:l10-two-puppies-1-bit-per-pixel.png}})
 
 > 🧑‍🏫 Show the two puppy images: same photo, fewer bits = fewer colours = lower quality. Likely error: confusing colour depth with resolution — fix-words "depth = colours, resolution = number of pixels".
 

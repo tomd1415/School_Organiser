@@ -10,7 +10,7 @@ Today I will learn to size shapes accurately and make holes in them, to build my
 ## A desk tidy
 A desk tidy holds your pens and rubbers. This one was made from several **cylinders** that have been hollowed out to make containers.
 
-![A 3D desk tidy made of hollow cylinders]({{res:l4-desk-tidy.png}})
+![A 3D desk tidy made of hollow cylinders]({{res:l4-a-3d-desk-tidy-made-of-hollow-cylinders-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

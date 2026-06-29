@@ -11,7 +11,7 @@ Today I will name the sensors on a data logger, read its display, and learn that
 This is a data logger. It has three sensors built in. Drag each label onto the right spot.
 
 ```label
-image: {{res:l2-data-logger.png}}
+image: {{res:l2-data-logger-with-sensors-teach-computing.png}}
 mic (8%, 12%): Sound sensor
 temp (46%, 14%): Temperature sensor
 light (78%, 12%): Light sensor
@@ -51,7 +51,7 @@ Temperature sensor: how warm the room is, when it gets cold
 ## Recording automatically
 When the data logger is connected to a computer, the readings can be recorded and turned into a graph. The computer collects the numbers for you.
 
-![Data logger readings on the EasySense screen]({{res:l2-easysense-live.png}})
+![Data logger readings on the EasySense screen]({{res:l2-easysense-live-readings-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

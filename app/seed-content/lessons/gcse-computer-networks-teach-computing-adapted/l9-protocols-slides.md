@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary: protocol · standard · HTTP/HTTPS · SMTP/POP/IMAP · FTP · Ethernet · WiFi. Hand out both worksheets. Same routine as every lesson.
 
 ## Starter — the agreed greeting
-![Two hands meeting in an agreed greeting — both sides follow the same rule]({{res:l9-agreed-greeting.png}})
+![Two hands meeting in an agreed greeting — both sides follow the same rule]({{res:l9-an-agreed-greeting-both-sides-follow-the-same-rule.png}})
 
 Both people follow the **same rule** for the greeting, so it works. What might go wrong if they each did something different?
 

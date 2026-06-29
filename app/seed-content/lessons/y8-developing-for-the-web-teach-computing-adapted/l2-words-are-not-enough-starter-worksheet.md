@@ -7,7 +7,7 @@
 ## Starter — tags recap
 Tags are the building blocks of every web page. Here are some you have already met.
 
-![A list of common HTML tags and what they do]({{res:l2-html-tags-reference.png}})
+![A list of common HTML tags and what they do]({{res:l2-html-tags-reference-teach-computing.png}})
 
 Complete the missing **closing** tags:
 

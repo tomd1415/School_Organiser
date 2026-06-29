@@ -8,14 +8,14 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on board: data cleansing · error · analysis · visualisation. We are in the Data + Analysis steps of PPDAC.
 
 ## Starter — spot the problem
-![A zoo spreadsheet with a row highlighted]({{res:l5-dirty-data-spreadsheet.png}})
+![A zoo spreadsheet with a row highlighted]({{res:l5-zoo-data-spreadsheet-with-error-teach-computing.png}})
 
 This data was scanned in from paper. Which values look wrong?
 
 > 🧑‍🏫 The meerkat at 3 m is the obvious error (should be ~0.3 m). Think · write · pair · share. Change a cell's colour to flag a problem.
 
 ## Garbage in, garbage out
-![A bar chart of average animal heights]({{res:l5-heights-chart.png}})
+![A bar chart of average animal heights]({{res:l5-average-animal-heights-bar-chart-teach-computing.png}})
 
 If we chart dirty data, the chart lies.
 

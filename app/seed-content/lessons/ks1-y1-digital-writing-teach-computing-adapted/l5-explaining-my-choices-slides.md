@@ -15,7 +15,7 @@
 > 🧑‍🏫 Read each hint, pupils choose the tool. This matches the starter worksheet riddles.
 
 ## The Undo button
-![A word processor toolbar showing Undo and Redo]({{res:l5-toolbar.png}})
+![A word processor toolbar showing Undo and Redo]({{res:l5-word-processor-toolbar-undo-and-redo-teach-computing.png}})
 
 - Undo removes your last change
 - the arrow points back, like Backspace

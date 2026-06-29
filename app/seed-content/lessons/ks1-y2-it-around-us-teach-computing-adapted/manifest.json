@@ -10,13 +10,55 @@
       "objectives": "I can name some computers\nI can name the parts of a computer\nI can say what a computer is used for\nI can sort things into IT and not IT",
       "outline": "Routine first (same every lesson). Vocabulary on board: computer, IT (information technology). TA: everyone has the starter and activity worksheet; have a few real items ready (a tablet, a pencil). Read the four \"I can…\" aloud.\n1. (0–5) Starter — what is IT? On the starter worksheet pupils CHOOSE the meaning of IT (a computer, or something that works with a computer), then tick yes/no on a few items.  • Support: yes/no — is a laptop/banana a computer?  • Core: name one computer used at school.  • Challenge: multi-select the computers.\n2. (5–15) I-do → we-do — IT means information technology: a computer, or something that works with a computer. Show the desktop computer image and name the parts. Likely error: calling the whole thing \"the screen\" → fix-words \"the screen is just the part we look at.\"\n3. (15–30) Name the parts — pupils do the LABEL task (screen, keyboard, mouse, computer) on the activity worksheet. Then multi-select what a computer can help us do. TA: prompt, do not drag it for them.\n4. (30–45) IT or not IT? Pupils SORT items into IT / not IT (card-sort). Scaffolding prompts: \"Is it a computer? Does it work with a computer?\" Then a calm IT hunt; they photograph one piece for show-your-work.\n5. (45–50) Plenary — self-tick the four \"I can…\"; each pupil names one piece of IT and why it is IT.\nDifferentiation on the SAME task, low floor / high ceiling — nobody's sheet looks \"less done\". No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "What is IT? — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-it-starter-worksheet.md" },
-        { "title": "What is IT? — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-it-activity-worksheet.md" },
-        { "title": "What is IT? — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l1-what-is-it-slides.md" },
-        { "title": "A desktop computer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-desktop-computer.png" },
-        { "title": "A laptop (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-laptop.png" },
-        { "title": "A smart speaker (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-smart-speaker.png" },
-        { "title": "A printer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l1-printer.png" }
+        {
+          "title": "A desktop computer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-desktop-computer-teach-computing.png"
+        },
+        {
+          "title": "A laptop (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-laptop-teach-computing.png"
+        },
+        {
+          "title": "A smart speaker (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-smart-speaker-teach-computing.png"
+        },
+        {
+          "title": "A printer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l1-a-printer-teach-computing.png"
+        },
+        {
+          "title": "What is IT? — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-it-starter-worksheet.md"
+        },
+        {
+          "title": "What is IT? — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-it-activity-worksheet.md"
+        },
+        {
+          "title": "What is IT? — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l1-what-is-it-slides.md"
+        }
       ]
     },
     {
@@ -24,11 +66,41 @@
       "objectives": "I can name IT in my school\nI can sort school IT by what it is used for\nI can say that some IT can be used in more than one way",
       "outline": "Routine first. Vocabulary on board: IT (information technology). TA: everyone has the starter and activity worksheet; point out IT in the room. Read the three \"I can…\" aloud.\n1. (0–5) Starter — is it IT? Thumbs up/down for pictures; on the starter worksheet pupils choose yes/no.  • Support: yes/no — is a tablet/printer/teddy IT?  • Core: name one piece of IT in the classroom.  • Challenge: multi-select the school IT.\n2. (5–15) I-do → we-do — look around the room and list the IT we can see (tablets, whiteboard, printer). Likely error: \"a teddy is IT\" → fix-words \"it does not work with a computer.\"\n3. (15–35) Sorting IT — pupils SORT school IT into what it is used for (write or make / find things out / play and learn) on the activity worksheet (card-sort). Scaffolding: \"What job would you do with it?\" TA: prompt, do not sort it for them.\n4. (35–45) Some IT does more than one job — Challenge multi-select: all the jobs a tablet can do. Then show-your-work: photograph a piece of classroom IT.\n5. (45–50) Plenary — self-tick the three \"I can…\"; each pupil names a device and its job.\nGenuine S/C/C on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "IT in school — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-it-in-school-starter-worksheet.md" },
-        { "title": "IT in school — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-it-in-school-activity-worksheet.md" },
-        { "title": "IT in school — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l2-it-in-school-slides.md" },
-        { "title": "A computer keyboard (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-keyboard.png" },
-        { "title": "A desktop computer (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l2-desktop-computer.png" }
+        {
+          "title": "A computer keyboard (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-computer-keyboard-teach-computing.png"
+        },
+        {
+          "title": "A desktop computer (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l2-a-desktop-computer-teach-computing.png"
+        },
+        {
+          "title": "IT in school — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-it-in-school-starter-worksheet.md"
+        },
+        {
+          "title": "IT in school — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-it-in-school-activity-worksheet.md"
+        },
+        {
+          "title": "IT in school — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l2-it-in-school-slides.md"
+        }
       ]
     },
     {
@@ -36,13 +108,55 @@
       "objectives": "I can find examples of IT\nI can sort IT by where it is found\nI can talk about what IT is used for",
       "outline": "Routine first. Vocabulary on board: IT (information technology), computer. TA: everyone has the starter and activity worksheet. Read the three \"I can…\" aloud.\n1. (0–5) Starter — where do we find IT? Thumbs up/down for places (shop, woods, street, sea); on the worksheet pupils choose.  • Support: yes/no — is there IT in a shop/street/sea?  • Core: name a place outside school with IT.  • Challenge: multi-select the places.\n2. (5–15) I-do → we-do — IT is all around us: shops, the street, lots of jobs. Show the card-reader / cash-machine images. Likely error: \"IT is only in school\" → fix-words \"a shop till is IT too.\"\n3. (15–35) Where is the IT found? Pupils SORT IT into in a shop / on the street (card-sort) on the activity worksheet. Then a TALK-ABOUT: pick one piece and say where it is and what it does (Core sentence \"It is found… It helps us…\"). TA: prompt, do not answer for them.\n4. (35–45) Challenge — the crossing button: multi-select how it helps. Show-your-work: think of a grown-up's job and one piece of IT they use; add a picture.\n5. (45–50) Plenary — IT is nearly everywhere; can you think of a job with NO IT? Self-tick the three \"I can…\".\nGenuine S/C/C on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "IT in the world — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-it-in-the-world-starter-worksheet.md" },
-        { "title": "IT in the world — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-it-in-the-world-activity-worksheet.md" },
-        { "title": "IT in the world — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l3-it-in-the-world-slides.md" },
-        { "title": "A card machine in a shop (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-card-reader.jpg" },
-        { "title": "A cash machine (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-cash-machine.jpg" },
-        { "title": "A pedestrian crossing button (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-crossing-button.jpg" },
-        { "title": "A speed camera (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l3-speed-camera.jpg" }
+        {
+          "title": "A card machine in a shop (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-card-machine-in-a-shop-teach-computing.jpg"
+        },
+        {
+          "title": "A cash machine (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-cash-machine-teach-computing.jpg"
+        },
+        {
+          "title": "A pedestrian crossing button (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-pedestrian-crossing-button-teach-computing.jpg"
+        },
+        {
+          "title": "A speed camera (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l3-a-speed-camera-teach-computing.jpg"
+        },
+        {
+          "title": "IT in the world — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-it-in-the-world-starter-worksheet.md"
+        },
+        {
+          "title": "IT in the world — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-it-in-the-world-activity-worksheet.md"
+        },
+        {
+          "title": "IT in the world — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l3-it-in-the-world-slides.md"
+        }
       ]
     },
     {
@@ -50,11 +164,41 @@
       "objectives": "I can recognise common types of IT\nI can show how IT devices work together\nI can say why we use IT",
       "outline": "Routine first. Vocabulary on board: IT, computer, barcode, scanner/scan. TA: everyone has the starter and activity worksheet; set up the till role-play (product list, price list). Read the three \"I can…\" aloud.\n1. (0–5) Starter — IT in a supermarket. Show the barcode image; on the worksheet pupils choose what a scanner reads (the price).  • Support: yes/no — is a till/scanner/tractor in a supermarket?  • Core: what does a scanner do?  • Challenge: multi-select IT at a till.\n2. (5–15) I-do → we-do — a barcode is a number for one product; the scanner reads it; the computer looks up the price; the screen shows it. Pupils ORDER the till steps on the activity worksheet.\n3. (15–40) You-do — the till role-play (shopper / scanner / price finder). Swap roles so everyone tries each part. Focus on the PROCESS, not the maths. Likely error: doing all jobs at once → fix-words \"each part does just one job.\" TA: keep the steps visible; prompt the next step.\n4. (40–47) Why do we use IT? Challenge multi-select (saves time, quick, helps us not forget). Show-your-work: photograph the receipt / the group working.\n5. (47–50) Plenary — self-tick the three \"I can…\"; one reason we use IT.\nGenuine S/C/C on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "The benefits of IT — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-benefits-of-it-starter-worksheet.md" },
-        { "title": "The benefits of IT — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-benefits-of-it-activity-worksheet.md" },
-        { "title": "The benefits of IT — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l4-benefits-of-it-slides.md" },
-        { "title": "A barcode (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-barcode.jpg" },
-        { "title": "A cash machine (Teach Computing).jpg", "kind": "image", "mimeType": "image/jpeg", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l4-cash-machine.jpg" }
+        {
+          "title": "A barcode (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-barcode-teach-computing.jpg"
+        },
+        {
+          "title": "A cash machine (Teach Computing).jpg",
+          "kind": "image",
+          "mimeType": "image/jpeg",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l4-a-cash-machine-teach-computing.jpg"
+        },
+        {
+          "title": "The benefits of IT — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-benefits-of-it-starter-worksheet.md"
+        },
+        {
+          "title": "The benefits of IT — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-benefits-of-it-activity-worksheet.md"
+        },
+        {
+          "title": "The benefits of IT — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l4-the-benefits-of-it-slides.md"
+        }
       ]
     },
     {
@@ -62,11 +206,41 @@
       "objectives": "I can list different uses of IT\nI can talk about rules for using IT\nI can say how rules keep me safe",
       "outline": "Routine first. Vocabulary on board: IT (information technology), rule, safe. TA: everyone has the starter and activity worksheet. Read the three \"I can…\" aloud. Note: this touches online safety — follow the school policy if anything is disclosed.\n1. (0–5) Starter — what can we do with IT? Multi-select with a tablet; list devices pupils use at home.  • Support: yes/no — can you paint/watch a video/bake a real cake on it?  • Core: name a home device and one use.  • Challenge: multi-select which are IT.\n2. (5–15) I-do → we-do — there are RULES for using IT; rules keep us safe and look after the device. Read each rule aloud. Likely error: thinking sharing a password is kind → fix-words \"a password is a secret.\"\n3. (15–35) Safe or not safe? Pupils SORT choices into a safe choice / not a safe choice (card-sort), then MATCH each rule to why it helps (Core). TA: prompt, do not match it for them.\n4. (35–45) Challenge — pick a rule and say how it keeps you safe (\"This rule keeps me safe because…\"). Show-your-work: write one rule they will follow; photograph it.\n5. (45–50) Plenary — safe AND kind with photos (ask first, check the background). Self-tick the three \"I can…\".\nGenuine S/C/C on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Using IT safely — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-using-it-safely-starter-worksheet.md" },
-        { "title": "Using IT safely — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-using-it-safely-activity-worksheet.md" },
-        { "title": "Using IT safely — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l5-using-it-safely-slides.md" },
-        { "title": "A smart TV with apps (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-smart-tv.png" },
-        { "title": "A smart speaker (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l5-smart-speaker.png" }
+        {
+          "title": "A smart TV with apps (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-smart-tv-with-apps-teach-computing.png"
+        },
+        {
+          "title": "A smart speaker (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l5-a-smart-speaker-teach-computing.png"
+        },
+        {
+          "title": "Using IT safely — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-using-it-safely-starter-worksheet.md"
+        },
+        {
+          "title": "Using IT safely — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-using-it-safely-activity-worksheet.md"
+        },
+        {
+          "title": "Using IT safely — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l5-using-it-safely-slides.md"
+        }
       ]
     },
     {
@@ -74,10 +248,34 @@
       "objectives": "I can see the choices I make when using IT\nI can use IT for different types of activities\nI can explain why we use IT in different ways",
       "outline": "Routine first. Vocabulary on board: IT (information technology), choice. TA: everyone has the starter and activity worksheet; set up activity stations (connect, get creative, be active, be mindful). Read the three \"I can…\" aloud.\n1. (0–5) Starter — your favourite IT activity (text). Big idea: try a MIX, not just one thing.  • Support: yes/no — can you video call / paint / make IT sleep for you?  • Core: multi-select things you can do with IT.  • Challenge: why use IT in lots of ways?\n2. (5–15) I-do → we-do — different TYPES of IT activity: connect, get creative, be active or rest. Model one example for each. Pupils SORT activities into the types on the activity worksheet (card-sort), then MATCH activity → type (Core).\n3. (15–40) You-do — the stations; pupils try each type. Allow transition time between activities. Likely error: wanting to stay on a favourite → fix-words \"we are trying a mix today.\" TA: prompt the swap; keep it calm. They photograph what they made/did for show-your-work.\n4. (40–47) Why use IT in different ways? Challenge written answer. Plenary: how does IT help us; what do you like/dislike?\n5. (47–50) Self-tick the three \"I can…\"; name two different ways to use IT.\nGenuine S/C/C on the SAME task. No flashing/sound; movement breaks are routine.",
       "resources": [
-        { "title": "Using IT in different ways — starter worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-different-ways-starter-worksheet.md" },
-        { "title": "Using IT in different ways — activity worksheet.md", "kind": "worksheet", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-different-ways-activity-worksheet.md" },
-        { "title": "Using IT in different ways — slides.md", "kind": "slides", "mimeType": "text/markdown", "sourceAttribution": "", "file": "l6-different-ways-slides.md" },
-        { "title": "A paint palette and brushes (Teach Computing).png", "kind": "image", "mimeType": "image/png", "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.", "file": "l6-paint-palette.png" }
+        {
+          "title": "A paint palette and brushes (Teach Computing).png",
+          "kind": "image",
+          "mimeType": "image/png",
+          "sourceAttribution": "Teach Computing Curriculum © Raspberry Pi Foundation, OGL v3.0.",
+          "file": "l6-a-paint-palette-and-brushes-teach-computing.png"
+        },
+        {
+          "title": "Using IT in different ways — starter worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-using-it-in-different-ways-starter-worksheet.md"
+        },
+        {
+          "title": "Using IT in different ways — activity worksheet.md",
+          "kind": "worksheet",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-using-it-in-different-ways-activity-worksheet.md"
+        },
+        {
+          "title": "Using IT in different ways — slides.md",
+          "kind": "slides",
+          "mimeType": "text/markdown",
+          "sourceAttribution": "",
+          "file": "l6-using-it-in-different-ways-slides.md"
+        }
       ]
     }
   ]

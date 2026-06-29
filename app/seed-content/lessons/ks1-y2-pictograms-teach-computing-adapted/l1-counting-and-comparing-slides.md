@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: data · count · tally chart · total · more than · less than. This is the first lesson of the unit — set the routine.
 
 ## Count the animals
-![A cartoon elephant]({{res:l1-elephant.png}})
+![A cartoon elephant]({{res:l1-a-cartoon-elephant-teach-computing.png}})
 
 - point to each object as you count
 - 4 elephants, 6 leopards, 8 tigers, 3 zebras
@@ -32,7 +32,7 @@
 > 🧑‍🏫 Model a few tallies on the board. Likely error: counting marks as you draw them → fix-words "make the marks first, count the total at the end."
 
 ## Read a tally chart
-![Favourite pets tally chart]({{res:l1-pets-tally-chart.png}})
+![Favourite pets tally chart]({{res:l1-favourite-pets-tally-chart-teach-computing.png}})
 
 - find the **most** and the **fewest**
 - use **more than** and **less than**

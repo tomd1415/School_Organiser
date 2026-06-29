@@ -14,9 +14,9 @@
 > 🧑‍🏫 I-do: model each comparing word with two real groups on the table.
 
 ## Compare these two groups
-![A frog]({{res:l5-frog.png}})
-![A frog]({{res:l5-frog.png}})
-![A blue car]({{res:l5-blue-car.png}})
+![A frog]({{res:l5-frog-teach-computing.png}})
+![A frog]({{res:l5-frog-teach-computing.png}})
+![A blue car]({{res:l5-blue-car-teach-computing.png}})
 
 - the frog group has MORE objects
 - the car group has the FEWEST objects

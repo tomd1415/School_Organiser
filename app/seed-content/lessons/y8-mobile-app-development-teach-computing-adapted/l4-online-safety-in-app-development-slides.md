@@ -16,7 +16,7 @@ What online-safety ideas do you remember from Lesson 2?
 ## Secure data handling
 Apps should protect the data they collect — store it safely and encrypt it.
 
-![A padlock made of circuit lines]({{res:l4-data-security-padlock.jpg}})
+![A padlock made of circuit lines]({{res:l4-data-security-padlock-teach-computing.jpg}})
 
 > 🧑‍🏫 Link back to encryption. Likely error: "safe = hidden" → fix-words "safe = protected AND only used as promised."
 
@@ -31,7 +31,7 @@ A privacy policy tells users what data is collected and why.
 > 🧑‍🏫 Groups read the policy snippets (Handout 1) and find good and poor points, then sort them on the worksheet.
 
 ## Ethical dilemmas
-![Data rising from a laptop into the cloud]({{res:l4-big-data-cloud.jpg}})
+![Data rising from a laptop into the cloud]({{res:l4-big-data-cloud-teach-computing.jpg}})
 
 What is the right thing to do when handling user data?
 

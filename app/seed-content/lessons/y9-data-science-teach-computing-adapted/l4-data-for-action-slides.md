@@ -15,7 +15,7 @@ Match each step to what you do. Then check with your group.
 > 🧑‍🏫 We-do the match on the worksheet. Likely error: Plan vs Data swapped. Fix-words: "plan first, collect second."
 
 ## Our problem — litter
-![A 'put litter in the bin' sign]({{res:l4-litter-bin-sign.png}})
+![A 'put litter in the bin' sign]({{res:l4-put-litter-in-the-bin-sign-teach-computing.png}})
 
 How can we use data to reduce litter in our school?
 
@@ -27,7 +27,7 @@ Turn "reduce litter" into a precise question you can answer with data.
 > 🧑‍🏫 Support: offer a starter question to adapt. Challenge: write two questions. TA: prompt only.
 
 ## Plan step — what data?  (you do)
-![A blank mind map template]({{res:l4-mind-map-template.jpg}})
+![A blank mind map template]({{res:l4-mind-map-template-teach-computing.jpg}})
 
 Use a mind map to plan every piece of data you need (type, location, time…).
 

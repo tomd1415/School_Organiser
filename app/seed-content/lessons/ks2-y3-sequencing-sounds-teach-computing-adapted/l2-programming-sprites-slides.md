@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Vocabulary on the board: sprite · motion · turn · go to · glide. Same routine as every lesson.
 
 ## Which block moved the cat?
-![The motion blocks you can use]({{res:l2-which-blocks.png}})
+![The motion blocks you can use]({{res:l2-motion-blocks-teach-computing.png}})
 
 - the cat moved across the stage
 - which block (or blocks) did it?

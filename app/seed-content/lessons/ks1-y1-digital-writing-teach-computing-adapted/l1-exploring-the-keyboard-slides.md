@@ -20,7 +20,7 @@
 > 🧑‍🏫 Hold up a blank sheet of paper next to the blank document. Both are pages you can write on. No sound or animation on the board.
 
 ## The keyboard
-![A computer keyboard]({{res:l1-keyboard.png}})
+![A computer keyboard]({{res:l1-computer-keyboard-teach-computing.png}})
 
 - the buttons on a keyboard are called KEYS
 - the letter keys are not in alphabetical order

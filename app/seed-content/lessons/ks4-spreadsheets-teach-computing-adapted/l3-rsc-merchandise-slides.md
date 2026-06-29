@@ -15,7 +15,7 @@
 > 🧑‍🏫 Use the starter sort to draw out cheap vs expensive. Cheap items usually sell in bigger numbers — useful later for stock control.
 
 ## The model
-![The blank merchandise sheet]({{res:l3-merch-blank.png}})
+![The blank merchandise sheet]({{res:l3-merchandise-sheet-blank-teach-computing.png}})
 
 - cost price = what the shop pays (wholesale)
 - selling price = what the customer pays (retail)
@@ -31,7 +31,7 @@
 > 🧑‍🏫 Read the formula in cell order. Likely error: forgetting the brackets, so it multiplies before subtracting. Fix-words: "brackets first."
 
 ## The finished model
-![The finished merchandise model]({{res:l3-merch-model.png}})
+![The finished merchandise model]({{res:l3-merchandise-model-completed-teach-computing.png}})
 
 - money cells formatted as currency (£)
 - headings: borders, fill, bold, centre, wrap text
@@ -39,7 +39,7 @@
 > 🧑‍🏫 Formatting is not decoration — it makes the model readable. Keep colours calm, no flashing.
 
 ## Conditional formatting — meet the target?
-![A conditional formatting rule]({{res:l3-conditional-format-dialog.png}})
+![A conditional formatting rule]({{res:l3-conditional-format-rule-dialog-teach-computing.png}})
 
 - a rule changes the colour automatically
 - rule: if forecast profit is LESS THAN target → red

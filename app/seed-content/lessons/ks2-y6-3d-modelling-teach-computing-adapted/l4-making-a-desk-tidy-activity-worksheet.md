@@ -10,7 +10,7 @@ Today I will size shapes accurately, make a hole using a placeholder, and combin
 ## Accurate measurements
 When you point at a handle, the size shows in **millimetres (mm)**. You can also click the number and type an exact size.
 
-![A cylinder showing its size as 23.50]({{res:l4-measure-cylinder.png}})
+![A cylinder showing its size as 23.50]({{res:l4-a-cylinder-showing-its-size-in-mm-teach-computing.png}})
 
 On the grid, each small square is 1 mm and each large square is 10 mm (1 cm).
 
@@ -31,9 +31,9 @@ Fill in the gaps:
 ## Making a hole with a placeholder
 A **placeholder** is a special shape that cuts a hole. You put it where you want the hole, then group it with the solid shape.
 
-![A cube with a round hole cut into it]({{res:l4-hole-cube.png}})
+![A cube with a round hole cut into it]({{res:l4-a-cube-with-a-round-hole-cut-into-it-teach-computing.png}})
 
-![A hollowed-out cylinder pot]({{res:l4-hollow-cylinder.png}})
+![A hollowed-out cylinder pot]({{res:l4-a-hollowed-out-cylinder-pot-teach-computing.png}})
 
 Put the steps in order to hollow out a cylinder.
 

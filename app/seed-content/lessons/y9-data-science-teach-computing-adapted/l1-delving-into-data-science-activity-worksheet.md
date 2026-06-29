@@ -11,7 +11,7 @@ A **visualisation** is a picture of data (like a chart or map) that makes patter
 ## The same data, as a picture
 This is the same data from the starter — now drawn as a picture by Charles Minard. It shows Napoleon's army marching to Moscow in 1812. The band gets thinner as more soldiers die.
 
-![Minard's visualisation of Napoleon's 1812 march]({{res:l1-minard-napoleon-march.png}})
+![Minard's visualisation of Napoleon's 1812 march]({{res:l1-minard-s-visualisation-of-napoleon-s-march-teach-computing.png}})
 
 | Question | Your prediction |
 |---|---|
@@ -28,7 +28,7 @@ Shows parts of a whole: pie chart, doughnut chart
 
 Here is a bar chart. A bar chart is good for **comparing separate amounts**.
 
-![A bar chart comparing the number of female astronauts each year]({{res:l1-female-astronauts-chart.png}})
+![A bar chart comparing the number of female astronauts each year]({{res:l1-female-astronauts-bar-chart-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose one |

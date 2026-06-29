@@ -8,9 +8,9 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Vocabulary on the board: group · object · label · image. Same routine as every lesson.
 
 ## Starter — how many objects?
-![A frog]({{res:l2-frog.png}})
-![A frog]({{res:l2-frog.png}})
-![A frog]({{res:l2-frog.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
+![A frog]({{res:l2-frog-teach-computing.png}})
 
 - count them out loud together
 - point to each one as you count
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Activity 1 (physical): scatter 10–20 real objects, NO moving allowed. Let them feel that counting a mess is hard. This is the point of the lesson.
 
 ## Make it easier — put them in groups
-![A blue car]({{res:l2-blue-car.png}})
+![A blue car]({{res:l2-blue-car-teach-computing.png}})
 
 - sort the objects into groups first
 - then count one group at a time

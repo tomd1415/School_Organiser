@@ -14,9 +14,9 @@
 > 🧑‍🏫 "Why don't we store everything in RAM?" Pull out: volatile, not enough space, can't carry it to another computer. Matches the starter worksheet.
 
 ## Three types of secondary storage
-![A solid-state storage chip]({{res:l5-solid-state.png}})
-![A hard disk drive]({{res:l5-hard-drive.png}})
-![An optical disc]({{res:l5-optical-disc.png}})
+![A solid-state storage chip]({{res:l5-solid-state-storage-chip-teach-computing.png}})
+![A hard disk drive]({{res:l5-a-hard-disk-drive-teach-computing.png}})
+![An optical disc]({{res:l5-an-optical-disc-teach-computing.png}})
 
 - SOLID STATE (USB stick, SSD, SD card)
 - OPTICAL (CD, DVD, Blu-ray)

@@ -10,7 +10,7 @@ Today I will learn the difference between **base-10** (decimal) and **base-2** (
 ## Starter — how small is a transistor?
 A computer is full of tiny switches called **transistors**. They are far too small to see.
 
-![A single human hair, hugely magnified]({{res:l2-transistor-on-a-hair-teach-computing.png}})
+![A single human hair, hugely magnified]({{res:l2-transistor-on-a-human-hair-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

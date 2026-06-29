@@ -1,0 +1,21 @@
+{
+  "unitTitle": "Screen readers",
+  "course": {
+    "name": "Using Computers for VI Pupils",
+    "keyStage": "KS5"
+  },
+  "lessons": [
+    {
+      "title": "Introduction to screen readers",
+      "objectives": "- Start a screen reader\n- Read a line of text",
+      "outline": "First steps with the reader; verbosity settings.",
+      "resources": []
+    },
+    {
+      "title": "Navigating documents by audio",
+      "objectives": "- Move by heading and paragraph",
+      "outline": "Jump around a structured document by audio.",
+      "resources": []
+    }
+  ]
+}

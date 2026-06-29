@@ -10,7 +10,7 @@ Today I will plan an event with a spreadsheet and work out the costs.
 ## Planning a party
 We are going to plan a class party (just for practice — it is not really happening). A spreadsheet keeps all our choices and costs **organised** in one place.
 
-![A party planning spreadsheet]({{res:l5-party-table.png}})
+![A party planning spreadsheet]({{res:l5-a-party-planning-spreadsheet-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

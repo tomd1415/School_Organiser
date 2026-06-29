@@ -10,7 +10,7 @@ Today I will answer exam-style questions to show what I have learned about sprea
 ## The spreadsheet
 This is a model for a school summer fete. Use it to answer the questions.
 
-![A summer fete planning spreadsheet with expenses, food income and games income]({{res:l6-fete-spreadsheet.png}})
+![A summer fete planning spreadsheet with expenses, food income and games income]({{res:l6-summer-fete-planning-spreadsheet-teach-computing.png}})
 
 ## Questions — part 1 (write formulae)
 Write the spreadsheet formula for each cell. Read carefully — some are worth more than one mark.

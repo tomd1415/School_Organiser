@@ -8,7 +8,7 @@
 Today I will review my own data, answer my question, and say why a data logger is useful.
 
 ## Review my data
-![A data logger]({{res:l6-data-logger.png}})
+![A data logger]({{res:l6-data-logger-teach-computing.png}})
 
 Open the data your logger collected. Check it looks right — make sure it is YOUR data.
 

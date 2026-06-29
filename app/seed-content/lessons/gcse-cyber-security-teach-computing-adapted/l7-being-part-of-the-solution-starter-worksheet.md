@@ -8,7 +8,7 @@
 Today I will revise the whole unit, then show what I know in the end-of-unit quiz.
 
 ## Starter — the global threat map
-![A live map showing millions of cyberattacks happening around the world]({{res:l7-cyber-threat-map.png}})
+![A live map showing millions of cyberattacks happening around the world]({{res:l7-live-cyber-threat-map.png}})
 
 | Question | Choose one |
 |---|---|

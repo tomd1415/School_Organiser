@@ -10,7 +10,7 @@ Today I will record a navigation path, plan my own website, and link pages with 
 ## Where will you go?
 A **navigation path** is the route you take through a website's pages. You often start on the home page, click a link to a **subpage**, then go back and click another.
 
-![Exploring the San Diego Zoo Kids website]({{res:l5-zoo-website.png}})
+![Exploring the San Diego Zoo Kids website]({{res:l5-exploring-the-san-diego-zoo-kids-website-teach-computing.png}})
 
 Put this navigation path in order.
 
@@ -36,7 +36,7 @@ Look at 'Arctic foxes'
 ## Plan your website
 A **site map** shows your home page at the top and your subpages branching off it. This is the plan for how your pages link together.
 
-![A site map showing pages linking together]({{res:l5-site-map.png}})
+![A site map showing pages linking together]({{res:l5-a-site-map-showing-how-pages-link-together-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

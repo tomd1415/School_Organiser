@@ -18,7 +18,7 @@ Camera: rule of thirds, f-stop, look through the lens
 ## The rule of thirds
 Photographers split the picture into thirds and place the subject on a line. It looks more balanced.
 
-![A scene with a rule-of-thirds grid over it]({{res:l5-rule-of-thirds.png}})
+![A scene with a rule-of-thirds grid over it]({{res:l5-rule-of-thirds-grid.png}})
 
 | Question | Your prediction |
 |---|---|
@@ -48,7 +48,7 @@ Add keyframes to make the light spin
 | What does the camera's **focus (f-stop)** do to the background? | Type your answer here |
 
 ## 🔴 Challenge
-![A night scene lit by a spotlight from a lighthouse]({{res:l5-island-spotlight-night.png}})
+![A night scene lit by a spotlight from a lighthouse]({{res:l5-island-lit-by-a-spotlight.png}})
 
 | Question | Your answer |
 |---|---|

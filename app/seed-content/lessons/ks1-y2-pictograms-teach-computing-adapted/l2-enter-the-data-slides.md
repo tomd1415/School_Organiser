@@ -16,7 +16,7 @@
 > 🧑‍🏫 Quick recap. Ask one pupil what the Total box is for.
 
 ## What is a pictogram?
-![Our favourite fruit pictogram]({{res:l2-fruit-pictogram.png}})
+![Our favourite fruit pictogram]({{res:l2-our-favourite-fruit-pictogram-teach-computing.png}})
 
 - a chart that uses **pictures** to show data
 - one picture = one thing
@@ -25,7 +25,7 @@
 > 🧑‍🏫 Key idea. Likely error: counting the picture in the bottom key box → fix-words "the bottom box just shows the picture; count the pictures above the line."
 
 ## Enter data on the computer
-![Pictogram software template screen]({{res:l2-pictogram-software.png}})
+![Pictogram software template screen]({{res:l2-pictogram-software-template-screen-teach-computing.png}})
 
 - choose a template (fruit, pets, minibeasts)
 - click the **+** to add a picture

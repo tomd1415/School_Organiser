@@ -10,7 +10,7 @@ Today I will enter data on the computer to make a pictogram, then answer questio
 ## Make a pictogram on the computer
 We use the Pictogram software. You pick a template, then click the **+** under a picture each time someone chooses it.
 
-![Pictogram software template screen]({{res:l2-pictogram-software.png}})
+![Pictogram software template screen]({{res:l2-pictogram-software-template-screen-teach-computing.png}})
 
 Put the steps in the right order. Drag them into order.
 
@@ -25,7 +25,7 @@ Read your pictogram
 ## Read the pictogram
 This pictogram shows the favourite fruit of eight people.
 
-![Our favourite fruit pictogram]({{res:l2-fruit-pictogram.png}})
+![Our favourite fruit pictogram]({{res:l2-our-favourite-fruit-pictogram-teach-computing.png}})
 
 ## 🟢 Support
 | Question | Choose |

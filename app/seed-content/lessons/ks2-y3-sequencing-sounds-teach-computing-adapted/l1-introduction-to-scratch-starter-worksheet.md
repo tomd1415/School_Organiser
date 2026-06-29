@@ -10,7 +10,7 @@ Today I will find my way around the Scratch screen and run my first block.
 ## Bee-Bot and Scratch
 You have used Bee-Bot and ScratchJr before. Scratch is a new program on a computer. Like Bee-Bot, it follows commands you give it.
 
-![A Bee-Bot floor robot — it follows commands]({{res:l1-beebot-top.png}})
+![A Bee-Bot floor robot — it follows commands]({{res:l1-bee-bot-top-teach-computing.png}})
 
 ## 🟢 Support
 Match each Scratch word to what it means.

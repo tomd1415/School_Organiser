@@ -10,7 +10,7 @@ Today I will turn my design into code, and choose good names for my variables.
 ## A chatbot project
 This chatbot asks you questions and remembers your answers in **variables**.
 
-![Chatbot code that stores answers in variables named variable_a and variable_b]({{res:l5-chatbot-bad-names.png}})
+![Chatbot code that stores answers in variables named variable_a and variable_b]({{res:l5-chatbot-code-with-unclear-names-variable-a-and-variable-b-teach-computing.png}})
 
 | Question | Your answer |
 |---|---|

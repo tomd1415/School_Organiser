@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: operation · range · SUM · AVERAGE · duplicate · sigma. Recap: a formula starts with = and points to cells.
 
 ## Starter — the four operations
-![A spreadsheet with operation tabs]({{res:l4-operations.png}})
+![A spreadsheet with operation tabs]({{res:l4-a-spreadsheet-with-operation-tabs-teach-computing.png}})
 
 - + add, − subtract, \* multiply, / divide
 
@@ -22,7 +22,7 @@
 > 🧑‍🏫 Find functions with the ∑ (sigma) button. Likely error: pupils total the wrong cells (including the Total column). Fix-words: "select only the weekly scores."
 
 ## Duplicating a formula
-![A spreadsheet of scores with totals]({{res:l4-times-table-totals.png}})
+![A spreadsheet of scores with totals]({{res:l4-a-spreadsheet-of-scores-with-totals-teach-computing.png}})
 
 - write SUM once: =SUM(B2:G2)
 - drag the cell down to duplicate it

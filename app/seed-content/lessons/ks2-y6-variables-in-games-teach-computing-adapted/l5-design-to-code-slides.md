@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: design · code · variable · name · test · debug. Recap: you planned your game last lesson.
 
 ## Starter — a chatbot's variables
-![Chatbot code with variable_a and variable_b]({{res:l5-chatbot-bad-names.png}})
+![Chatbot code with variable_a and variable_b]({{res:l5-chatbot-code-with-unclear-names-variable-a-and-variable-b-teach-computing.png}})
 
 - the chatbot remembers your **name** and **age** in variables
 - but they are called variable_a and variable_b
@@ -17,7 +17,7 @@
 > 🧑‍🏫 Pupils tick where variables are used on the starter worksheet. Support choose why variable_a is a poor name.
 
 ## Good names help
-![The same chatbot with variables named name and age]({{res:l5-chatbot-good-names.png}})
+![The same chatbot with variables named name and age]({{res:l5-chatbot-code-with-clear-names-name-and-age-teach-computing.png}})
 
 - rename variable_b → **name**
 - rename variable_a → **age**

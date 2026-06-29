@@ -9,7 +9,7 @@
 > 🧑‍🏫 Read the four "I can…" aloud. Words on the board: copyright · fair use · Creative Commons · copyright-free · credit. Recap: last lesson we planned our page; now we find images for it.
 
 ## Starter — where do pictures come from?
-![The copyright symbol]({{res:l3-copyright.png}})
+![The copyright symbol]({{res:l3-the-copyright-symbol-teach-computing.png}})
 
 - you might search the internet for a picture
 - but the person who made it owns it
@@ -24,7 +24,7 @@
 > 🧑‍🏫 Ask: "how would you feel if someone stole your work?" Link to being a respectful, responsible technology user. Support pupils choose what copyright means.
 
 ## Creative Commons — free to use
-![Creative Commons licences]({{res:l3-cc-licences.png}})
+![Creative Commons licences]({{res:l3-creative-commons-licences-teach-computing.png}})
 
 - Creative Commons images are shared for others to use
 - often you must credit (name) the maker

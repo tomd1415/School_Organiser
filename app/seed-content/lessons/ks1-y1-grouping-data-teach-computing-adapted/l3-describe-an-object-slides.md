@@ -15,7 +15,7 @@
 > 🧑‍🏫 A property is a way to describe an object. Think-pair-share words for each property. Add their words to the board.
 
 ## Describe the car — colour
-![A red car]({{res:l3-red-car.png}})
+![A red car]({{res:l3-red-car-teach-computing.png}})
 
 - this car is RED
 - "red" is its colour
@@ -24,7 +24,7 @@
 > 🧑‍🏫 I-do: name the colour, then reveal the word "property". A property is data we collect about the object.
 
 ## Describe the ball — shape
-![A tennis ball]({{res:l3-tennis-ball.png}})
+![A tennis ball]({{res:l3-tennis-ball-teach-computing.png}})
 
 - this ball is ROUND
 - "round" is its shape
@@ -33,7 +33,7 @@
 > 🧑‍🏫 We-do: ask "what is the same about a ball and a coin?" (both round) — same property, different object.
 
 ## One object, many properties
-![A parrot]({{res:l3-parrot.png}})
+![A parrot]({{res:l3-parrot-teach-computing.png}})
 
 - this parrot has MANY colours
 - you usually label the main colours only

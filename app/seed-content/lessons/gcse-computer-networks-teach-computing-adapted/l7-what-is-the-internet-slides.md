@@ -17,7 +17,7 @@ Bandwidth = data per second · lowest-cost route = smallest total · more device
 - **The World Wide Web** = the **web pages** you view on it.
 They are often confused — the Web rides *on* the internet.
 
-![Networks linked all around the world]({{res:l7-internet-world.png}})
+![Networks linked all around the world]({{res:l7-the-internet-networks-linked-around-the-world.png}})
 
 > 🧑‍🏫 Plain line: internet = the roads, the Web = the shops you visit. Then the internet/Web card-sort. Brief history: ARPA built a distributed network so it could survive damage.
 

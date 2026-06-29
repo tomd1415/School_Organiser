@@ -13,7 +13,7 @@ A model is made of **vertices**, **edges**, and **faces**. Label them on the sta
 > 🧑‍🏫 Take answers, then point each part out on a live model.
 
 ## Real things are not perfect
-![A symmetrical face and a natural, asymmetrical face]({{res:l4-symmetry-faces.png}})
+![A symmetrical face and a natural, asymmetrical face]({{res:l4-symmetry-two-faces.png}})
 
 Natural things are usually a little bit **asymmetrical**. Perfectly even models look fake.
 
@@ -30,7 +30,7 @@ Cut a shape into a flat surface, press **Enter** to fix the cut, delete the wast
 > 🧑‍🏫 Make a palm leaf. Support: steps in order on the worksheet. Challenge: add coconuts. TA: prompt, do not do it for them.
 
 ## Subdivision
-![A finished palm tree]({{res:l4-palm-tree.png}})
+![A finished palm tree]({{res:l4-palm-tree-model.png}})
 
 Subdivision splits one face into many smaller ones, so you can shape it more smoothly.
 

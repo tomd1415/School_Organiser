@@ -28,9 +28,9 @@
 > 🧑‍🏫 I-do. Show a short program, ask pupils to predict, then run it. Likely error: guessing without reading the blocks → fix-words "read the blocks in order, left to right."
 
 ## Same outcome
-![Program A]({{res:l2-program-a.png}})
+![Program A]({{res:l2-program-a-blocks-teach-computing.png}})
 
-![Program B]({{res:l2-program-b.png}})
+![Program B]({{res:l2-program-b-same-blocks-reordered-teach-computing.png}})
 
 - same blocks, different order
 - both end in the same place
@@ -39,7 +39,7 @@
 > 🧑‍🏫 We-do. Run both on a tablet to show they match. The worksheet sort splits same-outcome from different-outcome.
 
 ## Match the programs
-![Match the programs]({{res:l2-match-programs.png}})
+![Match the programs]({{res:l2-match-the-programs-activity-teach-computing.png}})
 
 - find the programs that do the same thing
 - run them on your tablet to check

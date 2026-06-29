@@ -11,8 +11,8 @@ Today I will show how a message travels from one network to another, and say why
 In one network, a **switch** passes a message to the right computer.
 To send a message to ANOTHER network, we need a **router**. A router passes the message from one network to another.
 
-![A router]({{res:l1-router.png}})
-![A network switch]({{res:l1-switch.png}})
+![A router]({{res:l1-a-router-teach-computing.png}})
+![A network switch]({{res:l1-a-network-switch-teach-computing.png}})
 
 ## Order — how a message crosses two networks
 A message goes from a computer in network A to a computer in network B. Drag the steps into order.
@@ -39,7 +39,7 @@ The switch sends the message to the right computer in network B
 ## 🔴 Challenge
 A network can be kept safe with **network security**, so only the right people get in.
 
-![A safe shield and an unsafe shield]({{res:l1-security-shields.png}})
+![A safe shield and an unsafe shield]({{res:l1-safe-and-unsafe-shields-network-security-teach-computing.png}})
 
 | Question | Tick ALL that are TRUE |
 |---|---|

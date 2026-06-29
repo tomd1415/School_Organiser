@@ -8,7 +8,7 @@
 > 🧑‍🏫 Read the three "I can…" aloud. Words on the board: hyperlink · external link · implication · evaluate · embed. This is the last lesson — recap the whole unit at the end.
 
 ## Starter — is it OK to link?
-![Is the site secure?]({{res:l6-secure.png}})
+![Is the site secure?]({{res:l6-a-locked-and-unlocked-padlock-is-the-site-secure-teach-computing.png}})
 
 - a link to someone else's site is an external link
 - it is OK to link, but think first
@@ -30,7 +30,7 @@
 > 🧑‍🏫 Show the add-external-link video. Pupils add a link tied to their topic. Early finishers: embedding content (show the video). Avoid sites with adverts/suggested content.
 
 ## Evaluate a website
-![A finished website to evaluate]({{res:l6-website-example.png}})
+![A finished website to evaluate]({{res:l6-a-finished-website-to-evaluate-teach-computing.png}})
 
 - evaluate = judge how good it is
 - user experience = what it is like to use
