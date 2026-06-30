@@ -129,6 +129,35 @@ DATABASE_URL=… RESOURCE_STORE_PATH=… npm run seed:lessons -- --new-only
 DATABASE_URL=… RESOURCE_STORE_PATH=… npm run seed:lessons -- <unit-slug>
 ```
 
+### On a production server (Docker, no Node on the host)
+
+The commands above assume Node/npm on the host — true in dev, **not** on a deployed box, where the app
+runs the **built image** (`node dist/server.js`) and the host has no `npm`/`tsx`. There you seed by
+running the **compiled** script **inside the `app` container** (env vars are already set in-container
+via `.env` + the compose overrides, so you don't pass them):
+
+```bash
+# from the repo root on the server; container must be up (./start.sh prod brings it up + migrates)
+docker compose -f app/docker-compose.yml exec app node dist/seed/seedLessons.js --new-only
+```
+
+> **The bundles must be IN the image.** The runtime image copies `seed-content/` in (see the
+> `COPY seed-content ./seed-content` line in [app/Dockerfile](../app/Dockerfile)). So after pulling new
+> bundles on the server you must **rebuild** before seeding, or the container won't have them and the
+> seed prints `no seed-content/lessons/ — nothing to seed`:
+> ```bash
+> git pull --ff-only
+> docker compose -f app/docker-compose.yml build app
+> docker compose -f app/docker-compose.yml up -d app
+> docker compose -f app/docker-compose.yml exec app node dist/seed/seedLessons.js --new-only
+> ```
+> One-off escape hatch without a rebuild — bind-mount the host bundles into a throwaway container:
+> ```bash
+> docker compose -f app/docker-compose.yml run --rm \
+>   -v "$(pwd)/app/seed-content:/app/seed-content:ro" \
+>   app node dist/seed/seedLessons.js --new-only
+> ```
+
 ### ⚠️ The one footgun — plain `seed:lessons` is destructive on a populated DB
 
 The **default** (no `--new-only`) **replaces** any unit whose title already exists on the target
