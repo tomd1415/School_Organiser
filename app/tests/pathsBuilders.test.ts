@@ -56,10 +56,11 @@ describe('paths builders — exact URLs', () => {
     [paths.mapMove(), '/map/move'],
     [paths.mapSlot(4, 9), '/map?slot=4:9'],
     // now
-    [paths.nowClock('a b&c'), '/now/clock?sig=a%20b%26c'], // encodeURIComponent applied inside
+    [paths.nowHero(), '/now/hero'],
     [paths.nowTimeline(), '/now/timeline'],
-    [paths.nowCurrent('a b&c'), '/now/current?sig=a%20b%26c'],
+    [paths.nowCurrent('a b&c'), '/now/current?sig=a%20b%26c'], // encodeURIComponent applied inside
     [paths.nowInboxQueue(), '/now/inbox-queue'],
+    [paths.nowNeedsMe(), '/now/needs-me'],
     [paths.settingsExperience(), '/settings/experience'],
     [paths.settingsExperienceNudgeDismiss(), '/settings/experience-nudge/dismiss'],
     // tasks

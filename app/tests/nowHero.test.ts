@@ -53,4 +53,15 @@ describe('renderNowHero', () => {
     expect(html).toContain('inset day');
     expect(html).not.toContain('now-hero-count');
   });
+
+  it('carries the self-polling attributes (and drops them for the inert gallery render)', () => {
+    const state: NowState = { ...base, current: slot('Period 3', 10 * 60 + 5, 11 * 60 + 5), minutesRemaining: 18 };
+    const live = renderNowHero(state, lesson('Year 9 Computing', 'B14'), null);
+    expect(live).toContain('id="now-hero"');
+    expect(live).toContain('hx-get="/now/hero"');
+    expect(live).toContain('hx-trigger="every 30s"');
+    expect(live).toContain('hx-swap="outerHTML"');
+    const inert = renderNowHero(state, lesson('Year 9 Computing', 'B14'), null, undefined, undefined, false);
+    expect(inert).not.toContain('hx-get');
+  });
 });

@@ -48,10 +48,13 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('8PFA');
   });
 
-  it('Now clock strip renders', async () => {
-    const res = await app.inject({ method: 'GET', url: '/now/clock', headers: { cookie: session } });
+  it('Now hero fragment renders and re-emits its own 30s poll', async () => {
+    const res = await app.inject({ method: 'GET', url: '/now/hero', headers: { cookie: session } });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain('now-strip');
+    expect(res.body).toContain('id="now-hero"');
+    // re-emits the poll attrs so the self-replacing element keeps ticking (never freezes after one tick)
+    expect(res.body).toContain('hx-get="/now/hero"');
+    expect(res.body).toContain('hx-trigger="every 30s"');
   });
 
   it('Now day-timeline fragment renders the agenda card AND re-emits its own 30s poll', async () => {
@@ -196,24 +199,25 @@ describe('authenticated screens (integration — needs the dev DB up)', () => {
     expect(res.body).toContain('focus-poll'); // self-poll element drives the auto-refresh
   });
 
-  it('Now clock poll: same sig → quiet strip; changed lesson → a refresh prompt, NOT a hard reload', async () => {
-    // initial poll (no sig) returns the strip with its current signature baked into the poll URL
-    const first = await app.inject({ method: 'GET', url: '/now/clock', headers: { cookie: session } });
-    expect(first.statusCode).toBe(200);
-    expect(first.body).toContain('now-strip');
-    const sig = /\/now\/clock\?sig=([^"&]+)/.exec(first.body)?.[1] ?? '';
-    expect(sig).not.toBe('');
-    // same signature → the still-polling strip, no reload, no prompt
-    const same = await app.inject({ method: 'GET', url: `/now/clock?sig=${sig}`, headers: { cookie: session } });
-    expect(same.statusCode).toBe(200);
-    expect(same.headers['hx-refresh']).toBeUndefined();
-    expect(same.body).toContain('hx-trigger="every 30s"'); // still polling
-    // a stale signature (the lesson changed) → a persistent manual-refresh prompt, and the poll stops,
-    // so a half-typed note is never wiped by a hard reload (#27).
-    const stale = await app.inject({ method: 'GET', url: '/now/clock?sig=stale-value', headers: { cookie: session } });
+  it('Now current-card poll: stale sig → a refresh prompt that stops polling, NOT a hard reload', async () => {
+    // The current-lesson card body carries a signature in its poll URL; a mismatch (the lesson changed
+    // under it) must return a persistent manual-refresh prompt with the poll attrs DROPPED, so a
+    // half-typed Quick note is never wiped by a silent swap or a hard reload (#27).
+    const stale = await app.inject({ method: 'GET', url: '/now/current?sig=stale-value', headers: { cookie: session } });
+    expect(stale.statusCode).toBe(200);
     expect(stale.headers['hx-refresh']).toBeUndefined(); // no hard reload
+    expect(stale.body).toContain('id="now-current-body"');
     expect(stale.body).toContain('now-changed'); // the refresh prompt
     expect(stale.body).not.toContain('hx-trigger="every 30s"'); // polling stopped
+  });
+
+  it('Now needs-me fragment renders and re-emits its own 60s poll', async () => {
+    const res = await app.inject({ method: 'GET', url: '/now/needs-me', headers: { cookie: session } });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('id="now-needs"');
+    expect(res.body).toContain('hx-get="/now/needs-me"');
+    expect(res.body).toContain('hx-trigger="every 60s"');
+    expect(res.body).toContain('Needs me');
   });
 
   it('Focus self-poll skips the swap when nothing changed, re-renders when it does (auto-refresh)', async () => {

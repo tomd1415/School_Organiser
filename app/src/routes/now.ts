@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../auth/guard';
 import { esc, layout } from '../lib/html';
-import { resolveNow, termProgress, classifyDay, type NowState, type TermDate } from '../services/clock';
+import { resolveNow, type NowState } from '../services/clock';
 import { getClockContext, getSelfLessonAt, type NowLesson } from '../repos/clock';
 import {
   countTaughtLessons,
@@ -31,10 +31,10 @@ import { getPeriodDefinitions, getTimetabledLessons } from '../repos/timetable';
 import { coverageAtRisk } from '../repos/brief';
 import { openReviewCount } from '../repos/reviews';
 import { buildBrief } from '../services/brief';
-import { addDays, weekdayOf, tzDateToEpoch } from '../lib/time';
+import { tzDateToEpoch } from '../lib/time';
 import {
   renderNowNext,
-  renderStrip,
+  renderNowHero,
   renderTimelineCard,
   renderTimelineShell,
   renderCurrentCard,
@@ -42,12 +42,8 @@ import {
   renderCurrentChangedBody,
   currentCardSig,
   renderInboxQueueCard,
-  renderNextCard,
-  renderDayList,
-  purposeLabel,
-  lessonName,
+  renderNeedsMe,
   nextSchoolDayInfo,
-  nowSignature,
   nowLabels,
 } from '../lib/nowView';
 import { type FollowupItem, type NoteItem } from '../lib/notesView';
@@ -75,6 +71,28 @@ async function nowExceptions(
   };
 }
 
+// The "Needs me" card's inputs — shared by the page render and the /now/needs-me poll fragment so the
+// two can never drift: before-the-bell tasks, due events, resurfacing heads-ups, the marking backlog
+// (plus the raw captured list, which the page also feeds to the inbox-queue card).
+async function needsMeData(now: Date, ctx: { terms: Parameters<typeof beforeNextBell>[4]; tz: string }, state: NowState) {
+  const [bellAll, groupSlots, events, captured, marksWaiting] = await Promise.all([
+    listBellTasks(),
+    getGroupSlots(),
+    listUpcoming(),
+    listForResurfacing(),
+    marksEnabled().then((on) => (on ? marksBacklog() : [])),
+  ]);
+  const nextBell = state.nextTeaching
+    ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
+    : null;
+  const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
+  const todayGroupIds = [...groupSlots.entries()]
+    .filter(([, slots]) => slots.some((s) => s.weekday === state.weekday))
+    .map(([gid]) => gid);
+  const heads = resurfacing(captured, state.isoDate, todayGroupIds);
+  return { bell, events, heads, marksWaiting, captured };
+}
+
 export function registerNowRoutes(app: FastifyInstance): void {
   app.get('/', { preHandler: requireAuth }, async (_req, reply) => {
     const now = new Date();
@@ -100,30 +118,18 @@ export function registerNowRoutes(app: FastifyInstance): void {
         }
         const noteItems: NoteItem[] = noteRows.map((n) => ({ id: n.id, body: n.body, time: n.time, followups: fuByNote.get(n.id) ?? [] }));
         card = renderCurrentCard(current, courses, lastStops, noteItems, occurrenceId, state, curEx);
-      } else if (current) {
-        card = `<div class="now-card"><p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p><h1>${esc(lessonName(current))}</h1><p class="muted">${esc(purposeLabel(current.purpose))} is on now — not a teaching slot.</p></div>`;
       } else {
-        const heading = state.isSchoolDay ? 'No lesson right now' : 'No school today';
-        card = `<div class="now-card"><h1>${esc(heading)}</h1><p class="muted">The next teaching slot is shown above.</p></div>`;
+        // No teaching lesson on now: the hero above already says what IS on ("Outside lesson time",
+        // "No school today", "Duty"…), so no placeholder card — repeating it here was pure duplication.
+        card = '';
       }
 
-      const [bellAll, groupSlots, events, running, captured, allLessons, periods] = await Promise.all([
-        listBellTasks(),
-        getGroupSlots(),
-        listUpcoming(),
+      const [running, allLessons, periods, { bell, events, heads, marksWaiting, captured }] = await Promise.all([
         getRunningTimer(),
-        listForResurfacing(),
         getTimetabledLessons(),
         getPeriodDefinitions(),
+        needsMeData(now, ctx, state),
       ]);
-      const nextBell = state.nextTeaching
-        ? { date: state.nextTeaching.date, startMin: state.nextTeaching.startMin }
-        : null;
-      const bell = beforeNextBell(bellAll, nextBell, now, groupSlots, ctx.terms, ctx.tz);
-      const todayGroupIds = [...groupSlots.entries()]
-        .filter(([, slots]) => slots.some((s) => s.weekday === state.weekday))
-        .map(([gid]) => gid);
-      const heads = resurfacing(captured, state.isoDate, todayGroupIds);
 
       // Earned-unlock nudge: only do the count query when it could actually show (everyday + not yet
       // dismissed), so the common path stays cheap.
@@ -134,38 +140,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
 
       const dayPart: 'start' | 'end' = state.minutes < 12 * 60 ? 'start' : 'end';
       const dayItems = await getDayChecklist(state.isoDate, dayPart);
-      const marksWaiting = (await marksEnabled()) ? await marksBacklog() : [];
       const interests = await currentInterests(now.getTime()); // D2: time-decaying current-interest profile
-
-      // The "next session" card for the right column.
-      let nextCard: string;
-      if (state.nextTeaching && next && (next.purpose === 'teaching' || next.purpose === 'free' || next.purpose === 'form')) {
-        const nextOccId = await findOrCreateOccurrence(next.lessonId, state.nextTeaching.date);
-        const [nextCourses, nextLastStops] = await Promise.all([
-          getOccurrenceCourses(nextOccId),
-          getLastStoppingPoints(next.lessonId, state.nextTeaching.date),
-        ]);
-        nextCard = renderNextCard(next, state, nextCourses, nextLastStops, state.nextTeaching, nextEx);
-      } else if (state.nextTeaching && next) {
-        nextCard = `<div class="now-card now-next"><p class="kicker">Next · ${esc(state.nextTeaching.label)}</p><h2>${esc(lessonName(next))}</h2><p class="muted">${esc(state.nextTeaching.date)}</p></div>`;
-      } else {
-        nextCard = `<div class="now-card now-next"><p class="kicker">Next</p><p class="muted">${state.isSchoolDay ? 'No more teaching today.' : 'No school today.'}</p></div>`;
-      }
-
-      // When not in a lesson, fill the main column with what's coming: the rest of today's own
-      // lessons, or (evenings/weekends/holidays) the next teaching day's list.
-      let dayList = '';
-      const inTeachingCard = current && (current.purpose === 'teaching' || current.purpose === 'free' || current.purpose === 'form');
-      if (!inTeachingCard) {
-        if (state.isSchoolDay) {
-          dayList = renderDayList(allLessons, periods, state.weekday, state.minutes, state.isoDate, 'Rest of today');
-        }
-        if (!dayList && state.nextTeaching) {
-          const d = state.nextTeaching.date;
-          const label = new Intl.DateTimeFormat('en-GB', { timeZone: ctx.tz, weekday: 'long', day: 'numeric', month: 'short' }).format(new Date(`${d}T12:00:00Z`));
-          dayList = renderDayList(allLessons, periods, weekdayOf(d), null, d, `Next teaching day — ${label}`);
-        }
-      }
 
       // Wave 7.1 — forward-looking morning brief (coverage-at-risk + next day + marking); hidden when empty.
       const briefItems = buildBrief({
@@ -181,8 +156,6 @@ export function registerNowRoutes(app: FastifyInstance): void {
           current,
           next,
           card,
-          nextCard,
-          dayList,
           briefItems,
           marksWaiting,
           bell,
@@ -211,24 +184,38 @@ export function registerNowRoutes(app: FastifyInstance): void {
     }
   });
 
-  // Auto-refreshing clock strip (every 30s) — never includes the note composer,
-  // so a half-typed note is never wiped.
-  app.get('/now/clock', { preHandler: requireAuth }, async (req, reply) => {
+  // Auto-refreshing hero (every 30s). Recomputes now/next + exceptions with a FRESH clock so the
+  // time-remaining countdown ticks down and the now/next lines advance across lesson boundaries. It
+  // contains no inputs, so it re-renders freely (no signature/refresh-prompt dance needed) and never
+  // stops polling — a transient DB blip returns a minimal shell that keeps the poller alive.
+  app.get('/now/hero', { preHandler: requireAuth }, async (_req, reply) => {
     const now = new Date();
     try {
-      const { ctx, state, current, next } = await resolveNowLessons(now);
+      const { state, current, next } = await resolveNowLessons(now);
       const { curEx, nextEx } = await nowExceptions(state.isoDate, current, next);
-      const prevSig = typeof (req.query as { sig?: unknown }).sig === 'string' ? (req.query as { sig: string }).sig : null;
-      const sig = nowSignature(state, current, next);
-      // The lesson/day changed since this strip was rendered → show a persistent "refresh" prompt
-      // (and stop polling) rather than hard-reloading, which would wipe a half-typed note.
-      if (prevSig !== null && prevSig !== sig) {
-        return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, true, curEx, nextEx));
-      }
-      return reply.type('text/html').send(renderStrip(state, current, next, now, ctx.tz, ctx.terms, false, curEx, nextEx));
+      return reply.type('text/html').send(renderNowHero(state, current, next, curEx, nextEx));
     } catch (err) {
-      app.log.error({ err }, 'page render failed (shown as unavailable)');
-      return reply.type('text/html').send('<div id="now-strip" class="now-strip muted">clock unavailable</div>');
+      app.log.error({ err }, 'hero fragment render failed');
+      return reply
+        .type('text/html')
+        .send(`<div id="now-hero" class="now-hero" hx-get="${paths.nowHero()}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this"><div class="now-hero-main"><div class="now-hero-eyebrow">Now</div><div class="now-hero-title muted">unavailable</div></div></div>`);
+    }
+  });
+
+  // Auto-refreshing "Needs me" card (every 60s — its queries fan across marking, tasks, events and
+  // captured notes, so it polls at half the clock cadence). Buttons only, no text inputs → swap-safe.
+  app.get('/now/needs-me', { preHandler: requireAuth }, async (_req, reply) => {
+    const now = new Date();
+    try {
+      const { ctx, state } = await resolveNowLessons(now);
+      const { bell, events, heads, marksWaiting } = await needsMeData(now, ctx, state);
+      return reply.type('text/html').send(renderNeedsMe(marksWaiting, bell, events, heads, state.isoDate));
+    } catch (err) {
+      app.log.error({ err }, 'needs-me fragment render failed');
+      // Keep the self-polling element alive on a transient DB blip rather than letting it vanish.
+      return reply
+        .type('text/html')
+        .send(`<div id="now-needs" class="now-card now-needs" hx-get="${paths.nowNeedsMe()}" hx-trigger="every 60s" hx-swap="outerHTML" hx-target="this"><p class="kicker">Needs me</p><p class="muted">unavailable</p></div>`);
     }
   });
 
@@ -266,11 +253,11 @@ export function registerNowRoutes(app: FastifyInstance): void {
       if (!isTeaching || !current) {
         // No teaching/free/form lesson on now any more — prompt a reload so the page rebuilds the
         // correct card (and the note form rebinds to the right occurrence).
-        return reply.type('text/html').send(renderCurrentChangedBody(state));
+        return reply.type('text/html').send(renderCurrentChangedBody());
       }
       const sig = currentCardSig(state, current, curEx);
       if (prevSig !== null && prevSig !== sig) {
-        return reply.type('text/html').send(renderCurrentChangedBody(state));
+        return reply.type('text/html').send(renderCurrentChangedBody());
       }
       const occurrenceId = await findOrCreateOccurrence(current.lessonId, state.isoDate);
       const [courses, lastStops] = await Promise.all([
@@ -284,7 +271,7 @@ export function registerNowRoutes(app: FastifyInstance): void {
       const retrySig = prevSig ?? '';
       return reply
         .type('text/html')
-        .send(`<div id="now-current-body" class="now-current-body" hx-get="${paths.nowCurrent(retrySig)}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this"><p class="kicker">Now</p><p class="muted">current lesson unavailable</p></div>`);
+        .send(`<div id="now-current-body" class="now-current-body" hx-get="${paths.nowCurrent(retrySig)}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this"><p class="kicker">This lesson</p><p class="muted">current lesson unavailable</p></div>`);
     }
   });
 

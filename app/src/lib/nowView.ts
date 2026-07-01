@@ -1,5 +1,5 @@
 import { esc } from './html';
-import { NowState, TermDate, classifyDay, termProgress } from '../services/clock';
+import { NowState, TermDate, classifyDay } from '../services/clock';
 import { NowLesson } from '../repos/clock';
 import { OccurrenceCourseRow } from '../services/occurrence';
 import { LastStop } from '../services/occurrence';
@@ -48,76 +48,20 @@ export function nowLabels(now: Date, tz: string): { dateLabel: string; clock: st
   };
 }
 
-export function nowSignature(state: NowState, current: NowLesson | null, next: NowLesson | null): string {
-  return [
-    state.isoDate,
-    state.isSchoolDay ? '1' : '0',
-    state.current?.slotOrder ?? '',
-    current?.lessonId ?? '',
-    next?.lessonId ?? '',
-    state.nextTeaching?.date ?? '',
-  ].join('|');
-}
-
-export function renderStrip(
-  state: NowState,
-  current: NowLesson | null,
-  next: NowLesson | null,
-  now: Date,
-  tz: string,
-  terms: TermDate[],
-  changed = false,
-  curEx: ExceptionEffect = NO_EXCEPTION,
-  nextEx: ExceptionEffect = NO_EXCEPTION
-): string {
-  const { dateLabel, clock } = nowLabels(now, tz);
-  const sig = nowSignature(state, current, next);
-  const tp = termProgress(state.isoDate, terms);
-  const weekBadge = tp ? ` · <span class="now-week" title="${esc(tp.name)}">wk ${tp.week}/${tp.weeksTotal}</span>` : '';
-
-  let nowLine: string;
-  if (!state.isSchoolDay) {
-    nowLine = `<strong>No school today</strong> <span class="muted">(${esc(state.dayKind.replace('_', ' '))})</span>`;
-  } else if (state.current) {
-    const mins = state.minutesRemaining;
-    const left = mins != null ? ` · <span class="now-mins">${mins} min left</span>` : '';
-    let who = current ? ` · ${esc(lessonName(current))}` : '';
-    if (curEx.mode === 'free') who = ` · <span class="now-ex-free">Free</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
-    else if (curEx.mode === 'cover') who = ` · <span class="now-ex-cover">On cover</span>${curEx.detail ? ` <span class="muted">(${esc(curEx.detail)})</span>` : ''}`;
-    else if (curEx.mode === 'room' && current) who = ` · ${esc(lessonName(current))} <span class="muted">→ ${esc(curEx.roomName ?? '')}</span>`;
-    nowLine = `<strong>NOW</strong> ${esc(state.current.label)}${who}${left}`;
-  } else {
-    nowLine = `<strong>Outside lesson time</strong>`;
-  }
-
-  let nextLine = '';
-  if (state.nextTeaching && next) {
-    const href = paths.lessonOpen(next.lessonId, state.nextTeaching.date);
-    const what =
-      nextEx.mode === 'free' ? `<span class="now-ex-free">Free</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
-      : nextEx.mode === 'cover' ? `<span class="now-ex-cover">On cover</span>${nextEx.detail ? ` <span class="muted">(${esc(nextEx.detail)})</span>` : ''}`
-      : esc(lessonName(next));
-    nextLine = ` &nbsp;·&nbsp; <strong>NEXT</strong> ${esc(state.nextTeaching.label)} ${what} <a href="${href}">open</a>`;
-  }
-
-  const poll = changed ? '' : ` data-bg-poll hx-get="${paths.nowClock(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"`;
-  const notice = changed ? ` &nbsp;·&nbsp; <a class="now-changed" href="/">↻ the lesson has changed — refresh</a>` : '';
-  return `<div id="now-strip" class="now-strip"${poll}>
-    <span class="now-when">${esc(dateLabel)} · ${esc(clock)}</span>${weekBadge} &nbsp;·&nbsp; ${nowLine}${nextLine}${notice}
-  </div>`;
-}
-
-// The prominent "hero" strip atop the Now screen (UI rebuild): a calm gradient block stating what's
-// happening NOW (period · lesson · room · started) with the time-remaining countdown and what's next.
-// Rendered once at page load from the same now/next signals as the (hidden) self-polling #now-strip —
-// it does not poll itself, so it never interferes with the clock/timeline pollers; the strip's
-// "↻ changed — refresh" notice still drives mid-lesson updates.
+// The prominent "hero" strip atop the Now screen: a calm gradient block stating what's happening NOW
+// (period · lesson · room · started) with the time-remaining countdown and what's next. It SELF-POLLS
+// every 30s (the /now/hero fragment) so the countdown ticks down and the now/next lines advance across
+// lesson boundaries without a reload. The SAME opening tag is used by the page-load render and the
+// fragment, so the swapped-in element keeps the poll alive; it contains no inputs, so re-rendering it
+// can never wipe anything the teacher is typing. `poll:false` renders it inert (the /ui-gallery preview,
+// which must not swap live data over its fixture).
 export function renderNowHero(
   state: NowState,
   current: NowLesson | null,
   next: NowLesson | null,
   curEx: ExceptionEffect = NO_EXCEPTION,
   nextEx: ExceptionEffect = NO_EXCEPTION,
+  poll = true,
 ): string {
   let eyebrow = 'Now';
   let title = 'Outside lesson time';
@@ -160,7 +104,8 @@ export function renderNowHero(
         </div>`
       : '';
 
-  return `<div class="now-hero">
+  const pollAttrs = poll ? ` hx-get="${paths.nowHero()}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this"` : '';
+  return `<div id="now-hero" class="now-hero"${pollAttrs}>
     <div class="now-hero-main">
       <div class="now-hero-eyebrow">${esc(eyebrow)}</div>
       <div class="now-hero-title">${esc(title)}</div>
@@ -179,14 +124,15 @@ export function currentCardSig(state: NowState, current: NowLesson | null, ex: E
   return [state.isoDate, state.isSchoolDay ? '1' : '0', state.current?.slotOrder ?? '', current?.lessonId ?? '', ex.mode].join('|');
 }
 
-// The lesson-IDENTITY portion of the current card (kicker · exception banner · heading · last-time
-// resume lines). It self-polls every 30s so it advances across lesson boundaries WITHOUT a reload —
-// but, unlike the timeline, a boundary crossing also invalidates the Quick-note form's occurrence
-// binding (which lives OUTSIDE this element, in renderCurrentCard). So on a signature change the
-// fragment route swaps in renderCurrentChangedBody (a refresh prompt that stops polling) instead of the
-// new lesson; within the same lesson the re-render is a near-no-op that simply keeps the poll alive.
-// The SAME opening tag (id + poll attrs) is reused by the page-load render and the fragment, so the
-// swapped-in element keeps the timer registered (an attribute-less replacement would freeze it).
+// The live portion of the current card: exception banner + "last time → resume" lines. The lesson's
+// NAME / period / room live in the hero directly above (which self-polls), so this card deliberately
+// does NOT repeat them — it is the lesson WORKSPACE (resume points, worksheets, quick note, links).
+// This body still self-polls every 30s, for one reason: a lesson-boundary crossing invalidates the
+// Quick-note form's occurrence binding (the form lives OUTSIDE this element, in renderCurrentCard), so
+// on a signature change the fragment route swaps in renderCurrentChangedBody (a refresh prompt that
+// stops polling) rather than silently leaving the note form pointed at the old lesson. The SAME opening
+// tag (id + poll attrs) is reused by the page-load render and the fragment, so the swapped-in element
+// keeps the timer registered (an attribute-less replacement would freeze it).
 export function renderCurrentCardBody(
   current: NowLesson,
   courses: OccurrenceCourseRow[],
@@ -203,24 +149,17 @@ export function renderCurrentCardBody(
         : '';
     })
     .join('');
-  const courseList = current.courses.map((c) => esc(c.name)).join(' · ');
-  const meta = [courseList || (current.purpose === 'free' ? 'Free — protected work time' : ''), current.roomName ? esc(current.roomName) : '']
-    .filter(Boolean)
-    .join(' · ');
 
   const exBanner = ex.mode !== 'none'
     ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
     : '';
   const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
-  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(current.groupName ?? purposeLabel(current.purpose));
   const wasLine = isFreeOrCover && current.groupName ? `<p class="muted now-ex-was">${ex.mode === 'free' ? 'was ' : 'instead of '}${esc(current.groupName)}</p>` : '';
   const sig = currentCardSig(state, current, ex);
   return `<div id="now-current-body" class="now-current-body" hx-get="${paths.nowCurrent(sig)}" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">
-    <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
+    <p class="kicker">This lesson</p>
     ${exBanner}
-    <h1>${heading}</h1>
     ${wasLine}
-    ${meta && !isFreeOrCover ? `<p class="ld-meta">${meta}</p>` : ''}
     ${isFreeOrCover ? '' : lastLines}
   </div>`;
 }
@@ -228,9 +167,9 @@ export function renderCurrentCardBody(
 // Replacement body shown when the current-lesson poll detects the lesson has changed (or there is no
 // teaching lesson on now any more). It deliberately drops the poll attributes — polling stops, and the
 // teacher is prompted to reload so the whole card (including the Quick-note occurrence binding) rebinds.
-export function renderCurrentChangedBody(state: NowState): string {
+export function renderCurrentChangedBody(): string {
   return `<div id="now-current-body" class="now-current-body">
-    <p class="kicker">Now${state.current ? ' · ' + esc(state.current.label) : ''}</p>
+    <p class="kicker">This lesson</p>
     <p class="now-changed-line"><a class="now-changed" href="/">↻ The lesson has changed — refresh</a></p>
   </div>`;
 }
@@ -264,77 +203,6 @@ export function renderCurrentCard(
       ${renderNotesList(listId, notes)}
     </div>
     <p><a href="${openHref}">Open lesson detail →</a> &nbsp;·&nbsp; <a href="${paths.lessonOpen(current.lessonId, state.isoDate, { lab: true })}" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
-  </div>`;
-}
-
-export function renderNextCard(
-  next: NowLesson,
-  state: NowState,
-  courses: OccurrenceCourseRow[],
-  lastStops: LastStop[],
-  slot: { date: string; label: string; startMin: number },
-  ex: ExceptionEffect
-): string {
-  const lastByGc = new Map<number, LastStop>(lastStops.map((ls) => [ls.groupCourseId, ls]));
-  const courseBlocks = courses
-    .map((c) => {
-      const ls = lastByGc.get(c.groupCourseId);
-      const plan = c.planTitle ? `<span class="next-plan">📋 ${esc(c.planTitle)}</span>` : '<span class="muted">no plan bound</span>';
-      const resume = ls ? `<div class="muted next-resume">resume → ${esc(ls.stoppingPoint)} <span class="next-when2">(${esc(ls.date)})</span></div>` : '';
-      return `<li><strong>${esc(c.courseName)}</strong> ${plan}${resume}</li>`;
-    })
-    .join('');
-  const sameDay = slot.date === state.isoDate;
-  const when = sameDay
-    ? `${fromMinutes(slot.startMin)} · <span class="now-mins">in ${Math.max(0, slot.startMin - state.minutes)} min</span>`
-    : esc(slot.date);
-  const room = next.roomName ? ` · ${esc(next.roomName)}` : '';
-  const openHref = paths.lessonOpen(next.lessonId, slot.date);
-  const exBanner = ex.mode !== 'none'
-    ? `<p class="now-exbanner now-ex-${ex.mode}">⚠ <strong>${esc(ex.label)}</strong>${ex.detail ? ` — ${esc(ex.detail)}` : ''}</p>`
-    : '';
-  const isFreeOrCover = ex.mode === 'free' || ex.mode === 'cover';
-  const heading = ex.mode === 'free' ? 'Free' : ex.mode === 'cover' ? 'On cover' : esc(next.groupName ?? purposeLabel(next.purpose));
-  return `<div class="now-card now-next">
-    <p class="kicker">Next · ${esc(slot.label)}</p>
-    ${exBanner}
-    <h2>${heading}</h2>
-    <p class="ld-meta">${when}${room}</p>
-    ${isFreeOrCover ? '' : courseBlocks ? `<ul class="next-courses">${courseBlocks}</ul>` : ''}
-    <p><a href="${openHref}">Open next lesson →</a> &nbsp;·&nbsp; <a href="${paths.lessonOpen(next.lessonId, slot.date, { lab: true })}" target="_blank" rel="noopener" title="Run this lesson in the Test Lab — a sandbox copy (teacher + test pupil), no effect on the real class">🧪 Test</a></p>
-  </div>`;
-}
-
-export function renderDayList(
-  lessons: LessonRow[],
-  periods: PeriodRow[],
-  weekday: number,
-  afterMin: number | null,
-  date: string,
-  heading: string
-): string {
-  const startOf = new Map(periods.filter((p) => p.weekday === weekday).map((p) => [p.slotOrder, p.start]));
-  const rows = lessons
-    .filter((l) => l.weekday === weekday && l.isSelf && ['teaching', 'form', 'club'].includes(l.purpose))
-    .map((l) => ({ ...l, start: startOf.get(l.slotOrder) ?? '' }))
-    .filter((l) => l.start && (afterMin === null || toMinutes(l.start) > afterMin))
-    // Order by clock time, not slot_order — slot_order isn't reliably chronological (same fix as the
-    // timetable grid, see services/timetable.ts buildWeekGrid). "HH:MM" sorts lexically = chronologically.
-    .sort((a, b) => a.start.localeCompare(b.start));
-  if (!rows.length) return '';
-  const items = rows
-    .map((l) => {
-      const courses = l.courses.map((c) => esc(c.name)).join(' · ');
-      return `<li><a href="${paths.lessonOpen(l.lessonId, date)}">
-        <span class="day-time">${esc(l.start)}</span>
-        <span class="day-group">${esc(l.groupName ?? purposeLabel(l.purpose))}</span>
-        ${courses ? `<span class="muted day-courses">${courses}</span>` : ''}
-      </a></li>`;
-    })
-    .join('');
-  return `<div class="now-card now-day">
-    <p class="kicker">${esc(heading)}</p>
-    <ul class="day-list">${items}</ul>
   </div>`;
 }
 
@@ -375,15 +243,23 @@ function daysUntil(d1: string, d2: string): number {
   return Math.round((new Date(d1).getTime() - new Date(d2).getTime()) / (24 * 3600 * 1000));
 }
 
+// Self-polls every 60s (a slower cadence than the 30s clock pollers — its queries span marking, tasks,
+// events and captured notes) so new tasks/marks/heads-ups appear without a reload. The SAME opening tag
+// is used by both branches AND the /now/needs-me fragment, so the swapped-in element keeps the poll
+// alive. Its only controls are buttons (task-done, open-marking) — no text inputs — so an outer-swap
+// can never wipe in-progress typing.
+const NOW_NEEDS_OPEN =
+  `<div id="now-needs" class="now-card now-needs" hx-get="${paths.nowNeedsMe()}" hx-trigger="every 60s" hx-swap="outerHTML" hx-target="this">`;
+
 export function renderNeedsMe(marks: MarksBacklogRow[], bell: BellTask[], events: UpcomingEvent[], heads: CapturedItem[], today: string): string {
   const rows = needsMeRows(marks, bell, events, heads, today);
   if (rows.length === 0) {
-    return `<div class="now-card now-needs"><p class="kicker">Needs me</p><p class="muted nm-clear">Nothing needs you before the bell. ✓</p></div>`;
+    return `${NOW_NEEDS_OPEN}<p class="kicker">Needs me</p><p class="muted nm-clear">Nothing needs you before the bell. ✓</p></div>`;
   }
   const CAP = 6;
   const shown = rows.slice(0, CAP).map((r) => r.html).join('');
   const more = rows.length > CAP ? `<li class="nm-row nm-more muted">+ ${rows.length - CAP} more</li>` : '';
-  return `<div class="now-card now-needs">
+  return `${NOW_NEEDS_OPEN}
     <p class="kicker">Needs me</p>
     <ul class="nm-list">${shown}${more}</ul>
     <p class="nm-foot"><a href="${paths.marking()}">✎ Marking</a> · <a href="${paths.tasks()}">Tasks</a> · <a href="${paths.events()}">Events</a> · <a href="${paths.captured()}">Captured</a></p>
@@ -426,8 +302,6 @@ export interface NowNextData {
   current: NowLesson | null;
   next: NowLesson | null;
   card: string;
-  nextCard: string;
-  dayList: string;
   briefItems: BriefItem[];
   marksWaiting: MarksBacklogRow[];
   bell: BellTask[];
@@ -480,6 +354,10 @@ export function renderTimelineCard(
   let targetWeekday = state.weekday;
   let targetLabel = "Today's Timetable";
   let isFuture = !state.isSchoolDay;
+  // The civil date the shown timetable belongs to — slots link into their lesson pages with it. Null on
+  // a non-school day whose weekday still has periods (a holiday Monday: the grid previews, nothing links)
+  // and on the no-data Monday fallback.
+  let targetDate: string | null = state.isSchoolDay ? state.isoDate : null;
 
   let todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.start.localeCompare(b.start));
   if (!todayPeriods.length) {
@@ -490,11 +368,13 @@ export function renderTimelineCard(
       const formattedDate = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric' }).format(new Date(`${d}T12:00:00Z`));
       targetLabel = `Timetable: ${formattedDate}`;
       isFuture = true;
+      targetDate = d;
     } else {
       // Fallback to Monday
       targetWeekday = 1;
       targetLabel = "Monday's Timetable";
       isFuture = true;
+      targetDate = null;
     }
     todayPeriods = periods.filter(p => p.weekday === targetWeekday).sort((a, b) => a.start.localeCompare(b.start));
   }
@@ -542,13 +422,24 @@ export function renderTimelineCard(
       detail += ` · ${l.courses.map(c => c.name).join(', ')}`;
     }
 
+    // The timeline is the ONE "today" view (the old "Rest of today" list it replaces was a duplicate),
+    // so its own lessons open directly: teaching/form → the lesson cockpit, club → the session record,
+    // free → the free-period workspace. Non-lesson slots (breaks, duty…) stay plain.
+    const href = l && targetDate
+      ? l.purpose === 'club' ? paths.clubOpen(l.lessonId, targetDate)
+        : l.purpose === 'free' ? paths.freeOpen(l.lessonId, targetDate)
+        : l.purpose === 'teaching' || l.purpose === 'form' ? paths.lessonOpen(l.lessonId, targetDate)
+        : null
+      : null;
+    const body = `<strong>${esc(title)}</strong>
+          <small>${esc(detail)}</small>`;
+
     return `
       <li class="timeline-slot ${statusClass}"${fillStyle}>
         <time>${p.start}</time>
         <span class="node"></span>
         <div class="slot-details">
-          <strong>${esc(title)}</strong>
-          <small>${esc(detail)}</small>
+          ${href ? `<a class="slot-link" href="${href}">${body}</a>` : body}
           <span class="state">${stateLabel}</span>
         </div>
       </li>
@@ -649,8 +540,6 @@ export function renderNowNext(data: NowNextData): string {
     current,
     next,
     card,
-    nextCard,
-    dayList,
     briefItems,
     marksWaiting,
     bell,
@@ -672,8 +561,6 @@ export function renderNowNext(data: NowNextData): string {
     captured,
   } = data;
 
-  const sig = nowSignature(state, current, next);
-
   const nudgeHtml = showNudge
     ? `<div class="exp-nudge" id="exp-nudge">
         <span class="exp-nudge-text">✨ You've taught 20+ lessons — ready for the planning &amp; AI tools?</span>
@@ -691,9 +578,6 @@ export function renderNowNext(data: NowNextData): string {
 
   return `<section class="now-screen" hx-headers='{"x-csrf-token":"${csrf}"}'>
     ${renderTimerBanner(running)}
-    <!-- Hidden poll strip to preserve hx-get clock contract -->
-    <div id="now-strip" class="now-strip" style="display: none;" hx-get="${paths.nowClock(sig)}" hx-trigger="every 30s" hx-swap="outerHTML"></div>
-
     ${nudgeHtml}
     ${exceptionBanner}
 
@@ -703,7 +587,6 @@ export function renderNowNext(data: NowNextData): string {
       <!-- COLUMN 1: Contextual Action Cards -->
       <div class="now-col-left">
         ${card}
-        ${dayList}
         ${renderDayCard(dayPart, dayItems, state.isoDate)}
       </div>
 

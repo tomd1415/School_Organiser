@@ -2207,6 +2207,8 @@ body[data-shell="next"] .timeline-slot.active { margin-left: -0.7rem; padding-le
 body[data-shell="next"] .timeline-slot.active .node { background: var(--violet); border-color: var(--violet); box-shadow: 0 0 0 4px rgba(154,143,255,.15); }
 body[data-shell="next"] .timeline-slot.done .node { background: var(--teal); border-color: var(--teal); }
 body[data-shell="next"] .timeline-slot.next .node { border-color: var(--amber); }
+body[data-shell="next"] .timeline-slot .slot-link { display: block; text-decoration: none; color: inherit; }
+body[data-shell="next"] .timeline-slot .slot-link:hover strong { text-decoration: underline; color: var(--violet); }
 body[data-shell="next"] .timeline-slot strong { display: block; font-size: 0.84rem; color: var(--text); }
 body[data-shell="next"] .timeline-slot small { display: block; margin-top: 0.18rem; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
 body[data-shell="next"] .timeline-slot .state { display: block; margin-top: 0.2rem; color: var(--violet); font-size: 0.64rem; font-weight: 850; text-transform: uppercase; }
@@ -3648,7 +3650,6 @@ body[data-shell="next"] .pupil-results .rc-fb {
 body[data-shell="next"] .ok,
 body[data-shell="next"] .note-status,
 body[data-shell="next"] .kit-import-ok,
-body[data-shell="next"] .now-strip .now-ex-free,
 body[data-shell="next"] .tt-ex-free,
 body[data-shell="next"] .obj-list li::marker,
 body[data-shell="next"] .ws-saved,
@@ -3663,7 +3664,6 @@ body[data-shell="next"] .pw-live-badge {
   color: var(--green) !important;
 }
 
-body[data-shell="next"] .now-strip .now-ex-cover,
 body[data-shell="next"] .tt-ex-cover {
   color: var(--blue) !important;
 }

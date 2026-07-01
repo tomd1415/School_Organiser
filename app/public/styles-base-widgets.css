@@ -325,11 +325,6 @@ a.tt-lesson:hover { background: #eef3fc; }
 .stop-input { display: inline-block; width: auto; min-width: 16rem; margin-top: 0.25rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-weight: 400; }
 
 /* now screen */
-.now-strip { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.95rem; margin-bottom: 1rem; font-size: 0.95rem; }
-.now-strip .now-when { font-weight: 700; }
-.now-strip .now-mins { color: var(--accent); font-weight: 700; }
-.now-strip .now-week { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
-.now-strip a { color: var(--accent); font-weight: 600; }
 .now-changed { font-weight: 700; color: var(--warn); }
 /* Now hero (UI rebuild): the prominent "what's happening now" strip atop the Now screen. */
 .now-hero { display: flex; gap: 16px; align-items: stretch; border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; margin-bottom: 1.1rem; }
@@ -742,12 +737,6 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .now-cols { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem; align-items: start; }
 .now-col { min-width: 0; }
 @media (max-width: 760px) { .now-cols { grid-template-columns: 1fr; } }
-.now-next h2 { margin: 0.1rem 0 0.3rem; font-size: 1.15rem; }
-.next-courses { list-style: none; padding: 0; margin: 0.5rem 0 0.3rem; }
-.next-courses li { padding: 0.4rem 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
-.next-plan { font-size: 0.82rem; }
-.next-resume { font-size: 0.8rem; margin-top: 0.15rem; }
-.next-when2 { font-size: 0.75rem; }
 /* now: before the next bell */
 
 /* email paste box */
@@ -895,14 +884,6 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .res-usage-list { list-style: none; margin: 0.2rem 0 0.2rem 1.6rem; padding: 0; font-size: 0.8rem; }
 
 /* now: rest-of-today / next-teaching-day list (fills the main column outside lessons) */
-.now-day { margin-top: 1rem; }
-.day-list { list-style: none; padding: 0; margin: 0.4rem 0 0; }
-.day-list li { border-top: 1px solid var(--line); }
-.day-list a { display: flex; gap: 0.8rem; align-items: baseline; padding: 0.55rem 0.2rem; text-decoration: none; color: inherit; flex-wrap: wrap; }
-.day-list a:hover { background: var(--bg); }
-.day-time { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 3.2rem; }
-.day-group { font-weight: 700; }
-.day-courses { font-size: 0.85rem; }
 
 /* 6.2: setup editors */
 .setup-year { margin: 0.6rem 0; font-size: 0.85rem; }
@@ -973,8 +954,6 @@ li.map-drop-over .map-card { box-shadow: inset 0 0 0 2px var(--accent); }
 .now-exbanner.now-ex-free { background: #e9f7ee; border-color: #b6e0c4; }
 .now-exbanner.now-ex-cover { background: #e9f0fb; border-color: #b7cdee; }
 .now-ex-was { margin: 0.1rem 0 0.3rem; }
-.now-strip .now-ex-free { color: #1f8a4c; font-weight: 700; }
-.now-strip .now-ex-cover { color: #2563c9; font-weight: 700; }
 /* Wave 7.1 — morning brief card */
 .now-brief .brief-list { list-style: none; margin: 0.3rem 0 0; padding: 0; font-size: 0.9rem; }
 .now-brief .brief-list li { margin: 0.2rem 0; }

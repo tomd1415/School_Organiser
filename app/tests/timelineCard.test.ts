@@ -92,4 +92,26 @@ describe('renderTimelineCard auto-advance', () => {
     const html = renderTimelineCard(lessons, periods, future, new Date('2026-06-23T09:05:00Z'), 'Europe/London');
     expect(slotStatuses(html)).toEqual(['next', 'next']);
   });
+
+  it('on a school day each own lesson links straight into its lesson page (the timeline IS the day list)', () => {
+    const html = renderTimelineCard(lessons, periods, stateAt(9 * 60 + 5), new Date('2026-06-23T09:05:00Z'), 'Europe/London');
+    expect(html).toContain(`class="slot-link" href="/lesson?lesson=1&amp;date=2026-06-23"`);
+    expect(html).toContain(`class="slot-link" href="/lesson?lesson=2&amp;date=2026-06-23"`);
+  });
+
+  it('a weekend previews the NEXT teaching day and links slots with THAT date', () => {
+    const sat: NowState = {
+      ...stateAt(10 * 60), weekday: 6, isSchoolDay: false, dayKind: 'weekend',
+      nextTeaching: { date: '2026-06-23', weekday: WEEKDAY, slotOrder: 1, slotType: 'lesson', label: 'P1', lessonIndex: 0, startMin: 9 * 60, endMin: 10 * 60 },
+    };
+    const html = renderTimelineCard(lessons, periods, sat, new Date('2026-06-20T10:00:00Z'), 'Europe/London');
+    expect(html).toContain('Timetable:'); // labelled as a future day, not "Today's Timetable"
+    expect(html).toContain(`href="/lesson?lesson=1&amp;date=2026-06-23"`);
+  });
+
+  it('a non-school day whose weekday still has periods (holiday Monday) previews WITHOUT links', () => {
+    const holiday = { ...stateAt(9 * 60 + 5), isSchoolDay: false, dayKind: 'holiday' as const };
+    const html = renderTimelineCard(lessons, periods, holiday, new Date('2026-06-23T09:05:00Z'), 'Europe/London');
+    expect(html).not.toContain('slot-link');
+  });
 });

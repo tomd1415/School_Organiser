@@ -171,10 +171,11 @@ export const paths = {
   followupToggle: (id: number): string => `/followups/${id}/toggle`,
 
   // ── Now screen ──────────────────────────────────────────────────────────────────────────────────
-  nowClock: (sig: string): string => `/now/clock?sig=${encodeURIComponent(sig)}`,
+  nowHero: (): string => '/now/hero',
   nowTimeline: (): string => '/now/timeline',
   nowCurrent: (sig: string): string => `/now/current?sig=${encodeURIComponent(sig)}`,
   nowInboxQueue: (): string => '/now/inbox-queue',
+  nowNeedsMe: (): string => '/now/needs-me',
   settingsExperience: (): string => '/settings/experience',
   settingsExperienceNudgeDismiss: (): string => '/settings/experience-nudge/dismiss',
 
